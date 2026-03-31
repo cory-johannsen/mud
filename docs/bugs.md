@@ -430,11 +430,11 @@
 
 ### BUG-51: Web UI level-up ability boost not reflected in Stats tab and levelup command non-functional
 **Severity:** high
-**Status:** open
+**Status:** fixed
 **Category:** UI
 **Description:** On level-up, the console correctly announces a pending ability boost but the Stats tab shows no pending boosts and the `levelup` command has no effect.
 **Steps:** Level up a character in the web client; observe the console messages announcing the level-up and pending ability boost; open the Stats drawer — no pending boost is shown; type `levelup` in the input — nothing happens.
-**Fix:**
+**Fix:** Root cause: neither `handleGrant` (on level-up) nor `handleLevelUp` pushed an updated `CharacterSheetView` after mutating `PendingBoosts`. Added `s.pushCharacterSheet(target)` in `handleGrant` after level-up messages are sent, and `s.pushCharacterSheet(sess)` in `handleLevelUp` after the boost is applied. The Stats tab now immediately reflects both the new pending boost count and the updated ability scores.
 
 ### BUG-52: Web UI character selection screen does not show zone and room
 **Severity:** medium

@@ -21,13 +21,13 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/ai"
 	"github.com/cory-johannsen/mud/internal/game/character"
 	"github.com/cory-johannsen/mud/internal/game/combat"
-	"github.com/cory-johannsen/mud/internal/game/drawback"
 	"github.com/cory-johannsen/mud/internal/game/command"
 	"github.com/cory-johannsen/mud/internal/game/condition"
 	"github.com/cory-johannsen/mud/internal/game/crafting"
 	"github.com/cory-johannsen/mud/internal/game/danger"
 	"github.com/cory-johannsen/mud/internal/game/dice"
 	"github.com/cory-johannsen/mud/internal/game/downtime"
+	"github.com/cory-johannsen/mud/internal/game/drawback"
 	"github.com/cory-johannsen/mud/internal/game/faction"
 	"github.com/cory-johannsen/mud/internal/game/focuspoints"
 	"github.com/cory-johannsen/mud/internal/game/inventory"
@@ -773,6 +773,9 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 	}
 	defer s.cleanupPlayer(uid, username)
 
+	// Propagate headless flag from the join request; used to skip interactive prompts.
+	sess.Headless = joinReq.Headless
+
 	// Set home region ID for Honkeypot targeting.
 	if dbChar != nil {
 		sess.Region = dbChar.Region
@@ -1327,7 +1330,7 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 				if sess.FeatureChoices[id] != nil && sess.FeatureChoices[id][cf.Choices.Key] != "" {
 					continue
 				}
-				chosen, promptErr := s.promptFeatureChoice(stream, id, cf.Choices)
+				chosen, promptErr := s.promptFeatureChoice(stream, id, cf.Choices, sess.Headless)
 				if promptErr != nil {
 					s.logger.Warn("prompting feature choice", zap.String("feature", id), zap.Error(promptErr))
 					continue
@@ -1359,7 +1362,7 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 					if sess.FeatureChoices[id] != nil && sess.FeatureChoices[id][f.Choices.Key] != "" {
 						continue
 					}
-					chosen, promptErr := s.promptFeatureChoice(stream, id, f.Choices)
+					chosen, promptErr := s.promptFeatureChoice(stream, id, f.Choices, sess.Headless)
 					if promptErr != nil {
 						s.logger.Warn("prompting feat choice", zap.String("feat", id), zap.Error(promptErr))
 						continue
@@ -1419,7 +1422,7 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 						Options: pool,
 						Key:     fmt.Sprintf("archetype_boost_%d", i),
 					}
-					chosen, promptErr := s.promptFeatureChoice(stream, "archetype_boost", choices)
+					chosen, promptErr := s.promptFeatureChoice(stream, "archetype_boost", choices, sess.Headless)
 					if promptErr != nil || chosen == "" {
 						break
 					}
@@ -1447,7 +1450,7 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 						Options: pool,
 						Key:     fmt.Sprintf("region_boost_%d", i),
 					}
-					chosen, promptErr := s.promptFeatureChoice(stream, "region_boost", choices)
+					chosen, promptErr := s.promptFeatureChoice(stream, "region_boost", choices, sess.Headless)
 					if promptErr != nil || chosen == "" {
 						break
 					}
@@ -1520,13 +1523,14 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 					if archetypeID := job.Archetype; archetypeID != "" {
 						archetype = s.archetypes[archetypeID]
 					}
+					headless := sess.Headless
 					promptFn := func(options []string) (string, error) {
 						choices := &ruleset.FeatureChoices{
 							Prompt:  "Choose a technology:",
 							Options: options,
 							Key:     "tech_choice",
 						}
-						return s.promptFeatureChoice(stream, "tech_choice", choices)
+						return s.promptFeatureChoice(stream, "tech_choice", choices, headless)
 					}
 					var region *ruleset.Region
 					if dbChar != nil {
@@ -1581,13 +1585,14 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 	// entity/clock goroutines are spawned.
 	if len(sess.PendingTechGrants) > 0 && s.jobRegistry != nil {
 		if job, ok := s.jobRegistry.Job(sess.Class); ok {
+			headless := sess.Headless
 			promptFn := func(options []string) (string, error) {
 				choices := &ruleset.FeatureChoices{
 					Prompt:  "Choose a technology:",
 					Options: options,
 					Key:     "tech_choice",
 				}
-				return s.promptFeatureChoice(stream, "tech_choice", choices)
+				return s.promptFeatureChoice(stream, "tech_choice", choices, headless)
 			}
 			if err := ResolvePendingTechGrants(stream.Context(), sess, characterID,
 				job, s.techRegistry, promptFn,
@@ -1727,8 +1732,8 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 				// REQ-DT-7: check all sessions with active downtime
 				for _, activeUID := range s.sessions.AllUIDs() {
 					s.checkDowntimeCompletion(activeUID)
-					s.checkCampingStatus(activeUID)   // REQ-REST-15/18
-					s.checkRefocusStatus(activeUID)   // REQ-EXP-REFOCUS-1
+					s.checkCampingStatus(activeUID) // REQ-REST-15/18
+					s.checkRefocusStatus(activeUID) // REQ-EXP-REFOCUS-1
 				}
 			case <-ctx.Done():
 				return
@@ -2166,6 +2171,8 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 		return s.handleSpawnChar(uid, p.SpawnCharRequest)
 	case *gamev1.ClientMessage_DeleteCharRequest:
 		return s.handleDeleteChar(uid, p.DeleteCharRequest)
+	case *gamev1.ClientMessage_KillNpcRequest:
+		return s.handleKillNPC(uid, p.KillNpcRequest)
 	case *gamev1.ClientMessage_HotbarRequest:
 		evt, hbErr := s.handleHotbar(uid, p.HotbarRequest)
 		if hbErr != nil {
@@ -3750,13 +3757,14 @@ func (s *GameServiceServer) applyFullLongRest(uid string, sess *session.PlayerSe
 			},
 		})
 	}
+	headless := sess.Headless
 	promptFn := func(options []string) (string, error) {
 		choices := &ruleset.FeatureChoices{
 			Prompt:  "Choose a technology to prepare:",
 			Options: options,
 			Key:     "tech_choice",
 		}
-		return s.promptFeatureChoice(stream, "tech_choice", choices)
+		return s.promptFeatureChoice(stream, "tech_choice", choices, headless)
 	}
 	return s.applyFullLongRestCtx(uid, sess, stream.Context(), sendMsg, promptFn)
 }
@@ -3910,13 +3918,14 @@ func (s *GameServiceServer) handleSelectTech(uid string, requestID string, strea
 		return sendMsg("You have no pending technology selections.")
 	}
 
+	headlessFlag := sess.Headless
 	promptFn := func(options []string) (string, error) {
 		choices := &ruleset.FeatureChoices{
 			Prompt:  "Choose a technology:",
 			Options: options,
 			Key:     "tech_choice",
 		}
-		return s.promptFeatureChoice(stream, "tech_choice", choices)
+		return s.promptFeatureChoice(stream, "tech_choice", choices, headlessFlag)
 	}
 
 	if err := ResolvePendingTechGrants(stream.Context(), sess, sess.CharacterID,
@@ -6502,6 +6511,9 @@ func (s *GameServiceServer) handleLevelUp(uid, ability string) (*gamev1.ServerEv
 	sess.Abilities = updated
 	sess.PendingBoosts--
 
+	// Push updated character sheet so Stats tab reflects new ability scores and pending boost count.
+	s.pushCharacterSheet(sess)
+
 	return &gamev1.ServerEvent{
 		Payload: &gamev1.ServerEvent_Message{
 			Message: &gamev1.MessageEvent{
@@ -7229,7 +7241,7 @@ func (s *GameServiceServer) handleAmpedUse(
 				Prompt:  "Use at what level?",
 				Options: validOptions,
 			}
-			chosen, err := s.promptFeatureChoice(stream, "slot_level", choices)
+			chosen, err := s.promptFeatureChoice(stream, "slot_level", choices, sess.Headless)
 			if err != nil {
 				return nil, fmt.Errorf("handleAmpedUse: prompt: %w", err)
 			}
@@ -7526,9 +7538,15 @@ func (s *GameServiceServer) promptFeatureChoice(
 	stream gamev1.GameService_SessionServer,
 	featureID string,
 	choices *ruleset.FeatureChoices,
+	headless bool,
 ) (string, error) {
 	if len(choices.Options) == 0 {
 		return "", fmt.Errorf("feature %s has empty Options slice", featureID)
+	}
+
+	// In headless mode, auto-select the first option without blocking on stream.Recv().
+	if headless {
+		return choices.Options[0], nil
 	}
 
 	var sb strings.Builder
@@ -9483,11 +9501,12 @@ func (s *GameServiceServer) handleEscape(uid string) (*gamev1.ServerEvent, error
 	return messageEvent(detail + " — success! You break free."), nil
 }
 
-// handleGrant awards XP or money to a named online player (editor/admin command).
+// handleGrant awards XP, money, or an item to a named or room-scoped player (editor/admin command).
 //
 // Precondition: uid identifies an active session with role "editor" or "admin"; req is non-nil.
 // Postcondition: on "xp" grant, target.Experience is increased and persisted;
 // on "money" grant, target.Currency is increased and persisted;
+// on "item" grant, the item is placed on the floor of the editor's current room;
 // target receives a console notification; caller receives a success MessageEvent.
 func (s *GameServiceServer) handleGrant(uid string, req *gamev1.GrantRequest) (*gamev1.ServerEvent, error) {
 	sess, ok := s.sessions.GetPlayer(uid)
@@ -9497,9 +9516,51 @@ func (s *GameServiceServer) handleGrant(uid string, req *gamev1.GrantRequest) (*
 	if evt := requireEditor(sess); evt != nil {
 		return evt, nil
 	}
+
+	// Handle item grant: drop item on editor's room floor (no target player needed).
+	if req.GrantType == "item" {
+		if req.ItemId == "" {
+			return errorEvent("grant_item requires an item_id"), nil
+		}
+		if s.floorMgr == nil {
+			return errorEvent("floor system not available"), nil
+		}
+		itemID := req.ItemId
+		inst := inventory.ItemInstance{
+			InstanceID: fmt.Sprintf("grant-%s-%d", itemID, time.Now().UnixNano()),
+			ItemDefID:  itemID,
+			Quantity:   1,
+		}
+		s.floorMgr.Drop(sess.RoomID, inst)
+		return messageEvent(fmt.Sprintf("granted %s to room %s.", itemID, sess.RoomID)), nil
+	}
+
 	if req.GrantType != "heropoint" && req.Amount <= 0 {
 		return errorEvent("amount must be greater than zero"), nil
 	}
+
+	// Handle money grant with empty char_name: give to all players in editor's room.
+	if req.GrantType == "money" && req.CharName == "" {
+		amount := int(req.Amount)
+		ctx := context.Background()
+		roomPlayers := s.sessions.PlayersInRoomDetails(sess.RoomID)
+		count := 0
+		for _, p := range roomPlayers {
+			if p.UID == uid {
+				continue // skip the editor themselves
+			}
+			p.Currency += amount
+			if p.CharacterID > 0 && s.charSaver != nil {
+				if err := s.charSaver.SaveCurrency(ctx, p.CharacterID, p.Currency); err != nil {
+					s.logger.Warn("handleGrant: SaveCurrency failed", zap.Int64("char_id", p.CharacterID), zap.Error(err))
+				}
+			}
+			s.pushMessageToUID(p.UID, fmt.Sprintf("You received %d credits.", amount))
+			count++
+		}
+		return messageEvent(fmt.Sprintf("granted %d credits to %d player(s) in room.", amount, count)), nil
+	}
+
 	target, ok := s.sessions.GetPlayerByCharName(req.CharName)
 	if !ok {
 		return errorEvent(fmt.Sprintf("player %q not online", req.CharName)), nil
@@ -9637,6 +9698,10 @@ func (s *GameServiceServer) handleGrant(uid string, req *gamev1.GrantRequest) (*
 			if data, mErr := proto.Marshal(notif); mErr == nil {
 				_ = target.Entity.Push(data)
 			}
+		}
+		// Push updated character sheet so Stats tab reflects new level, HP, and pending boosts.
+		if len(levelMsgs) > 0 {
+			s.pushCharacterSheet(target)
 		}
 		// Notify target.
 		notif := messageEvent(fmt.Sprintf("You have been granted %d XP by %s.", amount, sess.CharName))
