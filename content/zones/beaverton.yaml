@@ -746,6 +746,10 @@ zone:
       target: beav_neutral_workshop
     map_x: -8
     map_y: -10
+    spawns:
+    - template: beaverton_motel_keeper
+      count: 1
+      respawn_after: 0s
     properties:
       lighting: overcast
       atmosphere: commerce

@@ -754,6 +754,10 @@ zone:
       target: hills_waystation_shelter
     map_x: 2
     map_y: -3
+    spawns:
+    - template: hillsboro_motel_keeper
+      count: 1
+      respawn_after: 0s
     properties:
       lighting: dim
       atmosphere: quiet

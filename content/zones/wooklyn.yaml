@@ -51,6 +51,9 @@ zone:
       - template: wook_fixer
         count: 1
         respawn_after: 15m
+      - template: wooklyn_motel_keeper
+        count: 1
+        respawn_after: 0s
 
   - id: the_jam_meadow
     title: The Jam Meadow

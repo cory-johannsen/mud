@@ -721,6 +721,10 @@ zone:
       target: ne_neutral_garage
     map_x: 4
     map_y: -6
+    spawns:
+    - template: ne_portland_motel_keeper
+      count: 1
+      respawn_after: 0s
     properties:
       lighting: dim
       atmosphere: quiet

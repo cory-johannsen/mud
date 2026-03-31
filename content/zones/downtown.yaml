@@ -132,6 +132,10 @@ zone:
       target: dt_park_blocks_south
     map_x: 0
     map_y: 2
+    spawns:
+    - template: downtown_motel_keeper
+      count: 1
+      respawn_after: 0s
     properties:
       lighting: firelight
       atmosphere: smoke

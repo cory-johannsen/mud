@@ -179,6 +179,9 @@ zone:
     - template: lake_oswego_hireling
       count: 1
       respawn_after: 0s
+    - template: lake_oswego_motel_keeper
+      count: 1
+      respawn_after: 0s
     properties:
       lighting: well_lit
       atmosphere: commerce
