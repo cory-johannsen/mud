@@ -1,0 +1,39 @@
+id: ginger_wook
+name: Ginger Wook
+description: >
+  A flame-haired free spirit with a disarming smile and quick feet. She moves
+  through the crowd like smoke, dispensing good vibes and sharper elbows than
+  you'd expect. Don't mistake her warmth for weakness.
+type: human
+level: 2
+max_hp: 16
+ac: 11
+awareness: 6
+faction_id: wooks
+disposition: neutral
+attack_verb: "blows a kiss at"
+ai_domain: ginger_wook_combat
+respawn_delay: "5m"
+abilities:
+  brutality: 8
+  grit: 10
+  quickness: 13
+  reasoning: 9
+  savvy: 12
+  flair: 16
+weapon:
+  - id: drum_stick
+    weight: 1
+loot:
+  currency:
+    min: 5
+    max: 25
+  items:
+    - item: herb_bundle
+      chance: 0.35
+      min_qty: 1
+      max_qty: 2
+    - item: dried_mushroom
+      chance: 0.35
+      min_qty: 1
+      max_qty: 2

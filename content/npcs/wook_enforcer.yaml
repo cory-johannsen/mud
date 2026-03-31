@@ -1,0 +1,45 @@
+id: wook_enforcer
+name: Wook Enforcer
+description: >
+  A wall of muscle in a patched leather jacket, this enforcer keeps order at the
+  perimeter of the wook encampment. He doesn't ask questions before swinging. The
+  dreadlocks don't slow him down one bit.
+type: human
+level: 5
+max_hp: 52
+ac: 15
+awareness: 7
+faction_id: wooks
+disposition: hostile
+attack_verb: "slams"
+ai_domain: wook_combat
+respawn_delay: "10m"
+toughness_rank: trained
+abilities:
+  brutality: 17
+  grit: 16
+  quickness: 11
+  reasoning: 9
+  savvy: 10
+  flair: 11
+weapon:
+  - id: reinforced_baton
+    weight: 2
+  - id: cheap_blade
+    weight: 1
+armor:
+  - id: leather_jacket
+    weight: 1
+loot:
+  currency:
+    min: 20
+    max: 60
+  items:
+    - item: medkit
+      chance: 0.25
+      min_qty: 1
+      max_qty: 1
+    - item: dried_mushroom
+      chance: 0.30
+      min_qty: 1
+      max_qty: 2

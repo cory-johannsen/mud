@@ -1,0 +1,43 @@
+id: wook_shaman
+name: Wook Shaman
+description: >
+  An elder of the wook collective, robed in layers of hand-dyed cloth and adorned
+  with bones, crystals, and dried fungi. His staff leaves a faint haze in the air
+  wherever he walks. Those who linger too long report visions for days.
+type: human
+level: 4
+max_hp: 28
+ac: 12
+awareness: 7
+faction_id: wooks
+disposition: hostile
+attack_verb: "exhales a cloud at"
+ai_domain: wook_shaman_combat
+respawn_delay: "10m"
+abilities:
+  brutality: 9
+  grit: 13
+  quickness: 10
+  reasoning: 14
+  savvy: 13
+  flair: 15
+weapon:
+  - id: shaman_staff
+    weight: 1
+loot:
+  currency:
+    min: 15
+    max: 50
+  items:
+    - item: dried_mushroom
+      chance: 0.60
+      min_qty: 2
+      max_qty: 5
+    - item: herb_bundle
+      chance: 0.40
+      min_qty: 1
+      max_qty: 3
+    - item: spore_pouch
+      chance: 0.25
+      min_qty: 1
+      max_qty: 1

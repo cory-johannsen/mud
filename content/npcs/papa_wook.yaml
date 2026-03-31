@@ -1,0 +1,68 @@
+id: papa_wook
+name: Papa Wook
+description: >
+  The patriarch of the Wooklyn collective, Papa Wook commands the tribe through
+  sheer presence and an ancient ceremonial staff said to channel the spirits of
+  every festival ever held in these streets. His dreadlocks are woven with bones,
+  coins, and living flowers that bloom regardless of season. To face Papa Wook is
+  to face the groove itself.
+type: human
+gender: male
+tier: boss
+level: 10
+max_hp: 120
+ac: 16
+awareness: 9
+faction_id: wooks
+disposition: hostile
+attack_verb: "brings down his dreadlock crown upon"
+ai_domain: papa_wook_combat
+respawn_delay: "72h"
+toughness_rank: expert
+hustle_rank: trained
+cool_rank: trained
+abilities:
+  brutality: 20
+  grit: 18
+  quickness: 12
+  reasoning: 14
+  savvy: 14
+  flair: 18
+weapon:
+  - id: ceremonial_staff
+    weight: 1
+armor:
+  - id: wook_robe
+    weight: 1
+boss_abilities:
+  - id: psychedelic_burst
+    name: "Psychedelic Burst"
+    trigger: round_start
+    trigger_value: 0
+    cooldown: "4m"
+    effect:
+      aoe_condition: nausea
+  - id: eternal_groove_drain
+    name: "The Eternal Groove"
+    trigger: hp_pct_below
+    trigger_value: 50
+    cooldown: "6m"
+    effect:
+      aoe_damage_expr: "1d6"
+loot:
+  currency:
+    min: 200
+    max: 500
+  items:
+    - item: ceremonial_staff
+      chance: 0.80
+      min_qty: 1
+      max_qty: 1
+    - item: wook_robe
+      chance: 0.70
+      min_qty: 1
+      max_qty: 1
+    - item: rare_recording
+      chance: 1.0
+      min_qty: 1
+      max_qty: 3

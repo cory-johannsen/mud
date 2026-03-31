@@ -1,0 +1,41 @@
+id: wook_merchant
+name: Wook Merchant
+description: >
+  An affable trader who has turned the wook collective's surplus of dried herbs,
+  handcrafted goods, and salvaged supplies into a thriving informal market. He
+  haggles cheerfully, never gets rattled, and always has something useful tucked
+  behind the tie-dye curtain.
+type: human
+npc_type: merchant
+npc_role: merchant
+level: 3
+max_hp: 20
+ac: 10
+awareness: 6
+faction_id: wooks
+disposition: neutral
+personality: cowardly
+ai_domain: ""
+respawn_delay: "15m"
+abilities:
+  brutality: 8
+  grit: 10
+  quickness: 11
+  reasoning: 12
+  savvy: 15
+  flair: 14
+merchant:
+  merchant_type: consumables
+  sell_margin: 1.25
+  buy_margin: 0.40
+  budget: 1000
+  inventory: []
+  replenish_rate:
+    min_hours: 12
+    max_hours: 24
+    stock_refill: 2
+    budget_refill: 200
+loot:
+  currency:
+    min: 10
+    max: 50

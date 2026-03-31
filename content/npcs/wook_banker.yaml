@@ -1,0 +1,33 @@
+id: wook_banker
+name: Wook Banker
+description: >
+  Manages the collective's communal credit pool from a repurposed food cart fitted
+  with a salvaged terminal. He keeps meticulous ledgers in a battered notebook and
+  can be trusted with your balance — as long as you're square with the collective.
+type: human
+npc_type: banker
+npc_role: banker
+level: 3
+max_hp: 22
+ac: 11
+awareness: 7
+faction_id: wooks
+disposition: neutral
+personality: cowardly
+ai_domain: ""
+respawn_delay: "15m"
+abilities:
+  brutality: 10
+  grit: 12
+  quickness: 9
+  reasoning: 14
+  savvy: 14
+  flair: 11
+banker:
+  zone_id: wooklyn
+  base_rate: 0.98
+  rate_variance: 0.02
+loot:
+  currency:
+    min: 20
+    max: 80

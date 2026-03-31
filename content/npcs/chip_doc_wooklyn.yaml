@@ -1,0 +1,33 @@
+id: chip_doc_wooklyn
+name: "Sparks"
+description: >
+  A self-taught neural technician who learned the trade from salvaged manuals
+  and practice on willing volunteers. The wooks trust Sparks implicitly; outsiders
+  get a wary once-over before any tools come out. Her workspace is surprisingly
+  sterile given the surroundings.
+type: human
+npc_type: chip_doc
+npc_role: chip_doc
+level: 3
+max_hp: 20
+ac: 10
+awareness: 6
+faction_id: wooks
+disposition: neutral
+personality: cowardly
+ai_domain: ""
+respawn_delay: "20m"
+abilities:
+  brutality: 7
+  grit: 11
+  quickness: 10
+  reasoning: 15
+  savvy: 14
+  flair: 12
+chip_doc:
+  removal_cost: 200
+  check_dc: 14
+loot:
+  currency:
+    min: 5
+    max: 20
