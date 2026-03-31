@@ -83,11 +83,14 @@ func (r *PostgresWeatherRepo) StartEvent(ctx context.Context, weatherType string
 
 // EndEvent marks the active event as inactive and sets the cooldown end tick.
 func (r *PostgresWeatherRepo) EndEvent(ctx context.Context, cooldownEndTick int64) error {
-	_, err := r.db.Exec(ctx,
+	tag, err := r.db.Exec(ctx,
 		`UPDATE weather_events SET active = FALSE, cooldown_end_tick = $1 WHERE active = TRUE`,
 		cooldownEndTick)
 	if err != nil {
 		return fmt.Errorf("weather repo EndEvent: %w", err)
+	}
+	if tag.RowsAffected() == 0 {
+		return fmt.Errorf("weather repo EndEvent: no active event found")
 	}
 	return nil
 }

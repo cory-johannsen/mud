@@ -386,6 +386,9 @@ func applyAllMigrations(pool *pgxpool.Pool) error {
 			cooldown_end_tick BIGINT NOT NULL DEFAULT 0,
 			active            BOOL   NOT NULL DEFAULT TRUE
 		);
+		CREATE UNIQUE INDEX IF NOT EXISTS weather_events_one_active
+			ON weather_events (active)
+			WHERE active = TRUE;
 	`)
 	return err
 }
