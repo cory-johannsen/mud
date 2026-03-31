@@ -26,20 +26,30 @@ var validUnequipSlotSet = func() map[string]bool {
 }()
 
 // HandleUnequip processes the "unequip" command.
-// arg must be one of the valid slot names.
+// arg is either a valid slot name or an item def ID (e.g. "tactical_knife").
+// When an item def ID is given, the equipped weapon with matching ItemDefID is located
+// and its slot is derived automatically.
 //
 // Precondition: sess must not be nil; sess.LoadoutSet and sess.Equipment must not be nil.
 // Postcondition: On success, the named slot is cleared and a confirmation is returned.
-// Unknown slots return an error listing all valid slot names.
+// Unknown slots/items return an error listing all valid slot names.
 func HandleUnequip(sess *session.PlayerSession, arg string) string {
 	slot := strings.TrimSpace(arg)
 
 	if !validUnequipSlotSet[slot] {
-		return fmt.Sprintf(
-			"Unknown slot %q. Valid slots: %s",
-			slot,
-			strings.Join(validUnequipSlots, ", "),
-		)
+		// Try to find the slot by item def ID.
+		preset := sess.LoadoutSet.ActivePreset()
+		if preset.MainHand != nil && preset.MainHand.ItemDefID == slot {
+			slot = "main"
+		} else if preset.OffHand != nil && preset.OffHand.ItemDefID == slot {
+			slot = "off"
+		} else {
+			return fmt.Sprintf(
+				"Unknown slot %q. Valid slots: %s",
+				slot,
+				strings.Join(validUnequipSlots, ", "),
+			)
+		}
 	}
 
 	preset := sess.LoadoutSet.ActivePreset()

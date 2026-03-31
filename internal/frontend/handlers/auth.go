@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"sync"
 	"time"
 
 	"go.uber.org/zap"
@@ -137,6 +138,9 @@ type CharacterClassFeaturesSetter interface {
 
 // AuthHandler implements telnet.SessionHandler and processes the
 // authentication loop for a connected client.
+// maxFailedLogins is the number of consecutive failed login attempts before an account is locked out.
+const maxFailedLogins = 5
+
 type AuthHandler struct {
 	accounts       AccountStore
 	characters     CharacterStore
@@ -156,6 +160,9 @@ type AuthHandler struct {
 	logger                 *zap.Logger
 	gameServerAddr string
 	telnetCfg      config.TelnetConfig
+	// loginFailures tracks consecutive failed password attempts per username.
+	loginFailuresMu sync.Mutex
+	loginFailures   map[string]int
 }
 
 // NewAuthHandler creates an AuthHandler backed by the given account and character stores.
@@ -211,14 +218,23 @@ func NewAuthHandler(
 		logger:                 logger,
 		gameServerAddr:  gameServerAddr,
 		telnetCfg:       telnetCfg,
+		loginFailures:   make(map[string]int),
 	}
 }
 
 // HandleSession implements telnet.SessionHandler. It shows the welcome banner
 // and processes authentication commands until the player logs in or quits.
 //
+// In headless mode (conn.Headless == true) the banner and command loop are
+// skipped; the session goes directly to username/password prompts so that
+// automated clients can authenticate without sending a "login" command first.
+//
 // Postcondition: Returns nil on clean quit, or an error if the session ended abnormally.
 func (h *AuthHandler) HandleSession(ctx context.Context, conn *telnet.Conn) error {
+	if conn.Headless {
+		return h.handleHeadlessSession(ctx, conn)
+	}
+
 	start := time.Now()
 	addr := conn.RemoteAddr().String()
 
@@ -293,6 +309,135 @@ func (h *AuthHandler) HandleSession(ctx context.Context, conn *telnet.Conn) erro
 	}
 }
 
+// handleHeadlessSession is the headless-mode entry point for HandleSession.
+// It skips the welcome banner and command loop, going directly to username/
+// password prompts. Sending "quit" or "exit" as the username cleanly
+// disconnects with a "Goodbye!" message.
+//
+// Role-specific post-auth behavior:
+//   - editor/admin: auto-selects or auto-creates a character then enters the
+//     game directly so automated clients can issue game commands immediately.
+//   - player: emits a bare "> " confirmation line first (allowing automated
+//     clients to sync), then runs the normal character-selection flow.
+//
+// Postcondition: Returns nil on clean quit, or an error on fatal connection failure.
+func (h *AuthHandler) handleHeadlessSession(ctx context.Context, conn *telnet.Conn) error {
+	for {
+		select {
+		case <-ctx.Done():
+			_ = conn.WriteLine(telnet.Colorize(telnet.Yellow, "Server shutting down. Goodbye!"))
+			return ctx.Err()
+		default:
+		}
+
+		// Prompt for username directly — no banner, no command loop.
+		_ = conn.WritePrompt(telnet.Colorize(telnet.White, "Username: "))
+		username, err := conn.ReadLine()
+		if err != nil {
+			return fmt.Errorf("reading username: %w", err)
+		}
+		username = strings.TrimSpace(username)
+
+		cmd := strings.ToLower(username)
+		if cmd == "quit" || cmd == "exit" {
+			_ = conn.WriteLine(telnet.Colorize(telnet.Cyan, "Goodbye!"))
+			return nil
+		}
+
+		if username == "" {
+			_ = conn.WriteLine(telnet.Colorize(telnet.Red, "Username cannot be empty."))
+			continue
+		}
+
+		// Pass username as arg so handleLogin skips its own username prompt
+		// and goes directly to the password prompt.
+		acct, err := h.handleLogin(ctx, conn, []string{username})
+		if err != nil {
+			return err
+		}
+		if acct.ID == 0 {
+			// Authentication failed — retry.
+			continue
+		}
+
+		// Route post-auth flow by role.
+		if acct.Role == "editor" || acct.Role == "admin" {
+			return h.handleHeadlessEditorSession(ctx, conn, acct)
+		}
+		return h.handleHeadlessPlayerSession(ctx, conn, acct)
+	}
+}
+
+// handleHeadlessEditorSession handles post-auth flow for editor/admin accounts in
+// headless mode. It auto-creates a minimal character if the account has none, then
+// enters the game directly (bypassing interactive ensure* prompts) so that automated
+// clients can issue game commands immediately after loginAs returns.
+//
+// Precondition: acct must have role editor or admin.
+// Postcondition: Returns nil on clean disconnect; non-nil error on fatal failure.
+func (h *AuthHandler) handleHeadlessEditorSession(ctx context.Context, conn *telnet.Conn, acct postgres.Account) error {
+	chars, err := h.characters.ListByAccount(ctx, acct.ID)
+	if err != nil {
+		return fmt.Errorf("listing characters for headless editor: %w", err)
+	}
+
+	var selected *character.Character
+	if len(chars) == 0 {
+		// Auto-create a minimal character so the editor can enter the game.
+		c := &character.Character{
+			AccountID: acct.ID,
+			Name:      "HeadlessEditor",
+			Region:    "northeast",
+			Class:     "gunslinger",
+			Location:  "battle_infirmary",
+			Level:     1,
+			MaxHP:     20,
+			CurrentHP: 20,
+			Gender:    "they/them",
+			Abilities: character.AbilityScores{
+				Brutality: 10, Quickness: 10, Grit: 10,
+				Reasoning: 10, Savvy: 10, Flair: 10,
+			},
+		}
+		created, createErr := h.characters.Create(ctx, c)
+		if createErr != nil {
+			// If creation fails (e.g., duplicate name from a prior run), try listing again.
+			chars, err = h.characters.ListByAccount(ctx, acct.ID)
+			if err != nil || len(chars) == 0 {
+				return fmt.Errorf("auto-creating headless editor character: %w", createErr)
+			}
+			selected = chars[0]
+		} else {
+			selected = created
+		}
+	} else {
+		selected = chars[0]
+	}
+
+	// Pre-assign class features so the game server's promptFeatureChoice is skipped.
+	if err := h.ensureClassFeatures(ctx, conn, selected); err != nil {
+		return fmt.Errorf("assigning class features for headless editor: %w", err)
+	}
+
+	// Enter game directly — skip interactive ensure* prompts in headless mode.
+	return h.gameBridge(ctx, conn, acct, selected)
+}
+
+// handleHeadlessPlayerSession handles post-auth flow for player accounts in
+// headless mode. It emits a bare "> " sync line immediately so that automated
+// clients (loginAs) can confirm authentication, then runs the normal character
+// selection flow. The character list follows the "> " sync line so that
+// selectCharacter can find character entries in the output buffer.
+//
+// Precondition: acct must have role player.
+// Postcondition: Returns nil on clean disconnect; non-nil error on fatal failure.
+func (h *AuthHandler) handleHeadlessPlayerSession(ctx context.Context, conn *telnet.Conn, acct postgres.Account) error {
+	// Send the auth-sync marker before the character list so loginAs can
+	// match "> " and return before selectCharacter needs the list.
+	_ = conn.WriteLine("> ")
+	return h.characterFlow(ctx, conn, acct)
+}
+
 // handleLogin authenticates a player interactively.
 // Username is taken from args[0] if provided, otherwise prompted.
 // Password is always prompted with echo suppressed.
@@ -336,7 +481,15 @@ func (h *AuthHandler) handleLogin(ctx context.Context, conn *telnet.Conn, args [
 			_ = conn.WriteLine(telnet.Colorize(telnet.Red, "Account not found. Use 'register' to create one."))
 			return postgres.Account{}, nil
 		case errors.Is(err, postgres.ErrInvalidCredentials):
-			_ = conn.WriteLine(telnet.Colorize(telnet.Red, "Invalid password."))
+			h.loginFailuresMu.Lock()
+			h.loginFailures[username]++
+			failures := h.loginFailures[username]
+			h.loginFailuresMu.Unlock()
+			if failures >= maxFailedLogins {
+				_ = conn.WriteLine(telnet.Colorize(telnet.Red, "Too many failed login attempts. Account temporarily locked."))
+			} else {
+				_ = conn.WriteLine(telnet.Colorize(telnet.Red, "Invalid password."))
+			}
 			return postgres.Account{}, nil
 		default:
 			h.logger.Error("authentication error", zap.Error(err), zap.Duration("elapsed", elapsed))
@@ -344,6 +497,11 @@ func (h *AuthHandler) handleLogin(ctx context.Context, conn *telnet.Conn, args [
 			return postgres.Account{}, nil
 		}
 	}
+
+	// Correct password: reset failure counter regardless of lockout state.
+	h.loginFailuresMu.Lock()
+	delete(h.loginFailures, username)
+	h.loginFailuresMu.Unlock()
 
 	_ = conn.WriteLine(telnet.Colorf(telnet.BrightGreen,
 		"Logged in as %s [%s] (account #%d) [%s]",

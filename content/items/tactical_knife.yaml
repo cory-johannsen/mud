@@ -1,0 +1,9 @@
+id: tactical_knife
+name: tactical knife
+description: A compact, balanced blade favored by urban operatives.
+kind: weapon
+weapon_ref: combat_knife
+weight: 0.8
+stackable: false
+max_stack: 1
+value: 80

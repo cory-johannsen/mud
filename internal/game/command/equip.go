@@ -25,11 +25,11 @@ func HandleEquip(sess *session.PlayerSession, reg *inventory.Registry, arg strin
 
 	itemDefID := parts[0]
 
-	// Require explicit slot for weapons.
-	if len(parts) < 2 {
-		return "specify main or off"
+	// Default to main hand when no slot is specified.
+	slot := "main"
+	if len(parts) >= 2 {
+		slot = parts[1]
 	}
-	slot := parts[1]
 	if slot != "main" && slot != "off" {
 		return "specify main or off"
 	}
@@ -71,9 +71,15 @@ func HandleEquip(sess *session.PlayerSession, reg *inventory.Registry, arg strin
 	case "main":
 		equipErr = preset.EquipMainHand(weaponDef)
 		slotLabel = "main"
+		if equipErr == nil && preset.MainHand != nil {
+			preset.MainHand.ItemDefID = itemDefID
+		}
 	case "off":
 		equipErr = preset.EquipOffHand(weaponDef)
 		slotLabel = "off"
+		if equipErr == nil && preset.OffHand != nil {
+			preset.OffHand.ItemDefID = itemDefID
+		}
 	}
 	if equipErr != nil {
 		return equipErr.Error()

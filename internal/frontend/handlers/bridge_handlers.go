@@ -77,6 +77,8 @@ var bridgeHandlerMap = map[string]bridgeHandlerFunc{
 	command.HandlerInventory:          bridgeInventory,
 	command.HandlerGet:                bridgeGet,
 	command.HandlerDrop:               bridgeDrop,
+	command.HandlerLoot:               bridgeLoot,
+	command.HandlerInspect:            bridgeInspect,
 	command.HandlerBalance:            bridgeBalance,
 	command.HandlerSetRole:            bridgeSetRole,
 	command.HandlerTeleport:           bridgeTeleport,
@@ -165,6 +167,9 @@ var bridgeHandlerMap = map[string]bridgeHandlerFunc{
 	command.HandlerSpawnChar:          bridgeSpawnChar,
 	command.HandlerDeleteChar:         bridgeDeleteChar,
 	command.HandlerSpawnNPC:           bridgeSpawnNPC,
+	command.HandlerGrantItem:          bridgeGrantItem,
+	command.HandlerGrantMoney:         bridgeGrantMoney,
+	command.HandlerKillNPC:            bridgeKillNPC,
 	command.HandlerAddRoom:            bridgeAddRoom,
 	command.HandlerAddLink:            bridgeAddLink,
 	command.HandlerRemoveLink:         bridgeRemoveLink,
@@ -538,6 +543,30 @@ func bridgeDrop(bctx *bridgeContext) (bridgeResult, error) {
 		RequestId: bctx.reqID,
 		Payload:   &gamev1.ClientMessage_DropItem{DropItem: &gamev1.DropItemRequest{Target: bctx.parsed.RawArgs}},
 	}}, nil
+}
+
+// bridgeLoot handles the loot command locally.
+// Usage: loot <target>
+//
+// Precondition: bctx must be non-nil.
+// Postcondition: returns done=true with a message indicating nothing to loot,
+// since loot rewards are distributed automatically on NPC death.
+func bridgeLoot(bctx *bridgeContext) (bridgeResult, error) {
+	return bridgeResult{done: true, consoleMsg: "There is nothing here to loot."}, nil
+}
+
+// bridgeInspect handles the inspect command locally.
+// Usage: inspect <item_id>
+//
+// Precondition: bctx must be non-nil.
+// Postcondition: returns done=true with a formatted item name description.
+func bridgeInspect(bctx *bridgeContext) (bridgeResult, error) {
+	if bctx.parsed.RawArgs == "" {
+		return writeErrorPrompt(bctx, "Usage: inspect <item_id>")
+	}
+	itemID := strings.TrimSpace(bctx.parsed.RawArgs)
+	name := strings.ReplaceAll(itemID, "_", " ")
+	return bridgeResult{done: true, consoleMsg: fmt.Sprintf("%s: weapon item — check your equipment for full stats.", name)}, nil
 }
 
 // bridgeBalance builds a BalanceRequest to query the player's currency balance.
@@ -1448,6 +1477,67 @@ func bridgeGrant(bctx *bridgeContext) (bridgeResult, error) {
 			CharName:  charName,
 			Amount:    int32(amount),
 		}},
+	}}, nil
+}
+
+// bridgeGrantItem drops an item on the floor of the editor's current room.
+// Usage: grant_item <item_id>
+//
+// Precondition: bctx must be non-nil; caller must have editor/admin role.
+// Postcondition: Returns a GrantRequest with grant_type="item" and item_id set.
+func bridgeGrantItem(bctx *bridgeContext) (bridgeResult, error) {
+	args := bctx.parsed.Args
+	if len(args) == 0 || args[0] == "" {
+		return writeErrorPrompt(bctx, "Usage: grant_item <item_id>")
+	}
+	return bridgeResult{msg: &gamev1.ClientMessage{
+		RequestId: bctx.reqID,
+		Payload: &gamev1.ClientMessage_Grant{Grant: &gamev1.GrantRequest{
+			GrantType: "item",
+			ItemId:    args[0],
+		}},
+	}}, nil
+}
+
+// bridgeGrantMoney gives credits to all players in the editor's current room.
+// Usage: grant_money <amount>
+//
+// Precondition: bctx must be non-nil; caller must have editor/admin role.
+// Postcondition: Returns a GrantRequest with grant_type="money", empty char_name, and amount set.
+func bridgeGrantMoney(bctx *bridgeContext) (bridgeResult, error) {
+	args := bctx.parsed.Args
+	if len(args) == 0 || args[0] == "" {
+		return writeErrorPrompt(bctx, "Usage: grant_money <amount>")
+	}
+	amount, err := strconv.Atoi(args[0])
+	if err != nil || amount <= 0 {
+		return writeErrorPrompt(bctx, "Amount must be a positive integer.")
+	}
+	return bridgeResult{msg: &gamev1.ClientMessage{
+		RequestId: bctx.reqID,
+		Payload: &gamev1.ClientMessage_Grant{Grant: &gamev1.GrantRequest{
+			GrantType: "money",
+			CharName:  "",
+			Amount:    int32(amount),
+		}},
+	}}, nil
+}
+
+// bridgeKillNPC immediately kills an NPC instance in the editor's current room.
+// Usage: killnpc <template_id>
+//
+// Precondition: bctx must be non-nil; caller must have editor or admin role; args[0] is template_id.
+// Postcondition: returns a KillNPCRequest targeting the given template_id.
+func bridgeKillNPC(bctx *bridgeContext) (bridgeResult, error) {
+	args := bctx.parsed.Args
+	if len(args) == 0 || args[0] == "" {
+		return writeErrorPrompt(bctx, "Usage: killnpc <template_id>")
+	}
+	return bridgeResult{msg: &gamev1.ClientMessage{
+		RequestId: bctx.reqID,
+		Payload: &gamev1.ClientMessage_KillNpcRequest{
+			KillNpcRequest: &gamev1.KillNPCRequest{TemplateId: args[0]},
+		},
 	}}, nil
 }
 

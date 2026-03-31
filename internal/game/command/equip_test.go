@@ -147,17 +147,17 @@ func TestHandleEquip_OffHand_Success(t *testing.T) {
 	}
 }
 
-// TestHandleEquip_NoSlot_Weapon_ReturnsError verifies that omitting the slot argument
-// for a weapon returns an instructive error message.
-func TestHandleEquip_NoSlot_Weapon_ReturnsError(t *testing.T) {
+// TestHandleEquip_NoSlot_Weapon_DefaultsToMain verifies that omitting the slot argument
+// for a weapon defaults to equipping in the main hand.
+func TestHandleEquip_NoSlot_Weapon_DefaultsToMain(t *testing.T) {
 	sess := newTestSessionWithBackpack()
 	reg := newTestRegistry()
 	addPistolToBackpack(t, sess, reg)
 
 	result := command.HandleEquip(sess, reg, "pistol-9mm")
 
-	if !strings.Contains(strings.ToLower(result), "specify main or off") {
-		t.Errorf("expected 'specify main or off' in result, got: %q", result)
+	if !strings.Contains(strings.ToLower(result), "main") {
+		t.Errorf("expected main hand equip confirmation, got: %q", result)
 	}
 }
 

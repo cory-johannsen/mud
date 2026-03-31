@@ -43,7 +43,7 @@ func (s *GameServiceServer) handleSpawnNPC(uid string, req *gamev1.SpawnNPCReque
 		return errorEvent(fmt.Sprintf("Failed to spawn NPC: %v", err)), nil
 	}
 
-	return messageEvent(fmt.Sprintf("Spawned %s in %s.", tmpl.Name, room.Title)), nil
+	return messageEvent(fmt.Sprintf("spawned %s in %s.", tmpl.Name, room.Title)), nil
 }
 
 // handleAddRoom adds a new room to a zone. (REQ-EC-17,18)
@@ -257,4 +257,33 @@ func (s *GameServiceServer) handleDeleteChar(uid string, req *gamev1.DeleteCharR
 		return messageEvent(fmt.Sprintf("delete_char: failed to delete character %q: %v", req.GetName(), err)), nil
 	}
 	return messageEvent(fmt.Sprintf("Character %q deleted from claude_player.", req.GetName())), nil
+}
+
+// handleKillNPC immediately removes the first matching NPC instance in the editor's room. (REQ-EC-30)
+//
+// Precondition: uid session must exist; req.TemplateId must be non-empty; caller must have editor role.
+// Postcondition: The first NPC instance whose TemplateID matches req.TemplateId in the editor's room
+// is removed from the NPC manager. Returns an error event if not found.
+func (s *GameServiceServer) handleKillNPC(uid string, req *gamev1.KillNPCRequest) (*gamev1.ServerEvent, error) {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return errorEvent("session not found"), nil
+	}
+	if evt := requireEditor(sess); evt != nil {
+		return evt, nil
+	}
+	if req.GetTemplateId() == "" {
+		return errorEvent("killnpc: template_id must be non-empty"), nil
+	}
+
+	instances := s.npcMgr.InstancesInRoom(sess.RoomID)
+	for _, inst := range instances {
+		if inst.TemplateID == req.GetTemplateId() {
+			if err := s.npcMgr.Remove(inst.ID); err != nil {
+				return errorEvent(fmt.Sprintf("killnpc: %v", err)), nil
+			}
+			return messageEvent(fmt.Sprintf("killed %s in %s.", inst.Name(), sess.RoomID)), nil
+		}
+	}
+	return errorEvent(fmt.Sprintf("no %s found in room %s.", req.GetTemplateId(), sess.RoomID)), nil
 }

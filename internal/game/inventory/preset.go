@@ -11,6 +11,8 @@ type EquippedWeapon struct {
 	Magazine *Magazine
 	// InstanceID links this weapon to the corresponding ItemInstance (UUID).
 	InstanceID string
+	// ItemDefID is the item definition ID used when this weapon was equipped (e.g. "tactical_knife").
+	ItemDefID string
 	// Durability is a cached copy; the ItemInstance is the source of truth.
 	Durability int
 	// Modifier is the item modifier: "" | "tuned" | "defective" | "cursed".

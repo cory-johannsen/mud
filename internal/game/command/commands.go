@@ -151,6 +151,11 @@ const (
 	HandlerDowntime           = "downtime"
 	HandlerSeduce             = "seduce"
 	HandlerHotbar             = "hotbar"
+	HandlerGrantItem          = "grant_item"
+	HandlerGrantMoney         = "grant_money"
+	HandlerKillNPC            = "kill_npc"
+	HandlerLoot               = "loot"
+	HandlerInspect            = "inspect"
 )
 
 // Command defines a player-invocable command.
@@ -202,6 +207,7 @@ func BuiltinCommands() []Command {
 		{Name: "inventory", Aliases: []string{"inv", "i"}, Help: "Show backpack contents and currency", Category: CategoryWorld, Handler: HandlerInventory},
 		{Name: "get", Aliases: []string{"take"}, Help: "Pick up item from room floor", Category: CategoryWorld, Handler: HandlerGet},
 		{Name: "drop", Aliases: nil, Help: "Drop an item from your backpack", Category: CategoryWorld, Handler: HandlerDrop},
+		{Name: "inspect", Aliases: nil, Help: "Inspect an item in your backpack (inspect <item_id>)", Category: CategoryWorld, Handler: HandlerInspect},
 		{Name: "balance", Aliases: []string{"bal"}, Help: "Show your currency (Rounds/Clips/Crates)", Category: CategoryWorld, Handler: HandlerBalance},
 
 		// NPC interaction commands
@@ -263,6 +269,9 @@ func BuiltinCommands() []Command {
 		{Name: "ecmds", Aliases: nil, Help: "List all editor commands", Category: CategoryEditor, Handler: HandlerEditorCmds},
 		{Name: "spawn_char", Aliases: nil, Help: "Create a test character for claude_player account. Usage: spawn_char <name>", Category: CategoryEditor, Handler: HandlerSpawnChar},
 		{Name: "delete_char", Aliases: nil, Help: "Delete a character by name from claude_player account. Usage: delete_char <name>", Category: CategoryEditor, Handler: HandlerDeleteChar},
+		{Name: "grant_item", Aliases: nil, Help: "Place an item on the floor of your current room. Usage: grant_item <item_id>", Category: CategoryEditor, Handler: HandlerGrantItem},
+		{Name: "grant_money", Aliases: nil, Help: "Give credits to all players in your current room. Usage: grant_money <amount>", Category: CategoryEditor, Handler: HandlerGrantMoney},
+		{Name: "killnpc", Aliases: nil, Help: "Kill an NPC in your current room. Usage: killnpc <template_id>", Category: CategoryEditor, Handler: HandlerKillNPC},
 
 		{Name: "map", Aliases: nil, Help: "Display your automap for the current zone", Category: CategoryWorld, Handler: HandlerMap},
 		{Name: "travel", Aliases: nil, Help: "Fast travel to a discovered zone (travel <zone name>)", Category: CategoryWorld, Handler: HandlerTravel},
