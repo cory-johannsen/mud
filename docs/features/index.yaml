@@ -755,3 +755,44 @@ features:
     category: ui
     file: docs/features/character-switch.md
     effort: "S"  # LogoutDropdown component in GamePage toolbar; Switch Character navigates to /characters
+
+  - slug: web-ui-inventory-equip
+    name: Web UI — Inventory Equip Control
+    status: backlog
+    priority: 480
+    category: ui
+    file: docs/features/web-ui-inventory-equip.md
+    effort: "S"  # inline equip button/slot selector on equippable items in Inventory tab
+    dependencies:
+      - web-client
+
+  - slug: web-ui-inventory-consume
+    name: Web UI — Inventory Consume Control
+    status: backlog
+    priority: 481
+    category: ui
+    file: docs/features/web-ui-inventory-consume.md
+    effort: "S"  # inline consume button on consumable items in Inventory tab
+    dependencies:
+      - web-client
+
+  - slug: web-ui-equipment-controls
+    name: Web UI — Equipment Tab Controls
+    status: backlog
+    priority: 482
+    category: ui
+    file: docs/features/web-ui-equipment-controls.md
+    effort: "S"  # equip/unequip controls per slot in Equipment tab; no command typing required
+    dependencies:
+      - web-client
+
+  - slug: technology-short-names
+    name: Technology Short Names
+    status: backlog
+    priority: 483
+    category: ui
+    file: docs/features/technology-short-names.md
+    effort: "S"  # short_name field on tech definitions; use command alias; hotbar uses short name
+    dependencies:
+      - technology
+      - web-client
