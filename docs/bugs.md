@@ -334,10 +334,11 @@
 
 ### BUG-42: buy command cannot match items by display name or partial name
 **Severity:** high
-**Status:** open
+**Status:** fixed
 **Category:** World
 **Description:** The `buy` command fails to match merchant items by display name, partial name, or slug — none of "Sawn-Off", "sawn-off", "sawn-off-shotgun", or "Sawn-Off Shotgun" resolve to the Sawn-Off Shotgun in Sergeant Mack's inventory.
 **Steps:** Browse Sergeant Mack's wares (`browse mack`); attempt `buy mack sawn-off`, `buy mack sawn-off-shotgun`, `buy mack Sawn-Off`, `buy mack Sawn-Off Shotgun`; all return "Sergeant Mack doesn't sell <term>".
+**Fix:** Added `normalizeMerchantQuery` helper and fuzzy matching in `handleBuy`: exact → case-insensitive → slug-normalized → display name from `invRegistry`.
 **Fix:**
 
 ### BUG-41: Non-combat NPCs do not appear as POIs on map after visiting room

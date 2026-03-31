@@ -148,6 +148,34 @@ func TestHandleBuy_SuccessAddsItemToBackpack(t *testing.T) {
 	assert.Equal(t, 1, items[0].Quantity)
 }
 
+// REQ-NPC-BUY-2: buy MUST match items by display name, slug, or partial case-insensitive name.
+func TestHandleBuy_MatchByDisplayName(t *testing.T) {
+	svc, uid, inst := newMerchantTestServer(t)
+	// invRegistry has stim_pack with Name "Stim Pack"; try matching by display name.
+	evt, err := svc.handleBuy(uid, &gamev1.BuyRequest{NpcName: inst.Name(), ItemId: "Stim Pack", Quantity: 1})
+	require.NoError(t, err)
+	assert.Contains(t, evt.GetMessage().Content, "buy", "display name match should succeed")
+
+	sess, ok := svc.sessions.GetPlayer(uid)
+	require.True(t, ok)
+	assert.Equal(t, 450, sess.Currency, "currency must be deducted on display-name match")
+}
+
+func TestHandleBuy_MatchBySlug(t *testing.T) {
+	svc, uid, inst := newMerchantTestServer(t)
+	// "stim-pack" should resolve to "stim_pack" via slug normalization.
+	evt, err := svc.handleBuy(uid, &gamev1.BuyRequest{NpcName: inst.Name(), ItemId: "stim-pack", Quantity: 1})
+	require.NoError(t, err)
+	assert.Contains(t, evt.GetMessage().Content, "buy", "slug match should succeed")
+}
+
+func TestHandleBuy_MatchCaseInsensitive(t *testing.T) {
+	svc, uid, inst := newMerchantTestServer(t)
+	evt, err := svc.handleBuy(uid, &gamev1.BuyRequest{NpcName: inst.Name(), ItemId: "STIM_PACK", Quantity: 1})
+	require.NoError(t, err)
+	assert.Contains(t, evt.GetMessage().Content, "buy", "case-insensitive item ID match should succeed")
+}
+
 func TestHandleBuy_InsufficientCredits(t *testing.T) {
 	svc, uid, inst := newMerchantTestServer(t)
 	sess, ok := svc.sessions.GetPlayer(uid)

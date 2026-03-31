@@ -66,6 +66,17 @@ func (s *GameServiceServer) findMerchantInRoom(roomID, npcName string) (*npc.Ins
 	return inst, ""
 }
 
+// normalizeMerchantQuery lowercases s and replaces spaces and hyphens with underscores.
+//
+// Precondition: none.
+// Postcondition: Returns a lowercase string with spaces/hyphens replaced by underscores.
+func normalizeMerchantQuery(s string) string {
+	s = strings.ToLower(s)
+	s = strings.ReplaceAll(s, " ", "_")
+	s = strings.ReplaceAll(s, "-", "_")
+	return s
+}
+
 // wantedSurchargeFor returns 1.1 if the player has WantedLevel >= 1 in the room's zone, else 1.0.
 //
 // Precondition: sess is non-nil.
@@ -171,17 +182,34 @@ func (s *GameServiceServer) handleBuy(uid string, req *gamev1.BuyRequest) (*game
 		s.initMerchantRuntimeState(inst)
 		state = s.merchantStateFor(inst.ID)
 	}
-	itemID := req.GetItemId()
+	query := req.GetItemId()
 	qty := int(req.GetQuantity())
 	if qty < 1 {
 		qty = 1
 	}
+	// Resolve query to canonical item ID using fuzzy matching:
+	// 1. exact, 2. case-insensitive, 3. slug-normalized, 4. display name.
+	normQuery := normalizeMerchantQuery(query)
 	var itemCfg *npc.MerchantItem
 	for i := range tmpl.Merchant.Inventory {
-		if tmpl.Merchant.Inventory[i].ItemID == itemID {
+		id := tmpl.Merchant.Inventory[i].ItemID
+		if id == query || strings.EqualFold(id, query) || normalizeMerchantQuery(id) == normQuery {
 			itemCfg = &tmpl.Merchant.Inventory[i]
 			break
 		}
+		if s.invRegistry != nil {
+			if def, ok := s.invRegistry.Item(id); ok {
+				if strings.EqualFold(def.Name, query) || normalizeMerchantQuery(def.Name) == normQuery {
+					itemCfg = &tmpl.Merchant.Inventory[i]
+					break
+				}
+			}
+		}
+	}
+	// Use the canonical ID for all downstream operations.
+	itemID := query
+	if itemCfg != nil {
+		itemID = itemCfg.ItemID
 	}
 	if itemCfg == nil {
 		// Check merchant material stock
