@@ -774,6 +774,8 @@ message InventoryItem {
   string kind = 3;
   int32 quantity = 4;
   double weight = 5;
+  string item_def_id = 6;  // ItemDef ID used by equip/wear commands
+  string armor_slot = 7;   // ArmorDef.Slot (head/torso/etc.) when kind == "armor"
 }
 
 // InventoryView shows the player's backpack and currency.

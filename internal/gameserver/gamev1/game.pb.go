@@ -7898,6 +7898,8 @@ type InventoryItem struct {
 	Kind          string                 `protobuf:"bytes,3,opt,name=kind,proto3" json:"kind,omitempty"`
 	Quantity      int32                  `protobuf:"varint,4,opt,name=quantity,proto3" json:"quantity,omitempty"`
 	Weight        float64                `protobuf:"fixed64,5,opt,name=weight,proto3" json:"weight,omitempty"`
+	ItemDefId     string                 `protobuf:"bytes,6,opt,name=item_def_id,json=itemDefId,proto3" json:"item_def_id,omitempty"`
+	ArmorSlot     string                 `protobuf:"bytes,7,opt,name=armor_slot,json=armorSlot,proto3" json:"armor_slot,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -7965,6 +7967,20 @@ func (x *InventoryItem) GetWeight() float64 {
 		return x.Weight
 	}
 	return 0
+}
+
+func (x *InventoryItem) GetItemDefId() string {
+	if x != nil {
+		return x.ItemDefId
+	}
+	return ""
+}
+
+func (x *InventoryItem) GetArmorSlot() string {
+	if x != nil {
+		return x.ArmorSlot
+	}
+	return ""
 }
 
 // InventoryView shows the player's backpack and currency.

@@ -5228,11 +5228,17 @@ func (s *GameServiceServer) handleInventory(uid string) (*gamev1.ServerEvent, er
 		name := inst.ItemDefID
 		kind := ""
 		weight := 0.0
+		armorSlot := ""
 		if s.invRegistry != nil {
 			if def, ok := s.invRegistry.Item(inst.ItemDefID); ok {
 				name = def.Name
 				kind = def.Kind
 				weight = def.Weight
+				if def.Kind == inventory.KindArmor && def.ArmorRef != "" {
+					if armorDef, ok := s.invRegistry.Armor(def.ArmorRef); ok {
+						armorSlot = string(armorDef.Slot)
+					}
+				}
 			}
 		}
 		items = append(items, &gamev1.InventoryItem{
@@ -5241,6 +5247,8 @@ func (s *GameServiceServer) handleInventory(uid string) (*gamev1.ServerEvent, er
 			Kind:       kind,
 			Quantity:   int32(inst.Quantity),
 			Weight:     weight * float64(inst.Quantity),
+			ItemDefId:  inst.ItemDefID,
+			ArmorSlot:  armorSlot,
 		})
 	}
 	var totalWeight float64
