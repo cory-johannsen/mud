@@ -1,0 +1,16 @@
+id: wook_spore
+name: Wook Spore
+category: drug
+onset_delay: "0s"
+duration: "10m"
+effects:
+  - apply_condition: delirium
+    stacks: 1
+remove_on_expire:
+  - delirium
+addictive: false
+addiction_chance: 0.05
+overdose_threshold: 5
+overdose_condition: ""
+withdrawal_conditions: []
+recovery_duration: "2m"
