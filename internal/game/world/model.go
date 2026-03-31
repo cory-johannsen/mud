@@ -201,6 +201,9 @@ type Room struct {
 	//   - the map renderer displays the tile as <BB> instead of [BB].
 	//   - boss NPC respawns trigger coordinated respawn of all room spawns.
 	BossRoom bool `yaml:"boss_room,omitempty"`
+	// Indoor marks this room as an enclosed indoor space. When true,
+	// weather effects (temperature modifiers, precipitation, wind) do not apply.
+	Indoor bool `yaml:"indoor,omitempty"`
 	// Hazards lists environmental hazards that fire on player entry or each combat round.
 	Hazards []HazardDef `yaml:"hazards,omitempty"`
 	// MinFactionTierID is the minimum faction tier ID required to enter this room.

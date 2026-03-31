@@ -89,6 +89,7 @@ type yamlRoom struct {
 	DangerLevel     string                  `yaml:"danger_level,omitempty"`
 	RoomTrapChance  *int                    `yaml:"room_trap_chance,omitempty"`
 	CoverTrapChance *int                    `yaml:"cover_trap_chance,omitempty"`
+	Indoor          bool                    `yaml:"indoor"`
 }
 
 // yamlExit is the YAML representation of an exit.
@@ -217,6 +218,7 @@ func convertYAMLZone(yz yamlZone) (*Zone, error) {
 			DangerLevel:     yr.DangerLevel,
 			RoomTrapChance:  yr.RoomTrapChance,
 			CoverTrapChance: yr.CoverTrapChance,
+			Indoor:          yr.Indoor,
 		}
 		if room.Properties == nil {
 			room.Properties = make(map[string]string)
@@ -289,6 +291,7 @@ func zoneToYAML(zone *Zone) yamlZoneFile {
 			DangerLevel:     room.DangerLevel,
 			RoomTrapChance:  room.RoomTrapChance,
 			CoverTrapChance: room.CoverTrapChance,
+			Indoor:          room.Indoor,
 		}
 		for _, exit := range room.Exits {
 			yr.Exits = append(yr.Exits, yamlExit{
