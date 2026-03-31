@@ -138,7 +138,7 @@ function WorldMapView({ tiles, onTravel }: { tiles: WorldZoneTile[]; onTravel: (
 }
 
 export function MapPanel() {
-  const { state, sendMessage } = useGame()
+  const { state, sendMessage, sendCommand } = useGame()
   const [showWorld, setShowWorld] = useState(false)
 
   function refreshZone() {
@@ -173,6 +173,13 @@ export function MapPanel() {
       <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
         <div className="map-header">
           <h3>Battle Map</h3>
+          <button
+            className="map-refresh-btn"
+            style={{ background: '#2a1a1a', borderColor: '#7a2a2a', color: '#f66' }}
+            onClick={() => sendCommand('flee')}
+          >
+            Flee!
+          </button>
         </div>
         <div style={{ overflow: 'auto', padding: '0.5rem' }}>
           {renderBattleMap(state.combatPositions)}
