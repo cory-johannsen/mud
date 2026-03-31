@@ -2,6 +2,7 @@ package gameserver
 
 import (
 	"fmt"
+	"log"
 	"math/rand"
 	"time"
 
@@ -9,6 +10,56 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/substance"
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 )
+
+// ambientDoseInterval is the minimum elapsed time between ambient substance doses.
+//
+// REQ-OCF-8: Players in a room with AmbientSubstance receive one dose per 60 seconds.
+const ambientDoseInterval = 60 * time.Second
+
+// ShouldApplyAmbientDose reports whether enough time has elapsed since lastDose
+// to apply the next ambient substance dose.
+//
+// Precondition: now must be >= lastDose (or lastDose is zero).
+// Postcondition: Returns true iff lastDose is zero OR now-lastDose >= ambientDoseInterval.
+func ShouldApplyAmbientDose(lastDose, now time.Time) bool {
+	if lastDose.IsZero() {
+		return true
+	}
+	return now.Sub(lastDose) >= ambientDoseInterval
+}
+
+// tickAmbientSubstances iterates all active player sessions and applies one micro-dose
+// of the room's AmbientSubstance to each player who has not been dosed in the last 60s.
+//
+// REQ-OCF-8: Called by the 5-second ticker goroutine; enforces 60-second minimum interval.
+// Precondition: s.world and s.substanceReg must be non-nil for dosing to occur.
+// Postcondition: sess.LastAmbientDose is updated for each player that receives a dose.
+func (s *GameServiceServer) tickAmbientSubstances() {
+	if s.world == nil || s.substanceReg == nil {
+		return
+	}
+	now := time.Now()
+	for _, uid := range s.sessions.AllUIDs() {
+		sess, ok := s.sessions.GetPlayer(uid)
+		if !ok {
+			continue
+		}
+		room, ok := s.world.GetRoom(sess.RoomID)
+		if !ok || room.AmbientSubstance == "" {
+			continue
+		}
+		if !ShouldApplyAmbientDose(sess.LastAmbientDose, now) {
+			continue
+		}
+		def, ok := s.substanceReg.Get(room.AmbientSubstance)
+		if !ok {
+			log.Printf("tickAmbientSubstances: room %q references unknown substance %q", sess.RoomID, room.AmbientSubstance)
+			continue
+		}
+		sess.LastAmbientDose = now
+		s.applySubstanceDose(uid, def)
+	}
+}
 
 // applySubstanceDose applies one dose of def to the player session identified by uid.
 //

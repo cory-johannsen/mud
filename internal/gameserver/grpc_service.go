@@ -1774,7 +1774,8 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 				if sess, ok := s.sessions.GetPlayer(uid); ok {
 					s.pushRoomViewToAllInRoom(sess.RoomID)
 				}
-				s.tickSubstances(uid) // REQ-AH-12
+				s.tickSubstances(uid)     // REQ-AH-12
+				s.tickAmbientSubstances() // REQ-OCF-8
 				// REQ-DT-7: check all sessions with active downtime
 				for _, activeUID := range s.sessions.AllUIDs() {
 					s.checkDowntimeCompletion(activeUID)

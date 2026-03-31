@@ -326,6 +326,11 @@ type PlayerSession struct {
 	// When true, promptFeatureChoice auto-selects the first valid option instead of
 	// blocking on stream.Recv(); no interactive prompts are sent to the client.
 	Headless bool
+	// LastAmbientDose is the wall-clock time at which the most recent ambient substance
+	// dose was applied to this player. Zero value means the player has never received an
+	// ambient dose in this session; tickAmbientSubstances treats zero as immediately eligible.
+	// REQ-OCF-8: session-only; not persisted.
+	LastAmbientDose time.Time
 }
 
 // EquippedInstances returns all ItemInstances currently equipped across the active weapon
