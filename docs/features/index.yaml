@@ -556,7 +556,7 @@ features:
 
   - slug: wooklyn
     name: Wooklyn Zone
-    status: planned
+    status: done
     priority: 339
     category: world
     file: docs/features/wooklyn.md
