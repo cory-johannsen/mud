@@ -39,6 +39,7 @@ function formatTimeOfDay(tod: TimeOfDayEvent): string {
 // Inner component that has access to GameContext.
 function GameLayout() {
   const { state } = useGame()
+  const activeWeather = state.activeWeather
   const [openDrawer, setOpenDrawer] = useState<DrawerType | null>(null)
   const [activeMobilePanel, setActiveMobilePanel] = useState<MobilePanel>('room')
   const [showHelp, setShowHelp] = useState(false)
@@ -57,6 +58,26 @@ function GameLayout() {
           </span>
           {state.timeOfDay && (
             <span className="toolbar-time">{formatTimeOfDay(state.timeOfDay)}</span>
+          )}
+          {activeWeather && (
+            <div style={{
+              position: 'absolute',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              background: 'rgba(0,0,0,0.7)',
+              color: '#f0a500',
+              border: '1px solid #f0a500',
+              borderRadius: '12px',
+              padding: '2px 12px',
+              fontSize: '0.8rem',
+              fontFamily: 'monospace',
+              fontWeight: 'bold',
+              letterSpacing: '0.05em',
+              whiteSpace: 'nowrap',
+              pointerEvents: 'none',
+            }}>
+              {'\u26C8'} {activeWeather}
+            </div>
           )}
           {(['inventory', 'equipment', 'skills', 'feats', 'stats', 'technology'] as DrawerType[]).map((d) => (
             <button

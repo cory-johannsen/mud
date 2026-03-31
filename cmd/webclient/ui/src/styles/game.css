@@ -38,6 +38,7 @@
   padding: 0.4rem 0.75rem;
   background: #111;
   border-bottom: 1px solid #333;
+  position: relative;
 }
 .toolbar-zone {
   flex: 1;
