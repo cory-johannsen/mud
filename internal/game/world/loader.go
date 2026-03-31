@@ -32,6 +32,7 @@ type yamlZone struct {
 	WorldX                 *int                   `yaml:"world_x,omitempty"`
 	WorldY                 *int                   `yaml:"world_y,omitempty"`
 	ZoneEffects            []RoomEffect           `yaml:"zone_effects,omitempty"`
+	FactionID              string                 `yaml:"faction_id,omitempty"`
 }
 
 // yamlTrapProbabilities is the YAML representation of zone trap placement config.
@@ -91,6 +92,9 @@ type yamlRoom struct {
 	CoverTrapChance *int                    `yaml:"cover_trap_chance,omitempty"`
 	Indoor           bool                    `yaml:"indoor"`
 	AmbientSubstance string                  `yaml:"ambient_substance,omitempty"`
+	BossRoom         bool                    `yaml:"boss_room,omitempty"`
+	Hazards          []HazardDef             `yaml:"hazards,omitempty"`
+	MinFactionTierID string                  `yaml:"min_faction_tier_id,omitempty"`
 }
 
 // yamlExit is the YAML representation of an exit.
@@ -187,6 +191,7 @@ func convertYAMLZone(yz yamlZone) (*Zone, error) {
 		WorldX:                 yz.WorldX,
 		WorldY:                 yz.WorldY,
 		ZoneEffects:            yz.ZoneEffects,
+		FactionID:              yz.FactionID,
 	}
 	if yz.TrapProbabilities != nil {
 		tp := &TrapProbabilities{
@@ -207,20 +212,23 @@ func convertYAMLZone(yz yamlZone) (*Zone, error) {
 			return nil, fmt.Errorf("zone %q: room %q: missing required field map_y", yz.ID, yr.ID)
 		}
 		room := &Room{
-			ID:              yr.ID,
-			ZoneID:          yz.ID,
-			Title:           yr.Title,
-			Description:     strings.TrimSpace(yr.Description),
-			Properties:      yr.Properties,
-			SkillChecks:     yr.SkillChecks,
-			Effects:         yr.Effects,
-			MapX:            *yr.MapX,
-			MapY:            *yr.MapY,
+			ID:               yr.ID,
+			ZoneID:           yz.ID,
+			Title:            yr.Title,
+			Description:      strings.TrimSpace(yr.Description),
+			Properties:       yr.Properties,
+			SkillChecks:      yr.SkillChecks,
+			Effects:          yr.Effects,
+			MapX:             *yr.MapX,
+			MapY:             *yr.MapY,
 			DangerLevel:      yr.DangerLevel,
 			RoomTrapChance:   yr.RoomTrapChance,
 			CoverTrapChance:  yr.CoverTrapChance,
 			Indoor:           yr.Indoor,
 			AmbientSubstance: yr.AmbientSubstance,
+			BossRoom:         yr.BossRoom,
+			Hazards:          yr.Hazards,
+			MinFactionTierID: yr.MinFactionTierID,
 		}
 		if room.Properties == nil {
 			room.Properties = make(map[string]string)
@@ -295,6 +303,9 @@ func zoneToYAML(zone *Zone) yamlZoneFile {
 			CoverTrapChance:  room.CoverTrapChance,
 			Indoor:           room.Indoor,
 			AmbientSubstance: room.AmbientSubstance,
+			BossRoom:         room.BossRoom,
+			Hazards:          room.Hazards,
+			MinFactionTierID: room.MinFactionTierID,
 		}
 		for _, exit := range room.Exits {
 			yr.Exits = append(yr.Exits, yamlExit{
@@ -347,6 +358,7 @@ func zoneToYAML(zone *Zone) yamlZoneFile {
 		DangerLevel:            zone.DangerLevel,
 		RoomTrapChance:         zone.RoomTrapChance,
 		CoverTrapChance:        zone.CoverTrapChance,
+		FactionID:              zone.FactionID,
 	}
 	if zone.TrapProbabilities != nil {
 		tp := &yamlTrapProbabilities{
