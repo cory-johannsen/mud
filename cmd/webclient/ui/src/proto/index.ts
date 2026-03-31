@@ -234,6 +234,10 @@ export interface InventoryItem {
   kind?: string
   quantity?: number
   weight?: number
+  itemDefId?: string
+  item_def_id?: string
+  armorSlot?: string
+  armor_slot?: string
 }
 
 export interface InventoryView {
