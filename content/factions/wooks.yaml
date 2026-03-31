@@ -1,0 +1,25 @@
+id: wooks
+name: The Wooks
+zone_id: wooklyn
+hostile_factions:
+  - gun
+  - machete
+tiers:
+  - id: narc
+    label: "Narc"
+    min_rep: 0
+    price_discount: 0.0
+  - id: curious
+    label: "Curious Traveler"
+    min_rep: 10
+    price_discount: 0.05
+  - id: fellow_traveler
+    label: "Fellow Traveler"
+    min_rep: 25
+    price_discount: 0.15
+  - id: wook_brother
+    label: "Wook Brother/Sister"
+    min_rep: 50
+    price_discount: 0.25
+exclusive_items: []
+gated_rooms: []
