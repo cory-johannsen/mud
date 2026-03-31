@@ -272,6 +272,9 @@ func applyAllMigrations(pool *pgxpool.Pool) error {
 			hour  INTEGER NOT NULL DEFAULT 6
 		);
 
+		-- Migration 056
+		ALTER TABLE world_calendar ADD COLUMN IF NOT EXISTS tick BIGINT NOT NULL DEFAULT 0;
+
 		CREATE TABLE IF NOT EXISTS character_wanted_levels (
 			character_id BIGINT NOT NULL REFERENCES characters(id) ON DELETE CASCADE,
 			zone_id      VARCHAR(64) NOT NULL,

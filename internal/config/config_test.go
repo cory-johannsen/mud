@@ -44,6 +44,10 @@ func validConfig() Config {
 			GameClockStart:   6,
 			GameTickDuration: time.Minute,
 		},
+		Weather: WeatherConfig{
+			ChancePerTick: 0.05,
+			ContentFile:   "content/weather.yaml",
+		},
 	}
 }
 
