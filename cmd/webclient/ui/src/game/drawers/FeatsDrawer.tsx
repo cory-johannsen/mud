@@ -160,7 +160,7 @@ const styles: Record<string, React.CSSProperties> = {
     paddingBottom: '0.2rem',
   },
   list: { listStyle: 'none', padding: 0, margin: 0 },
-  featItem: { marginBottom: '0.75rem' },
+  featItem: { marginBottom: '0.75rem', position: 'relative' as const },
   featHeader: { display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.15rem' },
   featDesc: { margin: '0.15rem 0 0.3rem', color: '#888', fontSize: '0.8rem' },
   badgeActive: {
@@ -193,7 +193,11 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: '0.75rem',
   },
   slotPicker: {
-    marginTop: '0.4rem',
+    position: 'absolute' as const,
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 10,
     background: '#111',
     border: '1px solid #333',
     borderRadius: '4px',

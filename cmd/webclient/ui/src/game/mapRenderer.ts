@@ -231,7 +231,7 @@ export function renderMapTiles(tiles: MapTile[]): MapRenderResult {
   // Format matches telnet: marker(1) + num right-aligned(2) + "."(1) + name truncated/padded(16) = 20 chars/entry
   const LEGEND_COL_WIDTH = 20
   const LEGEND_NAME_WIDTH = LEGEND_COL_WIDTH - 4  // 4 = marker(1)+num(2)+dot(1)
-  const LEGEND_COLS = 5
+  const LEGEND_COLS = 3
 
   const presentPOIs = new Set<string>()
   for (const t of normalized) {

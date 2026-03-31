@@ -1,10 +1,11 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
+import ReactDOM from 'react-dom'
 import { useGame } from './GameContext'
 import type { ShopItem, ShopView } from '../proto'
 
 // ---------- Stat tooltip ----------
 
-function ItemTooltip({ item }: { item: ShopItem }) {
+function ItemTooltip({ item, pos }: { item: ShopItem; pos: { x: number; y: number } }) {
   const kind = item.kind ?? ''
   const desc = item.description ?? ''
   const lines: Array<{ label: string; value: string }> = []
@@ -30,8 +31,8 @@ function ItemTooltip({ item }: { item: ShopItem }) {
     if (prof) lines.push({ label: 'Proficiency', value: prof.replace(/_/g, ' ') })
   }
 
-  return (
-    <div style={styles.tooltip}>
+  return ReactDOM.createPortal(
+    <div style={{ ...styles.tooltip, left: pos.x, top: pos.y }}>
       <div style={styles.tooltipName}>{item.name ?? item.itemId ?? item.item_id}</div>
       {kind && <div style={styles.tooltipKind}>{kind}</div>}
       {desc && <p style={styles.tooltipDesc}>{desc}</p>}
@@ -42,7 +43,8 @@ function ItemTooltip({ item }: { item: ShopItem }) {
         </div>
       ))}
       {lines.length === 0 && !desc && <div style={{ color: '#666', fontSize: '0.75rem' }}>No stats available.</div>}
-    </div>
+    </div>,
+    document.body,
   )
 }
 
@@ -82,6 +84,8 @@ function ShopRow({
   onBuy: (itemId: string, qty: number) => void
 }) {
   const [hovered, setHovered] = useState(false)
+  const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 })
+  const tdRef = useRef<HTMLTableCellElement>(null)
   const id = item.itemId ?? item.item_id ?? ''
   const name = item.name ?? id
   const buy = item.buyPrice ?? item.buy_price ?? 0
@@ -90,13 +94,21 @@ function ShopRow({
   const equipped = equippedLabel(item, sheet)
   const hasStats = !!(item.kind && (item.kind === 'weapon' || item.kind === 'armor' || item.description))
 
+  function handleMouseEnter() {
+    if (tdRef.current) {
+      const rect = tdRef.current.getBoundingClientRect()
+      setTooltipPos({ x: rect.left, y: rect.bottom + 4 })
+    }
+    setHovered(true)
+  }
+
   return (
     <tr
       style={{ ...styles.row, ...(hovered ? styles.rowHovered : {}) }}
-      onMouseEnter={() => setHovered(true)}
+      onMouseEnter={handleMouseEnter}
       onMouseLeave={() => setHovered(false)}
     >
-      <td style={styles.tdName}>
+      <td ref={tdRef} style={styles.tdName}>
         <div style={styles.nameCell}>
           <span style={{ cursor: hasStats ? 'help' : 'default' }}>
             {name}
@@ -104,7 +116,7 @@ function ShopRow({
           </span>
           {equipped && <span style={styles.equippedBadge}>{equipped}</span>}
         </div>
-        {hovered && hasStats && <ItemTooltip item={item} />}
+        {hovered && hasStats && <ItemTooltip item={item} pos={tooltipPos} />}
       </td>
       <td style={styles.tdNum}>{buy}¢</td>
       <td style={styles.tdNum}>{sell}¢</td>
@@ -326,10 +338,8 @@ const styles: Record<string, React.CSSProperties> = {
   },
   // Tooltip
   tooltip: {
-    position: 'absolute' as const,
-    left: '0',
-    top: '100%',
-    zIndex: 300,
+    position: 'fixed' as const,
+    zIndex: 1000,
     background: '#1a1a1a',
     border: '1px solid #444',
     borderRadius: '5px',

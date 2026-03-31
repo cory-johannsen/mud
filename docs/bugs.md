@@ -359,11 +359,11 @@
 
 ### BUG-43: Hotbar rendered into feed/console after every server event (web client)
 **Severity:** medium
-**Status:** open
+**Status:** fixed
 **Category:** UI
 **Description:** In the web client, hotbar slot data appears as a system message in the FeedPanel after every server event, instead of only updating the fixed HotbarPanel row.
 **Steps:** Log in with a character; observe the FeedPanel; after any server event (room entry, combat message, status update) a hotbar line appears in the feed output.
-**Fix:**
+**Fix:** Investigation confirmed the `case 'HotbarUpdate':` branch in `GameContext.tsx` correctly dispatches `SET_HOTBAR` without `APPEND_FEED`. The code was already correct in the deployed codebase; the bug was resolved by a prior deployment.
 
 ### BUG-44: New characters created with 0 HP
 **Severity:** critical
@@ -414,19 +414,19 @@
 
 ### BUG-49: Web UI map legend exceeds available screen width
 **Severity:** medium
-**Status:** open
+**Status:** fixed
 **Category:** UI
 **Description:** The map legend renders with 5 fixed columns regardless of panel width, causing it to overflow and be clipped on typical screen sizes.
 **Steps:** Open the web client; enter a room and view the map panel; observe the legend overflows horizontally.
-**Fix:**
+**Fix:** Reduced `LEGEND_COLS` in `mapRenderer.ts` from 5 to 3. Each column is 20 characters wide; 3 columns = 60 chars fits comfortably in typical panel widths (~300–400px at 0.75rem monospace).
 
 ### BUG-50: Web UI shop item hover tooltips clipped inside modal
 **Severity:** medium
-**Status:** open
+**Status:** fixed
 **Category:** UI
 **Description:** Hover detail tooltips for items in the merchant shop modal are clipped by the modal's overflow boundary instead of rendering on top of it.
 **Steps:** Open the web client; interact with a merchant NPC; hover over an item in the shop listing; observe the tooltip is cut off by the modal edges rather than floating above all content.
-**Fix:**
+**Fix:** Changed `ItemTooltip` in `NpcModal.tsx` to render via `ReactDOM.createPortal` into `document.body` with `position: fixed` and coordinates computed from `tdName.getBoundingClientRect()` on `mouseEnter`. This places the tooltip completely outside the modal's DOM subtree, bypassing all ancestor `overflow` clipping.
 
 ### BUG-51: Web UI level-up ability boost not reflected in Stats tab and levelup command non-functional
 **Severity:** high
@@ -438,11 +438,11 @@
 
 ### BUG-52: Web UI character selection screen does not show zone and room
 **Severity:** medium
-**Status:** open
+**Status:** fixed
 **Category:** UI
 **Description:** The character selection screen in the web client lists characters but does not display their current zone or room location. Players cannot tell where a character is positioned before selecting them.
 **Steps:** Open the web client; reach the character selection screen; observe that each character entry shows name/class/level but no zone or room.
-**Fix:**
+**Fix:** Added `Location string \`json:"location,omitempty"\`` to `CharacterResponse` in `characters.go` and populated it from `c.Location` in `characterToResponse`. Added `location?: string` to the `Character` TypeScript interface in `client.ts`. Updated `CharactersPage.tsx` `CharacterCard` to render the room ID (underscores replaced with spaces) when present.
 
 ### BUG-53: Web UI character creation technology selection shows no descriptions
 **Severity:** high
@@ -478,11 +478,11 @@
 
 ### BUG-57: Web UI hotbar layout in Feats/Technologies tab forces scrolling instead of overlaying
 **Severity:** low
-**Status:** open
+**Status:** fixed
 **Category:** UI
 **Description:** When using "Add to Hotbar" in the Feats or Technologies tab, the hotbar layout panel does not fit within the tab area and forces the user to scroll. The layout panel should overlay the tab content and expand as necessary to show all slots.
 **Steps:** Open the web client; navigate to the Feats or Technologies tab; click "Add to Hotbar" on any feat or technology; observe that the hotbar layout panel is too large for the tab area and requires scrolling to interact with it.
-**Fix:**
+**Fix:** Added `position: 'relative'` to `featItem`/`techItem` styles and changed `slotPicker` to `position: 'absolute', top: 0, left: 0, right: 0, zIndex: 10` in both `FeatsDrawer.tsx` and `TechnologyDrawer.tsx`. The slot picker now overlays the list item instead of expanding the document flow and forcing scroll.
 
 ### BUG-58: Stride command rejected in combat with "can only be used in combat" error
 **Severity:** high

@@ -197,6 +197,7 @@ export interface Character {
   max_hp: number
   region: string
   archetype: string
+  location?: string
 }
 
 export interface SpontaneousChoice {

@@ -107,6 +107,11 @@ function CharacterCard({ char, onPlay, onDelete }: { char: Character; onPlay: (c
         Level {char.level} {char.job} ({char.archetype})
       </div>
       <div style={styles.cardSub}>{char.region}</div>
+      {char.location && (
+        <div style={styles.cardSub}>
+          Location: {char.location.replace(/_/g, ' ')}
+        </div>
+      )}
       <div style={styles.hpBar}>
         <div style={{ ...styles.hpFill, width: `${hpPct}%`, background: hpColor }} />
       </div>

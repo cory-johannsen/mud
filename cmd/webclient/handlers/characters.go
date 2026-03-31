@@ -106,6 +106,7 @@ type CharacterResponse struct {
 	MaxHP     int32  `json:"max_hp"`
 	Region    string `json:"region"`
 	Archetype string `json:"archetype"`
+	Location  string `json:"location,omitempty"`
 }
 
 // CharacterHandler serves all /api/characters endpoints.
@@ -237,6 +238,7 @@ func characterToResponse(c *character.Character, opts *CharacterOptions) Charact
 		MaxHP:     int32(c.MaxHP),
 		Region:    region,
 		Archetype: archetype,
+		Location:  c.Location,
 	}
 }
 
