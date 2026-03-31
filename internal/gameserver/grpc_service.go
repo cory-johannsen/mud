@@ -523,6 +523,8 @@ func NewGameServiceServer(
 		if s.questSvc != nil {
 			s.combatH.SetQuestService(s.questSvc)
 		}
+		// REQ-BUG61-1: wire pushCharacterSheet so the web UI Stats tab updates after XP award.
+		s.combatH.SetPushCharacterSheetFn(s.pushCharacterSheet)
 	}
 	s.merchantRuntimeStates = make(map[string]*npc.MerchantRuntimeState)
 	s.bankerRuntimeStates = make(map[string]*npc.BankerRuntimeState)

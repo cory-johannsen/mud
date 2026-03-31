@@ -510,8 +510,8 @@
 
 ### BUG-61: Web UI Stats tab does not update XP after combat
 **Severity:** medium
-**Status:** open
+**Status:** fixed
 **Category:** UI
 **Description:** After combat ends, the console correctly displays the XP granted message, but the Stats tab continues to show the pre-combat XP value and does not reflect the updated total.
 **Steps:** Open the web client; engage and complete combat; observe the XP granted message in the console; navigate to the Stats tab and observe that the XP value has not updated.
-**Fix:**
+**Fix:** `CombatHandler.pushXPMessages` was sending XP grant text messages but never pushing a `CharacterSheetView` to the client. The `StatsDrawer` reads XP from `state.characterSheet`, which is only updated when a `CharacterSheetView` arrives. Added a `pushCharacterSheetFn func(*session.PlayerSession)` callback field to `CombatHandler` with `SetPushCharacterSheetFn`, called unconditionally at the end of `pushXPMessages`. Wired `s.pushCharacterSheet` as the callback in `grpc_service.go`.

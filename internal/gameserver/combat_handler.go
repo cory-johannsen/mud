@@ -117,6 +117,10 @@ type CombatHandler struct {
 	// weatherMgr provides active weather effects for outdoor rooms during combat.
 	// May be nil when weather feature is not configured.
 	weatherMgr *WeatherManager
+	// pushCharacterSheetFn is an optional callback invoked after XP is awarded to push
+	// an updated CharacterSheetView to the player so the web UI Stats tab refreshes.
+	// May be nil; no-op when nil.
+	pushCharacterSheetFn func(sess *session.PlayerSession)
 }
 
 // NewCombatHandler creates a CombatHandler with a round timer and broadcast function.
@@ -247,6 +251,15 @@ func (h *CombatHandler) SetFactionService(svc *faction.Service, cfg *faction.Fac
 // Postcondition: RecordKill is called for each living participant when an NPC dies.
 func (h *CombatHandler) SetQuestService(svc *quest.Service) {
 	h.questSvc = svc
+}
+
+// SetPushCharacterSheetFn registers a callback invoked after XP is awarded in
+// pushXPMessages so the web client Stats tab receives an updated CharacterSheetView.
+//
+// Precondition: fn must be non-nil.
+// Postcondition: fn is called once per XP award with the receiving session.
+func (h *CombatHandler) SetPushCharacterSheetFn(fn func(sess *session.PlayerSession)) {
+	h.pushCharacterSheetFn = fn
 }
 
 // SetCurrencySaver registers the saver used to persist player currency after loot award.
@@ -4110,6 +4123,10 @@ func (h *CombatHandler) pushXPMessages(sess *session.PlayerSession, levelMsgs []
 		if data, marshalErr := proto.Marshal(ciEvt); marshalErr == nil {
 			_ = sess.Entity.Push(data)
 		}
+	}
+	// Push an updated CharacterSheetView so the web UI Stats tab reflects the new XP total.
+	if h.pushCharacterSheetFn != nil {
+		h.pushCharacterSheetFn(sess)
 	}
 }
 
