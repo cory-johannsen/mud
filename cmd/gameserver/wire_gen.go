@@ -277,22 +277,25 @@ func Initialize(ctx context.Context, cfg *AppConfig, clock *gameserver.GameClock
 	if cfg.WeatherFile != "" {
 		weatherTypes, wtErr := gameserver.LoadWeatherTypes(cfg.WeatherFile)
 		if wtErr != nil {
-			return nil, fmt.Errorf("loading weather types: %w", wtErr)
+			// File missing or unreadable — run without weather (e.g. e2e tests).
+			weatherTypes = nil
 		}
-		postgresWeatherRepo := postgres.NewWeatherRepo(pgxpoolPool)
-		weatherManager = gameserver.NewWeatherManager(postgresWeatherRepo, weatherTypes, cfg.WeatherChancePerTick, sessionManager)
-		if lsErr := weatherManager.LoadState(ctx); lsErr != nil {
-			return nil, fmt.Errorf("loading weather state: %w", lsErr)
-		}
-		weatherCh := make(chan gameserver.GameDateTime, 2)
-		gameCalendar.Subscribe(weatherCh)
-		go func() {
-			for dt := range weatherCh {
-				weatherManager.OnTick(dt)
+		if weatherTypes != nil {
+			postgresWeatherRepo := postgres.NewWeatherRepo(pgxpoolPool)
+			weatherManager = gameserver.NewWeatherManager(postgresWeatherRepo, weatherTypes, cfg.WeatherChancePerTick, sessionManager)
+			if lsErr := weatherManager.LoadState(ctx); lsErr != nil {
+				return nil, fmt.Errorf("loading weather state: %w", lsErr)
 			}
-		}()
-		gameServiceServer.SetWeatherManager(weatherManager)
-		combatHandler.SetWeatherManager(weatherManager)
+			weatherCh := make(chan gameserver.GameDateTime, 2)
+			gameCalendar.Subscribe(weatherCh)
+			go func() {
+				for dt := range weatherCh {
+					weatherManager.OnTick(dt)
+				}
+			}()
+			gameServiceServer.SetWeatherManager(weatherManager)
+			combatHandler.SetWeatherManager(weatherManager)
+		}
 	}
 	app := &App{
 		GRPCService:   gameServiceServer,
