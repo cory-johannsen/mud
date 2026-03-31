@@ -773,6 +773,18 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 	}
 	defer s.cleanupPlayer(uid, username)
 
+	// Restore combat status if the player reconnected mid-combat.
+	// AddPlayer always initialises Status=1 (idle); if an active combat in this room
+	// already has the player as a combatant, reset Status to statusInCombat so that
+	// combat commands (stride, pass, etc.) work immediately after reconnect.
+	if s.combatH != nil {
+		if cbt, inCombat := s.combatH.GetCombatForRoom(sess.RoomID); inCombat {
+			if cbt.GetCombatant(uid) != nil {
+				sess.Status = statusInCombat
+			}
+		}
+	}
+
 	// Propagate headless flag from the join request; used to skip interactive prompts.
 	sess.Headless = joinReq.Headless
 
@@ -1075,7 +1087,15 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 						zap.Error(flagErr),
 					)
 				} else if !received {
+					// Resolve archetype from job registry — authoritative source regardless of
+					// what the client sent. The web client sends char.Team ("gun"/"machete")
+					// instead of the job's archetype ID ("aggressor"/"drifter"/etc.).
 					archetype := joinReq.Archetype
+					if s.jobRegistry != nil {
+						if job, ok := s.jobRegistry.Job(sess.Class); ok && job.Archetype != "" {
+							archetype = job.Archetype
+						}
+					}
 					team := ""
 					if s.jobRegistry != nil {
 						team = s.jobRegistry.TeamFor(sess.Class)

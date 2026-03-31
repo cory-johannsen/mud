@@ -446,27 +446,27 @@
 
 ### BUG-53: Web UI character creation technology selection shows no descriptions
 **Severity:** high
-**Status:** open
+**Status:** fixed
 **Category:** UI
 **Description:** During character creation, the technology selection step displays technology names but no descriptions. Players cannot see damage values, healing amounts, range, AP cost, or other stat details needed to make an informed choice.
 **Steps:** Create a new character in the web client; reach the technology selection step; observe that technologies are listed by name only with no stat details, damage, healing, or flavor text.
-**Fix:**
+**Fix:** Added `description`, `action_cost`, `range`, `tradition`, `passive`, and `focus_cost` fields to `preparedEntryResponse`/`spontaneousEntryResponse` in `characters.go`. Added `preparedEntry`/`spontaneousEntry` helpers that populate these from `TechRegistry`. Updated TypeScript interfaces and `TechnologyStep` UI to display description and key stats (AP cost, range, tradition) beside each technology name.
 
 ### BUG-54: Web UI combat HUD and battlemap persist after successful flee
 **Severity:** high
-**Status:** open
+**Status:** fixed
 **Category:** UI
 **Description:** When a player successfully flees from combat, the server-side combat state is cleared but the web UI still shows the combat HUD and battlemap as active. The player is stuck seeing combat UI even though they are no longer in combat.
 **Steps:** Enter combat in the web client; use the flee action; observe that the flee succeeds but the combat HUD remains visible and the battlemap is still active.
-**Fix:**
+**Fix:** Root cause: `GameContext.tsx` only dispatched `SET_COMBAT_ROUND(null)` on `COMBAT_EVENT_TYPE_END`; a flee sends `COMBAT_EVENT_TYPE_FLEE` which was unhandled. Added `COMBAT_EVENT_TYPE_FLEE` to the clearing condition so the combat HUD and battlemap are dismissed immediately on a successful flee.
 
 ### BUG-55: New character created in web UI has no starting equipment, money, or inventory
 **Severity:** high
-**Status:** open
+**Status:** fixed
 **Category:** Content
 **Description:** A newly created character starts with an empty inventory, zero credits, and no equipped items. Players cannot engage with combat, shops, or any gear-dependent content immediately after creation.
 **Steps:** Create a new character in the web client through the full creation flow; inspect the character's inventory and equipment; observe all slots are empty and credits are 0.
-**Fix:**
+**Fix:** Root cause: web client's `JoinWorldRequest` sends `char.Team` ("gun"/"machete") as the `Archetype` field, but `grantStartingInventory` needs the job's archetype ID (e.g., "aggressor"). `LoadStartingLoadoutWithOverride` couldn't find the loadout file and silently skipped the grant. Fixed in `grpc_service.go`: resolved archetype from `jobRegistry.Job(sess.Class).Archetype` (authoritative), overriding the client-supplied value.
 
 ### BUG-56: Invalid wire-format proto data causes forwardEvents to log parse errors
 **Severity:** high
@@ -486,16 +486,16 @@
 
 ### BUG-58: Stride command rejected in combat with "can only be used in combat" error
 **Severity:** high
-**Status:** open
+**Status:** fixed
 **Category:** Combat
 **Description:** Using the `stride` command during active combat fails with an error indicating stride can only be used in combat, despite the player already being in combat.
 **Steps:** Enter combat in the web client; type `stride` in the input; observe the command is rejected with an error that stride can only be used in combat.
-**Fix:**
+**Fix:** Root cause: `AddPlayer` always initialises `sess.Status = 1` (idle); on reconnect mid-combat the new session has status idle even though the combat engine still has the player as a combatant. Added a post-`AddPlayer` check in the Session handler: if the player's room has an active combat and the player is a combatant, `sess.Status` is restored to `statusInCombat` before the command loop starts.
 
 ### BUG-59: Character creation ability boost pools for region and job are not independent
 **Severity:** high
-**Status:** open
+**Status:** fixed
 **Category:** Character
 **Description:** During character creation, the ability boost selections for region and job share a single pool of available boosts instead of being independent. This leaves the player unable to fill all required boost selections — for example, Archetype: Nerd + Job: Engineer produces fewer available boost choices than slots to fill.
 **Steps:** Start character creation in the web client; select Archetype: Nerd and Job: Engineer; proceed to the ability boost selection screen; observe that region and job boost slots compete for the same pool of abilities, leaving insufficient options to complete all required selections.
-**Fix:**
+**Fix:** Root cause: `takenAbilities` in `AbilityBoostsStep` aggregated both archetype and region choices into a single exclusion set, blocking the same ability from being chosen by two different sources. Fixed to maintain per-source exclusion: archetype dropdowns only exclude abilities already taken within the archetype source; region dropdowns only exclude within the region source. Cross-source double-boosting is now correctly permitted.

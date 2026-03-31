@@ -93,12 +93,24 @@ export interface PreparedEntry {
   id: string
   name?: string
   level: number
+  description?: string
+  action_cost?: number
+  range?: string
+  tradition?: string
+  passive?: boolean
+  focus_cost?: boolean
 }
 
 export interface SpontaneousEntry {
   id: string
   name?: string
   level: number
+  description?: string
+  action_cost?: number
+  range?: string
+  tradition?: string
+  passive?: boolean
+  focus_cost?: boolean
 }
 
 export interface PreparedGrants {

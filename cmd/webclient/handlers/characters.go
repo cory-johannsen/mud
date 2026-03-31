@@ -499,9 +499,15 @@ type preparedGrantsResponse struct {
 }
 
 type preparedEntryResponse struct {
-	ID    string `json:"id"`
-	Name  string `json:"name,omitempty"`
-	Level int    `json:"level"`
+	ID          string `json:"id"`
+	Name        string `json:"name,omitempty"`
+	Level       int    `json:"level"`
+	Description string `json:"description,omitempty"`
+	ActionCost  int    `json:"action_cost,omitempty"`
+	Range       string `json:"range,omitempty"`
+	Tradition   string `json:"tradition,omitempty"`
+	Passive     bool   `json:"passive,omitempty"`
+	FocusCost   bool   `json:"focus_cost,omitempty"`
 }
 
 type spontaneousGrantsResponse struct {
@@ -512,9 +518,15 @@ type spontaneousGrantsResponse struct {
 }
 
 type spontaneousEntryResponse struct {
-	ID    string `json:"id"`
-	Name  string `json:"name,omitempty"`
-	Level int    `json:"level"`
+	ID          string `json:"id"`
+	Name        string `json:"name,omitempty"`
+	Level       int    `json:"level"`
+	Description string `json:"description,omitempty"`
+	ActionCost  int    `json:"action_cost,omitempty"`
+	Range       string `json:"range,omitempty"`
+	Tradition   string `json:"tradition,omitempty"`
+	Passive     bool   `json:"passive,omitempty"`
+	FocusCost   bool   `json:"focus_cost,omitempty"`
 }
 
 type regionResponse struct {
@@ -569,6 +581,40 @@ func (h *CharacterHandler) techName(id string) string {
 		return def.Name
 	}
 	return id
+}
+
+// preparedEntry builds a preparedEntryResponse for the given tech ID and level,
+// enriching it with description and key stats from the registry when available.
+func (h *CharacterHandler) preparedEntry(id string, level int) preparedEntryResponse {
+	e := preparedEntryResponse{ID: id, Name: h.techName(id), Level: level}
+	if h.options != nil && h.options.TechRegistry != nil {
+		if def, ok := h.options.TechRegistry.Get(id); ok {
+			e.Description = def.Description
+			e.ActionCost = def.ActionCost
+			e.Range = string(def.Range)
+			e.Tradition = string(def.Tradition)
+			e.Passive = def.Passive
+			e.FocusCost = def.FocusCost
+		}
+	}
+	return e
+}
+
+// spontaneousEntry builds a spontaneousEntryResponse for the given tech ID and level,
+// enriching it with description and key stats from the registry when available.
+func (h *CharacterHandler) spontaneousEntry(id string, level int) spontaneousEntryResponse {
+	e := spontaneousEntryResponse{ID: id, Name: h.techName(id), Level: level}
+	if h.options != nil && h.options.TechRegistry != nil {
+		if def, ok := h.options.TechRegistry.Get(id); ok {
+			e.Description = def.Description
+			e.ActionCost = def.ActionCost
+			e.Range = string(def.Range)
+			e.Tradition = string(def.Tradition)
+			e.Passive = def.Passive
+			e.FocusCost = def.FocusCost
+		}
+	}
+	return e
 }
 
 // ListOptions handles GET /api/characters/options.
@@ -634,10 +680,10 @@ func (h *CharacterHandler) ListOptions(w http.ResponseWriter, r *http.Request) {
 					SlotsByLevel: job.TechnologyGrants.Prepared.SlotsByLevel,
 				}
 				for _, e := range job.TechnologyGrants.Prepared.Fixed {
-					prep.Fixed = append(prep.Fixed, preparedEntryResponse{ID: e.ID, Name: h.techName(e.ID), Level: e.Level})
+					prep.Fixed = append(prep.Fixed, h.preparedEntry(e.ID, e.Level))
 				}
 				for _, e := range job.TechnologyGrants.Prepared.Pool {
-					prep.Pool = append(prep.Pool, preparedEntryResponse{ID: e.ID, Name: h.techName(e.ID), Level: e.Level})
+					prep.Pool = append(prep.Pool, h.preparedEntry(e.ID, e.Level))
 				}
 				tg.Prepared = prep
 			}
@@ -647,10 +693,10 @@ func (h *CharacterHandler) ListOptions(w http.ResponseWriter, r *http.Request) {
 					UsesByLevel:  job.TechnologyGrants.Spontaneous.UsesByLevel,
 				}
 				for _, e := range job.TechnologyGrants.Spontaneous.Fixed {
-					spont.Fixed = append(spont.Fixed, spontaneousEntryResponse{ID: e.ID, Name: h.techName(e.ID), Level: e.Level})
+					spont.Fixed = append(spont.Fixed, h.spontaneousEntry(e.ID, e.Level))
 				}
 				for _, e := range job.TechnologyGrants.Spontaneous.Pool {
-					spont.Pool = append(spont.Pool, spontaneousEntryResponse{ID: e.ID, Name: h.techName(e.ID), Level: e.Level})
+					spont.Pool = append(spont.Pool, h.spontaneousEntry(e.ID, e.Level))
 				}
 				tg.Spontaneous = spont
 			}
@@ -687,10 +733,10 @@ func (h *CharacterHandler) ListOptions(w http.ResponseWriter, r *http.Request) {
 					SlotsByLevel: arch.TechnologyGrants.Prepared.SlotsByLevel,
 				}
 				for _, e := range arch.TechnologyGrants.Prepared.Fixed {
-					prep.Fixed = append(prep.Fixed, preparedEntryResponse{ID: e.ID, Name: h.techName(e.ID), Level: e.Level})
+					prep.Fixed = append(prep.Fixed, h.preparedEntry(e.ID, e.Level))
 				}
 				for _, e := range arch.TechnologyGrants.Prepared.Pool {
-					prep.Pool = append(prep.Pool, preparedEntryResponse{ID: e.ID, Name: h.techName(e.ID), Level: e.Level})
+					prep.Pool = append(prep.Pool, h.preparedEntry(e.ID, e.Level))
 				}
 				atg.Prepared = prep
 			}
@@ -700,10 +746,10 @@ func (h *CharacterHandler) ListOptions(w http.ResponseWriter, r *http.Request) {
 					UsesByLevel:  arch.TechnologyGrants.Spontaneous.UsesByLevel,
 				}
 				for _, e := range arch.TechnologyGrants.Spontaneous.Fixed {
-					spont.Fixed = append(spont.Fixed, spontaneousEntryResponse{ID: e.ID, Name: h.techName(e.ID), Level: e.Level})
+					spont.Fixed = append(spont.Fixed, h.spontaneousEntry(e.ID, e.Level))
 				}
 				for _, e := range arch.TechnologyGrants.Spontaneous.Pool {
-					spont.Pool = append(spont.Pool, spontaneousEntryResponse{ID: e.ID, Name: h.techName(e.ID), Level: e.Level})
+					spont.Pool = append(spont.Pool, h.spontaneousEntry(e.ID, e.Level))
 				}
 				atg.Spontaneous = spont
 			}

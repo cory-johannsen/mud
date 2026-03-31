@@ -540,19 +540,25 @@ function AbilityBoostsStep({
   const regionFixed = region?.ability_boosts?.fixed ?? []
   const regionFree = region?.ability_boosts?.free ?? 0
 
-  // Abilities already taken by fixed or chosen boosts (across both archetype and region)
+  // Abilities already taken within the same boost source (archetype or region).
+  // Each source's free boosts are independent — a region boost does not block an
+  // archetype free-boost slot from choosing the same ability, and vice versa.
+  // Within a single source, however, you cannot pick the same ability twice.
   function takenAbilities(excludeSource: 'archetype' | 'region', excludeIndex: number): Set<string> {
     const taken = new Set<string>()
-    for (const a of archetypeFixed) taken.add(a)
-    for (const a of regionFixed) taken.add(a)
-    archetypeBoosts.forEach((a, i) => {
-      if (excludeSource === 'archetype' && i === excludeIndex) return
-      if (a) taken.add(a)
-    })
-    regionBoosts.forEach((a, i) => {
-      if (excludeSource === 'region' && i === excludeIndex) return
-      if (a) taken.add(a)
-    })
+    if (excludeSource === 'archetype') {
+      for (const a of archetypeFixed) taken.add(a)
+      archetypeBoosts.forEach((a, i) => {
+        if (i === excludeIndex) return
+        if (a) taken.add(a)
+      })
+    } else {
+      for (const a of regionFixed) taken.add(a)
+      regionBoosts.forEach((a, i) => {
+        if (i === excludeIndex) return
+        if (a) taken.add(a)
+      })
+    }
     return taken
   }
 
@@ -573,7 +579,7 @@ function AbilityBoostsStep({
       <h2 style={styles.stepHeading}>Ability Boosts</h2>
       <p style={styles.stepSubtext}>
         Choose ability boosts granted by your archetype and region.
-        Each boost increases an ability score by +2. You cannot boost the same ability twice.
+        Each boost increases an ability score by +2. Within each source you cannot boost the same ability twice, but different sources may boost the same ability.
       </p>
 
       {archetypeFree > 0 || archetypeFixed.length > 0 ? (
@@ -931,7 +937,9 @@ function TechnologyStep({
           <div style={styles.grantList}>
             {archetypePrepFixed.map((t) => (
               <div key={`${t.id}-${t.level}`} style={styles.grantItem}>
-                {t.id} <span style={styles.levelBadge}>Lv{t.level}</span>
+                <strong>{t.name ?? t.id}</strong> <span style={styles.levelBadge}>Lv{t.level}</span>
+                {t.description && <div style={{ fontSize: '0.8em', color: '#aaa', marginTop: 2 }}>{t.description}</div>}
+                {(t.action_cost != null && t.action_cost > 0) && <div style={{ fontSize: '0.75em', color: '#888' }}>{t.action_cost} AP · {t.range ?? ''} · {t.tradition ?? ''}</div>}
               </div>
             ))}
           </div>
@@ -965,11 +973,16 @@ function TechnologyStep({
                     onChange={(e) => setPrepChoice(lvl, slotIdx, e.target.value)}
                   >
                     <option value="">Select technology…</option>
-                    {poolAtLevel.map((e) => (
-                      <option key={e.id} value={e.id} disabled={takenIDs.includes(e.id) && chosen !== e.id}>
-                        {e.name ?? e.id}
-                      </option>
-                    ))}
+                    {poolAtLevel.map((e) => {
+                      const label = e.name ?? e.id
+                      const stats = [e.action_cost ? `${e.action_cost} AP` : '', e.range ?? '', e.tradition ?? ''].filter(Boolean).join(' · ')
+                      const tooltip = [e.description, stats].filter(Boolean).join('\n')
+                      return (
+                        <option key={e.id} value={e.id} disabled={takenIDs.includes(e.id) && chosen !== e.id} title={tooltip || undefined}>
+                          {label}{stats ? ` (${stats})` : ''}
+                        </option>
+                      )
+                    })}
                   </select>
                 </div>
               )
@@ -983,7 +996,9 @@ function TechnologyStep({
           <div style={styles.grantList}>
             {fixedSpont.map((t) => (
               <div key={`${t.id}-${t.level}`} style={styles.grantItem}>
-                {t.name ?? t.id} <span style={styles.levelBadge}>Lv{t.level}</span>
+                <strong>{t.name ?? t.id}</strong> <span style={styles.levelBadge}>Lv{t.level}</span>
+                {t.description && <div style={{ fontSize: '0.8em', color: '#aaa', marginTop: 2 }}>{t.description}</div>}
+                {(t.action_cost != null && t.action_cost > 0) && <div style={{ fontSize: '0.75em', color: '#888' }}>{t.action_cost} AP · {t.range ?? ''} · {t.tradition ?? ''}</div>}
               </div>
             ))}
           </div>
@@ -1010,8 +1025,10 @@ function TechnologyStep({
                   onClick={() => toggleSpont(entry)}
                   disabled={disabled}
                 >
-                  <div>{entry.name ?? entry.id}</div>
+                  <div><strong>{entry.name ?? entry.id}</strong></div>
                   <div style={styles.levelBadge}>Level {entry.level}</div>
+                  {entry.description && <div style={{ fontSize: '0.75em', color: '#aaa', marginTop: 2, whiteSpace: 'normal', textAlign: 'left' }}>{entry.description}</div>}
+                  {(entry.action_cost != null && entry.action_cost > 0) && <div style={{ fontSize: '0.7em', color: '#888' }}>{entry.action_cost} AP · {entry.range ?? ''}</div>}
                 </button>
               )
             })}

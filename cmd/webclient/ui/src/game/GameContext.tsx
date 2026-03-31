@@ -321,7 +321,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
             }
             break
           }
-          if (ce.type === 'COMBAT_EVENT_TYPE_END') {
+          if (ce.type === 'COMBAT_EVENT_TYPE_END' || ce.type === 'COMBAT_EVENT_TYPE_FLEE') {
             dispatch({ type: 'SET_COMBAT_ROUND', round: null })
             dispatch({ type: 'CLEAR_COMBAT_POSITIONS' })
             dispatch({ type: 'CLEAR_COMBATANT_HP' })
