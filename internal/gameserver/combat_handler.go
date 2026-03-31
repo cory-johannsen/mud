@@ -256,7 +256,7 @@ func (h *CombatHandler) SetQuestService(svc *quest.Service) {
 // SetPushCharacterSheetFn registers a callback invoked after XP is awarded in
 // pushXPMessages so the web client Stats tab receives an updated CharacterSheetView.
 //
-// Precondition: fn must be non-nil.
+// Precondition: fn may be nil (no-op when nil).
 // Postcondition: fn is called once per XP award with the receiving session.
 func (h *CombatHandler) SetPushCharacterSheetFn(fn func(sess *session.PlayerSession)) {
 	h.pushCharacterSheetFn = fn
