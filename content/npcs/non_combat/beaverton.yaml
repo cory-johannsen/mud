@@ -108,3 +108,17 @@
     daily_cost: 75
     combat_role: melee
     max_follow_zones: 3
+
+- id: beaverton_motel_keeper
+  name: "Extended Stay Clerk"
+  npc_type: motel_keeper
+  type: human
+  description: "Works the front desk of a former corporate extended-stay hotel, still running on backup power. Hot water, sometimes."
+  level: 2
+  max_hp: 20
+  ac: 10
+  awareness: 3
+  disposition: neutral
+  personality: neutral
+  motel:
+    rest_cost: 75

@@ -1,0 +1,13 @@
+- id: wooklyn_motel_keeper
+  name: "Camp Steward"
+  npc_type: motel_keeper
+  type: human
+  description: "Keeps the caravan bunk tent. Communal sleeping, communal rules. No violence, no exceptions, no refunds."
+  level: 2
+  max_hp: 20
+  ac: 10
+  awareness: 3
+  disposition: neutral
+  personality: neutral
+  motel:
+    rest_cost: 45

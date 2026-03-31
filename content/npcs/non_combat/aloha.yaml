@@ -112,3 +112,17 @@
       2: 350
       3: 700
       4: 1500
+
+- id: aloha_motel_keeper
+  name: "Bazaar Host"
+  npc_type: motel_keeper
+  type: human
+  description: "Rents back rooms above the market stalls. The beds are clean, the noise never fully stops, but the price is fair."
+  level: 2
+  max_hp: 20
+  ac: 10
+  awareness: 3
+  disposition: neutral
+  personality: neutral
+  motel:
+    rest_cost: 60

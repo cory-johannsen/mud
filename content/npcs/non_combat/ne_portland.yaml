@@ -77,3 +77,17 @@
     zone_id: ne_portland
     base_rate: 0.91
     rate_variance: 0.04
+
+- id: ne_portland_motel_keeper
+  name: "Bunker Host"
+  npc_type: motel_keeper
+  type: human
+  description: "Rents bunks in the reinforced neutral bunker. Not fancy, but you'll wake up in the morning."
+  level: 2
+  max_hp: 20
+  ac: 10
+  awareness: 3
+  disposition: neutral
+  personality: neutral
+  motel:
+    rest_cost: 55

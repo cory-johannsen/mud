@@ -92,3 +92,17 @@
   guard:
     wanted_threshold: 2
     bribeable: false
+
+- id: pdx_international_motel_keeper
+  name: "Terminal Agent"
+  npc_type: motel_keeper
+  type: human
+  description: "Manages the last operational terminal hotel. Prices reflect demand, not quality. Knows it."
+  level: 2
+  max_hp: 20
+  ac: 10
+  awareness: 3
+  disposition: neutral
+  personality: neutral
+  motel:
+    rest_cost: 150

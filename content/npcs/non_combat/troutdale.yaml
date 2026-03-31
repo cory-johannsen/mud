@@ -77,3 +77,17 @@
     zone_id: troutdale
     base_rate: 0.91
     rate_variance: 0.04
+
+- id: troutdale_motel_keeper
+  name: "Motel Clerk"
+  npc_type: motel_keeper
+  type: human
+  description: "Runs what's left of the highway motel — half the rooms still intact, the sign still lights up at night. Old habit."
+  level: 2
+  max_hp: 20
+  ac: 10
+  awareness: 3
+  disposition: neutral
+  personality: neutral
+  motel:
+    rest_cost: 50

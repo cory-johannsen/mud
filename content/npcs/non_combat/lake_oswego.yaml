@@ -93,3 +93,17 @@
     daily_cost: 100
     combat_role: melee
     max_follow_zones: 3
+
+- id: lake_oswego_motel_keeper
+  name: "Estate Concierge"
+  npc_type: motel_keeper
+  type: human
+  description: "Manages guest quarters in a former lakeside estate. Speaks quietly, prices loudly. The linens are actual linen."
+  level: 2
+  max_hp: 20
+  ac: 10
+  awareness: 3
+  disposition: neutral
+  personality: neutral
+  motel:
+    rest_cost: 120

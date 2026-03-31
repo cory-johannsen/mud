@@ -108,3 +108,17 @@
     daily_cost: 100
     combat_role: melee
     max_follow_zones: 3
+
+- id: hillsboro_motel_keeper
+  name: "Waystation Keeper"
+  npc_type: motel_keeper
+  type: human
+  description: "Manages the waystation's bunk room. Former tech corridor worker, now runs the most organized lodging west of Portland."
+  level: 2
+  max_hp: 20
+  ac: 10
+  awareness: 3
+  disposition: neutral
+  personality: neutral
+  motel:
+    rest_cost: 75
