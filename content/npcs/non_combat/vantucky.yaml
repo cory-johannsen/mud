@@ -93,3 +93,17 @@
     daily_cost: 65
     combat_role: melee
     max_follow_zones: 4
+
+- id: vantucky_motel_keeper
+  name: "Compound Steward"
+  npc_type: motel_keeper
+  type: human
+  description: "Manages sleeping quarters inside the compound walls. Strict check-in, strict lights-out. Worth it for the security."
+  level: 2
+  max_hp: 20
+  ac: 10
+  awareness: 3
+  disposition: neutral
+  personality: neutral
+  motel:
+    rest_cost: 45

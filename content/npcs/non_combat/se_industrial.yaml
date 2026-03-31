@@ -108,3 +108,17 @@
     daily_cost: 55
     combat_role: melee
     max_follow_zones: 2
+
+- id: se_industrial_motel_keeper
+  name: "Shift Boss"
+  npc_type: motel_keeper
+  type: human
+  description: "Manages the break room cots between shifts. The fluorescent lights never fully turn off. You get used to it."
+  level: 2
+  max_hp: 20
+  ac: 10
+  awareness: 3
+  disposition: neutral
+  personality: neutral
+  motel:
+    rest_cost: 35

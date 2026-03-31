@@ -93,3 +93,17 @@
     daily_cost: 60
     combat_role: melee
     max_follow_zones: 2
+
+- id: ross_island_motel_keeper
+  name: "Dock Keeper"
+  npc_type: motel_keeper
+  type: human
+  description: "Rents a cot in the corner of the dock shack. The river noise keeps some people up. Others find it peaceful."
+  level: 2
+  max_hp: 20
+  ac: 10
+  awareness: 3
+  disposition: neutral
+  personality: neutral
+  motel:
+    rest_cost: 40

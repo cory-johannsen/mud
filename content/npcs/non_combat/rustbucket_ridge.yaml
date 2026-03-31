@@ -93,3 +93,17 @@
     daily_cost: 65
     combat_role: melee
     max_follow_zones: 3
+
+- id: rustbucket_ridge_motel_keeper
+  name: "Scrap Inn Clerk"
+  npc_type: motel_keeper
+  type: human
+  description: "Runs a row of converted shipping containers fitted with cots. Cold in winter, hot in summer, safe year-round."
+  level: 2
+  max_hp: 20
+  ac: 10
+  awareness: 3
+  disposition: neutral
+  personality: neutral
+  motel:
+    rest_cost: 35

@@ -92,3 +92,17 @@
   guard:
     wanted_threshold: 2
     bribeable: false
+
+- id: battleground_motel_keeper
+  name: "Commons Steward"
+  npc_type: motel_keeper
+  type: human
+  description: "Manages sleeping quarters in the neutral commons. Militia affiliation checked at the door; inside, everyone's just tired."
+  level: 2
+  max_hp: 20
+  ac: 10
+  awareness: 3
+  disposition: neutral
+  personality: neutral
+  motel:
+    rest_cost: 50

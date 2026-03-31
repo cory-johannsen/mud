@@ -77,3 +77,17 @@
     zone_id: sauvie_island
     base_rate: 0.89
     rate_variance: 0.04
+
+- id: sauvie_island_motel_keeper
+  name: "Farm Host"
+  npc_type: motel_keeper
+  type: human
+  description: "Rents bunk space in the old farmhouse. Breakfast is not included, but the smell of coffee at dawn is free."
+  level: 2
+  max_hp: 20
+  ac: 10
+  awareness: 3
+  disposition: neutral
+  personality: neutral
+  motel:
+    rest_cost: 40

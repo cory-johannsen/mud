@@ -112,3 +112,17 @@
       2: 450
       3: 900
       4: 1800
+
+- id: the_couve_motel_keeper
+  name: "Crossing Keeper"
+  npc_type: motel_keeper
+  type: human
+  description: "Runs the only beds at the river crossing. Charges by the night, cash only, no exceptions."
+  level: 2
+  max_hp: 20
+  ac: 10
+  awareness: 3
+  disposition: neutral
+  personality: neutral
+  motel:
+    rest_cost: 45

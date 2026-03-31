@@ -97,3 +97,17 @@
       2: 300
       3: 650
       4: 1400
+
+- id: felony_flats_motel_keeper
+  name: "Crash Pad Runner"
+  npc_type: motel_keeper
+  type: human
+  description: "Rents floor space in the safe house, three to a room, no questions asked. Bring your own bedroll."
+  level: 2
+  max_hp: 20
+  ac: 10
+  awareness: 3
+  disposition: neutral
+  personality: neutral
+  motel:
+    rest_cost: 25
