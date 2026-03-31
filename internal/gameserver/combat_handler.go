@@ -3311,17 +3311,15 @@ func (h *CombatHandler) applyPlanLocked(cbt *combat.Combat, actor *combat.Combat
 			if h.mentalStateMgr != nil {
 				changes := h.mentalStateMgr.ApplyTrigger(targetUID, track, sev)
 				msgs := h.applyMentalStateChanges(targetUID, changes)
-				if targSess, ok := h.sessions.GetPlayer(targetUID); ok && targSess.Entity != nil {
-					for _, msg := range msgs {
-						_ = targSess.Entity.Push([]byte(msg + "\n"))
-					}
+				for _, msg := range msgs {
+					h.pushMessageToUID(targetUID, msg)
 				}
 			}
 
 			// Push taunt message to target.
 			taunt := h.pickTaunt(inst)
-			if targSess, ok := h.sessions.GetPlayer(targetUID); ok && targSess.Entity != nil {
-				_ = targSess.Entity.Push([]byte(taunt + "\n"))
+			if taunt != "" {
+				h.pushMessageToUID(targetUID, taunt)
 			}
 
 			// Set cooldown (lazy-initialize map on first write).

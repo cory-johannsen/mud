@@ -470,11 +470,11 @@
 
 ### BUG-56: Invalid wire-format proto data causes forwardEvents to log parse errors
 **Severity:** high
-**Status:** open
+**Status:** fixed
 **Category:** Gameserver
 **Description:** `grpc_service.go:3154` logs `proto: cannot parse invalid wire-format data` when unmarshaling an entity event inside `forwardEvents`, indicating a corrupted or misencoded protobuf message is being written to the entity event stream.
 **Steps:** Observe server console — error appears at `gameserver/grpc_service.go:3154` in `forwardEvents` called from `Session.func3` at line 1654.
-**Fix:**
+**Fix:** Root cause: two sites in `combat_handler.go` (mental-state messages ~line 3316, NPC taunt ~line 3324) pushed raw UTF-8 strings via `Entity.Push([]byte(msg))` instead of proto-marshaled `ServerEvent` data. `forwardEvents` always calls `proto.Unmarshal` on everything in the channel, so raw strings caused parse errors. Fixed both sites to use the existing `pushMessageToUID` helper which correctly wraps the message in a `MessageEvent` proto before pushing.
 
 ### BUG-57: Web UI hotbar layout in Feats/Technologies tab forces scrolling instead of overlaying
 **Severity:** low
