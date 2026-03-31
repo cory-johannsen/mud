@@ -114,6 +114,9 @@ type CombatHandler struct {
 	// seduceConditions is the shared map of NPC instance ID → condition.ActiveSet used for charmed tracking.
 	// Set after construction via SetSeduceConditions; nil means charmed-save processing is skipped.
 	seduceConditions map[string]*condition.ActiveSet
+	// weatherMgr provides active weather effects for outdoor rooms during combat.
+	// May be nil when weather feature is not configured.
+	weatherMgr *WeatherManager
 }
 
 // NewCombatHandler creates a CombatHandler with a round timer and broadcast function.
@@ -339,6 +342,15 @@ func (h *CombatHandler) SetOnNPCDeath(fn func(instID string)) {
 // Postcondition: h.seduceConditions is set; charmed-save processing is enabled.
 func (h *CombatHandler) SetSeduceConditions(m map[string]*condition.ActiveSet) {
 	h.seduceConditions = m
+}
+
+// SetWeatherManager wires the WeatherManager into the CombatHandler so outdoor
+// rooms receive active weather effects during combat round evaluation.
+//
+// Precondition: wm may be nil (weather effects are skipped when nil).
+// Postcondition: h.weatherMgr is set; outdoor weather effect processing is enabled.
+func (h *CombatHandler) SetWeatherManager(wm *WeatherManager) {
+	h.weatherMgr = wm
 }
 
 // SetNPCIdleTickInterval sets the idle tick interval used to convert say cooldown
@@ -3102,7 +3114,11 @@ func (h *CombatHandler) autoQueueNPCsLocked(cbt *combat.Combat) {
 			}
 		}
 		// Apply room effects only if current room has effects.
-		if zoneRoom, ok := h.worldMgr.GetRoom(cbt.RoomID); ok && len(zoneRoom.Effects) > 0 {
+		if zoneRoom, ok := h.worldMgr.GetRoom(cbt.RoomID); ok {
+			roomEffects := zoneRoom.Effects
+			if h.weatherMgr != nil {
+				roomEffects = append(roomEffects, h.weatherMgr.ActiveEffects(zoneRoom.Indoor)...)
+			}
 			for _, c := range cbt.Combatants {
 				if c.Kind != combat.KindPlayer || c.IsDead() {
 					continue
@@ -3112,7 +3128,7 @@ func (h *CombatHandler) autoQueueNPCsLocked(cbt *combat.Combat) {
 					continue
 				}
 				// Check each room effect.
-				for _, effect := range zoneRoom.Effects {
+				for _, effect := range roomEffects {
 					key := cbt.RoomID + ":" + effect.Track
 					if sess.ZoneEffectCooldowns[key] > 0 {
 						continue // immune

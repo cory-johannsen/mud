@@ -272,6 +272,28 @@ func Initialize(ctx context.Context, cfg *AppConfig, clock *gameserver.GameClock
 	aiTickInterval := cfg.AITickInterval
 	zoneTickManager := gameserver.NewZoneTickManagerProvider(aiTickInterval)
 	characterProgressRepository := postgres.NewCharacterProgressRepository(pgxpoolPool)
+	// Construct WeatherManager when weather content file is configured.
+	var weatherManager *gameserver.WeatherManager
+	if cfg.WeatherFile != "" {
+		weatherTypes, wtErr := gameserver.LoadWeatherTypes(cfg.WeatherFile)
+		if wtErr != nil {
+			return nil, fmt.Errorf("loading weather types: %w", wtErr)
+		}
+		postgresWeatherRepo := postgres.NewWeatherRepo(pgxpoolPool)
+		weatherManager = gameserver.NewWeatherManager(postgresWeatherRepo, weatherTypes, cfg.WeatherChancePerTick, sessionManager)
+		if lsErr := weatherManager.LoadState(ctx); lsErr != nil {
+			return nil, fmt.Errorf("loading weather state: %w", lsErr)
+		}
+		weatherCh := make(chan gameserver.GameDateTime, 2)
+		gameCalendar.Subscribe(weatherCh)
+		go func() {
+			for dt := range weatherCh {
+				weatherManager.OnTick(dt)
+			}
+		}()
+		gameServiceServer.SetWeatherManager(weatherManager)
+		combatHandler.SetWeatherManager(weatherManager)
+	}
 	app := &App{
 		GRPCService:   gameServiceServer,
 		CombatHandler: combatHandler,
@@ -291,6 +313,7 @@ func Initialize(ctx context.Context, cfg *AppConfig, clock *gameserver.GameClock
 		RoomEquipMgr:  roomEquipmentManager,
 		CharRepo:      characterRepository,
 		ProgressRepo:  characterProgressRepository,
+		WeatherMgr:    weatherManager,
 	}
 	return app, nil
 }
@@ -317,4 +340,5 @@ type App struct {
 	RoomEquipMgr  *inventory.RoomEquipmentManager
 	CharRepo      *postgres.CharacterRepository
 	ProgressRepo  *postgres.CharacterProgressRepository
+	WeatherMgr    *gameserver.WeatherManager
 }

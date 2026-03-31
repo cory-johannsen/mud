@@ -46,6 +46,7 @@ type App struct {
 	RoomEquipMgr  *inventory.RoomEquipmentManager
 	CharRepo      *postgres.CharacterRepository
 	ProgressRepo  *postgres.CharacterProgressRepository
+	WeatherMgr    *gameserver.WeatherManager
 }
 
 // Initialize is the wire-generated injector for the gameserver binary.

@@ -6,6 +6,8 @@ import (
 	"sync"
 	"time"
 
+	"google.golang.org/protobuf/proto"
+
 	"github.com/cory-johannsen/mud/internal/game/character"
 	"github.com/cory-johannsen/mud/internal/game/condition"
 	"github.com/cory-johannsen/mud/internal/game/inventory"
@@ -13,6 +15,7 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/reaction"
 	"github.com/cory-johannsen/mud/internal/game/ruleset"
 	"github.com/cory-johannsen/mud/internal/game/substance"
+	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 	"github.com/google/uuid"
 )
 
@@ -884,6 +887,24 @@ func (m *Manager) ForEachPlayer(fn func(*PlayerSession)) {
 	defer m.mu.RUnlock()
 	for _, sess := range m.players {
 		fn(sess)
+	}
+}
+
+// BroadcastAll sends ev to every connected player session.
+//
+// Precondition: ev must not be nil.
+// Postcondition: Each player with a non-nil Entity receives the marshaled event; send errors are silently dropped.
+func (m *Manager) BroadcastAll(ev *gamev1.ServerEvent) {
+	data, err := proto.Marshal(ev)
+	if err != nil {
+		return
+	}
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	for _, sess := range m.players {
+		if sess.Entity != nil {
+			_ = sess.Entity.Push(data)
+		}
 	}
 }
 

@@ -64,6 +64,8 @@ type AppConfig struct {
 	MaterialsFile           string
 	RecipesDir              string
 	DowntimeQueueLimitsFile string
+	WeatherChancePerTick    float64
+	WeatherFile             string
 }
 
 // AppConfigToDatabase extracts database config from AppConfig for wire.
@@ -163,6 +165,8 @@ func main() {
 		MaterialsFile:           *materialsFile,
 		RecipesDir:              *recipesDir,
 		DowntimeQueueLimitsFile: *downtimeQueueLimitsFile,
+		WeatherChancePerTick:    cfg.Weather.ChancePerTick,
+		WeatherFile:             cfg.Weather.ContentFile,
 	}
 
 	app, err := Initialize(ctx, appCfg, gameClock, logger)

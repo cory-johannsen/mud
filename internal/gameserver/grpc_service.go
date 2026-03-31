@@ -323,6 +323,9 @@ type GameServiceServer struct {
 	// Used by executeSeduce (REQ-ZN-7/8) and the charmed saving throw at round end (REQ-ZN-9).
 	// Initialized lazily; always access via getOrCreateSeduceConditions.
 	seduceConditions map[string]*condition.ActiveSet
+	// weatherMgr manages active weather events and provides per-tick effect application.
+	// May be nil when weather feature is not configured.
+	weatherMgr *WeatherManager
 }
 
 // CharacterJobsRepository persists per-character job lists in the character_jobs table.
@@ -597,6 +600,15 @@ func (s *GameServiceServer) World() *world.Manager {
 // Passing nil disables world-editing commands.
 func (s *GameServiceServer) SetWorldEditor(we *world.WorldEditor) {
 	s.worldEditor = we
+}
+
+// SetWeatherManager wires the WeatherManager into the GameServiceServer so weather
+// effects are applied on room entry and weather events are sent on session join.
+//
+// Precondition: wm may be nil (weather features are skipped when nil).
+// Postcondition: s.weatherMgr is set; weather effect and event processing are enabled.
+func (s *GameServiceServer) SetWeatherManager(wm *WeatherManager) {
+	s.weatherMgr = wm
 }
 
 // SetXPService registers the XP service used to award experience.
@@ -1330,6 +1342,20 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 		Payload:   &gamev1.ServerEvent_RoomView{RoomView: roomView},
 	}); err != nil {
 		return fmt.Errorf("sending initial room view: %w", err)
+	}
+
+	// Notify joining player of any active weather event.
+	if s.weatherMgr != nil {
+		if name := s.weatherMgr.ActiveWeatherName(); name != "" {
+			_ = stream.Send(&gamev1.ServerEvent{
+				Payload: &gamev1.ServerEvent_Weather{
+					Weather: &gamev1.WeatherEvent{
+						WeatherName: name,
+						Active:      true,
+					},
+				},
+			})
+		}
 	}
 
 	// Send initial HotbarUpdateEvent so the frontend can render the hotbar row (REQ-HB-12).
@@ -2749,10 +2775,14 @@ func (s *GameServiceServer) applyRoomSkillChecks(uid string, room *world.Room) [
 func (s *GameServiceServer) applyRoomEffectsOnEntry(
 	sess *session.PlayerSession, uid string, room *world.Room, now int64,
 ) {
-	if len(room.Effects) == 0 {
+	effects := room.Effects
+	if s.weatherMgr != nil {
+		effects = append(effects, s.weatherMgr.ActiveEffects(room.Indoor)...)
+	}
+	if len(effects) == 0 {
 		return
 	}
-	for _, effect := range room.Effects {
+	for _, effect := range effects {
 		if s.condRegistry == nil {
 			continue
 		}
