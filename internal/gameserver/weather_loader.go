@@ -46,6 +46,9 @@ func LoadWeatherTypes(path string) ([]WeatherType, error) {
 // Precondition: month in [1,12].
 // Postcondition: returns one of "spring", "summer", "fall", "winter".
 func SeasonForMonth(month int) string {
+	if month < 1 || month > 12 {
+		panic(fmt.Sprintf("SeasonForMonth: month %d out of range [1,12]", month))
+	}
 	switch month {
 	case 3, 4, 5:
 		return "spring"
@@ -53,7 +56,7 @@ func SeasonForMonth(month int) string {
 		return "summer"
 	case 9, 10, 11:
 		return "fall"
-	default: // 12, 1, 2
+	default:
 		return "winter"
 	}
 }

@@ -41,7 +41,7 @@ types:
     end_announce: "The blizzard has passed."
     seasons: [winter]
     weight: 3
-    conditions: [reduced_visibility, terrain_ice, terrain_mud]
+    conditions: [reduced_visibility, terrain_ice]
 
   - id: ice_storm
     name: Ice Storm

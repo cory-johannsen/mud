@@ -169,6 +169,10 @@ func (c Config) Validate() error {
 		errs = append(errs, err.Error())
 	}
 
+	if err := validateWeather(c.Weather); err != nil {
+		errs = append(errs, err.Error())
+	}
+
 	if len(errs) > 0 {
 		return fmt.Errorf("configuration validation failed: %s", strings.Join(errs, "; "))
 	}
@@ -261,6 +265,20 @@ func validateGameServer(g GameServerConfig) error {
 
 func validateWeb(w WebConfig) error {
 	return w.Validate()
+}
+
+func validateWeather(w WeatherConfig) error {
+	var errs []string
+	if w.ChancePerTick <= 0 || w.ChancePerTick > 1.0 {
+		errs = append(errs, fmt.Sprintf("weather.chance_per_tick must be in (0.0, 1.0], got %v", w.ChancePerTick))
+	}
+	if w.ContentFile == "" {
+		errs = append(errs, "weather.content_file must not be empty")
+	}
+	if len(errs) > 0 {
+		return fmt.Errorf("%s", strings.Join(errs, "; "))
+	}
+	return nil
 }
 
 func validateLogging(l LoggingConfig) error {

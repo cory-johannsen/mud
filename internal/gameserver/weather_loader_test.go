@@ -63,3 +63,35 @@ func TestLoadWeatherTypes_Empty(t *testing.T) {
 		t.Fatal("expected error for empty types, got nil")
 	}
 }
+
+func TestLoadWeatherTypes_FileNotFound(t *testing.T) {
+	_, err := gameserver.LoadWeatherTypes("/nonexistent/path/weather.yaml")
+	if err == nil {
+		t.Fatal("expected error for missing file, got nil")
+	}
+}
+
+func TestLoadWeatherTypes_MalformedYAML(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "weather.yaml")
+	if err := os.WriteFile(path, []byte("types: [invalid: yaml: {\n"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	_, err := gameserver.LoadWeatherTypes(path)
+	if err == nil {
+		t.Fatal("expected error for malformed YAML, got nil")
+	}
+}
+
+func TestSeasonForMonth_PanicsOutOfRange(t *testing.T) {
+	cases := []int{0, -1, 13, 100}
+	for _, month := range cases {
+		func() {
+			defer func() {
+				if r := recover(); r == nil {
+					t.Errorf("SeasonForMonth(%d) did not panic", month)
+				}
+			}()
+			gameserver.SeasonForMonth(month)
+		}()
+	}
+}
