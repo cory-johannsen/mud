@@ -15,6 +15,7 @@ import type { DrawerType } from '../game/drawers/DrawerContainer'
 import { HelpModal } from '../game/HelpModal'
 import { NpcModal } from '../game/NpcModal'
 import { NpcInteractModal } from '../game/NpcInteractModal'
+import { LogoutDropdown } from '../components/LogoutDropdown'
 import '../styles/game.css'
 type MobilePanel = 'room' | 'map' | 'character'
 
@@ -38,7 +39,6 @@ function formatTimeOfDay(tod: TimeOfDayEvent): string {
 // Inner component that has access to GameContext.
 function GameLayout() {
   const { state } = useGame()
-  const { logout } = useAuth()
   const [openDrawer, setOpenDrawer] = useState<DrawerType | null>(null)
   const [activeMobilePanel, setActiveMobilePanel] = useState<MobilePanel>('room')
   const [showHelp, setShowHelp] = useState(false)
@@ -68,7 +68,7 @@ function GameLayout() {
             </button>
           ))}
           <button className="toolbar-btn" onClick={() => setShowHelp(true)}>Help</button>
-          <button className="toolbar-btn toolbar-btn-logout" onClick={logout}>Logout</button>
+          <LogoutDropdown />
         </div>
         {state.combatRound !== null && <CombatBanner />}
       </div>
