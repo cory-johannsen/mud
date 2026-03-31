@@ -89,7 +89,8 @@ type yamlRoom struct {
 	DangerLevel     string                  `yaml:"danger_level,omitempty"`
 	RoomTrapChance  *int                    `yaml:"room_trap_chance,omitempty"`
 	CoverTrapChance *int                    `yaml:"cover_trap_chance,omitempty"`
-	Indoor          bool                    `yaml:"indoor"`
+	Indoor           bool                    `yaml:"indoor"`
+	AmbientSubstance string                  `yaml:"ambient_substance,omitempty"`
 }
 
 // yamlExit is the YAML representation of an exit.
@@ -215,10 +216,11 @@ func convertYAMLZone(yz yamlZone) (*Zone, error) {
 			Effects:         yr.Effects,
 			MapX:            *yr.MapX,
 			MapY:            *yr.MapY,
-			DangerLevel:     yr.DangerLevel,
-			RoomTrapChance:  yr.RoomTrapChance,
-			CoverTrapChance: yr.CoverTrapChance,
-			Indoor:          yr.Indoor,
+			DangerLevel:      yr.DangerLevel,
+			RoomTrapChance:   yr.RoomTrapChance,
+			CoverTrapChance:  yr.CoverTrapChance,
+			Indoor:           yr.Indoor,
+			AmbientSubstance: yr.AmbientSubstance,
 		}
 		if room.Properties == nil {
 			room.Properties = make(map[string]string)
@@ -280,18 +282,19 @@ func zoneToYAML(zone *Zone) yamlZoneFile {
 	yrooms := make([]yamlRoom, 0, len(zone.Rooms))
 	for _, room := range zone.Rooms {
 		yr := yamlRoom{
-			ID:              room.ID,
-			Title:           room.Title,
-			Description:     room.Description,
-			Properties:      room.Properties,
-			SkillChecks:     room.SkillChecks,
-			Effects:         room.Effects,
-			MapX:            new(room.MapX),
-			MapY:            new(room.MapY),
-			DangerLevel:     room.DangerLevel,
-			RoomTrapChance:  room.RoomTrapChance,
-			CoverTrapChance: room.CoverTrapChance,
-			Indoor:          room.Indoor,
+			ID:               room.ID,
+			Title:            room.Title,
+			Description:      room.Description,
+			Properties:       room.Properties,
+			SkillChecks:      room.SkillChecks,
+			Effects:          room.Effects,
+			MapX:             new(room.MapX),
+			MapY:             new(room.MapY),
+			DangerLevel:      room.DangerLevel,
+			RoomTrapChance:   room.RoomTrapChance,
+			CoverTrapChance:  room.CoverTrapChance,
+			Indoor:           room.Indoor,
+			AmbientSubstance: room.AmbientSubstance,
 		}
 		for _, exit := range room.Exits {
 			yr.Exits = append(yr.Exits, yamlExit{

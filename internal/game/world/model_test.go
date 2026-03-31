@@ -5,6 +5,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"gopkg.in/yaml.v3"
 	"pgregory.net/rapid"
 )
 
@@ -286,4 +287,32 @@ func TestZone_WorldCoords(t *testing.T) {
 	z.WorldY = new(-4)
 	require.Equal(t, 2, *z.WorldX)
 	require.Equal(t, -4, *z.WorldY)
+}
+
+func TestRoom_AmbientSubstance_YAMLRoundTrip(t *testing.T) {
+	rapid.Check(t, func(t *rapid.T) {
+		id := rapid.StringMatching(`[a-z_]{1,20}`).Draw(t, "id")
+		r := &Room{AmbientSubstance: id}
+		if r.AmbientSubstance != id {
+			t.Fatalf("AmbientSubstance: got %q want %q", r.AmbientSubstance, id)
+		}
+		data, err := yaml.Marshal(r)
+		if err != nil {
+			t.Fatalf("yaml.Marshal failed: %v", err)
+		}
+		var r2 Room
+		if err := yaml.Unmarshal(data, &r2); err != nil {
+			t.Fatalf("yaml.Unmarshal failed: %v", err)
+		}
+		if r2.AmbientSubstance != id {
+			t.Fatalf("after round-trip: got %q want %q", r2.AmbientSubstance, id)
+		}
+	})
+}
+
+func TestRoom_AmbientSubstance_EmptyByDefault(t *testing.T) {
+	r := &Room{}
+	if r.AmbientSubstance != "" {
+		t.Fatalf("expected empty AmbientSubstance by default, got %q", r.AmbientSubstance)
+	}
 }

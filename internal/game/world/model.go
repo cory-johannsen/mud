@@ -209,6 +209,9 @@ type Room struct {
 	// MinFactionTierID is the minimum faction tier ID required to enter this room.
 	// Empty string means no gating.
 	MinFactionTierID string `yaml:"min_faction_tier_id"`
+	// AmbientSubstance is the substance ID dosed to players in this room every 60s
+	// by the ambient substance ticker. Empty string means no ambient dosing.
+	AmbientSubstance string `yaml:"ambient_substance,omitempty"`
 }
 
 // HazardDef defines an environmental hazard in a room.
