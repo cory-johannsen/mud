@@ -97,6 +97,14 @@ func (g GameServerConfig) Addr() string {
 	return fmt.Sprintf("%s:%d", g.GRPCHost, g.GRPCPort)
 }
 
+// WeatherConfig holds weather engine settings.
+type WeatherConfig struct {
+	// ChancePerTick is the probability [0,1] of a weather change occurring each game tick.
+	ChancePerTick float64 `mapstructure:"chance_per_tick"`
+	// ContentFile is the path to the weather type definitions YAML file.
+	ContentFile string `mapstructure:"content_file"`
+}
+
 // WebConfig holds HTTP web server settings.
 type WebConfig struct {
 	// Port is the TCP port for the web HTTP server. Default: 0 (disabled). Set to 0 to disable.
@@ -131,6 +139,7 @@ type Config struct {
 	Logging    LoggingConfig    `mapstructure:"logging"`
 	GameServer GameServerConfig `mapstructure:"gameserver"`
 	Web        WebConfig        `mapstructure:"web"`
+	Weather    WeatherConfig    `mapstructure:"weather"`
 }
 
 // Validate checks all configuration invariants.
@@ -345,4 +354,7 @@ func setDefaults(v *viper.Viper) {
 	v.SetDefault("gameserver.game_tick_duration", "1m")
 
 	v.SetDefault("web.port", 0)
+
+	v.SetDefault("weather.chance_per_tick", 0.05)
+	v.SetDefault("weather.content_file", "content/weather.yaml")
 }

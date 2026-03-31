@@ -34,3 +34,7 @@ gameserver:
 web:
   port: 8080
   jwt_secret: dev-secret-change-in-prod
+
+weather:
+  chance_per_tick: 0.05
+  content_file: content/weather.yaml

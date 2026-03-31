@@ -1,0 +1,84 @@
+# Weather event type definitions.
+# seasons: spring (3-5), summer (6-8), fall (9-11), winter (12,1,2)
+# weight: relative probability within eligible seasons (higher = more frequent)
+# conditions: condition IDs applied to outdoor players while event is active
+types:
+  - id: rain
+    name: Rain
+    announce: "Rain begins to fall across Portland."
+    end_announce: "The rain has stopped."
+    seasons: [spring, fall, winter]
+    weight: 10
+    conditions: [reduced_visibility]
+
+  - id: heavy_rain
+    name: Heavy Rain
+    announce: "Heavy rain lashes the streets of Portland."
+    end_announce: "The heavy rain has eased."
+    seasons: [spring, fall, winter]
+    weight: 6
+    conditions: [reduced_visibility, terrain_flooded]
+
+  - id: fog
+    name: Dense Fog
+    announce: "A thick fog rolls in across Portland."
+    end_announce: "The fog has lifted."
+    seasons: [spring, fall, winter]
+    weight: 7
+    conditions: [reduced_visibility]
+
+  - id: thunderstorm
+    name: Thunderstorm
+    announce: "A violent thunderstorm sweeps across Portland!"
+    end_announce: "The thunderstorm has passed."
+    seasons: [spring, summer, fall]
+    weight: 5
+    conditions: [reduced_visibility, terrain_flooded]
+
+  - id: blizzard
+    name: Blizzard
+    announce: "A blizzard is blanketing Portland in snow and ice!"
+    end_announce: "The blizzard has passed."
+    seasons: [winter]
+    weight: 3
+    conditions: [reduced_visibility, terrain_ice, terrain_mud]
+
+  - id: ice_storm
+    name: Ice Storm
+    announce: "An ice storm coats every surface in Portland with a treacherous glaze."
+    end_announce: "The ice storm has ended."
+    seasons: [winter]
+    weight: 4
+    conditions: [terrain_ice, reduced_visibility]
+
+  - id: sleet
+    name: Sleet
+    announce: "Sleet hammers down across Portland."
+    end_announce: "The sleet has stopped."
+    seasons: [winter, spring]
+    weight: 5
+    conditions: [terrain_ice, reduced_visibility]
+
+  - id: hailstorm
+    name: Hailstorm
+    announce: "Hailstones the size of marbles pelt down across Portland!"
+    end_announce: "The hailstorm has ended."
+    seasons: [spring, summer, fall]
+    weight: 3
+    conditions: [reduced_visibility]
+
+  - id: windstorm
+    name: Windstorm
+    announce: "Gale-force winds tear through Portland's streets."
+    end_announce: "The windstorm has died down."
+    seasons: [spring, fall]
+    weight: 4
+    conditions: [reduced_visibility]
+
+  - id: extreme_heat
+    name: Extreme Heat
+    announce: "An oppressive heat wave descends on Portland."
+    end_announce: "The heat wave has broken."
+    seasons: [summer]
+    weight: 5
+    conditions: [dazzled]
