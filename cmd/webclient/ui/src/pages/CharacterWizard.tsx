@@ -876,6 +876,117 @@ function FeatsStep({
   )
 }
 
+interface TechSelectOption {
+  id: string
+  label: string
+  description?: string
+  stats?: string
+  disabled?: boolean
+}
+
+function TechSelectDropdown({
+  value,
+  options,
+  placeholder,
+  onChange,
+}: {
+  value: string
+  options: TechSelectOption[]
+  placeholder: string
+  onChange: (id: string) => void
+}) {
+  const [open, setOpen] = useState(false)
+  const [hoveredId, setHoveredId] = useState<string | null>(null)
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!open) { setHoveredId(null); return }
+    function handleOutside(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+    }
+    document.addEventListener('mousedown', handleOutside)
+    return () => document.removeEventListener('mousedown', handleOutside)
+  }, [open])
+
+  const selected = options.find((o) => o.id === value)
+  const hoveredOpt = hoveredId ? options.find((o) => o.id === hoveredId) : undefined
+
+  return (
+    <div ref={ref} style={{ position: 'relative', flex: 1 }}>
+      <button
+        type="button"
+        style={{
+          ...styles.boostSelect,
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          cursor: 'pointer',
+          width: '100%',
+          boxSizing: 'border-box',
+        }}
+        onClick={() => setOpen((o) => !o)}
+      >
+        <span style={{ color: selected ? '#eee' : '#555', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          {selected?.label ?? placeholder}
+        </span>
+        <span style={{ color: '#666', marginLeft: '0.5rem', flexShrink: 0 }}>▾</span>
+      </button>
+      {open && (
+        <div style={{ position: 'relative', background: '#1a1a1a', border: '1px solid #444', borderRadius: '4px', marginTop: '2px', zIndex: 20 }}>
+          <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
+            <div
+              style={{ padding: '0.4rem 0.5rem', color: '#555', fontSize: '0.9rem', cursor: 'pointer', fontFamily: 'monospace' }}
+              onMouseDown={() => { onChange(''); setOpen(false) }}
+            >
+              {placeholder}
+            </div>
+            {options.map((opt) => (
+              <div
+                key={opt.id}
+                style={{
+                  padding: '0.4rem 0.5rem',
+                  color: opt.disabled ? '#555' : '#eee',
+                  fontSize: '0.9rem',
+                  fontFamily: 'monospace',
+                  cursor: opt.disabled ? 'not-allowed' : 'pointer',
+                  background: value === opt.id ? '#2a2a1a' : hoveredId === opt.id && !opt.disabled ? '#252525' : 'transparent',
+                }}
+                onMouseEnter={() => { if (!opt.disabled) setHoveredId(opt.id) }}
+                onMouseLeave={() => setHoveredId(null)}
+                onMouseDown={() => { if (!opt.disabled) { onChange(opt.id); setOpen(false) } }}
+              >
+                {opt.label}
+              </div>
+            ))}
+          </div>
+          {hoveredOpt && (hoveredOpt.description || hoveredOpt.stats) && (
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              zIndex: 30,
+              background: '#1a1a1a',
+              border: '1px solid #555',
+              borderRadius: '4px',
+              padding: '0.5rem',
+              pointerEvents: 'none',
+            }}>
+              <div style={{ fontWeight: 'bold', color: '#e0c060', fontSize: '0.9rem', marginBottom: '0.2rem' }}>{hoveredOpt.label}</div>
+              {hoveredOpt.description && (
+                <div style={{ color: '#aaa', fontSize: '0.78rem', lineHeight: 1.4, whiteSpace: 'normal' }}>{hoveredOpt.description}</div>
+              )}
+              {hoveredOpt.stats && (
+                <div style={{ color: '#888', fontSize: '0.72rem', marginTop: '0.2rem' }}>{hoveredOpt.stats}</div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
 interface TechnologyStepProps {
   job: JobOption
   archetype: ArchetypeOption | undefined
@@ -985,23 +1096,22 @@ function TechnologyStep({
               return (
                 <div key={slotIdx} style={styles.freeBoostRow}>
                   <label style={styles.freeBoostLabel}>Slot #{slotIdx - fixedAtLevel + 1}</label>
-                  <select
-                    style={styles.boostSelect}
+                  <TechSelectDropdown
                     value={chosen}
-                    onChange={(e) => setPrepChoice(lvl, slotIdx, e.target.value)}
-                  >
-                    <option value="">Select technology…</option>
-                    {poolAtLevel.map((e) => {
+                    placeholder="Select technology…"
+                    options={poolAtLevel.map((e) => {
                       const label = e.name ?? e.id
                       const stats = [e.action_cost ? `${e.action_cost} AP` : '', e.range ?? '', e.tradition ?? ''].filter(Boolean).join(' · ')
-                      const tooltip = [e.description, stats].filter(Boolean).join('\n')
-                      return (
-                        <option key={e.id} value={e.id} disabled={takenIDs.includes(e.id) && chosen !== e.id} title={tooltip || undefined}>
-                          {label}{stats ? ` (${stats})` : ''}
-                        </option>
-                      )
+                      return {
+                        id: e.id,
+                        label: `${label}${stats ? ` (${stats})` : ''}`,
+                        description: e.description,
+                        stats: stats || undefined,
+                        disabled: takenIDs.includes(e.id) && chosen !== e.id,
+                      }
                     })}
-                  </select>
+                    onChange={(id) => setPrepChoice(lvl, slotIdx, id)}
+                  />
                 </div>
               )
             })}
