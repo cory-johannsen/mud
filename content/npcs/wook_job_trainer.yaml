@@ -1,0 +1,44 @@
+id: wook_job_trainer
+name: "Brother Groove"
+description: >
+  A laid-back Wook in a hand-dyed tunic who has quietly mastered more practical
+  skills than he lets on. He teaches the willing — herbalism, fermentation,
+  navigation, and the deeper arts of living free — for a fair price and no questions.
+type: human
+npc_type: job_trainer
+level: 3
+max_hp: 20
+ac: 10
+awareness: 6
+faction_id: wooks
+disposition: neutral
+personality: cowardly
+abilities:
+  brutality: 8
+  grit: 10
+  quickness: 11
+  reasoning: 14
+  savvy: 12
+  flair: 13
+job_trainer:
+  offered_jobs:
+    - job_id: free_spirit
+      training_cost: 100
+      prerequisites:
+        min_level: 1
+    - job_id: hippie
+      training_cost: 150
+      prerequisites:
+        min_level: 1
+    - job_id: natural_mystic
+      training_cost: 200
+      prerequisites:
+        min_level: 2
+    - job_id: freegan
+      training_cost: 120
+      prerequisites:
+        min_level: 1
+loot:
+  currency:
+    min: 5
+    max: 20

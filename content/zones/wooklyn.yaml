@@ -1,0 +1,789 @@
+zone:
+  id: wooklyn
+  name: "Wooklyn"
+  description: The Enchanted Forest theme park grounds (Turner, OR, I-5 exit 248), colonized by the Wooks into an eternal open-air festival compound. Fairy-tale architecture persists beneath layers of tie-dye, compost, patchouli, and mycelium.
+  faction_id: wooks
+  danger_level: sketchy
+  world_x: 0
+  world_y: -10
+  start_room: tofteville_gate
+
+  rooms:
+
+  # Safe Cluster — Tofteville Market
+
+  - id: tofteville_gate
+    title: Tofteville Gate
+    description: |
+      The park's original wrought-iron entrance gate has been wrapped in prayer flags,
+      dream catchers, and hand-painted signs reading "WELCOME HOME" and "NARCS GO BACK
+      TO PORTLAND." Two Wooks with drum sticks check everyone who enters. The smell of
+      patchouli and woodsmoke drifts through from inside.
+    danger_level: safe
+    map_x: 0
+    map_y: 0
+    exits:
+      - direction: south
+        target: tofteville_market
+
+  - id: tofteville_market
+    title: Tofteville Market
+    description: |
+      Old western-town storefronts line the main drag, their facades repainted in bright
+      tie-dye murals. Wooks staff the barter stalls, trading herbs, recordings, salvage,
+      and homemade goods. A hand-lettered sign above the central stall reads "THE CONNECTOR
+      — ALL REP SERVICES." The smell of fermenting grain and dried mushrooms hangs thick.
+    danger_level: safe
+    map_x: 0
+    map_y: -2
+    exits:
+      - direction: north
+        target: tofteville_gate
+      - direction: west
+        target: the_jam_meadow
+      - direction: east
+        target: tie_dye_tent_row
+      - direction: south
+        target: storybook_lane
+      - direction: southeast
+        target: the_caravan
+    spawns:
+      - template: wook_fixer
+        count: 1
+        respawn_after: 15m
+
+  - id: the_jam_meadow
+    title: The Jam Meadow
+    description: |
+      An open field with a permanent plywood-and-pallet stage at the far end. Three
+      campfire rings smolder day and night. A healer with braided white hair sits beside
+      the nearest fire, surrounded by herbs and bandages. The stage currently hosts an
+      endless, looping acoustic jam.
+    danger_level: safe
+    map_x: -2
+    map_y: -2
+    exits:
+      - direction: east
+        target: tofteville_market
+      - direction: south
+        target: the_main_stage
+    spawns:
+      - template: wook_healer
+        count: 1
+        respawn_after: 20m
+
+  - id: tie_dye_tent_row
+    title: Tie-Dye Tent Row
+    description: |
+      A row of canvas market tents in progressively more saturated colors. One sells
+      hand-spun goods; another offers job training in herbalism and fermentation. The
+      tent at the end serves thick mushroom tea to anyone with enough credits or trade.
+    danger_level: safe
+    map_x: 2
+    map_y: -2
+    exits:
+      - direction: west
+        target: tofteville_market
+    spawns:
+      - template: wook_job_trainer
+        count: 1
+        respawn_after: 20m
+
+  - id: the_caravan
+    title: The Caravan
+    description: |
+      A converted school bus painted with murals of mycelium networks and human figures
+      dancing in spore clouds. Inside, the seats have been removed and replaced with a
+      clean examination table and shelves of tools. A sign on the door reads "DOC SPORE
+      — CHIP REMOVAL, NO QUESTIONS." The bus smells like antiseptic under the patchouli.
+    danger_level: safe
+    map_x: 1
+    map_y: -3
+    exits:
+      - direction: northwest
+        target: tofteville_market
+    spawns:
+      - template: chip_doc_wooklyn
+        count: 1
+        respawn_after: 20m
+
+  # Sketchy — Park Grounds
+
+  - id: storybook_lane
+    title: Storybook Lane
+    description: |
+      Fairy-tale sculptures in states of surreal decay line the winding path: a
+      ten-foot concrete toadstool with a Wook sleeping on top, a crumbling Humpty
+      Dumpty plastered in band stickers. The Wooks camped among them regard you
+      with measured curiosity.
+    danger_level: sketchy
+    ambient_substance: wook_spore
+    map_x: 0
+    map_y: -4
+    exits:
+      - direction: north
+        target: tofteville_market
+      - direction: west
+        target: the_mushroom_circle
+      - direction: east
+        target: forest_path_north
+    spawns:
+      - template: wook
+        count: 1
+        respawn_after: 5m
+      - template: ginger_wook
+        count: 1
+        respawn_after: 5m
+
+  - id: the_mushroom_circle
+    title: The Mushroom Circle
+    description: |
+      A ring of giant painted mushroom sculptures surrounds a bare-earth clearing.
+      Candles and offerings dot the ground: crystals, feathers, lost shoes, handwritten
+      notes. The air here is thick with a sweet, earthy spore cloud that never fully
+      disperses. Wooks circle slowly, chanting.
+    danger_level: sketchy
+    ambient_substance: wook_spore
+    map_x: -2
+    map_y: -4
+    exits:
+      - direction: east
+        target: storybook_lane
+      - direction: south
+        target: the_enchanted_pond
+      - direction: west
+        target: the_tilt_platform
+    spawns:
+      - template: wook
+        count: 2
+        respawn_after: 5m
+
+  - id: the_enchanted_pond
+    title: The Enchanted Pond
+    description: |
+      The former bumper boat lake has gone murky and green. Ritual offerings float on
+      the surface alongside a few deflated boats. Wooks wade knee-deep in the water,
+      conducting some kind of cleansing ceremony. The smell is brackish and herbal.
+    danger_level: sketchy
+    ambient_substance: wook_spore
+    map_x: -2
+    map_y: -6
+    exits:
+      - direction: north
+        target: the_mushroom_circle
+    spawns:
+      - template: wook
+        count: 1
+        respawn_after: 5m
+      - template: ginger_wook
+        count: 1
+        respawn_after: 5m
+
+  - id: the_tilt_platform
+    title: The Tilt Platform
+    description: |
+      The rusted Tilt-a-Whirl still spins occasionally, its mechanical groan mixing
+      with the ambient music. Wooks ride it without apparent fear, whooping as it lurches.
+      The platform reeks of motor oil, patchouli, and something sweeter.
+    danger_level: sketchy
+    ambient_substance: wook_spore
+    map_x: -4
+    map_y: -4
+    exits:
+      - direction: east
+        target: the_mushroom_circle
+    spawns:
+      - template: ginger_wook
+        count: 1
+        respawn_after: 5m
+      - template: wook
+        count: 1
+        respawn_after: 5m
+
+  - id: the_main_stage
+    title: The Main Stage
+    description: |
+      A permanent concert stage stretches the width of the field. The music never stops:
+      bands rotate through without apparent set lists or endings. Wooks dance in concentric
+      rings, dreadlocks flying. The bass frequencies are felt as much as heard.
+    danger_level: sketchy
+    ambient_substance: wook_spore
+    map_x: -3
+    map_y: -2
+    exits:
+      - direction: north
+        target: the_jam_meadow
+      - direction: south
+        target: the_drum_circle_grounds
+    spawns:
+      - template: wook
+        count: 1
+        respawn_after: 5m
+      - template: ginger_wook
+        count: 1
+        respawn_after: 5m
+
+  - id: forest_path_north
+    title: Forest Path North
+    description: |
+      A well-worn path cuts north through the park's perimeter trees. Wooks have
+      hung wind chimes and lanterns from the branches, making the path feel like
+      a gauntlet of gentle sound. The trees thicken ahead.
+    danger_level: sketchy
+    ambient_substance: wook_spore
+    map_x: 2
+    map_y: -4
+    exits:
+      - direction: west
+        target: storybook_lane
+      - direction: east
+        target: forest_path_east
+      - direction: south
+        target: the_hill_tunnels
+    spawns:
+      - template: wook
+        count: 1
+        respawn_after: 5m
+
+  - id: forest_path_east
+    title: Forest Path East
+    description: |
+      The eastern perimeter path runs along a rusted chain-link fence. Old "ENCHANTED
+      FOREST" signs are visible through the trees, now plastered with band stickers and
+      hand-drawn maps of the compound. The path curves south toward the flume.
+    danger_level: sketchy
+    ambient_substance: wook_spore
+    map_x: 4
+    map_y: -4
+    exits:
+      - direction: west
+        target: forest_path_north
+      - direction: south
+        target: the_flow_entry
+    spawns:
+      - template: ginger_wook
+        count: 1
+        respawn_after: 5m
+      - template: wook
+        count: 1
+        respawn_after: 5m
+
+  - id: the_flow_entry
+    title: The Flow Entry
+    description: |
+      The top of the log flume ride. Miraculously, water still runs through the channel,
+      pumped by a generator the Wooks keep fueled. A hand-painted sign reads "THE FLOW."
+      The drop below is dark and loud. You can ride or walk the maintenance catwalk.
+    danger_level: sketchy
+    ambient_substance: wook_spore
+    map_x: 4
+    map_y: -6
+    exits:
+      - direction: north
+        target: forest_path_east
+      - direction: down
+        target: the_flow_exit
+    spawns:
+      - template: wook
+        count: 1
+        respawn_after: 5m
+
+  - id: the_flow_exit
+    title: The Flow Exit
+    description: |
+      The bottom of the flume. Everything is perpetually wet: the platform, the
+      handrails, your boots. A Wook with a towel offers to dry you off for a small
+      credit. The splash pool has been converted into a meditation bath.
+    danger_level: sketchy
+    ambient_substance: wook_spore
+    map_x: 4
+    map_y: -8
+    exits:
+      - direction: up
+        target: the_flow_entry
+      - direction: south
+        target: forest_path_south
+    spawns:
+      - template: ginger_wook
+        count: 1
+        respawn_after: 5m
+
+  - id: forest_path_south
+    title: Forest Path South
+    description: |
+      The southern perimeter path. Trees press close on both sides. Wook graffiti
+      covers every surface: faction tags, musical notation, and cryptic warnings to
+      those who proceed deeper into the compound without invitation.
+    danger_level: sketchy
+    ambient_substance: wook_spore
+    map_x: 4
+    map_y: -10
+    exits:
+      - direction: north
+        target: the_flow_exit
+      - direction: west
+        target: forest_path_west
+    spawns:
+      - template: wook
+        count: 1
+        respawn_after: 5m
+      - template: ginger_wook
+        count: 1
+        respawn_after: 5m
+
+  - id: forest_path_west
+    title: Forest Path West
+    description: |
+      The western path circles back toward the park core. The tree canopy overhead is
+      dense enough to block most rain, leaving the ground damp and mossy. The smell
+      of fermentation drifts from the west.
+    danger_level: sketchy
+    ambient_substance: wook_spore
+    map_x: 2
+    map_y: -10
+    exits:
+      - direction: east
+        target: forest_path_south
+      - direction: west
+        target: the_fermentation_hall
+    spawns:
+      - template: wook
+        count: 1
+        respawn_after: 5m
+
+  - id: the_fermentation_hall
+    title: The Fermentation Hall
+    description: |
+      The old food court has been converted into an industrial brewery and kitchen.
+      Barrels of infused mead and mushroom beer line the walls. The Wooks who staff
+      it sample their products continuously. The smell alone could alter your consciousness.
+    danger_level: sketchy
+    ambient_substance: wook_spore
+    map_x: 0
+    map_y: -10
+    exits:
+      - direction: east
+        target: forest_path_west
+      - direction: west
+        target: gift_shoppe_ruins
+    spawns:
+      - template: wook
+        count: 2
+        respawn_after: 5m
+
+  - id: gift_shoppe_ruins
+    title: Gift Shoppe Ruins
+    description: |
+      The former gift shop still has its shelves, now stocked with Wook trade goods:
+      hand-spun textiles, pressed flowers, dried mushrooms in wax paper, and bootleg
+      recordings burned to disc. A Wook behind the counter eyes your credits with interest.
+    danger_level: sketchy
+    ambient_substance: wook_spore
+    map_x: -2
+    map_y: -10
+    exits:
+      - direction: east
+        target: the_fermentation_hall
+      - direction: west
+        target: ice_mountain_base
+    spawns:
+      - template: wook
+        count: 1
+        respawn_after: 5m
+      - template: ginger_wook
+        count: 1
+        respawn_after: 5m
+
+  - id: ice_mountain_base
+    title: Ice Mountain Base
+    description: |
+      The base of what was once a bobsled ride called Ice Mountain. The ice melted
+      long ago; the concrete track remains, overgrown with moss and lichen. Wooks
+      use the run as a slide — slowly, on their backs, with their dreadlocks spread
+      wide. The peak looms above.
+    danger_level: sketchy
+    ambient_substance: wook_spore
+    map_x: -4
+    map_y: -10
+    exits:
+      - direction: east
+        target: gift_shoppe_ruins
+      - direction: up
+        target: ice_mountain_peak
+    spawns:
+      - template: wook
+        count: 1
+        respawn_after: 5m
+      - template: ginger_wook
+        count: 1
+        respawn_after: 5m
+
+  - id: the_hill_tunnels
+    title: The Hill Tunnels
+    description: |
+      Maintenance tunnels bored through the artificial hill that separates the north
+      and south sections of the park. Wooks have painted the tunnel walls in
+      bioluminescent pigments that glow faintly. The sound of drums echoes from both ends.
+    danger_level: sketchy
+    ambient_substance: wook_spore
+    map_x: 2
+    map_y: -6
+    exits:
+      - direction: north
+        target: forest_path_north
+      - direction: south
+        target: the_deep_forest
+    spawns:
+      - template: wook
+        count: 1
+        respawn_after: 5m
+      - template: ginger_wook
+        count: 1
+        respawn_after: 5m
+
+  - id: the_drum_circle_grounds
+    title: The Drum Circle Grounds
+    description: |
+      A permanent outdoor drum circle operates continuously, day and night, season
+      after season. The ground is worn smooth by years of dancing feet. The rhythm
+      is hypnotic — even players resistant to the Wooks' charms find themselves
+      swaying slightly.
+    danger_level: sketchy
+    ambient_substance: wook_spore
+    map_x: -2
+    map_y: -8
+    exits:
+      - direction: north
+        target: the_main_stage
+    spawns:
+      - template: wook
+        count: 2
+        respawn_after: 5m
+
+  # Dangerous — Deep Park
+
+  - id: the_deep_forest
+    title: The Deep Forest
+    description: |
+      Dense old-growth presses in on all sides — Douglas fir and western cedar,
+      unmaintained since the park closed. Wook shamans move between the trees,
+      painting sigils on the bark. The light is dim even at midday.
+    danger_level: dangerous
+    ambient_substance: wook_spore
+    map_x: 2
+    map_y: -8
+    exits:
+      - direction: north
+        target: the_hill_tunnels
+      - direction: south
+        target: the_forbidden_campground
+      - direction: west
+        target: the_ancient_oak_grove
+    spawns:
+      - template: wook_enforcer
+        count: 1
+        respawn_after: 10m
+      - template: wook_shaman
+        count: 1
+        respawn_after: 10m
+      - template: wook
+        count: 1
+        respawn_after: 5m
+
+  - id: the_forbidden_campground
+    title: The Forbidden Campground
+    description: |
+      What was once a family campground is now a Wook barracks and training area.
+      Heavy canvas tents are arranged in military rows. Enforcers drill with
+      weighted drum sticks. Entry here without invitation is considered a declaration
+      of hostility.
+    danger_level: dangerous
+    ambient_substance: wook_spore
+    map_x: 3
+    map_y: -8
+    exits:
+      - direction: north
+        target: the_deep_forest
+      - direction: south
+        target: the_wook_barracks
+    spawns:
+      - template: wook_enforcer
+        count: 2
+        respawn_after: 10m
+      - template: wook
+        count: 1
+        respawn_after: 5m
+
+  - id: ice_mountain_peak
+    title: Ice Mountain Peak
+    description: |
+      The bobsled peak overlooks the entire compound. The original concrete
+      observation platform is intact, giving a panoramic view of Wooklyn. Wook
+      enforcers patrol up here — it's a natural vantage point, and they know it.
+    danger_level: dangerous
+    ambient_substance: wook_spore
+    map_x: -4
+    map_y: -12
+    exits:
+      - direction: down
+        target: ice_mountain_base
+      - direction: east
+        target: the_fungal_cavern
+    spawns:
+      - template: wook_enforcer
+        count: 2
+        respawn_after: 10m
+      - template: wook_shaman
+        count: 1
+        respawn_after: 10m
+
+  - id: the_fungal_cavern
+    title: The Fungal Cavern
+    description: |
+      A natural cave system beneath the park, expanded by the Wooks over the years.
+      Enormous bioluminescent mushrooms line the walls, providing ghostly blue-white
+      light. The air is dense with spores — almost solid. You can taste them.
+    danger_level: dangerous
+    ambient_substance: wook_spore
+    map_x: -2
+    map_y: -12
+    exits:
+      - direction: west
+        target: ice_mountain_peak
+      - direction: east
+        target: the_underground_passage
+    spawns:
+      - template: wook_shaman
+        count: 2
+        respawn_after: 10m
+      - template: wook_enforcer
+        count: 1
+        respawn_after: 10m
+
+  - id: the_ancient_oak_grove
+    title: The Ancient Oak Grove
+    description: |
+      A circle of massive old-growth oaks at the park's wild edge, each one centuries
+      old. Wook shamans treat this place as sacred. Disturbing it is treated as a
+      grave offense — the response will be swift and unified.
+    danger_level: dangerous
+    ambient_substance: wook_spore
+    map_x: 0
+    map_y: -8
+    exits:
+      - direction: east
+        target: the_deep_forest
+      - direction: south
+        target: mondor_approach
+    spawns:
+      - template: wook_shaman
+        count: 1
+        respawn_after: 10m
+      - template: wook_enforcer
+        count: 1
+        respawn_after: 10m
+      - template: wook
+        count: 1
+        respawn_after: 5m
+
+  - id: the_underground_passage
+    title: The Underground Passage
+    description: |
+      A maintenance tunnel connecting the deep forest cavern system to the base of
+      the Mondor attraction. The Wooks have reinforced it with timber and spray-painted
+      warnings: "MONDOR AHEAD. TURN BACK NARC." Enforcer footprints cover the muddy floor.
+    danger_level: dangerous
+    ambient_substance: wook_spore
+    map_x: 0
+    map_y: -12
+    exits:
+      - direction: west
+        target: the_fungal_cavern
+      - direction: east
+        target: mondor_approach
+    spawns:
+      - template: wook_enforcer
+        count: 2
+        respawn_after: 10m
+      - template: wook_shaman
+        count: 1
+        respawn_after: 10m
+
+  - id: the_wook_barracks
+    title: The Wook Barracks
+    description: |
+      The elite enforcer quarters: a converted park maintenance building with iron
+      bunks, weapon racks (drum sticks, staffs, reinforced batons), and a hand-drawn
+      map of the compound on one wall. This is where the Wooks' muscle rests between
+      patrols. They do not appreciate visitors.
+    danger_level: dangerous
+    ambient_substance: wook_spore
+    map_x: 2
+    map_y: -12
+    exits:
+      - direction: north
+        target: the_forbidden_campground
+      - direction: south
+        target: mondor_approach
+    spawns:
+      - template: wook_enforcer
+        count: 2
+        respawn_after: 10m
+      - template: wook_shaman
+        count: 1
+        respawn_after: 10m
+
+  - id: mondor_approach
+    title: Mondor Approach
+    description: |
+      The winding path leading to the Challenge of Mondor attraction. The original
+      medieval theming has been repainted in Wook iconography. Torches burn in
+      iron sconces. Three different paths converge here before the final approach.
+      Enforcers line the route in silence.
+    danger_level: dangerous
+    ambient_substance: wook_spore
+    map_x: 0
+    map_y: -14
+    exits:
+      - direction: north
+        target: the_ancient_oak_grove
+      - direction: northwest
+        target: the_underground_passage
+      - direction: northeast
+        target: the_wook_barracks
+      - direction: south
+        target: the_mystic_temple
+    spawns:
+      - template: wook_enforcer
+        count: 2
+        respawn_after: 10m
+      - template: wook_shaman
+        count: 1
+        respawn_after: 10m
+
+  - id: the_mystic_temple
+    title: The Mystic Temple
+    description: |
+      The antechamber to the Challenge of Mondor. Every surface is covered in murals
+      of Papa Wook, the eternal groove, and the founding myths of Wooklyn. Offerings
+      of flowers, mushrooms, and burning incense cover every horizontal surface.
+      The bass from within is physically perceptible.
+    danger_level: dangerous
+    ambient_substance: wook_spore
+    map_x: 0
+    map_y: -16
+    exits:
+      - direction: north
+        target: mondor_approach
+      - direction: south
+        target: mondor_inner_sanctum
+    spawns:
+      - template: wook_enforcer
+        count: 2
+        respawn_after: 10m
+      - template: wook_shaman
+        count: 1
+        respawn_after: 10m
+
+  # Boss Area — Challenge of Mondor
+
+  - id: mondor_inner_sanctum
+    title: Mondor Inner Sanctum
+    description: |
+      The ride's inner chamber, stripped of its original mechanics and converted
+      into a throne antechamber. Stone-effect painted foam has been replaced with
+      actual stone slabs hauled in by hand. Two Wook enforcers stand vigil at
+      the far archway, unmoving.
+    danger_level: all_out_war
+    ambient_substance: wook_spore
+    map_x: 0
+    map_y: -18
+    exits:
+      - direction: north
+        target: the_mystic_temple
+      - direction: south
+        target: the_eternal_stage
+    spawns:
+      - template: wook_enforcer
+        count: 3
+        respawn_after: 10m
+
+  - id: the_eternal_stage
+    title: The Eternal Stage
+    description: |
+      An underground stage where Papa Wook holds court. A massive sound system
+      pumps out bass frequencies that resonate in the chest cavity. The walls
+      are hung with tapestries of past festivals. Wook enforcers flank the stage
+      in rows. Papa Wook's chamber lies beyond.
+    danger_level: all_out_war
+    ambient_substance: wook_spore
+    map_x: 0
+    map_y: -20
+    exits:
+      - direction: north
+        target: mondor_inner_sanctum
+      - direction: south
+        target: papa_wooks_chamber
+    spawns:
+      - template: wook_enforcer
+        count: 4
+        respawn_after: 10m
+
+  - id: papa_wooks_chamber
+    title: Papa Wook's Chamber
+    description: |
+      A vast private chamber behind the stage, accessible only to those who have
+      survived everything else. Papa Wook's throne is built from the wreckage of
+      the original Mondor ride mechanisms, draped in ceremonial cloth. The ceiling
+      is lost in darkness. The drumming resonance here is physical — you feel it
+      in your teeth.
+    danger_level: all_out_war
+    boss_room: true
+    ambient_substance: wook_spore
+    map_x: 0
+    map_y: -22
+    hazards:
+      - id: drumming_resonance
+        trigger: round_start
+        damage_expr: "1d4"
+        damage_type: sonic
+        message: "The sub-bass drumming resonance rattles your bones."
+      - id: psychedelic_fog
+        trigger: round_start
+        damage_expr: "1d2"
+        damage_type: poison
+        condition_id: nausea
+        message: "The concentrated spore fog fills your lungs."
+    exits:
+      - direction: north
+        target: the_eternal_stage
+      - direction: south
+        target: the_vault_of_jams
+        locked: true
+    spawns:
+      - template: papa_wook
+        count: 1
+        respawn_after: 72h
+      - template: wook_enforcer
+        count: 2
+        respawn_after: 10m
+
+  - id: the_vault_of_jams
+    title: The Vault of Jams
+    description: |
+      A sealed vault behind Papa Wook's throne, revealed only when the boss falls.
+      Floor-to-ceiling shelves hold rare recordings, master tapes, and trade goods
+      of exceptional value. The Wooks consider this their most sacred repository.
+      Only true Wook Brothers and Sisters may enter.
+    danger_level: all_out_war
+    min_faction_tier_id: wook_brother
+    ambient_substance: wook_spore
+    map_x: 0
+    map_y: -24
+    exits:
+      - direction: north
+        target: papa_wooks_chamber
+    spawns:
+      - template: wook_enforcer
+        count: 3
+        respawn_after: 10m

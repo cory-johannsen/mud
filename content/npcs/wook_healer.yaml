@@ -1,0 +1,30 @@
+id: wook_healer
+name: "Mama Roots"
+description: >
+  A Wook healer with braided white hair and calloused hands, sitting beside a
+  campfire surrounded by dried herbs, poultices, and well-worn bandages. She
+  patches wounds with the unhurried confidence of someone who has been doing
+  this for a very long time.
+type: human
+npc_type: healer
+level: 3
+max_hp: 22
+ac: 10
+awareness: 7
+faction_id: wooks
+disposition: neutral
+personality: cowardly
+abilities:
+  brutality: 7
+  grit: 12
+  quickness: 10
+  reasoning: 13
+  savvy: 11
+  flair: 14
+healer:
+  price_per_hp: 3
+  daily_capacity: 50
+loot:
+  currency:
+    min: 5
+    max: 20
