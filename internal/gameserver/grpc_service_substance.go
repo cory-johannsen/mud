@@ -13,7 +13,7 @@ import (
 
 // ambientDoseInterval is the minimum elapsed time between ambient substance doses.
 //
-// REQ-OCF-8: Players in a room with AmbientSubstance receive one dose per 60 seconds.
+// REQ-WK-50: Players in a room with AmbientSubstance receive one dose per 60 seconds.
 const ambientDoseInterval = 60 * time.Second
 
 // ShouldApplyAmbientDose reports whether enough time has elapsed since lastDose
@@ -31,7 +31,7 @@ func ShouldApplyAmbientDose(lastDose, now time.Time) bool {
 // tickAmbientSubstances iterates all active player sessions and applies one micro-dose
 // of the room's AmbientSubstance to each player who has not been dosed in the last 60s.
 //
-// REQ-OCF-8: Called by the 5-second ticker goroutine; enforces 60-second minimum interval.
+// REQ-WK-50: Called by the 5-second ticker goroutine; enforces 60-second minimum interval.
 // Precondition: s.world and s.substanceReg must be non-nil for dosing to occur.
 // Postcondition: sess.LastAmbientDose is updated for each player that receives a dose.
 func (s *GameServiceServer) tickAmbientSubstances() {
