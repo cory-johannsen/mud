@@ -1082,10 +1082,16 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 				if rv, ok := lastRoomView.Load().(*gamev1.RoomView); ok && rv != nil && session.Mode() != ModeCombat {
 					rw, _ := conn.Dimensions()
 					dt := currentDT.Load().(*gameserver.GameDateTime)
+					if dt == nil {
+						dt = &gameserver.GameDateTime{}
+					}
 					aw, _ := activeWeather.Load().(string)
 					if conn.IsSplitScreen() {
 						_ = conn.WriteRoom(RenderRoomView(rv, rw, telnet.RoomRegionRows, *dt, aw))
 						_ = conn.WritePromptSplit(session.CurrentPrompt())
+					} else {
+						_ = conn.WriteLine(RenderRoomView(rv, rw, telnet.RoomRegionRows, *dt, aw))
+						_ = conn.WritePrompt(session.CurrentPrompt())
 					}
 				}
 				continue
