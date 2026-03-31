@@ -1,7 +1,7 @@
 # Seasonal Weather Effects
 
 **Slug:** seasonal-weather-effects
-**Status:** planned
+**Status:** done
 **Priority:** 475
 **Category:** world
 **Effort:** L
