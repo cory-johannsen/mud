@@ -9,6 +9,9 @@ import (
 	"sync"
 	"time"
 
+	"go.uber.org/zap"
+	"google.golang.org/protobuf/proto"
+
 	"github.com/cory-johannsen/mud/internal/game/npc"
 	"github.com/cory-johannsen/mud/internal/game/session"
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
@@ -238,6 +241,37 @@ func (s *GameServiceServer) handleBuy(uid string, req *gamev1.BuyRequest) (*game
 	state.Stock[itemID] -= qty
 	merchantRuntimeMu.Unlock()
 	sess.Currency -= total
+
+	// Add purchased item to player backpack.
+	if sess.Backpack != nil {
+		if _, addErr := sess.Backpack.Add(itemID, qty, s.invRegistry); addErr != nil {
+			s.logger.Warn("handleBuy: failed to add item to backpack",
+				zap.String("uid", uid),
+				zap.String("itemID", itemID),
+				zap.Int("qty", qty),
+				zap.Error(addErr),
+			)
+		}
+	}
+
+	// Persist inventory and currency.
+	if s.charSaver != nil && sess.CharacterID > 0 {
+		ctx := context.Background()
+		if err := s.charSaver.SaveInventory(ctx, sess.CharacterID, backpackToInventoryItems(sess.Backpack)); err != nil {
+			s.logger.Warn("handleBuy: SaveInventory failed", zap.Error(err))
+		}
+		if err := s.charSaver.SaveCurrency(ctx, sess.CharacterID, sess.Currency); err != nil {
+			s.logger.Warn("handleBuy: SaveCurrency failed", zap.Error(err))
+		}
+	}
+
+	// Push InventoryView to player stream so the frontend reflects the purchase.
+	if invEvt, _ := s.handleInventory(uid); invEvt != nil && sess.Entity != nil {
+		if data, marshalErr := proto.Marshal(invEvt); marshalErr == nil {
+			_ = sess.Entity.PushBlocking(data, time.Second)
+		}
+	}
+
 	return messageEvent(fmt.Sprintf("You buy %d× %s for %d credits.", qty, itemID, total)), nil
 }
 

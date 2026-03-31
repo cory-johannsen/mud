@@ -405,14 +405,11 @@
 
 ### BUG-47: Merchant Buy button does not give item to player and does not refresh UI
 **Severity:** critical
-**Status:** open
+**Status:** fixed
 **Category:** Vendor
 **Description:** Clicking Buy in the web merchant modal deducts stock from the NPC's inventory but does not add the item to the player's backpack, and neither the InventoryView nor CharacterSheetView is pushed after the transaction, so the player's currency and inventory appear unchanged.
 **Steps:** Open Sergeant Mack's shop via the web UI; click Buy on any item; observe that item does not appear in inventory, carried currency does not visually decrease, and shop stock decrements.
-**Root Cause:**
-1. `handleBuy` in `grpc_service_merchant.go` (line 237–241) decrements `state.Stock[itemID]` and deducts `sess.Currency` but never calls `sess.Backpack.Add(itemID, qty, s.invRegistry)` — the item is silently discarded.
-2. `handleBuy` returns only a `MessageEvent`. No `InventoryView` or `CharacterSheetView` is pushed after the transaction, so the client's currency display and backpack never update regardless of whether the item add succeeded.
-**Fix:**
+**Fix:** `handleBuy` now calls `sess.Backpack.Add(itemID, qty, s.invRegistry)` after the successful transaction, saves inventory and currency to the DB, and pushes an `InventoryView` event via `sess.Entity.PushBlocking` so the frontend immediately reflects the purchase.
 
 ### BUG-49: Web UI map legend exceeds available screen width
 **Severity:** medium
@@ -452,4 +449,52 @@
 **Category:** UI
 **Description:** During character creation, the technology selection step displays technology names but no descriptions. Players cannot see damage values, healing amounts, range, AP cost, or other stat details needed to make an informed choice.
 **Steps:** Create a new character in the web client; reach the technology selection step; observe that technologies are listed by name only with no stat details, damage, healing, or flavor text.
+**Fix:**
+
+### BUG-54: Web UI combat HUD and battlemap persist after successful flee
+**Severity:** high
+**Status:** open
+**Category:** UI
+**Description:** When a player successfully flees from combat, the server-side combat state is cleared but the web UI still shows the combat HUD and battlemap as active. The player is stuck seeing combat UI even though they are no longer in combat.
+**Steps:** Enter combat in the web client; use the flee action; observe that the flee succeeds but the combat HUD remains visible and the battlemap is still active.
+**Fix:**
+
+### BUG-55: New character created in web UI has no starting equipment, money, or inventory
+**Severity:** high
+**Status:** open
+**Category:** Content
+**Description:** A newly created character starts with an empty inventory, zero credits, and no equipped items. Players cannot engage with combat, shops, or any gear-dependent content immediately after creation.
+**Steps:** Create a new character in the web client through the full creation flow; inspect the character's inventory and equipment; observe all slots are empty and credits are 0.
+**Fix:**
+
+### BUG-56: Invalid wire-format proto data causes forwardEvents to log parse errors
+**Severity:** high
+**Status:** open
+**Category:** Gameserver
+**Description:** `grpc_service.go:3154` logs `proto: cannot parse invalid wire-format data` when unmarshaling an entity event inside `forwardEvents`, indicating a corrupted or misencoded protobuf message is being written to the entity event stream.
+**Steps:** Observe server console — error appears at `gameserver/grpc_service.go:3154` in `forwardEvents` called from `Session.func3` at line 1654.
+**Fix:**
+
+### BUG-57: Web UI hotbar layout in Feats/Technologies tab forces scrolling instead of overlaying
+**Severity:** low
+**Status:** open
+**Category:** UI
+**Description:** When using "Add to Hotbar" in the Feats or Technologies tab, the hotbar layout panel does not fit within the tab area and forces the user to scroll. The layout panel should overlay the tab content and expand as necessary to show all slots.
+**Steps:** Open the web client; navigate to the Feats or Technologies tab; click "Add to Hotbar" on any feat or technology; observe that the hotbar layout panel is too large for the tab area and requires scrolling to interact with it.
+**Fix:**
+
+### BUG-58: Stride command rejected in combat with "can only be used in combat" error
+**Severity:** high
+**Status:** open
+**Category:** Combat
+**Description:** Using the `stride` command during active combat fails with an error indicating stride can only be used in combat, despite the player already being in combat.
+**Steps:** Enter combat in the web client; type `stride` in the input; observe the command is rejected with an error that stride can only be used in combat.
+**Fix:**
+
+### BUG-59: Character creation ability boost pools for region and job are not independent
+**Severity:** high
+**Status:** open
+**Category:** Character
+**Description:** During character creation, the ability boost selections for region and job share a single pool of available boosts instead of being independent. This leaves the player unable to fill all required boost selections — for example, Archetype: Nerd + Job: Engineer produces fewer available boost choices than slots to fill.
+**Steps:** Start character creation in the web client; select Archetype: Nerd and Job: Engineer; proceed to the ability boost selection screen; observe that region and job boost slots compete for the same pool of abilities, leaving insufficient options to complete all required selections.
 **Fix:**

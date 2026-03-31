@@ -132,6 +132,22 @@ func TestHandleBuy_SuccessDeductsCreditsAndStock(t *testing.T) {
 	assert.Equal(t, 2, state.Stock["stim_pack"])
 }
 
+// REQ-NPC-BUY-1: A successful purchase MUST add the item to the player's backpack.
+func TestHandleBuy_SuccessAddsItemToBackpack(t *testing.T) {
+	svc, uid, inst := newMerchantTestServer(t)
+
+	sess, ok := svc.sessions.GetPlayer(uid)
+	require.True(t, ok)
+	require.Empty(t, sess.Backpack.FindByItemDefID("stim_pack"), "backpack must be empty before purchase")
+
+	_, err := svc.handleBuy(uid, &gamev1.BuyRequest{NpcName: inst.Name(), ItemId: "stim_pack", Quantity: 1})
+	require.NoError(t, err)
+
+	items := sess.Backpack.FindByItemDefID("stim_pack")
+	assert.Len(t, items, 1, "backpack must contain exactly 1 stim_pack after purchase")
+	assert.Equal(t, 1, items[0].Quantity)
+}
+
 func TestHandleBuy_InsufficientCredits(t *testing.T) {
 	svc, uid, inst := newMerchantTestServer(t)
 	sess, ok := svc.sessions.GetPlayer(uid)
