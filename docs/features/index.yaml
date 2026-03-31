@@ -758,7 +758,7 @@ features:
 
   - slug: web-ui-inventory-equip
     name: Web UI — Inventory Equip Control
-    status: backlog
+    status: done
     priority: 480
     category: ui
     file: docs/features/web-ui-inventory-equip.md

@@ -1,7 +1,7 @@
 # Web UI — Inventory Equip Control
 
 **Slug:** web-ui-inventory-equip
-**Status:** backlog
+**Status:** done
 **Priority:** 480
 **Category:** ui
 **Effort:** S
