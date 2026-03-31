@@ -1,0 +1,47 @@
+domain:
+  id: wook_shaman_combat
+  description: Combat behavior for wook_shaman NPCs. Exhales disorienting spores before attacking.
+
+  tasks:
+    - id: behave
+      description: Root task — fight or idle
+    - id: fight
+      description: Engage nearest enemy, applying spore-induced delirium when possible
+
+  methods:
+    - task: behave
+      id: combat_mode
+      precondition: wook_shaman_has_enemy
+      subtasks: [fight]
+
+    - task: behave
+      id: idle_mode
+      precondition: ""
+      subtasks: [do_pass]
+
+    - task: fight
+      id: spore_and_attack
+      precondition: wook_shaman_has_enemy
+      subtasks: [exhale_spores, attack_enemy]
+
+    - task: fight
+      id: attack_only
+      precondition: ""
+      subtasks: [attack_enemy]
+
+  operators:
+    - id: attack_enemy
+      action: attack
+      target: nearest_enemy
+
+    - id: do_pass
+      action: pass
+      target: ""
+
+    - id: exhale_spores
+      action: apply_mental_state
+      track: delirium
+      severity: moderate
+      target: nearest_enemy
+      cooldown_rounds: 2
+      ap_cost: 1

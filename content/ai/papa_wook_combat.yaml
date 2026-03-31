@@ -1,0 +1,71 @@
+domain:
+  id: papa_wook_combat
+  description: Combat behavior for papa_wook boss. Rotates through drum circle summons, psychedelic burst, and the eternal groove.
+
+  tasks:
+    - id: behave
+      description: Root task — fight or idle
+    - id: fight
+      description: Engage enemies with boss ability rotation
+
+  methods:
+    - task: behave
+      id: combat_mode
+      precondition: papa_wook_has_enemy
+      subtasks: [fight]
+
+    - task: behave
+      id: idle_mode
+      precondition: ""
+      subtasks: [do_pass]
+
+    - task: fight
+      id: summon_and_attack
+      precondition: papa_wook_enemy_count_exceeds_minion_count
+      subtasks: [summon_drum_circle, attack_enemy]
+
+    - task: fight
+      id: burst_and_attack
+      precondition: papa_wook_enemy_count_gte_2
+      subtasks: [psychedelic_burst, attack_enemy]
+
+    - task: fight
+      id: groove_and_attack
+      precondition: papa_wook_has_enemy
+      subtasks: [the_eternal_groove, attack_enemy]
+
+    - task: fight
+      id: attack_only
+      precondition: ""
+      subtasks: [attack_enemy]
+
+  operators:
+    - id: attack_enemy
+      action: attack
+      target: nearest_enemy
+
+    - id: do_pass
+      action: pass
+      target: ""
+
+    - id: summon_drum_circle
+      action: call_for_help
+      target: ""
+      cooldown_rounds: 5
+      ap_cost: 2
+
+    - id: psychedelic_burst
+      action: apply_mental_state
+      track: delirium
+      severity: severe
+      target: nearest_enemy
+      cooldown_rounds: 4
+      ap_cost: 2
+
+    - id: the_eternal_groove
+      action: apply_mental_state
+      track: despair
+      severity: mild
+      target: nearest_enemy
+      cooldown_rounds: 6
+      ap_cost: 1

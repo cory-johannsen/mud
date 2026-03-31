@@ -1,0 +1,47 @@
+domain:
+  id: ginger_wook_combat
+  description: Combat behavior for ginger_wook NPCs. Attempts to unsettle enemies with delirium before attacking.
+
+  tasks:
+    - id: behave
+      description: Root task — fight or idle
+    - id: fight
+      description: Engage nearest enemy, applying seductive mental pressure when possible
+
+  methods:
+    - task: behave
+      id: combat_mode
+      precondition: ginger_wook_has_enemy
+      subtasks: [fight]
+
+    - task: behave
+      id: idle_mode
+      precondition: ""
+      subtasks: [do_pass]
+
+    - task: fight
+      id: seduce_and_attack
+      precondition: ginger_wook_has_enemy
+      subtasks: [ginger_seduce, attack_enemy]
+
+    - task: fight
+      id: attack_only
+      precondition: ""
+      subtasks: [attack_enemy]
+
+  operators:
+    - id: attack_enemy
+      action: attack
+      target: nearest_enemy
+
+    - id: do_pass
+      action: pass
+      target: ""
+
+    - id: ginger_seduce
+      action: apply_mental_state
+      track: delirium
+      severity: mild
+      target: nearest_enemy
+      cooldown_rounds: 3
+      ap_cost: 1

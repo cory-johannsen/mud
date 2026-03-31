@@ -1,0 +1,48 @@
+domain:
+  id: wook_combat
+  description: Combat behavior for wook NPCs. Taunts and attacks enemies.
+
+  tasks:
+    - id: behave
+      description: Root task — fight or idle
+    - id: fight
+      description: Engage nearest enemy, taunting when possible
+
+  methods:
+    - task: behave
+      id: combat_mode
+      precondition: wook_has_enemy
+      subtasks: [fight]
+
+    - task: behave
+      id: idle_mode
+      precondition: ""
+      subtasks: [do_pass]
+
+    - task: fight
+      id: taunt_and_attack
+      precondition: wook_has_enemy
+      subtasks: [wook_taunt, attack_enemy]
+
+    - task: fight
+      id: attack_only
+      precondition: ""
+      subtasks: [attack_enemy]
+
+  operators:
+    - id: attack_enemy
+      action: attack
+      target: nearest_enemy
+
+    - id: do_pass
+      action: pass
+      target: ""
+
+    - id: wook_taunt
+      action: say
+      cooldown: "20s"
+      strings:
+        - "Stay groovy or stay down, narc."
+        - "You're harshing the vibe, friend."
+        - "The rhythm doesn't forgive."
+        - "We were all at peace until you showed up."
