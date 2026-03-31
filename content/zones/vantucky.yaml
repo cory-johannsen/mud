@@ -629,6 +629,9 @@ zone:
     - template: vantucky_hireling
       count: 1
       respawn_after: 0s
+    - template: vantucky_motel_keeper
+      count: 1
+      respawn_after: 0s
     properties:
       lighting: fluorescent
       atmosphere: military

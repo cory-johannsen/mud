@@ -599,6 +599,9 @@ zone:
     - template: sauvie_island_banker
       count: 1
       respawn_after: 0s
+    - template: sauvie_island_motel_keeper
+      count: 1
+      respawn_after: 0s
     properties:
       lighting: natural
       atmosphere: peaceful
