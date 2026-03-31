@@ -55,7 +55,7 @@ type Conn struct {
 	height      int
 	splitScreen bool
 	inputBuf    string
-	roomBuf     string    // last rendered room content for redraw after console scroll
+	roomBuf     string     // last rendered room content for redraw after console scroll
 	hotbarBuf   [10]string // last rendered hotbar slots for redraw after console scroll
 
 	// Scroll buffer (guarded by mu)
@@ -628,10 +628,15 @@ func (c *Conn) sendEchoControl(cmd byte) error {
 }
 
 // WriteLine sends a line of text followed by \r\n to the client.
+// In headless mode, ANSI escape codes are stripped before sending so that
+// automated line-oriented clients can match plain-text patterns.
 //
 // Precondition: text should not contain trailing newline characters.
 // Postcondition: text + \r\n is written to the connection.
 func (c *Conn) WriteLine(text string) error {
+	if c.Headless {
+		text = StripANSI(text)
+	}
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
@@ -657,7 +662,9 @@ func (c *Conn) Write(data []byte) error {
 }
 
 // WritePrompt sends a prompt string without a trailing newline.
-// In headless mode, always sends "> " regardless of the prompt argument.
+// In headless mode, strips ANSI codes from prompt and sends it as a full
+// line terminated with \r\n, enabling line-oriented automated clients to
+// detect prompts with ReadString('\n').
 //
 // Postcondition: The prompt text is written to the connection.
 func (c *Conn) WritePrompt(prompt string) error {
@@ -667,7 +674,7 @@ func (c *Conn) WritePrompt(prompt string) error {
 		if c.writeTimeout > 0 {
 			_ = c.raw.SetWriteDeadline(time.Now().Add(c.writeTimeout))
 		}
-		_, err := fmt.Fprint(c.raw, "> ")
+		_, err := fmt.Fprintf(c.raw, "%s\r\n", StripANSI(prompt))
 		return err
 	}
 

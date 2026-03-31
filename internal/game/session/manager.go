@@ -18,7 +18,7 @@ import (
 
 // Exploration mode ID constants.
 const (
-	ExploreModeCaseIt        = "case_it"       // Search mode — enables trap detection (REQ-EXP-24)
+	ExploreModeCaseIt        = "case_it"        // Search mode — enables trap detection (REQ-EXP-24)
 	ExploreModeLayLow        = "lay_low"        // Stealth mode — secret Ghosting check on entry
 	ExploreModeHoldGround    = "hold_ground"    // Shield mode — auto raise shield at combat start
 	ExploreModeActiveSensors = "active_sensors" // Tech scan — secret Tech Lore check on entry
@@ -318,6 +318,11 @@ type PlayerSession struct {
 	// Refocus state — transient; not persisted.
 	RefocusingActive    bool      // true while a refocus rest is in progress (REQ-EXP-REFOCUS-1)
 	RefocusingStartTime time.Time // when refocus started
+
+	// Headless is true when this session is driven by an automated client (e.g. e2e tests).
+	// When true, promptFeatureChoice auto-selects the first valid option instead of
+	// blocking on stream.Recv(); no interactive prompts are sent to the client.
+	Headless bool
 }
 
 // EquippedInstances returns all ItemInstances currently equipped across the active weapon
@@ -517,13 +522,13 @@ func (m *Manager) AddPlayer(opts AddPlayerOptions) (*PlayerSession, error) {
 		WantedLevel:        make(map[string]int),
 		SafeViolations:     make(map[string]int),
 		LastViolationDay:   make(map[string]int),
-		Jobs: make(map[string]int),
+		Jobs:               make(map[string]int),
 		MaterialState: inventory.MaterialSessionState{
 			CombatUsed: make(map[string]bool),
 			DailyUsed:  make(map[string]int),
 		},
 		ZoneCircumstanceBonus: make(map[string]int),
-		InitDone: make(chan struct{}),
+		InitDone:              make(chan struct{}),
 	}
 
 	sess.Backpack = inventory.NewBackpack(20, 50.0)

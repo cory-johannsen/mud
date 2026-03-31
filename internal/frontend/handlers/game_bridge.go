@@ -166,6 +166,7 @@ func (h *AuthHandler) gameBridge(ctx context.Context, conn *telnet.Conn, acct po
 				Class:         char.Class,
 				Level:         int32(char.Level),
 				Archetype:     h.archetypeForJob(char.Class),
+				Headless:      conn.Headless,
 			},
 		},
 	}); err != nil {
@@ -773,71 +774,123 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 
 			var text string
 			switch p := resp.Payload.(type) {
-		case *gamev1.ServerEvent_TimeOfDay:
-			currentTime.Store(p.TimeOfDay)
-			dt := &gameserver.GameDateTime{
-				Hour:  gameserver.GameHour(p.TimeOfDay.GetHour()),
-				Day:   int(p.TimeOfDay.GetDay()),
-				Month: int(p.TimeOfDay.GetMonth()),
-			}
-			currentDT.Store(dt)
-			if conn.IsSplitScreen() {
-				_ = conn.WritePromptSplit(session.CurrentPrompt())
-			} else {
-				_ = conn.WritePrompt(session.CurrentPrompt())
-			}
-			continue
-		case *gamev1.ServerEvent_RoomView:
-			// Exit map mode only when the player has actually changed rooms (travel/movement).
-			// Ambient refreshes of the current room (same room ID) must not disrupt map mode.
-			// Never exit combat mode due to a room view — combat manages its own region.
-			if session.Mode() != ModeRoom && session.Mode() != ModeCombat {
-				incomingID := p.RoomView.GetRoomId()
-				existingID, _ := currentRoom.Load().(string)
-				if incomingID == "" || incomingID != existingID {
-					session.SetMode(conn, session.Room())
+			case *gamev1.ServerEvent_TimeOfDay:
+				currentTime.Store(p.TimeOfDay)
+				dt := &gameserver.GameDateTime{
+					Hour:  gameserver.GameHour(p.TimeOfDay.GetHour()),
+					Day:   int(p.TimeOfDay.GetDay()),
+					Month: int(p.TimeOfDay.GetMonth()),
 				}
-			}
-			if roomID := p.RoomView.GetRoomId(); roomID != "" {
-				currentRoom.Store(roomID)
-			}
-			if p.RoomView.GetPeriod() != "" {
-				currentTime.Store(&gamev1.TimeOfDayEvent{Hour: p.RoomView.GetHour(), Period: p.RoomView.GetPeriod()})
-				if existing, ok := currentDT.Load().(*gameserver.GameDateTime); ok && existing != nil {
-					currentDT.Store(&gameserver.GameDateTime{
-						Hour:  gameserver.GameHour(p.RoomView.GetHour()),
-						Day:   existing.Day,
-						Month: existing.Month,
-					})
+				currentDT.Store(dt)
+				if conn.IsSplitScreen() {
+					_ = conn.WritePromptSplit(session.CurrentPrompt())
+				} else {
+					_ = conn.WritePrompt(session.CurrentPrompt())
 				}
-			}
-			lastRoomView.Store(p.RoomView)
-			// Suppress room region render during combat — the combat screen owns that region.
-			if session.Mode() == ModeCombat {
 				continue
-			}
-			w, _ := conn.Dimensions()
-			rvDT := currentDT.Load().(*gameserver.GameDateTime)
-			text = RenderRoomView(p.RoomView, w, telnet.RoomRegionRows, *rvDT)
-		case *gamev1.ServerEvent_Message:
-			period := ""
-			if tod, ok := currentTime.Load().(*gamev1.TimeOfDayEvent); ok && tod != nil {
-				period = tod.GetPeriod()
-			}
-			text = RenderMessage(p.Message, period)
-		case *gamev1.ServerEvent_RoomEvent:
-			text = RenderRoomEvent(p.RoomEvent)
-		case *gamev1.ServerEvent_PlayerList:
-			text = RenderPlayerList(p.PlayerList)
-		case *gamev1.ServerEvent_ExitList:
-			text = RenderExitList(p.ExitList)
-		case *gamev1.ServerEvent_Error:
-			text = RenderError(p.Error)
-		case *gamev1.ServerEvent_CombatEvent:
-			ce := p.CombatEvent
-			// Handle position events: update combatant position and re-render the battlefield.
-			if ce.GetType() == gamev1.CombatEventType_COMBAT_EVENT_TYPE_POSITION {
-				combatHandler.UpdatePosition(ce.GetAttacker(), int(ce.GetAttackerPosition()))
+			case *gamev1.ServerEvent_RoomView:
+				// Exit map mode only when the player has actually changed rooms (travel/movement).
+				// Ambient refreshes of the current room (same room ID) must not disrupt map mode.
+				// Never exit combat mode due to a room view — combat manages its own region.
+				if session.Mode() != ModeRoom && session.Mode() != ModeCombat {
+					incomingID := p.RoomView.GetRoomId()
+					existingID, _ := currentRoom.Load().(string)
+					if incomingID == "" || incomingID != existingID {
+						session.SetMode(conn, session.Room())
+					}
+				}
+				if roomID := p.RoomView.GetRoomId(); roomID != "" {
+					currentRoom.Store(roomID)
+				}
+				if p.RoomView.GetPeriod() != "" {
+					currentTime.Store(&gamev1.TimeOfDayEvent{Hour: p.RoomView.GetHour(), Period: p.RoomView.GetPeriod()})
+					if existing, ok := currentDT.Load().(*gameserver.GameDateTime); ok && existing != nil {
+						currentDT.Store(&gameserver.GameDateTime{
+							Hour:  gameserver.GameHour(p.RoomView.GetHour()),
+							Day:   existing.Day,
+							Month: existing.Month,
+						})
+					}
+				}
+				lastRoomView.Store(p.RoomView)
+				// Suppress room region render during combat — the combat screen owns that region.
+				if session.Mode() == ModeCombat {
+					continue
+				}
+				w, _ := conn.Dimensions()
+				rvDT := currentDT.Load().(*gameserver.GameDateTime)
+				text = RenderRoomView(p.RoomView, w, telnet.RoomRegionRows, *rvDT)
+			case *gamev1.ServerEvent_Message:
+				period := ""
+				if tod, ok := currentTime.Load().(*gamev1.TimeOfDayEvent); ok && tod != nil {
+					period = tod.GetPeriod()
+				}
+				text = RenderMessage(p.Message, period)
+			case *gamev1.ServerEvent_RoomEvent:
+				text = RenderRoomEvent(p.RoomEvent)
+			case *gamev1.ServerEvent_PlayerList:
+				text = RenderPlayerList(p.PlayerList)
+			case *gamev1.ServerEvent_ExitList:
+				text = RenderExitList(p.ExitList)
+			case *gamev1.ServerEvent_Error:
+				text = RenderError(p.Error)
+			case *gamev1.ServerEvent_CombatEvent:
+				ce := p.CombatEvent
+				// Handle position events: update combatant position and re-render the battlefield.
+				if ce.GetType() == gamev1.CombatEventType_COMBAT_EVENT_TYPE_POSITION {
+					combatHandler.UpdatePosition(ce.GetAttacker(), int(ce.GetAttackerPosition()))
+					if session.Mode() == ModeCombat {
+						cw, _ := conn.Dimensions()
+						snap := combatHandler.SnapshotForRender()
+						if conn.IsSplitScreen() {
+							_ = conn.WriteRoom(RenderCombatScreen(snap, cw))
+						}
+					}
+					continue
+				}
+				// Update current HP when this player is the attack target.
+				if ce.GetTarget() == charName && ce.GetTargetHp() != 0 {
+					currentHP.Store(ce.GetTargetHp())
+				}
+				combatHandler.UpdateCombatEvent(
+					ce.GetAttacker(), ce.GetTarget(),
+					int(ce.GetDamage()), int(ce.GetTargetHp()), int(ce.GetTargetMaxHp()),
+					ce.GetNarrative(), int32(ce.GetType()),
+				)
+				if ce.GetType() == gamev1.CombatEventType_COMBAT_EVENT_TYPE_END {
+					combatHandler.SetSummary("Combat complete.")
+					cw, _ := conn.Dimensions()
+					summary := RenderCombatSummary("Combat complete.", cw)
+					if conn.IsSplitScreen() {
+						_ = conn.WriteRoom(summary)
+						_ = conn.WritePromptSplit(combatHandler.Prompt())
+					} else {
+						_ = conn.WriteLine(summary)
+						_ = conn.WritePrompt(combatHandler.Prompt())
+					}
+					combatEndTimer = time.AfterFunc(3*time.Second, func() {
+						session.SetMode(conn, session.Room())
+						// Re-render the room view now that the combat screen is gone.
+						rv, _ := lastRoomView.Load().(*gamev1.RoomView)
+						if rv != nil {
+							rw, _ := conn.Dimensions()
+							dt := currentDT.Load().(*gameserver.GameDateTime)
+							if dt == nil {
+								dt = &gameserver.GameDateTime{}
+							}
+							roomScreen := RenderRoomView(rv, rw, telnet.RoomRegionRows, *dt)
+							if conn.IsSplitScreen() {
+								_ = conn.WriteRoom(roomScreen)
+								_ = conn.WritePromptSplit(session.CurrentPrompt())
+							} else {
+								_ = conn.WriteLine(roomScreen)
+								_ = conn.WritePrompt(session.CurrentPrompt())
+							}
+						}
+					})
+					continue
+				}
+				// Re-render combat screen for non-END events.
 				if session.Mode() == ModeCombat {
 					cw, _ := conn.Dimensions()
 					snap := combatHandler.SnapshotForRender()
@@ -845,225 +898,173 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 						_ = conn.WriteRoom(RenderCombatScreen(snap, cw))
 					}
 				}
-				continue
-			}
-			// Update current HP when this player is the attack target.
-			if ce.GetTarget() == charName && ce.GetTargetHp() != 0 {
-				currentHP.Store(ce.GetTargetHp())
-			}
-			combatHandler.UpdateCombatEvent(
-				ce.GetAttacker(), ce.GetTarget(),
-				int(ce.GetDamage()), int(ce.GetTargetHp()), int(ce.GetTargetMaxHp()),
-				ce.GetNarrative(), int32(ce.GetType()),
-			)
-			if ce.GetType() == gamev1.CombatEventType_COMBAT_EVENT_TYPE_END {
-				combatHandler.SetSummary("Combat complete.")
+				text = RenderCombatEvent(ce)
+			case *gamev1.ServerEvent_RoundStart:
+				rs := p.RoundStart
+				// Cancel any pending combat-end timer to prevent it from
+				// yanking the player out of a new combat that started quickly.
+				if combatEndTimer != nil {
+					combatEndTimer.Stop()
+					combatEndTimer = nil
+				}
+				// Transition to combat mode on first round.
+				if session.Mode() != ModeCombat {
+					combatHandler.Reset()
+					session.SetMode(conn, combatHandler)
+				}
+				turnOrder := make([]string, len(rs.GetTurnOrder()))
+				copy(turnOrder, rs.GetTurnOrder())
+				combatHandler.UpdateRoundStart(int(rs.GetRound()), int(rs.GetActionsPerTurn()), turnOrder)
+				// Seed player HP from stored values so the HP bar shows immediately.
+				combatHandler.UpdatePlayerHP(int(currentHP.Load()), int(maxHP.Load()))
+				// Render combat screen in room region.
 				cw, _ := conn.Dimensions()
-				summary := RenderCombatSummary("Combat complete.", cw)
+				snap := combatHandler.SnapshotForRender()
 				if conn.IsSplitScreen() {
-					_ = conn.WriteRoom(summary)
+					_ = conn.WriteRoom(RenderCombatScreen(snap, cw))
 					_ = conn.WritePromptSplit(combatHandler.Prompt())
 				} else {
-					_ = conn.WriteLine(summary)
+					_ = conn.WriteLine(RenderCombatScreen(snap, cw))
 					_ = conn.WritePrompt(combatHandler.Prompt())
 				}
-				combatEndTimer = time.AfterFunc(3*time.Second, func() {
-					session.SetMode(conn, session.Room())
-					// Re-render the room view now that the combat screen is gone.
-					rv, _ := lastRoomView.Load().(*gamev1.RoomView)
-					if rv != nil {
-						rw, _ := conn.Dimensions()
-						dt := currentDT.Load().(*gameserver.GameDateTime)
-						if dt == nil {
-							dt = &gameserver.GameDateTime{}
-						}
-						roomScreen := RenderRoomView(rv, rw, telnet.RoomRegionRows, *dt)
-						if conn.IsSplitScreen() {
-							_ = conn.WriteRoom(roomScreen)
-							_ = conn.WritePromptSplit(session.CurrentPrompt())
-						} else {
-							_ = conn.WriteLine(roomScreen)
-							_ = conn.WritePrompt(session.CurrentPrompt())
-						}
+				// Also write the text-mode round start to console for the combat log.
+				text = RenderRoundStartEvent(rs)
+			case *gamev1.ServerEvent_RoundEnd:
+				text = RenderRoundEndEvent(p.RoundEnd)
+			case *gamev1.ServerEvent_NpcView:
+				text = RenderNpcView(p.NpcView)
+			case *gamev1.ServerEvent_ConditionEvent:
+				ce := p.ConditionEvent
+				if ce.ConditionId == "" {
+					if conn.IsSplitScreen() {
+						_ = conn.WriteConsole(telnet.Colorize(telnet.Cyan, "No active conditions."))
+						_ = conn.WritePromptSplit(session.CurrentPrompt())
+					} else {
+						_ = conn.WriteLine(telnet.Colorize(telnet.Cyan, "No active conditions."))
+						_ = conn.WritePrompt(session.CurrentPrompt())
 					}
-				})
-				continue
-			}
-			// Re-render combat screen for non-END events.
-			if session.Mode() == ModeCombat {
-				cw, _ := conn.Dimensions()
-				snap := combatHandler.SnapshotForRender()
-				if conn.IsSplitScreen() {
-					_ = conn.WriteRoom(RenderCombatScreen(snap, cw))
+					continue
 				}
-			}
-			text = RenderCombatEvent(ce)
-		case *gamev1.ServerEvent_RoundStart:
-			rs := p.RoundStart
-			// Cancel any pending combat-end timer to prevent it from
-			// yanking the player out of a new combat that started quickly.
-			if combatEndTimer != nil {
-				combatEndTimer.Stop()
-				combatEndTimer = nil
-			}
-			// Transition to combat mode on first round.
-			if session.Mode() != ModeCombat {
-				combatHandler.Reset()
-				session.SetMode(conn, combatHandler)
-			}
-			turnOrder := make([]string, len(rs.GetTurnOrder()))
-			copy(turnOrder, rs.GetTurnOrder())
-			combatHandler.UpdateRoundStart(int(rs.GetRound()), int(rs.GetActionsPerTurn()), turnOrder)
-			// Seed player HP from stored values so the HP bar shows immediately.
-			combatHandler.UpdatePlayerHP(int(currentHP.Load()), int(maxHP.Load()))
-			// Render combat screen in room region.
-			cw, _ := conn.Dimensions()
-			snap := combatHandler.SnapshotForRender()
-			if conn.IsSplitScreen() {
-				_ = conn.WriteRoom(RenderCombatScreen(snap, cw))
-				_ = conn.WritePromptSplit(combatHandler.Prompt())
-			} else {
-				_ = conn.WriteLine(RenderCombatScreen(snap, cw))
-				_ = conn.WritePrompt(combatHandler.Prompt())
-			}
-			// Also write the text-mode round start to console for the combat log.
-			text = RenderRoundStartEvent(rs)
-		case *gamev1.ServerEvent_RoundEnd:
-			text = RenderRoundEndEvent(p.RoundEnd)
-		case *gamev1.ServerEvent_NpcView:
-			text = RenderNpcView(p.NpcView)
-		case *gamev1.ServerEvent_ConditionEvent:
-			ce := p.ConditionEvent
-			if ce.ConditionId == "" {
+				condMu.Lock()
+				if ce.GetApplied() {
+					activeConditions[ce.GetConditionId()] = ce.GetConditionName()
+				} else {
+					delete(activeConditions, ce.GetConditionId())
+				}
+				if session.Mode() == ModeCombat {
+					condNames := make([]string, 0, len(activeConditions))
+					for _, name := range activeConditions {
+						condNames = append(condNames, name)
+					}
+					condMu.Unlock()
+					combatHandler.UpdateConditions(condNames)
+					cw, _ := conn.Dimensions()
+					snap := combatHandler.SnapshotForRender()
+					if conn.IsSplitScreen() {
+						_ = conn.WriteRoom(RenderCombatScreen(snap, cw))
+					}
+				} else {
+					condMu.Unlock()
+				}
+				text = RenderConditionEvent(ce)
+			case *gamev1.ServerEvent_InventoryView:
+				text = RenderInventoryView(p.InventoryView)
+			case *gamev1.ServerEvent_CharacterInfo:
+				ci := p.CharacterInfo
+				if ci.GetMaxHp() > 0 {
+					maxHP.Store(ci.GetMaxHp())
+				}
+				currentHP.Store(ci.GetCurrentHp())
+				text = RenderCharacterInfo(ci)
+			case *gamev1.ServerEvent_CharacterSheet:
+				cw, _ := conn.Dimensions()
+				text = RenderCharacterSheet(p.CharacterSheet, cw)
+			case *gamev1.ServerEvent_Map:
+				mw, _ := conn.Dimensions()
+				if session.Mode() == ModeMap {
+					mapHandler.SetLastResponse(p.Map)
+					mapView, _, _ := mapHandler.Snapshot()
+					var rendered string
+					if mapView == "world" {
+						rendered = RenderWorldMap(p.Map, mw)
+					} else {
+						rendered = RenderMap(p.Map, mw)
+					}
+					if conn.IsSplitScreen() {
+						_ = conn.WriteConsole(rendered)
+						_ = conn.WritePromptSplit(session.CurrentPrompt())
+					} else {
+						_ = conn.WriteLine(rendered)
+						_ = conn.WritePrompt(session.CurrentPrompt())
+					}
+					continue
+				}
+				text = RenderMap(p.Map, mw)
+			case *gamev1.ServerEvent_SkillsResponse:
+				text = RenderSkillsResponse(p.SkillsResponse)
+			case *gamev1.ServerEvent_FeatsResponse:
+				text = RenderFeatsResponse(p.FeatsResponse)
+			case *gamev1.ServerEvent_ClassFeaturesResponse:
+				text = RenderClassFeaturesResponse(p.ClassFeaturesResponse)
+			case *gamev1.ServerEvent_ProficienciesResponse:
+				text = RenderProficienciesResponse(p.ProficienciesResponse)
+			case *gamev1.ServerEvent_InteractResponse:
+				text = RenderInteractResponse(p.InteractResponse)
+			case *gamev1.ServerEvent_UseResponse:
+				text = RenderUseResponse(p.UseResponse)
+			case *gamev1.ServerEvent_HpUpdate:
+				hpu := p.HpUpdate
+				currentHP.Store(hpu.GetCurrentHp())
+				if hpu.GetMaxHp() > 0 {
+					maxHP.Store(hpu.GetMaxHp())
+				}
+				currentFP.Store(hpu.GetFocusPoints())
+				if hpu.GetMaxFocusPoints() > 0 {
+					maxFP.Store(hpu.GetMaxFocusPoints())
+				}
+				if session.Mode() == ModeCombat {
+					combatHandler.UpdatePlayerHP(int(hpu.GetCurrentHp()), int(hpu.GetMaxHp()))
+					cw, _ := conn.Dimensions()
+					snap := combatHandler.SnapshotForRender()
+					if conn.IsSplitScreen() {
+						_ = conn.WriteRoom(RenderCombatScreen(snap, cw))
+					}
+				}
 				if conn.IsSplitScreen() {
-					_ = conn.WriteConsole(telnet.Colorize(telnet.Cyan, "No active conditions."))
 					_ = conn.WritePromptSplit(session.CurrentPrompt())
 				} else {
-					_ = conn.WriteLine(telnet.Colorize(telnet.Cyan, "No active conditions."))
 					_ = conn.WritePrompt(session.CurrentPrompt())
 				}
 				continue
-			}
-			condMu.Lock()
-			if ce.GetApplied() {
-				activeConditions[ce.GetConditionId()] = ce.GetConditionName()
-			} else {
-				delete(activeConditions, ce.GetConditionId())
-			}
-			if session.Mode() == ModeCombat {
-				condNames := make([]string, 0, len(activeConditions))
-				for _, name := range activeConditions {
-					condNames = append(condNames, name)
-				}
-				condMu.Unlock()
-				combatHandler.UpdateConditions(condNames)
-				cw, _ := conn.Dimensions()
-				snap := combatHandler.SnapshotForRender()
+			case *gamev1.ServerEvent_Disconnected:
+				dcMsg := telnet.Colorf(telnet.Yellow, "Disconnected: %s", p.Disconnected.Reason)
 				if conn.IsSplitScreen() {
-					_ = conn.WriteRoom(RenderCombatScreen(snap, cw))
-				}
-			} else {
-				condMu.Unlock()
-			}
-			text = RenderConditionEvent(ce)
-		case *gamev1.ServerEvent_InventoryView:
-			text = RenderInventoryView(p.InventoryView)
-		case *gamev1.ServerEvent_CharacterInfo:
-			ci := p.CharacterInfo
-			if ci.GetMaxHp() > 0 {
-				maxHP.Store(ci.GetMaxHp())
-			}
-			currentHP.Store(ci.GetCurrentHp())
-			text = RenderCharacterInfo(ci)
-		case *gamev1.ServerEvent_CharacterSheet:
-			cw, _ := conn.Dimensions()
-			text = RenderCharacterSheet(p.CharacterSheet, cw)
-		case *gamev1.ServerEvent_Map:
-			mw, _ := conn.Dimensions()
-			if session.Mode() == ModeMap {
-				mapHandler.SetLastResponse(p.Map)
-				mapView, _, _ := mapHandler.Snapshot()
-				var rendered string
-				if mapView == "world" {
-					rendered = RenderWorldMap(p.Map, mw)
+					_ = conn.WriteConsole(dcMsg)
 				} else {
-					rendered = RenderMap(p.Map, mw)
+					_ = conn.WriteLine(dcMsg)
 				}
+				return
+			case *gamev1.ServerEvent_HotbarUpdate:
+				slots := p.HotbarUpdate.GetSlots()
+				var arr [10]string
+				for i := 0; i < len(slots) && i < 10; i++ {
+					arr[i] = slots[i]
+				}
+				currentHotbar.Store(arr)
 				if conn.IsSplitScreen() {
-					_ = conn.WriteConsole(rendered)
-					_ = conn.WritePromptSplit(session.CurrentPrompt())
-				} else {
-					_ = conn.WriteLine(rendered)
-					_ = conn.WritePrompt(session.CurrentPrompt())
+					_ = conn.WriteHotbar(arr)
+				}
+				continue
+			case *gamev1.ServerEvent_TabComplete:
+				// Route to the dedicated channel; the TabCompleter callback reads it.
+				// Non-blocking send: drop if no one is waiting (e.g. TabCompleter timed out).
+				// REQ-USE-5.
+				select {
+				case conn.TabCompleteResponse <- p.TabComplete:
+				default:
 				}
 				continue
 			}
-			text = RenderMap(p.Map, mw)
-		case *gamev1.ServerEvent_SkillsResponse:
-			text = RenderSkillsResponse(p.SkillsResponse)
-		case *gamev1.ServerEvent_FeatsResponse:
-			text = RenderFeatsResponse(p.FeatsResponse)
-		case *gamev1.ServerEvent_ClassFeaturesResponse:
-			text = RenderClassFeaturesResponse(p.ClassFeaturesResponse)
-		case *gamev1.ServerEvent_ProficienciesResponse:
-			text = RenderProficienciesResponse(p.ProficienciesResponse)
-		case *gamev1.ServerEvent_InteractResponse:
-			text = RenderInteractResponse(p.InteractResponse)
-		case *gamev1.ServerEvent_UseResponse:
-			text = RenderUseResponse(p.UseResponse)
-		case *gamev1.ServerEvent_HpUpdate:
-			hpu := p.HpUpdate
-			currentHP.Store(hpu.GetCurrentHp())
-			if hpu.GetMaxHp() > 0 {
-				maxHP.Store(hpu.GetMaxHp())
-			}
-			currentFP.Store(hpu.GetFocusPoints())
-			if hpu.GetMaxFocusPoints() > 0 {
-				maxFP.Store(hpu.GetMaxFocusPoints())
-			}
-			if session.Mode() == ModeCombat {
-				combatHandler.UpdatePlayerHP(int(hpu.GetCurrentHp()), int(hpu.GetMaxHp()))
-				cw, _ := conn.Dimensions()
-				snap := combatHandler.SnapshotForRender()
-				if conn.IsSplitScreen() {
-					_ = conn.WriteRoom(RenderCombatScreen(snap, cw))
-				}
-			}
-			if conn.IsSplitScreen() {
-				_ = conn.WritePromptSplit(session.CurrentPrompt())
-			} else {
-				_ = conn.WritePrompt(session.CurrentPrompt())
-			}
-			continue
-		case *gamev1.ServerEvent_Disconnected:
-			dcMsg := telnet.Colorf(telnet.Yellow, "Disconnected: %s", p.Disconnected.Reason)
-			if conn.IsSplitScreen() {
-				_ = conn.WriteConsole(dcMsg)
-			} else {
-				_ = conn.WriteLine(dcMsg)
-			}
-			return
-		case *gamev1.ServerEvent_HotbarUpdate:
-			slots := p.HotbarUpdate.GetSlots()
-			var arr [10]string
-			for i := 0; i < len(slots) && i < 10; i++ {
-				arr[i] = slots[i]
-			}
-			currentHotbar.Store(arr)
-			if conn.IsSplitScreen() {
-				_ = conn.WriteHotbar(arr)
-			}
-			continue
-		case *gamev1.ServerEvent_TabComplete:
-			// Route to the dedicated channel; the TabCompleter callback reads it.
-			// Non-blocking send: drop if no one is waiting (e.g. TabCompleter timed out).
-			// REQ-USE-5.
-			select {
-			case conn.TabCompleteResponse <- p.TabComplete:
-			default:
-			}
-			continue
-		}
 
 			if text != "" {
 				if conn.IsSplitScreen() {

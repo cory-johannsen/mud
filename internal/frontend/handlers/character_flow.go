@@ -473,9 +473,15 @@ func (h *AuthHandler) characterCreationFlow(ctx context.Context, conn *telnet.Co
 // runs the interactive selection and persists the result. It is called before
 // gameBridge for both new and existing characters so backfill always prompts.
 //
+// In headless mode (conn.Headless) this function is a no-op: automated clients
+// cannot respond to interactive prompts.
+//
 // Precondition: char must have a valid ID and Class set.
 // Postcondition: character_skills rows exist for char; returns non-nil error only on fatal failure.
 func (h *AuthHandler) ensureSkills(ctx context.Context, conn *telnet.Conn, char *character.Character) error {
+	if conn.Headless {
+		return nil
+	}
 	if h.characterSkills == nil || len(h.allSkills) == 0 {
 		return nil
 	}
@@ -672,10 +678,16 @@ func FeatPoolDeficit(pool []string, storedFeatIDs map[string]bool, count int) in
 // count. It is called before gameBridge for both new and existing characters so
 // backfill always prompts for any un-filled pool.
 //
+// In headless mode (conn.Headless) this function is a no-op: automated clients
+// cannot respond to interactive prompts.
+//
 // Precondition: char must have a valid ID, Class, and Skills populated.
 // Postcondition: character_feats rows exist for char covering all granted pools;
 // returns non-nil error only on fatal failure.
 func (h *AuthHandler) ensureFeats(ctx context.Context, conn *telnet.Conn, char *character.Character) error {
+	if conn.Headless {
+		return nil
+	}
 	if h.characterFeats == nil || h.featRegistry == nil {
 		return nil
 	}
@@ -812,6 +824,7 @@ func (h *AuthHandler) ensureFeats(ctx context.Context, conn *telnet.Conn, char *
 // ensureClassFeatures checks whether the character has class features recorded and, if not,
 // assigns all class features from the job (all fixed — no player selection) and persists.
 // Called before gameBridge for both new and existing characters so backfill always runs.
+// Safe to call in headless mode: no interactive prompts, purely automatic DB assignment.
 //
 // Precondition: char must have a valid ID and Class set.
 // Postcondition: character_class_features rows exist for char; returns non-nil error only on fatal failure.
@@ -853,9 +866,15 @@ func (h *AuthHandler) ensureClassFeatures(ctx context.Context, conn *telnet.Conn
 // prompts the player to select one and persists the result.
 // Called before gameBridge for both new and existing characters.
 //
+// In headless mode (conn.Headless) this function is a no-op: automated clients
+// cannot respond to interactive prompts.
+//
 // Precondition: char must have a valid ID.
 // Postcondition: char.Gender is non-empty on return; returns non-nil error only on fatal failure.
 func (h *AuthHandler) ensureGender(ctx context.Context, conn *telnet.Conn, char *character.Character) error {
+	if conn.Headless {
+		return nil
+	}
 	if char.Gender != "" {
 		return nil
 	}

@@ -3,12 +3,12 @@ package gameserver
 import (
 	"math/rand"
 
-	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 	"github.com/cory-johannsen/mud/internal/game/combat"
 	"github.com/cory-johannsen/mud/internal/game/inventory"
 	"github.com/cory-johannsen/mud/internal/game/reaction"
 	"github.com/cory-johannsen/mud/internal/game/ruleset"
 	"github.com/cory-johannsen/mud/internal/game/session"
+	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 )
 
 // triggerDescriptions provides human-readable descriptions for each trigger type.
@@ -244,7 +244,7 @@ func (s *GameServiceServer) buildReactionCallback(
 			Prompt:  prompt,
 			Options: []string{"yes", "no"},
 		}
-		chosen, err := s.promptFeatureChoice(stream, "reaction", choices)
+		chosen, err := s.promptFeatureChoice(stream, "reaction", choices, sess.Headless)
 		if err != nil {
 			return false, err
 		}

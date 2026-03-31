@@ -148,6 +148,7 @@ message ClientMessage {
     HotbarRequest        hotbar_request        = 131;
     SpawnCharRequest     spawn_char_request    = 132;
     DeleteCharRequest    delete_char_request   = 133;
+    KillNPCRequest       kill_npc_request      = 134;
   }
 }
 
@@ -377,6 +378,10 @@ message JoinWorldRequest {
   string class          = 9;
   int32  level          = 10;
   string archetype      = 11;
+  // headless indicates the session is driven by an automated client (e.g. e2e tests).
+  // When true, the server must auto-select the first valid option for all interactive
+  // prompts rather than blocking on stream.Recv().
+  bool   headless       = 12;
 }
 
 // MoveRequest asks the server to move the player in the given direction.
@@ -1191,11 +1196,12 @@ message MotiveRequest {
   string target = 1;
 }
 
-// GrantRequest asks the server to grant XP or money to a named player (editor command).
+// GrantRequest asks the server to grant XP, money, or an item (editor command).
 message GrantRequest {
-  string grant_type = 1; // "xp" or "money"
-  string char_name  = 2; // target character name
-  int32  amount     = 3; // amount to grant (must be > 0)
+  string grant_type = 1; // "xp", "money", or "item"
+  string char_name  = 2; // target character name; empty = all players in editor's room
+  int32  amount     = 3; // amount to grant (must be > 0 for xp/money)
+  string item_id    = 4; // item def ID to place on the room floor (grant_type == "item")
 }
 
 
@@ -1203,6 +1209,11 @@ message GrantRequest {
 message SpawnNPCRequest {
   string template_id = 1;
   string room_id     = 2; // empty = editor's current room
+}
+
+// KillNPCRequest asks the server to immediately kill an NPC instance (editor command).
+message KillNPCRequest {
+  string template_id = 1; // template or instance ID to kill; first match in editor's room
 }
 
 // AddRoomRequest asks the server to add a new room to a zone.
