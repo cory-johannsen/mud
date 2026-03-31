@@ -14,6 +14,7 @@ import {
   type ArchetypeOption,
   type JobOption,
   type FeatOption,
+  type SkillOption,
   type BasicOption,
   type SpontaneousChoice,
   type PreparedTechChoice,
@@ -385,6 +386,7 @@ export function CharacterWizard({ onComplete, onCancel }: Props) {
           {currentStepName === 'Skills' && job && (
             <SkillsStep
               job={job}
+              availableSkills={options?.skills ?? []}
               skillChoices={state.skillChoices}
               onSkillChoicesChange={(choices) => update({ skillChoices: choices })}
             />
@@ -659,14 +661,22 @@ function AbilityBoostsStep({
 
 interface SkillsStepProps {
   job: JobOption
+  availableSkills: SkillOption[]
   skillChoices: string[]
   onSkillChoicesChange: (choices: string[]) => void
 }
 
-function SkillsStep({ job, skillChoices, onSkillChoicesChange }: SkillsStepProps) {
+function SkillsStep({ job, availableSkills, skillChoices, onSkillChoicesChange }: SkillsStepProps) {
   const fixed = job.skill_grants?.fixed ?? []
   const choicePool = job.skill_grants?.choices?.pool ?? []
   const choiceCount = job.skill_grants?.choices?.count ?? 0
+
+  // Build a lookup map from skill ID → SkillOption for display
+  const skillByID = useMemo(() => {
+    const m = new Map<string, SkillOption>()
+    for (const s of availableSkills) m.set(s.id, s)
+    return m
+  }, [availableSkills])
 
   function toggle(skillId: string) {
     if (skillChoices.includes(skillId)) {
@@ -682,10 +692,16 @@ function SkillsStep({ job, skillChoices, onSkillChoicesChange }: SkillsStepProps
       {fixed.length > 0 && (
         <div style={styles.grantSection}>
           <h3 style={styles.grantSectionTitle}>Fixed Skills (granted automatically)</h3>
-          <div style={styles.grantList}>
-            {fixed.map((s) => (
-              <div key={s} style={styles.grantItem}>{s}</div>
-            ))}
+          <div style={styles.optionGrid}>
+            {fixed.map((s) => {
+              const skill = skillByID.get(s)
+              return (
+                <div key={s} style={{ ...styles.optionCard, opacity: 0.7, cursor: 'default' }}>
+                  <div style={styles.optionName}>{skill?.name ?? s}</div>
+                  {skill?.description && <div style={styles.optionDesc}>{skill.description}</div>}
+                </div>
+              )
+            })}
           </div>
         </div>
       )}
@@ -694,8 +710,9 @@ function SkillsStep({ job, skillChoices, onSkillChoicesChange }: SkillsStepProps
           <h3 style={styles.grantSectionTitle}>
             Choose {choiceCount} Skill{choiceCount !== 1 ? 's' : ''} ({skillChoices.length}/{choiceCount} selected)
           </h3>
-          <div style={styles.choiceGrid}>
+          <div style={styles.optionGrid}>
             {choicePool.map((s) => {
+              const skill = skillByID.get(s)
               const selected = skillChoices.includes(s)
               const disabled = !selected && skillChoices.length >= choiceCount
               return (
@@ -703,14 +720,15 @@ function SkillsStep({ job, skillChoices, onSkillChoicesChange }: SkillsStepProps
                   key={s}
                   type="button"
                   style={{
-                    ...styles.choiceBtn,
-                    ...(selected ? styles.choiceBtnSelected : {}),
+                    ...styles.optionCard,
+                    ...(selected ? styles.optionCardSelected : {}),
                     ...(disabled ? styles.choiceBtnDisabled : {}),
                   }}
                   onClick={() => toggle(s)}
                   disabled={disabled}
                 >
-                  {s}
+                  <div style={styles.optionName}>{skill?.name ?? s}</div>
+                  {skill?.description && <div style={styles.optionDesc}>{skill.description}</div>}
                 </button>
               )
             })}

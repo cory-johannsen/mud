@@ -348,6 +348,68 @@ func TestListOptions_ReturnsRulesetData(t *testing.T) {
 	assert.Contains(t, body, "teams")
 }
 
+func TestListOptions_SkillsArrayIncludesIDNameDescription(t *testing.T) {
+	opts := &handlers.CharacterOptions{
+		Regions:    []*ruleset.Region{{ID: "rustbucket", Name: "Rustbucket Ridge"}},
+		Jobs:       []*ruleset.Job{{ID: "ganger", Name: "Ganger"}},
+		Archetypes: []*ruleset.Archetype{{ID: "aggressor", Name: "Aggressor"}},
+		Teams:      []*ruleset.Team{{ID: "gun", Name: "Gun"}},
+		Skills: []*ruleset.Skill{
+			{ID: "athletics", Name: "Athletics", Description: "Physical prowess and raw strength.", Ability: "str"},
+			{ID: "intimidation", Name: "Intimidation", Description: "Coerce others through threats.", Ability: "cha"},
+		},
+	}
+	h := handlers.NewCharacterHandler(nil, nil, nil).WithOptions(opts)
+
+	req := httptest.NewRequest(http.MethodGet, "/api/characters/options", nil)
+	rr := httptest.NewRecorder()
+	h.ListOptions(rr, req)
+
+	require.Equal(t, http.StatusOK, rr.Code)
+	var body map[string]any
+	require.NoError(t, json.NewDecoder(rr.Body).Decode(&body))
+	require.Contains(t, body, "skills")
+
+	rawSkills, ok := body["skills"].([]any)
+	require.True(t, ok, "skills must be a JSON array")
+	require.Len(t, rawSkills, 2)
+
+	first, ok := rawSkills[0].(map[string]any)
+	require.True(t, ok)
+	assert.Equal(t, "athletics", first["id"])
+	assert.Equal(t, "Athletics", first["name"])
+	assert.Equal(t, "Physical prowess and raw strength.", first["description"])
+	assert.Equal(t, "str", first["ability"])
+
+	second, ok := rawSkills[1].(map[string]any)
+	require.True(t, ok)
+	assert.Equal(t, "intimidation", second["id"])
+	assert.Equal(t, "Intimidation", second["name"])
+}
+
+func TestListOptions_SkillsArrayEmptyWhenNilSkills(t *testing.T) {
+	opts := &handlers.CharacterOptions{
+		Regions:    []*ruleset.Region{{ID: "rustbucket", Name: "Rustbucket Ridge"}},
+		Jobs:       []*ruleset.Job{{ID: "ganger", Name: "Ganger"}},
+		Archetypes: []*ruleset.Archetype{{ID: "aggressor", Name: "Aggressor"}},
+		Teams:      []*ruleset.Team{{ID: "gun", Name: "Gun"}},
+		Skills:     nil,
+	}
+	h := handlers.NewCharacterHandler(nil, nil, nil).WithOptions(opts)
+
+	req := httptest.NewRequest(http.MethodGet, "/api/characters/options", nil)
+	rr := httptest.NewRecorder()
+	h.ListOptions(rr, req)
+
+	require.Equal(t, http.StatusOK, rr.Code)
+	var body map[string]any
+	require.NoError(t, json.NewDecoder(rr.Body).Decode(&body))
+	require.Contains(t, body, "skills")
+	rawSkills, ok := body["skills"].([]any)
+	require.True(t, ok, "skills must be a JSON array even when no skills loaded")
+	assert.Len(t, rawSkills, 0)
+}
+
 func TestCheckName_Available(t *testing.T) {
 	checker := &stubNameChecker{available: true}
 	h := handlers.NewCharacterHandler(nil, nil, checker)

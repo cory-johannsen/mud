@@ -502,11 +502,11 @@
 
 ### BUG-60: Web UI character creation skill selection shows IDs instead of names; no hover descriptions
 **Severity:** medium
-**Status:** open
+**Status:** fixed
 **Category:** UI
 **Description:** On the skill selection screen during web UI character creation, skill IDs are displayed instead of human-readable skill names, and no description is shown on hover.
 **Steps:** Open the web client; begin character creation; proceed to the skill selection step; observe that each skill is identified by its raw ID string rather than its display name; hover over a skill entry and observe no tooltip or description appears.
-**Fix:**
+**Fix:** Three-layer fix matching the feat selection pattern. (1) Server: added `skillResponse` struct to `characters.go` and populated a `skills` array in `ListOptions` with `id`, `name`, `description`, and `ability` fields, adding it to the JSON response alongside `feats`. (2) TypeScript: added `SkillOption` interface to `client.ts` and added `skills: SkillOption[]` to `CharacterOptions`. (3) Client: updated `SkillsStep` in `CharacterWizard.tsx` to accept `availableSkills: SkillOption[]` prop, build a `skillByID` lookup map with `useMemo`, render `skill?.name ?? id` instead of raw IDs, display `skill.description` below each skill name, and updated fixed-skill display to use `optionCard` style matching the feat pattern. Updated the call site to pass `availableSkills={options?.skills ?? []}`.
 
 ### BUG-61: Web UI Stats tab does not update XP after combat
 **Severity:** medium

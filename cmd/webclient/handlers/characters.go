@@ -573,6 +573,13 @@ type featResponse struct {
 	Category    string `json:"category"`
 }
 
+type skillResponse struct {
+	ID          string `json:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Ability     string `json:"ability"`
+}
+
 // techName returns the display name for the given tech ID, falling back to the
 // ID itself when the registry is nil or the entry is not found.
 func (h *CharacterHandler) techName(id string) string {
@@ -784,6 +791,18 @@ func (h *CharacterHandler) ListOptions(w http.ResponseWriter, r *http.Request) {
 			})
 		}
 	}
+	skills := make([]skillResponse, 0)
+	if h.options.Skills != nil {
+		skills = make([]skillResponse, 0, len(h.options.Skills))
+		for _, s := range h.options.Skills {
+			skills = append(skills, skillResponse{
+				ID:          s.ID,
+				Name:        s.Name,
+				Description: s.Description,
+				Ability:     s.Ability,
+			})
+		}
+	}
 	w.Header().Set("Content-Type", "application/json")
 	_ = json.NewEncoder(w).Encode(map[string]any{
 		"regions":    regions,
@@ -791,6 +810,7 @@ func (h *CharacterHandler) ListOptions(w http.ResponseWriter, r *http.Request) {
 		"archetypes": archetypes,
 		"teams":      teams,
 		"feats":      feats,
+		"skills":     skills,
 	})
 }
 

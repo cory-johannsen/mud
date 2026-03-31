@@ -180,12 +180,20 @@ export interface FeatOption {
   category: string
 }
 
+export interface SkillOption {
+  id: string
+  name: string
+  description: string
+  ability: string
+}
+
 export interface CharacterOptions {
   regions: RegionOption[]
   teams: TeamOption[]
   archetypes: ArchetypeOption[]
   jobs: JobOption[]
   feats: FeatOption[]
+  skills: SkillOption[]
 }
 
 export interface Character {
