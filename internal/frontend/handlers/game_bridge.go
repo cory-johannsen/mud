@@ -200,6 +200,10 @@ func (h *AuthHandler) gameBridge(ctx context.Context, conn *telnet.Conn, acct po
 	var condMu sync.Mutex
 	activeConditions := make(map[string]string)
 
+	// activeWeather holds the current weather event name, or "" when no weather is active.
+	var activeWeather atomic.Value
+	activeWeather.Store("")
+
 	// Initialize split-screen now that the game session is starting.
 	// This is deferred from acceptor so the auth/char-select flow renders
 	// without a scroll region. Re-entering gameBridge (after switch) also
@@ -247,7 +251,8 @@ func (h *AuthHandler) gameBridge(ctx context.Context, conn *telnet.Conn, acct po
 			})
 		}
 		dt := currentDT.Load().(*gameserver.GameDateTime)
-		renderedRoom := RenderRoomView(rv, w, telnet.RoomRegionRows, *dt)
+		aw, _ := activeWeather.Load().(string)
+		renderedRoom := RenderRoomView(rv, w, telnet.RoomRegionRows, *dt, aw)
 		if conn.IsSplitScreen() {
 			_ = conn.WriteRoom(renderedRoom)
 		} else {
@@ -365,7 +370,7 @@ func (h *AuthHandler) gameBridge(ctx context.Context, conn *telnet.Conn, acct po
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		h.forwardServerEvents(streamCtx, stream, conn, char.Name, &currentRoom, &currentTime, &currentDT, &currentHP, &maxHP, &currentFP, &maxFP, &lastRoomView, &condMu, activeConditions, session, mapHandler, &currentHotbar)
+		h.forwardServerEvents(streamCtx, stream, conn, char.Name, &currentRoom, &currentTime, &currentDT, &currentHP, &maxHP, &currentFP, &maxFP, &lastRoomView, &condMu, activeConditions, session, mapHandler, &currentHotbar, &activeWeather)
 	}()
 
 	// Command loop: read Telnet → parse → send gRPC
@@ -692,7 +697,7 @@ func renderTabCompleteResponse(conn *telnet.Conn, resp *gamev1.TabCompleteRespon
 // Side-effect: currentRoom is updated to the latest RoomView.RoomId whenever a RoomView event is received.
 // Side-effect: currentTime and currentDT are updated from TimeOfDayEvent or RoomView events.
 // Side-effect: currentHP, maxHP, currentFP, and maxFP are updated from CharacterInfo and HpUpdateEvent events.
-func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.GameService_SessionClient, conn *telnet.Conn, charName string, currentRoom *atomic.Value, currentTime *atomic.Value, currentDT *atomic.Value, currentHP *atomic.Int32, maxHP *atomic.Int32, currentFP *atomic.Int32, maxFP *atomic.Int32, lastRoomView *atomic.Value, condMu *sync.Mutex, activeConditions map[string]string, session *SessionInputState, mapHandler *MapModeHandler, currentHotbar *atomic.Value) {
+func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.GameService_SessionClient, conn *telnet.Conn, charName string, currentRoom *atomic.Value, currentTime *atomic.Value, currentDT *atomic.Value, currentHP *atomic.Int32, maxHP *atomic.Int32, currentFP *atomic.Int32, maxFP *atomic.Int32, lastRoomView *atomic.Value, condMu *sync.Mutex, activeConditions map[string]string, session *SessionInputState, mapHandler *MapModeHandler, currentHotbar *atomic.Value, activeWeather *atomic.Value) {
 	// Pump stream.Recv() into a channel so it can participate in a proper
 	// select alongside resize events and the prompt-refresh ticker.
 	type recvResult struct {
@@ -751,7 +756,8 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 				}
 				if rv, ok := lastRoomView.Load().(*gamev1.RoomView); ok && rv != nil {
 					dt := currentDT.Load().(*gameserver.GameDateTime)
-					_ = conn.WriteRoom(RenderRoomView(rv, rw, telnet.RoomRegionRows, *dt))
+					aw, _ := activeWeather.Load().(string)
+					_ = conn.WriteRoom(RenderRoomView(rv, rw, telnet.RoomRegionRows, *dt, aw))
 				}
 				hb, _ := currentHotbar.Load().([10]string)
 				_ = conn.WriteHotbar(hb)
@@ -819,7 +825,8 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 				}
 				w, _ := conn.Dimensions()
 				rvDT := currentDT.Load().(*gameserver.GameDateTime)
-				text = RenderRoomView(p.RoomView, w, telnet.RoomRegionRows, *rvDT)
+				aw, _ := activeWeather.Load().(string)
+				text = RenderRoomView(p.RoomView, w, telnet.RoomRegionRows, *rvDT, aw)
 			case *gamev1.ServerEvent_Message:
 				period := ""
 				if tod, ok := currentTime.Load().(*gamev1.TimeOfDayEvent); ok && tod != nil {
@@ -878,7 +885,8 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 							if dt == nil {
 								dt = &gameserver.GameDateTime{}
 							}
-							roomScreen := RenderRoomView(rv, rw, telnet.RoomRegionRows, *dt)
+							aw, _ := activeWeather.Load().(string)
+							roomScreen := RenderRoomView(rv, rw, telnet.RoomRegionRows, *dt, aw)
 							if conn.IsSplitScreen() {
 								_ = conn.WriteRoom(roomScreen)
 								_ = conn.WritePromptSplit(session.CurrentPrompt())
@@ -1062,6 +1070,23 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 				select {
 				case conn.TabCompleteResponse <- p.TabComplete:
 				default:
+				}
+				continue
+			case *gamev1.ServerEvent_Weather:
+				if p.Weather.Active {
+					activeWeather.Store(p.Weather.WeatherName)
+				} else {
+					activeWeather.Store("")
+				}
+				// Re-render the room view to display or clear the weather banner.
+				if rv, ok := lastRoomView.Load().(*gamev1.RoomView); ok && rv != nil && session.Mode() != ModeCombat {
+					rw, _ := conn.Dimensions()
+					dt := currentDT.Load().(*gameserver.GameDateTime)
+					aw, _ := activeWeather.Load().(string)
+					if conn.IsSplitScreen() {
+						_ = conn.WriteRoom(RenderRoomView(rv, rw, telnet.RoomRegionRows, *dt, aw))
+						_ = conn.WritePromptSplit(session.CurrentPrompt())
+					}
 				}
 				continue
 			}

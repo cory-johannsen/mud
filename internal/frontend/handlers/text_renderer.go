@@ -40,9 +40,19 @@ func DangerColor(dangerLevel string) string {
 // limit so the output never overflows the pinned room region.
 // Postcondition: Returns a multi-line ANSI-colored string of at most maxLines
 // rows suitable for WriteRoom.
-func RenderRoomView(rv *gamev1.RoomView, width int, maxLines int, dt gameserver.GameDateTime) string {
+func RenderRoomView(rv *gamev1.RoomView, width int, maxLines int, dt gameserver.GameDateTime, activeWeather string) string {
 	// Collect all lines in priority order, then trim to maxLines.
 	var lines []string
+
+	if activeWeather != "" {
+		banner := fmt.Sprintf("*** %s ***", strings.ToUpper(activeWeather))
+		padLen := 0
+		if width > len(banner) {
+			padLen = (width - len(banner)) / 2
+		}
+		centered := strings.Repeat(" ", padLen) + banner
+		lines = append(lines, telnet.Colorize(telnet.BrightCyan, centered))
+	}
 
 	if rv.Title != "" {
 		dateStr := gameserver.FormatDate(dt.Month, dt.Day)
