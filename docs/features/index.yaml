@@ -750,7 +750,7 @@ features:
 
   - slug: character-switch
     name: Character Switch
-    status: planned
+    status: done
     priority: 440
     category: ui
     file: docs/features/character-switch.md

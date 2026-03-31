@@ -1,7 +1,7 @@
 # Character Switch
 
 **Slug:** character-switch
-**Status:** planned
+**Status:** done
 **Priority:** 440
 **Category:** ui
 **Effort:** S
