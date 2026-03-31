@@ -33,12 +33,12 @@ type AITickInterval time.Duration
 // The loaded hour is applied to clock via SetHour so the clock resumes at the
 // persisted hour rather than the config default.
 func NewGameCalendarFromRepo(repo *postgres.CalendarRepo, clock *GameClock) (*GameCalendar, error) {
-	hour, day, month, err := repo.Load()
+	hour, day, month, tick, err := repo.Load()
 	if err != nil {
 		return nil, fmt.Errorf("loading calendar state: %w", err)
 	}
 	clock.SetHour(int32(hour))
-	return NewGameCalendar(clock, day, month, repo), nil
+	return NewGameCalendar(clock, day, month, tick, repo), nil
 }
 
 // NewCommandRegistry builds the command registry with class feature shortcuts.

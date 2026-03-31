@@ -37,7 +37,7 @@ func TestFormatDate_OrdinalSuffixes(t *testing.T) {
 
 func TestGameCalendar_BroadcastsEveryTick(t *testing.T) {
 	clock := NewGameClock(6, 50*time.Millisecond)
-	cal := NewGameCalendar(clock, 1, 1, &noopRepo{})
+	cal := NewGameCalendar(clock, 1, 1, 0, &noopRepo{})
 	ch := make(chan GameDateTime, 4)
 	cal.Subscribe(ch)
 	stopCal := cal.Start()
@@ -58,7 +58,7 @@ func TestGameCalendar_BroadcastsEveryTick(t *testing.T) {
 func TestGameCalendar_DayAdvancesByOne(t *testing.T) {
 	// Basic: Jan 5 → Jan 6 at midnight.
 	clock := NewGameClock(23, 50*time.Millisecond)
-	cal := NewGameCalendar(clock, 5, 1, &noopRepo{})
+	cal := NewGameCalendar(clock, 5, 1, 0, &noopRepo{})
 	ch := make(chan GameDateTime, 4)
 	cal.Subscribe(ch)
 	stopCal := cal.Start()
@@ -85,7 +85,7 @@ func TestGameCalendar_DayAdvancesByOne(t *testing.T) {
 
 func TestGameCalendar_JanRollover(t *testing.T) {
 	clock := NewGameClock(23, 50*time.Millisecond)
-	cal := NewGameCalendar(clock, 31, 1, &noopRepo{})
+	cal := NewGameCalendar(clock, 31, 1, 0, &noopRepo{})
 	ch := make(chan GameDateTime, 4)
 	cal.Subscribe(ch)
 	stopCal := cal.Start()
@@ -113,7 +113,7 @@ func TestGameCalendar_JanRollover(t *testing.T) {
 func TestGameCalendar_FebRollover(t *testing.T) {
 	// Feb 28 → Mar 1 (year 2001 is not a leap year).
 	clock := NewGameClock(23, 50*time.Millisecond)
-	cal := NewGameCalendar(clock, 28, 2, &noopRepo{})
+	cal := NewGameCalendar(clock, 28, 2, 0, &noopRepo{})
 	ch := make(chan GameDateTime, 4)
 	cal.Subscribe(ch)
 	stopCal := cal.Start()
@@ -140,7 +140,7 @@ func TestGameCalendar_FebRollover(t *testing.T) {
 
 func TestGameCalendar_NoSubscribers_NoPanic(t *testing.T) {
 	clock := NewGameClock(6, 50*time.Millisecond)
-	cal := NewGameCalendar(clock, 1, 1, &noopRepo{})
+	cal := NewGameCalendar(clock, 1, 1, 0, &noopRepo{})
 
 	// subscribe a channel so we know when ticks are being processed
 	ch := make(chan GameDateTime, 4)
@@ -165,7 +165,7 @@ func TestGameCalendar_NoSubscribers_NoPanic(t *testing.T) {
 
 func TestGameCalendar_SaveFailure_DoesNotStopBroadcast(t *testing.T) {
 	clock := NewGameClock(23, 50*time.Millisecond)
-	cal := NewGameCalendar(clock, 31, 1, &failRepo{})
+	cal := NewGameCalendar(clock, 31, 1, 0, &failRepo{})
 	ch := make(chan GameDateTime, 4)
 	cal.Subscribe(ch)
 	stopCal := cal.Start()
@@ -183,35 +183,42 @@ func TestGameCalendar_SaveFailure_DoesNotStopBroadcast(t *testing.T) {
 
 func TestNewGameCalendar_PanicsOnNilClock(t *testing.T) {
 	assert.Panics(t, func() {
-		NewGameCalendar(nil, 1, 1, &noopRepo{})
+		NewGameCalendar(nil, 1, 1, 0, &noopRepo{})
 	})
 }
 
 func TestNewGameCalendar_PanicsOnNilRepo(t *testing.T) {
 	clock := NewGameClock(6, 50*time.Millisecond)
 	assert.Panics(t, func() {
-		NewGameCalendar(clock, 1, 1, nil)
+		NewGameCalendar(clock, 1, 1, 0, nil)
 	})
 }
 
 func TestNewGameCalendar_PanicsOnInvalidDay(t *testing.T) {
 	clock := NewGameClock(6, 50*time.Millisecond)
 	assert.Panics(t, func() {
-		NewGameCalendar(clock, 0, 1, &noopRepo{})
+		NewGameCalendar(clock, 0, 1, 0, &noopRepo{})
 	}, "day=0 should panic")
 	assert.Panics(t, func() {
-		NewGameCalendar(clock, 32, 1, &noopRepo{})
+		NewGameCalendar(clock, 32, 1, 0, &noopRepo{})
 	}, "day=32 should panic")
 }
 
 func TestNewGameCalendar_PanicsOnInvalidMonth(t *testing.T) {
 	clock := NewGameClock(6, 50*time.Millisecond)
 	assert.Panics(t, func() {
-		NewGameCalendar(clock, 1, 0, &noopRepo{})
+		NewGameCalendar(clock, 1, 0, 0, &noopRepo{})
 	}, "month=0 should panic")
 	assert.Panics(t, func() {
-		NewGameCalendar(clock, 1, 13, &noopRepo{})
+		NewGameCalendar(clock, 1, 13, 0, &noopRepo{})
 	}, "month=13 should panic")
+}
+
+func TestNewGameCalendar_PanicsOnNegativeTick(t *testing.T) {
+	clock := NewGameClock(6, 50*time.Millisecond)
+	assert.Panics(t, func() {
+		NewGameCalendar(clock, 1, 1, -1, &noopRepo{})
+	})
 }
 
 // Property: FormatDate ordinal suffix is always one of "st", "nd", "rd", "th"
@@ -268,11 +275,11 @@ func TestProperty_GameCalendar_RolloverProducesValidDate(t *testing.T) {
 // noopRepo is a CalendarRepo stub that does nothing.
 type noopRepo struct{}
 
-func (r *noopRepo) Load() (int, int, int, error) { return 6, 1, 1, nil }
-func (r *noopRepo) Save(_, _, _ int) error        { return nil }
+func (r *noopRepo) Load() (int, int, int, int64, error) { return 6, 1, 1, 0, nil }
+func (r *noopRepo) Save(_, _, _ int, _ int64) error     { return nil }
 
 // failRepo is a CalendarRepo stub whose Save always fails.
 type failRepo struct{}
 
-func (r *failRepo) Load() (int, int, int, error) { return 6, 1, 1, nil }
-func (r *failRepo) Save(_, _, _ int) error        { return fmt.Errorf("db error") }
+func (r *failRepo) Load() (int, int, int, int64, error) { return 6, 1, 1, 0, nil }
+func (r *failRepo) Save(_, _, _ int, _ int64) error     { return fmt.Errorf("db error") }

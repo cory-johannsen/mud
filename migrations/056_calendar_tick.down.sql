@@ -1,0 +1,1 @@
+ALTER TABLE world_calendar DROP COLUMN IF EXISTS tick;
