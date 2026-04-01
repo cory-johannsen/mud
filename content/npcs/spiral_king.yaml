@@ -1,0 +1,63 @@
+id: spiral_king
+name: "The Spiral King"
+description: >
+  An ancient wook elder draped in a robe of living vines and owl feathers, eyes like twin galaxies.
+type: human
+tier: boss
+level: 12
+max_hp: 150
+ac: 16
+awareness: 14
+faction_id: wooks
+disposition: hostile
+attack_verb: "gestures with cosmic authority at"
+ai_domain: ganger_combat
+respawn_delay: "72h"
+abilities:
+  brutality: 14
+  quickness: 12
+  grit: 18
+  reasoning: 18
+  savvy: 16
+  flair: 20
+weapon:
+  - id: gnarled_staff
+    weight: 1
+armor: []
+boss_abilities:
+  - id: eternal_groove
+    name: "Eternal Groove"
+    trigger: round_start
+    trigger_value: 0
+    cooldown: "3m"
+    effect:
+      aoe_damage_expr: "1d4"
+  - id: spore_cloud
+    name: "Spore Cloud"
+    trigger: round_start
+    trigger_value: 0
+    cooldown: "4m"
+    effect:
+      aoe_condition: nausea
+  - id: spiral_vision
+    name: "Spiral Vision"
+    trigger: round_start
+    trigger_value: 0
+    cooldown: "2m"
+    effect:
+      aoe_condition: stunned
+loot:
+  currency:
+    min: 200
+    max: 500
+  items:
+    - item: vine_robe
+      chance: 0.60
+      min_qty: 1
+      max_qty: 1
+    - item: wook_spore_vial
+      chance: 0.75
+      min_qty: 1
+      max_qty: 3
+allowed_rooms:
+  - the_spiral_kings_grove

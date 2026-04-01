@@ -1,0 +1,44 @@
+domain:
+  id: tweaker_paranoid_combat
+  description: Combat behavior for tweaker_paranoid NPCs. Sounds alarm on sight, then attacks.
+
+  tasks:
+    - id: behave
+      description: Root task — fight or idle
+    - id: fight
+      description: Sound alarm, then engage nearest enemy
+
+  methods:
+    - task: behave
+      id: combat_mode
+      precondition: tweaker_paranoid_has_enemy
+      subtasks: [fight]
+
+    - task: behave
+      id: idle_mode
+      precondition: ""
+      subtasks: [do_pass]
+
+    - task: fight
+      id: alarm_and_attack
+      precondition: tweaker_paranoid_has_enemy
+      subtasks: [sound_alarm, attack_enemy]
+
+    - task: fight
+      id: attack_only
+      precondition: ""
+      subtasks: [attack_enemy]
+
+  operators:
+    - id: attack_enemy
+      action: attack
+      target: nearest_enemy
+
+    - id: do_pass
+      action: pass
+      target: ""
+
+    - id: sound_alarm
+      action: call_for_help
+      target: ""
+      cooldown: "0s"

@@ -1,0 +1,41 @@
+id: juggalo_prophet
+name: "Juggalo Prophet"
+description: >
+  An elder Juggalo in full ceremonial face paint and a black robe, reciting the gospel of the Dark Carnival.
+type: human
+level: 7
+max_hp: 72
+ac: 15
+awareness: 9
+faction_id: juggalos
+disposition: hostile
+attack_verb: "raises a hatchet at"
+ai_domain: juggalo_prophet_combat
+respawn_delay: "10m"
+abilities:
+  brutality: 16
+  quickness: 10
+  grit: 18
+  reasoning: 12
+  savvy: 11
+  flair: 14
+weapon:
+  - id: hatchet
+    weight: 3
+armor:
+  - id: leather_jacket
+    weight: 2
+  - id: kevlar_vest
+    weight: 1
+loot:
+  currency:
+    min: 20
+    max: 60
+  items:
+    - item: faygo_bottle
+      chance: 0.50
+      min_qty: 1
+      max_qty: 2
+allowed_danger_levels:
+  - dangerous
+  - all_out_war

@@ -1,0 +1,38 @@
+id: juggalo
+name: Juggalo
+description: >
+  A face-painted warrior in torn ICP merch, wielding a hatchet with unhinged enthusiasm.
+type: human
+level: 4
+max_hp: 38
+ac: 13
+awareness: 7
+faction_id: juggalos
+disposition: hostile
+attack_verb: "swings a hatchet at"
+ai_domain: ganger_combat
+respawn_delay: "5m"
+abilities:
+  brutality: 14
+  quickness: 12
+  grit: 14
+  reasoning: 8
+  savvy: 9
+  flair: 11
+weapon:
+  - id: hatchet
+    weight: 3
+  - id: cheap_blade
+    weight: 1
+armor:
+  - id: leather_jacket
+    weight: 2
+loot:
+  currency:
+    min: 5
+    max: 20
+  items:
+    - item: faygo_bottle
+      chance: 0.30
+      min_qty: 1
+      max_qty: 1

@@ -1,0 +1,37 @@
+id: tweaker
+name: Tweaker
+description: >
+  A gaunt, manic figure twitching with paranoid energy. Fast, unpredictable, and desperate.
+type: human
+level: 3
+max_hp: 22
+ac: 12
+awareness: 9
+faction_id: tweakers
+disposition: hostile
+attack_verb: "claws at"
+ai_domain: ganger_combat
+respawn_delay: "5m"
+attacks_per_round: 2
+abilities:
+  brutality: 10
+  quickness: 18
+  grit: 10
+  reasoning: 7
+  savvy: 8
+  flair: 8
+weapon:
+  - id: cheap_blade
+    weight: 3
+  - id: improvised_weapon
+    weight: 2
+armor: []
+loot:
+  currency:
+    min: 1
+    max: 15
+  items:
+    - item: scrap_metal
+      chance: 0.40
+      min_qty: 1
+      max_qty: 3

@@ -1,0 +1,43 @@
+id: tweaker_paranoid
+name: "Paranoid Tweaker"
+description: >
+  Eyes darting in every direction, this tweaker screams for backup the moment they spot an intruder.
+type: human
+level: 3
+max_hp: 20
+ac: 12
+awareness: 14
+faction_id: tweakers
+disposition: hostile
+attack_verb: "screams and swings at"
+ai_domain: tweaker_paranoid_combat
+respawn_delay: "5m"
+on_hit_condition:
+  condition_id: paranoid
+  attribute_modifier:
+    attribute: savvy
+    modifier: -2
+    duration_rounds: 2
+  save:
+    attribute: grit
+    dc: 14
+abilities:
+  brutality: 10
+  quickness: 16
+  grit: 10
+  reasoning: 6
+  savvy: 7
+  flair: 7
+weapon:
+  - id: cheap_blade
+    weight: 3
+armor: []
+loot:
+  currency:
+    min: 1
+    max: 10
+  items:
+    - item: scrap_metal
+      chance: 0.30
+      min_qty: 1
+      max_qty: 2

@@ -1,0 +1,49 @@
+domain:
+  id: juggalo_prophet_combat
+  description: Combat behavior for juggalo_prophet NPCs. Proclaims Dark Carnival scripture before attacking.
+
+  tasks:
+    - id: behave
+      description: Root task — fight or idle
+    - id: fight
+      description: Engage nearest enemy, proclaiming scripture when possible
+
+  methods:
+    - task: behave
+      id: combat_mode
+      precondition: juggalo_prophet_has_enemy
+      subtasks: [fight]
+
+    - task: behave
+      id: idle_mode
+      precondition: ""
+      subtasks: [do_pass]
+
+    - task: fight
+      id: proclaim_and_attack
+      precondition: juggalo_prophet_has_enemy
+      subtasks: [proclaim_scripture, attack_enemy]
+
+    - task: fight
+      id: attack_only
+      precondition: ""
+      subtasks: [attack_enemy]
+
+  operators:
+    - id: attack_enemy
+      action: attack
+      target: nearest_enemy
+
+    - id: do_pass
+      action: pass
+      target: ""
+
+    - id: proclaim_scripture
+      action: say
+      cooldown: "60s"
+      strings:
+        - "The Carnival is not a place! It's a state of mind!"
+        - "Thy wicked shall receive no love! Whoop whoop!"
+        - "The Dark Carnival comes for all — even you, Normie!"
+        - "Juggalos ain't a gang — we a family! And you ain't in it!"
+        - "Ashes, ashes, everybody falls but us!"

@@ -1,0 +1,65 @@
+id: crystal_karen
+name: "Crystal Karen"
+description: >
+  A brilliant, terrifying woman in a lab coat covered in chemical burns. She runs the operation. She runs everything.
+type: human
+tier: boss
+level: 12
+max_hp: 145
+ac: 17
+awareness: 13
+faction_id: tweakers
+disposition: hostile
+attack_verb: "hurls chemicals at"
+ai_domain: ganger_combat
+respawn_delay: "72h"
+abilities:
+  brutality: 14
+  quickness: 20
+  grit: 16
+  reasoning: 20
+  savvy: 16
+  flair: 10
+weapon:
+  - id: chemical_sprayer
+    weight: 1
+armor:
+  - id: kevlar_vest
+    weight: 1
+boss_abilities:
+  - id: paranoid_burst
+    name: "Paranoid Burst"
+    trigger: round_start
+    trigger_value: 0
+    cooldown: "3m"
+    effect:
+      aoe_condition: fear
+  - id: meth_bomb
+    name: "Meth Bomb"
+    trigger: round_start
+    trigger_value: 0
+    cooldown: "4m"
+    effect:
+      aoe_condition: nausea
+  - id: speed_rush
+    name: "Speed Rush"
+    trigger: hp_pct_below
+    trigger_value: 75
+    cooldown: "4m"
+    effect:
+      aoe_damage_expr: "2d6"
+loot:
+  currency:
+    min: 200
+    max: 500
+  items:
+    - item: speed_rig
+      chance: 0.75
+      min_qty: 1
+      max_qty: 1
+    - item: paranoia_grenade
+      chance: 0.50
+      min_qty: 1
+      max_qty: 2
+allowed_rooms:
+  - crystal_karens_lab

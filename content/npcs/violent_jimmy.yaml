@@ -1,0 +1,65 @@
+id: violent_jimmy
+name: "Violent Jimmy"
+description: >
+  An enormous face-painted warrior in a velvet robe. The Juggalo boss radiates Dark Carnival authority.
+type: human
+tier: boss
+level: 12
+max_hp: 160
+ac: 18
+awareness: 11
+faction_id: juggalos
+disposition: hostile
+attack_verb: "raises a hatchet at"
+ai_domain: ganger_combat
+respawn_delay: "72h"
+abilities:
+  brutality: 20
+  quickness: 14
+  grit: 20
+  reasoning: 11
+  savvy: 12
+  flair: 16
+weapon:
+  - id: hatchet
+    weight: 1
+armor:
+  - id: kevlar_vest
+    weight: 1
+boss_abilities:
+  - id: faygo_bomb
+    name: "Faygo Bomb"
+    trigger: round_start
+    trigger_value: 0
+    cooldown: "3m"
+    effect:
+      aoe_damage_expr: "2d6"
+  - id: hatchet_dance
+    name: "Hatchet Dance"
+    trigger: round_start
+    trigger_value: 0
+    cooldown: "2m"
+    effect:
+      aoe_damage_expr: "1d8"
+  - id: dark_carnival_prayer
+    name: "Dark Carnival Prayer"
+    trigger: hp_pct_below
+    trigger_value: 50
+    cooldown: "24h"
+    effect:
+      heal_pct: 25
+loot:
+  currency:
+    min: 200
+    max: 500
+  items:
+    - item: hatchet_man_pendant
+      chance: 0.75
+      min_qty: 1
+      max_qty: 1
+    - item: faygo_grenade
+      chance: 0.50
+      min_qty: 1
+      max_qty: 2
+allowed_rooms:
+  - violent_jimmys_tent
