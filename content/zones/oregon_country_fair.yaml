@@ -1,0 +1,841 @@
+zone:
+  id: oregon_country_fair
+  name: "Oregon Country Fair"
+  description: The Veneta fairgrounds, 13 miles west of Eugene on Hwy 126 — a forested river-adjacent festival site turned three-way warzone. Wooks, Juggalos, and Tweakers each control a pocket of the fairgrounds and fight continuously for dominance.
+  faction_id: ""
+  danger_level: dangerous
+  world_x: -2
+  world_y: -3
+  start_room: ocf_main_gate
+
+  rooms:
+
+  # Neutral Zone
+
+  - id: ocf_main_gate
+    title: OCF Main Gate
+    description: |
+      The original Oregon Country Fair entrance arch still stands, its hand-painted
+      banners shredded by years of factional fighting and Oregon rain. Spent shell
+      casings and broken Faygo bottles crunch underfoot. The gate is the last neutral
+      ground before the warzone swallows you whole.
+    danger_level: dangerous
+    map_x: 0
+    map_y: 0
+    exits:
+      - direction: east
+        target: ocf_main_stage_ruins
+      - direction: south
+        target: ocf_market_row
+    spawns:
+      - template: juggalo
+        count: 1
+        respawn_after: 5m
+      - template: tweaker
+        count: 1
+        respawn_after: 5m
+
+  - id: ocf_main_stage_ruins
+    title: Main Stage Ruins
+    description: |
+      The fairground's main performance stage collapsed inward years ago, leaving a
+      tangle of timber, trusses, and rusted PA scaffolding. Juggalos and Tweakers
+      use the wreckage as cover, spraying graffiti over each other's tags in an
+      endless territorial argument. The stage lights still flicker intermittently,
+      powered by nothing anyone can explain.
+    danger_level: dangerous
+    map_x: 2
+    map_y: 0
+    exits:
+      - direction: west
+        target: ocf_main_gate
+      - direction: south
+        target: chela_mela_meadow
+      - direction: east
+        target: the_no_mans_meadow
+    spawns:
+      - template: juggalo
+        count: 1
+        respawn_after: 5m
+      - template: tweaker
+        count: 1
+        respawn_after: 5m
+
+  - id: chela_mela_meadow
+    title: Chela Mela Meadow
+    description: |
+      Once the fairground's premier performance meadow, Chela Mela is now a contested
+      no-man's-land where all three factions clash at the intersection of their territories.
+      The grass is torn up, the stage shell riddled with holes, and blood has mixed with
+      mud in equal measure. Whatever magic this place once held is buried under the violence.
+    danger_level: dangerous
+    map_x: 2
+    map_y: -2
+    exits:
+      - direction: north
+        target: ocf_main_stage_ruins
+      - direction: west
+        target: ocf_craft_row
+      - direction: south
+        target: forest_junction_north
+    spawns:
+      - template: juggalo
+        count: 1
+        respawn_after: 5m
+      - template: wook
+        count: 1
+        respawn_after: 5m
+      - template: tweaker
+        count: 1
+        respawn_after: 5m
+
+  - id: ocf_craft_row
+    title: Craft Row
+    description: |
+      The vendor booths that once sold handmade goods are stripped down to their frames,
+      canvas in tatters. Tweakers have bolted sheet metal across some stalls as improvised
+      fortifications; Juggalos have painted the rest in hatchet-man murals. The smell of
+      spray paint and axle grease has replaced incense.
+    danger_level: dangerous
+    map_x: 0
+    map_y: -2
+    exits:
+      - direction: east
+        target: chela_mela_meadow
+      - direction: south
+        target: ocf_market_row
+    spawns:
+      - template: tweaker
+        count: 1
+        respawn_after: 5m
+      - template: juggalo
+        count: 1
+        respawn_after: 5m
+
+  - id: ocf_market_row
+    title: Market Row
+    description: |
+      The old food and goods market row maintains a tense détente — all three factions
+      recognize that some commerce must continue. A neutral operator runs the central
+      stall and a folding-table neural tech sets up between the vendor rows. The truce
+      holds by mutual necessity and the unspoken threat of collective ruin.
+    danger_level: sketchy
+    map_x: 0
+    map_y: -4
+    exits:
+      - direction: north
+        target: ocf_main_gate
+      - direction: east
+        target: ocf_craft_row
+      - direction: south
+        target: the_long_tom_crossing
+    spawns:
+      - template: chip_doc_ocf
+        count: 1
+        respawn_after: 0s
+
+  - id: the_long_tom_crossing
+    title: Long Tom Crossing
+    description: |
+      The footbridge over the Long Tom River serves as the critical crossroads of the
+      fairgrounds. All three factions patrol the bridge and the banks below, fighting
+      for control of this single chokepoint that connects north and south. The river
+      below runs the color of old rust after a decade of blood and iron.
+    danger_level: dangerous
+    map_x: 0
+    map_y: -6
+    exits:
+      - direction: north
+        target: ocf_market_row
+      - direction: east
+        target: the_mud_pit
+      - direction: south
+        target: forest_junction_south
+      - direction: west
+        target: wook_river_camp
+    spawns:
+      - template: juggalo
+        count: 1
+        respawn_after: 5m
+      - template: wook
+        count: 1
+        respawn_after: 5m
+
+  - id: the_mud_pit
+    title: The Mud Pit
+    description: |
+      An open field that Oregon rain and foot traffic have churned into a permanent
+      quagmire. Tweakers and Juggalos wade through the knee-deep mud in a slugging
+      brawl that never fully resolves — fighters slip and sink and keep swinging.
+      The mud smells of river silt, sweat, and chemical burn.
+    danger_level: dangerous
+    map_x: 2
+    map_y: -6
+    exits:
+      - direction: west
+        target: the_long_tom_crossing
+      - direction: north
+        target: forest_junction_north
+    spawns:
+      - template: tweaker
+        count: 1
+        respawn_after: 5m
+      - template: juggalo
+        count: 1
+        respawn_after: 5m
+
+  - id: forest_junction_north
+    title: Forest Junction North
+    description: |
+      Four paths converge at the northern edge of the Douglas fir grove, making
+      this junction a strategic nightmare for every faction. Whoever controls this
+      clearing controls movement across the entire fairground. Bodies are dragged
+      away from here more often than anywhere else on the grounds.
+    danger_level: dangerous
+    map_x: 2
+    map_y: -4
+    exits:
+      - direction: north
+        target: chela_mela_meadow
+      - direction: south
+        target: the_mud_pit
+      - direction: west
+        target: the_no_mans_meadow
+      - direction: east
+        target: the_big_top
+    spawns:
+      - template: juggalo
+        count: 1
+        respawn_after: 5m
+      - template: wook
+        count: 1
+        respawn_after: 5m
+
+  - id: forest_junction_south
+    title: Forest Junction South
+    description: |
+      The southern forest path intersection is dominated by Tweaker scouts who
+      move too fast and change direction unpredictably. The trees here are marked
+      with crude directional blazes — some accurate, many deliberately wrong.
+      A low paranoia hum runs through this clearing at all hours.
+    danger_level: dangerous
+    map_x: 0
+    map_y: -8
+    exits:
+      - direction: north
+        target: the_long_tom_crossing
+      - direction: east
+        target: the_trailer_cluster
+      - direction: south
+        target: the_no_mans_meadow
+    spawns:
+      - template: tweaker_paranoid
+        count: 1
+        respawn_after: 5m
+      - template: juggalo
+        count: 1
+        respawn_after: 5m
+
+  - id: the_no_mans_meadow
+    title: No Man's Meadow
+    description: |
+      The dead center of the fairgrounds belongs to no one and everyone simultaneously.
+      All three factions converge here in a continuous, grinding battle that has reduced
+      the meadow to bare dirt and scrap metal. No faction has held it for more than an
+      hour. The fighting never stops.
+    danger_level: all_out_war
+    map_x: 1
+    map_y: -6
+    exits:
+      - direction: north
+        target: forest_junction_north
+      - direction: west
+        target: forest_junction_south
+      - direction: east
+        target: ocf_main_stage_ruins
+    spawns:
+      - template: juggalo
+        count: 1
+        respawn_after: 5m
+      - template: tweaker
+        count: 1
+        respawn_after: 5m
+      - template: wook
+        count: 1
+        respawn_after: 5m
+
+  # Juggalo Territory
+
+  - id: the_big_top
+    title: The Big Top
+    description: |
+      A massive circus tent — Juggalo-black with hatchet-man flags along the crown —
+      serves as the faction's central hub. Merchants hawk Faygo, face paint, and salvage
+      gear from folding tables. The Big Top's neutrality within Juggalo territory is
+      enforced by painted muscle who stand at every entrance.
+    danger_level: safe
+    map_x: 4
+    map_y: -4
+    exits:
+      - direction: west
+        target: forest_junction_north
+      - direction: north
+        target: the_faygo_fountain
+      - direction: south
+        target: the_gathering_ground
+    spawns:
+      - template: juggalo_merchant
+        count: 1
+        respawn_after: 0s
+      - template: juggalo_banker
+        count: 1
+        respawn_after: 0s
+
+  - id: the_faygo_fountain
+    title: The Faygo Fountain
+    description: |
+      A salvaged pump system feeds a permanent Faygo spray fountain at the heart of
+      the Juggalo camp. The sticky mist coats everything in a ten-foot radius with a
+      fine haze of off-brand grape soda. The Juggalo healer works here, tending the
+      wounded beneath the perpetual fizzing shower with surprising clinical precision.
+    danger_level: safe
+    map_x: 4
+    map_y: -2
+    exits:
+      - direction: south
+        target: the_big_top
+    spawns:
+      - template: juggalo_healer
+        count: 1
+        respawn_after: 0s
+
+  - id: the_gathering_ground
+    title: The Gathering Ground
+    description: |
+      An open-air amphitheater marked by a circle of torches and a permanent fire
+      pit at center. The Gathering Ground is where the Juggalo Family hears grievances,
+      takes oaths, and receives missions from the hierarchy. The quest giver and fixer
+      hold court here, running operations for the whole territory.
+    danger_level: safe
+    map_x: 4
+    map_y: -6
+    exits:
+      - direction: north
+        target: the_big_top
+      - direction: east
+        target: icp_shrine
+    spawns:
+      - template: juggalo_quest_giver
+        count: 1
+        respawn_after: 0s
+      - template: juggalo_fixer
+        count: 1
+        respawn_after: 0s
+
+  - id: icp_shrine
+    title: ICP Shrine
+    description: |
+      A fifteen-foot mural of the Dark Carnival covers the side of a generator shed,
+      painted with that obsessive precision that only true believers achieve. Candles,
+      Faygo bottles, and handwritten confessions surround the base. Juggalos approach
+      and leave in small groups, voices hushed.
+    danger_level: sketchy
+    map_x: 6
+    map_y: -6
+    exits:
+      - direction: west
+        target: the_gathering_ground
+      - direction: east
+        target: the_carnival_arcade
+    spawns:
+      - template: juggalo
+        count: 1
+        respawn_after: 5m
+      - template: juggalo_prophet
+        count: 1
+        respawn_after: 10m
+
+  - id: the_carnival_arcade
+    title: Carnival Arcade
+    description: |
+      Salvaged carnival game booths have been repurposed as Juggalo training stations —
+      ring toss with hatchets, knock-down targets painted as rival faction faces, throwing
+      knives and clown-mask shooting galleries. The Juggalos here sharpen skills and settle
+      minor disputes through game outcomes.
+    danger_level: sketchy
+    map_x: 8
+    map_y: -6
+    exits:
+      - direction: west
+        target: icp_shrine
+      - direction: north
+        target: the_hatchet_barracks
+    spawns:
+      - template: juggalo
+        count: 2
+        respawn_after: 5m
+
+  - id: the_hatchet_barracks
+    title: Hatchet Barracks
+    description: |
+      The Juggalo military barracks occupies what was once a festival camping area,
+      the tents replaced by hardened sleeping bunkers. Hatchets hang in racks beside
+      every bunk. Face paint is applied here before every patrol. A prophet moves
+      between the bunks, conducting rituals before deployment.
+    danger_level: dangerous
+    map_x: 8
+    map_y: -4
+    exits:
+      - direction: south
+        target: the_carnival_arcade
+      - direction: west
+        target: the_dark_carnival_stage
+    spawns:
+      - template: juggalo
+        count: 2
+        respawn_after: 5m
+      - template: juggalo_prophet
+        count: 1
+        respawn_after: 10m
+
+  - id: the_dark_carnival_stage
+    title: Dark Carnival Stage
+    description: |
+      A full concert stage draped in black and red, built from salvage and sacrifice.
+      This is where ICP's mythology is performed live, night after night, in rituals
+      that function as combat training as much as devotion. The air smells of greasepaint,
+      Faygo, and old blood. Prophets perform on the stage even when no audience is present.
+    danger_level: dangerous
+    map_x: 6
+    map_y: -4
+    exits:
+      - direction: east
+        target: the_hatchet_barracks
+      - direction: south
+        target: violent_jimmys_tent
+    spawns:
+      - template: juggalo
+        count: 2
+        respawn_after: 5m
+      - template: juggalo_prophet
+        count: 1
+        respawn_after: 10m
+
+  - id: violent_jimmys_tent
+    title: Violent Jimmy's Tent
+    description: |
+      A massive canvas tent walled in chain-link and scrap iron, Violent Jimmy's
+      personal domain at the heart of Juggalo territory. Faygo rains down from
+      overhead pipes at irregular intervals — corrosive, somehow, in a way natural
+      soda is not. Anyone who enters without an invitation leaves in pieces.
+    danger_level: all_out_war
+    boss_room: true
+    map_x: 6
+    map_y: -2
+    hazards:
+      - id: faygo_rain
+        trigger: round_start
+        damage_expr: "1d4"
+        damage_type: acid
+        message: "A burst of caustic Faygo rains down from overhead pipes, burning exposed skin."
+    exits:
+      - direction: north
+        target: the_dark_carnival_stage
+    spawns:
+      - template: violent_jimmy
+        count: 1
+        respawn_after: 72h
+      - template: juggalo_prophet
+        count: 2
+        respawn_after: 10m
+
+  # Tweaker Territory
+
+  - id: the_trailer_cluster
+    title: Trailer Cluster
+    description: |
+      A ring of reinforced travel trailers forms the outer perimeter of Tweaker
+      territory, hitched bumper-to-bumper and welded together into a continuous
+      wall. The merchants operate out of the two trailers with the most intact
+      awnings. Everything smells of chemical solvent and burnt plastic.
+    danger_level: safe
+    ambient_substance: tweaker_crystal
+    map_x: 2
+    map_y: -8
+    exits:
+      - direction: west
+        target: forest_junction_south
+      - direction: north
+        target: the_cook_shed_anteroom
+      - direction: south
+        target: tweaker_command_post
+    spawns:
+      - template: tweaker_merchant
+        count: 1
+        respawn_after: 0s
+      - template: tweaker_banker
+        count: 1
+        respawn_after: 0s
+
+  - id: the_cook_shed_anteroom
+    title: Cook Shed Anteroom
+    description: |
+      A decontamination antechamber before the cook shed proper, lined in yellow plastic
+      sheeting and smelling of harsh antiseptic over something far worse underneath. The
+      Tweaker healer works here — patching up those burned, cut, or overdosed — with a
+      detached efficiency born of seeing the same wounds every single day.
+    danger_level: safe
+    ambient_substance: tweaker_crystal
+    map_x: 3
+    map_y: -6
+    exits:
+      - direction: south
+        target: the_trailer_cluster
+    spawns:
+      - template: tweaker_healer
+        count: 1
+        respawn_after: 0s
+
+  - id: tweaker_command_post
+    title: Tweaker Command Post
+    description: |
+      The operations center of Tweaker territory runs out of a modified shipping container
+      with antenna arrays welded to the roof and monitors inside showing camera feeds from
+      across the grounds. The quest giver dispatches runners continuously; the fixer moves
+      product and handles personnel with flat affect and zero sentimentality.
+    danger_level: safe
+    ambient_substance: tweaker_crystal
+    map_x: 2
+    map_y: -10
+    exits:
+      - direction: north
+        target: the_trailer_cluster
+      - direction: east
+        target: tweaker_watchtower
+    spawns:
+      - template: tweaker_quest_giver
+        count: 1
+        respawn_after: 0s
+      - template: tweaker_fixer
+        count: 1
+        respawn_after: 0s
+
+  - id: tweaker_watchtower
+    title: Tweaker Watchtower
+    description: |
+      A salvaged telephone-pole tower with a plywood platform at the top, manned
+      by paranoid scouts who have been awake for days and see threats in every shadow.
+      They are not entirely wrong. The tower gives commanding views of the surrounding
+      territory — and makes the occupants extremely visible targets.
+    danger_level: sketchy
+    ambient_substance: tweaker_crystal
+    map_x: 4
+    map_y: -10
+    exits:
+      - direction: west
+        target: tweaker_command_post
+      - direction: east
+        target: the_junk_maze
+    spawns:
+      - template: tweaker_paranoid
+        count: 2
+        respawn_after: 5m
+
+  - id: the_junk_maze
+    title: Junk Maze
+    description: |
+      Salvaged appliances, stripped vehicles, and festival detritus have been
+      deliberately arranged into a labyrinth that only Tweakers know how to navigate
+      quickly. Outsiders spend minutes finding dead ends while the Tweakers are already
+      behind them. The crystal residue on every surface glitters faintly in the dark.
+    danger_level: sketchy
+    ambient_substance: tweaker_crystal
+    map_x: 6
+    map_y: -10
+    exits:
+      - direction: west
+        target: tweaker_watchtower
+      - direction: south
+        target: the_paranoia_corridor
+    spawns:
+      - template: tweaker
+        count: 2
+        respawn_after: 5m
+
+  - id: the_paranoia_corridor
+    title: Paranoia Corridor
+    description: |
+      A long covered walkway running between rows of locked storage units, its walls
+      painted floor-to-ceiling in surveillance warnings and conspiracy diagrams. Tweakers
+      move through it at speed, checking over their shoulders on every step. The cooks
+      pass through here on their supply runs, never making eye contact.
+    danger_level: dangerous
+    ambient_substance: tweaker_crystal
+    map_x: 6
+    map_y: -12
+    exits:
+      - direction: north
+        target: the_junk_maze
+      - direction: south
+        target: the_hunting_grounds
+    spawns:
+      - template: tweaker_paranoid
+        count: 1
+        respawn_after: 5m
+      - template: tweaker_cook
+        count: 1
+        respawn_after: 10m
+      - template: tweaker
+        count: 1
+        respawn_after: 5m
+
+  - id: the_hunting_grounds
+    title: Hunting Grounds
+    description: |
+      The eastern killing fields where Tweaker patrols intercept anyone who gets
+      this deep into their territory. The grass is dead from chemical runoff and the
+      treeline is rigged with improvised alarms — cans on wire, trip-activated lights,
+      noise-makers. The cooks move through at unpredictable intervals.
+    danger_level: dangerous
+    ambient_substance: tweaker_crystal
+    map_x: 6
+    map_y: -14
+    exits:
+      - direction: north
+        target: the_paranoia_corridor
+      - direction: west
+        target: crystal_karens_lab
+    spawns:
+      - template: tweaker
+        count: 2
+        respawn_after: 5m
+      - template: tweaker_cook
+        count: 1
+        respawn_after: 10m
+
+  - id: crystal_karens_lab
+    title: Crystal Karen's Lab
+    description: |
+      The innermost sanctum of Tweaker territory is a converted greenhouse reeking
+      of toxic fumes that leak from every seam. The floor is a grid of barely-visible
+      trip wire connected to noisemakers and fragmentation charges. Crystal Karen
+      herself commands the space with the calm authority of someone who has survived
+      every possible chemical accident.
+    danger_level: all_out_war
+    boss_room: true
+    ambient_substance: tweaker_crystal
+    map_x: 4
+    map_y: -14
+    hazards:
+      - id: toxic_fumes
+        trigger: round_start
+        damage_expr: "1d4"
+        damage_type: poison
+        message: "Toxic chemical fumes from the lab's venting systems sear your lungs."
+      - id: trip_wire_grid
+        trigger: on_enter
+        damage_expr: "1d6"
+        damage_type: piercing
+        message: "A trip wire snags your ankle and detonates a fragmentation charge."
+    exits:
+      - direction: east
+        target: the_hunting_grounds
+    spawns:
+      - template: crystal_karen
+        count: 1
+        respawn_after: 72h
+      - template: tweaker_cook
+        count: 2
+        respawn_after: 10m
+
+  # Wook Territory
+
+  - id: wook_river_camp
+    title: Wook River Camp
+    description: |
+      The Wooks have claimed the Long Tom riverbank as their base of operations,
+      raising a camp of canvas domes and yurts strung with solar lights and prayer
+      flags. The merchant and banker operate from converted river-craft moored at
+      the bank. The sound of hand drums and flowing water mingles with the distant
+      crack of gunfire.
+    danger_level: safe
+    ambient_substance: wook_spore
+    map_x: -2
+    map_y: -6
+    exits:
+      - direction: east
+        target: the_long_tom_crossing
+      - direction: north
+        target: the_healing_waters_ocf
+      - direction: south
+        target: the_wook_council_fire
+    spawns:
+      - template: wook_merchant
+        count: 1
+        respawn_after: 0s
+      - template: wook_banker
+        count: 1
+        respawn_after: 0s
+
+  - id: the_healing_waters_ocf
+    title: Healing Waters (OCF)
+    description: |
+      A natural spring at the river's edge has been consecrated as a healing site,
+      ringed with smooth stones and woven offerings. The Wook healer keeps a fire
+      burning here continuously, brewing medicines from foraged herbs and tending
+      the injured with the unhurried care of someone who operates outside of time.
+    danger_level: safe
+    ambient_substance: wook_spore
+    map_x: -2
+    map_y: -4
+    exits:
+      - direction: south
+        target: wook_river_camp
+    spawns:
+      - template: wook_healer
+        count: 1
+        respawn_after: 0s
+
+  - id: the_wook_council_fire
+    title: Wook Council Fire
+    description: |
+      A massive stone fire ring at the center of Wook territory burns day and night.
+      The council of elders meets here to plan operations and arbitrate disputes.
+      The quest giver assigns missions to those deemed worthy; the fixer handles
+      logistics with a methodical calm that belies the war raging on the perimeter.
+    danger_level: safe
+    ambient_substance: wook_spore
+    map_x: -2
+    map_y: -8
+    exits:
+      - direction: north
+        target: wook_river_camp
+      - direction: west
+        target: mushroom_grove_ocf
+    spawns:
+      - template: wook_quest_giver
+        count: 1
+        respawn_after: 0s
+      - template: wook_fixer
+        count: 1
+        respawn_after: 0s
+
+  - id: mushroom_grove_ocf
+    title: Mushroom Grove (OCF)
+    description: |
+      A stand of old-growth oak and fir where massive fungal colonies have taken
+      hold, some caps spanning three feet across. The Wooks cultivate and protect
+      this grove as both food source and spiritual site. The spore concentration
+      here is high enough to cause vivid hallucinations after ten minutes of exposure.
+    danger_level: sketchy
+    ambient_substance: wook_spore
+    map_x: -4
+    map_y: -8
+    exits:
+      - direction: east
+        target: the_wook_council_fire
+      - direction: south
+        target: the_wook_meditation_field
+    spawns:
+      - template: wook
+        count: 2
+        respawn_after: 5m
+
+  - id: the_wook_meditation_field
+    title: Wook Meditation Field
+    description: |
+      An open meadow deep in Wook territory where the faction comes to reset between
+      engagements. Circles of meditating Wooks sit in the tall grass despite the
+      ambient danger — or perhaps because of it. The field is ringed by hidden
+      sentinels who track every footstep from the treeline.
+    danger_level: sketchy
+    ambient_substance: wook_spore
+    map_x: -4
+    map_y: -10
+    exits:
+      - direction: north
+        target: mushroom_grove_ocf
+      - direction: south
+        target: the_wook_deep_forest_ocf
+    spawns:
+      - template: wook
+        count: 2
+        respawn_after: 5m
+
+  - id: the_wook_deep_forest_ocf
+    title: Wook Deep Forest (OCF)
+    description: |
+      The Douglas fir canopy closes overhead into near-total darkness. Wook shamans
+      have painted every trunk with spiraling sigils that glow faintly in the blackness,
+      marking territory and warding intruders. The forest amplifies sound in strange ways —
+      a whisper here carries fifty yards; a shout becomes a murmur.
+    danger_level: dangerous
+    ambient_substance: wook_spore
+    map_x: -4
+    map_y: -12
+    exits:
+      - direction: north
+        target: the_wook_meditation_field
+      - direction: south
+        target: the_wook_outpost_wall
+    spawns:
+      - template: wook
+        count: 2
+        respawn_after: 5m
+      - template: wook_shaman
+        count: 1
+        respawn_after: 10m
+
+  - id: the_wook_outpost_wall
+    title: Wook Outpost Wall
+    description: |
+      A perimeter wall of lashed timber and salvaged fencing marks the final approach
+      to Wook leadership. Enforcer pairs patrol the wall's length in practiced silence,
+      communicating by hand signal. Shamans pace behind the line, maintaining wards
+      against intrusion. The Spiral King's grove lies just beyond.
+    danger_level: dangerous
+    ambient_substance: wook_spore
+    map_x: -4
+    map_y: -14
+    exits:
+      - direction: north
+        target: the_wook_deep_forest_ocf
+      - direction: west
+        target: the_spiral_kings_grove
+    spawns:
+      - template: wook_enforcer
+        count: 2
+        respawn_after: 5m
+      - template: wook_shaman
+        count: 1
+        respawn_after: 10m
+
+  - id: the_spiral_kings_grove
+    title: The Spiral King's Grove
+    description: |
+      An ancient grove of cedar and hemlock where the canopy forms a perfect spiral
+      pattern overhead, as if shaped by intention over centuries. The Spiral King
+      holds court at the grove's center, seated on a throne of living root and moss.
+      A permanent psychedelic fog rolls in off the ground, thick with wook spore and
+      older things still. To enter is to leave ordinary consciousness behind.
+    danger_level: all_out_war
+    boss_room: true
+    ambient_substance: wook_spore
+    map_x: -6
+    map_y: -14
+    hazards:
+      - id: psychedelic_fog
+        trigger: round_start
+        damage_expr: "1d4"
+        damage_type: poison
+        message: "The concentrated psychedelic fog fills your mind with fractured visions, poisoning your clarity."
+    exits:
+      - direction: east
+        target: the_wook_outpost_wall
+    spawns:
+      - template: spiral_king
+        count: 1
+        respawn_after: 72h
+      - template: wook_shaman
+        count: 2
+        respawn_after: 10m

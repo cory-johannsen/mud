@@ -10,6 +10,24 @@ import (
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 )
 
+// stubQuestGiverMessage is the message displayed by quest giver NPCs before
+// the quests feature is fully implemented for their faction.
+const stubQuestGiverMessage = "I've got work for you, but the time isn't right yet."
+
+// HandleQuestGiverInteract is a no-op handler for quest giver NPC interactions.
+// It returns the stub message for all quest giver types until the quests
+// feature is fully implemented.
+//
+// Precondition: giverID must not be empty.
+// Postcondition: Returns (stubQuestGiverMessage, nil) for any non-empty giverID;
+// returns ("", error) for an empty giverID.
+func HandleQuestGiverInteract(_ context.Context, giverID string, _ string) (string, error) {
+	if giverID == "" {
+		return "", fmt.Errorf("quest giver NPC ID must not be empty")
+	}
+	return stubQuestGiverMessage, nil
+}
+
 // findQuestGiverInRoom returns the first quest_giver NPC matching npcName in roomID.
 //
 // Precondition: roomID and npcName are non-empty.
