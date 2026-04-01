@@ -953,10 +953,11 @@ message UseResponse {
 
 // PreparedSlotView represents one prepared technology slot on the character sheet.
 message PreparedSlotView {
-    string tech_id      = 1;
-    bool   expended     = 2;
-    string tech_name    = 3;
-    string description  = 4;
+    string tech_id          = 1;
+    bool   expended         = 2;
+    string tech_name        = 3;
+    string description      = 4;
+    string effects_summary  = 5;
 }
 
 // HardwiredSlotView represents one always-available hardwired technology.
@@ -964,14 +965,16 @@ message HardwiredSlotView {
     string tech_id          = 1;
     string tech_name        = 2;
     string description      = 3;
+    string effects_summary  = 4;
 }
 
 // SpontaneousKnownEntry represents one tech known in the spontaneous pool with its name.
 message SpontaneousKnownEntry {
-    string tech_id      = 1;
-    string tech_name    = 2;
-    int32  tech_level   = 3;
-    string description  = 4;
+    string tech_id          = 1;
+    string tech_name        = 2;
+    int32  tech_level       = 3;
+    string description      = 4;
+    string effects_summary  = 5;
 }
 
 // CharacterSheetView delivers the player's full character sheet.
@@ -1039,12 +1042,13 @@ message CharacterSheetView {
 
 // InnateSlotView delivers the per-tech innate use slot state for the character sheet.
 message InnateSlotView {
-    string tech_id        = 1;
-    int32  uses_remaining = 2;
-    int32  max_uses       = 3;
-    string tech_name      = 4;
-    string description    = 5;
-    bool   is_reaction    = 6;
+    string tech_id          = 1;
+    int32  uses_remaining   = 2;
+    int32  max_uses         = 3;
+    string tech_name        = 4;
+    string description      = 5;
+    bool   is_reaction      = 6;
+    string effects_summary  = 7;
 }
 
 // SpontaneousUsePoolView delivers the daily use pool for one spontaneous tech level.

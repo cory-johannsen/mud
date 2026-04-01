@@ -5698,17 +5698,20 @@ func (s *GameServiceServer) handleChar(uid string) (*gamev1.ServerEvent, error) 
 				if slot != nil {
 					techName := slot.TechID
 					techDesc := ""
+					techFX := ""
 					if s.techRegistry != nil {
 						if def, ok := s.techRegistry.Get(slot.TechID); ok {
 							techName = def.Name
 							techDesc = def.Description
+							techFX = technology.FormatEffectsSummary(def)
 						}
 					}
 					view.PreparedSlots = append(view.PreparedSlots, &gamev1.PreparedSlotView{
-						TechId:      slot.TechID,
-						Expended:    slot.Expended,
-						TechName:    techName,
-						Description: techDesc,
+						TechId:         slot.TechID,
+						Expended:       slot.Expended,
+						TechName:       techName,
+						Description:    techDesc,
+						EffectsSummary: techFX,
 					})
 				}
 			}
@@ -5741,17 +5744,20 @@ func (s *GameServiceServer) handleChar(uid string) (*gamev1.ServerEvent, error) 
 			for _, tid := range sess.SpontaneousTechs[lvl] {
 				techName := tid
 				techDesc := ""
+				techFX := ""
 				if s.techRegistry != nil {
 					if def, ok := s.techRegistry.Get(tid); ok {
 						techName = def.Name
 						techDesc = def.Description
+						techFX = technology.FormatEffectsSummary(def)
 					}
 				}
 				view.SpontaneousKnown = append(view.SpontaneousKnown, &gamev1.SpontaneousKnownEntry{
-					TechId:      tid,
-					TechName:    techName,
-					TechLevel:   int32(lvl),
-					Description: techDesc,
+					TechId:         tid,
+					TechName:       techName,
+					TechLevel:      int32(lvl),
+					Description:    techDesc,
+					EffectsSummary: techFX,
 				})
 			}
 		}
@@ -5766,21 +5772,24 @@ func (s *GameServiceServer) handleChar(uid string) (*gamev1.ServerEvent, error) 
 		slot := sess.InnateTechs[id]
 		techName := id
 		techDesc := ""
+		techFX := ""
 		var isReaction bool
 		if s.techRegistry != nil {
 			if def, ok := s.techRegistry.Get(id); ok {
 				techName = def.Name
 				techDesc = def.Description
+				techFX = technology.FormatEffectsSummary(def)
 				isReaction = def.Reaction != nil
 			}
 		}
 		view.InnateSlots = append(view.InnateSlots, &gamev1.InnateSlotView{
-			TechId:        id,
-			UsesRemaining: int32(slot.UsesRemaining),
-			MaxUses:       int32(slot.MaxUses),
-			TechName:      techName,
-			Description:   techDesc,
-			IsReaction:    isReaction,
+			TechId:         id,
+			UsesRemaining:  int32(slot.UsesRemaining),
+			MaxUses:        int32(slot.MaxUses),
+			TechName:       techName,
+			Description:    techDesc,
+			EffectsSummary: techFX,
+			IsReaction:     isReaction,
 		})
 	}
 
@@ -5792,16 +5801,19 @@ func (s *GameServiceServer) handleChar(uid string) (*gamev1.ServerEvent, error) 
 		for _, id := range hwIDs {
 			techName := id
 			techDesc := ""
+			techFX := ""
 			if s.techRegistry != nil {
 				if def, ok := s.techRegistry.Get(id); ok {
 					techName = def.Name
 					techDesc = def.Description
+					techFX = technology.FormatEffectsSummary(def)
 				}
 			}
 			view.HardwiredSlots = append(view.HardwiredSlots, &gamev1.HardwiredSlotView{
-				TechId:      id,
-				TechName:    techName,
-				Description: techDesc,
+				TechId:         id,
+				TechName:       techName,
+				Description:    techDesc,
+				EffectsSummary: techFX,
 			})
 		}
 	}

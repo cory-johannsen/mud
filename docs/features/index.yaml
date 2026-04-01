@@ -768,7 +768,7 @@ features:
 
   - slug: web-ui-inventory-consume
     name: Web UI — Inventory Consume Control
-    status: backlog
+    status: planned
     priority: 481
     category: ui
     file: docs/features/web-ui-inventory-consume.md
@@ -778,7 +778,7 @@ features:
 
   - slug: web-ui-equipment-controls
     name: Web UI — Equipment Tab Controls
-    status: backlog
+    status: planned
     priority: 482
     category: ui
     file: docs/features/web-ui-equipment-controls.md
@@ -788,7 +788,7 @@ features:
 
   - slug: technology-short-names
     name: Technology Short Names
-    status: backlog
+    status: planned
     priority: 483
     category: ui
     file: docs/features/technology-short-names.md

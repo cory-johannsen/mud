@@ -25,6 +25,17 @@ function UsePips({ remaining, max }: { remaining: number; max: number }) {
   )
 }
 
+function EffectsSummary({ text }: { text: string }) {
+  const lines = text.split('\n')
+  return (
+    <div style={styles.effectsSummary}>
+      {lines.map((line, i) => (
+        <div key={i} style={line.startsWith('  ') ? styles.effectsIndent : undefined}>{line}</div>
+      ))}
+    </div>
+  )
+}
+
 function SlotPicker({
   hotbarSlots,
   onPick,
@@ -88,6 +99,7 @@ function PreparedItem({
         {slot.expended && <span style={styles.expendedBadge}>expended</span>}
       </div>
       {slot.description && <p style={styles.techDesc}>{slot.description}</p>}
+      {slot.effectsSummary && <EffectsSummary text={slot.effectsSummary} />}
       {!slot.expended && !picking && (
         <button style={styles.hotbarBtn} onClick={() => setPicking(true)} type="button">
           + Add to Hotbar
@@ -130,6 +142,7 @@ function InnateItem({
         {max > 0 && <UsePips remaining={remaining} max={max} />}
       </div>
       {slot.description && <p style={styles.techDesc}>{slot.description}</p>}
+      {slot.effectsSummary && <EffectsSummary text={slot.effectsSummary} />}
       {!exhausted && !slot.isReaction && !picking && (
         <button style={styles.hotbarBtn} onClick={() => setPicking(true)} type="button">
           + Add to Hotbar
@@ -171,6 +184,7 @@ function SpontaneousItem({
         <span style={styles.badgeActive}>active</span>
       </div>
       {entry.description && <p style={styles.techDesc}>{entry.description}</p>}
+      {entry.effectsSummary && <EffectsSummary text={entry.effectsSummary} />}
       {!exhausted && !picking && (
         <button style={styles.hotbarBtn} onClick={() => setPicking(true)} type="button">
           + Add to Hotbar
@@ -194,6 +208,7 @@ function HardwiredItem({ slot }: { slot: HardwiredSlotView }) {
         <span style={styles.badgePassive}>passive</span>
       </div>
       {slot.description && <p style={styles.techDesc}>{slot.description}</p>}
+      {slot.effectsSummary && <EffectsSummary text={slot.effectsSummary} />}
     </li>
   )
 }
@@ -370,7 +385,9 @@ const styles: Record<string, React.CSSProperties> = {
   list: { listStyle: 'none', padding: 0, margin: 0 },
   techItem: { marginBottom: '0.75rem', position: 'relative' as const },
   techHeader: { display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.15rem' },
-  techDesc: { margin: '0.15rem 0 0.3rem', color: '#888', fontSize: '0.8rem' },
+  techDesc: { margin: '0.15rem 0 0.2rem', color: '#888', fontSize: '0.8rem' },
+  effectsSummary: { margin: '0.1rem 0 0.3rem', color: '#6a9', fontSize: '0.75rem', fontFamily: 'monospace', lineHeight: 1.4 },
+  effectsIndent: { paddingLeft: '1em' },
   expended: { color: '#666', textDecoration: 'line-through' as const },
   expendedBadge: {
     fontSize: '0.65rem',

@@ -1,0 +1,330 @@
+1:package handlers
+2:
+3:import (
+4:	"context"
+5:	"errors"
+6:	"fmt"
+7:	"math/rand"
+8:	"strings"
+9:	"time"
+10:
+11:	"go.uber.org/zap"
+12:
+13:	"github.com/cory-johannsen/mud/internal/frontend/telnet"
+14:	"github.com/cory-johannsen/mud/internal/game/character"
+15:	"github.com/cory-johannsen/mud/internal/game/ruleset"
+16:	"github.com/cory-johannsen/mud/internal/storage/postgres"
+17:)
+18:
+19:// RandomNames is a list of post-apocalyptic themed character names suitable for
+20:// random selection during character creation. All names are 2-32 characters and
+21:// are not equal to "cancel" or "random" (case-insensitive).
+22:var RandomNames = []string{
+23:	"Raze", "Vex", "Cinder", "Sable", "Grit",
+24:	"Ash", "Flint", "Thorn", "Kael", "Dusk",
+25:	"Riven", "Scar", "Nox", "Wren", "Jace",
+26:	"Brix", "Colt", "Ember", "Slate", "Pike",
+27:}
+28:
+29:// RandomizeRemaining selects a region, team, and job for character creation,
+30:// using fixed values where provided and random selection otherwise.
+31://
+32:// Precondition: regions, teams, and allJobs must each be non-empty; returns error if any is empty or no compatible jobs exist.
+33:// Postcondition: returned job.Team is "" or equals returned team.ID; err is non-nil if no compatible jobs exist.
+34:func RandomizeRemaining(
+35:	regions []*ruleset.Region, fixedRegion *ruleset.Region,
+36:	teams []*ruleset.Team, fixedTeam *ruleset.Team,
+37:	allJobs []*ruleset.Job,
+38:) (region *ruleset.Region, team *ruleset.Team, job *ruleset.Job, err error) {
+39:	if len(regions) == 0 {
+40:		err = fmt.Errorf("RandomizeRemaining: regions must be non-empty")
+41:		return
+42:	}
+43:	if len(teams) == 0 {
+44:		err = fmt.Errorf("RandomizeRemaining: teams must be non-empty")
+45:		return
+46:	}
+47:	if len(allJobs) == 0 {
+48:		err = fmt.Errorf("RandomizeRemaining: allJobs must be non-empty")
+49:		return
+50:	}
+51:	if fixedRegion != nil {
+52:		region = fixedRegion
+53:	} else {
+54:		region = regions[rand.Intn(len(regions))]
+55:	}
+56:
+57:	if fixedTeam != nil {
+58:		team = fixedTeam
+59:	} else {
+60:		team = teams[rand.Intn(len(teams))]
+61:	}
+62:
+63:	var compatible []*ruleset.Job
+64:	for _, j := range allJobs {
+65:		if j.Team == "" || j.Team == team.ID {
+66:			compatible = append(compatible, j)
+67:		}
+68:	}
+69:	if len(compatible) == 0 {
+70:		err = fmt.Errorf("RandomizeRemaining: no jobs compatible with team %q", team.ID)
+71:		return
+72:	}
+73:	job = compatible[rand.Intn(len(compatible))]
+74:	return region, team, job, nil
+75:}
+76:
+77:// IsAlreadyLoggedIn returns true if err indicates the character is already connected.
+78://
+79:// Precondition: err may be nil or non-nil.
+80:// Postcondition: Returns true only when the error message contains "already connected".
+81:func IsAlreadyLoggedIn(err error) bool {
+82:	return err != nil && strings.Contains(err.Error(), "already connected")
+83:}
+84:
+85:// IsRandomInput reports whether the player's input at a list step requests random selection.
+86:// Blank input, "r", and "random" (all case-insensitive) are treated as random.
+87:// Exported for testing.
+88:func IsRandomInput(s string) bool {
+89:	lower := strings.ToLower(strings.TrimSpace(s))
+90:	return lower == "" || lower == "r" || lower == "random"
+91:}
+92:
+93:// characterFlow runs the character selection/creation UI after login.
+94:// It exits by calling gameBridge with the selected or newly created character.
+95://
+96:// Precondition: acct.ID must be > 0; conn must be open.
+97:// Postcondition: Calls gameBridge on success; returns non-nil error on fatal failure.
+98:func (h *AuthHandler) characterFlow(ctx context.Context, conn *telnet.Conn, acct postgres.Account) error {
+99:	for {
+100:		chars, err := h.characters.ListByAccount(ctx, acct.ID)
+101:		if err != nil {
+102:			return fmt.Errorf("listing characters: %w", err)
+103:		}
+104:
+105:		if len(chars) == 0 {
+106:			_ = conn.WriteLine(telnet.Colorize(telnet.BrightYellow,
+107:				"\r\nYou have no characters. Let's create one."))
+108:			c, err := h.characterCreationFlow(ctx, conn, acct.ID)
+109:			if err != nil {
+110:				return err
+111:			}
+112:			if c == nil {
+113:				continue // user cancelled — loop again
+114:			}
+115:			if err := h.ensureGender(ctx, conn, c); err != nil {
+116:				return err
+117:			}
+118:			if err := h.ensureSkills(ctx, conn, c); err != nil {
+119:				return err
+120:			}
+121:			if err := h.ensureFeats(ctx, conn, c); err != nil {
+122:				return err
+123:			}
+124:			if err := h.ensureClassFeatures(ctx, conn, c); err != nil {
+125:				return err
+126:			}
+127:			if err := h.gameBridge(ctx, conn, acct, c); err != nil {
+128:				if errors.Is(err, ErrSwitchCharacter) {
+129:					continue
+130:				}
+131:				if IsAlreadyLoggedIn(err) {
+132:					_ = conn.WriteLine(telnet.Colorize(telnet.Red, "That character is already logged in."))
+133:					continue
+134:				}
+135:				return err
+136:			}
+137:			return nil
+138:		}
+139:
+140:		// Show character list
+141:		_ = conn.WriteLine(telnet.Colorize(telnet.BrightWhite, "\r\nYour characters:"))
+142:		for i, c := range chars {
+143:			_ = conn.WriteLine(fmt.Sprintf("  %s%d%s. %s",
+144:				telnet.Green, i+1, telnet.Reset,
+145:				FormatCharacterSummary(c, h.regionDisplayName(c.Region))))
+146:		}
+147:		_ = conn.WriteLine(fmt.Sprintf("  %s%d%s. Create a new character",
+148:			telnet.Green, len(chars)+1, telnet.Reset))
+149:		_ = conn.WriteLine(fmt.Sprintf("  %squit%s. Disconnect",
+150:			telnet.Green, telnet.Reset))
+151:		_ = conn.WriteLine(telnet.Colorize(telnet.Yellow, "  Type 'delete N' to permanently delete character N."))
+152:
+153:		_ = conn.WritePrompt(telnet.Colorf(telnet.BrightWhite, "Select [1-%d]: ", len(chars)+1))
+154:		line, err := conn.ReadLine()
+155:		if err != nil {
+156:			return fmt.Errorf("reading character selection: %w", err)
+157:		}
+158:		line = strings.TrimSpace(line)
+159:
+160:		if strings.ToLower(line) == "quit" || strings.ToLower(line) == "exit" {
+161:			_ = conn.WriteLine(telnet.Colorize(telnet.Cyan, "Goodbye."))
+162:			return nil
+163:		}
+164:
+165:		// Handle "delete N" command.
+166:		if lower := strings.ToLower(line); strings.HasPrefix(lower, "delete ") {
+167:			parts := strings.Fields(line)
+168:			if len(parts) == 2 {
+169:				var delIdx int
+170:				if _, scanErr := fmt.Sscan(parts[1], &delIdx); scanErr == nil && delIdx >= 1 && delIdx <= len(chars) {
+171:					target := chars[delIdx-1]
+172:					_ = conn.WritePrompt(telnet.Colorf(telnet.Red,
+173:						"Delete %q? This cannot be undone. Type 'yes' to confirm: ", target.Name))
+174:					confirm, readErr := conn.ReadLine()
+175:					if readErr != nil {
+176:						return fmt.Errorf("reading delete confirmation: %w", readErr)
+177:					}
+178:					if strings.TrimSpace(strings.ToLower(confirm)) == "yes" {
+179:						if delErr := h.characters.DeleteByAccountAndName(ctx, acct.ID, target.Name); delErr != nil {
+180:							_ = conn.WriteLine(telnet.Colorize(telnet.Red, "Failed to delete character."))
+181:						} else {
+182:							_ = conn.WriteLine(telnet.Colorf(telnet.Cyan, "%q has been deleted.", target.Name))
+183:						}
+184:					} else {
+185:						_ = conn.WriteLine(telnet.Colorize(telnet.Yellow, "Delete cancelled."))
+186:					}
+187:				} else {
+188:					_ = conn.WriteLine(telnet.Colorize(telnet.Red, "Invalid selection for delete."))
+189:				}
+190:			} else {
+191:				_ = conn.WriteLine(telnet.Colorize(telnet.Red, "Usage: delete N"))
+192:			}
+193:			continue
+194:		}
+195:
+196:		choice := 0
+197:		if _, err := fmt.Sscanf(line, "%d", &choice); err != nil || choice < 1 || choice > len(chars)+1 {
+198:			_ = conn.WriteLine(telnet.Colorize(telnet.Red, "Invalid selection."))
+199:			continue
+200:		}
+201:
+202:		if choice == len(chars)+1 {
+203:			c, err := h.characterCreationFlow(ctx, conn, acct.ID)
+204:			if err != nil {
+205:				return err
+206:			}
+207:			if c != nil {
+208:				if err := h.ensureGender(ctx, conn, c); err != nil {
+209:					return err
+210:				}
+211:				if err := h.ensureSkills(ctx, conn, c); err != nil {
+212:					return err
+213:				}
+214:				if err := h.ensureFeats(ctx, conn, c); err != nil {
+215:					return err
+216:				}
+217:				if err := h.ensureClassFeatures(ctx, conn, c); err != nil {
+218:					return err
+219:				}
+220:				if err := h.gameBridge(ctx, conn, acct, c); err != nil {
+221:					if errors.Is(err, ErrSwitchCharacter) {
+222:						continue
+223:					}
+224:					if IsAlreadyLoggedIn(err) {
+225:						_ = conn.WriteLine(telnet.Colorize(telnet.Red, "That character is already logged in."))
+226:						continue
+227:					}
+228:					return err
+229:				}
+230:				return nil
+231:			}
+232:			continue
+233:		}
+234:
+235:		selected := chars[choice-1]
+236:		if err := h.ensureGender(ctx, conn, selected); err != nil {
+237:			return err
+238:		}
+239:		if err := h.ensureSkills(ctx, conn, selected); err != nil {
+240:			return err
+241:		}
+242:		if err := h.ensureFeats(ctx, conn, selected); err != nil {
+243:			return err
+244:		}
+245:		if err := h.ensureClassFeatures(ctx, conn, selected); err != nil {
+246:			return err
+247:		}
+248:		if err := h.gameBridge(ctx, conn, acct, selected); err != nil {
+249:			if errors.Is(err, ErrSwitchCharacter) {
+250:				continue
+251:			}
+252:			if IsAlreadyLoggedIn(err) {
+253:				_ = conn.WriteLine(telnet.Colorize(telnet.Red, "That character is already logged in."))
+254:				continue
+255:			}
+256:			return err
+257:		}
+258:		return nil
+259:	}
+260:}
+261:
+262:// characterCreationFlow guides the player through the interactive character builder.
+263:// Returns (nil, nil) if the player cancels at any step.
+264://
+265:// Precondition: accountID must be > 0; h.regions must be non-empty.
+266:// Postcondition: Returns a persisted *character.Character or (nil, nil) on cancel.
+267:func (h *AuthHandler) characterCreationFlow(ctx context.Context, conn *telnet.Conn, accountID int64) (*character.Character, error) {
+268:	_ = conn.WriteLine(telnet.Colorize(telnet.BrightCyan, "\r\n=== Character Creation ==="))
+269:	_ = conn.WriteLine("Type 'cancel' at any prompt to return to the character screen.\r\n")
+270:
+271:	// Step 1: Character name
+272:	_ = conn.WritePrompt(telnet.Colorize(telnet.BrightWhite,
+273:		"Enter your character's name (or 'random'): "))
+274:	nameLine, err := conn.ReadLine()
+275:	if err != nil {
+276:		return nil, fmt.Errorf("reading character name: %w", err)
+277:	}
+278:	nameLine = strings.TrimSpace(nameLine)
+279:	if strings.ToLower(nameLine) == "cancel" {
+280:		return nil, nil
+281:	}
+282:	if strings.ToLower(nameLine) == "random" {
+283:		nameLine = RandomNames[rand.Intn(len(RandomNames))]
+284:		_ = conn.WriteLine(telnet.Colorf(telnet.Cyan, "Random name selected: %s", nameLine))
+285:	}
+286:	if len(nameLine) < 2 || len(nameLine) > 32 {
+287:		_ = conn.WriteLine(telnet.Colorize(telnet.Red, "Name must be 2-32 characters."))
+288:		return nil, nil
+289:	}
+290:	charName := nameLine
+291:
+292:	// Step 1b: Gender
+293:	gender, err := PromptGenderStep(conn)
+294:	if err != nil {
+295:		return nil, fmt.Errorf("reading gender selection: %w", err)
+296:	}
+297:	if gender == "" {
+298:		// player typed cancel
+299:		return nil, nil
+300:	}
+301:
+302:	// Step 2: Home region
+303:	regions := h.regions
+304:	_ = conn.WriteLine(telnet.Colorize(telnet.BrightYellow, "\r\nChoose your home region:"))
+305:	for i, r := range regions {
+306:		_ = conn.WriteLine(fmt.Sprintf("  %s%d%s. %s%s%s\r\n     %s",
+307:			telnet.Green, i+1, telnet.Reset,
+308:			telnet.BrightWhite, r.Name, telnet.Reset,
+309:			r.Description))
+310:	}
+311:	_ = conn.WriteLine(fmt.Sprintf("  %sR%s. Random (default)", telnet.Green, telnet.Reset))
+312:	_ = conn.WritePrompt(telnet.Colorf(telnet.BrightWhite,
+313:		"Select region [1-%d/R, default=R]: ", len(regions)))
+314:	regionLine, err := conn.ReadLine()
+315:	if err != nil {
+316:		return nil, fmt.Errorf("reading region selection: %w", err)
+317:	}
+318:	regionLine = strings.TrimSpace(regionLine)
+319:	if strings.ToLower(regionLine) == "cancel" {
+320:		return nil, nil
+321:	}
+322:	if IsRandomInput(regionLine) {
+323:		region, team, job, err := RandomizeRemaining(regions, nil, h.teams, nil, h.jobs)
+324:		if err != nil {
+325:			h.logger.Error("randomizing character selections", zap.Error(err))
+326:			_ = conn.WriteLine(telnet.Colorf(telnet.Red, "Error randomizing selections: %v", err))
+327:			return nil, nil
+328:		}
+329:		_ = conn.WriteLine(telnet.Colorf(telnet.Cyan,
+330:			"Random selections: Region=%s, Team=%s, Archetype=%s, Job=%s", region.Name, 

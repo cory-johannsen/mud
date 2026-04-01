@@ -604,6 +604,22 @@
 **Steps:** Log in to the web UI; open the Inventory tab; click the Equip button on a weapon; observe that no modal appears to select a loadout or hand, inventory is not updated, and the Loadout tab does not reflect any change.
 **Fix:**
 
+### BUG-77: Web UI has a wide border surrounding the screen that should be removed
+**Severity:** low
+**Status:** open
+**Category:** UI
+**Description:** A wide border surrounds the entire web UI screen, consuming unnecessary screen space; it should be removed.
+**Steps:** Log in to the web UI; observe the wide border surrounding the full screen layout.
+**Fix:**
+
+### BUG-76: Web UI hotbar assignment popup anchors left and extends off-screen
+**Severity:** medium
+**Status:** open
+**Category:** UI
+**Description:** When assigning a Feat or Technology to the hotbar, the hotbar selection popup is anchored to the left edge of the tab and expands rightward, causing it to extend off-screen and become partially invisible.
+**Steps:** Log in to the web UI; open the Feats or Technologies tab; click the hotbar assignment control on any item; observe the hotbar popup anchors left and extends beyond the right edge of the viewport.
+**Fix:**
+
 ### BUG-75: Web UI Loadouts tab should be inside Equipment tab, not a separate tab
 **Severity:** medium
 **Status:** open

@@ -119,6 +119,7 @@ export interface PreparedSlotView {
   techName?: string
   tech_name?: string
   description?: string
+  effectsSummary?: string
 }
 
 export interface InnateSlotView {
@@ -132,6 +133,7 @@ export interface InnateSlotView {
   tech_name?: string
   description?: string
   isReaction?: boolean
+  effectsSummary?: string
 }
 
 export interface HardwiredSlotView {
@@ -140,6 +142,7 @@ export interface HardwiredSlotView {
   techName?: string
   tech_name?: string
   description?: string
+  effectsSummary?: string
 }
 
 export interface SpontaneousKnownEntry {
@@ -150,6 +153,7 @@ export interface SpontaneousKnownEntry {
   techLevel?: number
   tech_level?: number
   description?: string
+  effectsSummary?: string
 }
 
 export interface SpontaneousUsePoolView {

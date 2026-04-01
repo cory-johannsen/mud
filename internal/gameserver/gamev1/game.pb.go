@@ -9398,13 +9398,14 @@ func (x *UseResponse) GetChoices() []*FeatEntry {
 
 // PreparedSlotView represents one prepared technology slot on the character sheet.
 type PreparedSlotView struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	TechId        string                 `protobuf:"bytes,1,opt,name=tech_id,json=techId,proto3" json:"tech_id,omitempty"`
-	Expended      bool                   `protobuf:"varint,2,opt,name=expended,proto3" json:"expended,omitempty"`
-	TechName      string                 `protobuf:"bytes,3,opt,name=tech_name,json=techName,proto3" json:"tech_name,omitempty"`
-	Description   string                 `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	TechId         string                 `protobuf:"bytes,1,opt,name=tech_id,json=techId,proto3" json:"tech_id,omitempty"`
+	Expended       bool                   `protobuf:"varint,2,opt,name=expended,proto3" json:"expended,omitempty"`
+	TechName       string                 `protobuf:"bytes,3,opt,name=tech_name,json=techName,proto3" json:"tech_name,omitempty"`
+	Description    string                 `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
+	EffectsSummary string                 `protobuf:"bytes,5,opt,name=effects_summary,json=effectsSummary,proto3" json:"effects_summary,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
 }
 
 func (x *PreparedSlotView) Reset() {
@@ -9465,14 +9466,22 @@ func (x *PreparedSlotView) GetDescription() string {
 	return ""
 }
 
+func (x *PreparedSlotView) GetEffectsSummary() string {
+	if x != nil {
+		return x.EffectsSummary
+	}
+	return ""
+}
+
 // HardwiredSlotView represents one always-available hardwired technology.
 type HardwiredSlotView struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	TechId        string                 `protobuf:"bytes,1,opt,name=tech_id,json=techId,proto3" json:"tech_id,omitempty"`
-	TechName      string                 `protobuf:"bytes,2,opt,name=tech_name,json=techName,proto3" json:"tech_name,omitempty"`
-	Description   string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	TechId         string                 `protobuf:"bytes,1,opt,name=tech_id,json=techId,proto3" json:"tech_id,omitempty"`
+	TechName       string                 `protobuf:"bytes,2,opt,name=tech_name,json=techName,proto3" json:"tech_name,omitempty"`
+	Description    string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	EffectsSummary string                 `protobuf:"bytes,4,opt,name=effects_summary,json=effectsSummary,proto3" json:"effects_summary,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
 }
 
 func (x *HardwiredSlotView) Reset() {
@@ -9526,15 +9535,23 @@ func (x *HardwiredSlotView) GetDescription() string {
 	return ""
 }
 
+func (x *HardwiredSlotView) GetEffectsSummary() string {
+	if x != nil {
+		return x.EffectsSummary
+	}
+	return ""
+}
+
 // SpontaneousKnownEntry represents one tech known in the spontaneous pool with its name.
 type SpontaneousKnownEntry struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	TechId        string                 `protobuf:"bytes,1,opt,name=tech_id,json=techId,proto3" json:"tech_id,omitempty"`
-	TechName      string                 `protobuf:"bytes,2,opt,name=tech_name,json=techName,proto3" json:"tech_name,omitempty"`
-	TechLevel     int32                  `protobuf:"varint,3,opt,name=tech_level,json=techLevel,proto3" json:"tech_level,omitempty"`
-	Description   string                 `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	TechId         string                 `protobuf:"bytes,1,opt,name=tech_id,json=techId,proto3" json:"tech_id,omitempty"`
+	TechName       string                 `protobuf:"bytes,2,opt,name=tech_name,json=techName,proto3" json:"tech_name,omitempty"`
+	TechLevel      int32                  `protobuf:"varint,3,opt,name=tech_level,json=techLevel,proto3" json:"tech_level,omitempty"`
+	Description    string                 `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
+	EffectsSummary string                 `protobuf:"bytes,5,opt,name=effects_summary,json=effectsSummary,proto3" json:"effects_summary,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
 }
 
 func (x *SpontaneousKnownEntry) Reset() {
@@ -9591,6 +9608,13 @@ func (x *SpontaneousKnownEntry) GetTechLevel() int32 {
 func (x *SpontaneousKnownEntry) GetDescription() string {
 	if x != nil {
 		return x.Description
+	}
+	return ""
+}
+
+func (x *SpontaneousKnownEntry) GetEffectsSummary() string {
+	if x != nil {
+		return x.EffectsSummary
 	}
 	return ""
 }
@@ -10043,15 +10067,16 @@ func (x *CharacterSheetView) GetSpontaneousKnown() []*SpontaneousKnownEntry {
 
 // InnateSlotView delivers the per-tech innate use slot state for the character sheet.
 type InnateSlotView struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	TechId        string                 `protobuf:"bytes,1,opt,name=tech_id,json=techId,proto3" json:"tech_id,omitempty"`
-	UsesRemaining int32                  `protobuf:"varint,2,opt,name=uses_remaining,json=usesRemaining,proto3" json:"uses_remaining,omitempty"`
-	MaxUses       int32                  `protobuf:"varint,3,opt,name=max_uses,json=maxUses,proto3" json:"max_uses,omitempty"`
-	TechName      string                 `protobuf:"bytes,4,opt,name=tech_name,json=techName,proto3" json:"tech_name,omitempty"`
-	Description   string                 `protobuf:"bytes,5,opt,name=description,proto3" json:"description,omitempty"`
-	IsReaction    bool                   `protobuf:"varint,6,opt,name=is_reaction,json=isReaction,proto3" json:"is_reaction,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	TechId         string                 `protobuf:"bytes,1,opt,name=tech_id,json=techId,proto3" json:"tech_id,omitempty"`
+	UsesRemaining  int32                  `protobuf:"varint,2,opt,name=uses_remaining,json=usesRemaining,proto3" json:"uses_remaining,omitempty"`
+	MaxUses        int32                  `protobuf:"varint,3,opt,name=max_uses,json=maxUses,proto3" json:"max_uses,omitempty"`
+	TechName       string                 `protobuf:"bytes,4,opt,name=tech_name,json=techName,proto3" json:"tech_name,omitempty"`
+	Description    string                 `protobuf:"bytes,5,opt,name=description,proto3" json:"description,omitempty"`
+	IsReaction     bool                   `protobuf:"varint,6,opt,name=is_reaction,json=isReaction,proto3" json:"is_reaction,omitempty"`
+	EffectsSummary string                 `protobuf:"bytes,7,opt,name=effects_summary,json=effectsSummary,proto3" json:"effects_summary,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
 }
 
 func (x *InnateSlotView) Reset() {
@@ -10124,6 +10149,13 @@ func (x *InnateSlotView) GetIsReaction() bool {
 		return x.IsReaction
 	}
 	return false
+}
+
+func (x *InnateSlotView) GetEffectsSummary() string {
+	if x != nil {
+		return x.EffectsSummary
+	}
+	return ""
 }
 
 // SpontaneousUsePoolView delivers the daily use pool for one spontaneous tech level.
@@ -14129,22 +14161,25 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\x06target\x18\x02 \x01(\tR\x06target\"U\n" +
 	"\vUseResponse\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessage\x12,\n" +
-	"\achoices\x18\x02 \x03(\v2\x12.game.v1.FeatEntryR\achoices\"\x86\x01\n" +
+	"\achoices\x18\x02 \x03(\v2\x12.game.v1.FeatEntryR\achoices\"\xaf\x01\n" +
 	"\x10PreparedSlotView\x12\x17\n" +
 	"\atech_id\x18\x01 \x01(\tR\x06techId\x12\x1a\n" +
 	"\bexpended\x18\x02 \x01(\bR\bexpended\x12\x1b\n" +
 	"\ttech_name\x18\x03 \x01(\tR\btechName\x12 \n" +
-	"\vdescription\x18\x04 \x01(\tR\vdescription\"k\n" +
+	"\vdescription\x18\x04 \x01(\tR\vdescription\x12'\n" +
+	"\x0feffects_summary\x18\x05 \x01(\tR\x0eeffectsSummary\"\x94\x01\n" +
 	"\x11HardwiredSlotView\x12\x17\n" +
 	"\atech_id\x18\x01 \x01(\tR\x06techId\x12\x1b\n" +
 	"\ttech_name\x18\x02 \x01(\tR\btechName\x12 \n" +
-	"\vdescription\x18\x03 \x01(\tR\vdescription\"\x8e\x01\n" +
+	"\vdescription\x18\x03 \x01(\tR\vdescription\x12'\n" +
+	"\x0feffects_summary\x18\x04 \x01(\tR\x0eeffectsSummary\"\xb7\x01\n" +
 	"\x15SpontaneousKnownEntry\x12\x17\n" +
 	"\atech_id\x18\x01 \x01(\tR\x06techId\x12\x1b\n" +
 	"\ttech_name\x18\x02 \x01(\tR\btechName\x12\x1d\n" +
 	"\n" +
 	"tech_level\x18\x03 \x01(\x05R\ttechLevel\x12 \n" +
-	"\vdescription\x18\x04 \x01(\tR\vdescription\"\xc4\x11\n" +
+	"\vdescription\x18\x04 \x01(\tR\vdescription\x12'\n" +
+	"\x0feffects_summary\x18\x05 \x01(\tR\x0eeffectsSummary\"\xc4\x11\n" +
 	"\x12CharacterSheetView\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x10\n" +
 	"\x03job\x18\x02 \x01(\tR\x03job\x12\x1c\n" +
@@ -14210,7 +14245,7 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\x1a>\n" +
 	"\x10AccessoriesEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xcb\x01\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xf4\x01\n" +
 	"\x0eInnateSlotView\x12\x17\n" +
 	"\atech_id\x18\x01 \x01(\tR\x06techId\x12%\n" +
 	"\x0euses_remaining\x18\x02 \x01(\x05R\rusesRemaining\x12\x19\n" +
@@ -14218,7 +14253,8 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\ttech_name\x18\x04 \x01(\tR\btechName\x12 \n" +
 	"\vdescription\x18\x05 \x01(\tR\vdescription\x12\x1f\n" +
 	"\vis_reaction\x18\x06 \x01(\bR\n" +
-	"isReaction\"y\n" +
+	"isReaction\x12'\n" +
+	"\x0feffects_summary\x18\a \x01(\tR\x0eeffectsSummary\"y\n" +
 	"\x16SpontaneousUsePoolView\x12\x1d\n" +
 	"\n" +
 	"tech_level\x18\x01 \x01(\x05R\ttechLevel\x12%\n" +
