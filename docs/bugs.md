@@ -542,11 +542,11 @@
 
 ### BUG-64: Web UI does not display or manage loadouts
 **Severity:** high
-**Status:** open
+**Status:** fixed
 **Category:** UI
 **Description:** The web UI provides no way to view loadouts, switch between them, or edit the equipped items in each loadout.
 **Steps:** Open the web client; navigate to the Equipment or Character tab; observe that no loadout selector, loadout list, or loadout editing controls are present.
-**Fix:**
+**Fix:** Added a `LoadoutView` structured proto message (hand-written in `game.pb.go`) and `LoadoutWeaponPreset` sub-message. Modified `handleLoadout` in `grpc_service.go` to return a `LoadoutView` ServerEvent (field 33) when called with no arg, building preset data from the session's `LoadoutSet`. Added `serverEventLoadoutView` in `websocket.go` to marshal `LoadoutView` via `encoding/json` (bypassing protojson) and dispatch it to web clients as `"LoadoutView"` frames. Added `LoadoutRequest` to the websocket dispatch type map. Added a `LoadoutView` case to the telnet `forwardServerEvents` bridge that renders the structured data as plain text. Added TypeScript types `LoadoutView` and `LoadoutWeaponPreset` to `proto/index.ts`. Added `loadoutView` state and `SET_LOADOUT_VIEW` reducer to `GameContext.tsx`. Created `LoadoutDrawer.tsx` that sends a `LoadoutRequest` on open, displays all presets in cards (active preset highlighted), and provides a Switch button for each inactive preset. Wired `LoadoutDrawer` into `DrawerContainer.tsx` and added a "Loadout" toolbar button to `GamePage.tsx`.
 
 ### BUG-63: Motel keeper NPCs display with combat health status
 **Severity:** medium

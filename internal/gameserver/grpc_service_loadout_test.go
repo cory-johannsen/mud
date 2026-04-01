@@ -121,10 +121,10 @@ func TestHandleLoadout_InCombat_WithAP(t *testing.T) {
 }
 
 // TestHandleLoadout_InCombat_EmptyArg verifies that calling handleLoadout in combat with
-// an empty arg (display only) does NOT deduct any AP.
+// an empty arg (display only) does NOT deduct any AP and returns a LoadoutView.
 //
 // Precondition: Player "lo_empty" in combat with ≥1 AP remaining; Arg is "".
-// Postcondition: AP is unchanged; event contains loadout display text (no swap message).
+// Postcondition: AP is unchanged; event carries a LoadoutView (not a swap message).
 func TestHandleLoadout_InCombat_EmptyArg(t *testing.T) {
 	logger := zaptest.NewLogger(t)
 	roller := dice.NewLoggedRoller(&fixedDiceSource{val: 10}, logger)
@@ -137,7 +137,9 @@ func TestHandleLoadout_InCombat_EmptyArg(t *testing.T) {
 	ev, err := svc.handleLoadout("lo_empty", &gamev1.LoadoutRequest{Arg: ""})
 	require.NoError(t, err)
 	require.NotNil(t, ev)
-	assert.Contains(t, ev.GetMessage().GetContent(), "Preset", "display-only call must return loadout preset text")
+	lv := ev.GetLoadoutView()
+	require.NotNil(t, lv, "display-only call must return a LoadoutView event")
+	assert.NotEmpty(t, lv.Presets, "LoadoutView must contain presets")
 	assert.Equal(t, apBefore, combatHandler.RemainingAP("lo_empty"), "AP must not be deducted for empty-arg (display) call")
 }
 

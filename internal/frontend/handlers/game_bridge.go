@@ -1072,6 +1072,27 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 				default:
 				}
 				continue
+			case *gamev1.ServerEvent_LoadoutView:
+				lv := p.LoadoutView
+				var sb strings.Builder
+				for i, preset := range lv.Presets {
+					label := fmt.Sprintf("Preset %d", i+1)
+					if int32(i) == lv.ActiveIndex {
+						label += " [active]"
+					}
+					sb.WriteString(label + ":\n")
+					mainHand := preset.MainHand
+					if mainHand == "" {
+						mainHand = "empty"
+					}
+					offHand := preset.OffHand
+					if offHand == "" {
+						offHand = "empty"
+					}
+					sb.WriteString("  Main: " + mainHand + "\n")
+					sb.WriteString("  Off:  " + offHand + "\n")
+				}
+				text = strings.TrimRight(sb.String(), "\n")
 			case *gamev1.ServerEvent_Weather:
 				if p.Weather.Active {
 					activeWeather.Store(p.Weather.WeatherName)

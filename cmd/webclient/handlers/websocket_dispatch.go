@@ -812,6 +812,7 @@ func protoMessageByName(name string) (proto.Message, error) {
 		"SkillsRequest":         func() proto.Message { return &gamev1.SkillsRequest{} },
 		"FeatsRequest":          func() proto.Message { return &gamev1.FeatsRequest{} },
 		"CharacterSheetRequest": func() proto.Message { return &gamev1.CharacterSheetRequest{} },
+		"LoadoutRequest":        func() proto.Message { return &gamev1.LoadoutRequest{} },
 		"RestRequest":           func() proto.Message { return &gamev1.RestRequest{} },
 		"HotbarRequest":         func() proto.Message { return &gamev1.HotbarRequest{} },
 		"UseEquipmentRequest":   func() proto.Message { return &gamev1.UseEquipmentRequest{} },
@@ -870,6 +871,8 @@ func wrapProtoAsClientMessage(reqID, typeName string, msg proto.Message) (*gamev
 		cm.Payload = &gamev1.ClientMessage_FeatsRequest{FeatsRequest: m}
 	case *gamev1.CharacterSheetRequest:
 		cm.Payload = &gamev1.ClientMessage_CharSheet{CharSheet: m}
+	case *gamev1.LoadoutRequest:
+		cm.Payload = &gamev1.ClientMessage_Loadout{Loadout: m}
 	case *gamev1.RestRequest:
 		cm.Payload = &gamev1.ClientMessage_Rest{Rest: m}
 	case *gamev1.HotbarRequest:

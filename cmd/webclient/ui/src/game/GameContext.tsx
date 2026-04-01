@@ -31,6 +31,7 @@ import type {
   TimeOfDayEvent,
   ShopView,
   WeatherEvent,
+  LoadoutView,
 } from '../proto'
 
 const TOKEN_KEY = 'mud_token'
@@ -77,6 +78,7 @@ export interface GameState {
   healerView: import('../proto').HealerView | null
   trainerView: import('../proto').TrainerView | null
   npcView: { name: string; description: string; npcType: string; level: number; health: string } | null
+  loadoutView: LoadoutView | null
 }
 
 type Action =
@@ -101,6 +103,7 @@ type Action =
   | { type: 'SET_HEALER_VIEW'; view: import('../proto').HealerView | null }
   | { type: 'SET_TRAINER_VIEW'; view: import('../proto').TrainerView | null }
   | { type: 'SET_NPC_VIEW'; view: { name: string; description: string; npcType: string; level: number; health: string } | null }
+  | { type: 'SET_LOADOUT_VIEW'; view: LoadoutView | null }
 
 function reducer(state: GameState, action: Action): GameState {
   switch (action.type) {
@@ -149,6 +152,8 @@ function reducer(state: GameState, action: Action): GameState {
       return { ...state, trainerView: action.view }
     case 'SET_NPC_VIEW':
       return { ...state, npcView: action.view }
+    case 'SET_LOADOUT_VIEW':
+      return { ...state, loadoutView: action.view }
     case 'APPEND_FEED': {
       const updated = [...state.feedEntries, action.entry]
       return {
@@ -182,6 +187,7 @@ const initialState: GameState = {
   healerView: null,
   trainerView: null,
   npcView: null,
+  loadoutView: null,
 }
 
 interface GameContextValue {
@@ -192,6 +198,7 @@ interface GameContextValue {
   clearHealer: () => void
   clearTrainer: () => void
   clearNpcView: () => void
+  clearLoadout: () => void
 }
 
 const GameContext = createContext<GameContextValue | null>(null)
@@ -431,6 +438,10 @@ export function GameProvider({ children }: { children: ReactNode }) {
           dispatch({ type: 'SET_TRAINER_VIEW', view: payload as import('../proto').TrainerView })
           break
         }
+        case 'LoadoutView': {
+          dispatch({ type: 'SET_LOADOUT_VIEW', view: payload as LoadoutView })
+          break
+        }
         case 'ErrorEvent': {
           const err = payload as { message?: string }
           dispatch({
@@ -487,8 +498,12 @@ export function GameProvider({ children }: { children: ReactNode }) {
     dispatch({ type: 'SET_NPC_VIEW', view: null })
   }, [])
 
+  const clearLoadout = useCallback(() => {
+    dispatch({ type: 'SET_LOADOUT_VIEW', view: null })
+  }, [])
+
   return (
-    <GameContext.Provider value={{ state, sendMessage, sendCommand, clearShop, clearHealer, clearTrainer, clearNpcView }}>
+    <GameContext.Provider value={{ state, sendMessage, sendCommand, clearShop, clearHealer, clearTrainer, clearNpcView, clearLoadout }}>
       {children}
     </GameContext.Provider>
   )

@@ -15,13 +15,13 @@ import (
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 )
 
-// TestHandleLoadout_NoArg_CombinesSections verifies that handleLoadout with an empty arg
-// returns a combined message containing both the weapon preset section and the prepared
-// tech section, separated by a blank line.
+// TestHandleLoadout_NoArg_ReturnsLoadoutView verifies that handleLoadout with an empty arg
+// returns a structured LoadoutView event (not a message), which the web client renders
+// as a loadout management UI and the telnet bridge renders as text.
 //
-// Precondition: Player session has a non-nil LoadoutSet, non-empty PreparedTechs, and Class set.
-// Postcondition: Returns a ServerEvent whose content contains "\n\n" and "[Field Loadout]".
-func TestHandleLoadout_NoArg_CombinesSections(t *testing.T) {
+// Precondition: Player session has a non-nil LoadoutSet and Class set.
+// Postcondition: Returns a ServerEvent carrying a LoadoutView with the correct preset count.
+func TestHandleLoadout_NoArg_ReturnsLoadoutView(t *testing.T) {
 	svc := newLoadoutServer(t, "u_combined")
 	sess, ok := svc.sessions.GetPlayer("u_combined")
 	require.True(t, ok)
@@ -33,10 +33,10 @@ func TestHandleLoadout_NoArg_CombinesSections(t *testing.T) {
 	evt, err := svc.handleLoadout("u_combined", &gamev1.LoadoutRequest{Arg: ""})
 	require.NoError(t, err)
 	require.NotNil(t, evt)
-	msg := evt.GetMessage()
-	require.NotNil(t, msg)
-	assert.Contains(t, msg.Content, "\n\n", "combined sections must be separated by blank line")
-	assert.Contains(t, msg.Content, "[Field Loadout]", "nerd class must produce Field Loadout section header")
+	lv := evt.GetLoadoutView()
+	require.NotNil(t, lv, "no-arg handleLoadout must return a LoadoutView event")
+	assert.Len(t, lv.Presets, 2, "default LoadoutSet has 2 presets")
+	assert.Equal(t, int32(0), lv.ActiveIndex, "active index must be 0 by default")
 }
 
 // newLoadoutServer creates a GameServiceServer with a default loadout-aware session.
@@ -65,20 +65,20 @@ func newLoadoutServer(t *testing.T, uid string) *GameServiceServer {
 	return svc
 }
 
-// TestHandleLoadout_DisplaysPresets verifies that handleLoadout with no arg returns
-// a message containing "Preset", indicating the loadout set was rendered.
+// TestHandleLoadout_NoArg_HasPresetsInView verifies that handleLoadout with no arg returns
+// a LoadoutView event whose Presets slice is non-empty.
 //
-// Precondition: Player session has a non-nil LoadoutSet.
-// Postcondition: Returns a ServerEvent whose MessageEvent.Content contains "Preset".
-func TestHandleLoadout_DisplaysPresets(t *testing.T) {
+// Precondition: Player session has a non-nil LoadoutSet with 2 default presets.
+// Postcondition: Returns a ServerEvent carrying a LoadoutView with len(Presets) > 0.
+func TestHandleLoadout_NoArg_HasPresetsInView(t *testing.T) {
 	svc := newLoadoutServer(t, "u1")
 
 	evt, err := svc.handleLoadout("u1", &gamev1.LoadoutRequest{Arg: ""})
 	require.NoError(t, err)
 	require.NotNil(t, evt)
-	msg := evt.GetMessage()
-	require.NotNil(t, msg)
-	assert.Contains(t, msg.Content, "Preset")
+	lv := evt.GetLoadoutView()
+	require.NotNil(t, lv, "no-arg handleLoadout must return a LoadoutView event")
+	assert.NotEmpty(t, lv.Presets, "LoadoutView must contain at least one preset")
 }
 
 // TestHandleUnequip_UnknownSlot verifies that handleUnequip with an invalid slot name
@@ -259,7 +259,7 @@ func TestHandleEquip_UpdatesSessionLoadout(t *testing.T) {
 // TestPropertyHandleLoadout_ValidSessionAlwaysReturnsEvent asserts that any valid
 // session uid always receives a non-nil ServerEvent from handleLoadout, regardless of arg.
 // Precondition: uid maps to a valid player session.
-// Postcondition: event is non-nil and has a message payload.
+// Postcondition: event is non-nil; empty arg yields LoadoutView, non-empty arg yields MessageEvent.
 func TestPropertyHandleLoadout_ValidSessionAlwaysReturnsEvent(t *testing.T) {
 	rapid.Check(t, func(rt *rapid.T) {
 		uid := fmt.Sprintf("prop_loadout_%d", rapid.IntRange(0, 99999).Draw(rt, "uid"))
@@ -287,9 +287,13 @@ func TestPropertyHandleLoadout_ValidSessionAlwaysReturnsEvent(t *testing.T) {
 
 		arg := rapid.StringOf(rapid.RuneFrom(nil, unicode.Letter)).Draw(rt, "arg")
 		evt, err := svc.handleLoadout(uid, &gamev1.LoadoutRequest{Arg: arg})
-		require.NoError(t, err)
-		require.NotNil(t, evt)
-		require.NotNil(t, evt.GetMessage())
+		require.NoError(rt, err)
+		require.NotNil(rt, evt)
+		if arg == "" {
+			require.NotNil(rt, evt.GetLoadoutView(), "empty arg must return LoadoutView")
+		} else {
+			require.NotNil(rt, evt.GetMessage(), "non-empty arg must return MessageEvent")
+		}
 	})
 }
 

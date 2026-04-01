@@ -5348,10 +5348,41 @@ func (s *GameServiceServer) handleLoadout(uid string, req *gamev1.LoadoutRequest
 		}
 		return messageEvent(command.HandleLoadout(sess, arg, s.invRegistry)), nil
 	}
-	flavor := technology.FlavorFor(technology.DominantTradition(sess.Class))
-	weaponSection := command.HandleLoadout(sess, "", s.invRegistry)
-	prepSection := technology.FormatPreparedTechs(sess.PreparedTechs, flavor, s.techRegistry)
-	return messageEvent(weaponSection + "\n\n" + prepSection), nil
+	// No arg: return a structured LoadoutView for web clients; telnet bridge renders it as text.
+	return s.buildLoadoutView(sess), nil
+}
+
+// buildLoadoutView constructs a LoadoutView ServerEvent from the session's LoadoutSet.
+//
+// Precondition: sess must not be nil.
+// Postcondition: Returns a ServerEvent wrapping a LoadoutView with all presets populated.
+func (s *GameServiceServer) buildLoadoutView(sess *session.PlayerSession) *gamev1.ServerEvent {
+	lv := &gamev1.LoadoutView{}
+	if sess.LoadoutSet != nil {
+		lv.ActiveIndex = int32(sess.LoadoutSet.Active)
+		brutalityMod := combat.AbilityMod(sess.Abilities.Brutality)
+		weaponLevel := sess.Level
+		if weaponLevel < 1 {
+			weaponLevel = 1
+		}
+		for _, preset := range sess.LoadoutSet.Presets {
+			wp := &gamev1.LoadoutWeaponPreset{}
+			if preset.MainHand != nil {
+				def := preset.MainHand.Def
+				wp.MainHand = def.Name
+				wp.MainHandDamage = weaponDamageString(def.DamageDice, brutalityMod, def.IsMelee())
+			}
+			if preset.OffHand != nil {
+				def := preset.OffHand.Def
+				wp.OffHand = def.Name
+				wp.OffHandDamage = weaponDamageString(def.DamageDice, brutalityMod, def.IsMelee())
+			}
+			lv.Presets = append(lv.Presets, wp)
+		}
+	}
+	return &gamev1.ServerEvent{
+		Payload: &gamev1.ServerEvent_LoadoutView{LoadoutView: lv},
+	}
 }
 
 // handleUnequip removes the item in the given slot and returns it to the backpack.

@@ -321,6 +321,23 @@ func serverEventInner(event *gamev1.ServerEvent) (proto.Message, string) {
 	}
 }
 
+// serverEventLoadoutView checks if event carries a LoadoutView payload and returns
+// its JSON serialization and type name. Returns nil, "" for all other event types.
+//
+// Precondition: event must not be nil.
+// Postcondition: Returns non-nil bytes and "LoadoutView" when the payload is a LoadoutView.
+func serverEventLoadoutView(event *gamev1.ServerEvent) (json.RawMessage, string) {
+	lv, ok := event.Payload.(*gamev1.ServerEvent_LoadoutView)
+	if !ok || lv.LoadoutView == nil {
+		return nil, ""
+	}
+	data, err := json.Marshal(lv.LoadoutView)
+	if err != nil {
+		return nil, ""
+	}
+	return json.RawMessage(data), "LoadoutView"
+}
+
 // grpcToWS reads ServerEvent protos from the gRPC stream and writes JSON frames to the WS.
 // If h.bus is non-nil, each event is also published to the EventBus for SSE fan-out.
 func (h *WSHandler) grpcToWS(ctx context.Context, stream gamev1.GameService_SessionClient, wsConn *websocket.Conn) {
@@ -330,6 +347,23 @@ func (h *WSHandler) grpcToWS(ctx context.Context, stream gamev1.GameService_Sess
 		if err != nil {
 			h.logger.Info("grpcToWS: stream.Recv error", zap.Error(err))
 			return
+		}
+		// Handle non-proto LoadoutView via encoding/json before the proto path.
+		if rawPayload, msgName := serverEventLoadoutView(event); rawPayload != nil {
+			env := wsMessage{Type: msgName, Payload: rawPayload}
+			frame, err := json.Marshal(env)
+			if err != nil {
+				h.logger.Error("failed to marshal LoadoutView ws envelope", zap.Error(err))
+				continue
+			}
+			if h.bus != nil {
+				h.bus.Publish(eventbus.Event{Type: msgName, Payload: rawPayload, Time: time.Now()})
+			}
+			if err := wsConn.WriteMessage(websocket.TextMessage, frame); err != nil {
+				h.logger.Info("grpcToWS: WebSocket write error", zap.String("type", msgName), zap.Error(err))
+				return
+			}
+			continue
 		}
 		inner, msgName := serverEventInner(event)
 		if inner == nil {

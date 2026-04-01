@@ -3731,6 +3731,7 @@ type ServerEvent struct {
 	//	*ServerEvent_HealerView
 	//	*ServerEvent_TrainerView
 	//	*ServerEvent_Weather
+	//	*ServerEvent_LoadoutView
 	Payload       isServerEvent_Payload `protobuf_oneof:"payload"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -4059,6 +4060,15 @@ func (x *ServerEvent) GetWeather() *WeatherEvent {
 	return nil
 }
 
+func (x *ServerEvent) GetLoadoutView() *LoadoutView {
+	if x != nil {
+		if x, ok := x.Payload.(*ServerEvent_LoadoutView); ok {
+			return x.LoadoutView
+		}
+	}
+	return nil
+}
+
 type isServerEvent_Payload interface {
 	isServerEvent_Payload()
 }
@@ -4187,6 +4197,10 @@ type ServerEvent_Weather struct {
 	Weather *WeatherEvent `protobuf:"bytes,32,opt,name=weather,proto3,oneof"`
 }
 
+type ServerEvent_LoadoutView struct {
+	LoadoutView *LoadoutView `protobuf:"bytes,33,opt,name=loadout_view,json=loadoutView,proto3,oneof"`
+}
+
 func (*ServerEvent_RoomView) isServerEvent_Payload() {}
 
 func (*ServerEvent_Message) isServerEvent_Payload() {}
@@ -4248,6 +4262,8 @@ func (*ServerEvent_HealerView) isServerEvent_Payload() {}
 func (*ServerEvent_TrainerView) isServerEvent_Payload() {}
 
 func (*ServerEvent_Weather) isServerEvent_Payload() {}
+
+func (*ServerEvent_LoadoutView) isServerEvent_Payload() {}
 
 // ShopItem represents a single item row in a merchant's shop listing.
 type ShopItem struct {
@@ -13295,6 +13311,23 @@ func (x *WeatherEvent) GetActive() bool {
 		return x.Active
 	}
 	return false
+}
+
+// LoadoutWeaponPreset describes one weapon preset (main-hand + off-hand).
+// This is a hand-written proto mirror for the web client; it uses encoding/json tags
+// because protojson cannot marshal types without a registered protoreflect.Message.
+type LoadoutWeaponPreset struct {
+	MainHand      string `json:"mainHand,omitempty"`
+	OffHand       string `json:"offHand,omitempty"`
+	MainHandDamage string `json:"mainHandDamage,omitempty"`
+	OffHandDamage  string `json:"offHandDamage,omitempty"`
+}
+
+// LoadoutView delivers the player's full weapon loadout state to the web client.
+// This is a hand-written proto mirror; see LoadoutWeaponPreset.
+type LoadoutView struct {
+	Presets     []*LoadoutWeaponPreset `json:"presets,omitempty"`
+	ActiveIndex int32                  `json:"activeIndex,omitempty"`
 }
 
 var File_game_v1_game_proto protoreflect.FileDescriptor

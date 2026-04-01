@@ -325,6 +325,7 @@ message ServerEvent {
     HealerView           healer_view            = 30;
     TrainerView          trainer_view           = 31;
     WeatherEvent         weather                = 32;
+    LoadoutView          loadout_view           = 33;
   }
 }
 
@@ -660,6 +661,21 @@ message SetRoleRequest {
 // If arg is empty, the server returns the current loadout display.
 message LoadoutRequest {
   string arg = 1;
+}
+
+// LoadoutWeaponPreset describes one weapon preset (main-hand + off-hand).
+message LoadoutWeaponPreset {
+  string main_hand       = 1; // name of main-hand weapon, or "" if empty
+  string off_hand        = 2; // name of off-hand weapon, or "" if empty
+  string main_hand_damage = 3; // e.g. "1d8+3", or "" if no weapon
+  string off_hand_damage  = 4; // e.g. "1d6+1", or "" if no weapon
+}
+
+// LoadoutView delivers the player's full weapon loadout state.
+// Field 33 of ServerEvent.payload.
+message LoadoutView {
+  repeated LoadoutWeaponPreset presets = 1; // all available weapon presets
+  int32 active_index                  = 2; // 0-based index of active preset
 }
 
 // UnequipRequest removes the item in the named slot and returns it to the backpack.

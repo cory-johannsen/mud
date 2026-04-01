@@ -425,6 +425,18 @@ export interface WeatherEvent {
   active?: boolean
 }
 
+export interface LoadoutWeaponPreset {
+  mainHand?: string
+  offHand?: string
+  mainHandDamage?: string
+  offHandDamage?: string
+}
+
+export interface LoadoutView {
+  presets?: LoadoutWeaponPreset[]
+  activeIndex?: number
+}
+
 export interface ConditionEvent {
   targetUid?: string
   targetName?: string
