@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"go.uber.org/zap"
+	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 
 	"github.com/google/uuid"
@@ -5389,7 +5390,7 @@ func (s *GameServiceServer) buildLoadoutView(sess *session.PlayerSession) *gamev
 			lv.Presets = append(lv.Presets, wp)
 		}
 	}
-	data, err := json.Marshal(lv)
+	data, err := protojson.Marshal(lv)
 	if err != nil {
 		return errorEvent("failed to build loadout view")
 	}
