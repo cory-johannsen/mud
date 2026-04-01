@@ -824,8 +824,8 @@ zone:
     exits:
     - direction: west
       target: vantucky_fishers_landing
-    map_x: 7
-    map_y: -4
+    map_x: 6
+    map_y: -6
     spawns:
     - template: highway_bandit
       count: 1
