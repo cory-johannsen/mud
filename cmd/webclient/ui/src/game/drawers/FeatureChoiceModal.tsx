@@ -11,7 +11,7 @@ import { useGame } from '../GameContext'
 export function FeatureChoiceModal({ onClose }: { onClose: () => void }) {
   const { state, sendCommand, clearChoicePrompt } = useGame()
   const cp = state.choicePrompt
-  if (!cp) return null
+  if (!cp || cp.options.length === 0) return null
 
   function handleSelect(zeroBasedIndex: number) {
     // Send 1-based option number: server expects "1", "2", etc. as the choice.

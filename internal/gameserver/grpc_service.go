@@ -7760,14 +7760,12 @@ func (s *GameServiceServer) promptFeatureChoice(
 		// If the text is not a valid integer at all, skip it. A bare direction like
 		// "north" is not a choice attempt. Only an out-of-range integer (e.g. "99")
 		// is treated as an invalid selection and breaks the loop.
-		var parsedN int
-		_, scanErr := fmt.Sscanf(selText, "%d", &parsedN)
+		var n int
+		_, scanErr := fmt.Sscanf(selText, "%d", &n)
 		if scanErr != nil {
 			// Not a number — silently skip and wait for the next message.
 			continue
 		}
-
-		n := parsedN
 		idx := -1
 		if n >= 1 && n <= len(choices.Options) {
 			idx = n - 1

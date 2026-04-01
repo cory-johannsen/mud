@@ -2039,5 +2039,5 @@ func renderChoicePrompt(payload *choicePromptPayload) string {
 		fmt.Fprintf(&sb, "  %d) %s\r\n", i+1, opt)
 	}
 	fmt.Fprintf(&sb, "Enter 1-%d:", len(payload.Options))
-	return sb.String()
+	return strings.TrimRight(sb.String(), "\r\n")
 }

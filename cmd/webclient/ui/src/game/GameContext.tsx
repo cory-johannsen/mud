@@ -458,11 +458,11 @@ export function GameProvider({ children }: { children: ReactNode }) {
           break
         }
         case 'FeatureChoicePrompt': {
-          const cp = payload as { featureId?: string; feature_id?: string; prompt?: string; options?: string[] }
+          const cp = payload as { featureId?: string; prompt?: string; options?: string[] }
           dispatch({
             type: 'SET_CHOICE_PROMPT',
             prompt: {
-              featureId: cp.featureId ?? cp.feature_id ?? '',
+              featureId: cp.featureId ?? '',
               prompt: cp.prompt ?? '',
               options: Array.isArray(cp.options) ? cp.options : [],
             },
