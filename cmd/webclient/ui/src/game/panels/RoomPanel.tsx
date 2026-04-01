@@ -96,20 +96,37 @@ export function RoomPanel() {
         <>
           <div className="room-section-label">Equipment</div>
           <ul className="room-items">
-            {equipment.map((eq, i) => (
-              <li key={i}>
-                {eq.usable ? (
-                  <button
-                    className="item-link"
-                    onClick={() => sendMessage('UseEquipmentRequest', { instance_id: eq.instanceId })}
-                  >
-                    {eq.name} [interact]
-                  </button>
-                ) : (
-                  <span>{eq.name}</span>
-                )}
-              </li>
-            ))}
+            {equipment.map((eq, i) => {
+              const coverTier = eq.coverTier ?? ''
+              if (coverTier) {
+                return (
+                  <li key={i}>
+                    <button
+                      className="item-link"
+                      onClick={() => sendMessage('TakeCoverRequest', {})}
+                    >
+                      {eq.name}
+                    </button>
+                    {' '}
+                    <span style={{ color: '#7bc', fontSize: '0.75rem' }}>[{coverTier} cover]</span>
+                  </li>
+                )
+              }
+              return (
+                <li key={i}>
+                  {eq.usable ? (
+                    <button
+                      className="item-link"
+                      onClick={() => sendMessage('UseEquipmentRequest', { instance_id: eq.instanceId })}
+                    >
+                      {eq.name} [interact]
+                    </button>
+                  ) : (
+                    <span>{eq.name}</span>
+                  )}
+                </li>
+              )
+            })}
           </ul>
         </>
       )}

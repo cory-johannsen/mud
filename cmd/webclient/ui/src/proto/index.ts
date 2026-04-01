@@ -35,6 +35,7 @@ export interface RoomEquipmentItem {
   quantity?: number
   immovable?: boolean
   usable?: boolean
+  coverTier?: string  // "lesser" | "standard" | "greater" | "" (not cover)
 }
 
 export interface ResistanceEntry {

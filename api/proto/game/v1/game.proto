@@ -712,6 +712,7 @@ message RoomEquipmentItem {
     int32  quantity    = 3;
     bool   immovable   = 4;
     bool   usable      = 5;
+    string cover_tier  = 6; // "lesser", "standard", "greater", or "" (not cover)
 }
 
 // UseEquipmentRequest asks the server to use a room equipment item.

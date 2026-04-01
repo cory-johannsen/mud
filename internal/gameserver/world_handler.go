@@ -232,7 +232,10 @@ func (h *WorldHandler) buildRoomView(uid string, room *world.Room) *gamev1.RoomV
 	var equipInfos []*gamev1.RoomEquipmentItem
 	if h.roomEquipMgr != nil {
 		for _, eq := range h.roomEquipMgr.EquipmentInRoom(room.ID) {
-			name := eq.ItemDefID
+			name := eq.Description
+			if name == "" {
+				name = eq.ItemDefID
+			}
 			if h.invRegistry != nil {
 				if def, ok := h.invRegistry.Item(eq.ItemDefID); ok {
 					name = def.Name
@@ -244,6 +247,7 @@ func (h *WorldHandler) buildRoomView(uid string, room *world.Room) *gamev1.RoomV
 				Quantity:   1,
 				Immovable:  eq.Immovable,
 				Usable:     eq.Script != "",
+				CoverTier:  eq.CoverTier,
 			})
 		}
 	}

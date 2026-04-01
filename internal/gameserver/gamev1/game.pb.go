@@ -7362,6 +7362,7 @@ type RoomEquipmentItem struct {
 	Quantity      int32                  `protobuf:"varint,3,opt,name=quantity,proto3" json:"quantity,omitempty"`
 	Immovable     bool                   `protobuf:"varint,4,opt,name=immovable,proto3" json:"immovable,omitempty"`
 	Usable        bool                   `protobuf:"varint,5,opt,name=usable,proto3" json:"usable,omitempty"`
+	CoverTier     string                 `protobuf:"bytes,6,opt,name=cover_tier,json=coverTier,proto3" json:"cover_tier,omitempty"` // "lesser", "standard", "greater", or "" (not cover)
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -7429,6 +7430,13 @@ func (x *RoomEquipmentItem) GetUsable() bool {
 		return x.Usable
 	}
 	return false
+}
+
+func (x *RoomEquipmentItem) GetCoverTier() string {
+	if x != nil {
+		return x.CoverTier
+	}
+	return ""
 }
 
 // UseEquipmentRequest asks the server to use a room equipment item.
@@ -13942,14 +13950,16 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\vinstance_id\x18\x01 \x01(\tR\n" +
 	"instanceId\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x1a\n" +
-	"\bquantity\x18\x03 \x01(\x05R\bquantity\"\x9a\x01\n" +
+	"\bquantity\x18\x03 \x01(\x05R\bquantity\"\xb9\x01\n" +
 	"\x11RoomEquipmentItem\x12\x1f\n" +
 	"\vinstance_id\x18\x01 \x01(\tR\n" +
 	"instanceId\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x1a\n" +
 	"\bquantity\x18\x03 \x01(\x05R\bquantity\x12\x1c\n" +
 	"\timmovable\x18\x04 \x01(\bR\timmovable\x12\x16\n" +
-	"\x06usable\x18\x05 \x01(\bR\x06usable\"6\n" +
+	"\x06usable\x18\x05 \x01(\bR\x06usable\x12\x1d\n" +
+	"\n" +
+	"cover_tier\x18\x06 \x01(\tR\tcoverTier\"6\n" +
 	"\x13UseEquipmentRequest\x12\x1f\n" +
 	"\vinstance_id\x18\x01 \x01(\tR\n" +
 	"instanceId\" \n" +

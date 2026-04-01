@@ -19,6 +19,7 @@ type EquipmentInstance struct {
 	Immovable   bool
 	Script      string
 	Description string
+	CoverTier   string
 	SkillChecks []skillcheck.TriggerDef
 	configIdx   int
 }
@@ -32,6 +33,7 @@ type respawnEntry struct {
 	immovable   bool
 	script      string
 	description string
+	coverTier   string
 	skillChecks []skillcheck.TriggerDef
 }
 
@@ -74,6 +76,7 @@ func (m *RoomEquipmentManager) InitRoom(roomID string, configs []world.RoomEquip
 				Immovable:   cfg.Immovable,
 				Script:      cfg.Script,
 				Description: cfg.Description,
+				CoverTier:   cfg.CoverTier,
 				SkillChecks: cfg.SkillChecks,
 				configIdx:   idx,
 			})
@@ -157,6 +160,7 @@ func (m *RoomEquipmentManager) Pickup(roomID, instanceID string) bool {
 				immovable:   it.Immovable,
 				script:      it.Script,
 				description: it.Description,
+				coverTier:   it.CoverTier,
 				skillChecks: it.SkillChecks,
 			})
 		}
@@ -195,6 +199,7 @@ func (m *RoomEquipmentManager) ProcessRespawns() {
 				Immovable:   r.immovable,
 				Script:      r.script,
 				Description: r.description,
+				CoverTier:   r.coverTier,
 				SkillChecks: r.skillChecks,
 				configIdx:   r.configIdx,
 			})
@@ -221,6 +226,7 @@ func (m *RoomEquipmentManager) AddConfig(roomID string, cfg world.RoomEquipmentC
 			Immovable:   cfg.Immovable,
 			Script:      cfg.Script,
 			Description: cfg.Description,
+			CoverTier:   cfg.CoverTier,
 			SkillChecks: cfg.SkillChecks,
 			configIdx:   idx,
 		})
