@@ -25,6 +25,9 @@ const (
 	TriggerOnEnemyEntersRoom ReactionTriggerType = "on_enemy_enters_room"
 	// TriggerOnFall fires when the player would fall. Fire point deferred to a future feature.
 	TriggerOnFall ReactionTriggerType = "on_fall"
+	// TriggerOnEnemyDefeated fires when the player's attack reduces an enemy to 0 HP.
+	// Fire point deferred to a future feature.
+	TriggerOnEnemyDefeated ReactionTriggerType = "on_enemy_defeated"
 )
 
 // ReactionEffectType identifies what a reaction does when it fires.

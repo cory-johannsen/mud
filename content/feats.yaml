@@ -2421,6 +2421,10 @@ feats:
     active: true
     activate_text: "You twist out of the way at the last moment."
     description: "When targeted by an attack, use your reaction to gain +2 AC."
+    reaction:
+      triggers: [on_damage_taken]
+      effect:
+        type: reduce_damage
 
   - id: trap_eye
     name: Trap Eye
@@ -2448,6 +2452,11 @@ feats:
     active: true
     activate_text: "You look at the next one and let the moment speak for itself."
     description: "When you drop an enemy to 0 HP, immediately demoralize a nearby enemy as a reaction."
+    reaction:
+      triggers: [on_enemy_defeated]
+      effect:
+        type: strike
+        target: trigger_source
 
   - id: overextend
     name: Overextend
