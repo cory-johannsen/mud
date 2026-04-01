@@ -614,11 +614,11 @@
 
 ### BUG-77: Web UI has a wide border surrounding the screen that should be removed
 **Severity:** low
-**Status:** open
+**Status:** fixed
 **Category:** UI
 **Description:** A wide border surrounds the entire web UI screen, consuming unnecessary screen space; it should be removed.
 **Steps:** Log in to the web UI; observe the wide border surrounding the full screen layout.
-**Fix:**
+**Fix:** Added CSS reset (margin:0, padding:0, overflow:hidden) to html/body/#root to eliminate the default browser 8px body margin.
 
 ### BUG-76: Web UI hotbar assignment popup anchors left and extends off-screen
 **Severity:** medium
