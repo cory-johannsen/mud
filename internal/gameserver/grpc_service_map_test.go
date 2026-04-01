@@ -755,3 +755,67 @@ func TestHandleMap_ExploredRoom_ShowsDangerAndPOIs(t *testing.T) {
 	require.Equal(t, roomID, tile.RoomId, "tile must be for the explored room")
 	require.NotEmpty(t, tile.DangerLevel, "explored room must reveal danger level (BUG-27)")
 }
+
+// TestHandleMap_DangerLevelShownAfterExploring_PreDiscoveredRoom verifies that a room
+// pre-loaded into AutomapCache (e.g. via zone reveal) shows its danger level on the map
+// after the player physically enters it and ExploredCache is updated.
+//
+// Precondition: Room is in AutomapCache but NOT in ExploredCache (zone-reveal scenario).
+// Postcondition: handleMap returns the tile with a non-empty DangerLevel.
+func TestHandleMap_DangerLevelShownAfterExploring_PreDiscoveredRoom(t *testing.T) {
+	const zoneID = "zone1"
+	const roomID = "room1"
+	r := &world.Room{
+		ID:     roomID,
+		ZoneID: zoneID,
+		Title:  "Dangerous Room",
+		MapX:   0,
+		MapY:   0,
+	}
+	z := &world.Zone{
+		ID:          zoneID,
+		Name:        "Test Zone",
+		StartRoom:   roomID,
+		Rooms:       map[string]*world.Room{roomID: r},
+		DangerLevel: string(danger.Dangerous),
+	}
+	wMgr, err := world.NewManager([]*world.Zone{z})
+	require.NoError(t, err)
+
+	sMgr := session.NewManager()
+	_, addErr := sMgr.AddPlayer(session.AddPlayerOptions{
+		UID:         "uid1",
+		Username:    "user1",
+		CharName:    "Hero",
+		CharacterID: 1,
+		RoomID:      roomID,
+		CurrentHP:   10,
+		MaxHP:       10,
+		Abilities:   character.AbilityScores{},
+		Role:        "player",
+	})
+	require.NoError(t, addErr)
+
+	sess, _ := sMgr.GetPlayer("uid1")
+	// Room was pre-loaded into AutomapCache (zone reveal) but not yet explored.
+	sess.AutomapCache[zoneID] = map[string]bool{roomID: true}
+	// ExploredCache is empty — simulates the bug condition.
+
+	s := &GameServiceServer{sessions: sMgr, world: wMgr}
+
+	// Before fix: ExploredCache empty → danger level absent.
+	result, err := s.handleMap("uid1", &gamev1.MapRequest{})
+	require.NoError(t, err)
+	tile := result.GetMap().GetTiles()
+	require.Len(t, tile, 1)
+	require.Empty(t, tile[0].DangerLevel, "danger level must be absent before physical exploration")
+
+	// Simulate the player entering the room: set ExploredCache (what the fix does).
+	sess.ExploredCache[zoneID] = map[string]bool{roomID: true}
+
+	result, err = s.handleMap("uid1", &gamev1.MapRequest{})
+	require.NoError(t, err)
+	tile = result.GetMap().GetTiles()
+	require.Len(t, tile, 1)
+	require.NotEmpty(t, tile[0].DangerLevel, "explored room must reveal danger level (BUG-71)")
+}

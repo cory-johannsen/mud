@@ -39,3 +39,28 @@ func TestManager_InstanceByID_MissingReturnsNil(t *testing.T) {
 	mgr := NewManager()
 	assert.Nil(t, mgr.InstanceByID("ghost"))
 }
+
+// TestInstancesInRoom_StableOrder verifies that InstancesInRoom returns instances
+// in a deterministic order regardless of internal map iteration order.
+//
+// Precondition: Multiple instances are spawned in the same room.
+// Postcondition: Repeated calls return the same order (sorted by instance ID).
+func TestInstancesInRoom_StableOrder(t *testing.T) {
+	mgr := NewManager()
+	tmpl := &Template{ID: "bandit", Name: "Bandit", NPCType: "combat", MaxHP: 10, AC: 10, Level: 1}
+	for i := 0; i < 5; i++ {
+		_, err := mgr.Spawn(tmpl, "room-1")
+		require.NoError(t, err)
+	}
+
+	first := mgr.InstancesInRoom("room-1")
+	require.Len(t, first, 5)
+
+	for range 10 {
+		got := mgr.InstancesInRoom("room-1")
+		require.Len(t, got, 5)
+		for i := range first {
+			assert.Equal(t, first[i].ID, got[i].ID, "order must be stable across calls")
+		}
+	}
+}

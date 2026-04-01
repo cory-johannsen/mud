@@ -2488,9 +2488,19 @@ func (s *GameServiceServer) handleMove(uid string, req *gamev1.MoveRequest) (*ga
 		if sess.ExploredCache[zID] == nil {
 			sess.ExploredCache[zID] = make(map[string]bool)
 		}
+		// Always mark the room as physically explored so handleMap can show
+		// its danger level, regardless of whether it was already in AutomapCache
+		// (e.g. pre-loaded via zone reveal).
+		if !sess.ExploredCache[zID][newRoom.ID] {
+			sess.ExploredCache[zID][newRoom.ID] = true
+			if s.automapRepo != nil {
+				if err := s.automapRepo.Insert(context.Background(), sess.CharacterID, zID, newRoom.ID, true); err != nil {
+					s.logger.Warn("persisting exploration flag", zap.Error(err))
+				}
+			}
+		}
 		if !sess.AutomapCache[zID][newRoom.ID] {
 			sess.AutomapCache[zID][newRoom.ID] = true
-			sess.ExploredCache[zID][newRoom.ID] = true
 			if s.automapRepo != nil {
 				if err := s.automapRepo.Insert(context.Background(), sess.CharacterID, zID, newRoom.ID, true); err != nil {
 					s.logger.Warn("persisting map discovery", zap.Error(err))

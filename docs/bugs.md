@@ -572,6 +572,22 @@
 **Steps:** Explore the Vantucky area and attempt to navigate to all rooms; observe that some rooms cannot be reached from any adjacent room.
 **Fix:** Audited all exits in `content/zones/vantucky.yaml` via BFS reachability analysis. Found 6 rooms unreachable from the start room (`vantucky_abandoned_mall`, `vantucky_east_side`, `vantucky_overgrown_freeway`, `vantucky_rail_spur`, `vantucky_river_cliffs`, `vantucky_trailer_park`) due to 7 broken or missing bidirectional exits. Fixed: (1) added `east→abandoned_mall` to `shooting_range`; (2) changed `east_side.west` from `164th_ave` to `ammo_depot` (correct by map coordinates) and added `ammo_depot.east→east_side`; (3) added `ammo_depot.south→rail_spur`; (4) added `gun_market.west→gas_station_ruins`; (5) added `fishers_landing.east→river_cliffs`; (6) added `i84_onramp.south→trailer_park` and `i84_onramp.west→overgrown_freeway`, and corrected `trailer_park.north` from `gas_station_ruins` to `i84_onramp`, removing the stale `trailer_park.east→burnt_bridge_creek` orphaned exit. Added `TestLoadZone_Vantucky_AllRoomsReachable` property test to `internal/game/world/loader_test.go` verifying bidirectionality and full reachability.
 
+### BUG-71: Exploring rooms does not update map with danger level
+**Severity:** medium
+**Status:** fixed
+**Category:** UI
+**Description:** When a player explores a room, the map display does not update to reflect the room's danger level; danger level remains absent or stale on the map after visitation.
+**Steps:** Open the map; explore one or more rooms with a known danger level; observe that the map does not show or update the danger level for the visited rooms.
+**Fix:** ExploredCache update was gated inside `if !sess.AutomapCache[zID][newRoom.ID]` — rooms pre-loaded via zone reveal were in AutomapCache but never marked as explored. Moved ExploredCache update outside the AutomapCache gate so it always runs on room entry; added automapRepo persistence upsert.
+
+### BUG-70: NPC list order is non-deterministic and changes on refresh
+**Severity:** low
+**Status:** fixed
+**Category:** UI
+**Description:** NPCs displayed in room descriptions are not sorted, causing their order to change between refreshes and making placement inconsistent.
+**Steps:** Enter a room containing multiple NPCs; observe the NPC list order; refresh or re-enter the room and observe that the order may differ.
+**Fix:** Added `sort.Slice` by instance ID in `InstancesInRoom` after collecting instances from the map iteration.
+
 ### BUG-61: Web UI Stats tab does not update XP after combat
 **Severity:** medium
 **Status:** fixed
