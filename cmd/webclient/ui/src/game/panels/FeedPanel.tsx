@@ -33,7 +33,7 @@ export function FeedPanel() {
     const el = scrollRef.current
     if (!el) return
     const atBottom = el.scrollTop >= el.scrollHeight - el.clientHeight - 50
-    userScrolledRef.current = !atBottom
+    userScrolledRef.current = !atBottom // false when user returns to bottom — re-enables autoscroll
   }
 
   return (
