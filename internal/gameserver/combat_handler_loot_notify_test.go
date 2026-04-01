@@ -155,11 +155,11 @@ func TestLootNotification_ItemNamesResolvedViaRegistry(t *testing.T) {
 	const roomID = "room-loot-notify-1"
 
 	tmpl := &npc.Template{
-		ID:       "loot-notify-npc",
-		Name:     "LootNotifyGanger",
-		Level:    1,
-		MaxHP:    1,
-		AC:       1,
+		ID:        "loot-notify-npc",
+		Name:      "LootNotifyGanger",
+		Level:     1,
+		MaxHP:     1,
+		AC:        1,
 		Awareness: 2,
 		Loot: &npc.LootTable{
 			Items: []npc.ItemDrop{
@@ -183,7 +183,7 @@ func TestLootNotification_ItemNamesResolvedViaRegistry(t *testing.T) {
 	require.NoError(t, addErr)
 	sess.Entity = session.NewBridgeEntity("player-loot-notify-1", 256)
 
-	equipLootTestPistol(t, h,"player-loot-notify-1")
+	equipLootTestPistol(t, h, "player-loot-notify-1")
 
 	_, err = h.Attack("player-loot-notify-1", "LootNotifyGanger")
 	require.NoError(t, err)
@@ -211,22 +211,18 @@ func TestLootNotification_ItemNamesResolvedViaRegistry(t *testing.T) {
 func TestLootNotification_FallbackToItemDefID(t *testing.T) {
 	floorMgr := inventory.NewFloorManager()
 
-	var broadcastMu sync.Mutex
-	broadcastFn := func(_ string, _ []*gamev1.CombatEvent) {
-		broadcastMu.Lock()
-		defer broadcastMu.Unlock()
-	}
+	broadcastFn := func(_ string, _ []*gamev1.CombatEvent) {}
 
 	// nil registry — names fall back to ItemDefID
 	h := makeLootNotifyHandler(t, nil, floorMgr, broadcastFn)
 	const roomID = "room-loot-notify-fallback"
 
 	tmpl := &npc.Template{
-		ID:       "loot-notify-npc-fallback",
-		Name:     "FallbackGanger",
-		Level:    1,
-		MaxHP:    1,
-		AC:       1,
+		ID:        "loot-notify-npc-fallback",
+		Name:      "FallbackGanger",
+		Level:     1,
+		MaxHP:     1,
+		AC:        1,
 		Awareness: 2,
 		Loot: &npc.LootTable{
 			Items: []npc.ItemDrop{
@@ -250,7 +246,7 @@ func TestLootNotification_FallbackToItemDefID(t *testing.T) {
 	require.NoError(t, addErr)
 	sess.Entity = session.NewBridgeEntity("player-loot-fallback", 256)
 
-	equipLootTestPistol(t, h,"player-loot-fallback")
+	equipLootTestPistol(t, h, "player-loot-fallback")
 
 	_, err = h.Attack("player-loot-fallback", "FallbackGanger")
 	require.NoError(t, err)
@@ -284,11 +280,11 @@ func TestLootNotification_CurrencyOnlyNoItemMessage(t *testing.T) {
 	const roomID = "room-loot-notify-currency-only"
 
 	tmpl := &npc.Template{
-		ID:       "loot-currency-only",
-		Name:     "CurrencyGanger",
-		Level:    1,
-		MaxHP:    1,
-		AC:       1,
+		ID:        "loot-currency-only",
+		Name:      "CurrencyGanger",
+		Level:     1,
+		MaxHP:     1,
+		AC:        1,
 		Awareness: 2,
 		Loot: &npc.LootTable{
 			Currency: &npc.CurrencyDrop{Min: 10, Max: 10},
@@ -310,7 +306,7 @@ func TestLootNotification_CurrencyOnlyNoItemMessage(t *testing.T) {
 	require.NoError(t, addErr)
 	sess.Entity = session.NewBridgeEntity("player-loot-currency-only", 256)
 
-	equipLootTestPistol(t, h,"player-loot-currency-only")
+	equipLootTestPistol(t, h, "player-loot-currency-only")
 
 	_, err = h.Attack("player-loot-currency-only", "CurrencyGanger")
 	require.NoError(t, err)
