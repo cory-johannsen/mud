@@ -953,9 +953,10 @@ message UseResponse {
 
 // PreparedSlotView represents one prepared technology slot on the character sheet.
 message PreparedSlotView {
-    string tech_id   = 1;
-    bool   expended  = 2;
-    string tech_name = 3;
+    string tech_id      = 1;
+    bool   expended     = 2;
+    string tech_name    = 3;
+    string description  = 4;
 }
 
 // HardwiredSlotView represents one always-available hardwired technology.
@@ -967,9 +968,10 @@ message HardwiredSlotView {
 
 // SpontaneousKnownEntry represents one tech known in the spontaneous pool with its name.
 message SpontaneousKnownEntry {
-    string tech_id   = 1;
-    string tech_name = 2;
-    int32  tech_level = 3;
+    string tech_id      = 1;
+    string tech_name    = 2;
+    int32  tech_level   = 3;
+    string description  = 4;
 }
 
 // CharacterSheetView delivers the player's full character sheet.

@@ -5697,15 +5697,18 @@ func (s *GameServiceServer) handleChar(uid string) (*gamev1.ServerEvent, error) 
 			for _, slot := range sess.PreparedTechs[lvl] {
 				if slot != nil {
 					techName := slot.TechID
+					techDesc := ""
 					if s.techRegistry != nil {
 						if def, ok := s.techRegistry.Get(slot.TechID); ok {
 							techName = def.Name
+							techDesc = def.Description
 						}
 					}
 					view.PreparedSlots = append(view.PreparedSlots, &gamev1.PreparedSlotView{
-						TechId:   slot.TechID,
-						Expended: slot.Expended,
-						TechName: techName,
+						TechId:      slot.TechID,
+						Expended:    slot.Expended,
+						TechName:    techName,
+						Description: techDesc,
 					})
 				}
 			}
@@ -5737,15 +5740,18 @@ func (s *GameServiceServer) handleChar(uid string) (*gamev1.ServerEvent, error) 
 		for _, lvl := range knownLevels {
 			for _, tid := range sess.SpontaneousTechs[lvl] {
 				techName := tid
+				techDesc := ""
 				if s.techRegistry != nil {
 					if def, ok := s.techRegistry.Get(tid); ok {
 						techName = def.Name
+						techDesc = def.Description
 					}
 				}
 				view.SpontaneousKnown = append(view.SpontaneousKnown, &gamev1.SpontaneousKnownEntry{
-					TechId:    tid,
-					TechName:  techName,
-					TechLevel: int32(lvl),
+					TechId:      tid,
+					TechName:    techName,
+					TechLevel:   int32(lvl),
+					Description: techDesc,
 				})
 			}
 		}

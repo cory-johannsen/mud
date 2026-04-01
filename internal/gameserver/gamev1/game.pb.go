@@ -9402,6 +9402,7 @@ type PreparedSlotView struct {
 	TechId        string                 `protobuf:"bytes,1,opt,name=tech_id,json=techId,proto3" json:"tech_id,omitempty"`
 	Expended      bool                   `protobuf:"varint,2,opt,name=expended,proto3" json:"expended,omitempty"`
 	TechName      string                 `protobuf:"bytes,3,opt,name=tech_name,json=techName,proto3" json:"tech_name,omitempty"`
+	Description   string                 `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -9453,6 +9454,13 @@ func (x *PreparedSlotView) GetExpended() bool {
 func (x *PreparedSlotView) GetTechName() string {
 	if x != nil {
 		return x.TechName
+	}
+	return ""
+}
+
+func (x *PreparedSlotView) GetDescription() string {
+	if x != nil {
+		return x.Description
 	}
 	return ""
 }
@@ -9524,6 +9532,7 @@ type SpontaneousKnownEntry struct {
 	TechId        string                 `protobuf:"bytes,1,opt,name=tech_id,json=techId,proto3" json:"tech_id,omitempty"`
 	TechName      string                 `protobuf:"bytes,2,opt,name=tech_name,json=techName,proto3" json:"tech_name,omitempty"`
 	TechLevel     int32                  `protobuf:"varint,3,opt,name=tech_level,json=techLevel,proto3" json:"tech_level,omitempty"`
+	Description   string                 `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -9577,6 +9586,13 @@ func (x *SpontaneousKnownEntry) GetTechLevel() int32 {
 		return x.TechLevel
 	}
 	return 0
+}
+
+func (x *SpontaneousKnownEntry) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
 }
 
 // CharacterSheetView delivers the player's full character sheet.
@@ -14113,20 +14129,22 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\x06target\x18\x02 \x01(\tR\x06target\"U\n" +
 	"\vUseResponse\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessage\x12,\n" +
-	"\achoices\x18\x02 \x03(\v2\x12.game.v1.FeatEntryR\achoices\"d\n" +
+	"\achoices\x18\x02 \x03(\v2\x12.game.v1.FeatEntryR\achoices\"\x86\x01\n" +
 	"\x10PreparedSlotView\x12\x17\n" +
 	"\atech_id\x18\x01 \x01(\tR\x06techId\x12\x1a\n" +
 	"\bexpended\x18\x02 \x01(\bR\bexpended\x12\x1b\n" +
-	"\ttech_name\x18\x03 \x01(\tR\btechName\"k\n" +
+	"\ttech_name\x18\x03 \x01(\tR\btechName\x12 \n" +
+	"\vdescription\x18\x04 \x01(\tR\vdescription\"k\n" +
 	"\x11HardwiredSlotView\x12\x17\n" +
 	"\atech_id\x18\x01 \x01(\tR\x06techId\x12\x1b\n" +
 	"\ttech_name\x18\x02 \x01(\tR\btechName\x12 \n" +
-	"\vdescription\x18\x03 \x01(\tR\vdescription\"l\n" +
+	"\vdescription\x18\x03 \x01(\tR\vdescription\"\x8e\x01\n" +
 	"\x15SpontaneousKnownEntry\x12\x17\n" +
 	"\atech_id\x18\x01 \x01(\tR\x06techId\x12\x1b\n" +
 	"\ttech_name\x18\x02 \x01(\tR\btechName\x12\x1d\n" +
 	"\n" +
-	"tech_level\x18\x03 \x01(\x05R\ttechLevel\"\xc4\x11\n" +
+	"tech_level\x18\x03 \x01(\x05R\ttechLevel\x12 \n" +
+	"\vdescription\x18\x04 \x01(\tR\vdescription\"\xc4\x11\n" +
 	"\x12CharacterSheetView\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x10\n" +
 	"\x03job\x18\x02 \x01(\tR\x03job\x12\x1c\n" +
