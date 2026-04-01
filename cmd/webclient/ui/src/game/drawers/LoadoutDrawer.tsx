@@ -57,7 +57,7 @@ function PresetCard({
 }
 
 export function LoadoutDrawer({ onClose }: { onClose: () => void }) {
-  const { state, sendMessage } = useGame()
+  const { state, sendMessage, clearLoadout } = useGame()
   const [isSwitching, setIsSwitching] = useState(false)
 
   useEffect(() => {
@@ -87,7 +87,7 @@ export function LoadoutDrawer({ onClose }: { onClose: () => void }) {
     <>
       <div className="drawer-header">
         <h3>Loadouts</h3>
-        <button className="drawer-close" onClick={onClose}>✕</button>
+        <button className="drawer-close" onClick={() => { clearLoadout(); onClose() }}>✕</button>
       </div>
       <div className="drawer-body">
         {!lv ? (
@@ -98,7 +98,7 @@ export function LoadoutDrawer({ onClose }: { onClose: () => void }) {
           <div style={styles.presetList}>
             {presets.map((preset, i) => (
               <PresetCard
-                key={i}
+                key={`preset-${i}`}
                 preset={preset}
                 index={i}
                 isActive={i === activeIndex}

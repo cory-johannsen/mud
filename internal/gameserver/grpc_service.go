@@ -5361,10 +5361,6 @@ func (s *GameServiceServer) buildLoadoutView(sess *session.PlayerSession) *gamev
 	if sess.LoadoutSet != nil {
 		lv.ActiveIndex = int32(sess.LoadoutSet.Active)
 		brutalityMod := combat.AbilityMod(sess.Abilities.Brutality)
-		weaponLevel := sess.Level
-		if weaponLevel < 1 {
-			weaponLevel = 1
-		}
 		for _, preset := range sess.LoadoutSet.Presets {
 			wp := &gamev1.LoadoutWeaponPreset{}
 			if preset.MainHand != nil {
