@@ -1581,6 +1581,35 @@ func TestRenderNPCs_MotelKeeperShowsRoleTag(t *testing.T) {
 	rows := renderNPCs(npcs, 80)
 	combined := strings.Join(rows, "\n")
 	stripped := telnet.StripANSI(combined)
+	assert.Contains(t, stripped, "Scrap Inn Clerk", "motel_keeper NPC name must appear in output")
 	assert.Contains(t, stripped, "[motel]", "motel_keeper NPC must show [motel] role tag")
 	assert.NotContains(t, stripped, "(unharmed)", "motel_keeper NPC must not show health status")
+}
+
+// TestRenderNPCs_ChipDocShowsRoleTag verifies that chip_doc NPCs display
+// the [chip doc] role tag instead of a health status in parentheses.
+func TestRenderNPCs_ChipDocShowsRoleTag(t *testing.T) {
+	npcs := []*gamev1.NpcInfo{
+		{Name: "Doc Reyes", HealthDescription: "unharmed", NpcType: "chip_doc"},
+	}
+	rows := renderNPCs(npcs, 80)
+	combined := strings.Join(rows, "\n")
+	stripped := telnet.StripANSI(combined)
+	assert.Contains(t, stripped, "Doc Reyes", "chip_doc NPC name must appear in output")
+	assert.Contains(t, stripped, "[chip doc]", "chip_doc NPC must show [chip doc] role tag")
+	assert.NotContains(t, stripped, "(unharmed)", "chip_doc NPC must not show health status")
+}
+
+// TestRenderNPCs_CrafterShowsRoleTag verifies that crafter NPCs display
+// the [crafter] role tag instead of a health status in parentheses.
+func TestRenderNPCs_CrafterShowsRoleTag(t *testing.T) {
+	npcs := []*gamev1.NpcInfo{
+		{Name: "Mika the Tinker", HealthDescription: "unharmed", NpcType: "crafter"},
+	}
+	rows := renderNPCs(npcs, 80)
+	combined := strings.Join(rows, "\n")
+	stripped := telnet.StripANSI(combined)
+	assert.Contains(t, stripped, "Mika the Tinker", "crafter NPC name must appear in output")
+	assert.Contains(t, stripped, "[crafter]", "crafter NPC must show [crafter] role tag")
+	assert.NotContains(t, stripped, "(unharmed)", "crafter NPC must not show health status")
 }
