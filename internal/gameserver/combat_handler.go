@@ -3895,6 +3895,10 @@ func (h *CombatHandler) removeDeadNPCsLocked(cbt *combat.Combat) {
 					h.floorMgr.DropMaterials(roomID, result.Materials)
 				}
 			}
+			// Notify each living participant of items dropped as loot (REQ-BUG67-1).
+			if len(result.Items) > 0 {
+				h.pushLootMessages(livingParticipants, result.Items)
+			}
 		} else if inst.Currency > 0 {
 			// No loot table but NPC has rob wallet — distribute to living participants.
 			totalCurrency := inst.Currency
@@ -4146,6 +4150,51 @@ func (h *CombatHandler) pushQuestMessages(sess *session.PlayerSession, msgs []st
 		}
 		if data, marshalErr := proto.Marshal(evt); marshalErr == nil {
 			_ = sess.Entity.Push(data)
+		}
+	}
+}
+
+// pushLootMessages sends a loot notification message to each living combat participant
+// listing the items that were dropped by the defeated NPC.
+//
+// Precondition: livingParticipants must not be nil; items must be non-empty.
+// Postcondition: Each participant whose Entity is non-nil receives one MessageEvent
+// with content "You looted: <name> (xN), ..." using display names from invRegistry
+// when available, falling back to ItemDefID when the registry is nil or the item is unknown.
+func (h *CombatHandler) pushLootMessages(livingParticipants []*session.PlayerSession, items []npc.LootItem) {
+	if len(items) == 0 || len(livingParticipants) == 0 {
+		return
+	}
+	// Build display names for each item.
+	parts := make([]string, 0, len(items))
+	for _, lootItem := range items {
+		name := lootItem.ItemDefID
+		if h.invRegistry != nil {
+			if def, ok := h.invRegistry.Item(lootItem.ItemDefID); ok {
+				name = def.Name
+			}
+		}
+		if lootItem.Quantity > 1 {
+			parts = append(parts, fmt.Sprintf("%s (x%d)", name, lootItem.Quantity))
+		} else {
+			parts = append(parts, name)
+		}
+	}
+	content := "You looted: " + strings.Join(parts, ", ")
+	for _, p := range livingParticipants {
+		if p.Entity == nil {
+			continue
+		}
+		evt := &gamev1.ServerEvent{
+			Payload: &gamev1.ServerEvent_Message{
+				Message: &gamev1.MessageEvent{
+					Content: content,
+					Type:    gamev1.MessageType_MESSAGE_TYPE_UNSPECIFIED,
+				},
+			},
+		}
+		if data, marshalErr := proto.Marshal(evt); marshalErr == nil {
+			_ = p.Entity.Push(data)
 		}
 	}
 }

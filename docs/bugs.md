@@ -518,11 +518,11 @@
 
 ### BUG-67: Web UI does not display loot notification after killing an NPC
 **Severity:** high
-**Status:** open
+**Status:** fixed
 **Category:** UI
 **Description:** After killing an NPC the web UI console shows the XP earned message but displays no notification for loot obtained, leaving the player unaware of items added to their inventory.
 **Steps:** Open the web client; engage and kill an NPC that drops loot; observe the console shows XP granted but no loot message appears.
-**Fix:**
+**Fix:** Added `pushLootMessages` method to `CombatHandler` (`internal/gameserver/combat_handler.go`). Called after dropping items on the floor in `removeDeadNPCsLocked`. Sends a `MessageEvent` with content "You looted: Item Name (xN), ..." to each living combat participant. Item display names are resolved via `invRegistry.Item()` with fallback to `ItemDefID` when the registry is nil or the item definition is not found. No message is sent when loot produces no items (e.g. currency-only tables).
 
 ### BUG-66: Web UI console stops autoscrolling during combat
 **Severity:** medium
