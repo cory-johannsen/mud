@@ -1,6 +1,6 @@
 id: wooks
 name: The Wooks
-zone_id: wooklyn
+zone_id: ""
 hostile_factions:
   - gun
   - machete
@@ -23,3 +23,12 @@ tiers:
     price_discount: 0.25
 exclusive_items: []
 gated_rooms: []
+rep_sources:
+  - source: kill_juggalo
+    rep_per_level: 1
+    cap_per_kill: 5
+    cap_below_tier: fellow_traveler
+  - source: kill_tweaker
+    rep_per_level: 1
+    cap_per_kill: 5
+    cap_below_tier: fellow_traveler

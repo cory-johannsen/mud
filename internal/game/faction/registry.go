@@ -50,7 +50,7 @@ func LoadFactions(dir string) (FactionRegistry, error) {
 func (r FactionRegistry) Validate(zoneIDs, roomIDs, itemIDs map[string]bool, roomZoneIDs map[string]string, zoneOwners map[string]string) error {
 	globalExclusiveItems := make(map[string]string) // itemID → factionID that owns it
 	for id, def := range r {
-		if !zoneIDs[def.ZoneID] {
+		if def.ZoneID != "" && !zoneIDs[def.ZoneID] {
 			return fmt.Errorf("faction %q: ZoneID %q not found in world", id, def.ZoneID)
 		}
 		for _, hf := range def.HostileFactions {

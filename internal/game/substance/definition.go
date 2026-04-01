@@ -17,6 +17,7 @@ import (
 // ValidCategories is the set of accepted substance category values.
 var ValidCategories = map[string]bool{
 	"drug": true, "alcohol": true, "medicine": true, "poison": true, "toxin": true,
+	"stimulant": true,
 }
 
 // SubstanceEffect describes one effect applied at onset.
@@ -27,6 +28,9 @@ type SubstanceEffect struct {
 	RemoveCondition string   `yaml:"remove_condition,omitempty"`
 	HPRegen         int      `yaml:"hp_regen,omitempty"`
 	CureConditions  []string `yaml:"cure_conditions,omitempty"`
+	// Attribute-modifier effects adjust a named character attribute by Modifier.
+	Attribute string `yaml:"attribute,omitempty"`
+	Modifier  int    `yaml:"modifier,omitempty"`
 }
 
 // SubstanceDef is the static definition of a substance loaded from YAML.
@@ -39,10 +43,12 @@ type SubstanceDef struct {
 	Effects              []SubstanceEffect `yaml:"effects"`
 	RemoveOnExpire       []string          `yaml:"remove_on_expire"`
 	Addictive            bool              `yaml:"addictive"`
+	AddictionPotential   string            `yaml:"addiction_potential,omitempty"`
 	AddictionChance      float64           `yaml:"addiction_chance"`
 	OverdoseThreshold    int               `yaml:"overdose_threshold"`
 	OverdoseCondition    string            `yaml:"overdose_condition"`
 	WithdrawalConditions []string          `yaml:"withdrawal_conditions"`
+	WithdrawalEffects    []SubstanceEffect `yaml:"withdrawal_effects,omitempty"`
 	RecoveryDurStr       string            `yaml:"recovery_duration"`
 
 	// Parsed durations — populated by Validate().

@@ -44,9 +44,7 @@ func (f *FactionDef) Validate() error {
 	if f.Name == "" {
 		return fmt.Errorf("faction %q: Name must not be empty", f.ID)
 	}
-	if f.ZoneID == "" {
-		return fmt.Errorf("faction %q: ZoneID must not be empty", f.ID)
-	}
+	// ZoneID is optional; an empty string means the faction is zone-agnostic.
 	if len(f.Tiers) != 4 {
 		return fmt.Errorf("faction %q: must have exactly 4 tiers, got %d", f.ID, len(f.Tiers))
 	}

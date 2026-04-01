@@ -1,0 +1,42 @@
+id: tweakers
+name: "The Tweakers"
+zone_id: ""
+hostile_factions:
+  - juggalos
+  - wooks
+tiers:
+  - id: paranoid_stranger
+    label: "Paranoid Stranger"
+    min_rep: 0
+    price_discount: 0.0
+  - id: known
+    label: "Known Associate"
+    min_rep: 10
+    price_discount: 0.05
+  - id: trusted
+    label: "Trusted Tweaker"
+    min_rep: 25
+    price_discount: 0.15
+  - id: inner_circle
+    label: "Inner Circle"
+    min_rep: 50
+    price_discount: 0.30
+exclusive_items:
+  - tier_id: inner_circle
+    item_ids:
+      - crystal_shard_pipe
+      - speed_rig
+      - paranoia_grenade
+rep_sources:
+  - source: kill_juggalo
+    rep_per_level: 1
+    cap_per_kill: 5
+    cap_below_tier: trusted
+  - source: kill_wook
+    rep_per_level: 1
+    cap_per_kill: 5
+    cap_below_tier: trusted
+  - source: quest_completion
+    rep_per_completion: 15
+  - source: fixer_payment
+    rep_per_payment: 10

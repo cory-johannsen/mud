@@ -1,0 +1,21 @@
+id: tweaker_crystal
+name: "Tweaker Crystal"
+category: stimulant
+onset_delay: "0s"
+duration: "300s"
+recovery_duration: "120s"
+addiction_potential: high
+addiction_chance: 0.35
+overdose_threshold: 4
+effects:
+  - attribute: quickness
+    modifier: 4
+  - attribute: reasoning
+    modifier: -3
+  - attribute: savvy
+    modifier: -2
+withdrawal_effects:
+  - attribute: quickness
+    modifier: -2
+  - attribute: grit
+    modifier: -1
