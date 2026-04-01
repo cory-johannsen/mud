@@ -899,6 +899,7 @@ message FeatEntry {
   bool   active        = 4;
   string description   = 5;
   string activate_text = 6;
+  bool   is_reaction   = 7;
 }
 
 // FeatsResponse contains all feat entries for the character.
@@ -1040,6 +1041,7 @@ message InnateSlotView {
     int32  max_uses       = 3;
     string tech_name      = 4;
     string description    = 5;
+    bool   is_reaction    = 6;
 }
 
 // SpontaneousUsePoolView delivers the daily use pool for one spontaneous tech level.

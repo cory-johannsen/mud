@@ -58,11 +58,11 @@ function FeatItem({
   return (
     <li style={styles.featItem}>
       <div style={styles.featHeader}>
-        <strong style={{ color: feat.active ? '#e0c060' : '#aaa' }}>
+        <strong style={{ color: feat.isReaction ? '#f0a050' : feat.active ? '#e0c060' : '#aaa' }}>
           {feat.name ?? ''}
         </strong>
-        <span style={feat.active ? styles.badgeActive : styles.badgePassive}>
-          {feat.active ? 'active' : 'passive'}
+        <span style={feat.isReaction ? styles.badgeReaction : feat.active ? styles.badgeActive : styles.badgePassive}>
+          {feat.isReaction ? 'reaction' : feat.active ? 'active' : 'passive'}
         </span>
       </div>
       {feat.description && (
@@ -95,8 +95,9 @@ export function FeatsDrawer({ onClose }: { onClose: () => void }) {
 
   const sheet = state.characterSheet
   const rawFeats = Array.isArray(sheet?.feats) ? (sheet.feats as FeatEntry[]) : []
-  const active = rawFeats.filter((f) => f.active)
-  const passive = rawFeats.filter((f) => !f.active)
+  const reactions = rawFeats.filter((f) => f.isReaction)
+  const active = rawFeats.filter((f) => f.active && !f.isReaction)
+  const passive = rawFeats.filter((f) => !f.active && !f.isReaction)
 
   return (
     <>
@@ -111,13 +112,28 @@ export function FeatsDrawer({ onClose }: { onClose: () => void }) {
           <p style={{ color: '#666' }}>No feats.</p>
         ) : (
           <>
+            {reactions.length > 0 && (
+              <section style={styles.section}>
+                <div style={styles.sectionLabel}>Reactions</div>
+                <ul style={styles.list}>
+                  {reactions.map((f, i) => (
+                    <FeatItem
+                      key={f.featId ?? i}
+                      feat={f}
+                      hotbarSlots={state.hotbarSlots}
+                      sendMessage={sendMessage}
+                    />
+                  ))}
+                </ul>
+              </section>
+            )}
             {active.length > 0 && (
               <section style={styles.section}>
                 <div style={styles.sectionLabel}>Active</div>
                 <ul style={styles.list}>
                   {active.map((f, i) => (
                     <FeatItem
-                      key={f.featId ?? i}
+                      key={f.featId ?? (reactions.length + i)}
                       feat={f}
                       hotbarSlots={state.hotbarSlots}
                       sendMessage={sendMessage}
@@ -132,7 +148,7 @@ export function FeatsDrawer({ onClose }: { onClose: () => void }) {
                 <ul style={styles.list}>
                   {passive.map((f, i) => (
                     <FeatItem
-                      key={f.featId ?? (active.length + i)}
+                      key={f.featId ?? (reactions.length + active.length + i)}
                       feat={f}
                       hotbarSlots={state.hotbarSlots}
                       sendMessage={sendMessage}
@@ -163,6 +179,15 @@ const styles: Record<string, React.CSSProperties> = {
   featItem: { marginBottom: '0.75rem', position: 'relative' as const },
   featHeader: { display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.15rem' },
   featDesc: { margin: '0.15rem 0 0.3rem', color: '#888', fontSize: '0.8rem' },
+  badgeReaction: {
+    fontSize: '0.65rem',
+    padding: '0.1rem 0.4rem',
+    borderRadius: '3px',
+    background: '#3a2a0a',
+    border: '1px solid #8a5a1a',
+    color: '#f0a050',
+    whiteSpace: 'nowrap' as const,
+  },
   badgeActive: {
     fontSize: '0.65rem',
     padding: '0.1rem 0.4rem',

@@ -108,6 +108,7 @@ export interface FeatEntry {
   active?: boolean
   description?: string
   activateText?: string
+  isReaction?: boolean
 }
 
 export interface PreparedSlotView {
@@ -129,6 +130,7 @@ export interface InnateSlotView {
   techName?: string
   tech_name?: string
   description?: string
+  isReaction?: boolean
 }
 
 export interface HardwiredSlotView {

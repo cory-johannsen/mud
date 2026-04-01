@@ -5626,6 +5626,7 @@ func (s *GameServiceServer) handleChar(uid string) (*gamev1.ServerEvent, error) 
 					Active:       f.Active,
 					Description:  f.Description,
 					ActivateText: f.ActivateText,
+					IsReaction:   f.Reaction != nil,
 				})
 			}
 		}
@@ -5759,10 +5760,12 @@ func (s *GameServiceServer) handleChar(uid string) (*gamev1.ServerEvent, error) 
 		slot := sess.InnateTechs[id]
 		techName := id
 		techDesc := ""
+		var isReaction bool
 		if s.techRegistry != nil {
 			if def, ok := s.techRegistry.Get(id); ok {
 				techName = def.Name
 				techDesc = def.Description
+				isReaction = def.Reaction != nil
 			}
 		}
 		view.InnateSlots = append(view.InnateSlots, &gamev1.InnateSlotView{
@@ -5771,6 +5774,7 @@ func (s *GameServiceServer) handleChar(uid string) (*gamev1.ServerEvent, error) 
 			MaxUses:       int32(slot.MaxUses),
 			TechName:      techName,
 			Description:   techDesc,
+			IsReaction:    isReaction,
 		})
 	}
 
@@ -6516,6 +6520,7 @@ func (s *GameServiceServer) handleFeats(uid string) (*gamev1.ServerEvent, error)
 			Active:       f.Active,
 			Description:  f.Description,
 			ActivateText: f.ActivateText,
+			IsReaction:   f.Reaction != nil,
 		})
 	}
 	return &gamev1.ServerEvent{
@@ -6965,6 +6970,7 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string) (*gamev1.
 				Active:       f.Active,
 				Description:  desc,
 				ActivateText: f.ActivateText,
+				IsReaction:   f.Reaction != nil,
 			})
 		}
 	}

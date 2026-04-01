@@ -248,9 +248,13 @@ export function TechnologyDrawer({ onClose }: { onClose: () => void }) {
     knownByLevel.get(lvl)!.push(entry)
   }
 
-  const hasActive = prepared.length > 0 || innate.length > 0 || spontKnown.length > 0
+  const reactionInnate = innate.filter((s) => s.isReaction)
+  const normalInnate = innate.filter((s) => !s.isReaction)
+
+  const hasReactions = reactionInnate.length > 0
+  const hasActive = prepared.length > 0 || normalInnate.length > 0 || spontKnown.length > 0
   const hasPassive = hardwired.length > 0
-  const hasAny = hasActive || hasPassive
+  const hasAny = hasReactions || hasActive || hasPassive
 
   return (
     <>
@@ -270,6 +274,22 @@ export function TechnologyDrawer({ onClose }: { onClose: () => void }) {
               </div>
             )}
 
+            {hasReactions && (
+              <section style={styles.section}>
+                <SectionLabel label="Reactions" />
+                <ul style={styles.list}>
+                  {reactionInnate.map((inn, i) => (
+                    <InnateItem
+                      key={(inn.techId ?? inn.tech_id ?? '') + i}
+                      slot={inn}
+                      hotbarSlots={state.hotbarSlots}
+                      sendMessage={sendMessage}
+                    />
+                  ))}
+                </ul>
+              </section>
+            )}
+
             {hasActive && (
               <section style={styles.section}>
                 <SectionLabel label="Active" />
@@ -282,7 +302,7 @@ export function TechnologyDrawer({ onClose }: { onClose: () => void }) {
                       sendMessage={sendMessage}
                     />
                   ))}
-                  {innate.map((inn, i) => (
+                  {normalInnate.map((inn, i) => (
                     <InnateItem
                       key={(inn.techId ?? inn.tech_id ?? '') + i}
                       slot={inn}
