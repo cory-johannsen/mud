@@ -104,8 +104,6 @@ zone:
         target: chela_mela_meadow
       - direction: south
         target: ocf_market_row
-      - direction: west
-        target: ocf_market_row
     spawns:
       - template: tweaker
         count: 1
@@ -251,7 +249,7 @@ zone:
     exits:
       - direction: east
         target: forest_junction_north
-      - direction: north
+      - direction: south
         target: forest_junction_south
       - direction: west
         target: ocf_main_stage_ruins
