@@ -539,7 +539,7 @@ features:
 
   - slug: oregon-country-fair
     name: Oregon Country Fair Zone
-    status: planned
+    status: done
     priority: 340
     category: world
     file: docs/features/oregon-country-fair.md

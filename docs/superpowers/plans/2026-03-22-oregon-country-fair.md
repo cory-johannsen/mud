@@ -2041,6 +2041,624 @@ Expected: clean exit — zone loads, all factions load, all substances load, amb
 
 ---
 
+## Task 14: Non-Combat NPC Content YAML
+
+**Files:**
+- Create: `content/npcs/juggalo_merchant.yaml`
+- Create: `content/npcs/juggalo_healer.yaml`
+- Create: `content/npcs/juggalo_fixer.yaml`
+- Create: `content/npcs/juggalo_banker.yaml`
+- Create: `content/npcs/juggalo_quest_giver.yaml`
+- Create: `content/npcs/tweaker_merchant.yaml`
+- Create: `content/npcs/tweaker_healer.yaml`
+- Create: `content/npcs/tweaker_fixer.yaml`
+- Create: `content/npcs/tweaker_banker.yaml`
+- Create: `content/npcs/tweaker_quest_giver.yaml`
+- Create: `content/npcs/wook_quest_giver.yaml`
+- Create: `content/npcs/chip_doc_ocf.yaml`
+- Modify: `content/zones/oregon_country_fair.yaml` — update chip_doc spawn template from `chip_doc` to `chip_doc_ocf`
+
+**REQ coverage:** REQ-OCF-45 through REQ-OCF-55, REQ-OCF-37, REQ-OCF-39
+
+All NPC YAML files follow the schema from `content/npcs/wook_merchant.yaml`, `wook_healer.yaml`, `wook_fixer.yaml`, `wook_banker.yaml`, and `chip_doc_wooklyn.yaml`.
+
+### Juggalo Merchant
+
+- [ ] **Step 14.1: Create `content/npcs/juggalo_merchant.yaml`**
+
+```yaml
+id: juggalo_merchant
+name: "Carnival Vendor"
+description: >
+  A face-painted Juggalo running a makeshift market stall from a repurposed
+  carnival game booth. He sells with unhinged enthusiasm and always has a Faygo
+  close at hand.
+type: human
+npc_type: merchant
+npc_role: merchant
+level: 3
+max_hp: 20
+ac: 11
+awareness: 6
+faction_id: juggalos
+disposition: neutral
+personality: cowardly
+ai_domain: ""
+respawn_delay: "15m"
+abilities:
+  brutality: 10
+  grit: 10
+  quickness: 11
+  reasoning: 11
+  savvy: 14
+  flair: 16
+merchant:
+  merchant_type: general
+  sell_margin: 1.30
+  buy_margin: 0.35
+  budget: 800
+  inventory:
+    - item_id: hatchet
+      price: 30
+      stock: 5
+    - item_id: faygo_bottle
+      price: 5
+      stock: 20
+    - item_id: icp_face_paint
+      price: 2
+      stock: 10
+    - item_id: leather_jacket
+      price: 80
+      stock: 3
+  exclusive_items:
+    - item_id: hatchet_man_pendant
+      price: 120
+      stock: 2
+      required_tier: family
+    - item_id: faygo_grenade
+      price: 45
+      stock: 5
+      required_tier: family
+    - item_id: icp_mixtape
+      price: 35
+      stock: 3
+      required_tier: family
+  replenish_rate:
+    min_hours: 12
+    max_hours: 24
+    stock_refill: 2
+    budget_refill: 200
+loot:
+  currency:
+    min: 10
+    max: 40
+```
+
+### Juggalo Healer
+
+- [ ] **Step 14.2: Create `content/npcs/juggalo_healer.yaml`**
+
+```yaml
+id: juggalo_healer
+name: "Faygo Sister"
+description: >
+  A Juggalette in ceremonial paint who has appointed herself the faction medic.
+  She patches wounds with Faygo-soaked rags and genuine enthusiasm. It works
+  more often than you'd expect.
+type: human
+npc_type: healer
+npc_role: healer
+level: 3
+max_hp: 22
+ac: 10
+awareness: 7
+faction_id: juggalos
+disposition: neutral
+personality: cowardly
+ai_domain: ""
+respawn_delay: "15m"
+abilities:
+  brutality: 8
+  grit: 12
+  quickness: 11
+  reasoning: 12
+  savvy: 12
+  flair: 15
+healer:
+  price_per_hp: 3
+  daily_capacity: 50
+  services:
+    - service: full_hp
+      price: 15
+      description: "Faygo washes all wounds clean, homie."
+    - service: cure_condition
+      condition_id: poison
+      price: 20
+      description: "Ain't no poison that Faygo can't flush."
+    - service: cure_condition
+      condition_id: stunned
+      price: 10
+      description: "Walk it off, Family."
+  required_tier: down
+loot:
+  currency:
+    min: 5
+    max: 20
+```
+
+### Juggalo Fixer
+
+- [ ] **Step 14.3: Create `content/npcs/juggalo_fixer.yaml`**
+
+```yaml
+id: juggalo_fixer
+name: "The Broker"
+description: >
+  A quiet Juggalo in a clean tracksuit who handles reputation arrangements.
+  "You wanna be Family, you gotta pay the Gathering toll." He doesn't explain
+  further. He doesn't need to.
+type: human
+npc_type: fixer
+npc_role: fixer
+level: 3
+max_hp: 22
+ac: 11
+awareness: 8
+faction_id: juggalos
+disposition: neutral
+personality: cowardly
+ai_domain: ""
+respawn_delay: "15m"
+abilities:
+  brutality: 9
+  grit: 10
+  quickness: 11
+  reasoning: 12
+  savvy: 16
+  flair: 14
+fixer:
+  rep_purchases:
+    - cost: 10
+      rep_gain: 1
+      faction_id: juggalos
+      cooldown: daily
+    - cost: 50
+      rep_gain: 5
+      faction_id: juggalos
+      cooldown: weekly
+  required_tier: down
+loot:
+  currency:
+    min: 10
+    max: 40
+```
+
+### Juggalo Banker
+
+- [ ] **Step 14.4: Create `content/npcs/juggalo_banker.yaml`**
+
+```yaml
+id: juggalo_banker
+name: "Hatchet Bank"
+description: >
+  A heavyset Juggalo with an abacus and a lockbox, sitting in a black velvet
+  booth. He runs the Dark Carnival Credit Union with surprising competence.
+type: human
+npc_type: banker
+npc_role: banker
+level: 3
+max_hp: 22
+ac: 11
+awareness: 7
+faction_id: juggalos
+disposition: neutral
+personality: cowardly
+ai_domain: ""
+respawn_delay: "15m"
+abilities:
+  brutality: 11
+  grit: 12
+  quickness: 9
+  reasoning: 13
+  savvy: 13
+  flair: 12
+banker:
+  zone_id: oregon_country_fair
+  base_rate: 0.98
+  rate_variance: 0.02
+  required_tier: down
+loot:
+  currency:
+    min: 20
+    max: 80
+```
+
+### Juggalo Quest Giver
+
+- [ ] **Step 14.5: Create `content/npcs/juggalo_quest_giver.yaml`**
+
+```yaml
+id: juggalo_quest_giver
+name: "Prophet Scratch"
+description: >
+  An elder Juggalo in worn velvet, holding a crumpled notebook of field
+  intelligence. He tracks Tweaker and Wook movements obsessively and has
+  work for anyone willing to bleed for the Family.
+type: human
+npc_type: quest_giver
+npc_role: quest_giver
+level: 4
+max_hp: 25
+ac: 11
+awareness: 9
+faction_id: juggalos
+disposition: neutral
+personality: cowardly
+ai_domain: ""
+respawn_delay: "15m"
+abilities:
+  brutality: 10
+  grit: 12
+  quickness: 10
+  reasoning: 13
+  savvy: 14
+  flair: 16
+loot:
+  currency:
+    min: 0
+    max: 0
+```
+
+### Tweaker Merchant
+
+- [ ] **Step 14.6: Create `content/npcs/tweaker_merchant.yaml`**
+
+```yaml
+id: tweaker_merchant
+name: "Supply Runner"
+description: >
+  A twitchy Tweaker who handles procurement with manic efficiency. He talks
+  fast, stocks fast, and prices fast. Don't make eye contact too long.
+type: human
+npc_type: merchant
+npc_role: merchant
+level: 3
+max_hp: 20
+ac: 11
+awareness: 8
+faction_id: tweakers
+disposition: neutral
+personality: cowardly
+ai_domain: ""
+respawn_delay: "15m"
+abilities:
+  brutality: 9
+  grit: 10
+  quickness: 17
+  reasoning: 12
+  savvy: 13
+  flair: 9
+merchant:
+  merchant_type: general
+  sell_margin: 1.25
+  buy_margin: 0.40
+  budget: 750
+  inventory:
+    - item_id: shiv
+      price: 20
+      stock: 8
+    - item_id: scrap_armor
+      price: 60
+      stock: 3
+    - item_id: energy_drink
+      price: 8
+      stock: 15
+    - item_id: duct_tape
+      price: 3
+      stock: 20
+  exclusive_items:
+    - item_id: crystal_shard_pipe
+      price: 80
+      stock: 3
+      required_tier: inner_circle
+    - item_id: speed_rig
+      price: 200
+      stock: 1
+      required_tier: inner_circle
+    - item_id: paranoia_grenade
+      price: 60
+      stock: 4
+      required_tier: inner_circle
+  replenish_rate:
+    min_hours: 10
+    max_hours: 20
+    stock_refill: 3
+    budget_refill: 200
+loot:
+  currency:
+    min: 8
+    max: 35
+```
+
+### Tweaker Healer
+
+- [ ] **Step 14.7: Create `content/npcs/tweaker_healer.yaml`**
+
+```yaml
+id: tweaker_healer
+name: "Doc Meth"
+description: >
+  A Tweaker cook who moonlights as a field medic. His methods are unorthodox
+  and his bedside manner is nonexistent, but he gets the job done. "You look
+  rough. I can fix that."
+type: human
+npc_type: healer
+npc_role: healer
+level: 3
+max_hp: 22
+ac: 10
+awareness: 9
+faction_id: tweakers
+disposition: neutral
+personality: cowardly
+ai_domain: ""
+respawn_delay: "15m"
+abilities:
+  brutality: 9
+  grit: 11
+  quickness: 15
+  reasoning: 14
+  savvy: 11
+  flair: 8
+healer:
+  price_per_hp: 2
+  daily_capacity: 60
+  services:
+    - service: full_hp
+      price: 12
+      description: "You look rough. I can fix that."
+    - service: cure_condition
+      condition_id: poison
+      price: 18
+      description: "Wrong kind of chemical. Let's flush it."
+    - service: cure_condition
+      condition_id: paranoid
+      price: 8
+      description: "You're not being followed. Probably."
+    - service: cure_withdrawal
+      substance_id: tweaker_crystal
+      price: 25
+      description: "Coming down hard? I've got something for that."
+  required_tier: known
+loot:
+  currency:
+    min: 5
+    max: 20
+```
+
+### Tweaker Fixer
+
+- [ ] **Step 14.8: Create `content/npcs/tweaker_fixer.yaml`**
+
+```yaml
+id: tweaker_fixer
+name: "The Accountant"
+description: >
+  A methodical Tweaker in clean clothes who keeps immaculate records of who
+  owes what to whom. "Trust is earned. Around here, it's also bought." He
+  accepts exact payment only.
+type: human
+npc_type: fixer
+npc_role: fixer
+level: 3
+max_hp: 22
+ac: 11
+awareness: 9
+faction_id: tweakers
+disposition: neutral
+personality: cowardly
+ai_domain: ""
+respawn_delay: "15m"
+abilities:
+  brutality: 8
+  grit: 10
+  quickness: 14
+  reasoning: 15
+  savvy: 15
+  flair: 9
+fixer:
+  rep_purchases:
+    - cost: 8
+      rep_gain: 1
+      faction_id: tweakers
+      cooldown: daily
+    - cost: 40
+      rep_gain: 5
+      faction_id: tweakers
+      cooldown: weekly
+  required_tier: known
+loot:
+  currency:
+    min: 10
+    max: 40
+```
+
+### Tweaker Banker
+
+- [ ] **Step 14.9: Create `content/npcs/tweaker_banker.yaml`**
+
+```yaml
+id: tweaker_banker
+name: "Tweaker Treasury"
+description: >
+  A paranoid Tweaker with a custom-welded lockbox and a surveillance camera
+  pointed at every approach. He doesn't trust anyone, but he'll hold your
+  credits — for a fee.
+type: human
+npc_type: banker
+npc_role: banker
+level: 3
+max_hp: 22
+ac: 11
+awareness: 10
+faction_id: tweakers
+disposition: neutral
+personality: cowardly
+ai_domain: ""
+respawn_delay: "15m"
+abilities:
+  brutality: 9
+  grit: 11
+  quickness: 14
+  reasoning: 14
+  savvy: 13
+  flair: 9
+banker:
+  zone_id: oregon_country_fair
+  base_rate: 0.98
+  rate_variance: 0.02
+  required_tier: known
+loot:
+  currency:
+    min: 20
+    max: 80
+```
+
+### Tweaker Quest Giver
+
+- [ ] **Step 14.10: Create `content/npcs/tweaker_quest_giver.yaml`**
+
+```yaml
+id: tweaker_quest_giver
+name: "Lieutenant Scratch"
+description: >
+  Crystal Karen's intelligence officer, walls of notes behind him, eyes
+  never still. He assigns field work against Juggalos and Wooks with
+  clinical precision.
+type: human
+npc_type: quest_giver
+npc_role: quest_giver
+level: 4
+max_hp: 25
+ac: 11
+awareness: 11
+faction_id: tweakers
+disposition: neutral
+personality: cowardly
+ai_domain: ""
+respawn_delay: "15m"
+abilities:
+  brutality: 9
+  grit: 11
+  quickness: 16
+  reasoning: 15
+  savvy: 14
+  flair: 9
+loot:
+  currency:
+    min: 0
+    max: 0
+```
+
+### Wook Quest Giver
+
+- [ ] **Step 14.11: Create `content/npcs/wook_quest_giver.yaml`**
+
+```yaml
+id: wook_quest_giver
+name: "Council Elder"
+description: >
+  An ancient Wook who speaks slowly and means everything. The council fire
+  burns behind him as he assigns missions against Juggalos and Tweakers.
+  "The vibe is not right. We need your help to restore it."
+type: human
+npc_type: quest_giver
+npc_role: quest_giver
+level: 4
+max_hp: 25
+ac: 10
+awareness: 10
+faction_id: wooks
+disposition: neutral
+personality: cowardly
+ai_domain: ""
+respawn_delay: "15m"
+abilities:
+  brutality: 8
+  grit: 12
+  quickness: 9
+  reasoning: 14
+  savvy: 14
+  flair: 17
+loot:
+  currency:
+    min: 0
+    max: 0
+```
+
+### Chip Doc (OCF)
+
+- [ ] **Step 14.12: Create `content/npcs/chip_doc_ocf.yaml`**
+
+```yaml
+id: chip_doc_ocf
+name: "Neutral Node"
+description: >
+  A former Portland tech worker who drove out to the OCF years ago and never
+  left. She operates from a rusted food cart in Market Row, maintaining strict
+  neutrality. All three factions leave her alone because all three factions
+  need her.
+type: human
+npc_type: chip_doc
+npc_role: chip_doc
+level: 3
+max_hp: 20
+ac: 10
+awareness: 7
+faction_id: ""
+disposition: neutral
+personality: cowardly
+ai_domain: ""
+respawn_delay: "20m"
+abilities:
+  brutality: 7
+  grit: 11
+  quickness: 10
+  reasoning: 16
+  savvy: 14
+  flair: 12
+chip_doc:
+  removal_cost: 200
+  check_dc: 14
+loot:
+  currency:
+    min: 5
+    max: 20
+```
+
+### Zone YAML Fix — chip_doc spawn template
+
+- [ ] **Step 14.13: Update `content/zones/oregon_country_fair.yaml`**
+
+In `ocf_market_row`, change the spawn template from `chip_doc` to `chip_doc_ocf`:
+
+```yaml
+    spawns:
+      - template: chip_doc_ocf
+        count: 1
+        respawn_after: 0s
+```
+
+### Verification
+
+- [ ] **Step 14.14: Run go test ./... and confirm all pass**
+
+```bash
+cd /home/cjohannsen/src/mud && go test ./... -count=1 2>&1 | tail -20
+```
+
+---
+
 ## REQ Coverage Matrix
 
 | REQ | Task | Description |

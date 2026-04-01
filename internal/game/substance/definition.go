@@ -69,7 +69,7 @@ func (d *SubstanceDef) Validate() error {
 		errs = append(errs, errors.New("name must not be empty"))
 	}
 	if !ValidCategories[d.Category] {
-		errs = append(errs, fmt.Errorf("category must be one of drug|alcohol|medicine|poison|toxin, got %q", d.Category))
+		errs = append(errs, fmt.Errorf("category must be one of drug|alcohol|medicine|poison|toxin|stimulant, got %q", d.Category))
 	}
 	// REQ-AH-26: medicine may not be addictive.
 	if d.Category == "medicine" && d.Addictive {

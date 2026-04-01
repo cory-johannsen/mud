@@ -508,6 +508,54 @@
 **Steps:** Open the web client; begin character creation; proceed to the skill selection step; observe that each skill is identified by its raw ID string rather than its display name; hover over a skill entry and observe no tooltip or description appears.
 **Fix:** Three-layer fix matching the feat selection pattern. (1) Server: added `skillResponse` struct to `characters.go` and populated a `skills` array in `ListOptions` with `id`, `name`, `description`, and `ability` fields, adding it to the JSON response alongside `feats`. (2) TypeScript: added `SkillOption` interface to `client.ts` and added `skills: SkillOption[]` to `CharacterOptions`. (3) Client: updated `SkillsStep` in `CharacterWizard.tsx` to accept `availableSkills: SkillOption[]` prop, build a `skillByID` lookup map with `useMemo`, render `skill?.name ?? id` instead of raw IDs, display `skill.description` below each skill name, and updated fixed-skill display to use `optionCard` style matching the feat pattern. Updated the call site to pass `availableSkills={options?.skills ?? []}`.
 
+### BUG-68: Reaction feats and technologies displayed as Active instead of Reactions
+**Severity:** high
+**Status:** open
+**Category:** Character
+**Description:** Feats and technologies with a reaction trigger are categorized and displayed as Active abilities rather than Reactions, and the player is never prompted to apply them when the trigger condition occurs.
+**Steps:** Create a character with a reaction feat or technology (e.g. a counterattack reaction); observe the character sheet or abilities panel shows it listed under Active rather than a Reactions category; enter a situation that triggers the reaction and observe no prompt appears asking whether to use it.
+**Fix:**
+
+### BUG-67: Web UI does not display loot notification after killing an NPC
+**Severity:** high
+**Status:** open
+**Category:** UI
+**Description:** After killing an NPC the web UI console shows the XP earned message but displays no notification for loot obtained, leaving the player unaware of items added to their inventory.
+**Steps:** Open the web client; engage and kill an NPC that drops loot; observe the console shows XP granted but no loot message appears.
+**Fix:**
+
+### BUG-66: Web UI console stops autoscrolling during combat
+**Severity:** medium
+**Status:** open
+**Category:** UI
+**Description:** During combat the web UI console intermittently stops autoscrolling to new content, requiring the user to scroll manually to see the latest messages.
+**Steps:** Open the web client; enter combat; observe the console as combat messages arrive; intermittently the console stops scrolling to the bottom and new messages appear above the visible area.
+**Fix:**
+
+### BUG-65: Armor Training feat selection never prompted — feat has no effect
+**Severity:** high
+**Status:** open
+**Category:** Character
+**Description:** The Armor Training feat grants proficiency in one additional armor category, but the player is never prompted to choose the category, so the feat applies no benefit.
+**Steps:** Create or level a character; select the Armor Training feat; observe that no armor category selection prompt appears; observe that the character sheet shows no new armor proficiency from the feat.
+**Fix:**
+
+### BUG-64: Web UI does not display or manage loadouts
+**Severity:** high
+**Status:** open
+**Category:** UI
+**Description:** The web UI provides no way to view loadouts, switch between them, or edit the equipped items in each loadout.
+**Steps:** Open the web client; navigate to the Equipment or Character tab; observe that no loadout selector, loadout list, or loadout editing controls are present.
+**Fix:**
+
+### BUG-63: Motel keeper NPCs display with combat health status
+**Severity:** medium
+**Status:** open
+**Category:** World
+**Description:** Motel keeper NPCs render with a combat-style health label (e.g. "Scrap Inn Clerk (unharmed)") instead of the non-combat NPC format (e.g. "Scrap Inn Clerk [motel]").
+**Steps:** Enter any zone hub safe room containing a motel keeper NPC; observe the NPC label in the room description includes a health status in parentheses rather than a bracketed role tag.
+**Fix:**
+
 ### BUG-62: Vantucky map has disconnected rooms
 **Severity:** medium
 **Status:** open

@@ -1,7 +1,7 @@
 # Oregon Country Fair Zone
 
 **Slug:** oregon-country-fair
-**Status:** spec
+**Status:** done
 **Priority:** 340
 **Category:** world
 **Effort:** XL
@@ -165,6 +165,31 @@ Wooks hold the forested river-adjacent areas of the fairgrounds, closest to the 
   - Wook quest giver: quests targeting Juggalos and Tweakers (same objective types).
 - REQ-OCF-38: Quest completion awards faction rep with the quest-giver's faction AND negative rep (−5) with the targeted faction.
 - REQ-OCF-39: Quest givers MUST be present and interactive even before the quests feature is implemented; they display a stub message ("I've got work for you, but the time isn't right yet.") until quest system is active. This is a no-op handler registered in `grpc_service_quest_giver.go`.
+
+### Non-Combat NPC Content
+
+#### Merchants
+
+- REQ-OCF-45: The Juggalo merchant (`the_big_top`) MUST stock: `hatchet` (weapon, 30cr), `faygo_bottle` (consumable, 5cr, restores 10 HP), `icp_face_paint` (cosmetic consumable, 2cr), `leather_jacket` (light armor, 80cr). Faction exclusive items (`hatchet_man_pendant`, `faygo_grenade`, `icp_mixtape`) MUST also be stocked but only purchasable at `family` tier.
+- REQ-OCF-46: The Tweaker merchant (`the_trailer_cluster`) MUST stock: `shiv` (weapon, 20cr), `scrap_armor` (light armor, 60cr), `energy_drink` (consumable, 8cr, restores 15 HP and grants +1 Quickness for 60s), `duct_tape` (crafting material, 3cr). Faction exclusive items (`crystal_shard_pipe`, `speed_rig`, `paranoia_grenade`) MUST be stocked but only purchasable at `inner_circle` tier.
+- REQ-OCF-47: The Wook merchant (`wook_river_camp`) MUST stock: `walking_staff` (weapon, 25cr), `woven_vest` (light armor, 70cr), `herbal_poultice` (consumable, 10cr, restores 20 HP over 30s), `mushroom_tea` (consumable, 6cr, restores 8 HP). Wook faction exclusive items from the Wooklyn merchant MUST also be available here at the same tier requirements.
+- REQ-OCF-48: The neutral `chip_doc` NPC in `ocf_market_row` MUST stock the standard chip_doc inventory (cybernetic implants and augmentation chips as defined by the non-combat-npcs feature). All three factions tolerate the chip_doc's neutral presence; no faction rep required.
+
+#### Healers
+
+- REQ-OCF-49: The Juggalo healer (`the_faygo_fountain`) MUST offer: full HP restore (15cr), cure `poison` condition (20cr), cure `stunned` condition (10cr). Flavor: "Faygo washes all wounds clean, homie." Requires Juggalos rep ≥ `down` tier to use; hostile-tier players are turned away.
+- REQ-OCF-50: The Tweaker healer (`the_cook_shed_anteroom`) MUST offer: full HP restore (12cr), cure `poison` condition (18cr), remove `paranoid` condition (8cr), remove `tweaker_crystal` withdrawal (25cr). Flavor: "You look rough. I can fix that." Requires Tweakers rep ≥ `known` tier.
+- REQ-OCF-51: The Wook healer (`the_healing_waters_ocf`) MUST offer: full HP restore (18cr), cure `poison` condition (15cr), cure any active substance effect including withdrawal (30cr), cure `stunned` condition (12cr). Flavor: "The river knows what you need." Requires Wooks rep ≥ `curious` tier (inherited from Wooklyn faction tier naming).
+
+#### Fixers
+
+- REQ-OCF-52: The Juggalo Fixer (`the_gathering_ground`) MUST offer rep purchases at: 10cr → +1 Juggalos rep (cap: once per in-game day), 50cr → +5 Juggalos rep (cap: once per in-game week). Flavor: "You wanna be Family, you gotta pay the Gathering toll."
+- REQ-OCF-53: The Tweaker Fixer (`tweaker_command_post`) MUST offer rep purchases at: 8cr → +1 Tweakers rep (cap: once per in-game day), 40cr → +5 Tweakers rep (cap: once per in-game week). Flavor: "Trust is earned. Around here, it's also bought."
+- REQ-OCF-54: The Wook Fixer (`the_wook_council_fire`) MUST offer rep purchases at: 12cr → +1 Wooks rep (cap: once per in-game day), 60cr → +5 Wooks rep (cap: once per in-game week). Flavor: "The council sees your offering. The vibe is shifting."
+
+#### Banker NPCs
+
+- REQ-OCF-55: The Juggalo banker (`the_big_top`) and Tweaker banker (`the_trailer_cluster`) and Wook banker (`wook_river_camp`) MUST each provide standard deposit/withdraw/balance services per the non-combat-npcs banker spec. Faction rep requirement: same as the healer for that faction's cluster (turned away at hostile tier).
 
 ### Spawn Distribution
 

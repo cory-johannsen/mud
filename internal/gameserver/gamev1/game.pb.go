@@ -7898,8 +7898,8 @@ type InventoryItem struct {
 	Kind          string                 `protobuf:"bytes,3,opt,name=kind,proto3" json:"kind,omitempty"`
 	Quantity      int32                  `protobuf:"varint,4,opt,name=quantity,proto3" json:"quantity,omitempty"`
 	Weight        float64                `protobuf:"fixed64,5,opt,name=weight,proto3" json:"weight,omitempty"`
-	ItemDefId     string                 `protobuf:"bytes,6,opt,name=item_def_id,json=itemDefId,proto3" json:"item_def_id,omitempty"`
-	ArmorSlot     string                 `protobuf:"bytes,7,opt,name=armor_slot,json=armorSlot,proto3" json:"armor_slot,omitempty"`
+	ItemDefId     string                 `protobuf:"bytes,6,opt,name=item_def_id,json=itemDefId,proto3" json:"item_def_id,omitempty"` // ItemDef ID used by equip/wear commands
+	ArmorSlot     string                 `protobuf:"bytes,7,opt,name=armor_slot,json=armorSlot,proto3" json:"armor_slot,omitempty"`   // ArmorDef.Slot (head/torso/etc.) when kind == "armor"
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -13834,14 +13834,17 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\tmax_count\x18\x03 \x01(\x05R\bmaxCount\x12\x18\n" +
 	"\arespawn\x18\x04 \x01(\tR\arespawn\x12\x1c\n" +
 	"\timmovable\x18\x05 \x01(\bR\timmovable\x12\x16\n" +
-	"\x06script\x18\x06 \x01(\tR\x06script\"\x8c\x01\n" +
+	"\x06script\x18\x06 \x01(\tR\x06script\"\xcb\x01\n" +
 	"\rInventoryItem\x12\x1f\n" +
 	"\vinstance_id\x18\x01 \x01(\tR\n" +
 	"instanceId\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x12\n" +
 	"\x04kind\x18\x03 \x01(\tR\x04kind\x12\x1a\n" +
 	"\bquantity\x18\x04 \x01(\x05R\bquantity\x12\x16\n" +
-	"\x06weight\x18\x05 \x01(\x01R\x06weight\"\xfa\x01\n" +
+	"\x06weight\x18\x05 \x01(\x01R\x06weight\x12\x1e\n" +
+	"\vitem_def_id\x18\x06 \x01(\tR\titemDefId\x12\x1d\n" +
+	"\n" +
+	"armor_slot\x18\a \x01(\tR\tarmorSlot\"\xfa\x01\n" +
 	"\rInventoryView\x12,\n" +
 	"\x05items\x18\x01 \x03(\v2\x16.game.v1.InventoryItemR\x05items\x12\x1d\n" +
 	"\n" +
