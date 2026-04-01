@@ -278,3 +278,169 @@ func TestProperty_FeatEntry_IsReactionMatchesFeatReactionField(t *testing.T) {
 			"FeatEntry.IsReaction must equal (Feat.Reaction != nil)")
 	})
 }
+
+// TestProperty_InnateSlotView_IsReactionMatchesTechReactionField verifies that
+// InnateSlotView.IsReaction equals (TechnologyDef.Reaction != nil) for all combinations.
+//
+// Precondition: Session has one innate tech with or without a Reaction field.
+// Postcondition: InnateSlotView.IsReaction equals (Reaction != nil); registry-miss → false.
+func TestProperty_InnateSlotView_IsReactionMatchesTechReactionField(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		hasReaction := rapid.Bool().Draw(rt, "hasReaction")
+		registryMiss := rapid.Bool().Draw(rt, "registryMiss")
+
+		var techDef *technology.TechnologyDef
+		if !registryMiss {
+			var rxnDef *reaction.ReactionDef
+			if hasReaction {
+				rxnDef = &reaction.ReactionDef{
+					Triggers: []reaction.ReactionTriggerType{reaction.TriggerOnDamageTaken},
+					Effect:   reaction.ReactionEffect{Type: reaction.ReactionEffectReduceDamage},
+				}
+			}
+			techDef = &technology.TechnologyDef{
+				ID:        "prop-innate",
+				Name:      "Prop Innate",
+				UsageType: technology.UsageInnate,
+				Reaction:  rxnDef,
+			}
+		}
+
+		techReg := technology.NewRegistry()
+		if techDef != nil {
+			techReg.Register(techDef)
+		}
+
+		worldMgr, sessMgr := testWorldAndSession(t)
+		logger := zaptest.NewLogger(t)
+		svc := newTestGameServiceServer(
+			worldMgr, sessMgr,
+			command.DefaultRegistry(),
+			NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil, nil, nil),
+			NewChatHandler(sessMgr),
+			logger,
+			nil, nil, nil, nil, nil, nil,
+			nil, nil, nil, nil, nil, nil,
+			nil, nil, nil, techReg, nil, nil, nil, nil, "",
+			nil, nil, nil,
+			nil, nil, nil,
+			nil, nil, nil, nil, nil, nil, nil,
+			nil, nil,
+			nil,
+			nil,
+			nil, nil,
+		)
+
+		_, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+			UID:         "u_innate_prop",
+			Username:    "PropInnate",
+			CharName:    "PropInnate",
+			CharacterID: 0,
+			RoomID:      "room_a",
+			Abilities:   character.AbilityScores{},
+			Role:        "player",
+		})
+		require.NoError(rt, err)
+
+		sess, ok := sessMgr.GetPlayer("u_innate_prop")
+		require.True(rt, ok)
+		techID := "prop-innate"
+		if registryMiss {
+			techID = "missing-tech"
+		}
+		sess.InnateTechs = map[string]*session.InnateSlot{
+			techID: {UsesRemaining: 1, MaxUses: 1},
+		}
+
+		event, err := svc.handleChar("u_innate_prop")
+		require.NoError(rt, err)
+		require.NotNil(rt, event)
+
+		cs, ok := event.Payload.(*gamev1.ServerEvent_CharacterSheet)
+		require.True(rt, ok)
+		require.Len(rt, cs.CharacterSheet.InnateSlots, 1)
+
+		slot := cs.CharacterSheet.InnateSlots[0]
+		expectedIsReaction := !registryMiss && hasReaction
+		if slot.IsReaction != expectedIsReaction {
+			rt.Fatalf("InnateSlotView.IsReaction=%v, expected %v (registryMiss=%v, hasReaction=%v)",
+				slot.IsReaction, expectedIsReaction, registryMiss, hasReaction)
+		}
+	})
+}
+
+// TestHandleUse_InnateReactionTech_HasIsReactionTrue verifies that a reaction innate tech
+// in the handleUse no-arg choices list has IsReaction=true.
+//
+// Precondition: Session has an innate tech with non-nil Reaction; no-arg use request issued.
+// Postcondition: The FeatEntry in UseResponse.Choices has IsReaction=true.
+func TestHandleUse_InnateReactionTech_HasIsReactionTrue(t *testing.T) {
+	rxnDef := &reaction.ReactionDef{
+		Triggers: []reaction.ReactionTriggerType{reaction.TriggerOnDamageTaken},
+		Effect:   reaction.ReactionEffect{Type: reaction.ReactionEffectReduceDamage},
+	}
+	techDef := &technology.TechnologyDef{
+		ID:        "react-innate",
+		Name:      "Reactive Implant",
+		UsageType: technology.UsageInnate,
+		Reaction:  rxnDef,
+	}
+	techReg := technology.NewRegistry()
+	techReg.Register(techDef)
+
+	worldMgr, sessMgr := testWorldAndSession(t)
+	logger := zaptest.NewLogger(t)
+	svc := newTestGameServiceServer(
+		worldMgr, sessMgr,
+		command.DefaultRegistry(),
+		NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil, nil, nil),
+		NewChatHandler(sessMgr),
+		logger,
+		nil, nil, nil, nil, nil, nil,
+		nil, nil, nil, nil, nil, nil,
+		nil, nil, nil, techReg, nil, nil, nil, nil, "",
+		nil, nil, nil,
+		nil, nil, nil,
+		nil, nil, nil, nil, nil, nil, nil,
+		nil, nil,
+		nil,
+		nil,
+		nil, nil,
+	)
+
+	_, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID:         "u_use_react",
+		Username:    "UseReact",
+		CharName:    "UseReact",
+		CharacterID: 0,
+		RoomID:      "room_a",
+		Abilities:   character.AbilityScores{},
+		Role:        "player",
+	})
+	require.NoError(t, err)
+
+	sess, ok := sessMgr.GetPlayer("u_use_react")
+	require.True(t, ok)
+	sess.InnateTechs = map[string]*session.InnateSlot{
+		"react-innate": {UsesRemaining: 2, MaxUses: 2},
+	}
+
+	// handleUse(uid, abilityID, targetID) — empty abilityID triggers the no-arg list mode.
+	event, err := svc.handleUse("u_use_react", "", "")
+	require.NoError(t, err)
+	require.NotNil(t, event)
+
+	useResp := event.GetUseResponse()
+	require.NotNil(t, useResp, "expected UseResponse for no-arg handleUse")
+	require.NotEmpty(t, useResp.Choices, "expected at least one choice")
+
+	found := false
+	for _, choice := range useResp.Choices {
+		if choice.FeatId == "react-innate" {
+			found = true
+			assert.True(t, choice.IsReaction,
+				"innate reaction tech FeatEntry in choices must have IsReaction=true")
+		}
+	}
+	assert.True(t, found, "react-innate must appear in choices list")
+}

@@ -7009,9 +7009,11 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string) (*gamev1.
 			}
 			for techID, remaining := range counts {
 				displayName := techID
+				var prepIsReaction bool
 				if s.techRegistry != nil {
 					if def, ok := s.techRegistry.Get(techID); ok {
 						displayName = def.Name
+						prepIsReaction = def.Reaction != nil
 					}
 				}
 				active = append(active, &gamev1.FeatEntry{
@@ -7020,6 +7022,7 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string) (*gamev1.
 					Category:    "prepared_tech",
 					Active:      true,
 					Description: fmt.Sprintf("%d use(s) remaining", remaining),
+					IsReaction:  prepIsReaction,
 				})
 			}
 		}
@@ -7037,9 +7040,11 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string) (*gamev1.
 				}
 				for _, techID := range sess.SpontaneousTechs[l] {
 					displayName := techID
+					var spontIsReaction bool
 					if s.techRegistry != nil {
 						if def, ok := s.techRegistry.Get(techID); ok {
 							displayName = def.Name
+							spontIsReaction = def.Reaction != nil
 						}
 					}
 					active = append(active, &gamev1.FeatEntry{
@@ -7048,6 +7053,7 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string) (*gamev1.
 						Category:    "spontaneous_tech",
 						Active:      true,
 						Description: fmt.Sprintf("%s (%d uses remaining at level %d)", displayName, pool.Remaining, l),
+						IsReaction:  spontIsReaction,
 					})
 				}
 			}
@@ -7062,9 +7068,11 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string) (*gamev1.
 			for _, id := range innateIDs {
 				slot := sess.InnateTechs[id]
 				displayName := id
+				var innateIsReaction bool
 				if s.techRegistry != nil {
 					if def, ok := s.techRegistry.Get(id); ok {
 						displayName = def.Name
+						innateIsReaction = def.Reaction != nil
 					}
 				}
 				var desc string
@@ -7081,6 +7089,7 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string) (*gamev1.
 					Category:    "innate_tech",
 					Active:      true,
 					Description: desc,
+					IsReaction:  innateIsReaction,
 				})
 			}
 		}
