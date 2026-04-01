@@ -1435,6 +1435,27 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 		sess.FavoredTargetMu.Lock()
 		sess.FavoredTarget = sess.FeatureChoices["predators_eye"]["favored_target"]
 		sess.FavoredTargetMu.Unlock()
+
+		// Apply armor_training feat choice as a real proficiency.
+		// If the player has the armor_training feat and has made a category choice,
+		// ensure that category is persisted and loaded into the session.
+		if armorCategory := sess.FeatureChoices["armor_training"]["armor_category"]; armorCategory != "" {
+			if s.characterProficienciesRepo != nil {
+				if upsertErr := s.characterProficienciesRepo.Upsert(
+					stream.Context(), characterID, armorCategory, "trained",
+				); upsertErr != nil {
+					s.logger.Warn("persisting armor_training proficiency",
+						zap.String("category", armorCategory),
+						zap.Error(upsertErr),
+					)
+				} else {
+					if sess.Proficiencies == nil {
+						sess.Proficiencies = make(map[string]string)
+					}
+					sess.Proficiencies[armorCategory] = "trained"
+				}
+			}
+		}
 	}
 
 	// Resolve missing ability boost choices.

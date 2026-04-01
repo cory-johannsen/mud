@@ -308,6 +308,27 @@ func TestLoadFeats_MiscGapFeatsPresent(t *testing.T) {
 	}
 }
 
+// TestArmorTrainingFeat_HasChoicesBlock verifies that the armor_training feat
+// declares a choices block so the player is prompted to select an armor category.
+func TestArmorTrainingFeat_HasChoicesBlock(t *testing.T) {
+	feats, err := ruleset.LoadFeats("../../../content/feats.yaml")
+	require.NoError(t, err)
+	var feat *ruleset.Feat
+	for _, f := range feats {
+		if f.ID == "armor_training" {
+			feat = f
+			break
+		}
+	}
+	require.NotNil(t, feat, "armor_training feat must exist")
+	require.NotNil(t, feat.Choices, "armor_training feat must have a choices block")
+	assert.Equal(t, "armor_category", feat.Choices.Key)
+	assert.NotEmpty(t, feat.Choices.Prompt)
+	assert.Contains(t, feat.Choices.Options, "light_armor")
+	assert.Contains(t, feat.Choices.Options, "medium_armor")
+	assert.Contains(t, feat.Choices.Options, "heavy_armor")
+}
+
 func TestLoadFeats_SkillGapFeats_HustleSmoothTalkHardLookRep(t *testing.T) {
 	feats, err := ruleset.LoadFeats("../../../content/feats.yaml")
 	require.NoError(t, err)

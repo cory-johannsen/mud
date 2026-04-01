@@ -534,11 +534,11 @@
 
 ### BUG-65: Armor Training feat selection never prompted — feat has no effect
 **Severity:** high
-**Status:** open
+**Status:** fixed
 **Category:** Character
 **Description:** The Armor Training feat grants proficiency in one additional armor category, but the player is never prompted to choose the category, so the feat applies no benefit.
 **Steps:** Create or level a character; select the Armor Training feat; observe that no armor category selection prompt appears; observe that the character sheet shows no new armor proficiency from the feat.
-**Fix:**
+**Fix:** Added `choices` block to the `armor_training` feat in `content/feats.yaml` (key: `armor_category`, options: `light_armor`, `medium_armor`, `heavy_armor`). Added proficiency application logic in `internal/gameserver/grpc_service.go` after the feat-choice resolution loop: when `sess.FeatureChoices["armor_training"]["armor_category"]` is non-empty, the chosen category is upserted via `characterProficienciesRepo` and loaded into `sess.Proficiencies`.
 
 ### BUG-64: Web UI does not display or manage loadouts
 **Severity:** high

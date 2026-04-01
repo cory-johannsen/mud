@@ -31,6 +31,10 @@ feats:
     active: false
     activate_text: ""
     description: "Gain proficiency in one additional armor category."
+    choices:
+      key: armor_category
+      prompt: "Choose an armor category to gain proficiency in:"
+      options: [light_armor, medium_armor, heavy_armor]
 
   - id: weapon_training
     name: Weapon Training

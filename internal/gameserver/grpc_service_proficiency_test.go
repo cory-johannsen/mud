@@ -159,6 +159,84 @@ func TestCharacterProficienciesRepository_Interface(t *testing.T) {
 	var _ CharacterProficienciesRepository = newStubProficienciesRepo()
 }
 
+// applyArmorTrainingProficiency applies the armor_training feat choice as a real
+// proficiency on the session and persists it.  It mirrors the logic added to
+// the Session login path so that this behaviour can be unit-tested without a
+// live gRPC stream.
+//
+// Precondition: featureChoices["armor_training"]["armor_category"] must contain a
+// valid armor category string.
+// Postcondition: sess.Proficiencies[category] == "trained" and the value is persisted.
+func applyArmorTrainingProficiency(
+	ctx context.Context,
+	characterID int64,
+	featureChoices map[string]map[string]string,
+	profRepo CharacterProficienciesRepository,
+	sess interface{ SetProficiency(string, string) },
+) error {
+	chosen, ok := featureChoices["armor_training"]["armor_category"]
+	if !ok || chosen == "" {
+		return nil
+	}
+	if err := profRepo.Upsert(ctx, characterID, chosen, "trained"); err != nil {
+		return err
+	}
+	sess.SetProficiency(chosen, "trained")
+	return nil
+}
+
+// proficiencySetter is a minimal interface used by applyArmorTrainingProficiency in tests.
+type proficiencySetter struct {
+	profs map[string]string
+}
+
+func (p *proficiencySetter) SetProficiency(cat, rank string) {
+	p.profs[cat] = rank
+}
+
+// TestArmorTrainingProficiency_AppliedAfterChoice verifies that selecting
+// armor_training feat with a category choice results in that category being
+// added to the character's proficiencies.
+func TestArmorTrainingProficiency_AppliedAfterChoice(t *testing.T) {
+	ctx := context.Background()
+	repo := newStubProficienciesRepo()
+	sess := &proficiencySetter{profs: make(map[string]string)}
+	characterID := int64(7)
+
+	featureChoices := map[string]map[string]string{
+		"armor_training": {"armor_category": "medium_armor"},
+	}
+
+	err := applyArmorTrainingProficiency(ctx, characterID, featureChoices, repo, sess)
+	require.NoError(t, err)
+
+	// Proficiency must be in session.
+	assert.Equal(t, "trained", sess.profs["medium_armor"])
+
+	// Proficiency must be persisted.
+	stored, err := repo.GetAll(ctx, characterID)
+	require.NoError(t, err)
+	assert.Equal(t, "trained", stored["medium_armor"])
+}
+
+// TestArmorTrainingProficiency_NoChoiceNoEffect verifies that when no armor_training
+// choice has been made, no proficiency is applied.
+func TestArmorTrainingProficiency_NoChoiceNoEffect(t *testing.T) {
+	ctx := context.Background()
+	repo := newStubProficienciesRepo()
+	sess := &proficiencySetter{profs: make(map[string]string)}
+	characterID := int64(7)
+
+	featureChoices := map[string]map[string]string{}
+
+	err := applyArmorTrainingProficiency(ctx, characterID, featureChoices, repo, sess)
+	require.NoError(t, err)
+	assert.Empty(t, sess.profs)
+	stored, err := repo.GetAll(ctx, characterID)
+	require.NoError(t, err)
+	assert.Empty(t, stored)
+}
+
 // TestJobRegistry_HasProficiencies verifies that jobs loaded with a proficiencies section
 // expose their proficiencies through the registry.
 func TestJobRegistry_HasProficiencies(t *testing.T) {
