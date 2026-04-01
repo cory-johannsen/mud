@@ -178,6 +178,30 @@ type Template struct {
 	// Empty means no taunts.
 	Taunts []string `yaml:"taunts,omitempty"`
 
+	// OnHitEffect is the item effect ID applied to the target on a successful hit (e.g. "faygo_splash").
+	// Empty string means no effect is applied.
+	OnHitEffect string `yaml:"on_hit_effect,omitempty"`
+
+	// OnHitSubstance is the substance ID applied to the target on a successful hit (e.g. "tweaker_crystal").
+	// Empty string means no substance is applied.
+	OnHitSubstance string `yaml:"on_hit_substance,omitempty"`
+
+	// AttacksPerRound is the number of attacks this NPC makes per combat round.
+	// Zero is treated as 1 at runtime.
+	AttacksPerRound int `yaml:"attacks_per_round,omitempty"`
+
+	// AllowedDangerLevels restricts spawning to zones whose danger level matches
+	// one of the listed strings. Empty means no restriction.
+	AllowedDangerLevels []string `yaml:"allowed_danger_levels,omitempty"`
+
+	// AllowedRooms restricts spawning to the listed room IDs.
+	// Empty means no restriction.
+	AllowedRooms []string `yaml:"allowed_rooms,omitempty"`
+
+	// OnHitCondition defines a condition applied to the target on a successful hit.
+	// Nil means no condition is applied.
+	OnHitCondition *OnHitConditionDef `yaml:"on_hit_condition,omitempty"`
+
 	// Type-specific config — at most one is non-nil for a given NPC.
 	Merchant   *MerchantConfig   `yaml:"merchant,omitempty"`
 	Guard      *GuardConfig      `yaml:"guard,omitempty"`
