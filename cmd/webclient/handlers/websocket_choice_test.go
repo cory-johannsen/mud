@@ -2,7 +2,6 @@ package handlers_test
 
 import (
 	"encoding/json"
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -79,5 +78,4 @@ func TestServerEventEncodedChoice_DoesNotMatchLoadoutSentinel(t *testing.T) {
 
 	raw, _ := handlers.ServerEventEncodedChoiceForTest(event)
 	assert.Nil(t, raw, "loadout sentinel must not be matched by choice detector")
-	_ = strings.Contains(content, "loadout") // suppress unused import warning
 }

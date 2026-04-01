@@ -5,7 +5,7 @@ import { useGame } from '../GameContext'
 //
 // REQ-FCM-1: Display cp.prompt as the modal header.
 // REQ-FCM-2: Each option rendered as a numbered, clickable button.
-// REQ-FCM-3: Clicking an option sends the 1-based index as a CommandText message.
+// REQ-FCM-3: Clicking an option sends the 1-based option number as a CommandText message.
 // REQ-FCM-4: After selection, clearChoicePrompt() is called and onClose() is invoked.
 
 export function FeatureChoiceModal({ onClose }: { onClose: () => void }) {
@@ -13,9 +13,9 @@ export function FeatureChoiceModal({ onClose }: { onClose: () => void }) {
   const cp = state.choicePrompt
   if (!cp) return null
 
-  function handleSelect(index: number) {
-    // Send the 1-based selection number as a plain command (parsed as MoveRequest or SayRequest).
-    sendCommand(String(index + 1))
+  function handleSelect(zeroBasedIndex: number) {
+    // Send 1-based option number: server expects "1", "2", etc. as the choice.
+    sendCommand(String(zeroBasedIndex + 1))
     clearChoicePrompt()
     onClose()
   }

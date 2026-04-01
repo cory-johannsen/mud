@@ -321,13 +321,6 @@ func serverEventInner(event *gamev1.ServerEvent) (proto.Message, string) {
 	}
 }
 
-// featureChoicePayload is the JSON structure decoded from the "\x00choice\x00" sentinel.
-type featureChoicePayload struct {
-	FeatureID string   `json:"featureId"`
-	Prompt    string   `json:"prompt"`
-	Options   []string `json:"options"`
-}
-
 // serverEventEncodedChoice checks if a MessageEvent carries a sentinel-encoded
 // feature choice prompt and extracts the JSON bytes and type name if so.
 //
