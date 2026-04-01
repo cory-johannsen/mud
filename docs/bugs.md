@@ -510,11 +510,11 @@
 
 ### BUG-69: Armor Training armor category selection uses console prompt instead of modal in web UI
 **Severity:** high
-**Status:** open
+**Status:** fixed
 **Category:** UI
 **Description:** In the web UI, the Armor Training feat category selection is delivered as a numbered console prompt which the player cannot respond to — input is interpreted as a movement command instead; the selection should be presented as a modal popup.
 **Steps:** Create or level a character with the Armor Training feat in the web UI; observe the console shows "Choose an armor category to gain proficiency in: 1) light_armor 2) medium_armor 3) heavy_armor Enter 1-3:"; type "3"; observe the response is "Invalid selection. You will be prompted again on next login." and the input was routed to the movement handler as `no exit "3"`.
-**Fix:**
+**Fix:** Sentinel-encoded the choice prompt as `"\x00choice\x00" + JSON` in `promptFeatureChoice`. The recv loop now skips non-Say/non-Move messages (StatusRequest, MapRequest) and non-numeric text so web client status polls no longer consume the choice slot. The websocket handler decodes the sentinel and sends a `FeatureChoicePrompt` frame; the web client renders it as a `FeatureChoiceModal` overlay with clickable option buttons. Telnet clients receive human-readable numbered text via `renderChoicePrompt` in game_bridge.go.
 
 ### BUG-68: Reaction feats and technologies displayed as Active instead of Reactions
 **Severity:** high
