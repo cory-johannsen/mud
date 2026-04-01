@@ -130,7 +130,7 @@ function InnateItem({
         {max > 0 && <UsePips remaining={remaining} max={max} />}
       </div>
       {slot.description && <p style={styles.techDesc}>{slot.description}</p>}
-      {!exhausted && !picking && (
+      {!exhausted && !slot.isReaction && !picking && (
         <button style={styles.hotbarBtn} onClick={() => setPicking(true)} type="button">
           + Add to Hotbar
         </button>

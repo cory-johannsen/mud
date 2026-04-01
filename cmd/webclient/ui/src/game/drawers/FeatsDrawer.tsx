@@ -68,7 +68,7 @@ function FeatItem({
       {feat.description && (
         <p style={styles.featDesc}>{feat.description}</p>
       )}
-      {feat.active && feat.activateText && !picking && (
+      {feat.active && !feat.isReaction && feat.activateText && !picking && (
         <button style={styles.hotbarBtn} onClick={() => setPicking(true)} type="button">
           + Add to Hotbar
         </button>
