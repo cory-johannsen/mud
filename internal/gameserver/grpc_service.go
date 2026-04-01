@@ -7690,6 +7690,17 @@ func wrapOption(prefix, text string, width int) string {
 	return sb.String()
 }
 
+// choicePromptPayload is the JSON structure sent inside the "\x00choice\x00" sentinel.
+type choicePromptPayload struct {
+	FeatureID string   `json:"featureId"`
+	Prompt    string   `json:"prompt"`
+	Options   []string `json:"options"`
+}
+
+// maxChoiceAttempts is the maximum number of stream.Recv iterations before
+// promptFeatureChoice gives up waiting for a valid choice.
+const maxChoiceAttempts = 20
+
 func (s *GameServiceServer) promptFeatureChoice(
 	stream gamev1.GameService_SessionServer,
 	featureID string,
@@ -7705,73 +7716,100 @@ func (s *GameServiceServer) promptFeatureChoice(
 		return choices.Options[0], nil
 	}
 
-	var sb strings.Builder
-	sb.WriteString(choices.Prompt)
-	sb.WriteString("\n")
-	for i, opt := range choices.Options {
-		prefix := fmt.Sprintf("  %d) ", i+1)
-		sb.WriteString(wrapOption(prefix, opt, 78))
-		sb.WriteString("\n")
+	// Send the choice prompt as a sentinel-encoded MessageEvent so that web clients
+	// can decode it as a modal dialog, and telnet clients can render it as text.
+	payload := choicePromptPayload{
+		FeatureID: featureID,
+		Prompt:    choices.Prompt,
+		Options:   choices.Options,
 	}
-	fmt.Fprintf(&sb, "Enter 1-%d:", len(choices.Options))
-
-	if err := stream.Send(&gamev1.ServerEvent{
-		Payload: &gamev1.ServerEvent_Message{
-			Message: &gamev1.MessageEvent{Content: sb.String()},
-		},
-	}); err != nil {
-		return "", fmt.Errorf("sending choice prompt for %s: %w", featureID, err)
-	}
-
-	msg, err := stream.Recv()
+	data, err := json.Marshal(payload)
 	if err != nil {
-		return "", fmt.Errorf("receiving choice for %s: %w", featureID, err)
+		return "", fmt.Errorf("marshalling choice prompt for %s: %w", featureID, err)
 	}
-
-	// Extract selection text from any client message type.
-	// The commandLoop may send different message types depending on how the
-	// player's input was parsed (e.g. a bare number "1" becomes a MoveRequest
-	// because it is not a recognized command name).
-	selText := ""
-	switch {
-	case msg.GetSay() != nil:
-		selText = strings.TrimSpace(msg.GetSay().GetMessage())
-	case msg.GetMove() != nil:
-		selText = strings.TrimSpace(msg.GetMove().GetDirection())
-	}
-
-	n := 0
-	idx := -1
-	if _, scanErr := fmt.Sscanf(selText, "%d", &n); scanErr == nil && n >= 1 && n <= len(choices.Options) {
-		idx = n - 1
-	}
-
-	if idx < 0 {
-		s.logger.Warn("invalid feature choice selection",
-			zap.String("feature", featureID),
-			zap.String("input", selText),
-		)
-		if sendErr := stream.Send(&gamev1.ServerEvent{
-			Payload: &gamev1.ServerEvent_Message{
-				Message: &gamev1.MessageEvent{Content: "Invalid selection. You will be prompted again on next login."},
-			},
-		}); sendErr != nil {
-			s.logger.Warn("sending invalid-selection feedback", zap.String("feature", featureID), zap.Error(sendErr))
-			return "", sendErr
-		}
-		return "", nil
-	}
-
-	chosen := choices.Options[idx]
+	const choiceSentinel = "\x00choice\x00"
 	if sendErr := stream.Send(&gamev1.ServerEvent{
 		Payload: &gamev1.ServerEvent_Message{
-			Message: &gamev1.MessageEvent{Content: choices.Key + " set to: " + chosen},
+			Message: &gamev1.MessageEvent{Content: choiceSentinel + string(data)},
 		},
 	}); sendErr != nil {
-		// Non-fatal: value is already selected; log and continue.
-		s.logger.Warn("sending choice confirmation", zap.String("feature", featureID), zap.Error(sendErr))
+		return "", fmt.Errorf("sending choice prompt for %s: %w", featureID, sendErr)
 	}
-	return chosen, nil
+
+	// Loop up to maxChoiceAttempts, skipping any messages that are not Say or Move.
+	// This prevents StatusRequest / MapRequest messages (sent by the web client on
+	// connect) from being mis-interpreted as invalid choices.
+	for attempt := 0; attempt < maxChoiceAttempts; attempt++ {
+		msg, recvErr := stream.Recv()
+		if recvErr != nil {
+			return "", fmt.Errorf("receiving choice for %s: %w", featureID, recvErr)
+		}
+
+		// Only process Say and Move messages as potential choices.
+		selText := ""
+		switch {
+		case msg.GetSay() != nil:
+			selText = strings.TrimSpace(msg.GetSay().GetMessage())
+		case msg.GetMove() != nil:
+			selText = strings.TrimSpace(msg.GetMove().GetDirection())
+		default:
+			// Non-choice message type (e.g. StatusRequest, MapRequest); silently skip.
+			continue
+		}
+
+		// If the text is not a valid integer at all, skip it. A bare direction like
+		// "north" is not a choice attempt. Only an out-of-range integer (e.g. "99")
+		// is treated as an invalid selection and breaks the loop.
+		var parsedN int
+		_, scanErr := fmt.Sscanf(selText, "%d", &parsedN)
+		if scanErr != nil {
+			// Not a number — silently skip and wait for the next message.
+			continue
+		}
+
+		n := parsedN
+		idx := -1
+		if n >= 1 && n <= len(choices.Options) {
+			idx = n - 1
+		}
+
+		if idx < 0 {
+			// Numeric but out of range — log and report invalid selection.
+			if s.logger != nil {
+				s.logger.Warn("invalid feature choice selection",
+					zap.String("feature", featureID),
+					zap.String("input", selText),
+				)
+			}
+			break
+		}
+
+		chosen := choices.Options[idx]
+		if sendErr := stream.Send(&gamev1.ServerEvent{
+			Payload: &gamev1.ServerEvent_Message{
+				Message: &gamev1.MessageEvent{Content: choices.Key + " set to: " + chosen},
+			},
+		}); sendErr != nil {
+			// Non-fatal: value is already selected; log and continue.
+			if s.logger != nil {
+				s.logger.Warn("sending choice confirmation", zap.String("feature", featureID), zap.Error(sendErr))
+			}
+		}
+		return chosen, nil
+	}
+
+	// All attempts exhausted or invalid selection received.
+	if sendErr := stream.Send(&gamev1.ServerEvent{
+		Payload: &gamev1.ServerEvent_Message{
+			Message: &gamev1.MessageEvent{Content: "Invalid selection. You will be prompted again on next login."},
+		},
+	}); sendErr != nil {
+		if s.logger != nil {
+			s.logger.Warn("sending invalid-selection feedback", zap.String("feature", featureID), zap.Error(sendErr))
+		}
+		return "", sendErr
+	}
+	return "", nil
 }
 
 // recomputeBaseScores returns ability scores before any archetype/region boost choices are applied.

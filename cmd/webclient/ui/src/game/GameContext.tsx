@@ -59,6 +59,12 @@ export interface CombatantHp {
   max: number
 }
 
+export interface ChoicePrompt {
+  featureId: string
+  prompt: string
+  options: string[]
+}
+
 export interface GameState {
   connected: boolean
   roomView: RoomView | null
@@ -79,6 +85,7 @@ export interface GameState {
   trainerView: import('../proto').TrainerView | null
   npcView: { name: string; description: string; npcType: string; level: number; health: string } | null
   loadoutView: LoadoutView | null
+  choicePrompt: ChoicePrompt | null
 }
 
 type Action =
@@ -104,6 +111,8 @@ type Action =
   | { type: 'SET_TRAINER_VIEW'; view: import('../proto').TrainerView | null }
   | { type: 'SET_NPC_VIEW'; view: { name: string; description: string; npcType: string; level: number; health: string } | null }
   | { type: 'SET_LOADOUT_VIEW'; view: LoadoutView | null }
+  | { type: 'SET_CHOICE_PROMPT'; prompt: ChoicePrompt }
+  | { type: 'CLEAR_CHOICE_PROMPT' }
 
 function reducer(state: GameState, action: Action): GameState {
   switch (action.type) {
@@ -154,6 +163,10 @@ function reducer(state: GameState, action: Action): GameState {
       return { ...state, npcView: action.view }
     case 'SET_LOADOUT_VIEW':
       return { ...state, loadoutView: action.view }
+    case 'SET_CHOICE_PROMPT':
+      return { ...state, choicePrompt: action.prompt }
+    case 'CLEAR_CHOICE_PROMPT':
+      return { ...state, choicePrompt: null }
     case 'APPEND_FEED': {
       const updated = [...state.feedEntries, action.entry]
       return {
@@ -188,6 +201,7 @@ const initialState: GameState = {
   trainerView: null,
   npcView: null,
   loadoutView: null,
+  choicePrompt: null,
 }
 
 interface GameContextValue {
@@ -199,6 +213,7 @@ interface GameContextValue {
   clearTrainer: () => void
   clearNpcView: () => void
   clearLoadout: () => void
+  clearChoicePrompt: () => void
 }
 
 const GameContext = createContext<GameContextValue | null>(null)
@@ -442,6 +457,18 @@ export function GameProvider({ children }: { children: ReactNode }) {
           dispatch({ type: 'SET_LOADOUT_VIEW', view: payload as LoadoutView })
           break
         }
+        case 'FeatureChoicePrompt': {
+          const cp = payload as { featureId?: string; feature_id?: string; prompt?: string; options?: string[] }
+          dispatch({
+            type: 'SET_CHOICE_PROMPT',
+            prompt: {
+              featureId: cp.featureId ?? cp.feature_id ?? '',
+              prompt: cp.prompt ?? '',
+              options: Array.isArray(cp.options) ? cp.options : [],
+            },
+          })
+          break
+        }
         case 'ErrorEvent': {
           const err = payload as { message?: string }
           dispatch({
@@ -502,8 +529,12 @@ export function GameProvider({ children }: { children: ReactNode }) {
     dispatch({ type: 'SET_LOADOUT_VIEW', view: null })
   }, [])
 
+  const clearChoicePrompt = useCallback(() => {
+    dispatch({ type: 'CLEAR_CHOICE_PROMPT' })
+  }, [])
+
   return (
-    <GameContext.Provider value={{ state, sendMessage, sendCommand, clearShop, clearHealer, clearTrainer, clearNpcView, clearLoadout }}>
+    <GameContext.Provider value={{ state, sendMessage, sendCommand, clearShop, clearHealer, clearTrainer, clearNpcView, clearLoadout, clearChoicePrompt }}>
       {children}
     </GameContext.Provider>
   )

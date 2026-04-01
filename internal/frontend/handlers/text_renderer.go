@@ -2015,3 +2015,29 @@ func renderLoadoutView(lv *gamev1.LoadoutView) string {
 	}
 	return strings.TrimRight(sb.String(), "\r\n")
 }
+
+// choicePromptPayload matches the JSON structure emitted by grpc_service.go
+// inside the "\x00choice\x00" sentinel.
+type choicePromptPayload struct {
+	FeatureID string   `json:"featureId"`
+	Prompt    string   `json:"prompt"`
+	Options   []string `json:"options"`
+}
+
+// renderChoicePrompt formats a feature-choice prompt as human-readable telnet text.
+//
+// Precondition: payload must not be nil.
+// Postcondition: Returns a non-empty string listing the prompt and numbered options.
+func renderChoicePrompt(payload *choicePromptPayload) string {
+	if payload == nil {
+		return "No choice data."
+	}
+	var sb strings.Builder
+	sb.WriteString(payload.Prompt)
+	sb.WriteString("\r\n")
+	for i, opt := range payload.Options {
+		fmt.Fprintf(&sb, "  %d) %s\r\n", i+1, opt)
+	}
+	fmt.Fprintf(&sb, "Enter 1-%d:", len(payload.Options))
+	return sb.String()
+}

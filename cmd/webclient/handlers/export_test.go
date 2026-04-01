@@ -17,3 +17,8 @@ func WSMessageForTest(msgType string, payload any) wsMessage {
 func DispatchWSMessageForTest(env wsMessage, reqID string, registry *command.Registry) (*gamev1.ClientMessage, error) {
 	return dispatchWSMessage(env, reqID, registry)
 }
+
+// ServerEventEncodedChoiceForTest exposes serverEventEncodedChoice for unit tests.
+func ServerEventEncodedChoiceForTest(event *gamev1.ServerEvent) (json.RawMessage, string) {
+	return serverEventEncodedChoice(event)
+}

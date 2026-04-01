@@ -15,6 +15,7 @@ import type { DrawerType } from '../game/drawers/DrawerContainer'
 import { HelpModal } from '../game/HelpModal'
 import { NpcModal } from '../game/NpcModal'
 import { NpcInteractModal } from '../game/NpcInteractModal'
+import { FeatureChoiceModal } from '../game/drawers/FeatureChoiceModal'
 import { LogoutDropdown } from '../components/LogoutDropdown'
 import '../styles/game.css'
 type MobilePanel = 'room' | 'map' | 'character'
@@ -137,6 +138,7 @@ function GameLayout() {
       {showHelp && <HelpModal onClose={() => setShowHelp(false)} />}
       {state.shopView && <NpcModal />}
       <NpcInteractModal />
+      {state.choicePrompt && <FeatureChoiceModal onClose={() => { /* modal self-closes on selection */ }} />}
     </div>
   )
 }

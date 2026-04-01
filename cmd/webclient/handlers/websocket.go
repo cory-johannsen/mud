@@ -321,6 +321,32 @@ func serverEventInner(event *gamev1.ServerEvent) (proto.Message, string) {
 	}
 }
 
+// featureChoicePayload is the JSON structure decoded from the "\x00choice\x00" sentinel.
+type featureChoicePayload struct {
+	FeatureID string   `json:"featureId"`
+	Prompt    string   `json:"prompt"`
+	Options   []string `json:"options"`
+}
+
+// serverEventEncodedChoice checks if a MessageEvent carries a sentinel-encoded
+// feature choice prompt and extracts the JSON bytes and type name if so.
+//
+// Precondition: event must not be nil.
+// Postcondition: Returns non-nil bytes and "FeatureChoicePrompt" when the MessageEvent
+// content begins with the "\x00choice\x00" sentinel; returns nil, "" otherwise.
+func serverEventEncodedChoice(event *gamev1.ServerEvent) (json.RawMessage, string) {
+	msg, ok := event.Payload.(*gamev1.ServerEvent_Message)
+	if !ok || msg.Message == nil {
+		return nil, ""
+	}
+	const sentinel = "\x00choice\x00"
+	if !strings.HasPrefix(msg.Message.Content, sentinel) {
+		return nil, ""
+	}
+	jsonStr := msg.Message.Content[len(sentinel):]
+	return json.RawMessage(jsonStr), "FeatureChoicePrompt"
+}
+
 // serverEventEncodedLoadout checks if a MessageEvent carries a sentinel-encoded
 // LoadoutView payload and extracts the JSON bytes and type name if so.
 //
@@ -349,6 +375,23 @@ func (h *WSHandler) grpcToWS(ctx context.Context, stream gamev1.GameService_Sess
 		if err != nil {
 			h.logger.Info("grpcToWS: stream.Recv error", zap.Error(err))
 			return
+		}
+		// Handle sentinel-encoded FeatureChoicePrompt carried inside a MessageEvent.
+		if rawPayload, msgName := serverEventEncodedChoice(event); rawPayload != nil {
+			env := wsMessage{Type: msgName, Payload: rawPayload}
+			frame, err := json.Marshal(env)
+			if err != nil {
+				h.logger.Error("failed to marshal FeatureChoicePrompt ws envelope", zap.Error(err))
+				continue
+			}
+			if h.bus != nil {
+				h.bus.Publish(eventbus.Event{Type: msgName, Payload: rawPayload, Time: time.Now()})
+			}
+			if err := wsConn.WriteMessage(websocket.TextMessage, frame); err != nil {
+				h.logger.Info("grpcToWS: WebSocket write error", zap.String("type", msgName), zap.Error(err))
+				return
+			}
+			continue
 		}
 		// Handle sentinel-encoded LoadoutView carried inside a MessageEvent.
 		if rawPayload, msgName := serverEventEncodedLoadout(event); rawPayload != nil {

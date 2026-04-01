@@ -830,9 +830,20 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 				text = RenderRoomView(p.RoomView, w, telnet.RoomRegionRows, *rvDT, aw)
 			case *gamev1.ServerEvent_Message:
 				const loadoutSentinel = "\x00loadout\x00"
-				if strings.HasPrefix(p.Message.GetContent(), loadoutSentinel) {
+				const choiceSentinel = "\x00choice\x00"
+				content := p.Message.GetContent()
+				if strings.HasPrefix(content, choiceSentinel) {
+					// Sentinel-encoded feature choice prompt: decode JSON and render as text.
+					jsonStr := content[len(choiceSentinel):]
+					var payload choicePromptPayload
+					if err := json.Unmarshal([]byte(jsonStr), &payload); err == nil {
+						text = renderChoicePrompt(&payload)
+					} else {
+						text = "Error: could not display choice prompt."
+					}
+				} else if strings.HasPrefix(content, loadoutSentinel) {
 					// Sentinel-encoded LoadoutView: decode JSON and render as human-readable text.
-					jsonStr := p.Message.GetContent()[len(loadoutSentinel):]
+					jsonStr := content[len(loadoutSentinel):]
 					var lv gamev1.LoadoutView
 					if err := json.Unmarshal([]byte(jsonStr), &lv); err == nil {
 						text = renderLoadoutView(&lv)
