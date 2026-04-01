@@ -54,6 +54,22 @@ zone:
       immovable: true
       script: zone_map_use
       description: Zone Map
+    - item_id: rusted_car_body
+      description: Rusted Car Body
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: standard
+      cover_destructible: true
+      cover_hp: 3
+    - item_id: metal_barrel_cluster
+      description: Metal Barrel Cluster
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: lesser
+      cover_destructible: true
+      cover_hp: 2
   - id: wayne_dawgs_trailer
     title: Wayne Dawg's Trailer
     danger_level: safe
@@ -99,6 +115,23 @@ zone:
       respawn_after: 10m
     properties:
       area: filth_court
+    equipment:
+    - item_id: junk_wall
+      description: Junk Wall
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: standard
+      cover_destructible: true
+      cover_hp: 3
+    - item_id: scrap_pile
+      description: Scrap Pile
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: lesser
+      cover_destructible: true
+      cover_hp: 2
   - id: roach_haven
     title: Roach Haven
     danger_level: sketchy
@@ -116,6 +149,23 @@ zone:
       respawn_after: 3m
     properties:
       area: filth_court
+    equipment:
+    - item_id: overturned_cabinet
+      description: Overturned Cabinet
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: standard
+      cover_destructible: true
+      cover_hp: 2
+    - item_id: metal_barrel_cluster
+      description: Metal Barrel Cluster
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: lesser
+      cover_destructible: true
+      cover_hp: 2
   - id: last_stand_lodge
     title: Last Stand Lodge
     danger_level: safe
@@ -161,6 +211,23 @@ zone:
       respawn_after: 10m
     properties:
       area: filth_court
+    equipment:
+    - item_id: junk_wall
+      description: Junk Wall
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: standard
+      cover_destructible: true
+      cover_hp: 3
+    - item_id: reinforced_trailer_wall
+      description: Reinforced Trailer Wall
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: greater
+      cover_destructible: true
+      cover_hp: 4
   - id: the_green_hell
     title: The Green Hell
     danger_level: sketchy
@@ -183,6 +250,15 @@ zone:
       respawn_after: 10m
     properties:
       area: filth_court
+    equipment:
+    - item_id: scrap_pile
+      description: Scrap Pile
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: lesser
+      cover_destructible: true
+      cover_hp: 2
   - id: rotgut_alley
     title: Rotgut Alley
     core: true
@@ -210,6 +286,23 @@ zone:
     - template: dex
       count: 1
       respawn_after: 10m
+    equipment:
+    - item_id: metal_barrel_cluster
+      description: Metal Barrel Cluster
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: lesser
+      cover_destructible: true
+      cover_hp: 2
+    - item_id: rusted_car_body
+      description: Rusted Car Body
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: standard
+      cover_destructible: true
+      cover_hp: 3
   - id: the_bottle_shack
     title: The Bottle Shack
     danger_level: sketchy
@@ -230,6 +323,23 @@ zone:
       respawn_after: 10m
     properties:
       area: filth_court
+    equipment:
+    - item_id: overturned_cabinet
+      description: Overturned Cabinet
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: standard
+      cover_destructible: true
+      cover_hp: 2
+    - item_id: metal_barrel_cluster
+      description: Metal Barrel Cluster
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: lesser
+      cover_destructible: true
+      cover_hp: 2
   - id: the_heap
     title: The Heap
     core: true
@@ -257,6 +367,23 @@ zone:
       respawn_after: 10m
     properties:
       area: scrapheap_circle
+    equipment:
+    - item_id: scrap_pile
+      description: Scrap Pile
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: lesser
+      cover_destructible: true
+      cover_hp: 2
+    - item_id: junk_wall
+      description: Junk Wall
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: standard
+      cover_destructible: true
+      cover_hp: 3
   - id: the_tinkers_den
     title: The Tinker's Den
     danger_level: sketchy
@@ -282,6 +409,23 @@ zone:
       respawn_after: 10m
     properties:
       area: scrapheap_circle
+    equipment:
+    - item_id: overturned_cabinet
+      description: Overturned Cabinet
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: standard
+      cover_destructible: true
+      cover_hp: 2
+    - item_id: scrap_pile
+      description: Scrap Pile
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: lesser
+      cover_destructible: true
+      cover_hp: 2
   - id: scrapshack_23
     title: Scrapshack 23
     danger_level: sketchy
@@ -304,6 +448,23 @@ zone:
       respawn_after: 10m
     properties:
       area: scrapheap_circle
+    equipment:
+    - item_id: scrap_pile
+      description: Scrap Pile
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: lesser
+      cover_destructible: true
+      cover_hp: 2
+    - item_id: rusted_car_body
+      description: Rusted Car Body
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: standard
+      cover_destructible: true
+      cover_hp: 3
   - id: wreckers_rest
     title: Wrecker's Rest
     danger_level: sketchy
@@ -322,6 +483,15 @@ zone:
     - template: rio_wrench
       count: 1
       respawn_after: 10m
+    equipment:
+    - item_id: rusted_car_body
+      description: Rusted Car Body
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: standard
+      cover_destructible: true
+      cover_hp: 3
   - id: salvage_hut
     title: Salvage Hut
     danger_level: sketchy
@@ -340,6 +510,23 @@ zone:
     - template: rustbucket_ridge_merchant
       count: 1
       respawn_after: 0s
+    equipment:
+    - item_id: overturned_cabinet
+      description: Overturned Cabinet
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: standard
+      cover_destructible: true
+      cover_hp: 2
+    - item_id: scrap_pile
+      description: Scrap Pile
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: lesser
+      cover_destructible: true
+      cover_hp: 2
   - id: the_still
     title: The Still
     core: true
@@ -365,6 +552,23 @@ zone:
       respawn_after: 5m
     properties:
       area: rotgut_alley
+    equipment:
+    - item_id: metal_barrel_cluster
+      description: Metal Barrel Cluster
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: lesser
+      cover_destructible: true
+      cover_hp: 2
+    - item_id: reinforced_trailer_wall
+      description: Reinforced Trailer Wall
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: greater
+      cover_destructible: true
+      cover_hp: 4
   - id: rotgut_shack
     title: Rotgut Shack
     danger_level: sketchy
@@ -384,6 +588,23 @@ zone:
       respawn_after: 3m
     properties:
       area: rotgut_alley
+    equipment:
+    - item_id: overturned_cabinet
+      description: Overturned Cabinet
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: standard
+      cover_destructible: true
+      cover_hp: 2
+    - item_id: metal_barrel_cluster
+      description: Metal Barrel Cluster
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: lesser
+      cover_destructible: true
+      cover_hp: 2
   - id: the_barrel_house
     title: The Barrel House
     danger_level: sketchy
@@ -403,6 +624,23 @@ zone:
       respawn_after: 3m
     properties:
       area: rotgut_alley
+    equipment:
+    - item_id: metal_barrel_cluster
+      description: Metal Barrel Cluster
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: lesser
+      cover_destructible: true
+      cover_hp: 2
+    - item_id: junk_wall
+      description: Junk Wall
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: standard
+      cover_destructible: true
+      cover_hp: 3
   - id: snakepit
     title: Snakepit
     danger_level: sketchy
@@ -422,6 +660,23 @@ zone:
       respawn_after: 3m
     properties:
       area: rotgut_alley
+    equipment:
+    - item_id: scrap_pile
+      description: Scrap Pile
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: lesser
+      cover_destructible: true
+      cover_hp: 2
+    - item_id: overturned_cabinet
+      description: Overturned Cabinet
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: standard
+      cover_destructible: true
+      cover_hp: 2
   - id: the_keg_hole
     title: The Keg Hole
     danger_level: sketchy
@@ -439,6 +694,23 @@ zone:
       respawn_after: 3m
     properties:
       area: rotgut_alley
+    equipment:
+    - item_id: metal_barrel_cluster
+      description: Metal Barrel Cluster
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: lesser
+      cover_destructible: true
+      cover_hp: 2
+    - item_id: overturned_cabinet
+      description: Overturned Cabinet
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: standard
+      cover_destructible: true
+      cover_hp: 2
   - id: the_graveyard
     title: The Graveyard
     danger_level: sketchy
@@ -460,6 +732,23 @@ zone:
       respawn_after: 3m
     properties:
       area: boneyard_bend
+    equipment:
+    - item_id: scrap_pile
+      description: Scrap Pile
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: lesser
+      cover_destructible: true
+      cover_hp: 2
+    - item_id: rusted_car_body
+      description: Rusted Car Body
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: standard
+      cover_destructible: true
+      cover_hp: 3
   - id: the_mausoleum
     title: The Mausoleum
     danger_level: sketchy
@@ -479,6 +768,15 @@ zone:
       respawn_after: 3m
     properties:
       area: boneyard_bend
+    equipment:
+    - item_id: scrap_pile
+      description: Scrap Pile
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: lesser
+      cover_destructible: true
+      cover_hp: 2
   - id: ghosts_rest
     title: Ghost's Rest
     danger_level: sketchy
@@ -496,6 +794,15 @@ zone:
       respawn_after: 3m
     properties:
       area: boneyard_bend
+    equipment:
+    - item_id: scrap_pile
+      description: Scrap Pile
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: lesser
+      cover_destructible: true
+      cover_hp: 2
   - id: the_forgotten_trailer
     title: The Forgotten Trailer
     danger_level: sketchy
@@ -515,6 +822,15 @@ zone:
       respawn_after: 3m
     properties:
       area: boneyard_bend
+    equipment:
+    - item_id: scrap_pile
+      description: Scrap Pile
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: lesser
+      cover_destructible: true
+      cover_hp: 2
   - id: bonepickers_roost
     title: Bonepicker's Roost
     danger_level: sketchy
@@ -532,6 +848,15 @@ zone:
       respawn_after: 3m
     properties:
       area: boneyard_bend
+    equipment:
+    - item_id: scrap_pile
+      description: Scrap Pile
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: lesser
+      cover_destructible: true
+      cover_hp: 2
   - id: ashen_hollow
     title: Ashen Hollow
     core: true
@@ -556,6 +881,23 @@ zone:
       respawn_after: 5m
     properties:
       area: cinder_pit
+    equipment:
+    - item_id: junk_wall
+      description: Junk Wall
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: standard
+      cover_destructible: true
+      cover_hp: 3
+    - item_id: reinforced_trailer_wall
+      description: Reinforced Trailer Wall
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: greater
+      cover_destructible: true
+      cover_hp: 4
   - id: smokers_den
     title: Smoker's Den
     danger_level: sketchy
@@ -576,6 +918,23 @@ zone:
       respawn_after: 3m
     properties:
       area: cinder_pit
+    equipment:
+    - item_id: metal_barrel_cluster
+      description: Metal Barrel Cluster
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: lesser
+      cover_destructible: true
+      cover_hp: 2
+    - item_id: junk_wall
+      description: Junk Wall
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: standard
+      cover_destructible: true
+      cover_hp: 3
   - id: the_furnace
     title: The Furnace
     core: true
@@ -598,6 +957,23 @@ zone:
       respawn_after: 5m
     properties:
       area: cinder_pit
+    equipment:
+    - item_id: rusted_car_body
+      description: Rusted Car Body
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: standard
+      cover_destructible: true
+      cover_hp: 3
+    - item_id: reinforced_trailer_wall
+      description: Reinforced Trailer Wall
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: greater
+      cover_destructible: true
+      cover_hp: 4
   - id: scorchside_camp
     title: Scorchside Camp
     danger_level: sketchy
@@ -618,6 +994,23 @@ zone:
       respawn_after: 0s
     properties:
       area: cinder_pit
+    equipment:
+    - item_id: scrap_pile
+      description: Scrap Pile
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: lesser
+      cover_destructible: true
+      cover_hp: 2
+    - item_id: metal_barrel_cluster
+      description: Metal Barrel Cluster
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: lesser
+      cover_destructible: true
+      cover_hp: 2
   - id: the_embers_edge
     title: The Ember's Edge
     danger_level: sketchy
@@ -637,6 +1030,23 @@ zone:
       respawn_after: 3m
     properties:
       area: cinder_pit
+    equipment:
+    - item_id: metal_barrel_cluster
+      description: Metal Barrel Cluster
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: lesser
+      cover_destructible: true
+      cover_hp: 2
+    - item_id: overturned_cabinet
+      description: Overturned Cabinet
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: standard
+      cover_destructible: true
+      cover_hp: 2
   - id: blade_house
     title: Blade House
     core: true
@@ -661,6 +1071,23 @@ zone:
       respawn_after: 5m
     properties:
       area: shiv_way
+    equipment:
+    - item_id: junk_wall
+      description: Junk Wall
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: standard
+      cover_destructible: true
+      cover_hp: 3
+    - item_id: reinforced_trailer_wall
+      description: Reinforced Trailer Wall
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: greater
+      cover_destructible: true
+      cover_hp: 4
   - id: the_cutthroat
     title: The Cutthroat
     danger_level: sketchy
@@ -679,6 +1106,23 @@ zone:
       respawn_after: 3m
     properties:
       area: shiv_way
+    equipment:
+    - item_id: rusted_car_body
+      description: Rusted Car Body
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: standard
+      cover_destructible: true
+      cover_hp: 3
+    - item_id: scrap_pile
+      description: Scrap Pile
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: lesser
+      cover_destructible: true
+      cover_hp: 2
   - id: blood_camp
     title: Blood Camp
     danger_level: sketchy
@@ -699,6 +1143,23 @@ zone:
       respawn_after: 10m
     properties:
       area: shiv_way
+    equipment:
+    - item_id: rusted_car_body
+      description: Rusted Car Body
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: standard
+      cover_destructible: true
+      cover_hp: 3
+    - item_id: scrap_pile
+      description: Scrap Pile
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: lesser
+      cover_destructible: true
+      cover_hp: 2
   - id: the_slashers_den
     title: The Slasher's Den
     core: true
@@ -721,6 +1182,23 @@ zone:
       respawn_after: 5m
     properties:
       area: shiv_way
+    equipment:
+    - item_id: junk_wall
+      description: Junk Wall
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: standard
+      cover_destructible: true
+      cover_hp: 3
+    - item_id: reinforced_trailer_wall
+      description: Reinforced Trailer Wall
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: greater
+      cover_destructible: true
+      cover_hp: 4
   - id: the_razor_nest
     title: The Razor Nest
     danger_level: sketchy
@@ -741,6 +1219,23 @@ zone:
       respawn_after: 0s
     properties:
       area: shiv_way
+    equipment:
+    - item_id: scrap_pile
+      description: Scrap Pile
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: lesser
+      cover_destructible: true
+      cover_hp: 2
+    - item_id: overturned_cabinet
+      description: Overturned Cabinet
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: standard
+      cover_destructible: true
+      cover_hp: 2
   - id: rust_scrap_office
     title: Scrap Office
     description: "A repurposed foreman's office at the edge of the ridge. Metal desk, fluorescent light, and a corkboard full of job postings nobody's taken down."

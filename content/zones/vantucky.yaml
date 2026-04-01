@@ -72,6 +72,23 @@ zone:
     properties:
       lighting: overcast
       atmosphere: commercial
+    equipment:
+    - item_id: vehicle_wreck
+      description: Vehicle Wreck
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: standard
+      cover_destructible: true
+      cover_hp: 3
+    - item_id: chain_link_barricade
+      description: Chain-Link Barricade
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: lesser
+      cover_destructible: true
+      cover_hp: 2
   - id: vantucky_orchards
     title: The Orchards
     description: 'Once a quiet suburban neighborhood, the Orchards has been carved into
@@ -104,6 +121,15 @@ zone:
     properties:
       lighting: dappled
       atmosphere: suburban
+    equipment:
+    - item_id: chain_link_barricade
+      description: Chain-Link Barricade
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: lesser
+      cover_destructible: true
+      cover_hp: 2
   - id: vantucky_164th_ave
     title: 164th Avenue — Militia Territory
     description: 'The wide avenue is blocked by vehicle barricades made from stacked cars.
@@ -132,6 +158,23 @@ zone:
     properties:
       lighting: exposed
       atmosphere: militarized
+    equipment:
+    - item_id: vehicle_wreck
+      description: Vehicle Wreck
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: standard
+      cover_destructible: true
+      cover_hp: 3
+    - item_id: concrete_barrier
+      description: Concrete Barrier
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: greater
+      cover_destructible: true
+      cover_hp: 4
   - id: vantucky_i84_overpass
     title: I-84 Overpass
     description: 'The highway overpass is a notorious ambush point. Rusted guardrails
@@ -158,6 +201,23 @@ zone:
     properties:
       lighting: exposed
       atmosphere: sketchy
+    equipment:
+    - item_id: vehicle_wreck
+      description: Vehicle Wreck
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: standard
+      cover_destructible: true
+      cover_hp: 3
+    - item_id: chain_link_barricade
+      description: Chain-Link Barricade
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: lesser
+      cover_destructible: true
+      cover_hp: 2
   - id: vantucky_fishers_landing
     title: Fisher's Landing
     description: 'The old transit center at Fisher''s Landing overlooks the Columbia River.
@@ -186,6 +246,15 @@ zone:
     properties:
       lighting: overcast
       atmosphere: riverside
+    equipment:
+    - item_id: natural_cover
+      description: Natural Cover
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: lesser
+      cover_destructible: true
+      cover_hp: 2
   - id: vantucky_compound_alpha
     title: Compound Alpha
     description: 'A fortified homestead surrounded by earthen berms and razor wire.
@@ -214,6 +283,23 @@ zone:
     properties:
       lighting: floodlit
       atmosphere: fortified
+    equipment:
+    - item_id: sandbag_emplacement
+      description: Sandbag Emplacement
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: standard
+      cover_destructible: true
+      cover_hp: 3
+    - item_id: concrete_barrier
+      description: Concrete Barrier
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: greater
+      cover_destructible: true
+      cover_hp: 4
   - id: vantucky_compound_bravo
     title: Compound Bravo
     description: 'The second major compound in the area occupies a former farm property.
@@ -244,6 +330,23 @@ zone:
     properties:
       lighting: floodlit
       atmosphere: fortified
+    equipment:
+    - item_id: shipping_container
+      description: Shipping Container
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: greater
+      cover_destructible: true
+      cover_hp: 5
+    - item_id: sandbag_emplacement
+      description: Sandbag Emplacement
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: standard
+      cover_destructible: true
+      cover_hp: 3
   - id: vantucky_gun_market
     title: Gun Market
     description: 'An open-air arms bazaar sprawls across the parking lot of a dead strip mall.
@@ -274,6 +377,23 @@ zone:
     properties:
       lighting: overcast
       atmosphere: commerce
+    equipment:
+    - item_id: vehicle_wreck
+      description: Vehicle Wreck
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: standard
+      cover_destructible: true
+      cover_hp: 3
+    - item_id: chain_link_barricade
+      description: Chain-Link Barricade
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: lesser
+      cover_destructible: true
+      cover_hp: 2
   - id: vantucky_burnt_bridge_creek
     title: Burnt Bridge Creek
     description: 'A wooded ravine cuts through the suburban sprawl. The creek runs muddy
@@ -304,6 +424,15 @@ zone:
     properties:
       lighting: dim
       atmosphere: wilderness
+    equipment:
+    - item_id: natural_cover
+      description: Natural Cover
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: lesser
+      cover_destructible: true
+      cover_hp: 2
   - id: vantucky_i84_east
     title: I-84 East — Troutdale Border
     description: 'The eastbound lanes of I-84 stretch toward the Columbia River Gorge.
@@ -330,6 +459,23 @@ zone:
     properties:
       lighting: exposed
       atmosphere: wind
+    equipment:
+    - item_id: vehicle_wreck
+      description: Vehicle Wreck
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: standard
+      cover_destructible: true
+      cover_hp: 3
+    - item_id: chain_link_barricade
+      description: Chain-Link Barricade
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: lesser
+      cover_destructible: true
+      cover_hp: 2
   - id: vantucky_gas_station_ruins
     title: Gas Station Ruins
     description: 'The skeletal canopy of an old gas station stands over dry pumps and
@@ -358,6 +504,23 @@ zone:
     properties:
       lighting: dim
       atmosphere: decay
+    equipment:
+    - item_id: vehicle_wreck
+      description: Vehicle Wreck
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: standard
+      cover_destructible: true
+      cover_hp: 3
+    - item_id: chain_link_barricade
+      description: Chain-Link Barricade
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: lesser
+      cover_destructible: true
+      cover_hp: 2
   - id: vantucky_shooting_range
     title: Shooting Range
     description: 'A clearing behind a berm of packed earth serves as the community
@@ -388,6 +551,15 @@ zone:
     properties:
       lighting: open
       atmosphere: loud
+    equipment:
+    - item_id: sandbag_emplacement
+      description: Sandbag Emplacement
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: standard
+      cover_destructible: true
+      cover_hp: 3
   - id: vantucky_hidden_bunker
     title: Hidden Bunker
     description: 'A rusted hatch in the hillside opens to a concrete bunker from the
@@ -414,6 +586,23 @@ zone:
     properties:
       lighting: emergency
       atmosphere: underground
+    equipment:
+    - item_id: concrete_barrier
+      description: Concrete Barrier
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: greater
+      cover_destructible: true
+      cover_hp: 4
+    - item_id: sandbag_emplacement
+      description: Sandbag Emplacement
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: standard
+      cover_destructible: true
+      cover_hp: 3
   - id: vantucky_farm_compound
     title: Farm Compound
     description: 'A working farm surrounded by electric fence powered by solar panels.
@@ -442,6 +631,23 @@ zone:
     properties:
       lighting: open
       atmosphere: agricultural
+    equipment:
+    - item_id: sandbag_emplacement
+      description: Sandbag Emplacement
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: standard
+      cover_destructible: true
+      cover_hp: 3
+    - item_id: chain_link_barricade
+      description: Chain-Link Barricade
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: lesser
+      cover_destructible: true
+      cover_hp: 2
   - id: vantucky_checkpoint_north
     title: Northern Checkpoint
     description: 'A militia checkpoint controls the road heading north toward the river.
@@ -470,6 +676,23 @@ zone:
     properties:
       lighting: floodlit
       atmosphere: controlled
+    equipment:
+    - item_id: concrete_barrier
+      description: Concrete Barrier
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: greater
+      cover_destructible: true
+      cover_hp: 4
+    - item_id: sandbag_emplacement
+      description: Sandbag Emplacement
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: standard
+      cover_destructible: true
+      cover_hp: 3
   - id: vantucky_river_trail
     title: Columbia River Trail
     description: 'A muddy trail follows the south bank of the Columbia River. The water
@@ -498,6 +721,15 @@ zone:
     properties:
       lighting: overcast
       atmosphere: riverside
+    equipment:
+    - item_id: natural_cover
+      description: Natural Cover
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: lesser
+      cover_destructible: true
+      cover_hp: 2
   - id: vantucky_i84_onramp
     title: I-84 On-Ramp
     description: 'The crumbling on-ramp curves up toward the interstate. Wrecked cars
@@ -530,6 +762,23 @@ zone:
     properties:
       lighting: exposed
       atmosphere: sketchy
+    equipment:
+    - item_id: vehicle_wreck
+      description: Vehicle Wreck
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: standard
+      cover_destructible: true
+      cover_hp: 3
+    - item_id: chain_link_barricade
+      description: Chain-Link Barricade
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: lesser
+      cover_destructible: true
+      cover_hp: 2
   - id: vantucky_water_tower
     title: Water Tower
     description: 'A rusted municipal water tower rises above the treeline. The ladder
@@ -556,6 +805,15 @@ zone:
     properties:
       lighting: exposed
       atmosphere: elevated
+    equipment:
+    - item_id: sandbag_emplacement
+      description: Sandbag Emplacement
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: standard
+      cover_destructible: true
+      cover_hp: 3
   - id: vantucky_ammo_depot
     title: Ammo Depot
     description: 'A fortified storage building behind the shooting range serves as the
@@ -586,6 +844,23 @@ zone:
     properties:
       lighting: dim
       atmosphere: secure
+    equipment:
+    - item_id: sandbag_emplacement
+      description: Sandbag Emplacement
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: standard
+      cover_destructible: true
+      cover_hp: 3
+    - item_id: concrete_barrier
+      description: Concrete Barrier
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: greater
+      cover_destructible: true
+      cover_hp: 4
   - id: vantucky_trailer_park
     title: Trailer Park
     description: 'A sprawl of mobile homes in various states of decay. Some are occupied
@@ -614,6 +889,23 @@ zone:
     properties:
       lighting: dim
       atmosphere: residential
+    equipment:
+    - item_id: vehicle_wreck
+      description: Vehicle Wreck
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: standard
+      cover_destructible: true
+      cover_hp: 3
+    - item_id: chain_link_barricade
+      description: Chain-Link Barricade
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: lesser
+      cover_destructible: true
+      cover_hp: 2
   - id: vantucky_the_compound
     title: The Compound
     danger_level: safe
@@ -752,6 +1044,23 @@ zone:
     properties:
       lighting: dim
       atmosphere: gang_territory
+    equipment:
+    - item_id: vehicle_wreck
+      description: Vehicle Wreck
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: standard
+      cover_destructible: true
+      cover_hp: 3
+    - item_id: chain_link_barricade
+      description: Chain-Link Barricade
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: lesser
+      cover_destructible: true
+      cover_hp: 2
   - id: vantucky_abandoned_mall
     title: Abandoned Mall
     description: 'The skeleton of a mid-size shopping mall, its skylight long since shattered.
@@ -780,6 +1089,23 @@ zone:
     properties:
       lighting: dim
       atmosphere: derelict
+    equipment:
+    - item_id: welded_cart_barricade
+      description: Welded Cart Barricade
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: lesser
+      cover_destructible: true
+      cover_hp: 2
+    - item_id: vehicle_wreck
+      description: Vehicle Wreck
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: standard
+      cover_destructible: true
+      cover_hp: 3
   - id: vantucky_rail_spur
     title: Rail Spur Yard
     description: 'A short length of rail line terminates at a gravel yard behind the old
@@ -809,6 +1135,23 @@ zone:
     properties:
       lighting: overcast
       atmosphere: industrial
+    equipment:
+    - item_id: boxcar_wall
+      description: Boxcar Wall
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: standard
+      cover_destructible: true
+      cover_hp: 3
+    - item_id: chain_link_barricade
+      description: Chain-Link Barricade
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: lesser
+      cover_destructible: true
+      cover_hp: 2
   - id: vantucky_river_cliffs
     title: River Cliffs
     description: 'Shale cliffs drop twenty feet to a rocky shoreline where the Columbia
@@ -833,6 +1176,15 @@ zone:
     properties:
       lighting: exposed
       atmosphere: cliffside
+    equipment:
+    - item_id: natural_cover
+      description: Natural Cover
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: lesser
+      cover_destructible: true
+      cover_hp: 2
   - id: vantucky_overgrown_freeway
     title: Overgrown Freeway
     description: 'A section of raised highway reclaimed by vegetation. Blackberry canes
@@ -864,3 +1216,20 @@ zone:
     properties:
       lighting: dappled
       atmosphere: overgrown
+    equipment:
+    - item_id: natural_cover
+      description: Natural Cover
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: lesser
+      cover_destructible: true
+      cover_hp: 2
+    - item_id: vehicle_wreck
+      description: Vehicle Wreck
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      cover_tier: standard
+      cover_destructible: true
+      cover_hp: 3
