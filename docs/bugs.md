@@ -622,11 +622,11 @@
 
 ### BUG-76: Web UI hotbar assignment popup anchors left and extends off-screen
 **Severity:** medium
-**Status:** open
+**Status:** fixed
 **Category:** UI
 **Description:** When assigning a Feat or Technology to the hotbar, the hotbar selection popup is anchored to the left edge of the tab and expands rightward, causing it to extend off-screen and become partially invisible.
 **Steps:** Log in to the web UI; open the Feats or Technologies tab; click the hotbar assignment control on any item; observe the hotbar popup anchors left and extends beyond the right edge of the viewport.
-**Fix:**
+**Fix:** Removed position:absolute from SlotPicker in FeatsDrawer and TechnologyDrawer; picker now renders inline within the drawer flow, eliminating off-screen overflow.
 
 ### BUG-75: Web UI Loadouts tab should be inside Equipment tab, not a separate tab
 **Severity:** medium
