@@ -588,6 +588,38 @@
 **Steps:** Enter a room containing multiple NPCs; observe the NPC list order; refresh or re-enter the room and observe that the order may differ.
 **Fix:** Added `sort.Slice` by instance ID in `InstancesInRoom` after collecting instances from the map iteration.
 
+### BUG-74: `use brutal_surge` has no effect
+**Severity:** high
+**Status:** open
+**Category:** Combat
+**Description:** Using the `brutal_surge` technology via the `use brutal_surge` command produces no visible effect on the player or combat state.
+**Steps:** Enter combat; execute `use brutal_surge`; observe that no effect is applied and no feedback is given.
+**Fix:**
+
+### BUG-73: Web UI Inventory Equip button does not prompt for loadout and hand selection
+**Severity:** high
+**Status:** open
+**Category:** UI
+**Description:** The Equip button in the web UI Inventory tab equips items without prompting the player to select a loadout and hand slot; the item is not removed from inventory and the Loadout tab does not reflect the change.
+**Steps:** Log in to the web UI; open the Inventory tab; click the Equip button on a weapon; observe that no modal appears to select a loadout or hand, inventory is not updated, and the Loadout tab does not reflect any change.
+**Fix:**
+
+### BUG-75: Web UI Loadouts tab should be inside Equipment tab, not a separate tab
+**Severity:** medium
+**Status:** open
+**Category:** UI
+**Description:** The Loadouts tab exists as a standalone top-level tab; it should be moved inside the Equipment tab, replacing the Main Hand and Off Hand sections at the top, with the two loadouts displayed side by side horizontally.
+**Steps:** Log in to the web UI; observe the Loadouts tab as a separate top-level tab; note that the Equipment tab separately displays Main Hand and Off Hand rather than integrating loadout selection inline.
+**Fix:**
+
+### BUG-72: Web UI Technology tab items show no description or effects
+**Severity:** medium
+**Status:** fixed
+**Category:** UI
+**Description:** In the web UI Technology tab, each listed technology displays no description or effect details, leaving players unable to understand what any technology does.
+**Steps:** Log in to the web UI; open the Technology tab; observe that technology entries show no description or effect information.
+**Fix:** Added `description` field to `PreparedSlotView` and `SpontaneousKnownEntry` proto messages; server now populates description from tech registry for all slot types.
+
 ### BUG-61: Web UI Stats tab does not update XP after combat
 **Severity:** medium
 **Status:** fixed
