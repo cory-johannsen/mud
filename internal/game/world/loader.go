@@ -63,14 +63,17 @@ type yamlRoomTrap struct {
 
 // yamlRoomEquipment is the YAML representation of a room equipment config.
 type yamlRoomEquipment struct {
-	ItemID       string                  `yaml:"item_id"`
-	Description  string                  `yaml:"description"`
-	MaxCount     int                     `yaml:"max_count"`
-	RespawnAfter string                  `yaml:"respawn_after"`
-	Immovable    bool                    `yaml:"immovable"`
-	Script       string                  `yaml:"script"`
-	SkillChecks  []skillcheck.TriggerDef `yaml:"skill_checks"`
-	TrapTemplate string                  `yaml:"trap_template,omitempty"`
+	ItemID            string                  `yaml:"item_id"`
+	Description       string                  `yaml:"description"`
+	MaxCount          int                     `yaml:"max_count"`
+	RespawnAfter      string                  `yaml:"respawn_after"`
+	Immovable         bool                    `yaml:"immovable"`
+	Script            string                  `yaml:"script"`
+	SkillChecks       []skillcheck.TriggerDef `yaml:"skill_checks"`
+	TrapTemplate      string                  `yaml:"trap_template,omitempty"`
+	CoverTier         string                  `yaml:"cover_tier,omitempty"`
+	CoverDestructible bool                    `yaml:"cover_destructible"`
+	CoverHP           int                     `yaml:"cover_hp"`
 }
 
 // yamlRoom is the YAML representation of a room.
@@ -254,14 +257,17 @@ func convertYAMLZone(yz yamlZone) (*Zone, error) {
 				dur = 0
 			}
 			eq := RoomEquipmentConfig{
-				ItemID:       e.ItemID,
-				Description:  e.Description,
-				MaxCount:     e.MaxCount,
-				RespawnAfter: dur,
-				Immovable:    e.Immovable,
-				Script:       e.Script,
-				SkillChecks:  e.SkillChecks,
-				TrapTemplate: e.TrapTemplate,
+				ItemID:            e.ItemID,
+				Description:       e.Description,
+				MaxCount:          e.MaxCount,
+				RespawnAfter:      dur,
+				Immovable:         e.Immovable,
+				Script:            e.Script,
+				SkillChecks:       e.SkillChecks,
+				TrapTemplate:      e.TrapTemplate,
+				CoverTier:         e.CoverTier,
+				CoverDestructible: e.CoverDestructible,
+				CoverHP:           e.CoverHP,
 			}
 			room.Equipment = append(room.Equipment, eq)
 		}
@@ -328,14 +334,17 @@ func zoneToYAML(zone *Zone) yamlZoneFile {
 				respawnStr = eq.RespawnAfter.String()
 			}
 			yr.Equipment = append(yr.Equipment, yamlRoomEquipment{
-				ItemID:       eq.ItemID,
-				Description:  eq.Description,
-				MaxCount:     eq.MaxCount,
-				RespawnAfter: respawnStr,
-				Immovable:    eq.Immovable,
-				Script:       eq.Script,
-				SkillChecks:  eq.SkillChecks,
-				TrapTemplate: eq.TrapTemplate,
+				ItemID:            eq.ItemID,
+				Description:       eq.Description,
+				MaxCount:          eq.MaxCount,
+				RespawnAfter:      respawnStr,
+				Immovable:         eq.Immovable,
+				Script:            eq.Script,
+				SkillChecks:       eq.SkillChecks,
+				TrapTemplate:      eq.TrapTemplate,
+				CoverTier:         eq.CoverTier,
+				CoverDestructible: eq.CoverDestructible,
+				CoverHP:           eq.CoverHP,
 			})
 		}
 		for _, tr := range room.Traps {
