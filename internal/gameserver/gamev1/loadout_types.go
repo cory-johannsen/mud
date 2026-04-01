@@ -17,11 +17,3 @@ type LoadoutView struct {
 	ActiveIndex int32                  `json:"activeIndex,omitempty"`
 }
 
-// ServerEvent_LoadoutView is the oneof wrapper for LoadoutView in ServerEvent.Payload.
-// It is defined here (not in the generated game.pb.go) because LoadoutView is a
-// hand-written type and is not a registered protoreflect.Message.
-type ServerEvent_LoadoutView struct {
-	LoadoutView *LoadoutView `protobuf:"bytes,33,opt,name=loadout_view,json=loadoutView,proto3,oneof"`
-}
-
-func (*ServerEvent_LoadoutView) isServerEvent_Payload() {}

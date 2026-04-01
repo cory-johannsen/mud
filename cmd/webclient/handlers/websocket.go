@@ -321,21 +321,23 @@ func serverEventInner(event *gamev1.ServerEvent) (proto.Message, string) {
 	}
 }
 
-// serverEventLoadoutView checks if event carries a LoadoutView payload and returns
-// its JSON serialization and type name. Returns nil, "" for all other event types.
+// serverEventEncodedLoadout checks if a MessageEvent carries a sentinel-encoded
+// LoadoutView payload and extracts the JSON bytes and type name if so.
 //
 // Precondition: event must not be nil.
-// Postcondition: Returns non-nil bytes and "LoadoutView" when the payload is a LoadoutView.
-func serverEventLoadoutView(event *gamev1.ServerEvent) (json.RawMessage, string) {
-	lv, ok := event.Payload.(*gamev1.ServerEvent_LoadoutView)
-	if !ok || lv.LoadoutView == nil {
+// Postcondition: Returns non-nil bytes and "LoadoutView" when the MessageEvent content
+// begins with the "\x00loadout\x00" sentinel; returns nil, "" otherwise.
+func serverEventEncodedLoadout(event *gamev1.ServerEvent) (json.RawMessage, string) {
+	msg, ok := event.Payload.(*gamev1.ServerEvent_Message)
+	if !ok || msg.Message == nil {
 		return nil, ""
 	}
-	data, err := json.Marshal(lv.LoadoutView)
-	if err != nil {
+	const sentinel = "\x00loadout\x00"
+	if !strings.HasPrefix(msg.Message.Content, sentinel) {
 		return nil, ""
 	}
-	return json.RawMessage(data), "LoadoutView"
+	jsonStr := msg.Message.Content[len(sentinel):]
+	return json.RawMessage(jsonStr), "LoadoutView"
 }
 
 // grpcToWS reads ServerEvent protos from the gRPC stream and writes JSON frames to the WS.
@@ -348,8 +350,8 @@ func (h *WSHandler) grpcToWS(ctx context.Context, stream gamev1.GameService_Sess
 			h.logger.Info("grpcToWS: stream.Recv error", zap.Error(err))
 			return
 		}
-		// Handle non-proto LoadoutView via encoding/json before the proto path.
-		if rawPayload, msgName := serverEventLoadoutView(event); rawPayload != nil {
+		// Handle sentinel-encoded LoadoutView carried inside a MessageEvent.
+		if rawPayload, msgName := serverEventEncodedLoadout(event); rawPayload != nil {
 			env := wsMessage{Type: msgName, Payload: rawPayload}
 			frame, err := json.Marshal(env)
 			if err != nil {

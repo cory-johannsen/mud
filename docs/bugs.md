@@ -508,6 +508,14 @@
 **Steps:** Open the web client; begin character creation; proceed to the skill selection step; observe that each skill is identified by its raw ID string rather than its display name; hover over a skill entry and observe no tooltip or description appears.
 **Fix:** Three-layer fix matching the feat selection pattern. (1) Server: added `skillResponse` struct to `characters.go` and populated a `skills` array in `ListOptions` with `id`, `name`, `description`, and `ability` fields, adding it to the JSON response alongside `feats`. (2) TypeScript: added `SkillOption` interface to `client.ts` and added `skills: SkillOption[]` to `CharacterOptions`. (3) Client: updated `SkillsStep` in `CharacterWizard.tsx` to accept `availableSkills: SkillOption[]` prop, build a `skillByID` lookup map with `useMemo`, render `skill?.name ?? id` instead of raw IDs, display `skill.description` below each skill name, and updated fixed-skill display to use `optionCard` style matching the feat pattern. Updated the call site to pass `availableSkills={options?.skills ?? []}`.
 
+### BUG-69: Armor Training armor category selection uses console prompt instead of modal in web UI
+**Severity:** high
+**Status:** open
+**Category:** UI
+**Description:** In the web UI, the Armor Training feat category selection is delivered as a numbered console prompt which the player cannot respond to — input is interpreted as a movement command instead; the selection should be presented as a modal popup.
+**Steps:** Create or level a character with the Armor Training feat in the web UI; observe the console shows "Choose an armor category to gain proficiency in: 1) light_armor 2) medium_armor 3) heavy_armor Enter 1-3:"; type "3"; observe the response is "Invalid selection. You will be prompted again on next login." and the input was routed to the movement handler as `no exit "3"`.
+**Fix:**
+
 ### BUG-68: Reaction feats and technologies displayed as Active instead of Reactions
 **Severity:** high
 **Status:** open

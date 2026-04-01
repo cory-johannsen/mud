@@ -1,6 +1,8 @@
 package gameserver
 
 import (
+	"encoding/json"
+	"strings"
 	"testing"
 
 	"github.com/cory-johannsen/mud/internal/game/combat"
@@ -137,8 +139,13 @@ func TestHandleLoadout_InCombat_EmptyArg(t *testing.T) {
 	ev, err := svc.handleLoadout("lo_empty", &gamev1.LoadoutRequest{Arg: ""})
 	require.NoError(t, err)
 	require.NotNil(t, ev)
-	lv := ev.GetLoadoutView()
-	require.NotNil(t, lv, "display-only call must return a LoadoutView event")
+	// display-only call must return a sentinel-encoded MessageEvent with LoadoutView JSON.
+	const sentinel = "\x00loadout\x00"
+	content := ev.GetMessage().GetContent()
+	require.True(t, strings.HasPrefix(content, sentinel), "display-only call must return sentinel-encoded MessageEvent")
+	jsonStr := content[len(sentinel):]
+	var lv gamev1.LoadoutView
+	require.NoError(t, json.Unmarshal([]byte(jsonStr), &lv), "sentinel payload must be valid LoadoutView JSON")
 	assert.NotEmpty(t, lv.Presets, "LoadoutView must contain presets")
 	assert.Equal(t, apBefore, combatHandler.RemainingAP("lo_empty"), "AP must not be deducted for empty-arg (display) call")
 }

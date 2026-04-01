@@ -2,6 +2,7 @@ package gameserver
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"math"
@@ -5355,7 +5356,9 @@ func (s *GameServiceServer) handleLoadout(uid string, req *gamev1.LoadoutRequest
 // buildLoadoutView constructs a LoadoutView ServerEvent from the session's LoadoutSet.
 //
 // Precondition: sess must not be nil.
-// Postcondition: Returns a ServerEvent wrapping a LoadoutView with all presets populated.
+// Postcondition: Returns a ServerEvent wrapping a sentinel-encoded MessageEvent carrying
+// the LoadoutView as JSON. The sentinel prefix "\x00loadout\x00" allows the websocket and
+// telnet handlers to detect and re-render the payload correctly.
 func (s *GameServiceServer) buildLoadoutView(sess *session.PlayerSession) *gamev1.ServerEvent {
 	lv := &gamev1.LoadoutView{}
 	if sess.LoadoutSet != nil {
@@ -5376,8 +5379,19 @@ func (s *GameServiceServer) buildLoadoutView(sess *session.PlayerSession) *gamev
 			lv.Presets = append(lv.Presets, wp)
 		}
 	}
+	data, err := json.Marshal(lv)
+	if err != nil {
+		return errorEvent("failed to build loadout view")
+	}
+	// Embed JSON as sentinel-prefixed MessageEvent content.
+	// The websocket handler detects "\x00loadout\x00" and re-wraps as "LoadoutView".
+	// The telnet bridge renders it as human-readable text.
 	return &gamev1.ServerEvent{
-		Payload: &gamev1.ServerEvent_LoadoutView{LoadoutView: lv},
+		Payload: &gamev1.ServerEvent_Message{
+			Message: &gamev1.MessageEvent{
+				Content: "\x00loadout\x00" + string(data),
+			},
+		},
 	}
 }
 

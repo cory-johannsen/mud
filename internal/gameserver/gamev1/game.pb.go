@@ -3731,7 +3731,6 @@ type ServerEvent struct {
 	//	*ServerEvent_HealerView
 	//	*ServerEvent_TrainerView
 	//	*ServerEvent_Weather
-	//	*ServerEvent_LoadoutView
 	Payload       isServerEvent_Payload `protobuf_oneof:"payload"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -4055,15 +4054,6 @@ func (x *ServerEvent) GetWeather() *WeatherEvent {
 	if x != nil {
 		if x, ok := x.Payload.(*ServerEvent_Weather); ok {
 			return x.Weather
-		}
-	}
-	return nil
-}
-
-func (x *ServerEvent) GetLoadoutView() *LoadoutView {
-	if x != nil {
-		if x, ok := x.Payload.(*ServerEvent_LoadoutView); ok {
-			return x.LoadoutView
 		}
 	}
 	return nil

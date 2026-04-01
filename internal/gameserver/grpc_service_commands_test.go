@@ -1,7 +1,9 @@
 package gameserver
 
 import (
+	"encoding/json"
 	"fmt"
+	"strings"
 	"testing"
 	"unicode"
 
@@ -14,6 +16,22 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/session"
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 )
+
+const loadoutSentinel = "\x00loadout\x00"
+
+// extractLoadoutView decodes a sentinel-encoded LoadoutView from a ServerEvent MessageEvent.
+// Returns nil if the event does not carry a loadout sentinel.
+func extractLoadoutView(evt *gamev1.ServerEvent) *gamev1.LoadoutView {
+	msg := evt.GetMessage()
+	if msg == nil || !strings.HasPrefix(msg.Content, loadoutSentinel) {
+		return nil
+	}
+	var lv gamev1.LoadoutView
+	if err := json.Unmarshal([]byte(msg.Content[len(loadoutSentinel):]), &lv); err != nil {
+		return nil
+	}
+	return &lv
+}
 
 // TestHandleLoadout_NoArg_ReturnsLoadoutView verifies that handleLoadout with an empty arg
 // returns a structured LoadoutView event (not a message), which the web client renders
@@ -33,8 +51,8 @@ func TestHandleLoadout_NoArg_ReturnsLoadoutView(t *testing.T) {
 	evt, err := svc.handleLoadout("u_combined", &gamev1.LoadoutRequest{Arg: ""})
 	require.NoError(t, err)
 	require.NotNil(t, evt)
-	lv := evt.GetLoadoutView()
-	require.NotNil(t, lv, "no-arg handleLoadout must return a LoadoutView event")
+	lv := extractLoadoutView(evt)
+	require.NotNil(t, lv, "no-arg handleLoadout must return a sentinel-encoded LoadoutView")
 	assert.Len(t, lv.Presets, 2, "default LoadoutSet has 2 presets")
 	assert.Equal(t, int32(0), lv.ActiveIndex, "active index must be 0 by default")
 }
@@ -76,8 +94,8 @@ func TestHandleLoadout_NoArg_HasPresetsInView(t *testing.T) {
 	evt, err := svc.handleLoadout("u1", &gamev1.LoadoutRequest{Arg: ""})
 	require.NoError(t, err)
 	require.NotNil(t, evt)
-	lv := evt.GetLoadoutView()
-	require.NotNil(t, lv, "no-arg handleLoadout must return a LoadoutView event")
+	lv := extractLoadoutView(evt)
+	require.NotNil(t, lv, "no-arg handleLoadout must return a sentinel-encoded LoadoutView")
 	assert.NotEmpty(t, lv.Presets, "LoadoutView must contain at least one preset")
 }
 
@@ -290,7 +308,7 @@ func TestPropertyHandleLoadout_ValidSessionAlwaysReturnsEvent(t *testing.T) {
 		require.NoError(rt, err)
 		require.NotNil(rt, evt)
 		if arg == "" {
-			require.NotNil(rt, evt.GetLoadoutView(), "empty arg must return LoadoutView")
+			require.NotNil(rt, extractLoadoutView(evt), "empty arg must return sentinel-encoded LoadoutView")
 		} else {
 			require.NotNil(rt, evt.GetMessage(), "non-empty arg must return MessageEvent")
 		}

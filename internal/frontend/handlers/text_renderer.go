@@ -1976,3 +1976,42 @@ func RenderWorldMap(resp *gamev1.MapResponse, width int) string {
 
 	return sb.String()
 }
+
+// renderLoadoutView formats a LoadoutView as human-readable telnet text.
+//
+// Precondition: lv must not be nil.
+// Postcondition: Returns a non-empty string with one line per preset.
+func renderLoadoutView(lv *gamev1.LoadoutView) string {
+	if lv == nil {
+		return "No loadout data."
+	}
+	var sb strings.Builder
+	sb.WriteString("Loadout Presets\r\n")
+	for i, preset := range lv.Presets {
+		label := fmt.Sprintf("  Preset %d", i+1)
+		if int32(i) == lv.ActiveIndex {
+			label += " [ACTIVE]"
+		}
+		label += ": "
+		mainHand := preset.MainHand
+		mainDmg := preset.MainHandDamage
+		offHand := preset.OffHand
+		offDmg := preset.OffHandDamage
+		mainStr := "—"
+		if mainHand != "" {
+			mainStr = mainHand
+			if mainDmg != "" {
+				mainStr += " (" + mainDmg + ")"
+			}
+		}
+		offStr := "—"
+		if offHand != "" {
+			offStr = offHand
+			if offDmg != "" {
+				offStr += " (" + offDmg + ")"
+			}
+		}
+		sb.WriteString(label + "Main: " + mainStr + " | Off: " + offStr + "\r\n")
+	}
+	return strings.TrimRight(sb.String(), "\r\n")
+}

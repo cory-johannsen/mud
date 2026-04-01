@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -828,11 +829,23 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 				aw, _ := activeWeather.Load().(string)
 				text = RenderRoomView(p.RoomView, w, telnet.RoomRegionRows, *rvDT, aw)
 			case *gamev1.ServerEvent_Message:
-				period := ""
-				if tod, ok := currentTime.Load().(*gamev1.TimeOfDayEvent); ok && tod != nil {
-					period = tod.GetPeriod()
+				const loadoutSentinel = "\x00loadout\x00"
+				if strings.HasPrefix(p.Message.GetContent(), loadoutSentinel) {
+					// Sentinel-encoded LoadoutView: decode JSON and render as human-readable text.
+					jsonStr := p.Message.GetContent()[len(loadoutSentinel):]
+					var lv gamev1.LoadoutView
+					if err := json.Unmarshal([]byte(jsonStr), &lv); err == nil {
+						text = renderLoadoutView(&lv)
+					} else {
+						text = "Error: could not display loadout."
+					}
+				} else {
+					period := ""
+					if tod, ok := currentTime.Load().(*gamev1.TimeOfDayEvent); ok && tod != nil {
+						period = tod.GetPeriod()
+					}
+					text = RenderMessage(p.Message, period)
 				}
-				text = RenderMessage(p.Message, period)
 			case *gamev1.ServerEvent_RoomEvent:
 				text = RenderRoomEvent(p.RoomEvent)
 			case *gamev1.ServerEvent_PlayerList:
@@ -1072,27 +1085,6 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 				default:
 				}
 				continue
-			case *gamev1.ServerEvent_LoadoutView:
-				lv := p.LoadoutView
-				var sb strings.Builder
-				for i, preset := range lv.Presets {
-					label := fmt.Sprintf("Preset %d", i+1)
-					if int32(i) == lv.ActiveIndex {
-						label += " [active]"
-					}
-					sb.WriteString(label + ":\n")
-					mainHand := preset.MainHand
-					if mainHand == "" {
-						mainHand = "empty"
-					}
-					offHand := preset.OffHand
-					if offHand == "" {
-						offHand = "empty"
-					}
-					sb.WriteString("  Main: " + mainHand + "\n")
-					sb.WriteString("  Off:  " + offHand + "\n")
-				}
-				text = strings.TrimRight(sb.String(), "\n")
 			case *gamev1.ServerEvent_Weather:
 				if p.Weather.Active {
 					activeWeather.Store(p.Weather.WeatherName)
