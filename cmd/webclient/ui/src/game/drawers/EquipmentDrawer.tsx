@@ -1,5 +1,6 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useGame } from '../GameContext'
+import type { LoadoutWeaponPreset } from '../../proto'
 
 function EquipSlot({ label, value, bonus, dmg }: { label: string; value?: string | null; bonus?: string | null; dmg?: string | null }) {
   return (
@@ -12,6 +13,60 @@ function EquipSlot({ label, value, bonus, dmg }: { label: string; value?: string
       ) : (
         <div className="equip-slot-value equip-empty">—</div>
       )}
+    </div>
+  )
+}
+
+function WeaponSlot({ label, name, damage }: { label: string; name?: string; damage?: string }) {
+  const isEmpty = !name
+  return (
+    <div style={styles.weaponSlot}>
+      <div style={styles.weaponSlotLabel}>{label}</div>
+      {isEmpty ? (
+        <div style={{ ...styles.weaponSlotValue, color: '#444' }}>—</div>
+      ) : (
+        <div style={styles.weaponSlotValue}>
+          <span style={{ color: '#e0c060', fontSize: '0.85rem' }}>{name}</span>
+          {damage && <span style={{ color: '#999', fontSize: '0.75rem' }}> {damage}</span>}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function PresetCard({
+  preset,
+  index,
+  isActive,
+  onSwitch,
+  isSwitching,
+}: {
+  preset: LoadoutWeaponPreset
+  index: number
+  isActive: boolean
+  onSwitch: (n: number) => void
+  isSwitching: boolean
+}) {
+  return (
+    <div style={{ ...styles.presetCard, ...(isActive ? styles.presetCardActive : {}) }}>
+      <div style={styles.presetHeader}>
+        <span style={styles.presetName}>Preset {index + 1}</span>
+        {isActive
+          ? <span style={styles.activeBadge}>active</span>
+          : (
+            <button
+              style={styles.switchBtn}
+              onClick={() => onSwitch(index + 1)}
+              disabled={isSwitching}
+              type="button"
+            >
+              Switch
+            </button>
+          )
+        }
+      </div>
+      <WeaponSlot label="Main" name={preset.mainHand} damage={preset.mainHandDamage} />
+      <WeaponSlot label="Off" name={preset.offHand} damage={preset.offHandDamage} />
     </div>
   )
 }
@@ -42,39 +97,82 @@ const ACCESSORY_SLOTS: Array<{ key: string; label: string }> = [
 ]
 
 export function EquipmentDrawer({ onClose }: { onClose: () => void }) {
-  const { state, sendMessage } = useGame()
+  const { state, sendMessage, clearLoadout } = useGame()
+  const [isSwitching, setIsSwitching] = useState(false)
 
   useEffect(() => {
     if (!state.characterSheet) {
       sendMessage('CharacterSheetRequest', {})
     }
-  }, [state.characterSheet, sendMessage])
+    sendMessage('LoadoutRequest', { arg: '' })
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Re-fetch after a switch settles.
+  useEffect(() => {
+    if (!isSwitching) return
+    const id = setTimeout(() => {
+      sendMessage('LoadoutRequest', { arg: '' })
+      setIsSwitching(false)
+    }, 400)
+    return () => clearTimeout(id)
+  }, [isSwitching, sendMessage])
+
+  function handleSwitch(presetNumber: number) {
+    setIsSwitching(true)
+    sendMessage('LoadoutRequest', { arg: String(presetNumber) })
+  }
+
+  function handleClose() {
+    clearLoadout()
+    onClose()
+  }
 
   const sheet = state.characterSheet
   const armor = (sheet?.armor ?? {}) as Record<string, string>
   const accessories = (sheet?.accessories ?? {}) as Record<string, string>
+  const lv = state.loadoutView
+  const activeIndex = lv?.activeIndex ?? 0
+  const presets = lv?.presets ?? []
 
   return (
     <>
       <div className="drawer-header">
         <h3>Equipment</h3>
-        <button className="drawer-close" onClick={onClose}>✕</button>
+        <button className="drawer-close" onClick={handleClose}>✕</button>
       </div>
       <div className="drawer-body">
         {!sheet ? (
           <p style={{ color: '#666' }}>Loading…</p>
         ) : (
           <>
-            <EquipSlot
-              label="Main Hand"
-              value={sheet.mainHand ?? sheet.main_hand}
-              bonus={sheet.mainHandAttackBonus ?? sheet.main_hand_attack_bonus}
-              dmg={sheet.mainHandDamage ?? sheet.main_hand_damage}
-            />
-            <EquipSlot label="Off Hand" value={sheet.offHand ?? sheet.off_hand} />
+            {/* Loadout presets side-by-side */}
+            <div style={styles.sectionLabel}>Loadouts</div>
+            {presets.length === 0 ? (
+              <p style={{ color: '#666', fontSize: '0.8rem', marginBottom: '0.75rem' }}>No loadout presets.</p>
+            ) : (
+              <div style={styles.presetRow}>
+                {presets.map((preset, i) => (
+                  <PresetCard
+                    key={`preset-${i}`}
+                    preset={preset}
+                    index={i}
+                    isActive={i === activeIndex}
+                    onSwitch={handleSwitch}
+                    isSwitching={isSwitching}
+                  />
+                ))}
+              </div>
+            )}
+            {isSwitching && <p style={{ color: '#666', fontSize: '0.8rem', fontStyle: 'italic', marginBottom: '0.5rem' }}>Switching…</p>}
+
+            {/* Armor */}
+            <div style={{ ...styles.sectionLabel, marginTop: '0.75rem' }}>Armor</div>
             {ARMOR_SLOTS.map(({ key, label }) => (
               <EquipSlot key={key} label={label} value={armor[key] || null} />
             ))}
+
+            {/* Accessories */}
+            <div style={{ ...styles.sectionLabel, marginTop: '0.75rem' }}>Accessories</div>
             {ACCESSORY_SLOTS.map(({ key, label }) => (
               <EquipSlot key={key} label={label} value={accessories[key] || null} />
             ))}
@@ -83,4 +181,83 @@ export function EquipmentDrawer({ onClose }: { onClose: () => void }) {
       </div>
     </>
   )
+}
+
+const styles: Record<string, React.CSSProperties> = {
+  sectionLabel: {
+    color: '#7af',
+    fontSize: '0.72rem',
+    textTransform: 'uppercase',
+    letterSpacing: '0.08em',
+    marginBottom: '0.4rem',
+    borderBottom: '1px solid #2a2a2a',
+    paddingBottom: '0.2rem',
+  },
+  presetRow: {
+    display: 'flex',
+    gap: '0.5rem',
+    marginBottom: '0.5rem',
+  },
+  presetCard: {
+    flex: 1,
+    background: '#111',
+    border: '1px solid #2a2a2a',
+    borderRadius: '4px',
+    padding: '0.5rem 0.6rem',
+    minWidth: 0,
+  },
+  presetCardActive: {
+    borderColor: '#4a6a2a',
+    background: '#0d1a0d',
+  },
+  presetHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: '0.4rem',
+  },
+  presetName: {
+    color: '#ccc',
+    fontSize: '0.8rem',
+    fontWeight: 600,
+  },
+  activeBadge: {
+    fontSize: '0.65rem',
+    padding: '0.1rem 0.35rem',
+    borderRadius: '3px',
+    background: '#2a3a1a',
+    border: '1px solid #4a6a2a',
+    color: '#8d4',
+    whiteSpace: 'nowrap' as const,
+  },
+  switchBtn: {
+    padding: '0.1rem 0.45rem',
+    background: '#1a2a1a',
+    border: '1px solid #4a6a2a',
+    color: '#8d4',
+    borderRadius: '3px',
+    cursor: 'pointer',
+    fontFamily: 'monospace',
+    fontSize: '0.7rem',
+  },
+  weaponSlot: {
+    display: 'flex',
+    alignItems: 'baseline',
+    gap: '0.3rem',
+    marginBottom: '0.2rem',
+  },
+  weaponSlotLabel: {
+    color: '#7af',
+    fontSize: '0.68rem',
+    textTransform: 'uppercase' as const,
+    letterSpacing: '0.05em',
+    minWidth: '2.2rem',
+    flexShrink: 0,
+  },
+  weaponSlotValue: {
+    fontSize: '0.82rem',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap' as const,
+  },
 }

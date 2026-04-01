@@ -604,6 +604,14 @@
 **Steps:** Log in to the web UI; open the Inventory tab; click the Equip button on a weapon; observe that no modal appears to select a loadout or hand, inventory is not updated, and the Loadout tab does not reflect any change.
 **Fix:**
 
+### BUG-78: Technology "Force Field Emitter" description references Dexterity
+**Severity:** low
+**Status:** open
+**Category:** Content
+**Description:** The Force Field Emitter technology description incorrectly references Dexterity and mentions "mystic armor", both of which are PF2E/fantasy terms not used in this system.
+**Steps:** Log in; open the Technologies tab or view the Force Field Emitter technology description; observe the references to Dexterity and mystic armor.
+**Fix:**
+
 ### BUG-77: Web UI has a wide border surrounding the screen that should be removed
 **Severity:** low
 **Status:** open
@@ -622,11 +630,11 @@
 
 ### BUG-75: Web UI Loadouts tab should be inside Equipment tab, not a separate tab
 **Severity:** medium
-**Status:** open
+**Status:** fixed
 **Category:** UI
 **Description:** The Loadouts tab exists as a standalone top-level tab; it should be moved inside the Equipment tab, replacing the Main Hand and Off Hand sections at the top, with the two loadouts displayed side by side horizontally.
 **Steps:** Log in to the web UI; observe the Loadouts tab as a separate top-level tab; note that the Equipment tab separately displays Main Hand and Off Hand rather than integrating loadout selection inline.
-**Fix:**
+**Fix:** Merged loadout preset cards into EquipmentDrawer at the top, displayed side by side. Removed standalone Loadout toolbar button and DrawerType entry.
 
 ### BUG-72: Web UI Technology tab items show no description or effects
 **Severity:** medium
