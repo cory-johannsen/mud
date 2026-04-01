@@ -1021,6 +1021,10 @@ func TestLoadZone_Vantucky_AllRoomsReachable(t *testing.T) {
 				continue
 			}
 			revDir := exit.Direction.Opposite()
+			if revDir == "" {
+				// Non-standard direction has no defined opposite — skip.
+				continue
+			}
 			_, hasReverse := target.ExitForDirection(revDir)
 			assert.Truef(t, hasReverse,
 				"room %q has %s exit to %q, but %q has no %s exit back (BUG-62)",
