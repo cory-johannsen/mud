@@ -1,0 +1,32 @@
+id: juggalo_quest_giver
+name: "Prophet Scratch"
+description: >
+  An elder Juggalo in worn velvet, holding a crumpled notebook of field
+  intelligence. He tracks Tweaker and Wook movements obsessively and has
+  work for anyone willing to bleed for the Family.
+type: human
+npc_type: quest_giver
+npc_role: quest_giver
+level: 4
+max_hp: 25
+ac: 11
+awareness: 9
+faction_id: juggalos
+disposition: neutral
+personality: cowardly
+ai_domain: ""
+respawn_delay: "15m"
+abilities:
+  brutality: 10
+  grit: 12
+  quickness: 10
+  reasoning: 13
+  savvy: 14
+  flair: 16
+quest_giver:
+  placeholder_dialog:
+    - "The Family's got business. You interested, or you just passing through?"
+loot:
+  currency:
+    min: 0
+    max: 0

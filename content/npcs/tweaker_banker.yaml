@@ -1,0 +1,33 @@
+id: tweaker_banker
+name: "Tweaker Treasury"
+description: >
+  A paranoid Tweaker with a custom-welded lockbox and a surveillance camera
+  pointed at every approach. He doesn't trust anyone, but he'll hold your
+  credits.
+type: human
+npc_type: banker
+npc_role: banker
+level: 3
+max_hp: 22
+ac: 11
+awareness: 10
+faction_id: tweakers
+disposition: neutral
+personality: cowardly
+ai_domain: ""
+respawn_delay: "15m"
+abilities:
+  brutality: 9
+  grit: 11
+  quickness: 14
+  reasoning: 14
+  savvy: 13
+  flair: 9
+banker:
+  zone_id: oregon_country_fair
+  base_rate: 0.98
+  rate_variance: 0.02
+loot:
+  currency:
+    min: 20
+    max: 80

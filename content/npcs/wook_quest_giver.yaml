@@ -1,0 +1,31 @@
+id: wook_quest_giver
+name: "Council Elder"
+description: >
+  An ancient Wook who speaks slowly and means everything. The council fire
+  burns behind him as he assigns missions against Juggalos and Tweakers.
+type: human
+npc_type: quest_giver
+npc_role: quest_giver
+level: 4
+max_hp: 25
+ac: 10
+awareness: 10
+faction_id: wooks
+disposition: neutral
+personality: cowardly
+ai_domain: ""
+respawn_delay: "15m"
+abilities:
+  brutality: 8
+  grit: 12
+  quickness: 9
+  reasoning: 14
+  savvy: 14
+  flair: 17
+quest_giver:
+  placeholder_dialog:
+    - "The land speaks. The collective listens. Will you carry the message?"
+loot:
+  currency:
+    min: 0
+    max: 0

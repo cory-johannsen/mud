@@ -1,0 +1,32 @@
+id: tweaker_quest_giver
+name: "Lieutenant Scratch"
+description: >
+  Crystal Karen's intelligence officer, walls of notes behind him, eyes never
+  still. He assigns field work against Juggalos and Wooks with clinical
+  precision.
+type: human
+npc_type: quest_giver
+npc_role: quest_giver
+level: 4
+max_hp: 25
+ac: 11
+awareness: 11
+faction_id: tweakers
+disposition: neutral
+personality: cowardly
+ai_domain: ""
+respawn_delay: "15m"
+abilities:
+  brutality: 9
+  grit: 11
+  quickness: 16
+  reasoning: 15
+  savvy: 14
+  flair: 9
+quest_giver:
+  placeholder_dialog:
+    - "You want work? I've got targets. Don't waste my time."
+loot:
+  currency:
+    min: 0
+    max: 0

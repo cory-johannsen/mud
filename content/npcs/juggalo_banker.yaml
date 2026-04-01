@@ -1,0 +1,32 @@
+id: juggalo_banker
+name: "Hatchet Bank"
+description: >
+  A heavyset Juggalo with an abacus and a lockbox, sitting in a black velvet
+  booth. He runs the Dark Carnival Credit Union with surprising competence.
+type: human
+npc_type: banker
+npc_role: banker
+level: 3
+max_hp: 22
+ac: 11
+awareness: 7
+faction_id: juggalos
+disposition: neutral
+personality: cowardly
+ai_domain: ""
+respawn_delay: "15m"
+abilities:
+  brutality: 11
+  grit: 12
+  quickness: 9
+  reasoning: 13
+  savvy: 13
+  flair: 12
+banker:
+  zone_id: oregon_country_fair
+  base_rate: 0.98
+  rate_variance: 0.02
+loot:
+  currency:
+    min: 20
+    max: 80

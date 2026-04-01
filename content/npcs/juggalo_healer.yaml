@@ -1,0 +1,31 @@
+id: juggalo_healer
+name: "Faygo Sister"
+description: >
+  A Juggalette in ceremonial paint who has appointed herself the faction
+  medic. She patches wounds with Faygo-soaked rags and genuine enthusiasm.
+type: human
+npc_type: healer
+npc_role: healer
+level: 3
+max_hp: 22
+ac: 10
+awareness: 7
+faction_id: juggalos
+disposition: neutral
+personality: cowardly
+ai_domain: ""
+respawn_delay: "15m"
+abilities:
+  brutality: 8
+  grit: 12
+  quickness: 11
+  reasoning: 12
+  savvy: 12
+  flair: 15
+healer:
+  price_per_hp: 3
+  daily_capacity: 50
+loot:
+  currency:
+    min: 5
+    max: 20

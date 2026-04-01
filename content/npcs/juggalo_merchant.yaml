@@ -1,0 +1,56 @@
+id: juggalo_merchant
+name: "Carnival Vendor"
+description: >
+  A face-painted Juggalo running a makeshift market stall from a repurposed
+  carnival game booth. He sells with unhinged enthusiasm and always has a
+  Faygo close at hand.
+type: human
+npc_type: merchant
+npc_role: merchant
+level: 3
+max_hp: 20
+ac: 11
+awareness: 6
+faction_id: juggalos
+disposition: neutral
+personality: cowardly
+ai_domain: ""
+respawn_delay: "15m"
+abilities:
+  brutality: 10
+  grit: 10
+  quickness: 11
+  reasoning: 11
+  savvy: 14
+  flair: 16
+merchant:
+  merchant_type: general
+  sell_margin: 1.30
+  buy_margin: 0.35
+  budget: 800
+  inventory:
+    - item_id: hatchet
+      base_price: 30
+      init_stock: 5
+      max_stock: 5
+    - item_id: faygo_bottle
+      base_price: 5
+      init_stock: 20
+      max_stock: 20
+    - item_id: icp_face_paint
+      base_price: 2
+      init_stock: 10
+      max_stock: 10
+    - item_id: leather_jacket
+      base_price: 80
+      init_stock: 3
+      max_stock: 3
+  replenish_rate:
+    min_hours: 12
+    max_hours: 24
+    stock_refill: 2
+    budget_refill: 200
+loot:
+  currency:
+    min: 10
+    max: 40
