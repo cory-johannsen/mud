@@ -328,6 +328,39 @@ type GameServiceServer struct {
 	weatherMgr *WeatherManager
 }
 
+// applyArmorTrainingProficiency applies the armor_training feat choice as a real proficiency
+// on the session and persists it to the repository.
+//
+// Precondition: featureChoices["armor_training"]["armor_category"] must contain a valid armor
+// category string if the armor_training feat has been chosen.
+// Postcondition: profs[category] == "trained" when a choice exists. If profRepo is non-nil and
+// the category is not already in profs, an Upsert is attempted; failure is logged at Error level
+// but the in-memory proficiency is always set regardless.
+func applyArmorTrainingProficiency(
+	ctx context.Context,
+	characterID int64,
+	featureChoices map[string]map[string]string,
+	profRepo CharacterProficienciesRepository,
+	profs map[string]string,
+	logger *zap.Logger,
+) {
+	armorCategory := featureChoices["armor_training"]["armor_category"]
+	if armorCategory == "" {
+		return
+	}
+	if profRepo != nil {
+		if _, alreadySet := profs[armorCategory]; !alreadySet {
+			if upsertErr := profRepo.Upsert(ctx, characterID, armorCategory, "trained"); upsertErr != nil {
+				logger.Error("persisting armor_training proficiency",
+					zap.String("category", armorCategory),
+					zap.Error(upsertErr),
+				)
+			}
+		}
+	}
+	profs[armorCategory] = "trained"
+}
+
 // CharacterJobsRepository persists per-character job lists in the character_jobs table.
 //
 // Precondition: characterID must be > 0.
@@ -1439,23 +1472,13 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 		// Apply armor_training feat choice as a real proficiency.
 		// If the player has the armor_training feat and has made a category choice,
 		// ensure that category is persisted and loaded into the session.
-		if armorCategory := sess.FeatureChoices["armor_training"]["armor_category"]; armorCategory != "" {
-			if s.characterProficienciesRepo != nil {
-				if upsertErr := s.characterProficienciesRepo.Upsert(
-					stream.Context(), characterID, armorCategory, "trained",
-				); upsertErr != nil {
-					s.logger.Warn("persisting armor_training proficiency",
-						zap.String("category", armorCategory),
-						zap.Error(upsertErr),
-					)
-				} else {
-					if sess.Proficiencies == nil {
-						sess.Proficiencies = make(map[string]string)
-					}
-					sess.Proficiencies[armorCategory] = "trained"
-				}
-			}
+		if sess.Proficiencies == nil {
+			sess.Proficiencies = make(map[string]string)
 		}
+		applyArmorTrainingProficiency(
+			stream.Context(), characterID, sess.FeatureChoices,
+			s.characterProficienciesRepo, sess.Proficiencies, s.logger,
+		)
 	}
 
 	// Resolve missing ability boost choices.

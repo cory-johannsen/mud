@@ -2,10 +2,12 @@ package gameserver
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/zap"
 	"pgregory.net/rapid"
 
 	"github.com/cory-johannsen/mud/internal/game/ruleset"
@@ -159,59 +161,23 @@ func TestCharacterProficienciesRepository_Interface(t *testing.T) {
 	var _ CharacterProficienciesRepository = newStubProficienciesRepo()
 }
 
-// applyArmorTrainingProficiency applies the armor_training feat choice as a real
-// proficiency on the session and persists it.  It mirrors the logic added to
-// the Session login path so that this behaviour can be unit-tested without a
-// live gRPC stream.
-//
-// Precondition: featureChoices["armor_training"]["armor_category"] must contain a
-// valid armor category string.
-// Postcondition: sess.Proficiencies[category] == "trained" and the value is persisted.
-func applyArmorTrainingProficiency(
-	ctx context.Context,
-	characterID int64,
-	featureChoices map[string]map[string]string,
-	profRepo CharacterProficienciesRepository,
-	sess interface{ SetProficiency(string, string) },
-) error {
-	chosen, ok := featureChoices["armor_training"]["armor_category"]
-	if !ok || chosen == "" {
-		return nil
-	}
-	if err := profRepo.Upsert(ctx, characterID, chosen, "trained"); err != nil {
-		return err
-	}
-	sess.SetProficiency(chosen, "trained")
-	return nil
-}
-
-// proficiencySetter is a minimal interface used by applyArmorTrainingProficiency in tests.
-type proficiencySetter struct {
-	profs map[string]string
-}
-
-func (p *proficiencySetter) SetProficiency(cat, rank string) {
-	p.profs[cat] = rank
-}
-
 // TestArmorTrainingProficiency_AppliedAfterChoice verifies that selecting
 // armor_training feat with a category choice results in that category being
-// added to the character's proficiencies.
+// added to the character's proficiencies in both the session map and the repo.
 func TestArmorTrainingProficiency_AppliedAfterChoice(t *testing.T) {
 	ctx := context.Background()
 	repo := newStubProficienciesRepo()
-	sess := &proficiencySetter{profs: make(map[string]string)}
+	profs := make(map[string]string)
 	characterID := int64(7)
 
 	featureChoices := map[string]map[string]string{
 		"armor_training": {"armor_category": "medium_armor"},
 	}
 
-	err := applyArmorTrainingProficiency(ctx, characterID, featureChoices, repo, sess)
-	require.NoError(t, err)
+	applyArmorTrainingProficiency(ctx, characterID, featureChoices, repo, profs, zap.NewNop())
 
-	// Proficiency must be in session.
-	assert.Equal(t, "trained", sess.profs["medium_armor"])
+	// Proficiency must be in session map.
+	assert.Equal(t, "trained", profs["medium_armor"])
 
 	// Proficiency must be persisted.
 	stored, err := repo.GetAll(ctx, characterID)
@@ -224,17 +190,69 @@ func TestArmorTrainingProficiency_AppliedAfterChoice(t *testing.T) {
 func TestArmorTrainingProficiency_NoChoiceNoEffect(t *testing.T) {
 	ctx := context.Background()
 	repo := newStubProficienciesRepo()
-	sess := &proficiencySetter{profs: make(map[string]string)}
+	profs := make(map[string]string)
 	characterID := int64(7)
 
 	featureChoices := map[string]map[string]string{}
 
-	err := applyArmorTrainingProficiency(ctx, characterID, featureChoices, repo, sess)
-	require.NoError(t, err)
-	assert.Empty(t, sess.profs)
+	applyArmorTrainingProficiency(ctx, characterID, featureChoices, repo, profs, zap.NewNop())
+
+	assert.Empty(t, profs)
 	stored, err := repo.GetAll(ctx, characterID)
 	require.NoError(t, err)
 	assert.Empty(t, stored)
+}
+
+// TestArmorTrainingProficiency_AlreadySetSkipsUpsert verifies that when the proficiency
+// is already present in the session map, no Upsert is attempted (idempotency guard).
+func TestArmorTrainingProficiency_AlreadySetSkipsUpsert(t *testing.T) {
+	ctx := context.Background()
+	repo := newStubProficienciesRepo()
+	// Pre-populate repo to confirm no additional writes happen.
+	require.NoError(t, repo.Upsert(ctx, 7, "medium_armor", "trained"))
+	profs := map[string]string{"medium_armor": "trained"}
+	characterID := int64(7)
+
+	featureChoices := map[string]map[string]string{
+		"armor_training": {"armor_category": "medium_armor"},
+	}
+
+	applyArmorTrainingProficiency(ctx, characterID, featureChoices, repo, profs, zap.NewNop())
+
+	// Proficiency still present; no duplicate writes needed.
+	assert.Equal(t, "trained", profs["medium_armor"])
+	stored, err := repo.GetAll(ctx, characterID)
+	require.NoError(t, err)
+	assert.Equal(t, "trained", stored["medium_armor"])
+}
+
+// TestArmorTrainingProficiency_UpsertFailureSetsInMemory verifies that when Upsert
+// fails, the in-memory proficiency is still set so the session is not broken.
+func TestArmorTrainingProficiency_UpsertFailureSetsInMemory(t *testing.T) {
+	ctx := context.Background()
+	repo := &failingUpsertRepo{}
+	profs := make(map[string]string)
+	characterID := int64(7)
+
+	featureChoices := map[string]map[string]string{
+		"armor_training": {"armor_category": "medium_armor"},
+	}
+
+	applyArmorTrainingProficiency(ctx, characterID, featureChoices, repo, profs, zap.NewNop())
+
+	// In-memory proficiency must be set even though Upsert failed.
+	assert.Equal(t, "trained", profs["medium_armor"])
+}
+
+// failingUpsertRepo is a stub CharacterProficienciesRepository whose Upsert always fails.
+type failingUpsertRepo struct{}
+
+func (r *failingUpsertRepo) GetAll(_ context.Context, _ int64) (map[string]string, error) {
+	return map[string]string{}, nil
+}
+
+func (r *failingUpsertRepo) Upsert(_ context.Context, _ int64, _, _ string) error {
+	return fmt.Errorf("simulated upsert failure")
 }
 
 // TestJobRegistry_HasProficiencies verifies that jobs loaded with a proficiencies section
