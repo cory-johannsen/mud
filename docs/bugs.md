@@ -526,11 +526,11 @@
 
 ### BUG-66: Web UI console stops autoscrolling during combat
 **Severity:** medium
-**Status:** open
+**Status:** fixed
 **Category:** UI
 **Description:** During combat the web UI console intermittently stops autoscrolling to new content, requiring the user to scroll manually to see the latest messages.
 **Steps:** Open the web client; enter combat; observe the console as combat messages arrive; intermittently the console stops scrolling to the bottom and new messages appear above the visible area.
-**Fix:**
+**Fix:** Two root causes addressed in `FeedPanel.tsx`. (1) Replaced `useEffect` with `useLayoutEffect` so scroll happens after DOM layout but before paint, eliminating the race where `scrollTop = scrollHeight` fired before the new message node was measured. (2) Added a `programmaticScrollRef` boolean flag that suppresses the `onScroll` handler while a programmatic scroll is in flight, preventing the `atBottom` check from reading a stale `scrollHeight` and falsely setting `userScrolledRef = true`. A bottom sentinel `<div ref={bottomRef} />` is used as the scroll target via `scrollIntoView({ behavior: 'instant' })`.
 
 ### BUG-65: Armor Training feat selection never prompted — feat has no effect
 **Severity:** high

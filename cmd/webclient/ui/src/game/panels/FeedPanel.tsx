@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useLayoutEffect, useRef } from 'react'
 import { useGame } from '../GameContext'
 
 function formatTimestamp(d: Date): string {
@@ -9,16 +9,27 @@ function formatTimestamp(d: Date): string {
 
 export function FeedPanel() {
   const { state } = useGame()
+  const bottomRef = useRef<HTMLDivElement>(null)
   const scrollRef = useRef<HTMLDivElement>(null)
+  // true when the user has intentionally scrolled away from the bottom
   const userScrolledRef = useRef(false)
+  // true while a programmatic scroll is in flight — prevents the scroll event
+  // from falsely marking the user as having scrolled away
+  const programmaticScrollRef = useRef(false)
 
-  useEffect(() => {
-    const el = scrollRef.current
-    if (!el || userScrolledRef.current) return
-    el.scrollTop = el.scrollHeight
+  useLayoutEffect(() => {
+    if (userScrolledRef.current) return
+    programmaticScrollRef.current = true
+    bottomRef.current?.scrollIntoView({ behavior: 'instant' })
+    // The scroll event fires synchronously inside scrollIntoView on some
+    // browsers; reset the flag in a microtask so handleScroll can see it.
+    Promise.resolve().then(() => {
+      programmaticScrollRef.current = false
+    })
   }, [state.feedEntries.length])
 
   function handleScroll() {
+    if (programmaticScrollRef.current) return
     const el = scrollRef.current
     if (!el) return
     const atBottom = el.scrollTop >= el.scrollHeight - el.clientHeight - 50
@@ -38,6 +49,7 @@ export function FeedPanel() {
           {entry.text}
         </div>
       ))}
+      <div ref={bottomRef} />
     </div>
   )
 }
