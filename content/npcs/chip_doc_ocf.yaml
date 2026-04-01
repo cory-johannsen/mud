@@ -1,0 +1,33 @@
+id: chip_doc_ocf
+name: "Neutral Node"
+description: >
+  A former Portland tech worker who drove out to the OCF years ago and never
+  left. She operates from a rusted food cart in Market Row, maintaining
+  strict neutrality. All three factions leave her alone because all three
+  factions need her.
+type: human
+npc_type: chip_doc
+npc_role: chip_doc
+level: 3
+max_hp: 20
+ac: 10
+awareness: 7
+faction_id: ""
+disposition: neutral
+personality: cowardly
+ai_domain: ""
+respawn_delay: "20m"
+abilities:
+  brutality: 7
+  grit: 11
+  quickness: 10
+  reasoning: 16
+  savvy: 14
+  flair: 12
+chip_doc:
+  removal_cost: 200
+  check_dc: 14
+loot:
+  currency:
+    min: 5
+    max: 20
