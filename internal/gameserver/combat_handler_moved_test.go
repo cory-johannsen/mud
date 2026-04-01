@@ -160,19 +160,19 @@ func TestCombatantsInRoom_ReturnsCopy(t *testing.T) {
 	assert.Equal(t, original, second[0], "internal combat state must be unchanged after copy mutation")
 }
 
-// TestCombatantPosition_NPCStartsAt25 verifies that an NPC combatant is initialized at
-// position 25 (the default NPC starting position per the combat rules).
+// TestCombatantPosition_NPCStartsAt50 verifies that an NPC combatant is initialized at
+// position 50 (the default NPC starting position per the combat rules).
 //
 // Precondition: Combat started with one player and one NPC.
-// Postcondition: CombatantPosition returns 25 for the NPC combatant.
-func TestCombatantPosition_NPCStartsAt25(t *testing.T) {
+// Postcondition: CombatantPosition returns 50 for the NPC combatant.
+func TestCombatantPosition_NPCStartsAt50(t *testing.T) {
 	npcMgr := npc.NewManager()
 	sessMgr := session.NewManager()
 	h := makeHandlerWithManagers(t, npcMgr, sessMgr)
 
-	setupMovedCombat(t, h, npcMgr, sessMgr, "room_npc25", "npc25_player", "GuardNPC25")
+	setupMovedCombat(t, h, npcMgr, sessMgr, "room_npc50", "npc50_player", "GuardNPC50")
 
-	combatants := h.CombatantsInRoom("room_npc25")
+	combatants := h.CombatantsInRoom("room_npc50")
 	require.NotEmpty(t, combatants)
 
 	var npcCombatant *combat.Combatant
@@ -183,5 +183,5 @@ func TestCombatantPosition_NPCStartsAt25(t *testing.T) {
 		}
 	}
 	require.NotNil(t, npcCombatant, "NPC combatant must be present")
-	assert.Equal(t, 25, h.CombatantPosition("room_npc25", npcCombatant.ID))
+	assert.Equal(t, 50, h.CombatantPosition("room_npc50", npcCombatant.ID))
 }

@@ -15,7 +15,7 @@ import (
 // This is the root cause of BUG-29: range is only shown at round 2+ start, not at
 // combat initiation (round 1).
 //
-// Precondition: Player attacks NPC, starting combat. Player at Position=0, NPC at Position=25.
+// Precondition: Player attacks NPC, starting combat. Player at Position=0, NPC at Position=50.
 // Postcondition: The returned init events contain a narrative with "ft" and the NPC name.
 func TestCombatInit_RangeShownAtCombatStart(t *testing.T) {
 	var mu sync.Mutex

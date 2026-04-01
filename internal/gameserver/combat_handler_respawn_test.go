@@ -180,7 +180,7 @@ func TestCombatHandler_NPCDiedInCombat_RemovedFromManager(t *testing.T) {
 	_ = inst
 
 	addRespawnTestPlayer(t, sessMgr, "player-respawn-1", roomID, 100)
-	// Equip a pistol so the player can attack at the initial 25ft combat distance.
+	// Equip a pistol so the player can attack at the initial 50ft combat distance.
 	equipTestPistol(t, h, "player-respawn-1")
 
 	// Start combat. Player attacks NPC (1 HP) — should die this or next round.
@@ -212,7 +212,7 @@ func TestCombatHandler_NilRespawnMgr_NoPanic(t *testing.T) {
 	// Spawn NPC with 1 HP so any attack kills it.
 	inst := spawnRespawnTestNPC(t, npcMgr, roomID, "ganger", 1)
 	addRespawnTestPlayer(t, sessMgr, "player-respawn-nil", roomID, 100)
-	// Equip a pistol so the player can attack at the initial 25ft combat distance.
+	// Equip a pistol so the player can attack at the initial 50ft combat distance.
 	equipTestPistol(t, h, "player-respawn-nil")
 
 	_, err := h.Attack("player-respawn-nil", "Ganger")

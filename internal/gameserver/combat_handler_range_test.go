@@ -71,7 +71,7 @@ func TestCombatRound_RangeShownAtRoundStart(t *testing.T) {
 	)
 
 	// Start combat — Attack initialises the combat instance with player at
-	// Position=0 and NPC at Position=25 (engine defaults).
+	// Position=0 and NPC at Position=50 (engine defaults).
 	_, err = h.Attack(playerUID, npcName)
 	require.NoError(t, err)
 

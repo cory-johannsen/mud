@@ -116,7 +116,7 @@ type Combatant struct {
 	// Set by a successful Seek action to cbt.Round+1.
 	RevealedUntilRound int
 	// Position is the distance in feet along the combat axis from the player's starting point (0).
-	// Player combatants are initialized to 0; NPC combatants are initialized to 25.
+	// Player combatants are initialized to 0; NPC combatants are initialized to 50.
 	Position int
 	// CoverEquipmentID is the ItemID of the room equipment object this combatant is
 	// using for cover. Empty string means the combatant is not in cover.

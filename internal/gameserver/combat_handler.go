@@ -1538,7 +1538,7 @@ func (h *CombatHandler) startPursuitCombatLocked(playerSess *session.PlayerSessi
 			Weaknesses:  inst.Weaknesses,
 			WeaponName:  npcWeaponName,
 			AttackVerb:  inst.AttackVerb,
-			Position:    25,
+			Position:    50,
 		}
 		combatants = append(combatants, npcCbt)
 	}
@@ -2626,7 +2626,7 @@ func (h *CombatHandler) startCombatLocked(sess *session.PlayerSession, inst *npc
 		}
 	}
 	playerCbt.Position = 0  // player starts at near end
-	npcCbt.Position = 25    // NPC starts 25ft away
+	npcCbt.Position = 50    // NPC starts 50ft away
 	cbt, err := h.engine.StartCombat(sess.RoomID, combatants, h.condRegistry, scriptMgr, zoneID)
 	if err != nil {
 		return nil, nil, fmt.Errorf("starting combat: %w", err)

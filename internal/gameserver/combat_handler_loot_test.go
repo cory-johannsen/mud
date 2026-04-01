@@ -108,7 +108,7 @@ func TestCombatHandler_LootGeneration_CurrencyAndItems(t *testing.T) {
 
 	sess := addRespawnTestPlayer(t, sessMgr, "player-loot-1", roomID, 100)
 	initialCurrency := sess.Currency
-	// Equip a pistol so the player can attack at the initial 25ft combat distance.
+	// Equip a pistol so the player can attack at the initial 50ft combat distance.
 	equipTestPistol(t, h, "player-loot-1")
 
 	_, err = h.Attack("player-loot-1", "LootGanger")
@@ -173,7 +173,7 @@ func TestCombatHandler_LootGeneration_NilFloorMgr_NoPanic(t *testing.T) {
 	require.NoError(t, err)
 
 	sess := addRespawnTestPlayer(t, sessMgr, "player-loot-nil", roomID, 100)
-	// Equip a pistol so the player can attack at the initial 25ft combat distance.
+	// Equip a pistol so the player can attack at the initial 50ft combat distance.
 	equipTestPistol(t, h, "player-loot-nil")
 
 	_, err = h.Attack("player-loot-nil", "LootGangerNil")
@@ -216,7 +216,7 @@ func TestCombatHandler_NoLootTable_NoEffect(t *testing.T) {
 	require.NoError(t, err)
 
 	sess := addRespawnTestPlayer(t, sessMgr, "player-no-loot", roomID, 100)
-	// Equip a pistol so the player can attack at the initial 25ft combat distance.
+	// Equip a pistol so the player can attack at the initial 50ft combat distance.
 	equipTestPistol(t, h, "player-no-loot")
 
 	_, err = h.Attack("player-no-loot", "NoLootGanger")
