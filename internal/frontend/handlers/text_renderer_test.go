@@ -1571,3 +1571,16 @@ func TestRenderNPCs_CombatNPCNoTypeIndicator(t *testing.T) {
 	stripped := telnet.StripANSI(combined)
 	assert.NotContains(t, stripped, "[")
 }
+
+// TestRenderNPCs_MotelKeeperShowsRoleTag verifies that motel_keeper NPCs display
+// the [motel] role tag instead of a health status in parentheses (BUG-63).
+func TestRenderNPCs_MotelKeeperShowsRoleTag(t *testing.T) {
+	npcs := []*gamev1.NpcInfo{
+		{Name: "Scrap Inn Clerk", HealthDescription: "unharmed", NpcType: "motel_keeper"},
+	}
+	rows := renderNPCs(npcs, 80)
+	combined := strings.Join(rows, "\n")
+	stripped := telnet.StripANSI(combined)
+	assert.Contains(t, stripped, "[motel]", "motel_keeper NPC must show [motel] role tag")
+	assert.NotContains(t, stripped, "(unharmed)", "motel_keeper NPC must not show health status")
+}

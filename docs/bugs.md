@@ -550,11 +550,11 @@
 
 ### BUG-63: Motel keeper NPCs display with combat health status
 **Severity:** medium
-**Status:** open
+**Status:** fixed
 **Category:** World
 **Description:** Motel keeper NPCs render with a combat-style health label (e.g. "Scrap Inn Clerk (unharmed)") instead of the non-combat NPC format (e.g. "Scrap Inn Clerk [motel]").
 **Steps:** Enter any zone hub safe room containing a motel keeper NPC; observe the NPC label in the room description includes a health status in parentheses rather than a bracketed role tag.
-**Fix:**
+**Fix:** Added `"motel_keeper"` case to `npcTypeTag` in `internal/frontend/handlers/text_renderer.go` returning `"[motel]"`, so motel keeper NPCs are recognized as non-combat and display the role tag instead of health status.
 
 ### BUG-62: Vantucky map has disconnected rooms
 **Severity:** medium

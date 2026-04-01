@@ -192,6 +192,8 @@ func npcTypeTag(npcType string) string {
 		return "[fixer]"
 	case "hireling":
 		return "[hire]"
+	case "motel_keeper":
+		return "[motel]"
 	default:
 		return ""
 	}
