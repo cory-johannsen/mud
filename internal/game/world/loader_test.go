@@ -994,3 +994,66 @@ func TestLoadZone_ClubPrivata_HasSixteenRooms(t *testing.T) {
 	assert.Len(t, zone.Rooms, 16, "Club Privata must have exactly 16 rooms")
 	assert.Equal(t, "club_privata", zone.ID)
 }
+
+// TestLoadZone_Vantucky_AllRoomsReachable verifies that every room in the
+// Vantucky zone is reachable from the zone's start room via bidirectional exits,
+// and that all intra-zone exits have a corresponding reverse exit in the opposite
+// direction. Cross-zone exits (targets in other zones) are excluded from the
+// bidirectionality check.
+//
+// REQ-BUG62-1: Every intra-zone exit A→B in direction D MUST have a reverse
+// exit B→A in direction opposite(D).
+// REQ-BUG62-2: Every room in the Vantucky zone MUST be reachable from the
+// zone's start room by traversing intra-zone exits.
+func TestLoadZone_Vantucky_AllRoomsReachable(t *testing.T) {
+	data, err := os.ReadFile("../../../content/zones/vantucky.yaml")
+	require.NoError(t, err)
+	zone, err := LoadZoneFromBytes(data)
+	require.NoError(t, err)
+	require.Equal(t, "vantucky", zone.ID)
+
+	// Verify bidirectional exits for all intra-zone exits.
+	for roomID, room := range zone.Rooms {
+		for _, exit := range room.Exits {
+			target, inZone := zone.Rooms[exit.TargetRoom]
+			if !inZone {
+				// Cross-zone exit — skip bidirectionality check.
+				continue
+			}
+			revDir := exit.Direction.Opposite()
+			_, hasReverse := target.ExitForDirection(revDir)
+			assert.Truef(t, hasReverse,
+				"room %q has %s exit to %q, but %q has no %s exit back (BUG-62)",
+				roomID, exit.Direction, exit.TargetRoom, exit.TargetRoom, revDir,
+			)
+		}
+	}
+
+	// Verify all rooms are reachable from the start room via BFS.
+	visited := make(map[string]bool)
+	queue := []string{zone.StartRoom}
+	for len(queue) > 0 {
+		cur := queue[0]
+		queue = queue[1:]
+		if visited[cur] {
+			continue
+		}
+		visited[cur] = true
+		room, ok := zone.Rooms[cur]
+		if !ok {
+			continue
+		}
+		for _, exit := range room.Exits {
+			if _, inZone := zone.Rooms[exit.TargetRoom]; inZone && !visited[exit.TargetRoom] {
+				queue = append(queue, exit.TargetRoom)
+			}
+		}
+	}
+
+	for roomID := range zone.Rooms {
+		assert.Truef(t, visited[roomID],
+			"room %q is unreachable from start room %q (BUG-62)",
+			roomID, zone.StartRoom,
+		)
+	}
+}

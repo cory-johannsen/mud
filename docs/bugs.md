@@ -558,11 +558,11 @@
 
 ### BUG-62: Vantucky map has disconnected rooms
 **Severity:** medium
-**Status:** open
+**Status:** fixed
 **Category:** World
 **Description:** One or more rooms in the Vantucky area are not connected to the rest of the map, making them unreachable via normal navigation.
 **Steps:** Explore the Vantucky area and attempt to navigate to all rooms; observe that some rooms cannot be reached from any adjacent room.
-**Fix:**
+**Fix:** Audited all exits in `content/zones/vantucky.yaml` via BFS reachability analysis. Found 6 rooms unreachable from the start room (`vantucky_abandoned_mall`, `vantucky_east_side`, `vantucky_overgrown_freeway`, `vantucky_rail_spur`, `vantucky_river_cliffs`, `vantucky_trailer_park`) due to 7 broken or missing bidirectional exits. Fixed: (1) added `east→abandoned_mall` to `shooting_range`; (2) changed `east_side.west` from `164th_ave` to `ammo_depot` (correct by map coordinates) and added `ammo_depot.east→east_side`; (3) added `ammo_depot.south→rail_spur`; (4) added `gun_market.west→gas_station_ruins`; (5) added `fishers_landing.east→river_cliffs`; (6) added `i84_onramp.south→trailer_park` and `i84_onramp.west→overgrown_freeway`, and corrected `trailer_park.north` from `gas_station_ruins` to `i84_onramp`, removing the stale `trailer_park.east→burnt_bridge_creek` orphaned exit. Added `TestLoadZone_Vantucky_AllRoomsReachable` property test to `internal/game/world/loader_test.go` verifying bidirectionality and full reachability.
 
 ### BUG-61: Web UI Stats tab does not update XP after combat
 **Severity:** medium

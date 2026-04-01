@@ -175,6 +175,8 @@ zone:
     exits:
     - direction: west
       target: vantucky_river_trail
+    - direction: east
+      target: vantucky_river_cliffs
     map_x: 4
     map_y: -4
     spawns:
@@ -261,6 +263,8 @@ zone:
       target: vantucky_andresen_road
     - direction: east
       target: vantucky_burnt_bridge_creek
+    - direction: west
+      target: vantucky_gas_station_ruins
     map_x: 2
     map_y: 2
     spawns:
@@ -373,6 +377,8 @@ zone:
       target: vantucky_164th_ave
     - direction: south
       target: vantucky_ammo_depot
+    - direction: east
+      target: vantucky_abandoned_mall
     map_x: 8
     map_y: 0
     spawns:
@@ -511,6 +517,10 @@ zone:
       target: vantucky_gas_station_ruins
     - direction: east
       target: vantucky_i84_overpass
+    - direction: south
+      target: vantucky_trailer_park
+    - direction: west
+      target: vantucky_overgrown_freeway
     map_x: 0
     map_y: 4
     spawns:
@@ -563,6 +573,10 @@ zone:
     exits:
     - direction: north
       target: vantucky_shooting_range
+    - direction: south
+      target: vantucky_rail_spur
+    - direction: east
+      target: vantucky_east_side
     map_x: 8
     map_y: 2
     spawns:
@@ -588,9 +602,7 @@ zone:
     danger_level: sketchy
     exits:
     - direction: north
-      target: vantucky_gas_station_ruins
-    - direction: east
-      target: vantucky_burnt_bridge_creek
+      target: vantucky_i84_onramp
     - direction: south
       target: vantucky_overgrown_freeway
     map_x: 0
@@ -725,7 +737,7 @@ zone:
     danger_level: sketchy
     exits:
     - direction: west
-      target: vantucky_164th_ave
+      target: vantucky_ammo_depot
     - direction: north
       target: vantucky_abandoned_mall
     map_x: 9
