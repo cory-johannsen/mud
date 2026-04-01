@@ -51,6 +51,10 @@ feats:
     active: true
     activate_text: "You raise your shield and absorb the blow."
     description: "When hit by a physical attack, use your reaction to reduce damage with a raised shield."
+    reaction:
+      triggers: [on_damage_taken]
+      effect:
+        type: reduce_damage
 
   - id: hard_to_kill
     name: Hard to Kill
@@ -2156,6 +2160,11 @@ feats:
     active: true
     activate_text: "You heard what they said. You want them to hear it too."
     description: "React when a creature calls out or mocks your actions; immediately Demoralize them as a reaction."
+    reaction:
+      triggers: [on_condition_applied]
+      effect:
+        type: strike
+        target: trigger_source
 
   - id: battle_shout
     name: Battle Shout
@@ -2338,6 +2347,10 @@ feats:
     active: true
     activate_text: "You snap your shield up just in time."
     description: "When hit by a physical attack, raise your shield as a reaction to reduce damage."
+    reaction:
+      triggers: [on_damage_taken]
+      effect:
+        type: reduce_damage
 
   - id: overpower
     name: Overpower
@@ -2411,6 +2424,10 @@ feats:
     active: true
     activate_text: "You drop flat the moment you hear the shot."
     description: "Drop prone as a reaction when targeted by ranged fire; gain +2 AC against that attack."
+    reaction:
+      triggers: [on_damage_taken]
+      effect:
+        type: reduce_damage
 
   # ── JOB FEATS: CRIMINAL ───────────────────────────────────────────────────
   - id: quick_dodge
