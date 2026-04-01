@@ -10,11 +10,12 @@ import (
 
 // HandleEquip processes the "equip" command.
 // arg is expected to be "<itemDefID> <slot>" where slot is "main" or "off".
+// presetIndex is 1-based; pass 0 to use the active preset.
 //
 // Precondition: sess must not be nil; sess.LoadoutSet, sess.Backpack must not be nil; reg must not be nil.
 // Postcondition: On success, removes the item from the backpack, equips it in the named slot, and
 // returns a confirmation. On failure, the backpack and preset state are unchanged.
-func HandleEquip(sess *session.PlayerSession, reg *inventory.Registry, arg string) string {
+func HandleEquip(sess *session.PlayerSession, reg *inventory.Registry, arg string, presetIndex int) string {
 	arg = strings.TrimSpace(arg)
 
 	// Split into at most two tokens: itemDefID and optional slot.
@@ -63,8 +64,18 @@ func HandleEquip(sess *session.PlayerSession, reg *inventory.Registry, arg strin
 		}
 	}
 
+	// Resolve target preset: 1-based presetIndex, 0 means active.
+	var preset *inventory.WeaponPreset
+	if presetIndex > 0 && presetIndex <= len(sess.LoadoutSet.Presets) {
+		preset = sess.LoadoutSet.Presets[presetIndex-1]
+	} else {
+		preset = sess.LoadoutSet.ActivePreset()
+	}
+	if preset == nil {
+		return "no loadout preset available"
+	}
+
 	// Attempt to equip in the requested slot.
-	preset := sess.LoadoutSet.ActivePreset()
 	var equipErr error
 	var slotLabel string
 	switch slot {
@@ -97,5 +108,9 @@ func HandleEquip(sess *session.PlayerSession, reg *inventory.Registry, arg strin
 		return fmt.Sprintf("failed to remove item from pack: %v", err)
 	}
 
-	return fmt.Sprintf("Equipped %s in %s hand.", weaponDef.Name, slotLabel)
+	presetLabel := ""
+	if presetIndex > 0 {
+		presetLabel = fmt.Sprintf(" (preset %d)", presetIndex)
+	}
+	return fmt.Sprintf("Equipped %s in %s hand%s.", weaponDef.Name, slotLabel, presetLabel)
 }

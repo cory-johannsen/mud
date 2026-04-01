@@ -598,11 +598,11 @@
 
 ### BUG-73: Web UI Inventory Equip button does not prompt for loadout and hand selection
 **Severity:** high
-**Status:** open
+**Status:** fixed
 **Category:** UI
 **Description:** The Equip button in the web UI Inventory tab equips items without prompting the player to select a loadout and hand slot; the item is not removed from inventory and the Loadout tab does not reflect the change.
 **Steps:** Log in to the web UI; open the Inventory tab; click the Equip button on a weapon; observe that no modal appears to select a loadout or hand, inventory is not updated, and the Loadout tab does not reflect any change.
-**Fix:**
+**Fix:** Added 2-step preset+hand picker to WeaponRow; added EquipRequest to websocket dispatch; added preset field to EquipRequest proto; updated HandleEquip to accept presetIndex.
 
 ### BUG-78: Technology "Force Field Emitter" description references Dexterity
 **Severity:** low

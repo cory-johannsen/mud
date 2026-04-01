@@ -4518,7 +4518,7 @@ func (s *GameServiceServer) grantStartingInventory(ctx context.Context, sess *se
 		if _, addErr := sess.Backpack.Add(sl.Weapon, 1, s.invRegistry); addErr != nil {
 			s.logger.Warn("failed to add starting weapon", zap.String("item", sl.Weapon), zap.Error(addErr))
 		} else {
-			command.HandleEquip(sess, s.invRegistry, sl.Weapon+" main")
+			command.HandleEquip(sess, s.invRegistry, sl.Weapon+" main", 0)
 		}
 	}
 
@@ -4619,7 +4619,7 @@ func (s *GameServiceServer) handleEquip(uid string, req *gamev1.EquipRequest) (*
 	if slot := req.GetSlot(); slot != "" {
 		arg += " " + slot
 	}
-	result := command.HandleEquip(sess, s.invRegistry, arg)
+	result := command.HandleEquip(sess, s.invRegistry, arg, int(req.GetPreset()))
 	if result == "" || result == "Usage: equip <item_id> <main|off>" || result == "specify main or off" {
 		return errorEvent(result), nil
 	}

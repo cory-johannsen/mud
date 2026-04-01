@@ -6474,7 +6474,8 @@ func (x *StrikeRequest) GetTarget() string {
 type EquipRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	WeaponId      string                 `protobuf:"bytes,1,opt,name=weapon_id,json=weaponId,proto3" json:"weapon_id,omitempty"`
-	Slot          string                 `protobuf:"bytes,2,opt,name=slot,proto3" json:"slot,omitempty"` // "primary", "secondary", "holster"
+	Slot          string                 `protobuf:"bytes,2,opt,name=slot,proto3" json:"slot,omitempty"`      // "main" or "off"
+	Preset        int32                  `protobuf:"varint,3,opt,name=preset,proto3" json:"preset,omitempty"` // 1-based preset index (0 = active preset)
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -6521,6 +6522,13 @@ func (x *EquipRequest) GetSlot() string {
 		return x.Slot
 	}
 	return ""
+}
+
+func (x *EquipRequest) GetPreset() int32 {
+	if x != nil {
+		return x.Preset
+	}
+	return 0
 }
 
 // ReloadRequest asks the server to reload the specified weapon, or the primary slot if empty.
@@ -13952,10 +13960,11 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\vFleeRequest\"\r\n" +
 	"\vPassRequest\"'\n" +
 	"\rStrikeRequest\x12\x16\n" +
-	"\x06target\x18\x01 \x01(\tR\x06target\"?\n" +
+	"\x06target\x18\x01 \x01(\tR\x06target\"W\n" +
 	"\fEquipRequest\x12\x1b\n" +
 	"\tweapon_id\x18\x01 \x01(\tR\bweaponId\x12\x12\n" +
-	"\x04slot\x18\x02 \x01(\tR\x04slot\",\n" +
+	"\x04slot\x18\x02 \x01(\tR\x04slot\x12\x16\n" +
+	"\x06preset\x18\x03 \x01(\x05R\x06preset\",\n" +
 	"\rReloadRequest\x12\x1b\n" +
 	"\tweapon_id\x18\x01 \x01(\tR\bweaponId\"G\n" +
 	"\x10FireBurstRequest\x12\x16\n" +

@@ -2,15 +2,31 @@ import { useEffect, useState } from 'react'
 import { useGame } from '../GameContext'
 import type { InventoryItem } from '../../proto'
 
+type PickStage = 'preset' | 'hand'
+
 function WeaponRow({
   item,
+  numPresets,
   sendMessage,
 }: {
   item: InventoryItem
+  numPresets: number
   sendMessage: (type: string, payload: object) => void
 }) {
-  const [picking, setPicking] = useState(false)
+  const [stage, setStage] = useState<PickStage | null>(null)
+  const [chosenPreset, setChosenPreset] = useState<number>(0)
   const weaponId = item.itemDefId ?? item.item_def_id ?? ''
+
+  function handlePreset(preset: number) {
+    setChosenPreset(preset)
+    setStage('hand')
+  }
+
+  function handleHand(slot: 'main' | 'off') {
+    sendMessage('EquipRequest', { weaponId, slot, preset: chosenPreset })
+    setStage(null)
+    setChosenPreset(0)
+  }
 
   return (
     <tr style={{ position: 'relative' }}>
@@ -19,44 +35,36 @@ function WeaponRow({
       <td>{item.quantity ?? 1}</td>
       <td>{(item.weight ?? 0).toFixed(1)}</td>
       <td style={{ position: 'relative' }}>
-        {!picking && (
+        {stage === null && (
           <button
             style={styles.actionBtn}
-            onClick={() => setPicking(true)}
+            onClick={() => setStage('preset')}
             type="button"
           >
             Equip
           </button>
         )}
-        {picking && (
-          <div style={styles.slotPickerOverlay}>
-            <button
-              style={styles.slotPickerBtn}
-              onClick={() => {
-                sendMessage('Equip', { weapon_id: weaponId, slot: 'main' })
-                setPicking(false)
-              }}
-              type="button"
-            >
-              Main Hand
-            </button>
-            <button
-              style={styles.slotPickerBtn}
-              onClick={() => {
-                sendMessage('Equip', { weapon_id: weaponId, slot: 'off' })
-                setPicking(false)
-              }}
-              type="button"
-            >
-              Off Hand
-            </button>
-            <button
-              style={styles.cancelBtn}
-              onClick={() => setPicking(false)}
-              type="button"
-            >
-              ✕
-            </button>
+        {stage === 'preset' && (
+          <div style={styles.pickerOverlay}>
+            {Array.from({ length: numPresets }, (_, i) => (
+              <button
+                key={i}
+                style={styles.pickerBtn}
+                onClick={() => handlePreset(i + 1)}
+                type="button"
+              >
+                Preset {i + 1}
+              </button>
+            ))}
+            <button style={styles.cancelBtn} onClick={() => setStage(null)} type="button">✕</button>
+          </div>
+        )}
+        {stage === 'hand' && (
+          <div style={styles.pickerOverlay}>
+            <button style={styles.pickerBtn} onClick={() => handleHand('main')} type="button">Main Hand</button>
+            <button style={styles.pickerBtn} onClick={() => handleHand('off')} type="button">Off Hand</button>
+            <button style={styles.cancelBtn} onClick={() => { setStage('preset'); setChosenPreset(0) }} type="button">←</button>
+            <button style={styles.cancelBtn} onClick={() => { setStage(null); setChosenPreset(0) }} type="button">✕</button>
           </div>
         )}
       </td>
@@ -123,6 +131,7 @@ export function InventoryDrawer({ onClose }: { onClose: () => void }) {
   }, [state.inventoryView, sendMessage])
 
   const inv = state.inventoryView
+  const numPresets = state.loadoutView?.presets?.length ?? 2
 
   return (
     <>
@@ -149,7 +158,7 @@ export function InventoryDrawer({ onClose }: { onClose: () => void }) {
                 {(inv.items ?? []).map((item, i) => {
                   if (item.kind === 'weapon') {
                     return (
-                      <WeaponRow key={i} item={item} sendMessage={sendMessage} />
+                      <WeaponRow key={i} item={item} numPresets={numPresets} sendMessage={sendMessage} />
                     )
                   }
                   if (item.kind === 'armor') {
@@ -185,7 +194,7 @@ const styles: Record<string, React.CSSProperties> = {
     opacity: 0.4,
     cursor: 'not-allowed',
   },
-  slotPickerOverlay: {
+  pickerOverlay: {
     position: 'absolute',
     zIndex: 10,
     background: '#1a2a1a',
@@ -196,7 +205,7 @@ const styles: Record<string, React.CSSProperties> = {
     top: 0,
     left: 0,
   },
-  slotPickerBtn: {
+  pickerBtn: {
     background: '#9ab',
     color: '#000',
     border: 'none',

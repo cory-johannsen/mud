@@ -100,7 +100,7 @@ func TestHandleEquip_MainHand_Success(t *testing.T) {
 	reg := newTestRegistry()
 	addPistolToBackpack(t, sess, reg)
 
-	result := command.HandleEquip(sess, reg, "pistol-9mm main")
+	result := command.HandleEquip(sess, reg, "pistol-9mm main", 0)
 
 	if !strings.Contains(result, "Equipped") {
 		t.Errorf("expected success message, got: %q", result)
@@ -127,7 +127,7 @@ func TestHandleEquip_OffHand_Success(t *testing.T) {
 	reg := newTestRegistry()
 	addPistolToBackpack(t, sess, reg)
 
-	result := command.HandleEquip(sess, reg, "pistol-9mm off")
+	result := command.HandleEquip(sess, reg, "pistol-9mm off", 0)
 
 	if !strings.Contains(result, "Equipped") {
 		t.Errorf("expected success message, got: %q", result)
@@ -154,7 +154,7 @@ func TestHandleEquip_NoSlot_Weapon_DefaultsToMain(t *testing.T) {
 	reg := newTestRegistry()
 	addPistolToBackpack(t, sess, reg)
 
-	result := command.HandleEquip(sess, reg, "pistol-9mm")
+	result := command.HandleEquip(sess, reg, "pistol-9mm", 0)
 
 	if !strings.Contains(strings.ToLower(result), "main") {
 		t.Errorf("expected main hand equip confirmation, got: %q", result)
@@ -168,7 +168,7 @@ func TestHandleEquip_NotInBackpack_ReturnsError(t *testing.T) {
 	reg := newTestRegistry()
 	// Do not add anything to backpack.
 
-	result := command.HandleEquip(sess, reg, "pistol-9mm main")
+	result := command.HandleEquip(sess, reg, "pistol-9mm main", 0)
 
 	if !strings.Contains(strings.ToLower(result), "not found in your pack") {
 		t.Errorf("expected 'not found in your pack', got: %q", result)
@@ -181,7 +181,7 @@ func TestHandleEquip_UnknownItemID_ReturnsError(t *testing.T) {
 	sess := newTestSessionWithBackpack()
 	reg := newTestRegistry()
 
-	result := command.HandleEquip(sess, reg, "no-such-item main")
+	result := command.HandleEquip(sess, reg, "no-such-item main", 0)
 
 	if !strings.Contains(strings.ToLower(result), "not found in your pack") {
 		t.Errorf("expected 'not found in your pack', got: %q", result)
@@ -195,7 +195,7 @@ func TestHandleEquip_UnknownSlot_ReturnsError(t *testing.T) {
 	reg := newTestRegistry()
 	addPistolToBackpack(t, sess, reg)
 
-	result := command.HandleEquip(sess, reg, "pistol-9mm torso")
+	result := command.HandleEquip(sess, reg, "pistol-9mm torso", 0)
 
 	if !strings.Contains(strings.ToLower(result), "specify main or off") {
 		t.Errorf("expected 'specify main or off' for unknown slot, got: %q", result)
@@ -212,7 +212,7 @@ func TestHandleEquip_TwoHandedClearsOffHand(t *testing.T) {
 	// Add rifle to backpack.
 	addRifleToBackpack(t, sess, reg)
 
-	result := command.HandleEquip(sess, reg, "rifle-ar main")
+	result := command.HandleEquip(sess, reg, "rifle-ar main", 0)
 
 	if !strings.Contains(result, "Equipped") {
 		t.Errorf("expected success message for two-handed equip, got: %q", result)
@@ -236,7 +236,7 @@ func TestHandleEquip_OffHandBlockedByTwoHanded(t *testing.T) {
 	// Add pistol to backpack.
 	addPistolToBackpack(t, sess, reg)
 
-	result := command.HandleEquip(sess, reg, "pistol-9mm off")
+	result := command.HandleEquip(sess, reg, "pistol-9mm off", 0)
 
 	if !strings.Contains(strings.ToLower(result), "cannot equip off-hand") {
 		t.Errorf("expected off-hand blocked error, got: %q", result)
@@ -262,7 +262,7 @@ func TestProperty_HandleEquip_BackpackCountDecreases(t *testing.T) {
 		}
 		before := sess.Backpack.UsedSlots()
 
-		result := command.HandleEquip(sess, reg, "pistol-9mm "+slot)
+		result := command.HandleEquip(sess, reg, "pistol-9mm "+slot, 0)
 
 		if strings.Contains(result, "Equipped") {
 			after := sess.Backpack.UsedSlots()
@@ -299,7 +299,7 @@ func TestHandleEquip_MinLevelCheck_WeaponTooHighLevel(t *testing.T) {
 		t.Fatalf("failed to add ghost blade: %v", err)
 	}
 
-	result := command.HandleEquip(sess, reg, "ghost_blade main")
+	result := command.HandleEquip(sess, reg, "ghost_blade main", 0)
 
 	if !strings.Contains(result, "level 15") {
 		t.Errorf("expected level 15 in error message, got: %q", result)
@@ -338,7 +338,7 @@ func TestHandleEquip_MinLevelCheck_ExactLevel(t *testing.T) {
 		t.Fatalf("failed to add ghost blade: %v", err)
 	}
 
-	result := command.HandleEquip(sess, reg, "ghost_blade2 main")
+	result := command.HandleEquip(sess, reg, "ghost_blade2 main", 0)
 
 	if !strings.Contains(result, "Equipped") {
 		t.Errorf("expected success at exact min level, got: %q", result)

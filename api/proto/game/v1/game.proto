@@ -610,7 +610,8 @@ message StrikeRequest {
 // EquipRequest asks the server to equip a weapon in the specified slot.
 message EquipRequest {
   string weapon_id = 1;
-  string slot = 2; // "primary", "secondary", "holster"
+  string slot = 2; // "main" or "off"
+  int32 preset = 3; // 1-based preset index (0 = active preset)
 }
 
 // ReloadRequest asks the server to reload the specified weapon, or the primary slot if empty.
