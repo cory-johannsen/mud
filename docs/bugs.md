@@ -606,11 +606,11 @@
 
 ### BUG-78: Technology "Force Field Emitter" description references Dexterity
 **Severity:** low
-**Status:** open
+**Status:** fixed
 **Category:** Content
 **Description:** The Force Field Emitter technology description incorrectly references Dexterity and mentions "mystic armor", both of which are PF2E/fantasy terms not used in this system.
 **Steps:** Log in; open the Technologies tab or view the Force Field Emitter technology description; observe the references to Dexterity and mystic armor.
-**Fix:**
+**Fix:** Replaced "Dexterity" with "Quickness" (the game equivalent) in the Force Field Emitter utility effect description; also replaced "mystic armor" and "magical energy" with force-field-appropriate language.
 
 ### BUG-77: Web UI has a wide border surrounding the screen that should be removed
 **Severity:** low

@@ -13,5 +13,6 @@ effects:
   on_apply:
   - type: utility
     dc: 0
-    description: You ward yourself with shimmering magical energy, gaining a +1 item bonus to AC and a maximum Dexterity modifier
-      of +5. While wearing mystic armor, you use your unarmored proficiency to calculate your
+    description: You activate your force field emitter, surrounding yourself with a shimmering energy barrier.
+      You gain a +1 item bonus to AC. While the force field is active, you use your unarmored
+      proficiency to calculate your AC and add your Quickness modifier (maximum +5) to your defense.
