@@ -59,7 +59,7 @@ func TestProperty_LevelForXP_NeverExceedsCap(t *testing.T) {
 }
 
 func TestAward_NoLevelUp(t *testing.T) {
-	cfg := &xp.XPConfig{BaseXP: 100, LevelCap: 100, HPPerLevel: 5, BoostInterval: 5}
+	cfg := &xp.XPConfig{BaseXP: 100, LevelCap: 100, HPPerLevel: 5, BoostInterval: 5, SkillInterval: 4}
 	result := xp.Award(1, 0, 50, cfg) // level=1, currentXP=0, award 50
 	assert.Equal(t, 50, result.NewXP)
 	assert.Equal(t, 1, result.NewLevel)
@@ -69,7 +69,7 @@ func TestAward_NoLevelUp(t *testing.T) {
 }
 
 func TestAward_LevelUp(t *testing.T) {
-	cfg := &xp.XPConfig{BaseXP: 100, LevelCap: 100, HPPerLevel: 5, BoostInterval: 5}
+	cfg := &xp.XPConfig{BaseXP: 100, LevelCap: 100, HPPerLevel: 5, BoostInterval: 5, SkillInterval: 4}
 	// 400 XP needed for level 2; award 400 at XP=0
 	result := xp.Award(1, 0, 400, cfg)
 	assert.Equal(t, 400, result.NewXP)
@@ -80,7 +80,7 @@ func TestAward_LevelUp(t *testing.T) {
 }
 
 func TestAward_BoostAtInterval(t *testing.T) {
-	cfg := &xp.XPConfig{BaseXP: 100, LevelCap: 100, HPPerLevel: 5, BoostInterval: 5}
+	cfg := &xp.XPConfig{BaseXP: 100, LevelCap: 100, HPPerLevel: 5, BoostInterval: 5, SkillInterval: 4}
 	// Start at level 4 with just under level-4 threshold XP, award exactly enough to hit level 5
 	startXP := xp.XPToLevel(4, 100) - 1
 	awardAmt := xp.XPToLevel(5, 100) - startXP // lands exactly at level 5 threshold
@@ -90,7 +90,7 @@ func TestAward_BoostAtInterval(t *testing.T) {
 }
 
 func TestAward_AtLevelCap(t *testing.T) {
-	cfg := &xp.XPConfig{BaseXP: 100, LevelCap: 3, HPPerLevel: 5, BoostInterval: 5}
+	cfg := &xp.XPConfig{BaseXP: 100, LevelCap: 3, HPPerLevel: 5, BoostInterval: 5, SkillInterval: 4}
 	// Already at cap, extra XP should not level up
 	result := xp.Award(3, 900, 10000, cfg)
 	assert.Equal(t, 3, result.NewLevel)
@@ -99,7 +99,7 @@ func TestAward_AtLevelCap(t *testing.T) {
 }
 
 func TestProperty_Award_NeverExceedsCap(t *testing.T) {
-	cfg := &xp.XPConfig{BaseXP: 100, LevelCap: 100, HPPerLevel: 5, BoostInterval: 5}
+	cfg := &xp.XPConfig{BaseXP: 100, LevelCap: 100, HPPerLevel: 5, BoostInterval: 5, SkillInterval: 4}
 	rapid.Check(t, func(rt *rapid.T) {
 		level := rapid.IntRange(1, 99).Draw(rt, "level")
 		// currentXP anywhere in the valid range for this level
@@ -116,18 +116,18 @@ func TestProperty_Award_NeverExceedsCap(t *testing.T) {
 	})
 }
 
-func TestAward_NewSkillIncreases_EvenLevels(t *testing.T) {
-	cfg := &xp.XPConfig{BaseXP: 100, LevelCap: 100, HPPerLevel: 5, BoostInterval: 5}
-	// Level 1→2: one even level → 1 increase
-	result := xp.Award(1, 0, 400, cfg) // XPToLevel(2,100)=400
-	assert.Equal(t, 1, result.NewSkillIncreases)
+func TestAward_NewSkillIncreases_SkillInterval(t *testing.T) {
+	cfg := &xp.XPConfig{BaseXP: 100, LevelCap: 100, HPPerLevel: 5, BoostInterval: 5, SkillInterval: 4}
+	// Level 1→3: no multiples of 4 in (1,3] → 0 increases
+	result := xp.Award(1, 0, 900, cfg) // XPToLevel(3,100)=900
+	assert.Equal(t, 0, result.NewSkillIncreases)
 
-	// Level 1→3: levels 2,3 → only 2 is even → 1 increase
-	result = xp.Award(1, 0, 900, cfg) // XPToLevel(3,100)=900
-	assert.Equal(t, 1, result.NewSkillIncreases)
-
-	// Level 1→4: levels 2,3,4 → even: 2,4 → 2 increases
+	// Level 1→4: multiple of 4 at level 4 → 1 increase
 	result = xp.Award(1, 0, 1600, cfg)
+	assert.Equal(t, 1, result.NewSkillIncreases)
+
+	// Level 1→8: multiples of 4: 4, 8 → 2 increases
+	result = xp.Award(1, 0, 6400, cfg) // XPToLevel(8,100)=6400
 	assert.Equal(t, 2, result.NewSkillIncreases)
 
 	// No level-up → 0 increases
@@ -135,8 +135,8 @@ func TestAward_NewSkillIncreases_EvenLevels(t *testing.T) {
 	assert.Equal(t, 0, result.NewSkillIncreases)
 }
 
-func TestProperty_NewSkillIncreases_MatchesEvenCount(t *testing.T) {
-	cfg := &xp.XPConfig{BaseXP: 100, LevelCap: 100, HPPerLevel: 5, BoostInterval: 5}
+func TestProperty_NewSkillIncreases_MatchesIntervalCount(t *testing.T) {
+	cfg := &xp.XPConfig{BaseXP: 100, LevelCap: 100, HPPerLevel: 5, BoostInterval: 5, SkillInterval: 4}
 	rapid.Check(t, func(rt *rapid.T) {
 		level := rapid.IntRange(1, 50).Draw(rt, "level")
 		xpVal := xp.XPToLevel(level, cfg.BaseXP)
@@ -150,19 +150,19 @@ func TestProperty_NewSkillIncreases_MatchesEvenCount(t *testing.T) {
 
 		expected := 0
 		for l := level + 1; l <= result.NewLevel; l++ {
-			if l%2 == 0 {
+			if l%cfg.SkillInterval == 0 {
 				expected++
 			}
 		}
 		if result.NewSkillIncreases != expected {
-			rt.Fatalf("level %d→%d: expected %d skill increases, got %d",
-				level, result.NewLevel, expected, result.NewSkillIncreases)
+			rt.Fatalf("level %d→%d: expected %d skill increases (interval %d), got %d",
+				level, result.NewLevel, expected, cfg.SkillInterval, result.NewSkillIncreases)
 		}
 	})
 }
 
 func TestProperty_Award_BoostCountMatchesIntervalMultiples(t *testing.T) {
-	cfg := &xp.XPConfig{BaseXP: 100, LevelCap: 100, HPPerLevel: 5, BoostInterval: 5}
+	cfg := &xp.XPConfig{BaseXP: 100, LevelCap: 100, HPPerLevel: 5, BoostInterval: 5, SkillInterval: 4}
 	rapid.Check(t, func(rt *rapid.T) {
 		level := rapid.IntRange(1, 95).Draw(rt, "level")
 		levelFloor := xp.XPToLevel(level, cfg.BaseXP)

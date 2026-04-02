@@ -17,6 +17,7 @@ func TestLoadXPConfig_ParsesAllFields(t *testing.T) {
 base_xp: 100
 hp_per_level: 5
 boost_interval: 5
+skill_interval: 4
 level_cap: 100
 job_level_cap: 20
 awards:
@@ -34,6 +35,7 @@ awards:
 	assert.Equal(t, 100, cfg.BaseXP)
 	assert.Equal(t, 5, cfg.HPPerLevel)
 	assert.Equal(t, 5, cfg.BoostInterval)
+	assert.Equal(t, 4, cfg.SkillInterval)
 	assert.Equal(t, 100, cfg.LevelCap)
 	assert.Equal(t, 20, cfg.JobLevelCap)
 	assert.Equal(t, 50, cfg.Awards.KillXPPerNPCLevel)
@@ -61,6 +63,7 @@ func TestXPConfig_TierMultipliers_LoadedFromYAML(t *testing.T) {
 base_xp: 100
 hp_per_level: 5
 boost_interval: 5
+skill_interval: 4
 level_cap: 100
 job_level_cap: 20
 awards:

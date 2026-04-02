@@ -36,6 +36,7 @@ func testCfg() *xp.XPConfig {
 		BaseXP:        100,
 		HPPerLevel:    5,
 		BoostInterval: 5,
+		SkillInterval: 4,
 		LevelCap:      100,
 		Awards: xp.Awards{
 			KillXPPerNPCLevel:       50,
@@ -148,18 +149,19 @@ func (m *mockSkillIncreaseSaver) IncrementPendingSkillIncreases(_ context.Contex
 	return nil
 }
 
-func TestService_SkillIncrease_OnEvenLevelUp(t *testing.T) {
+func TestService_SkillIncrease_OnIntervalLevelUp(t *testing.T) {
 	saver := &fakeProgressSaver{}
 	skillSaver := &mockSkillIncreaseSaver{}
 	svc := xp.NewService(testCfg(), saver)
 	svc.SetSkillIncreaseSaver(skillSaver)
 
-	// Level 1 → 2 (even): should get 1 skill increase
-	// XPToLevel(2, 100) = 400; start at 350, award 50 via kill (npcLevel=1, 50xp/level)
-	sess := testSess(1, 350, 10)
-	msgs, err := svc.AwardKill(context.Background(), sess, 1, 1, "")
+	// Level 3 → 4 (multiple of skill_interval=4): should get 1 skill increase.
+	// XPToLevel(3,100)=900, XPToLevel(4,100)=1600; start at 900, need 700 more XP.
+	// AwardKill npcLevel=14 gives 700 XP.
+	sess := testSess(3, 900, 20)
+	msgs, err := svc.AwardKill(context.Background(), sess, 14, 1, "")
 	require.NoError(t, err)
-	assert.Equal(t, 2, sess.Level)
+	assert.Equal(t, 4, sess.Level)
 	assert.Equal(t, 1, sess.PendingSkillIncreases)
 	assert.Equal(t, []int{1}, skillSaver.calls)
 	// Check message is present
@@ -172,19 +174,19 @@ func TestService_SkillIncrease_OnEvenLevelUp(t *testing.T) {
 	assert.True(t, found, "expected skill increase message in: %v", msgs)
 }
 
-func TestService_SkillIncrease_OddLevelUp_NoIncrease(t *testing.T) {
+func TestService_SkillIncrease_NonIntervalLevelUp_NoIncrease(t *testing.T) {
 	saver := &fakeProgressSaver{}
 	skillSaver := &mockSkillIncreaseSaver{}
 	svc := xp.NewService(testCfg(), saver)
 	svc.SetSkillIncreaseSaver(skillSaver)
 
-	// Level 2 → 3 (odd): should get 0 skill increases
-	// XPToLevel(2,100)=400, XPToLevel(3,100)=900, need 500 more XP
-	// AwardKill npcLevel=10 gives 500 XP
-	sess := testSess(2, 400, 15)
-	_, err := svc.AwardKill(context.Background(), sess, 10, 1, "")
+	// Level 1 → 2 (not a multiple of skill_interval=4): should get 0 skill increases.
+	// XPToLevel(1,100)=100, XPToLevel(2,100)=400; start at 100, need 300 more XP.
+	// AwardKill npcLevel=6 gives 300 XP.
+	sess := testSess(1, 100, 10)
+	_, err := svc.AwardKill(context.Background(), sess, 6, 1, "")
 	require.NoError(t, err)
-	assert.Equal(t, 3, sess.Level)
+	assert.Equal(t, 2, sess.Level)
 	assert.Equal(t, 0, sess.PendingSkillIncreases)
 	assert.Empty(t, skillSaver.calls)
 }
@@ -348,7 +350,7 @@ func TestPropertyService_AwardRoomDiscovery_GrantMessageAlwaysFirst(t *testing.T
 
 func TestService_AwardKill_TierScaling_Elite(t *testing.T) {
 	cfg := &xp.XPConfig{
-		BaseXP: 100, HPPerLevel: 5, BoostInterval: 5, LevelCap: 100,
+		BaseXP: 100, HPPerLevel: 5, BoostInterval: 5, SkillInterval: 4, LevelCap: 100,
 		Awards: xp.Awards{KillXPPerNPCLevel: 50},
 		TierMultipliers: map[string]xp.TierMultiplier{
 			"standard": {XP: 1.0}, "elite": {XP: 2.0},
@@ -366,7 +368,7 @@ func TestService_AwardKill_TierScaling_Elite(t *testing.T) {
 
 func TestService_AwardKill_EmptyTierDefaultsToStandard(t *testing.T) {
 	cfg := &xp.XPConfig{
-		BaseXP: 100, HPPerLevel: 5, BoostInterval: 5, LevelCap: 100,
+		BaseXP: 100, HPPerLevel: 5, BoostInterval: 5, SkillInterval: 4, LevelCap: 100,
 		Awards: xp.Awards{KillXPPerNPCLevel: 50},
 		TierMultipliers: map[string]xp.TierMultiplier{
 			"standard": {XP: 1.0},
@@ -389,7 +391,7 @@ func TestProperty_AwardKill_TierMultipliesMonotonically(t *testing.T) {
 			"elite": {XP: 2.0}, "champion": {XP: 3.0}, "boss": {XP: 5.0},
 		}
 		cfg := &xp.XPConfig{
-			BaseXP: 100, HPPerLevel: 5, BoostInterval: 5, LevelCap: 100,
+			BaseXP: 100, HPPerLevel: 5, BoostInterval: 5, SkillInterval: 4, LevelCap: 100,
 			Awards: xp.Awards{KillXPPerNPCLevel: 50},
 			TierMultipliers: mults,
 		}

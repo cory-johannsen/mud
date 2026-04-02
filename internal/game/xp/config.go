@@ -45,6 +45,8 @@ type XPConfig struct {
 	HPPerLevel int `yaml:"hp_per_level"`
 	// BoostInterval is the level interval at which an ability boost is granted.
 	BoostInterval int `yaml:"boost_interval"`
+	// SkillInterval is the level interval at which a skill rank increase is granted.
+	SkillInterval int `yaml:"skill_interval"`
 	// LevelCap is the maximum character level.
 	LevelCap int `yaml:"level_cap"`
 	// JobLevelCap is the maximum level for any single job (reserved for future use).
