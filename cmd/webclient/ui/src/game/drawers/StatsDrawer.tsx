@@ -203,6 +203,7 @@ export function StatsDrawer({ onClose }: { onClose: () => void }) {
             ) : (
               <StatRow label="XP" value={`${sheet.experience ?? 0} / ${sheet.xpToNext ?? sheet.xp_to_next ?? 0}`} />
             )}
+            <StatRow label="Hero Points" value={sheet.heroPoints ?? sheet.hero_points ?? 0} />
 
             <div className="stats-row">
               <span className="stats-label">Pending Boosts</span>
