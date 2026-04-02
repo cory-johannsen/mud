@@ -651,3 +651,11 @@
 **Description:** After combat ends, the console correctly displays the XP granted message, but the Stats tab continues to show the pre-combat XP value and does not reflect the updated total.
 **Steps:** Open the web client; engage and complete combat; observe the XP granted message in the console; navigate to the Stats tab and observe that the XP value has not updated.
 **Fix:** `CombatHandler.pushXPMessages` was sending XP grant text messages but never pushing a `CharacterSheetView` to the client. The `StatsDrawer` reads XP from `state.characterSheet`, which is only updated when a `CharacterSheetView` arrives. Added a `pushCharacterSheetFn func(*session.PlayerSession)` callback field to `CombatHandler` with `SetPushCharacterSheetFn`, called unconditionally at the end of `pushXPMessages`. Wired `s.pushCharacterSheet` as the callback in `grpc_service.go`.
+
+### BUG-79: Loadout Switch button fails on second use outside combat
+**Severity:** medium
+**Status:** fixed
+**Category:** UI
+**Description:** Outside of combat, clicking the Switch button on a loadout preset works the first time but returns "You have already swapped loadouts this round." on subsequent clicks.
+**Steps:** Log in; open Equipment tab; click Switch on a loadout preset; click Switch again; observe the error.
+**Fix:** In `handleLoadout`, reset `SwappedThisRound` before swapping when the player is not in combat. The once-per-round limit only applies during combat rounds; outside combat no round ever resets the flag.

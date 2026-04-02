@@ -175,3 +175,59 @@ func TestHandleLoadout_OutOfCombat_NoAPCheck(t *testing.T) {
 	assert.Contains(t, ev.GetMessage().GetContent(), "Switched to preset 2.")
 	assert.Equal(t, 1, sess.LoadoutSet.Active, "active preset must change out of combat without AP check")
 }
+
+// TestHandleLoadout_OutOfCombat_RepeatedSwapAllowed verifies that switching loadout
+// presets multiple times outside combat never triggers the "already swapped this round"
+// error (regression for BUG-79).
+//
+// Precondition: Player not in combat; LoadoutSet has 2 presets; Active=0.
+// Postcondition: Both swaps succeed; active preset toggles back and forth.
+func TestHandleLoadout_OutOfCombat_RepeatedSwapAllowed(t *testing.T) {
+	worldMgr, sessMgr := testWorldAndSession(t)
+	logger := zaptest.NewLogger(t)
+	svc := newTestGameServiceServer(
+		worldMgr, sessMgr,
+		command.DefaultRegistry(),
+		NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil, nil, nil),
+		NewChatHandler(sessMgr),
+		logger,
+		nil, nil, nil, nil, nil, nil,
+		nil, nil, nil, nil, nil, nil,
+		nil, nil, nil, nil, nil, nil, nil, nil, "",
+		nil, nil, nil,
+		nil, nil, nil,
+		nil, nil, nil, nil, nil, nil, nil,
+		nil, nil,
+		nil,
+		nil,
+		nil, nil,
+	)
+
+	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID: "lo_rep", Username: "Tester", CharName: "Tester",
+		RoomID: "room_a", CurrentHP: 10, MaxHP: 10, Role: "player",
+	})
+	require.NoError(t, err)
+	// Not in combat — Status remains default (not statusInCombat).
+
+	// First swap: 0 → 1.
+	ev1, err := svc.handleLoadout("lo_rep", &gamev1.LoadoutRequest{Arg: "2"})
+	require.NoError(t, err)
+	msg1 := ev1.GetMessage().GetContent()
+	assert.NotContains(t, msg1, "already swapped", "first swap must succeed outside combat")
+	assert.Equal(t, 1, sess.LoadoutSet.Active)
+
+	// Second swap: 1 → 0. Must not fail with "already swapped this round".
+	ev2, err := svc.handleLoadout("lo_rep", &gamev1.LoadoutRequest{Arg: "1"})
+	require.NoError(t, err)
+	msg2 := ev2.GetMessage().GetContent()
+	assert.NotContains(t, msg2, "already swapped", "second swap must succeed outside combat")
+	assert.Equal(t, 0, sess.LoadoutSet.Active)
+
+	// Third swap: 0 → 1 again.
+	ev3, err := svc.handleLoadout("lo_rep", &gamev1.LoadoutRequest{Arg: "2"})
+	require.NoError(t, err)
+	msg3 := ev3.GetMessage().GetContent()
+	assert.NotContains(t, msg3, "already swapped", "third swap must succeed outside combat")
+	assert.Equal(t, 1, sess.LoadoutSet.Active)
+}

@@ -5357,6 +5357,12 @@ func (s *GameServiceServer) handleLoadout(uid string, req *gamev1.LoadoutRequest
 					return messageEvent("Not enough AP to swap loadouts."), nil
 				}
 			}
+		} else {
+			// Outside combat there are no rounds, so the once-per-round swap
+			// limit does not apply. Clear the flag so repeated swaps work.
+			if sess.LoadoutSet != nil {
+				sess.LoadoutSet.ResetRound()
+			}
 		}
 		return messageEvent(command.HandleLoadout(sess, arg, s.invRegistry)), nil
 	}
