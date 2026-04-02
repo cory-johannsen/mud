@@ -19,14 +19,46 @@ merchant:
       base_price: 80
       init_stock: 5
       max_stock: 8
-    - item_id: sawn_off
-      base_price: 350
+    - item_id: tactical_knife
+      base_price: 100
+      init_stock: 4
+      max_stock: 6
+    - item_id: spiked_knuckles
+      base_price: 80
+      init_stock: 3
+      max_stock: 5
+    - item_id: tactical_hatchet
+      base_price: 250
       init_stock: 2
       max_stock: 4
     - item_id: pipe_pistol
       base_price: 150
       init_stock: 3
       max_stock: 5
+    - item_id: heavy_revolver
+      base_price: 400
+      init_stock: 2
+      max_stock: 3
+    - item_id: sawn_off
+      base_price: 350
+      init_stock: 2
+      max_stock: 4
+    - item_id: riot_shotgun
+      base_price: 600
+      init_stock: 1
+      max_stock: 2
+    - item_id: street_sweeper_smg
+      base_price: 350
+      init_stock: 2
+      max_stock: 3
+    - item_id: emp_grenade
+      base_price: 250
+      init_stock: 4
+      max_stock: 8
+    - item_id: incendiary_grenade
+      base_price: 200
+      init_stock: 4
+      max_stock: 8
   replenish_rate:
     min_hours: 6
     max_hours: 12

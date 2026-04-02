@@ -658,11 +658,11 @@ features:
 
   - slug: game-client-ebiten
     name: Ebiten Game Client
-    status: planned
+    status: done
     priority: 440
     category: ui
     file: docs/features/game-client-ebiten.md
-    effort: "XXL"  # native cross-platform client (Windows/Mac/Linux) over gRPC; new game engine layer
+    effort: "XXL"  # deprecated — native cross-platform client (Windows/Mac/Linux) over gRPC; not pursued
     dependencies:
       - internal-client    # shared session, feed, history, auth, render contract, assets
       - web-client         # webclient REST API used for auth and character management
@@ -796,3 +796,13 @@ features:
     dependencies:
       - technology
       - web-client
+
+  - slug: reactive-block-fix
+    name: Reactive Block Fix
+    status: spec
+    priority: 484
+    category: combat
+    file: docs/features/reactive-block-fix.md
+    effort: "S"  # WeaponDef.Hardness field; shieldHardness(); wielding_shield requirement; feedback message
+    dependencies:
+      - actions

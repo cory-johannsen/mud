@@ -1,0 +1,89 @@
+id: ellie_mack
+name: Ellie Mack
+npc_type: merchant
+description: >
+  Sergeant Mack's younger sister and former army quartermaster. Where her
+  brother stocks the guns, Ellie keeps everyone alive long enough to use them.
+  She repairs and resells salvaged armor out of a reinforced storage locker at
+  the back of the lodge, and has a reputation for knowing exactly which piece
+  of kit will stop exactly which caliber of round.
+max_hp: 32
+ac: 13
+level: 4
+awareness: 4
+personality: cowardly
+merchant:
+  merchant_type: armor
+  sell_margin: 1.30
+  buy_margin: 0.40
+  budget: 2000
+  inventory:
+    - item_id: ballistic_cap
+      base_price: 120
+      init_stock: 3
+      max_stock: 5
+    - item_id: combat_helmet
+      base_price: 250
+      init_stock: 2
+      max_stock: 4
+    - item_id: leather_jacket
+      base_price: 100
+      init_stock: 3
+      max_stock: 5
+    - item_id: tactical_vest
+      base_price: 300
+      init_stock: 2
+      max_stock: 4
+    - item_id: tactical_gloves
+      base_price: 80
+      init_stock: 4
+      max_stock: 6
+    - item_id: shock_gloves
+      base_price: 180
+      init_stock: 2
+      max_stock: 3
+    - item_id: street_boots
+      base_price: 60
+      init_stock: 4
+      max_stock: 6
+    - item_id: tactical_boots
+      base_price: 150
+      init_stock: 2
+      max_stock: 4
+    - item_id: left_arm_guards
+      base_price: 100
+      init_stock: 3
+      max_stock: 5
+    - item_id: left_tactical_vambrace
+      base_price: 220
+      init_stock: 2
+      max_stock: 3
+    - item_id: right_arm_guards
+      base_price: 100
+      init_stock: 3
+      max_stock: 5
+    - item_id: right_tactical_vambrace
+      base_price: 220
+      init_stock: 2
+      max_stock: 3
+    - item_id: left_leg_guards
+      base_price: 100
+      init_stock: 3
+      max_stock: 5
+    - item_id: left_tactical_greaves
+      base_price: 220
+      init_stock: 2
+      max_stock: 3
+    - item_id: right_leg_guards
+      base_price: 100
+      init_stock: 3
+      max_stock: 5
+    - item_id: right_tactical_greaves
+      base_price: 220
+      init_stock: 2
+      max_stock: 3
+  replenish_rate:
+    min_hours: 8
+    max_hours: 16
+    stock_refill: 1
+    budget_refill: 400
