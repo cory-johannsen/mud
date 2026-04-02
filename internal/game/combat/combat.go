@@ -3,6 +3,10 @@ package combat
 
 import "github.com/cory-johannsen/mud/internal/game/inventory"
 
+// MaxCombatRange is the maximum allowed distance in feet between any two combatants.
+// Neither players nor NPCs may move beyond this range from their opponent.
+const MaxCombatRange = 100
+
 // Kind distinguishes player combatants from NPC combatants.
 type Kind int
 

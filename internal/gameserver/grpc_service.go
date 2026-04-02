@@ -8837,11 +8837,24 @@ func (s *GameServiceServer) handleStep(uid string, req *gamev1.StepRequest) (*ga
 
 	s.clearPlayerCover(uid, sess)
 
-	// Find the NPC combatant to compute distance.
+	// Find the NPC combatant to compute distance; clamp if step would exceed MaxCombatRange.
 	dist := 0
 	for _, c := range cbt.Combatants {
 		if c.Kind == combat.KindNPC {
-			dist = combat.PosDist(combatant.Position, c.Position)
+			d := combat.PosDist(combatant.Position, c.Position)
+			if d > combat.MaxCombatRange {
+				// Push player back so distance equals MaxCombatRange.
+				if combatant.Position > c.Position {
+					combatant.Position = c.Position + combat.MaxCombatRange
+				} else {
+					combatant.Position = c.Position - combat.MaxCombatRange
+					if combatant.Position < 0 {
+						combatant.Position = 0
+					}
+				}
+				d = combat.MaxCombatRange
+			}
+			dist = d
 			break
 		}
 	}

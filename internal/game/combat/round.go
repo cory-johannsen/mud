@@ -448,6 +448,17 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 							actor.Position -= 25
 						}
 					}
+					// Clamp: distance to opponent must not exceed MaxCombatRange.
+					if opponent != nil && posDist(actor.Position, opponent.Position) > MaxCombatRange {
+						if actorAhead {
+							actor.Position = opponent.Position + MaxCombatRange
+						} else {
+							actor.Position = opponent.Position - MaxCombatRange
+							if actor.Position < 0 {
+								actor.Position = 0
+							}
+						}
+					}
 				}
 				// REQ-RXN19: TriggerOnEnemyMoveAdjacent fires when an NPC moves into melee range of a player.
 				if actor.Kind == KindNPC {

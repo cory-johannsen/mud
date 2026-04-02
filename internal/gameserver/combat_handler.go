@@ -3646,7 +3646,7 @@ func (h *CombatHandler) npcMovementStrideLocked(cbt *combat.Combat, c *combat.Co
 	if !isRanged && playerDist > 5 {
 		return "toward"
 	}
-	if isRanged && playerDist <= 5 {
+	if isRanged && playerDist <= 5 && playerDist < combat.MaxCombatRange {
 		return "away"
 	}
 	return ""
