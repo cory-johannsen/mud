@@ -16,12 +16,12 @@ This directory contains Mermaid graph diagrams and room tables for all 16 zones 
 | ne_portland | Northeast Portland | 24 | 1 (Corner Store) | [ne_portland.md](ne_portland.md) |
 | pdx_international | PDX International | 24 | 1 (Terminal B) | [pdx_international.md](pdx_international.md) |
 | ross_island | Ross Island | 22 | 1 (Dock Shack) | [ross_island.md](ross_island.md) |
-| rustbucket_ridge | Rustbucket Ridge | 35 | 1 (Scrap Office) | [rustbucket_ridge.md](rustbucket_ridge.md) |
+| rustbucket_ridge | Rustbucket Ridge | 36 | 5 (Scrap Office, Grinder's Row, Last Stand Lodge, Wayne Dawg's Trailer, Dwayne Dawg's Trailer) | [rustbucket_ridge.md](rustbucket_ridge.md) |
 | sauvie_island | Sauvie Island | 22 | 1 (Farm Stand) | [sauvie_island.md](sauvie_island.md) |
 | se_industrial | Southeast Industrial | 22 | 1 (Break Room) | [se_industrial.md](se_industrial.md) |
 | the_couve | The Couve | 21 | 1 (The Crossing) | [the_couve.md](the_couve.md) |
 | troutdale | Troutdale | 24 | 1 (Truck Stop) | [troutdale.md](troutdale.md) |
-| vantucky | Vantucky | 22 | 1 (The Compound) | [vantucky.md](vantucky.md) |
+| vantucky | Vantucky | 30 | 5 (The Compound, Neutral Pawn, Neutral Back, Neutral Vault, Fourth Plain Border) | [vantucky.md](vantucky.md) |
 
 ## Danger Level Reference
 
