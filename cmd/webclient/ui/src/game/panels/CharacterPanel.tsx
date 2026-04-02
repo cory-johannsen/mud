@@ -151,7 +151,7 @@ export function CharacterPanel() {
   }, [characterSheet, sendMessage])
 
   function handleBoostSelect(ability: string) {
-    sendMessage('LevelUpRequest', { ability })
+    sendMessage('LevelUpRequest', { ability: ability.toLowerCase() })
     sendMessage('CharacterSheetRequest', {})
     setModal(null)
   }
