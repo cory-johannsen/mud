@@ -154,7 +154,11 @@ export function EquipmentDrawer({ onClose }: { onClose: () => void }) {
   const armor = (sheet?.armor ?? {}) as Record<string, string>
   const accessories = (sheet?.accessories ?? {}) as Record<string, string>
   const mainHand = sheet?.mainHand ?? sheet?.main_hand ?? null
+  const mainHandBonus = sheet?.mainHandAttackBonus ?? sheet?.main_hand_attack_bonus ?? null
+  const mainHandDamage = sheet?.mainHandDamage ?? sheet?.main_hand_damage ?? null
   const offHand = sheet?.offHand ?? sheet?.off_hand ?? null
+  const offHandBonus = sheet?.offHandAttackBonus ?? null
+  const offHandDamage = sheet?.offHandDamage ?? null
   const lv = state.loadoutView
   const activeIndex = lv?.activeIndex ?? 0
   const presets = lv?.presets ?? []
@@ -195,11 +199,15 @@ export function EquipmentDrawer({ onClose }: { onClose: () => void }) {
             <EquipSlot
               label="Main Hand"
               value={mainHand}
+              bonus={mainHandBonus}
+              dmg={mainHandDamage}
               onUnequip={mainHand ? () => handleUnequip('main') : undefined}
             />
             <EquipSlot
               label="Off Hand"
               value={offHand}
+              bonus={offHandBonus}
+              dmg={offHandDamage}
               onUnequip={offHand ? () => handleUnequip('off') : undefined}
             />
 
