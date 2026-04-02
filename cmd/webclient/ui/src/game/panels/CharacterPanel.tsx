@@ -1,5 +1,6 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useGame } from '../GameContext'
+import type { SkillEntry } from '../../proto'
 
 function HpBar({ current, max }: { current: number; max: number }) {
   const pct = max > 0 ? (current / max) * 100 : 0
@@ -79,10 +80,55 @@ function CombatInitiativeList() {
   )
 }
 
+const ABILITIES = ['Brutality', 'Grit', 'Quickness', 'Reasoning', 'Savvy', 'Flair']
+
+function AbilityBoostModal({ onSelect, onCancel }: { onSelect: (a: string) => void; onCancel: () => void }) {
+  return (
+    <div style={modalStyles.overlay}>
+      <div style={modalStyles.box}>
+        <div style={modalStyles.title}>Apply Ability Boost</div>
+        <div style={modalStyles.subtitle}>Choose an ability to increase by 2:</div>
+        <div style={modalStyles.abilityGrid}>
+          {ABILITIES.map(a => (
+            <button key={a} style={modalStyles.abilityBtn} onClick={() => onSelect(a)} type="button">{a}</button>
+          ))}
+        </div>
+        <button style={modalStyles.cancelBtn} onClick={onCancel} type="button">Cancel</button>
+      </div>
+    </div>
+  )
+}
+
+function SkillIncreaseModal({ skills, onSelect, onCancel }: { skills: SkillEntry[]; onSelect: (id: string) => void; onCancel: () => void }) {
+  const upgradeable = skills.filter(s => s.proficiency !== 'legendary')
+  return (
+    <div style={modalStyles.overlay}>
+      <div style={modalStyles.box}>
+        <div style={modalStyles.title}>Increase Skill Proficiency</div>
+        <div style={modalStyles.subtitle}>Choose a skill to advance:</div>
+        <div style={modalStyles.skillList}>
+          {upgradeable.length === 0
+            ? <div style={{ color: '#666', fontSize: '0.8rem' }}>No upgradeable skills.</div>
+            : upgradeable.map(s => (
+              <button key={s.skillId} style={modalStyles.skillBtn} onClick={() => onSelect(s.skillId ?? '')} type="button">
+                <span style={{ fontWeight: 600 }}>{s.name}</span>
+                <span style={{ color: '#666', fontSize: '0.7rem' }}>{s.proficiency ?? 'untrained'} ({s.ability})</span>
+              </button>
+            ))}
+        </div>
+        <button style={modalStyles.cancelBtn} onClick={onCancel} type="button">Cancel</button>
+      </div>
+    </div>
+  )
+}
+
+type Modal = 'boost' | 'skill' | null
+
 export function CharacterPanel() {
   const { state, sendMessage } = useGame()
   const { characterInfo, characterSheet, combatRound } = state
   const retryRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const [modal, setModal] = useState<Modal>(null)
 
   useEffect(() => {
     if (!characterSheet) {
@@ -104,6 +150,18 @@ export function CharacterPanel() {
     }
   }, [characterSheet, sendMessage])
 
+  function handleBoostSelect(ability: string) {
+    sendMessage('LevelUpRequest', { ability })
+    sendMessage('CharacterSheetRequest', {})
+    setModal(null)
+  }
+
+  function handleSkillSelect(skillId: string) {
+    sendMessage('TrainSkillRequest', { skillId })
+    sendMessage('CharacterSheetRequest', {})
+    setModal(null)
+  }
+
   if (combatRound) {
     return <CombatInitiativeList />
   }
@@ -120,35 +178,168 @@ export function CharacterPanel() {
   const heroPoints = characterSheet?.heroPoints ?? characterSheet?.hero_points ?? 0
   const hpPct = maxHp > 0 ? (currentHp / maxHp) * 100 : 0
   const hpClass = hpPct > 50 ? 'hp-green' : hpPct > 25 ? 'hp-yellow' : 'hp-red'
-
   const conditions = state.roomView?.activeConditions ?? state.roomView?.active_conditions ?? []
+  const xp = characterSheet?.experience ?? 0
+  const xpToNext = characterSheet?.xpToNext ?? characterSheet?.xp_to_next ?? 0
+  const pendingBoosts = characterSheet?.pendingBoosts ?? characterSheet?.pending_boosts ?? 0
+  const pendingSkillInc = characterSheet?.pendingSkillIncreases ?? 0
 
   return (
-    <div>
-      <h3 className="char-name">{name}</h3>
-      <span className="char-class">Level {level} {className}</span>
+    <>
+      {modal === 'boost' && (
+        <AbilityBoostModal onSelect={handleBoostSelect} onCancel={() => setModal(null)} />
+      )}
+      {modal === 'skill' && (
+        <SkillIncreaseModal skills={characterSheet?.skills ?? []} onSelect={handleSkillSelect} onCancel={() => setModal(null)} />
+      )}
+      <div>
+        <h3 className="char-name">{name}</h3>
+        <span className="char-class">Level {level} {className}</span>
 
-      <div className="hp-bar-track">
-        <div
-          className={`hp-bar-fill ${hpClass}`}
-          style={{ width: `${Math.min(100, Math.max(0, hpPct))}%` }}
-        />
-      </div>
-      <span className="hp-text">{currentHp} / {maxHp} HP</span>
-
-      {conditions.length > 0 && (
-        <div className="conditions">
-          {conditions.map((c, i) => (
-            <span key={i} className="condition-badge">
-              {typeof c === 'string' ? c : (c as { name?: string }).name ?? String(c)}
-            </span>
-          ))}
+        <div className="hp-bar-track">
+          <div
+            className={`hp-bar-fill ${hpClass}`}
+            style={{ width: `${Math.min(100, Math.max(0, hpPct))}%` }}
+          />
         </div>
-      )}
+        <span className="hp-text">{currentHp} / {maxHp} HP</span>
 
-      {characterSheet && (
-        <span className="hero-points">✦ Hero: {heroPoints}</span>
-      )}
-    </div>
+        {conditions.length > 0 && (
+          <div className="conditions">
+            {conditions.map((c, i) => (
+              <span key={i} className="condition-badge">
+                {typeof c === 'string' ? c : (c as { name?: string }).name ?? String(c)}
+              </span>
+            ))}
+          </div>
+        )}
+
+        {characterSheet && (
+          <>
+            <span className="hero-points">✦ Hero: {heroPoints}</span>
+            <div style={styles.progressBlock}>
+              <span style={styles.xpLine}>
+                XP: {xp}{xpToNext > 0 ? ` / ${xpToNext}` : ' (max)'}
+              </span>
+              {pendingBoosts > 0 && (
+                <button style={styles.pendingBtn} onClick={() => setModal('boost')} type="button">
+                  ★ {pendingBoosts} Pending Boost{pendingBoosts !== 1 ? 's' : ''} — Apply
+                </button>
+              )}
+              {pendingSkillInc > 0 && (
+                <button style={styles.pendingBtn} onClick={() => setModal('skill')} type="button">
+                  ★ {pendingSkillInc} Pending Skill Increase{pendingSkillInc !== 1 ? 's' : ''} — Apply
+                </button>
+              )}
+            </div>
+          </>
+        )}
+      </div>
+    </>
   )
+}
+
+const styles: Record<string, React.CSSProperties> = {
+  progressBlock: {
+    marginTop: '0.4rem',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0.25rem',
+  },
+  xpLine: {
+    fontSize: '0.75rem',
+    color: '#888',
+    fontFamily: 'monospace',
+  },
+  pendingBtn: {
+    background: '#3a3a00',
+    border: '1px solid #cc0',
+    color: '#cc0',
+    borderRadius: '3px',
+    cursor: 'pointer',
+    fontFamily: 'monospace',
+    fontSize: '0.72rem',
+    padding: '0.15rem 0.4rem',
+    textAlign: 'left',
+  },
+}
+
+const modalStyles: Record<string, React.CSSProperties> = {
+  overlay: {
+    position: 'fixed',
+    inset: 0,
+    background: 'rgba(0,0,0,0.7)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 200,
+  },
+  box: {
+    background: '#1a1a1a',
+    border: '1px solid #444',
+    borderRadius: '6px',
+    padding: '1.2rem',
+    minWidth: '240px',
+    maxWidth: '320px',
+  },
+  title: {
+    color: '#7af',
+    fontSize: '0.9rem',
+    fontWeight: 600,
+    marginBottom: '0.3rem',
+  },
+  subtitle: {
+    color: '#888',
+    fontSize: '0.75rem',
+    marginBottom: '0.75rem',
+  },
+  abilityGrid: {
+    display: 'grid',
+    gridTemplateColumns: '1fr 1fr',
+    gap: '0.4rem',
+    marginBottom: '0.75rem',
+  },
+  abilityBtn: {
+    background: '#1a2a1a',
+    border: '1px solid #4a6a2a',
+    color: '#8d4',
+    borderRadius: '3px',
+    cursor: 'pointer',
+    fontFamily: 'monospace',
+    fontSize: '0.8rem',
+    padding: '0.3rem 0.5rem',
+  },
+  skillList: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0.3rem',
+    marginBottom: '0.75rem',
+    maxHeight: '240px',
+    overflowY: 'auto',
+  },
+  skillBtn: {
+    background: '#1a2a1a',
+    border: '1px solid #4a6a2a',
+    color: '#8d4',
+    borderRadius: '3px',
+    cursor: 'pointer',
+    fontFamily: 'monospace',
+    fontSize: '0.78rem',
+    padding: '0.25rem 0.5rem',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: '0.5rem',
+  },
+  cancelBtn: {
+    background: 'none',
+    border: '1px solid #444',
+    color: '#666',
+    borderRadius: '3px',
+    cursor: 'pointer',
+    fontFamily: 'monospace',
+    fontSize: '0.75rem',
+    padding: '0.2rem 0.6rem',
+    width: '100%',
+  },
 }
