@@ -1,13 +1,6 @@
 import ReactDOM from 'react-dom'
 import type { MapTile } from '../proto'
-import { POI_TYPES } from './mapRenderer'
-
-const DANGER_COLOR: Record<string, string> = {
-  safe:        '#4a8',
-  sketchy:     '#cc0',
-  dangerous:   '#f80',
-  all_out_war: '#f44',
-}
+import { POI_TYPES, DANGER_COLOR } from './mapRenderer'
 
 interface RoomTooltipProps {
   tile: MapTile
@@ -25,7 +18,7 @@ export function RoomTooltip({ tile, pos }: RoomTooltipProps) {
   // Resolve tooltip position: appear below the hovered element, clamp to viewport.
   const style: React.CSSProperties = {
     position:    'fixed',
-    left:        Math.min(pos.x, window.innerWidth - 220),
+    left:        Math.min(pos.x, window.innerWidth - 260),
     top:         pos.y + 6,
     zIndex:      2000,
     background:  '#1a1a1a',

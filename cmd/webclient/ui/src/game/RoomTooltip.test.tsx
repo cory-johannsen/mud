@@ -49,4 +49,28 @@ describe('RoomTooltip', () => {
     render(<RoomTooltip tile={nonCurrentTile} pos={{ x: 100, y: 200 }} />)
     expect(screen.queryByText('current room')).toBeNull()
   })
+
+  it('renders nothing for POIs section when pois is empty', () => {
+    const emptyPoisTile: MapTile = { ...tile, pois: [] }
+    render(<RoomTooltip tile={emptyPoisTile} pos={{ x: 100, y: 200 }} />)
+    expect(screen.queryByText('Points of Interest:')).toBeNull()
+  })
+
+  it('renders nothing for exits section when exits is empty', () => {
+    const emptyExitsTile: MapTile = { ...tile, exits: [] }
+    render(<RoomTooltip tile={emptyExitsTile} pos={{ x: 100, y: 200 }} />)
+    expect(screen.queryByText('Exits:', { exact: false })).toBeNull()
+  })
+
+  it('falls back to raw id for unknown POI', () => {
+    const unknownPOITile: MapTile = { ...tile, pois: ['unknown_poi_type'] }
+    render(<RoomTooltip tile={unknownPOITile} pos={{ x: 100, y: 200 }} />)
+    expect(screen.getByText('unknown_poi_type')).toBeDefined()
+  })
+
+  it('renders danger level from snake_case danger_level field', () => {
+    const snakeTile: MapTile = { ...tile, dangerLevel: undefined, danger_level: 'dangerous' }
+    render(<RoomTooltip tile={snakeTile} pos={{ x: 100, y: 200 }} />)
+    expect(screen.getByText('dangerous')).toBeDefined()
+  })
 })

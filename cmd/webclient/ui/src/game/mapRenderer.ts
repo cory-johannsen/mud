@@ -7,7 +7,7 @@ import type { MapTile } from '../proto'
 const CELL_W = 4
 
 // Danger level → CSS color (matches DangerColor in text_renderer.go)
-const DANGER_COLOR: Record<string, string> = {
+export const DANGER_COLOR: Record<string, string> = {
   safe:        '#4a8',   // green
   sketchy:     '#cc0',   // yellow
   dangerous:   '#f80',   // orange
