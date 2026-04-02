@@ -1,19 +1,40 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useGame } from '../GameContext'
 import { renderMapTiles } from '../mapRenderer'
 import type { ColoredLine } from '../mapRenderer'
 import type { WorldZoneTile } from '../../proto'
+import type { MapTile } from '../../proto'
+import { RoomTooltip } from '../RoomTooltip'
 
-function renderLines(lines: ColoredLine[]): JSX.Element {
+interface HoverHandlers {
+  onMouseEnter: (tile: MapTile, e: React.MouseEvent) => void
+  onMouseLeave: () => void
+}
+
+function renderLines(lines: ColoredLine[], hover?: HoverHandlers): JSX.Element {
   return (
     <>
       {lines.map((line, i) => (
         <span key={i}>
-          {line.map((seg, j) =>
-            seg.color
+          {line.map((seg, j) => {
+            if (seg.tile && hover) {
+              const tile = seg.tile
+              return (
+                <span
+                  key={j}
+                  style={{ color: seg.color, cursor: 'default' }}
+                  data-room={tile.roomId ?? ''}
+                  onMouseEnter={e => hover.onMouseEnter(tile, e)}
+                  onMouseLeave={hover.onMouseLeave}
+                >
+                  {seg.text}
+                </span>
+              )
+            }
+            return seg.color
               ? <span key={j} style={{ color: seg.color }}>{seg.text}</span>
               : <span key={j}>{seg.text}</span>
-          )}
+          })}
           {i < lines.length - 1 ? '\n' : ''}
         </span>
       ))}
@@ -140,6 +161,23 @@ function WorldMapView({ tiles, onTravel }: { tiles: WorldZoneTile[]; onTravel: (
 export function MapPanel() {
   const { state, sendMessage, sendCommand } = useGame()
   const [showWorld, setShowWorld] = useState(false)
+  const [hoveredTile, setHoveredTile] = useState<MapTile | null>(null)
+  const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 })
+
+  const handleRoomEnter = useCallback((tile: MapTile, e: React.MouseEvent) => {
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
+    setTooltipPos({ x: rect.left, y: rect.bottom })
+    setHoveredTile(tile)
+  }, [])
+
+  const handleRoomLeave = useCallback(() => {
+    setHoveredTile(null)
+  }, [])
+
+  const hoverHandlers: HoverHandlers = {
+    onMouseEnter: handleRoomEnter,
+    onMouseLeave: handleRoomLeave,
+  }
 
   function refreshZone() {
     sendMessage('MapRequest', { view: 'zone' })
@@ -221,11 +259,14 @@ export function MapPanel() {
       ) : (
         <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start', overflow: 'auto' }}>
           <pre className="map-ascii" style={{ margin: 0, flexShrink: 0 }}>
-            {renderLines(gridLines)}
+            {renderLines(gridLines, hoverHandlers)}
           </pre>
           <pre className="map-ascii" style={{ margin: 0, flexShrink: 1, minWidth: 0 }}>
             {renderLines(legendLines)}
           </pre>
+          {hoveredTile && (
+            <RoomTooltip tile={hoveredTile} pos={tooltipPos} />
+          )}
         </div>
       )}
     </div>
