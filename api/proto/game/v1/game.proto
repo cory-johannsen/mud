@@ -743,7 +743,7 @@ message MapTile {
     string danger_level  = 7;
     repeated string pois = 8; // POI type IDs present in this room e.g. ["merchant", "equipment"]
     bool   boss_room     = 9; // true when this room is a boss arena (REQ-AE-24)
-    repeated PoiWithNpc poi_npcs = 10; // NPC-backed POIs with their display names
+    repeated PoiWithNpc poi_npcs = 10; // NPC-backed POIs with display names; non-NPC POIs (equipment, map, cover) are absent. Every poi_id here appears in pois.
 }
 
 // WorldZoneTile represents one zone on the world map.
