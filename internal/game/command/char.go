@@ -55,7 +55,7 @@ func HandleChar(sess *session.PlayerSession) string {
 	}
 
 	sb.WriteString("--- Currency ---\n")
-	sb.WriteString(fmt.Sprintf("%s\n", inventory.FormatRounds(sess.Currency)))
+	sb.WriteString(fmt.Sprintf("%s\n", inventory.FormatCrypto(sess.Currency)))
 
 	return sb.String()
 }

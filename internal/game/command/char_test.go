@@ -87,9 +87,9 @@ func TestHandleChar_ShowsLevel(t *testing.T) {
 // TestHandleChar_ShowsCurrency verifies that the currency appears in the sheet.
 func TestHandleChar_ShowsCurrency(t *testing.T) {
 	sess := newCharTestSession("boot_gun")
-	// Currency=100 rounds: 4 Clips, 0 Rounds — FormatRounds(100) = "4 Clips, 0 Rounds"
+	// Currency=100 crypto — FormatCrypto(100) = "100 Crypto"
 	result := command.HandleChar(sess)
-	assert.Contains(t, result, "Round")
+	assert.Contains(t, result, "Crypto")
 }
 
 // TestProperty_HandleChar_NeverPanics is a property-based test verifying that
