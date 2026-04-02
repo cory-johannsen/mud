@@ -102,6 +102,14 @@ export interface SkillEntry {
   description?: string
 }
 
+export interface ProficiencyEntry {
+  category?: string
+  name?: string
+  rank?: string
+  bonus?: number
+  kind?: string
+}
+
 export interface FeatEntry {
   featId?: string
   name: string
@@ -233,6 +241,7 @@ export interface CharacterSheetView {
   focus_points?: number
   maxFocusPoints?: number
   max_focus_points?: number
+  proficiencies?: ProficiencyEntry[]
 }
 
 export interface InventoryItem {

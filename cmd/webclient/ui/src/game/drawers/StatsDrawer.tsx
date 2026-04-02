@@ -96,10 +96,87 @@ export function StatsDrawer({ onClose }: { onClose: () => void }) {
               <span>Initiative: <strong>{abilMod(sheet.quickness ?? 10)}</strong></span>
             </div>
 
+            {(sheet.proficiencies ?? []).length > 0 && (() => {
+              const profs = sheet.proficiencies!
+              const armor   = profs.filter(p => p.kind === 'armor')
+              const weapons = profs.filter(p => p.kind === 'weapon')
+              const other   = profs.filter(p => p.kind !== 'armor' && p.kind !== 'weapon')
+              return (
+                <>
+                  <SectionHeader label="— Proficiencies —" />
+                  {armor.length > 0 && (
+                    <div style={styles.profGroup}>
+                      <span style={styles.profGroupLabel}>Armor</span>
+                      {armor.map(p => (
+                        <div key={p.category} className="stats-row">
+                          <span className="stats-label">{p.name ?? p.category}</span>
+                          <span className="stats-value" style={styles.profRank(p.rank ?? '')}>
+                            {p.rank ?? '—'}{p.bonus !== undefined && p.bonus !== 0 ? ` (${p.bonus >= 0 ? '+' : ''}${p.bonus})` : ''}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {weapons.length > 0 && (
+                    <div style={styles.profGroup}>
+                      <span style={styles.profGroupLabel}>Weapons</span>
+                      {weapons.map(p => (
+                        <div key={p.category} className="stats-row">
+                          <span className="stats-label">{p.name ?? p.category}</span>
+                          <span className="stats-value" style={styles.profRank(p.rank ?? '')}>
+                            {p.rank ?? '—'}{p.bonus !== undefined && p.bonus !== 0 ? ` (${p.bonus >= 0 ? '+' : ''}${p.bonus})` : ''}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {other.length > 0 && (
+                    <div style={styles.profGroup}>
+                      {other.map(p => (
+                        <div key={p.category} className="stats-row">
+                          <span className="stats-label">{p.name ?? p.category}</span>
+                          <span className="stats-value" style={styles.profRank(p.rank ?? '')}>
+                            {p.rank ?? '—'}{p.bonus !== undefined && p.bonus !== 0 ? ` (${p.bonus >= 0 ? '+' : ''}${p.bonus})` : ''}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </>
+              )
+            })()}
+
           </>
         )}
       </div>
     </>
   )
+}
+
+const RANK_COLORS: Record<string, string> = {
+  untrained: '#555',
+  trained:   '#aaa',
+  expert:    '#7af',
+  master:    '#fa7',
+  legendary: '#fa4',
+}
+
+const styles = {
+  profGroup: {
+    marginBottom: '0.4rem',
+  } as React.CSSProperties,
+  profGroupLabel: {
+    display: 'block',
+    color: '#666',
+    fontSize: '0.68rem',
+    textTransform: 'uppercase' as const,
+    letterSpacing: '0.06em',
+    marginBottom: '0.15rem',
+    marginTop: '0.3rem',
+  } as React.CSSProperties,
+  profRank: (rank: string): React.CSSProperties => ({
+    color: RANK_COLORS[rank] ?? '#aaa',
+    fontSize: '0.8rem',
+  }),
 }
 
