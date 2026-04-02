@@ -1,6 +1,6 @@
 zone:
   id: rustbucket_ridge
-  danger_level: dangerous
+  danger_level: sketchy
   world_x: 4
   world_y: 0
   script_dir: content/scripts/zones/rustbucket_ridge
@@ -91,6 +91,7 @@ zone:
       respawn_after: 0s
   - id: the_rusty_oasis
     title: The Rusty Oasis
+    danger_level: safe
     core: true
     description: This trailer belongs to Slick Sally, a resourceful scavenger and mechanic. Sally runs a small black-market
       shop out of her trailer, dealing in anything from salvaged tech to rare machine parts. Her trailer is surrounded by
@@ -107,9 +108,6 @@ zone:
     map_x: 0
     map_y: 2
     spawns:
-    - template: ganger
-      count: 2
-      respawn_after: 3m
     - template: slick_sally
       count: 1
       respawn_after: 10m
@@ -191,6 +189,7 @@ zone:
       respawn_after: 0s
   - id: junkers_dream
     title: Junker's Dream
+    danger_level: safe
     core: true
     description: This trailer is home to Tina Wires, a tech expert who runs a cyber rigging service for the few who can afford
       it. She's modified her trailer with solar panels and digital security, and it's packed with scavenged electronics. Her
@@ -203,12 +202,6 @@ zone:
     map_x: 0
     map_y: 4
     spawns:
-    - template: ganger
-      count: 2
-      respawn_after: 3m
-    - template: lieutenant
-      count: 1
-      respawn_after: 5m
     - template: tina_wires
       count: 1
       respawn_after: 10m
@@ -233,7 +226,7 @@ zone:
       cover_hp: 4
   - id: the_green_hell
     title: The Green Hell
-    danger_level: sketchy
+    danger_level: safe
     description: A lush, overgrown trailer owned by Herb, a strange recluse who is obsessed with growing post-apocalyptic
       food in his greenhouse and hydroponic system. His trailer is filled with plants and crawling vines, and it smells strongly
       of soil and decay.
@@ -245,9 +238,6 @@ zone:
     map_x: -2
     map_y: 2
     spawns:
-    - template: scavenger
-      count: 1
-      respawn_after: 3m
     - template: herb
       count: 1
       respawn_after: 10m
@@ -264,6 +254,7 @@ zone:
       cover_hp: 2
   - id: rotgut_alley
     title: Rotgut Alley
+    danger_level: safe
     core: true
     description: Known for its homebrewed alcohol and underground dealings, this court is where the more questionable residents
       gather. The trailers are covered in grime, with barrels of moonshine and makeshift distilleries scattered around. People
@@ -280,12 +271,6 @@ zone:
     map_x: 0
     map_y: -2
     spawns:
-    - template: ganger
-      count: 2
-      respawn_after: 3m
-    - template: scavenger
-      count: 1
-      respawn_after: 3m
     - template: dex
       count: 1
       respawn_after: 10m
@@ -308,7 +293,7 @@ zone:
       cover_hp: 3
   - id: the_bottle_shack
     title: The Bottle Shack
-    danger_level: sketchy
+    danger_level: safe
     description: This is Whiskey Joe's trailer, a former bartender who now distills his own liquor from whatever he can find.
       Joe runs an unofficial bar out of his trailer, trading moonshine and stories with anyone who passes through. His trailer
       is surrounded by empty bottles, and a smoky fire pit is usually burning nearby.
@@ -318,9 +303,6 @@ zone:
     map_x: 2
     map_y: -2
     spawns:
-    - template: scavenger
-      count: 1
-      respawn_after: 3m
     - template: whiskey_joe
       count: 1
       respawn_after: 10m
@@ -345,6 +327,7 @@ zone:
       cover_hp: 2
   - id: the_heap
     title: The Heap
+    danger_level: safe
     core: true
     description: This trailer is a cobbled-together monstrosity, owned by Old Rusty, a legendary scavenger known for his ability
       to find and repurpose almost anything. The trailer is half-buried in a mountain of scrap metal, with makeshift extensions
@@ -359,12 +342,6 @@ zone:
     map_x: -2
     map_y: -2
     spawns:
-    - template: ganger
-      count: 2
-      respawn_after: 3m
-    - template: mill_plain_thug
-      count: 1
-      respawn_after: 4m
     - template: old_rusty
       count: 1
       respawn_after: 10m
@@ -389,7 +366,7 @@ zone:
       cover_hp: 3
   - id: the_tinkers_den
     title: The Tinker's Den
-    danger_level: sketchy
+    danger_level: safe
     description: Home to Clutch, a talented mechanic who specializes in fixing up old-world vehicles and tech. His trailer
       is surrounded by half-disassembled cars and bikes, with greasy tools scattered around. People come here for repairs,
       but at a price—often paid in valuable scrap.
@@ -401,9 +378,6 @@ zone:
     map_x: -2
     map_y: -4
     spawns:
-    - template: scavenger
-      count: 1
-      respawn_after: 3m
     - template: clutch
       count: 1
       respawn_after: 10m
@@ -431,7 +405,7 @@ zone:
       cover_hp: 2
   - id: scrapshack_23
     title: Scrapshack 23
-    danger_level: sketchy
+    danger_level: safe
     description: A trailer covered in rusted metal sheets and salvaged materials, owned by Gail "Grinder" Graves, a tough-as-nails
       scrapper who deals in bulk metal. Her trailer has a massive makeshift crane outside, used to haul larger pieces of debris
       to her scrapyard for sorting and trade.
@@ -443,9 +417,6 @@ zone:
     map_x: -4
     map_y: -2
     spawns:
-    - template: scavenger
-      count: 2
-      respawn_after: 3m
     - template: gail_grinder_graves
       count: 1
       respawn_after: 10m
@@ -470,7 +441,7 @@ zone:
       cover_hp: 3
   - id: wreckers_rest
     title: Wrecker's Rest
-    danger_level: sketchy
+    danger_level: safe
     description: A camp site where The Twins, a duo of scavengers named Vic and Vee, operate. They live out of a beaten-up
       RV and spend their days sifting through the heaps of scrap around them. Their camp is surrounded by half-melted mannequins
       and broken droids they use for spare parts.
@@ -480,9 +451,6 @@ zone:
     map_x: -4
     map_y: -4
     spawns:
-    - template: scavenger
-      count: 1
-      respawn_after: 3m
     - template: rio_wrench
       count: 1
       respawn_after: 10m
@@ -497,7 +465,7 @@ zone:
       cover_hp: 3
   - id: salvage_hut
     title: Salvage Hut
-    danger_level: sketchy
+    danger_level: safe
     description: A trailer owned by Cog, a tech enthusiast obsessed with creating gadgets from scavenged parts. Cog's trailer
       is filled with half-finished projects and bizarre contraptions. The area around his home is littered with bits of old
       tech, and he's always on the lookout for rare finds to add to his collection.
@@ -507,9 +475,6 @@ zone:
     map_x: -4
     map_y: 0
     spawns:
-    - template: scavenger
-      count: 1
-      respawn_after: 3m
     - template: rustbucket_ridge_merchant
       count: 1
       respawn_after: 0s
@@ -979,7 +944,7 @@ zone:
       cover_hp: 4
   - id: scorchside_camp
     title: Scorchside Camp
-    danger_level: sketchy
+    danger_level: safe
     description: This camp site is occupied by Sooty Joe, a drifter who survives by burning trash and selling scavenged materials.
       His tent is surrounded by piles of ash and the remains of burnt-out objects. Joe always seems to have a small fire going,
       and he trades in charred items that others might find useless but still hold value in a post-apocalyptic world.
@@ -989,9 +954,6 @@ zone:
     map_x: 4
     map_y: 12
     spawns:
-    - template: scavenger
-      count: 1
-      respawn_after: 3m
     - template: rustbucket_ridge_hireling
       count: 1
       respawn_after: 0s
@@ -1128,7 +1090,7 @@ zone:
       cover_hp: 2
   - id: blood_camp
     title: Blood Camp
-    danger_level: sketchy
+    danger_level: safe
     description: Scar, a vicious mercenary, squats in this run-down camp site. His tent is made from patched-together tarps,
       and his area is marked by crude barricades of scrap metal and broken-down vehicles. Scar has a reputation for solving
       problems with violence and is often hired to settle disputes or enforce debts.
@@ -1138,9 +1100,6 @@ zone:
     map_x: 5
     map_y: 6
     spawns:
-    - template: scavenger
-      count: 1
-      respawn_after: 3m
     - template: patch
       count: 1
       respawn_after: 10m
@@ -1204,7 +1163,7 @@ zone:
       cover_hp: 4
   - id: the_razor_nest
     title: The Razor Nest
-    danger_level: sketchy
+    danger_level: safe
     description: A camp site occupied by Flea, a twitchy, wiry pickpocket and thief. Flea's small tent is hidden among piles
       of junk and debris, and he's known for disappearing into the shadows at a moment's notice. He's a low-level crook who
       survives by stealing from others, and his camp is littered with stolen goods, waiting to be fenced.
@@ -1214,9 +1173,6 @@ zone:
     map_x: 6
     map_y: 4
     spawns:
-    - template: scavenger
-      count: 1
-      respawn_after: 3m
     - template: rustbucket_ridge_banker
       count: 1
       respawn_after: 0s
