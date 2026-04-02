@@ -132,7 +132,7 @@ function ArmorRow({
           disabled={disabled}
           onClick={() => {
             if (!disabled) {
-              sendMessage('Wear', {
+              sendMessage('WearRequest', {
                 item_id: item.itemDefId ?? item.item_def_id,
                 slot: armorSlot,
               })

@@ -652,6 +652,14 @@
 **Steps:** Open the web client; engage and complete combat; observe the XP granted message in the console; navigate to the Stats tab and observe that the XP value has not updated.
 **Fix:** `CombatHandler.pushXPMessages` was sending XP grant text messages but never pushing a `CharacterSheetView` to the client. The `StatsDrawer` reads XP from `state.characterSheet`, which is only updated when a `CharacterSheetView` arrives. Added a `pushCharacterSheetFn func(*session.PlayerSession)` callback field to `CombatHandler` with `SetPushCharacterSheetFn`, called unconditionally at the end of `pushXPMessages`. Wired `s.pushCharacterSheet` as the callback in `grpc_service.go`.
 
+### BUG-80: Web UI "Wear" button does nothing for armor items
+**Severity:** high
+**Status:** fixed
+**Category:** UI
+**Description:** Clicking the "Wear" button on an armor item in the Inventory tab sends a WebSocket message of type `'Wear'` that is never dispatched to the game server, so no equip action occurs.
+**Steps:** Purchase an armor item from a merchant; open Inventory tab; click "Wear" on the armor item; observe no equip feedback and item remains unequipped.
+**Fix:** Added `"WearRequest"` to `protoMessageByName` typeMap and `case *gamev1.WearRequest:` to `wrapProtoAsClientMessage` in `websocket_dispatch.go`. Updated `InventoryDrawer.tsx` to send `'WearRequest'` instead of `'Wear'`.
+
 ### BUG-79: Loadout Switch button fails on second use outside combat
 **Severity:** medium
 **Status:** fixed

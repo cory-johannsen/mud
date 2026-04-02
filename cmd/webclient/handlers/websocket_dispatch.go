@@ -826,6 +826,7 @@ func protoMessageByName(name string) (proto.Message, error) {
 		"StashBalanceRequest":    func() proto.Message { return &gamev1.StashBalanceRequest{} },
 		"TakeCoverRequest":       func() proto.Message { return &gamev1.TakeCoverRequest{} },
 		"EquipRequest":           func() proto.Message { return &gamev1.EquipRequest{} },
+		"WearRequest":            func() proto.Message { return &gamev1.WearRequest{} },
 		"LevelUpRequest":         func() proto.Message { return &gamev1.LevelUpRequest{} },
 		"TrainSkillRequest":      func() proto.Message { return &gamev1.TrainSkillRequest{} },
 	}
@@ -903,6 +904,8 @@ func wrapProtoAsClientMessage(reqID, typeName string, msg proto.Message) (*gamev
 		cm.Payload = &gamev1.ClientMessage_TakeCover{TakeCover: m}
 	case *gamev1.EquipRequest:
 		cm.Payload = &gamev1.ClientMessage_Equip{Equip: m}
+	case *gamev1.WearRequest:
+		cm.Payload = &gamev1.ClientMessage_Wear{Wear: m}
 	case *gamev1.LevelUpRequest:
 		cm.Payload = &gamev1.ClientMessage_LevelUp{LevelUp: m}
 	case *gamev1.TrainSkillRequest:
