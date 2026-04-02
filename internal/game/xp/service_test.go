@@ -36,7 +36,7 @@ func testCfg() *xp.XPConfig {
 		BaseXP:        100,
 		HPPerLevel:    5,
 		BoostInterval: 5,
-		SkillInterval: 4,
+		SkillLevels:   []int{4, 8, 12, 16, 20, 24, 28, 32, 36, 40, 44, 48, 52, 56, 60, 64, 68, 72, 76, 80, 84, 88, 92, 96, 100},
 		LevelCap:      100,
 		Awards: xp.Awards{
 			KillXPPerNPCLevel:       50,
@@ -350,7 +350,7 @@ func TestPropertyService_AwardRoomDiscovery_GrantMessageAlwaysFirst(t *testing.T
 
 func TestService_AwardKill_TierScaling_Elite(t *testing.T) {
 	cfg := &xp.XPConfig{
-		BaseXP: 100, HPPerLevel: 5, BoostInterval: 5, SkillInterval: 4, LevelCap: 100,
+		BaseXP: 100, HPPerLevel: 5, BoostInterval: 5, SkillLevels: []int{4, 8, 12, 16, 20, 24, 28, 32, 36, 40, 44, 48, 52, 56, 60, 64, 68, 72, 76, 80, 84, 88, 92, 96, 100}, LevelCap: 100,
 		Awards: xp.Awards{KillXPPerNPCLevel: 50},
 		TierMultipliers: map[string]xp.TierMultiplier{
 			"standard": {XP: 1.0}, "elite": {XP: 2.0},
@@ -368,7 +368,7 @@ func TestService_AwardKill_TierScaling_Elite(t *testing.T) {
 
 func TestService_AwardKill_EmptyTierDefaultsToStandard(t *testing.T) {
 	cfg := &xp.XPConfig{
-		BaseXP: 100, HPPerLevel: 5, BoostInterval: 5, SkillInterval: 4, LevelCap: 100,
+		BaseXP: 100, HPPerLevel: 5, BoostInterval: 5, SkillLevels: []int{4, 8, 12, 16, 20, 24, 28, 32, 36, 40, 44, 48, 52, 56, 60, 64, 68, 72, 76, 80, 84, 88, 92, 96, 100}, LevelCap: 100,
 		Awards: xp.Awards{KillXPPerNPCLevel: 50},
 		TierMultipliers: map[string]xp.TierMultiplier{
 			"standard": {XP: 1.0},
@@ -391,7 +391,7 @@ func TestProperty_AwardKill_TierMultipliesMonotonically(t *testing.T) {
 			"elite": {XP: 2.0}, "champion": {XP: 3.0}, "boss": {XP: 5.0},
 		}
 		cfg := &xp.XPConfig{
-			BaseXP: 100, HPPerLevel: 5, BoostInterval: 5, SkillInterval: 4, LevelCap: 100,
+			BaseXP: 100, HPPerLevel: 5, BoostInterval: 5, SkillLevels: []int{4, 8, 12, 16, 20, 24, 28, 32, 36, 40, 44, 48, 52, 56, 60, 64, 68, 72, 76, 80, 84, 88, 92, 96, 100}, LevelCap: 100,
 			Awards: xp.Awards{KillXPPerNPCLevel: 50},
 			TierMultipliers: mults,
 		}

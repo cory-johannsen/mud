@@ -10,7 +10,7 @@ type AwardResult struct {
 	HPGained int
 	// NewBoosts is the number of new ability boosts earned this award.
 	NewBoosts int
-	// NewSkillIncreases is the number of new skill rank increases earned (one per SkillInterval levels).
+	// NewSkillIncreases is the number of new skill rank increases earned (at configured skill_levels).
 	NewSkillIncreases int
 	// LeveledUp is true if the character gained at least one level.
 	LeveledUp bool
@@ -64,11 +64,9 @@ func Award(level, currentXP, awardXP int, cfg *XPConfig) AwardResult {
 	}
 
 	newSkillIncreases := 0
-	if cfg.SkillInterval > 0 {
-		for l := level + 1; l <= newLevel; l++ {
-			if l%cfg.SkillInterval == 0 {
-				newSkillIncreases++
-			}
+	for _, sl := range cfg.SkillLevels {
+		if sl > level && sl <= newLevel {
+			newSkillIncreases++
 		}
 	}
 

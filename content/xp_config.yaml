@@ -4,8 +4,8 @@ base_xp: 100
 hp_per_level: 5
 # Ability boost granted every N levels
 boost_interval: 5
-# Skill rank increase granted every N levels
-skill_interval: 4
+# Explicit levels at which a skill rank increase is granted (15 evenly distributed across 100 levels)
+skill_levels: [7, 13, 20, 27, 33, 40, 47, 53, 60, 67, 73, 80, 87, 93, 100]
 # Hard cap on character level
 level_cap: 100
 # Hard cap on any single job's level (reserved for job advancement)
