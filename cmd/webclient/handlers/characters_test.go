@@ -494,3 +494,129 @@ func TestDeleteCharacter_NotConfigured(t *testing.T) {
 	h.DeleteCharacter(rr, req)
 	assert.Equal(t, http.StatusInternalServerError, rr.Code)
 }
+
+// stubCharacterGetter implements handlers.CharacterGetter for tests.
+type stubCharacterGetter struct {
+	char *character.Character
+	err  error
+}
+
+func (s *stubCharacterGetter) GetByID(_ context.Context, _ int64) (*character.Character, error) {
+	return s.char, s.err
+}
+
+func TestHandlePlay_Returns409WhenCharacterAlreadyActive(t *testing.T) {
+	const accountID int64 = 10
+	const charID int64 = 7
+
+	getter := &stubCharacterGetter{
+		char: &character.Character{ID: charID, AccountID: accountID},
+	}
+	registry := handlers.NewActiveCharacterRegistry()
+	registry.Register(charID)
+
+	h := handlers.NewCharacterHandler(nil, nil, nil).
+		WithJWTSecret("test-secret").
+		WithGetter(getter).
+		WithRegistry(registry)
+
+	req := httptest.NewRequest(http.MethodPost, "/api/characters/7/play", nil)
+	req.SetPathValue("id", "7")
+	req = req.WithContext(handlers.WithAccountID(req.Context(), accountID))
+	rr := httptest.NewRecorder()
+
+	h.HandlePlay(rr, req)
+
+	assert.Equal(t, http.StatusConflict, rr.Code)
+	assert.Contains(t, rr.Body.String(), "already in session")
+}
+
+func TestHandlePlay_Returns200WhenForceTrue(t *testing.T) {
+	const accountID int64 = 10
+	const charID int64 = 7
+
+	getter := &stubCharacterGetter{
+		char: &character.Character{ID: charID, AccountID: accountID},
+	}
+	registry := handlers.NewActiveCharacterRegistry()
+	registry.Register(charID)
+
+	h := handlers.NewCharacterHandler(nil, nil, nil).
+		WithJWTSecret("test-secret").
+		WithGetter(getter).
+		WithRegistry(registry)
+
+	req := httptest.NewRequest(http.MethodPost, "/api/characters/7/play?force=true", nil)
+	req.SetPathValue("id", "7")
+	req = req.WithContext(handlers.WithAccountID(req.Context(), accountID))
+	rr := httptest.NewRecorder()
+
+	h.HandlePlay(rr, req)
+
+	assert.Equal(t, http.StatusOK, rr.Code)
+	var body map[string]string
+	require.NoError(t, json.NewDecoder(rr.Body).Decode(&body))
+	assert.NotEmpty(t, body["token"])
+	// Registry should be cleared after force-evict.
+	assert.False(t, registry.IsActive(charID))
+}
+
+func TestHandlePlay_Returns200WhenNoRegistry(t *testing.T) {
+	const accountID int64 = 10
+	const charID int64 = 7
+
+	getter := &stubCharacterGetter{
+		char: &character.Character{ID: charID, AccountID: accountID},
+	}
+
+	// No registry attached — old behaviour preserved.
+	h := handlers.NewCharacterHandler(nil, nil, nil).
+		WithJWTSecret("test-secret").
+		WithGetter(getter)
+
+	req := httptest.NewRequest(http.MethodPost, "/api/characters/7/play", nil)
+	req.SetPathValue("id", "7")
+	req = req.WithContext(handlers.WithAccountID(req.Context(), accountID))
+	rr := httptest.NewRecorder()
+
+	h.HandlePlay(rr, req)
+
+	assert.Equal(t, http.StatusOK, rr.Code)
+}
+
+func TestListCharacters_IsOnlinePopulatedFromRegistry(t *testing.T) {
+	const accountID int64 = 42
+	chars := []*character.Character{
+		{ID: 1, Name: "Zork", Class: "ganger", Level: 5, CurrentHP: 38, MaxHP: 50, Region: "rustbucket", Team: "gun"},
+		{ID: 2, Name: "Mira", Class: "ganger", Level: 3, CurrentHP: 20, MaxHP: 30, Region: "rustbucket", Team: "gun"},
+	}
+	repo := &stubCharacterRepo{chars: chars}
+
+	registry := handlers.NewActiveCharacterRegistry()
+	registry.Register(1) // character 1 is online
+
+	h := handlers.NewCharacterHandler(repo, nil, nil).WithRegistry(registry)
+
+	req := httptest.NewRequest(http.MethodGet, "/api/characters", nil)
+	req = req.WithContext(handlers.WithAccountID(req.Context(), accountID))
+	rr := httptest.NewRecorder()
+
+	h.ListCharacters(rr, req)
+
+	require.Equal(t, http.StatusOK, rr.Code)
+	var resp []handlers.CharacterResponse
+	require.NoError(t, json.NewDecoder(rr.Body).Decode(&resp))
+	require.Len(t, resp, 2)
+
+	var zork, mira handlers.CharacterResponse
+	for _, c := range resp {
+		switch c.Name {
+		case "Zork":
+			zork = c
+		case "Mira":
+			mira = c
+		}
+	}
+	assert.True(t, zork.IsOnline, "Zork should be online (registered)")
+	assert.False(t, mira.IsOnline, "Mira should not be online (not registered)")
+}
