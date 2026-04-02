@@ -82,7 +82,7 @@
 | Room | Name | POIs |
 |------|------|------|
 | `salvage_hut` [12] | Salvage Hut | Merchant `$` |
-| `grinders_row` [13] | Grinder's Row | Motel Keeper `N` · Banker (Vera Coldcoin) `N` · Guard (Marshal Ironsides) `G` · Zone Map `E` |
+| `grinders_row` [13] | Grinder's Row | Motel Keeper `N` · Banker (Vera Coldcoin) `N` · Guard (Marshal Ironsides) `G` · Zone Map `M` |
 | `last_stand_lodge` [14] | Last Stand Lodge | Merchant (Sgt. Mack) `$` · Chip Doc `N` |
 | `rust_scrap_office` [SS] | Scrap Office | Healer `+` · Trainer `T` |
 | `the_rusty_oasis` [17] | The Rusty Oasis | Merchant (Slick Sally) `$` |
@@ -90,4 +90,4 @@
 | `the_razor_nest` [22] | The Razor Nest | Banker `N` |
 | `scorchside_camp` [35] | Scorchside Camp | Hireling `N` |
 
-**POI symbol key:** `$` merchant · `+` healer · `T` trainer · `G` guard · `N` notable NPC · `E` equipment/item
+**POI symbol key:** `$` merchant · `+` healer · `T` trainer · `G` guard · `N` notable NPC · `M` zone map · `C` cover · `E` other equipment

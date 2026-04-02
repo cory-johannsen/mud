@@ -6434,8 +6434,15 @@ func (s *GameServiceServer) handleMap(uid string, req *gamev1.MapRequest) (*game
 					}
 				}
 			}
-			if len(r.Equipment) > 0 {
-				poiSet["equipment"] = true
+			for _, eq := range r.Equipment {
+				switch {
+				case eq.ItemID == "zone_map":
+					poiSet["map"] = true
+				case eq.CoverTier != "":
+					poiSet["cover"] = true
+				default:
+					poiSet["equipment"] = true
+				}
 			}
 			for id := range poiSet {
 				poiSlice = append(poiSlice, id)

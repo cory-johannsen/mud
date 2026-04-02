@@ -73,6 +73,6 @@
 |------|------|------|
 | `vantucky_the_compound` [SS] | The Compound | Merchant `$` · Healer `+` · Trainer `T` · Banker · Hireling · Motel Keeper |
 | `vantucky_neutral_vault` [2] | Neutral Ground Vault | Chip Doc `N` |
-| `vantucky_fourth_plain_west` [13] | Fourth Plain — Vantucky Border | Zone Map `E` |
+| `vantucky_fourth_plain_west` [13] | Fourth Plain — Vantucky Border | Zone Map `M` |
 
-**POI symbol key:** `$` merchant · `+` healer · `T` trainer · `G` guard · `N` notable NPC · `E` equipment/item
+**POI symbol key:** `$` merchant · `+` healer · `T` trainer · `G` guard · `N` notable NPC · `M` zone map · `C` cover · `E` other equipment

@@ -22,6 +22,8 @@ var POITypes = []POIType{
 	{ID: "trainer", Symbol: 'T', Color: "\033[34m", Label: "Trainer"},
 	{ID: "guard", Symbol: 'G', Color: "\033[33m", Label: "Guard"},
 	{ID: "npc", Symbol: 'N', Color: "\033[37m", Label: "NPC"},
+	{ID: "map", Symbol: 'M', Color: "\033[96m", Label: "Map"},
+	{ID: "cover", Symbol: 'C', Color: "\033[33m", Label: "Cover"},
 	{ID: "equipment", Symbol: 'E', Color: "\033[35m", Label: "Equipment"},
 }
 
