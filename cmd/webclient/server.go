@@ -33,16 +33,17 @@ type charCreationRepos struct {
 //
 // Invariant: grpcConn is non-nil after New returns without error.
 type Server struct {
-	cfg              config.WebConfig
-	httpServer       *http.Server
-	grpcConn         *grpc.ClientConn
-	accountRepo      *postgres.AccountRepository
-	charRepo         *postgres.CharacterRepository
-	gameClient       gamev1.GameServiceClient
-	bus              *eventbus.EventBus
-	logger           *zap.Logger
-	charOptions      *handlers.CharacterOptions
-	charCreationRepos *charCreationRepos // may be nil if not configured
+	cfg               config.WebConfig
+	httpServer        *http.Server
+	grpcConn          *grpc.ClientConn
+	accountRepo       *postgres.AccountRepository
+	charRepo          *postgres.CharacterRepository
+	gameClient        gamev1.GameServiceClient
+	bus               *eventbus.EventBus
+	logger            *zap.Logger
+	charOptions       *handlers.CharacterOptions
+	charCreationRepos *charCreationRepos             // may be nil if not configured
+	activeRegistry    *handlers.ActiveCharacterRegistry
 }
 
 // New constructs a Server, establishes the gRPC connection, and registers routes.
@@ -69,15 +70,16 @@ func New(
 	bus := eventbus.New(256)
 
 	s := &Server{
-		cfg:              cfg,
-		grpcConn:         conn,
-		accountRepo:      accountRepo,
-		charRepo:         charRepo,
-		gameClient:       gamev1.NewGameServiceClient(conn),
-		bus:              bus,
-		logger:           logger,
-		charOptions:      charOptions,
+		cfg:               cfg,
+		grpcConn:          conn,
+		accountRepo:       accountRepo,
+		charRepo:          charRepo,
+		gameClient:        gamev1.NewGameServiceClient(conn),
+		bus:               bus,
+		logger:            logger,
+		charOptions:       charOptions,
 		charCreationRepos: creationRepos,
+		activeRegistry:    handlers.NewActiveCharacterRegistry(),
 	}
 
 	mux := http.NewServeMux()
@@ -213,7 +215,8 @@ func (s *Server) registerRoutes(mux *http.ServeMux) {
 		WithJWTSecret(s.cfg.JWTSecret).
 		WithGetter(s.charRepo).
 		WithDeleter(s.charRepo).
-		WithOptions(s.charOptions)
+		WithOptions(s.charOptions).
+		WithRegistry(s.activeRegistry)
 	if s.charCreationRepos != nil {
 		charHandler = charHandler.WithPersistenceRepos(
 			s.charCreationRepos.abilityBoosts,
@@ -237,7 +240,8 @@ func (s *Server) registerRoutes(mux *http.ServeMux) {
 	wsHandler := handlers.NewWSHandler(s.cfg.JWTSecret, s.gameClient, s.charRepo).
 		WithLogger(s.logger).
 		WithEventBus(s.bus).
-		WithAccountGetter(accountUsernameAdapter{s.accountRepo})
+		WithAccountGetter(accountUsernameAdapter{s.accountRepo}).
+		WithRegistry(s.activeRegistry)
 	mux.Handle("GET /ws", http.HandlerFunc(wsHandler.ServeHTTP))
 
 	// Admin API — all protected by JWT + RequireAdminRole.

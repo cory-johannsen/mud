@@ -37,8 +37,23 @@ export function CharactersPage() {
       const resp = await api.characters.play(char.id)
       localStorage.setItem('mud_token', resp.token)
       navigate('/game')
+    } catch (err) {
+      if (err instanceof ApiError && err.status === 409) {
+        setError(`${char.name} is already in an active session. Use Force Logout to reclaim it.`)
+      } else {
+        setError('Failed to start game session.')
+      }
+    }
+  }
+
+  async function handleForceLogout(char: Character) {
+    if (!window.confirm(`Force logout "${char.name}"? This will end the active session.`)) return
+    try {
+      const resp = await api.characters.play(char.id, true)
+      localStorage.setItem('mud_token', resp.token)
+      navigate('/game')
     } catch {
-      setError('Failed to start game session.')
+      setError(`Failed to force logout ${char.name}.`)
     }
   }
 
@@ -89,20 +104,29 @@ export function CharactersPage() {
 
       <div style={styles.grid}>
         {characters.map((char) => (
-          <CharacterCard key={char.id} char={char} onPlay={handlePlay} onDelete={handleDelete} />
+          <CharacterCard key={char.id} char={char} onPlay={handlePlay} onDelete={handleDelete} onForceLogout={handleForceLogout} />
         ))}
       </div>
     </div>
   )
 }
 
-function CharacterCard({ char, onPlay, onDelete }: { char: Character; onPlay: (c: Character) => void; onDelete: (c: Character) => void }) {
+function CharacterCard({ char, onPlay, onDelete, onForceLogout }: {
+  char: Character
+  onPlay: (c: Character) => void
+  onDelete: (c: Character) => void
+  onForceLogout: (c: Character) => void
+}) {
   const hpPct = char.max_hp > 0 ? (char.current_hp / char.max_hp) * 100 : 0
   const hpColor = hpPct > 50 ? '#4caf50' : hpPct > 25 ? '#ff9800' : '#f44336'
+  const isOnline = char.is_online === true
 
   return (
-    <div style={styles.card}>
-      <div style={styles.cardName}>{char.name}</div>
+    <div style={{ ...styles.card, ...(isOnline ? styles.cardOnline : {}) }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <div style={styles.cardName}>{char.name}</div>
+        {isOnline && <span style={styles.onlineBadge}>ONLINE</span>}
+      </div>
       <div style={styles.cardSub}>
         Level {char.level} {char.job} ({char.archetype})
       </div>
@@ -119,9 +143,15 @@ function CharacterCard({ char, onPlay, onDelete }: { char: Character; onPlay: (c
         {char.current_hp} / {char.max_hp} HP
       </div>
       <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.75rem' }}>
-        <button style={{ ...styles.playButton, margin: 0, flex: 1 }} onClick={() => onPlay(char)}>
-          Play
-        </button>
+        {isOnline ? (
+          <button style={{ ...styles.forceLogoutButton, flex: 1 }} onClick={() => onForceLogout(char)}>
+            Force Logout
+          </button>
+        ) : (
+          <button style={{ ...styles.playButton, margin: 0, flex: 1 }} onClick={() => onPlay(char)}>
+            Play
+          </button>
+        )}
         <button style={styles.deleteButton} onClick={() => onDelete(char)}>
           Delete
         </button>
@@ -213,6 +243,29 @@ const styles: Record<string, React.CSSProperties> = {
     borderRadius: '4px',
     cursor: 'pointer',
     fontFamily: 'monospace',
+    fontSize: '0.8rem',
+  },
+  cardOnline: {
+    border: '1px solid #4a8a4a',
+  },
+  onlineBadge: {
+    fontSize: '0.65rem',
+    fontWeight: 'bold',
+    background: '#2a4a2a',
+    color: '#7f7',
+    border: '1px solid #4a8a4a',
+    borderRadius: '3px',
+    padding: '0.1rem 0.35rem',
+  },
+  forceLogoutButton: {
+    padding: '0.4rem',
+    background: '#3a1a1a',
+    color: '#f88',
+    border: '1px solid #7a3a3a',
+    borderRadius: '4px',
+    cursor: 'pointer',
+    fontFamily: 'monospace',
+    fontWeight: 'bold',
     fontSize: '0.8rem',
   },
 }

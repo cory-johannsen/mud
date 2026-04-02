@@ -107,23 +107,25 @@ type CharacterResponse struct {
 	Region    string `json:"region"`
 	Archetype string `json:"archetype"`
 	Location  string `json:"location,omitempty"`
+	IsOnline  bool   `json:"is_online"`
 }
 
 // CharacterHandler serves all /api/characters endpoints.
 type CharacterHandler struct {
-	lister          CharacterLister
-	creator         CharacterCreator
-	checker         NameChecker
-	getter          CharacterGetter
-	deleter         CharacterDeleter   // may be nil
-	options         *CharacterOptions
-	jwtSecret       string
-	boostsAdder     AbilityBoostsAdder  // may be nil
-	skillsSetter    SkillsSetter        // may be nil
-	featsSetter     FeatsSetter         // may be nil
-	hwTechSetter    HardwiredTechSetter // may be nil
-	spontAdder      SpontaneousTechAdder  // may be nil
-	preparedSetter  PreparedTechSetter    // may be nil
+	lister         CharacterLister
+	creator        CharacterCreator
+	checker        NameChecker
+	getter         CharacterGetter
+	deleter        CharacterDeleter      // may be nil
+	options        *CharacterOptions
+	jwtSecret      string
+	boostsAdder    AbilityBoostsAdder    // may be nil
+	skillsSetter   SkillsSetter          // may be nil
+	featsSetter    FeatsSetter           // may be nil
+	hwTechSetter   HardwiredTechSetter   // may be nil
+	spontAdder     SpontaneousTechAdder  // may be nil
+	preparedSetter PreparedTechSetter    // may be nil
+	registry       *ActiveCharacterRegistry // may be nil
 }
 
 // NewCharacterHandler creates a CharacterHandler.
@@ -184,6 +186,15 @@ func (h *CharacterHandler) WithPreparedTechRepo(prep PreparedTechSetter) *Charac
 	return h
 }
 
+// WithRegistry attaches an ActiveCharacterRegistry used to report online status in
+// ListCharacters and enforce single-session semantics in HandlePlay.
+//
+// Postcondition: Returns h for chaining.
+func (h *CharacterHandler) WithRegistry(r *ActiveCharacterRegistry) *CharacterHandler {
+	h.registry = r
+	return h
+}
+
 // ListCharacters handles GET /api/characters.
 //
 // Precondition: Request context MUST carry account_id via WithAccountID.
@@ -197,7 +208,7 @@ func (h *CharacterHandler) ListCharacters(w http.ResponseWriter, r *http.Request
 	}
 	resp := make([]CharacterResponse, 0, len(chars))
 	for _, c := range chars {
-		resp = append(resp, characterToResponse(c, h.options))
+		resp = append(resp, characterToResponse(c, h.options, h.registry))
 	}
 	w.Header().Set("Content-Type", "application/json")
 	_ = json.NewEncoder(w).Encode(resp)
@@ -205,7 +216,8 @@ func (h *CharacterHandler) ListCharacters(w http.ResponseWriter, r *http.Request
 
 // characterToResponse maps a Character domain object to its API response shape.
 // If opts is non-nil, job/region/team IDs are resolved to display names.
-func characterToResponse(c *character.Character, opts *CharacterOptions) CharacterResponse {
+// If reg is non-nil, IsOnline is populated from the registry.
+func characterToResponse(c *character.Character, opts *CharacterOptions, reg *ActiveCharacterRegistry) CharacterResponse {
 	job := c.Class
 	region := c.Region
 	archetype := c.Team
@@ -229,6 +241,10 @@ func characterToResponse(c *character.Character, opts *CharacterOptions) Charact
 			}
 		}
 	}
+	isOnline := false
+	if reg != nil {
+		isOnline = reg.IsActive(c.ID)
+	}
 	return CharacterResponse{
 		ID:        c.ID,
 		Name:      c.Name,
@@ -239,6 +255,7 @@ func characterToResponse(c *character.Character, opts *CharacterOptions) Charact
 		Region:    region,
 		Archetype: archetype,
 		Location:  c.Location,
+		IsOnline:  isOnline,
 	}
 }
 
@@ -374,7 +391,7 @@ func (h *CharacterHandler) CreateCharacter(w http.ResponseWriter, r *http.Reques
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	_ = json.NewEncoder(w).Encode(map[string]any{"character": characterToResponse(created, h.options)})
+	_ = json.NewEncoder(w).Encode(map[string]any{"character": characterToResponse(created, h.options, h.registry)})
 }
 
 // persistCharacterChoices persists ability boosts, skills, feats, and technology
@@ -842,6 +859,18 @@ func (h *CharacterHandler) HandlePlay(w http.ResponseWriter, r *http.Request) {
 	if char.AccountID != accountID {
 		http.Error(w, `{"error":"forbidden"}`, http.StatusForbidden)
 		return
+	}
+	// Enforce single-session semantics: refuse if character is already active,
+	// unless the caller passes ?force=true to evict the existing session.
+	if h.registry != nil && h.registry.IsActive(charID) {
+		force := r.URL.Query().Get("force") == "true"
+		if !force {
+			http.Error(w, `{"error":"character already in session"}`, http.StatusConflict)
+			return
+		}
+		// force=true: deregister the existing session so the registry is clear
+		// before the new WebSocket connection registers itself.
+		h.registry.Deregister(charID)
 	}
 	claims := jwt.MapClaims{
 		"account_id":   accountID,

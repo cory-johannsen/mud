@@ -206,6 +206,7 @@ export interface Character {
   region: string
   archetype: string
   location?: string
+  is_online?: boolean
 }
 
 export interface SpontaneousChoice {
@@ -253,8 +254,9 @@ export const api = {
         `/api/characters/check-name?name=${encodeURIComponent(name)}`,
       )
     },
-    play(id: number): Promise<{ token: string }> {
-      return request<{ token: string }>('POST', `/api/characters/${id}/play`)
+    play(id: number, force?: boolean): Promise<{ token: string }> {
+      const url = force ? `/api/characters/${id}/play?force=true` : `/api/characters/${id}/play`
+      return request<{ token: string }>('POST', url)
     },
     delete(id: number): Promise<void> {
       return request<void>('DELETE', `/api/characters/${id}`)

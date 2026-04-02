@@ -652,6 +652,102 @@
 **Steps:** Open the web client; engage and complete combat; observe the XP granted message in the console; navigate to the Stats tab and observe that the XP value has not updated.
 **Fix:** `CombatHandler.pushXPMessages` was sending XP grant text messages but never pushing a `CharacterSheetView` to the client. The `StatsDrawer` reads XP from `state.characterSheet`, which is only updated when a `CharacterSheetView` arrives. Added a `pushCharacterSheetFn func(*session.PlayerSession)` callback field to `CombatHandler` with `SetPushCharacterSheetFn`, called unconditionally at the end of `pushXPMessages`. Wired `s.pushCharacterSheet` as the callback in `grpc_service.go`.
 
+### BUG-93: Hovering Consume button on consumable item shows no effect description tooltip
+**Severity:** low
+**Status:** open
+**Category:** UI
+**Description:** In the Inventory panel, hovering over the Consume button on a consumable item shows no tooltip. A popup describing the item's effects should appear on hover so the player knows what they are about to consume before clicking.
+**Steps:** Open the Inventory tab; hover over the Consume button on a consumable item; observe no tooltip or popup appears.
+**Fix:** Add a hover tooltip to the Consume button that renders the consumable item's description and effects, consistent with the hover behaviour on other item controls.
+
+### BUG-92: Post-combat loot grant not notified and inventory not refreshed in web UI
+**Severity:** high
+**Status:** open
+**Category:** UI
+**Description:** After defeating NPCs the player receives no loot notification in the console and the inventory panel does not update to reflect the Crypto gain. The Crypto was in fact awarded — logging out and back in shows the correct balance. The server-side loot grant is correct; the client is not being told about it.
+**Steps:** Enter combat; defeat all NPCs; observe the end-of-combat console — no loot message appears and the inventory Crypto total is unchanged; log out and log back in; observe the inventory now shows the correct Crypto balance.
+**Fix:** In the post-combat loot resolution path, ensure a console message is pushed to the player for each Crypto grant and that an updated `InventoryView` (or `CharacterSheetView`) is pushed immediately after the grant so the web UI reflects the new balance without requiring a reconnect.
+
+### BUG-91: Same character can be selected by multiple concurrent sessions; no active-session indicators or force-logout control
+**Severity:** critical
+**Status:** fixed
+**Category:** Meta
+**Description:** A user can open two browsers, log in to the same account, and select the same character in both — resulting in duplicate concurrent sessions for a single character. Three related defects must be fixed together: (1) the character selection screen does not indicate which characters are currently logged in; (2) a character that is actively logged in can still be selected, which must be prevented; (3) there is no way for the user to force-logout a stuck or duplicate session from the character selection screen.
+**Steps:** Open two browser windows; log in to the same account in both; select the same character in both; observe that both sessions enter the game simultaneously.
+**Fix:** Added `ActiveCharacterRegistry` in `cmd/webclient/handlers/active_characters.go` — a thread-safe in-process map tracking active character IDs. `WSHandler` registers on WS connect, deregisters on disconnect. `HandlePlay` returns HTTP 409 if the character is already active (unless `?force=true`). `ListCharacters` now includes `is_online` per character. TypeScript `Character` interface updated; `CharactersPage` shows an Online badge, replaces Play with Force Logout for online characters.
+
+### BUG-90: Character selection screen displays player location in lowercase instead of room display name
+**Severity:** low
+**Status:** open
+**Category:** UI
+**Description:** On the character selection screen, the player's current location is shown in all lowercase (e.g. `grinders_row`) instead of the room's display name (e.g. "Grinder's Row").
+**Steps:** Log in; observe the character selection screen — the location field shows the raw room ID in lowercase.
+**Fix:** Look up the room definition by ID and render its display name in the character selection screen.
+
+### BUG-89: Enfeeble technology description saving throw results presented as paragraph instead of formatted list
+**Severity:** low
+**Status:** open
+**Category:** UI
+**Description:** The Enfeeble technology description contains a saving throw result table (critical success / success / failure / critical failure outcomes) that is rendered as a single paragraph instead of a formatted list.
+**Steps:** Open the Technology tab or hover over Enfeeble; read the description — saving throw outcomes run together as prose.
+**Fix:** In the Enfeeble technology definition, reformat the saving throw result block as a multi-line list with one outcome per line.
+
+### BUG-88: Heal technology description has formatting issues and Foundry template code
+**Severity:** low
+**Status:** open
+**Category:** UI
+**Description:** The Heal technology description contains three issues: (1) the action-point-to-effect mapping is written as three run-on sentences instead of a formatted list; (2) the third entry contains a raw Foundry VTT template macro `@Template[emanation|distance:30]` that must be replaced with plain-text wording; (3) the Heightened entry runs on inline instead of appearing on its own line.
+**Steps:** Open the Technology tab or hover over Heal; read the description.
+**Fix:** In the Heal technology definition, reformat the action-point list as a proper multi-line list, replace `@Template[emanation|distance:30]` with a plain-text equivalent (e.g. "30ft emanation"), and place the Heightened entry on a separate line.
+
+### BUG-87: Rustbucket Ridge motel keeper not clickable and shows wrong descriptor
+**Severity:** medium
+**Status:** open
+**Category:** UI
+**Description:** The motel keeper NPC in Rustbucket Ridge is not clickable in the web UI room panel, and displays the descriptor `Scrap Inn Clerk (unharmed)` instead of their name. Non-combat NPCs should be clickable to interact, and should display their defined name, not a generic role label with a health suffix.
+**Steps:** Navigate to Grinder's Row in Rustbucket Ridge; observe the motel keeper in the NPC list — displayed as `Scrap Inn Clerk (unharmed)` and not clickable.
+**Fix:** Ensure non-combat NPCs render their `name` field in the room panel and are wired to the NPC interaction click handler. Investigate why the health suffix `(unharmed)` is being appended to a non-combat NPC.
+
+### BUG-86: Player AC not displayed on character sheet
+**Severity:** medium
+**Status:** open
+**Category:** UI
+**Description:** The character sheet does not display the player's Armor Class. AC should be shown beneath the hit points field.
+**Steps:** Open the character sheet; observe that AC is absent.
+**Fix:** Add an AC row to the character sheet, positioned below hit points, populated from the character sheet data sent by the server.
+
+### BUG-85: Technology "Chrome Reflex" is a Reaction but has an "active" tag
+**Severity:** medium
+**Status:** open
+**Category:** Combat
+**Description:** The Chrome Reflex technology is a Reaction but is incorrectly tagged as `active` in its definition, causing it to appear in the Active category instead of the Reactions category.
+**Steps:** Equip Chrome Reflex; open the Feats/Technologies tab in the web UI; observe Chrome Reflex is listed as Active instead of Reaction.
+**Fix:** In the Chrome Reflex technology definition, remove the `active` tag and ensure it is correctly categorised as a reaction (matching BUG-68's fix pattern).
+
+### BUG-84: Web UI character sheet displays job ID instead of job display name
+**Severity:** medium
+**Status:** open
+**Category:** UI
+**Description:** The character sheet in the web UI shows the raw job ID (e.g. `street_fighter`) instead of the human-readable display name (e.g. "Street Fighter").
+**Steps:** Log in; open the character sheet; observe the job field.
+**Fix:** Look up the job definition by ID and render its display name in the character sheet component.
+
+### BUG-83: No UI indication that player is in cover
+**Severity:** medium
+**Status:** open
+**Category:** UI
+**Description:** When a player takes cover, there is no visible indicator in the web UI showing their current cover status or tier. Cover is valid both in and out of combat, so the indicator must be visible in both contexts.
+**Steps:** Enter a room with cover equipment; take cover (in or out of combat); observe the web UI — no badge, condition icon, or status text reflects the active cover state.
+**Fix:** Add a cover condition badge to the room panel or character status area that is always visible (not only in the combat HUD), showing the current cover tier (e.g. "Standard Cover" or "Greater Cover").
+
+### BUG-82: No command to exit cover
+**Severity:** high
+**Status:** open
+**Category:** Combat
+**Description:** Once a player takes cover there is no command or UI control to leave cover. The cover condition persists with no way to remove it voluntarily. Cover is valid both in and out of combat, so the exit mechanism must work in both contexts.
+**Steps:** Take cover (in or out of combat); attempt to find a command or button to exit cover — none exists.
+**Fix:** Implement an `uncover` command (and corresponding web UI button) that removes the active cover condition from the player regardless of combat state.
+
 ### BUG-81: Cover message references "Stealth" instead of "Ghosting"
 **Severity:** low
 **Status:** open

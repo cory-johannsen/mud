@@ -60,8 +60,9 @@ type WSHandler struct {
 	jwtSecret     string
 	dialer        GameDialer
 	charGetter    CharacterGetter
-	accountGetter AccountUsernameGetter // may be nil; username falls back to synthetic "user_<id>"
-	bus           *eventbus.EventBus   // may be nil; if set, server events are published
+	accountGetter AccountUsernameGetter    // may be nil; username falls back to synthetic "user_<id>"
+	bus           *eventbus.EventBus       // may be nil; if set, server events are published
+	registry      *ActiveCharacterRegistry // may be nil; if set, tracks active character sessions
 	logger        *zap.Logger
 }
 
@@ -93,6 +94,14 @@ func (h *WSHandler) WithEventBus(bus *eventbus.EventBus) *WSHandler {
 // WithLogger attaches a logger to the handler.
 func (h *WSHandler) WithLogger(l *zap.Logger) *WSHandler {
 	h.logger = l
+	return h
+}
+
+// WithRegistry attaches an ActiveCharacterRegistry so the handler can track active sessions.
+//
+// Postcondition: Returns h for chaining.
+func (h *WSHandler) WithRegistry(r *ActiveCharacterRegistry) *WSHandler {
+	h.registry = r
 	return h
 }
 
@@ -164,6 +173,12 @@ func (h *WSHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	h.logger.Info("websocket connected", zap.Int64("character_id", characterID))
+
+	// Register the character as active; deregister when the WebSocket session ends.
+	if h.registry != nil {
+		h.registry.Register(char.ID)
+		defer h.registry.Deregister(char.ID)
+	}
 
 	ctx, cancel := context.WithCancel(context.Background())
 
