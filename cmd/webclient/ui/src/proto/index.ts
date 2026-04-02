@@ -273,6 +273,13 @@ export interface InventoryView {
   totalRounds?: number
 }
 
+export interface PoiWithNpc {
+  poiId?: string
+  poi_id?: string
+  npcName?: string
+  npc_name?: string
+}
+
 export interface MapTile {
   roomId?: string
   roomName?: string
@@ -286,6 +293,8 @@ export interface MapTile {
   bossRoom?: boolean
   boss?: boolean
   name?: string
+  poiNpcs?: PoiWithNpc[]
+  poi_npcs?: PoiWithNpc[]
 }
 
 export interface WorldZoneTile {
