@@ -2,6 +2,43 @@ import { useEffect, useState } from 'react'
 import { useGame } from '../GameContext'
 import type { InventoryItem } from '../../proto'
 
+function ConsumableRow({
+  item,
+  sendCommand,
+  sendMessage,
+}: {
+  item: InventoryItem
+  sendCommand: (raw: string) => void
+  sendMessage: (type: string, payload: object) => void
+}) {
+  const itemDefId = item.itemDefId ?? item.item_def_id ?? ''
+  const qty = item.quantity ?? 1
+
+  function handleConsume() {
+    sendCommand(`use ${itemDefId}`)
+    sendMessage('InventoryRequest', {})
+  }
+
+  return (
+    <tr>
+      <td>{item.name}</td>
+      <td>{item.kind}</td>
+      <td>{qty}</td>
+      <td>{(item.weight ?? 0).toFixed(1)}</td>
+      <td>
+        <button
+          style={{ ...styles.actionBtn, background: '#a74', ...(qty <= 0 ? styles.actionBtnDisabled : {}) }}
+          disabled={qty <= 0}
+          onClick={handleConsume}
+          type="button"
+        >
+          Consume
+        </button>
+      </td>
+    </tr>
+  )
+}
+
 type PickStage = 'preset' | 'hand'
 
 function WeaponRow({
@@ -122,7 +159,7 @@ function PlainRow({ item }: { item: InventoryItem }) {
 }
 
 export function InventoryDrawer({ onClose }: { onClose: () => void }) {
-  const { state, sendMessage } = useGame()
+  const { state, sendMessage, sendCommand } = useGame()
 
   useEffect(() => {
     if (!state.inventoryView) {
@@ -164,6 +201,11 @@ export function InventoryDrawer({ onClose }: { onClose: () => void }) {
                   if (item.kind === 'armor') {
                     return (
                       <ArmorRow key={i} item={item} sendMessage={sendMessage} />
+                    )
+                  }
+                  if (item.kind === 'consumable') {
+                    return (
+                      <ConsumableRow key={i} item={item} sendCommand={sendCommand} sendMessage={sendMessage} />
                     )
                   }
                   return <PlainRow key={i} item={item} />

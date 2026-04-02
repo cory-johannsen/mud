@@ -1,7 +1,7 @@
 # Web UI — Inventory Consume Control
 
 **Slug:** web-ui-inventory-consume
-**Status:** spec
+**Status:** done
 **Priority:** 481
 **Category:** ui
 **Effort:** S

@@ -768,7 +768,7 @@ features:
 
   - slug: web-ui-inventory-consume
     name: Web UI — Inventory Consume Control
-    status: planned
+    status: done
     priority: 481
     category: ui
     file: docs/features/web-ui-inventory-consume.md
