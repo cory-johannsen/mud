@@ -7180,12 +7180,26 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string) (*gamev1.
 			}
 			if strings.EqualFold(cf.ID, abilityID) || strings.EqualFold(cf.Name, abilityID) {
 				condID := cf.ConditionID
-				if condID != "" && sess.Conditions != nil && s.condRegistry != nil {
+				if condID != "" && s.condRegistry != nil {
 					if def, ok := s.condRegistry.Get(condID); ok {
-						if err := sess.Conditions.Apply(sess.UID, def, 1, -1); err != nil {
+						var applyErr error
+						var cbt *combat.Combat
+						if s.combatH != nil {
+							cbt = s.combatH.ActiveCombatForPlayer(uid)
+						}
+						if cbt != nil {
+							// Apply to the combat condition set so AC/damage modifiers take effect.
+							if applySet := cbt.Conditions[sess.UID]; applySet != nil {
+								applyErr = applySet.Apply(sess.UID, def, 1, -1)
+							}
+						} else if sess.Conditions != nil {
+							// Outside combat, fall back to session-level conditions.
+							applyErr = sess.Conditions.Apply(sess.UID, def, 1, -1)
+						}
+						if applyErr != nil {
 							s.logger.Warn("failed to apply class feature condition",
 								zap.String("condition_id", condID),
-								zap.Error(err),
+								zap.Error(applyErr),
 							)
 						}
 					} else {

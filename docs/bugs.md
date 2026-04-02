@@ -590,11 +590,11 @@
 
 ### BUG-74: `use brutal_surge` has no effect
 **Severity:** high
-**Status:** open
+**Status:** fixed
 **Category:** Combat
 **Description:** Using the `brutal_surge` technology via the `use brutal_surge` command produces no visible effect on the player or combat state.
 **Steps:** Enter combat; execute `use brutal_surge`; observe that no effect is applied and no feedback is given.
-**Fix:**
+**Fix:** Class feature condition application in handleUse now uses cbt.Conditions[uid] (combat-level set) when the player is in combat, instead of sess.Conditions (session-level set). Combat modifiers (AC penalty, damage bonus) only read from the combat set.
 
 ### BUG-73: Web UI Inventory Equip button does not prompt for loadout and hand selection
 **Severity:** high
