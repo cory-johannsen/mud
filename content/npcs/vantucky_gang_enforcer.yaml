@@ -1,8 +1,8 @@
 id: vantucky_gang_enforcer
 name: Gang Enforcer
 description: A heavy-set enforcer in a sleeveless jacket covered in gang patches. Knuckles scarred, eyes cold, moving with the unhurried confidence of someone who has broken many people.
-level: 3
-max_hp: 30
+level: 2
+max_hp: 28
 ac: 13
 awareness: 6
 ai_domain: ganger_combat

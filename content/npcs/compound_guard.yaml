@@ -1,9 +1,9 @@
 id: compound_guard
 name: Compound Guard
 description: A heavily armed guard behind sandbag walls, watching the approach to the compound with a rifle scope.
-level: 4
-max_hp: 44
-ac: 17
+level: 2
+max_hp: 28
+ac: 13
 awareness: 8
 ai_domain: ganger_combat
 respawn_delay: "5m"

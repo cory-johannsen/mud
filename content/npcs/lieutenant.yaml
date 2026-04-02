@@ -2,8 +2,8 @@ id: lieutenant
 name: Gang Lieutenant
 description: A seasoned enforcer in a battered leather coat. His posture says he has been in more fights than you have.
 level: 3
-max_hp: 42
-ac: 16
+max_hp: 35
+ac: 14
 ai_domain: lieutenant_combat
 rob_multiplier: 1.5
 awareness: 8
