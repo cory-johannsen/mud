@@ -806,3 +806,11 @@ features:
     effort: "S"  # WeaponDef.Hardness field; shieldHardness(); wielding_shield requirement; feedback message
     dependencies:
       - actions
+
+  - slug: beginner-zone-rebalance
+    name: Beginner Zone Rebalance (Rustbucket Ridge & Vantucky)
+    status: planned
+    priority: 485
+    category: world
+    file: docs/features/beginner-zone-rebalance.md
+    effort: "M"  # zone danger levels, safe room NPC audit, combat NPC difficulty rebalance for both beginner zones

@@ -652,6 +652,14 @@
 **Steps:** Open the web client; engage and complete combat; observe the XP granted message in the console; navigate to the Stats tab and observe that the XP value has not updated.
 **Fix:** `CombatHandler.pushXPMessages` was sending XP grant text messages but never pushing a `CharacterSheetView` to the client. The `StatsDrawer` reads XP from `state.characterSheet`, which is only updated when a `CharacterSheetView` arrives. Added a `pushCharacterSheetFn func(*session.PlayerSession)` callback field to `CombatHandler` with `SetPushCharacterSheetFn`, called unconditionally at the end of `pushXPMessages`. Wired `s.pushCharacterSheet` as the callback in `grpc_service.go`.
 
+### BUG-81: Cover message references "Stealth" instead of "Ghosting"
+**Severity:** low
+**Status:** open
+**Category:** Combat
+**Description:** The console message shown when taking cover reads `You take standard cover. (+2 AC, +2 Stealth)` but the correct in-game skill name is Ghosting, not Stealth.
+**Steps:** Enter a room with cover equipment; click the cover item or use the cover command; observe the console message.
+**Fix:** In `internal/gameserver/grpc_service.go:8252`, change the format string from `+%d Stealth` to `+%d Ghosting`.
+
 ### BUG-80: Web UI "Wear" button does nothing for armor items
 **Severity:** high
 **Status:** fixed

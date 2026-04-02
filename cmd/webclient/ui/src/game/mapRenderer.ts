@@ -23,6 +23,8 @@ const POI_TYPES: Array<{ id: string; symbol: string; color: string; label: strin
   { id: 'trainer',   symbol: 'T', color: '#48f', label: 'Trainer'   },
   { id: 'guard',     symbol: 'G', color: '#cc0', label: 'Guard'     },
   { id: 'npc',       symbol: 'N', color: '#aaa', label: 'NPC'       },
+  { id: 'map',       symbol: 'M', color: '#0cc', label: 'Map'       },
+  { id: 'cover',     symbol: 'C', color: '#cc0', label: 'Cover'     },
   { id: 'equipment', symbol: 'E', color: '#c8f', label: 'Equipment' },
 ]
 
