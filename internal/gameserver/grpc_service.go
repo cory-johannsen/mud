@@ -6413,6 +6413,7 @@ func (s *GameServiceServer) handleMap(uid string, req *gamev1.MapRequest) (*game
 		// Gate danger level and POIs on physical exploration (BUG-27).
 		var effectiveLevelStr string
 		var poiSlice []string
+		var poiNpcs []*gamev1.PoiWithNpc
 		if sess.ExploredCache[zoneID][roomID] {
 			effectiveLevel := danger.EffectiveDangerLevel(zone.DangerLevel, r.DangerLevel)
 			effectiveLevelStr = string(effectiveLevel)
@@ -6431,6 +6432,10 @@ func (s *GameServiceServer) handleMap(uid string, req *gamev1.MapRequest) (*game
 					poiID := maputil.NpcRoleToPOIID(role)
 					if poiID != "" {
 						poiSet[poiID] = true
+						poiNpcs = append(poiNpcs, &gamev1.PoiWithNpc{
+							PoiId:   poiID,
+							NpcName: inst.Name(),
+						})
 					}
 				}
 			}
@@ -6460,6 +6465,7 @@ func (s *GameServiceServer) handleMap(uid string, req *gamev1.MapRequest) (*game
 			DangerLevel: effectiveLevelStr,
 			Pois:        poiSlice,
 			BossRoom:    r.BossRoom,
+			PoiNpcs:     poiNpcs,
 		})
 	}
 	return &gamev1.ServerEvent{
