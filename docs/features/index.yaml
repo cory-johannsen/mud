@@ -807,9 +807,17 @@ features:
     dependencies:
       - actions
 
+  - slug: currency-refactor
+    name: Currency Refactor — Crypto
+    status: spec
+    priority: 486
+    category: world
+    file: docs/features/currency-refactor.md
+    effort: "M"  # rename Rounds/Clips/Crates to flat Crypto unit; update display layer, proto, messages, web UI; no DB schema change
+
   - slug: beginner-zone-rebalance
     name: Beginner Zone Rebalance (Rustbucket Ridge & Vantucky)
-    status: planned
+    status: done
     priority: 485
     category: world
     file: docs/features/beginner-zone-rebalance.md
