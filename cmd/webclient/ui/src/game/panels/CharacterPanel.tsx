@@ -181,6 +181,7 @@ export function CharacterPanel() {
   const conditions = state.roomView?.activeConditions ?? state.roomView?.active_conditions ?? []
   const xp = characterSheet?.experience ?? 0
   const xpToNext = characterSheet?.xpToNext ?? characterSheet?.xp_to_next ?? 0
+  const xpPct = xpToNext > 0 ? Math.min(100, (xp / xpToNext) * 100) : 100
   const pendingBoosts = characterSheet?.pendingBoosts ?? characterSheet?.pending_boosts ?? 0
   const pendingSkillInc = characterSheet?.pendingSkillIncreases ?? 0
 
@@ -218,8 +219,11 @@ export function CharacterPanel() {
           <>
             <span className="hero-points">✦ Hero: {heroPoints}</span>
             <div style={styles.progressBlock}>
-              <span style={styles.xpLine}>
-                XP: {xp}{xpToNext > 0 ? ` / ${xpToNext}` : ' (max)'}
+              <div className="hp-bar-track">
+                <div className="hp-bar-fill" style={{ width: `${xpPct}%`, background: '#47a' }} />
+              </div>
+              <span className="hp-text">
+                {xp}{xpToNext > 0 ? ` / ${xpToNext} XP` : ' XP (max)'}
               </span>
               {pendingBoosts > 0 && (
                 <button style={styles.pendingBtn} onClick={() => setModal('boost')} type="button">
@@ -245,11 +249,6 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'flex',
     flexDirection: 'column',
     gap: '0.25rem',
-  },
-  xpLine: {
-    fontSize: '0.75rem',
-    color: '#888',
-    fontFamily: 'monospace',
   },
   pendingBtn: {
     background: '#3a3a00',
