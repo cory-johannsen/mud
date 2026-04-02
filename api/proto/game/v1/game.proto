@@ -726,6 +726,12 @@ message MapRequest {
     string view = 1; // "zone" (default) | "world"
 }
 
+// PoiWithNpc pairs a POI type ID with the name of the NPC that provides it.
+message PoiWithNpc {
+    string poi_id   = 1; // e.g. "merchant", "healer", "guard"
+    string npc_name = 2; // NPC display name e.g. "Sgt. Mack"
+}
+
 // MapTile represents one discovered room on the automap grid.
 message MapTile {
     string room_id   = 1;
@@ -737,6 +743,7 @@ message MapTile {
     string danger_level  = 7;
     repeated string pois = 8; // POI type IDs present in this room e.g. ["merchant", "equipment"]
     bool   boss_room     = 9; // true when this room is a boss arena (REQ-AE-24)
+    repeated PoiWithNpc poi_npcs = 10; // NPC-backed POIs with their display names
 }
 
 // WorldZoneTile represents one zone on the world map.
