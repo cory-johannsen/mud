@@ -1,5 +1,5 @@
 import ReactDOM from 'react-dom'
-import type { MapTile } from '../proto'
+import type { MapTile, PoiWithNpc } from '../proto'
 import { POI_TYPES, DANGER_COLOR } from './mapRenderer'
 
 interface RoomTooltipProps {
@@ -12,6 +12,7 @@ export function RoomTooltip({ tile, pos }: RoomTooltipProps) {
   const danger = tile.dangerLevel ?? tile.danger_level ?? ''
   const dangerColor = DANGER_COLOR[danger] ?? '#8ab'
   const pois = Array.isArray(tile.pois) ? tile.pois : []
+  const poiNpcs: PoiWithNpc[] = tile.poiNpcs ?? tile.poi_npcs ?? []
   const exits = Array.isArray(tile.exits) ? tile.exits : []
   const isCurrent = tile.current === true
 
@@ -61,10 +62,17 @@ export function RoomTooltip({ tile, pos }: RoomTooltipProps) {
           <div style={{ color: '#666', marginBottom: '0.1rem' }}>Points of Interest:</div>
           {pois.map(id => {
             const pt = POI_TYPES.find(p => p.id === id)
+            const matching = poiNpcs.filter(p => (p.poiId ?? p.poi_id) === id)
+            const npcLabel = matching.length > 0
+              ? matching.map(p => p.npcName ?? p.npc_name ?? '').filter(Boolean).join(', ')
+              : ''
             return (
               <div key={id} style={{ paddingLeft: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
                 <span style={{ color: pt?.color ?? '#ccc' }}>{pt?.symbol ?? '?'}</span>
-                <span>{pt?.label ?? id}</span>
+                <span>
+                  {pt?.label ?? id}
+                  {npcLabel && <span style={{ color: '#aaa' }}> — {npcLabel}</span>}
+                </span>
               </div>
             )
           })}

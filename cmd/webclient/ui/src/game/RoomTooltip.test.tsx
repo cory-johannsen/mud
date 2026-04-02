@@ -73,4 +73,51 @@ describe('RoomTooltip', () => {
     render(<RoomTooltip tile={snakeTile} pos={{ x: 100, y: 200 }} />)
     expect(screen.getByText('dangerous')).toBeDefined()
   })
+
+  it('shows NPC name alongside POI label when poiNpcs is provided', () => {
+    const tileWithNpcs: MapTile = {
+      ...tile,
+      pois: ['merchant'],
+      poiNpcs: [{ poiId: 'merchant', npcName: 'Sgt. Mack' }],
+    }
+    render(<RoomTooltip tile={tileWithNpcs} pos={{ x: 100, y: 200 }} />)
+    expect(screen.getByText(/Merchant/)).toBeDefined()
+    expect(screen.getByText(/Sgt\. Mack/)).toBeDefined()
+  })
+
+  it('shows multiple NPC names comma-separated for same POI type', () => {
+    const tileWithMultiple: MapTile = {
+      ...tile,
+      pois: ['merchant'],
+      poiNpcs: [
+        { poiId: 'merchant', npcName: 'Sgt. Mack' },
+        { poiId: 'merchant', npcName: 'Ellie Mack' },
+      ],
+    }
+    render(<RoomTooltip tile={tileWithMultiple} pos={{ x: 100, y: 200 }} />)
+    expect(screen.getByText(/Sgt\. Mack/)).toBeDefined()
+    expect(screen.getByText(/Ellie Mack/)).toBeDefined()
+  })
+
+  it('shows label only (no dash) when no poiNpcs entry for that POI type', () => {
+    const tileWithEquipment: MapTile = {
+      ...tile,
+      pois: ['map'],
+      poiNpcs: [],
+    }
+    render(<RoomTooltip tile={tileWithEquipment} pos={{ x: 100, y: 200 }} />)
+    expect(screen.getByText('Map')).toBeDefined()
+    expect(screen.queryByText(/Map.*—/)).toBeNull()
+  })
+
+  it('uses poi_id snake_case fallback in poiNpcs entries', () => {
+    const tileSnakeCase: MapTile = {
+      ...tile,
+      pois: ['healer'],
+      poi_npcs: [{ poi_id: 'healer', npc_name: 'Tina Wires' }],
+    }
+    render(<RoomTooltip tile={tileSnakeCase} pos={{ x: 100, y: 200 }} />)
+    expect(screen.getByText(/Healer/)).toBeDefined()
+    expect(screen.getByText(/Tina Wires/)).toBeDefined()
+  })
 })
