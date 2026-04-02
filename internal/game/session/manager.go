@@ -50,7 +50,7 @@ type PlayerSession struct {
 	Abilities character.AbilityScores
 	// Backpack is the player's inventory container.
 	Backpack *inventory.Backpack
-	// Currency is the player's total rounds (ammunition-as-currency).
+	// Currency is the player's total Crypto.
 	Currency int
 	// Role is the account privilege level (player, editor, admin).
 	Role string

@@ -5335,8 +5335,8 @@ func (s *GameServiceServer) handleInventory(uid string) (*gamev1.ServerEvent, er
 		MaxSlots:    int32(sess.Backpack.MaxSlots),
 		TotalWeight: totalWeight,
 		MaxWeight:   sess.Backpack.MaxWeight,
-		Currency:    inventory.FormatRounds(sess.Currency),
-		TotalRounds: int32(sess.Currency),
+		Currency:    inventory.FormatCrypto(sess.Currency),
+		TotalCrypto: int32(sess.Currency),
 	}
 	return &gamev1.ServerEvent{Payload: &gamev1.ServerEvent_InventoryView{InventoryView: view}}, nil
 }
@@ -5350,7 +5350,7 @@ func (s *GameServiceServer) handleBalance(uid string) (*gamev1.ServerEvent, erro
 	if !ok {
 		return errorEvent("player not found"), nil
 	}
-	return messageEvent(fmt.Sprintf("Currency: %s", inventory.FormatRounds(sess.Currency))), nil
+	return messageEvent(fmt.Sprintf("Currency: %s", inventory.FormatCrypto(sess.Currency))), nil
 }
 
 // handleLoadout displays or swaps weapon presets for the player.
@@ -5504,7 +5504,7 @@ func (s *GameServiceServer) handleChar(uid string) (*gamev1.ServerEvent, error) 
 		Reasoning:      int32(sess.Abilities.Reasoning),
 		Savvy:          int32(sess.Abilities.Savvy),
 		Flair:          int32(sess.Abilities.Flair),
-		Currency:       inventory.FormatRounds(sess.Currency),
+		Currency:       inventory.FormatCrypto(sess.Currency),
 		Gender:         sess.Gender,
 		Team:           sess.Team,
 		HeroPoints:     int32(sess.HeroPoints),
