@@ -1,7 +1,7 @@
 # Web UI — Equipment Tab Controls
 
 **Slug:** web-ui-equipment-controls
-**Status:** spec
+**Status:** done
 **Priority:** 482
 **Category:** ui
 **Effort:** S

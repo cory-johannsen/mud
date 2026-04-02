@@ -2,13 +2,28 @@ import { useEffect, useState } from 'react'
 import { useGame } from '../GameContext'
 import type { LoadoutWeaponPreset } from '../../proto'
 
-function EquipSlot({ label, value, bonus, dmg }: { label: string; value?: string | null; bonus?: string | null; dmg?: string | null }) {
+function EquipSlot({
+  label,
+  value,
+  bonus,
+  dmg,
+  onUnequip,
+}: {
+  label: string
+  value?: string | null
+  bonus?: string | null
+  dmg?: string | null
+  onUnequip?: () => void
+}) {
   return (
     <div className="equip-slot">
       <div className="equip-slot-label">{label}</div>
       {value ? (
-        <div className="equip-slot-value">
-          {value}{bonus ? ` (${bonus})` : ''}{dmg ? ` [${dmg}]` : ''}
+        <div className="equip-slot-value" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+          <span>{value}{bonus ? ` (${bonus})` : ''}{dmg ? ` [${dmg}]` : ''}</span>
+          {onUnequip && (
+            <button style={styles.unequipBtn} onClick={onUnequip} type="button">Unequip</button>
+          )}
         </div>
       ) : (
         <div className="equip-slot-value equip-empty">—</div>
@@ -97,7 +112,7 @@ const ACCESSORY_SLOTS: Array<{ key: string; label: string }> = [
 ]
 
 export function EquipmentDrawer({ onClose }: { onClose: () => void }) {
-  const { state, sendMessage, clearLoadout } = useGame()
+  const { state, sendMessage, sendCommand, clearLoadout } = useGame()
   const [isSwitching, setIsSwitching] = useState(false)
 
   useEffect(() => {
@@ -122,6 +137,13 @@ export function EquipmentDrawer({ onClose }: { onClose: () => void }) {
     sendMessage('LoadoutRequest', { arg: String(presetNumber) })
   }
 
+  // REQ-WEC-3/4/5: send unequip command then refresh character sheet and inventory.
+  function handleUnequip(slot: string) {
+    sendCommand(`unequip ${slot}`)
+    sendMessage('CharacterSheetRequest', {})
+    sendMessage('InventoryRequest', {})
+  }
+
   function handleClose() {
     clearLoadout()
     onClose()
@@ -130,6 +152,8 @@ export function EquipmentDrawer({ onClose }: { onClose: () => void }) {
   const sheet = state.characterSheet
   const armor = (sheet?.armor ?? {}) as Record<string, string>
   const accessories = (sheet?.accessories ?? {}) as Record<string, string>
+  const mainHand = sheet?.mainHand ?? sheet?.main_hand ?? null
+  const offHand = sheet?.offHand ?? sheet?.off_hand ?? null
   const lv = state.loadoutView
   const activeIndex = lv?.activeIndex ?? 0
   const presets = lv?.presets ?? []
@@ -165,16 +189,39 @@ export function EquipmentDrawer({ onClose }: { onClose: () => void }) {
             )}
             {isSwitching && <p style={{ color: '#666', fontSize: '0.8rem', fontStyle: 'italic', marginBottom: '0.5rem' }}>Switching…</p>}
 
+            {/* Weapons (active preset — with unequip) */}
+            <div style={{ ...styles.sectionLabel, marginTop: '0.75rem' }}>Weapons</div>
+            <EquipSlot
+              label="Main Hand"
+              value={mainHand}
+              onUnequip={mainHand ? () => handleUnequip('main') : undefined}
+            />
+            <EquipSlot
+              label="Off Hand"
+              value={offHand}
+              onUnequip={offHand ? () => handleUnequip('off') : undefined}
+            />
+
             {/* Armor */}
             <div style={{ ...styles.sectionLabel, marginTop: '0.75rem' }}>Armor</div>
             {ARMOR_SLOTS.map(({ key, label }) => (
-              <EquipSlot key={key} label={label} value={armor[key] || null} />
+              <EquipSlot
+                key={key}
+                label={label}
+                value={armor[key] || null}
+                onUnequip={armor[key] ? () => handleUnequip(key) : undefined}
+              />
             ))}
 
             {/* Accessories */}
             <div style={{ ...styles.sectionLabel, marginTop: '0.75rem' }}>Accessories</div>
             {ACCESSORY_SLOTS.map(({ key, label }) => (
-              <EquipSlot key={key} label={label} value={accessories[key] || null} />
+              <EquipSlot
+                key={key}
+                label={label}
+                value={accessories[key] || null}
+                onUnequip={accessories[key] ? () => handleUnequip(key) : undefined}
+              />
             ))}
           </>
         )}
@@ -259,5 +306,16 @@ const styles: Record<string, React.CSSProperties> = {
     overflow: 'hidden',
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap' as const,
+  },
+  unequipBtn: {
+    padding: '0.1rem 0.4rem',
+    background: '#2a1a1a',
+    border: '1px solid #6a2a2a',
+    color: '#d84',
+    borderRadius: '3px',
+    cursor: 'pointer',
+    fontFamily: 'monospace',
+    fontSize: '0.65rem',
+    flexShrink: 0,
   },
 }

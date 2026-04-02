@@ -778,7 +778,7 @@ features:
 
   - slug: web-ui-equipment-controls
     name: Web UI — Equipment Tab Controls
-    status: planned
+    status: done
     priority: 482
     category: ui
     file: docs/features/web-ui-equipment-controls.md
