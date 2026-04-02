@@ -766,6 +766,12 @@ func RenderCharacterSheet(csv *gamev1.CharacterSheetView, width int) string {
 	left = append(left, slPlain(fmt.Sprintf("Gender: %s", displayGender(csv.GetGender()))))
 	left = append(left, slPlain(fmt.Sprintf("HP: %d / %d", csv.GetCurrentHp(), csv.GetMaxHp())))
 	left = append(left, slPlain(fmt.Sprintf("Hero Points: %d", csv.GetHeroPoints())))
+	if csv.GetPendingBoosts() > 0 {
+		left = append(left, sl(telnet.Colorf(telnet.BrightYellow, "Pending Boosts: %d", csv.GetPendingBoosts())))
+	}
+	if csv.GetPendingSkillIncreases() > 0 {
+		left = append(left, sl(telnet.Colorf(telnet.BrightYellow, "Pending Skill Increases: %d", csv.GetPendingSkillIncreases())))
+	}
 	if csv.GetMaxFocusPoints() > 0 {
 		left = append(left, slPlain(fmt.Sprintf("Focus Points: %d / %d",
 			csv.GetFocusPoints(), csv.GetMaxFocusPoints())))
