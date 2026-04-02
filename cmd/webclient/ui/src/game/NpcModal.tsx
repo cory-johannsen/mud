@@ -118,8 +118,8 @@ function ShopRow({
         </div>
         {hovered && hasStats && <ItemTooltip item={item} pos={tooltipPos} />}
       </td>
-      <td style={styles.tdNum}>{buy}¢</td>
-      <td style={styles.tdNum}>{sell}¢</td>
+      <td style={styles.tdNum}>{buy} Crypto</td>
+      <td style={styles.tdNum}>{sell} Crypto</td>
       <td style={{ ...styles.tdNum, color: stock === 0 ? '#666' : '#ccc' }}>
         {stock === 0 ? 'out' : stock}
       </td>

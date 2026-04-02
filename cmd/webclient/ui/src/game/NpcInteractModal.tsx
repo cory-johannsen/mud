@@ -42,11 +42,11 @@ function HealerModal({ view, onClose }: { view: HealerView; onClose: () => void 
             </div>
             <div style={styles.infoRow}>
               <span style={styles.infoLabel}>Price per HP</span>
-              <span style={styles.infoValue}>{pricePerHp}¢</span>
+              <span style={styles.infoValue}>{pricePerHp} Crypto</span>
             </div>
             <div style={styles.infoRow}>
-              <span style={styles.infoLabel}>Your credits</span>
-              <span style={styles.infoValue}>{playerCurrency}¢</span>
+              <span style={styles.infoLabel}>Your Crypto</span>
+              <span style={styles.infoValue}>{playerCurrency} Crypto</span>
             </div>
             {capacityRemaining > 0 && (
               <div style={styles.infoRow}>
@@ -67,10 +67,10 @@ function HealerModal({ view, onClose }: { view: HealerView; onClose: () => void 
                 disabled={!canAffordFull}
                 type="button"
               >
-                Heal to full — {fullHealCost}¢
+                Heal to full — {fullHealCost} Crypto
               </button>
               {!canAffordFull && (
-                <p style={styles.notice}>You need {fullHealCost}¢ but only have {playerCurrency}¢.</p>
+                <p style={styles.notice}>You need {fullHealCost} Crypto but only have {playerCurrency} Crypto.</p>
               )}
             </div>
           )}
@@ -106,7 +106,7 @@ function JobRow({ job, playerCurrency, onTrain }: {
           <div style={styles.reason}>{reason}</div>
         )}
       </td>
-      <td style={{ ...styles.tdNum, color: canAfford ? '#aaa' : '#665' }}>{cost}¢</td>
+      <td style={{ ...styles.tdNum, color: canAfford ? '#aaa' : '#665' }}>{cost} Crypto</td>
       <td style={styles.tdAction}>
         {available && !alreadyTrained && (
           <button
@@ -114,7 +114,7 @@ function JobRow({ job, playerCurrency, onTrain }: {
             onClick={() => onTrain(jobId)}
             disabled={!canAfford}
             type="button"
-            title={canAfford ? `Train ${jobName}` : `Need ${cost}¢`}
+            title={canAfford ? `Train ${jobName}` : `Need ${cost} Crypto`}
           >
             Train
           </button>
@@ -141,7 +141,7 @@ function TrainerModal({ view, onClose }: { view: TrainerView; onClose: () => voi
         <div style={styles.header}>
           <div style={styles.headerLeft}>
             <h3 style={styles.title}>{npcName}</h3>
-            <span style={styles.currency}>{playerCurrency}¢</span>
+            <span style={styles.currency}>{playerCurrency} Crypto</span>
           </div>
           <button style={styles.closeBtn} onClick={onClose} type="button">✕</button>
         </div>
@@ -228,7 +228,7 @@ function BankerModal({
           {view.description && <p style={styles.desc}>{view.description}</p>}
           {playerCurrency !== null && (
             <div style={styles.infoRow}>
-              <span style={styles.infoLabel}>Carried credits</span>
+              <span style={styles.infoLabel}>Carried Crypto</span>
               <span style={styles.infoValue}>{playerCurrency}</span>
             </div>
           )}

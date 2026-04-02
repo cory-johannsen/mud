@@ -270,7 +270,7 @@ export interface InventoryView {
   total_weight?: number
   maxWeight?: number
   currency?: string
-  totalRounds?: number
+  totalCrypto?: number
 }
 
 export interface PoiWithNpc {
