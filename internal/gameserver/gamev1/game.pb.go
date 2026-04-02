@@ -8053,8 +8053,9 @@ type InventoryItem struct {
 	Kind          string                 `protobuf:"bytes,3,opt,name=kind,proto3" json:"kind,omitempty"`
 	Quantity      int32                  `protobuf:"varint,4,opt,name=quantity,proto3" json:"quantity,omitempty"`
 	Weight        float64                `protobuf:"fixed64,5,opt,name=weight,proto3" json:"weight,omitempty"`
-	ItemDefId     string                 `protobuf:"bytes,6,opt,name=item_def_id,json=itemDefId,proto3" json:"item_def_id,omitempty"` // ItemDef ID used by equip/wear commands
-	ArmorSlot     string                 `protobuf:"bytes,7,opt,name=armor_slot,json=armorSlot,proto3" json:"armor_slot,omitempty"`   // ArmorDef.Slot (head/torso/etc.) when kind == "armor"
+	ItemDefId     string                 `protobuf:"bytes,6,opt,name=item_def_id,json=itemDefId,proto3" json:"item_def_id,omitempty"`           // ItemDef ID used by equip/wear commands
+	ArmorSlot     string                 `protobuf:"bytes,7,opt,name=armor_slot,json=armorSlot,proto3" json:"armor_slot,omitempty"`             // ArmorDef.Slot (head/torso/etc.) when kind == "armor"
+	ArmorCategory string                 `protobuf:"bytes,8,opt,name=armor_category,json=armorCategory,proto3" json:"armor_category,omitempty"` // "light", "medium", or "heavy" when kind == "armor"
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -8134,6 +8135,13 @@ func (x *InventoryItem) GetItemDefId() string {
 func (x *InventoryItem) GetArmorSlot() string {
 	if x != nil {
 		return x.ArmorSlot
+	}
+	return ""
+}
+
+func (x *InventoryItem) GetArmorCategory() string {
+	if x != nil {
+		return x.ArmorCategory
 	}
 	return ""
 }
@@ -9678,10 +9686,11 @@ type CharacterSheetView struct {
 	InnateSlots           []*InnateSlotView         `protobuf:"bytes,46,rep,name=innate_slots,json=innateSlots,proto3" json:"innate_slots,omitempty"`
 	// active_set_bonuses lists human-readable descriptions of currently active equipment set bonuses (REQ-EM-31).
 	ActiveSetBonuses []string                 `protobuf:"bytes,47,rep,name=active_set_bonuses,json=activeSetBonuses,proto3" json:"active_set_bonuses,omitempty"`
-	FocusPoints      int32                    `protobuf:"varint,48,opt,name=focus_points,json=focusPoints,proto3" json:"focus_points,omitempty"`               // current focus point pool
-	MaxFocusPoints   int32                    `protobuf:"varint,49,opt,name=max_focus_points,json=maxFocusPoints,proto3" json:"max_focus_points,omitempty"`    // maximum focus points
-	HardwiredSlots   []*HardwiredSlotView     `protobuf:"bytes,50,rep,name=hardwired_slots,json=hardwiredSlots,proto3" json:"hardwired_slots,omitempty"`       // always-available hardwired technologies
-	SpontaneousKnown []*SpontaneousKnownEntry `protobuf:"bytes,51,rep,name=spontaneous_known,json=spontaneousKnown,proto3" json:"spontaneous_known,omitempty"` // known spontaneous technologies with names
+	FocusPoints      int32                    `protobuf:"varint,48,opt,name=focus_points,json=focusPoints,proto3" json:"focus_points,omitempty"`                                                                                      // current focus point pool
+	MaxFocusPoints   int32                    `protobuf:"varint,49,opt,name=max_focus_points,json=maxFocusPoints,proto3" json:"max_focus_points,omitempty"`                                                                           // maximum focus points
+	HardwiredSlots   []*HardwiredSlotView     `protobuf:"bytes,50,rep,name=hardwired_slots,json=hardwiredSlots,proto3" json:"hardwired_slots,omitempty"`                                                                              // always-available hardwired technologies
+	SpontaneousKnown []*SpontaneousKnownEntry `protobuf:"bytes,51,rep,name=spontaneous_known,json=spontaneousKnown,proto3" json:"spontaneous_known,omitempty"`                                                                        // known spontaneous technologies with names
+	ArmorCategories  map[string]string        `protobuf:"bytes,52,rep,name=armor_categories,json=armorCategories,proto3" json:"armor_categories,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"` // slot -> "light"/"medium"/"heavy" for equipped armor
 	unknownFields    protoimpl.UnknownFields
 	sizeCache        protoimpl.SizeCache
 }
@@ -10069,6 +10078,13 @@ func (x *CharacterSheetView) GetHardwiredSlots() []*HardwiredSlotView {
 func (x *CharacterSheetView) GetSpontaneousKnown() []*SpontaneousKnownEntry {
 	if x != nil {
 		return x.SpontaneousKnown
+	}
+	return nil
+}
+
+func (x *CharacterSheetView) GetArmorCategories() map[string]string {
+	if x != nil {
+		return x.ArmorCategories
 	}
 	return nil
 }
@@ -14065,7 +14081,7 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\tmax_count\x18\x03 \x01(\x05R\bmaxCount\x12\x18\n" +
 	"\arespawn\x18\x04 \x01(\tR\arespawn\x12\x1c\n" +
 	"\timmovable\x18\x05 \x01(\bR\timmovable\x12\x16\n" +
-	"\x06script\x18\x06 \x01(\tR\x06script\"\xcb\x01\n" +
+	"\x06script\x18\x06 \x01(\tR\x06script\"\xf2\x01\n" +
 	"\rInventoryItem\x12\x1f\n" +
 	"\vinstance_id\x18\x01 \x01(\tR\n" +
 	"instanceId\x12\x12\n" +
@@ -14075,7 +14091,8 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\x06weight\x18\x05 \x01(\x01R\x06weight\x12\x1e\n" +
 	"\vitem_def_id\x18\x06 \x01(\tR\titemDefId\x12\x1d\n" +
 	"\n" +
-	"armor_slot\x18\a \x01(\tR\tarmorSlot\"\xfa\x01\n" +
+	"armor_slot\x18\a \x01(\tR\tarmorSlot\x12%\n" +
+	"\x0earmor_category\x18\b \x01(\tR\rarmorCategory\"\xfa\x01\n" +
 	"\rInventoryView\x12,\n" +
 	"\x05items\x18\x01 \x03(\v2\x16.game.v1.InventoryItemR\x05items\x12\x1d\n" +
 	"\n" +
@@ -14188,7 +14205,7 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\n" +
 	"tech_level\x18\x03 \x01(\x05R\ttechLevel\x12 \n" +
 	"\vdescription\x18\x04 \x01(\tR\vdescription\x12'\n" +
-	"\x0feffects_summary\x18\x05 \x01(\tR\x0eeffectsSummary\"\xc4\x11\n" +
+	"\x0feffects_summary\x18\x05 \x01(\tR\x0eeffectsSummary\"\xe5\x12\n" +
 	"\x12CharacterSheetView\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x10\n" +
 	"\x03job\x18\x02 \x01(\tR\x03job\x12\x1c\n" +
@@ -14247,12 +14264,16 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\ffocus_points\x180 \x01(\x05R\vfocusPoints\x12(\n" +
 	"\x10max_focus_points\x181 \x01(\x05R\x0emaxFocusPoints\x12C\n" +
 	"\x0fhardwired_slots\x182 \x03(\v2\x1a.game.v1.HardwiredSlotViewR\x0ehardwiredSlots\x12K\n" +
-	"\x11spontaneous_known\x183 \x03(\v2\x1e.game.v1.SpontaneousKnownEntryR\x10spontaneousKnown\x1a8\n" +
+	"\x11spontaneous_known\x183 \x03(\v2\x1e.game.v1.SpontaneousKnownEntryR\x10spontaneousKnown\x12[\n" +
+	"\x10armor_categories\x184 \x03(\v20.game.v1.CharacterSheetView.ArmorCategoriesEntryR\x0farmorCategories\x1a8\n" +
 	"\n" +
 	"ArmorEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\x1a>\n" +
 	"\x10AccessoriesEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\x1aB\n" +
+	"\x14ArmorCategoriesEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xf4\x01\n" +
 	"\x0eInnateSlotView\x12\x17\n" +
@@ -14472,7 +14493,7 @@ func file_game_v1_game_proto_rawDescGZIP() []byte {
 }
 
 var file_game_v1_game_proto_enumTypes = make([]protoimpl.EnumInfo, 4)
-var file_game_v1_game_proto_msgTypes = make([]protoimpl.MessageInfo, 192)
+var file_game_v1_game_proto_msgTypes = make([]protoimpl.MessageInfo, 193)
 var file_game_v1_game_proto_goTypes = []any{
 	(MessageType)(0),                  // 0: game.v1.MessageType
 	(RoomEventType)(0),                // 1: game.v1.RoomEventType
@@ -14670,6 +14691,7 @@ var file_game_v1_game_proto_goTypes = []any{
 	(*WeatherEvent)(nil),              // 193: game.v1.WeatherEvent
 	nil,                               // 194: game.v1.CharacterSheetView.ArmorEntry
 	nil,                               // 195: game.v1.CharacterSheetView.AccessoriesEntry
+	nil,                               // 196: game.v1.CharacterSheetView.ArmorCategoriesEntry
 }
 var file_game_v1_game_proto_depIdxs = []int32{
 	36,  // 0: game.v1.ClientMessage.join_world:type_name -> game.v1.JoinWorldRequest
@@ -14872,15 +14894,16 @@ var file_game_v1_game_proto_depIdxs = []int32{
 	120, // 197: game.v1.CharacterSheetView.innate_slots:type_name -> game.v1.InnateSlotView
 	117, // 198: game.v1.CharacterSheetView.hardwired_slots:type_name -> game.v1.HardwiredSlotView
 	118, // 199: game.v1.CharacterSheetView.spontaneous_known:type_name -> game.v1.SpontaneousKnownEntry
-	124, // 200: game.v1.ProficienciesResponse.proficiencies:type_name -> game.v1.ProficiencyEntry
-	190, // 201: game.v1.CraftResultEvent.materials_lost:type_name -> game.v1.MaterialLoss
-	4,   // 202: game.v1.GameService.Session:input_type -> game.v1.ClientMessage
-	32,  // 203: game.v1.GameService.Session:output_type -> game.v1.ServerEvent
-	203, // [203:204] is the sub-list for method output_type
-	202, // [202:203] is the sub-list for method input_type
-	202, // [202:202] is the sub-list for extension type_name
-	202, // [202:202] is the sub-list for extension extendee
-	0,   // [0:202] is the sub-list for field type_name
+	196, // 200: game.v1.CharacterSheetView.armor_categories:type_name -> game.v1.CharacterSheetView.ArmorCategoriesEntry
+	124, // 201: game.v1.ProficienciesResponse.proficiencies:type_name -> game.v1.ProficiencyEntry
+	190, // 202: game.v1.CraftResultEvent.materials_lost:type_name -> game.v1.MaterialLoss
+	4,   // 203: game.v1.GameService.Session:input_type -> game.v1.ClientMessage
+	32,  // 204: game.v1.GameService.Session:output_type -> game.v1.ServerEvent
+	204, // [204:205] is the sub-list for method output_type
+	203, // [203:204] is the sub-list for method input_type
+	203, // [203:203] is the sub-list for extension type_name
+	203, // [203:203] is the sub-list for extension extendee
+	0,   // [0:203] is the sub-list for field type_name
 }
 
 func init() { file_game_v1_game_proto_init() }
@@ -15063,7 +15086,7 @@ func file_game_v1_game_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_game_v1_game_proto_rawDesc), len(file_game_v1_game_proto_rawDesc)),
 			NumEnums:      4,
-			NumMessages:   192,
+			NumMessages:   193,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

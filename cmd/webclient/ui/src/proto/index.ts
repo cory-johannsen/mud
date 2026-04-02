@@ -242,6 +242,8 @@ export interface CharacterSheetView {
   maxFocusPoints?: number
   max_focus_points?: number
   proficiencies?: ProficiencyEntry[]
+  armorCategories?: Record<string, string>
+  armor_categories?: Record<string, string>
 }
 
 export interface InventoryItem {
@@ -254,6 +256,8 @@ export interface InventoryItem {
   item_def_id?: string
   armorSlot?: string
   armor_slot?: string
+  armorCategory?: string
+  armor_category?: string
 }
 
 export interface InventoryView {

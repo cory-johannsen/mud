@@ -213,14 +213,19 @@ export function EquipmentDrawer({ onClose }: { onClose: () => void }) {
 
             {/* Armor */}
             <div style={{ ...styles.sectionLabel, marginTop: '0.75rem' }}>Armor</div>
-            {ARMOR_SLOTS.map(({ key, label }) => (
-              <EquipSlot
-                key={key}
-                label={label}
-                value={armor[key] || null}
-                onUnequip={armor[key] ? () => handleUnequip(key) : undefined}
-              />
-            ))}
+            {ARMOR_SLOTS.map(({ key, label }) => {
+              const armorCategories = (sheet?.armorCategories ?? sheet?.armor_categories ?? {}) as Record<string, string>
+              const cat = armorCategories[key]
+              const displayName = armor[key] ? (cat ? `${armor[key]} [${cat}]` : armor[key]) : null
+              return (
+                <EquipSlot
+                  key={key}
+                  label={label}
+                  value={displayName}
+                  onUnequip={armor[key] ? () => handleUnequip(key) : undefined}
+                />
+              )
+            })}
 
             {/* Accessories */}
             <div style={{ ...styles.sectionLabel, marginTop: '0.75rem' }}>Accessories</div>

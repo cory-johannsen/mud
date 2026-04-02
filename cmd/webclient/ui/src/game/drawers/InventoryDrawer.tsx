@@ -117,12 +117,13 @@ function ArmorRow({
   sendMessage: (type: string, payload: object) => void
 }) {
   const armorSlot = item.armorSlot ?? item.armor_slot ?? ''
+  const armorCategory = item.armorCategory ?? item.armor_category ?? ''
   const disabled = !armorSlot
 
   return (
     <tr>
       <td>{item.name}</td>
-      <td>{item.kind}</td>
+      <td>{armorCategory ? `armor (${armorCategory})` : item.kind}</td>
       <td>{item.quantity ?? 1}</td>
       <td>{(item.weight ?? 0).toFixed(1)}</td>
       <td>

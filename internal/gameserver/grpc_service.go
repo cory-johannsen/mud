@@ -4586,6 +4586,21 @@ func backpackToInventoryItems(bp *inventory.Backpack) []inventory.InventoryItem 
 //
 // Precondition: msg must be non-empty.
 // Postcondition: Returns a non-nil ServerEvent.
+// armorProfCategoryLabel converts an ArmorDef.ProficiencyCategory value like
+// "light_armor" into a short display label ("light", "medium", "heavy").
+func armorProfCategoryLabel(category string) string {
+	switch category {
+	case "light_armor":
+		return "light"
+	case "medium_armor":
+		return "medium"
+	case "heavy_armor":
+		return "heavy"
+	default:
+		return ""
+	}
+}
+
 func errorEvent(msg string) *gamev1.ServerEvent {
 	return &gamev1.ServerEvent{
 		Payload: &gamev1.ServerEvent_Error{
@@ -5285,6 +5300,7 @@ func (s *GameServiceServer) handleInventory(uid string) (*gamev1.ServerEvent, er
 		kind := ""
 		weight := 0.0
 		armorSlot := ""
+		armorCategory := ""
 		if s.invRegistry != nil {
 			if def, ok := s.invRegistry.Item(inst.ItemDefID); ok {
 				name = def.Name
@@ -5293,18 +5309,20 @@ func (s *GameServiceServer) handleInventory(uid string) (*gamev1.ServerEvent, er
 				if def.Kind == inventory.KindArmor && def.ArmorRef != "" {
 					if armorDef, ok := s.invRegistry.Armor(def.ArmorRef); ok {
 						armorSlot = string(armorDef.Slot)
+						armorCategory = armorProfCategoryLabel(string(armorDef.ProficiencyCategory))
 					}
 				}
 			}
 		}
 		items = append(items, &gamev1.InventoryItem{
-			InstanceId: inst.InstanceID,
-			Name:       name,
-			Kind:       kind,
-			Quantity:   int32(inst.Quantity),
-			Weight:     weight * float64(inst.Quantity),
-			ItemDefId:  inst.ItemDefID,
-			ArmorSlot:  armorSlot,
+			InstanceId:    inst.InstanceID,
+			Name:          name,
+			Kind:          kind,
+			Quantity:      int32(inst.Quantity),
+			Weight:        weight * float64(inst.Quantity),
+			ItemDefId:     inst.ItemDefID,
+			ArmorSlot:     armorSlot,
+			ArmorCategory: armorCategory,
 		})
 	}
 	var totalWeight float64
@@ -5541,6 +5559,7 @@ func (s *GameServiceServer) handleChar(uid string) (*gamev1.ServerEvent, error) 
 
 	// Armor slots.
 	view.Armor = make(map[string]string)
+	view.ArmorCategories = make(map[string]string)
 	for slot, item := range sess.Equipment.Armor {
 		if item == nil {
 			continue
@@ -5551,6 +5570,9 @@ func (s *GameServiceServer) handleChar(uid string) (*gamev1.ServerEvent, error) 
 				name = armorDef.Name
 				if armorDef.ACBonus > 0 {
 					name = fmt.Sprintf("%s (+%d AC)", armorDef.Name, armorDef.ACBonus)
+				}
+				if cat := armorProfCategoryLabel(string(armorDef.ProficiencyCategory)); cat != "" {
+					view.ArmorCategories[string(slot)] = cat
 				}
 			}
 		}

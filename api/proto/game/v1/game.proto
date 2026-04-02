@@ -793,7 +793,8 @@ message InventoryItem {
   int32 quantity = 4;
   double weight = 5;
   string item_def_id = 6;  // ItemDef ID used by equip/wear commands
-  string armor_slot = 7;   // ArmorDef.Slot (head/torso/etc.) when kind == "armor"
+  string armor_slot     = 7;   // ArmorDef.Slot (head/torso/etc.) when kind == "armor"
+  string armor_category = 8;   // "light", "medium", or "heavy" when kind == "armor"
 }
 
 // InventoryView shows the player's backpack and currency.
@@ -1039,6 +1040,7 @@ message CharacterSheetView {
     int32 max_focus_points = 49; // maximum focus points
     repeated HardwiredSlotView     hardwired_slots     = 50; // always-available hardwired technologies
     repeated SpontaneousKnownEntry spontaneous_known   = 51; // known spontaneous technologies with names
+    map<string, string> armor_categories = 52; // slot -> "light"/"medium"/"heavy" for equipped armor
 }
 
 // InnateSlotView delivers the per-tech innate use slot state for the character sheet.
