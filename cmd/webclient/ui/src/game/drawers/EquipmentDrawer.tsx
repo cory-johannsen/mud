@@ -127,6 +127,7 @@ export function EquipmentDrawer({ onClose }: { onClose: () => void }) {
     if (!isSwitching) return
     const id = setTimeout(() => {
       sendMessage('LoadoutRequest', { arg: '' })
+      sendMessage('CharacterSheetRequest', {})
       setIsSwitching(false)
     }, 400)
     return () => clearTimeout(id)
