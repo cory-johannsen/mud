@@ -17,7 +17,7 @@ const DEFAULT_ROOM_COLOR = '#8ab'  // light blue-gray (unexplored / unknown)
 const CURRENT_ROOM_COLOR = '#fff'  // bright white for current room
 
 // POI type table — matches poi.go
-const POI_TYPES: Array<{ id: string; symbol: string; color: string; label: string }> = [
+export const POI_TYPES: Array<{ id: string; symbol: string; color: string; label: string }> = [
   { id: 'merchant',  symbol: '$', color: '#0bc', label: 'Merchant'  },
   { id: 'healer',    symbol: '+', color: '#4a8', label: 'Healer'    },
   { id: 'trainer',   symbol: 'T', color: '#48f', label: 'Trainer'   },
@@ -31,6 +31,7 @@ const POI_TYPES: Array<{ id: string; symbol: string; color: string; label: strin
 export interface Segment {
   text: string
   color?: string  // CSS color; undefined = inherit from .map-ascii
+  tile?: MapTile  // set on room cell segments only; used by MapPanel for hover tooltips
 }
 
 export type ColoredLine = Segment[]
@@ -40,8 +41,10 @@ export interface MapRenderResult {
   legendLines: ColoredLine[]
 }
 
-function seg(text: string, color?: string): Segment {
-  return color ? { text, color } : { text }
+function seg(text: string, color?: string, tile?: MapTile): Segment {
+  const s: Segment = color ? { text, color } : { text }
+  if (tile !== undefined) s.tile = tile
+  return s
 }
 
 function dangerColor(t: MapTile): string {
@@ -132,11 +135,11 @@ export function renderMapTiles(tiles: MapTile[]): MapRenderResult {
       } else {
         const num = numByCoord.get(coordKey(x, y))!
         if (t.current) {
-          row.push(seg(`<${String(num).padStart(2)}>`, CURRENT_ROOM_COLOR))
+          row.push(seg(`<${String(num).padStart(2)}>`, CURRENT_ROOM_COLOR, t))
         } else if (t.boss === true || t.bossRoom === true) {
-          row.push(seg('<BB>', dangerColor(t)))
+          row.push(seg('<BB>', dangerColor(t), t))
         } else {
-          row.push(seg(`[${String(num).padStart(2)}]`, dangerColor(t)))
+          row.push(seg(`[${String(num).padStart(2)}]`, dangerColor(t), t))
         }
       }
 
