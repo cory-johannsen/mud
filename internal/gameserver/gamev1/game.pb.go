@@ -7602,7 +7602,7 @@ type MapTile struct {
 	DangerLevel   string                 `protobuf:"bytes,7,opt,name=danger_level,json=dangerLevel,proto3" json:"danger_level,omitempty"`
 	Pois          []string               `protobuf:"bytes,8,rep,name=pois,proto3" json:"pois,omitempty"`                          // POI type IDs present in this room e.g. ["merchant", "equipment"]
 	BossRoom      bool                   `protobuf:"varint,9,opt,name=boss_room,json=bossRoom,proto3" json:"boss_room,omitempty"` // true when this room is a boss arena (REQ-AE-24)
-	PoiNpcs       []*PoiWithNpc          `protobuf:"bytes,10,rep,name=poi_npcs,json=poiNpcs,proto3" json:"poi_npcs,omitempty"`    // NPC-backed POIs with their display names
+	PoiNpcs       []*PoiWithNpc          `protobuf:"bytes,10,rep,name=poi_npcs,json=poiNpcs,proto3" json:"poi_npcs,omitempty"`    // NPC-backed POIs with display names; non-NPC POIs (equipment, map, cover) are absent. Every poi_id here appears in pois.
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -8216,7 +8216,7 @@ type InventoryView struct {
 	TotalWeight   float64                `protobuf:"fixed64,4,opt,name=total_weight,json=totalWeight,proto3" json:"total_weight,omitempty"`
 	MaxWeight     float64                `protobuf:"fixed64,5,opt,name=max_weight,json=maxWeight,proto3" json:"max_weight,omitempty"`
 	Currency      string                 `protobuf:"bytes,6,opt,name=currency,proto3" json:"currency,omitempty"`
-	TotalRounds   int32                  `protobuf:"varint,7,opt,name=total_rounds,json=totalRounds,proto3" json:"total_rounds,omitempty"`
+	TotalCrypto   int32                  `protobuf:"varint,7,opt,name=total_crypto,json=totalCrypto,proto3" json:"total_crypto,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -8293,9 +8293,9 @@ func (x *InventoryView) GetCurrency() string {
 	return ""
 }
 
-func (x *InventoryView) GetTotalRounds() int32 {
+func (x *InventoryView) GetTotalCrypto() int32 {
 	if x != nil {
-		return x.TotalRounds
+		return x.TotalCrypto
 	}
 	return 0
 }
@@ -14169,7 +14169,7 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\n" +
 	"max_weight\x18\x05 \x01(\x01R\tmaxWeight\x12\x1a\n" +
 	"\bcurrency\x18\x06 \x01(\tR\bcurrency\x12!\n" +
-	"\ftotal_rounds\x18\a \x01(\x05R\vtotalRounds\"\x91\x01\n" +
+	"\ftotal_crypto\x18\a \x01(\x05R\vtotalCrypto\"\x91\x01\n" +
 	"\x0fRoundStartEvent\x12\x14\n" +
 	"\x05round\x18\x01 \x01(\x05R\x05round\x12(\n" +
 	"\x10actions_per_turn\x18\x02 \x01(\x05R\x0eactionsPerTurn\x12\x1f\n" +

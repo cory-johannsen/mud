@@ -812,7 +812,7 @@ message InventoryView {
   double total_weight = 4;
   double max_weight = 5;
   string currency = 6;
-  int32 total_rounds = 7;
+  int32 total_crypto = 7;
 }
 
 // RoundStartEvent is broadcast to all combatants when a new round begins.
