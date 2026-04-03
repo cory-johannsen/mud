@@ -562,6 +562,8 @@ func NewGameServiceServer(
 		s.combatH.SetPushCharacterSheetFn(s.pushCharacterSheet)
 		// REQ-BUG92-1: wire pushInventory so the web UI Inventory tab updates after currency award.
 		s.combatH.SetPushInventoryFn(s.pushInventory)
+		// REQ-BUG96-1: wire saveInventory so looted items are persisted immediately.
+		s.combatH.SetSaveInventoryFn(s.saveInventory)
 	}
 	s.merchantRuntimeStates = make(map[string]*npc.MerchantRuntimeState)
 	s.bankerRuntimeStates = make(map[string]*npc.BankerRuntimeState)
@@ -5516,6 +5518,20 @@ func (s *GameServiceServer) pushCharacterSheet(sess *session.PlayerSession) {
 	if err := sess.Entity.Push(data); err != nil {
 		s.logger.Warn("pushCharacterSheet: push failed", zap.String("uid", sess.UID), zap.Error(err))
 	}
+}
+
+// saveInventory persists the player's current backpack to durable storage.
+// It is wired into CombatHandler via SetSaveInventoryFn so that post-combat
+// item loot is immediately durable after being granted.
+//
+// Precondition: sess must be non-nil and have a non-nil Backpack.
+// Postcondition: Backpack contents are persisted; errors are returned to the caller.
+func (s *GameServiceServer) saveInventory(sess *session.PlayerSession) error {
+	if sess == nil || sess.Backpack == nil {
+		return nil
+	}
+	items := backpackToInventoryItems(sess.Backpack)
+	return s.charSaver.SaveInventory(context.Background(), sess.CharacterID, items)
 }
 
 // pushInventory pushes a fresh InventoryView event to the given player session.

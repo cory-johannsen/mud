@@ -652,6 +652,46 @@
 **Steps:** Open the web client; engage and complete combat; observe the XP granted message in the console; navigate to the Stats tab and observe that the XP value has not updated.
 **Fix:** `CombatHandler.pushXPMessages` was sending XP grant text messages but never pushing a `CharacterSheetView` to the client. The `StatsDrawer` reads XP from `state.characterSheet`, which is only updated when a `CharacterSheetView` arrives. Added a `pushCharacterSheetFn func(*session.PlayerSession)` callback field to `CombatHandler` with `SetPushCharacterSheetFn`, called unconditionally at the end of `pushXPMessages`. Wired `s.pushCharacterSheet` as the callback in `grpc_service.go`.
 
+### BUG-104: Character selection screen location shows room only, not zone and room
+**Severity:** low
+**Status:** open
+**Category:** UI
+**Description:** The Location field on the character selection screen displays only the room name. It should display both the zone and the room (e.g. "Rustbucket Ridge — Grinder's Row").
+**Steps:** Log in; observe the character selection screen — the Location field shows only the room name with no zone.
+**Fix:** Include the zone display name alongside the room display name in the character selection location field.
+
+### BUG-103: Web UI has no Job tab
+**Severity:** high
+**Status:** open
+**Category:** UI
+**Description:** The web UI has no Job tab. Players have no way to view their current job, job progression, or available job advancement options from the web UI.
+**Steps:** Log in; browse all tabs in the web UI — no Job tab exists.
+**Fix:** Add a Job tab to the web UI displaying the player's current job, tier, level requirements, and available advancement options, drawing from the character sheet and job definition data.
+
+### BUG-102: Merchant stock quantity does not update in web UI after purchase
+**Severity:** medium
+**Status:** open
+**Category:** UI
+**Description:** After buying an item from a merchant in the web UI, the stock quantity displayed in the merchant screen does not decrease. The purchase is processed correctly server-side but the merchant view is not refreshed in the client.
+**Steps:** Open a merchant shop; note the stock quantity of an item; purchase the item; observe the stock quantity is unchanged in the UI.
+**Fix:** After a successful buy transaction, push an updated merchant view to the client so the stock quantity reflects the purchase without requiring the player to close and reopen the shop.
+
+### BUG-101: Equipped armor item remains visible in Inventory tab after wearing
+**Severity:** medium
+**Status:** open
+**Category:** UI
+**Description:** After clicking "Wear" on an armor item in the Inventory tab, the item correctly appears in the Equipment tab but is not removed from the Inventory tab. The item is double-displayed — once as equipped and once as still in the backpack.
+**Steps:** Purchase an armor item; open the Inventory tab; click "Wear"; observe the item appears in the Equipment tab; return to the Inventory tab — the item is still listed there.
+**Fix:** After a successful WearRequest, push an updated `InventoryView` to the client so the inventory panel removes the item, or handle the equip event in the web client to remove the item from the inventory list without a full refresh.
+
+### BUG-100: Player death outside combat does not trigger respawn at zone spawn point
+**Severity:** critical
+**Status:** open
+**Category:** Combat
+**Description:** If a player dies outside of combat (e.g. from a trap, environmental effect, or other non-combat damage source) they do not respawn at the zone spawn point. Respawn must always occur at the zone spawn point regardless of how the player died.
+**Steps:** Cause the player to die outside of combat; observe the player does not respawn and remains in a dead/stuck state.
+**Fix:** Ensure the death handler is invoked for all damage sources, not only in-combat damage. The respawn path (move player to zone spawn point, restore HP to minimum viable amount, notify player) must be called unconditionally whenever HP reaches zero.
+
 ### BUG-99: Web UI periodically sends map request during combat, producing spurious error messages
 **Severity:** medium
 **Status:** open
@@ -678,11 +718,11 @@
 
 ### BUG-96: Post-combat item loot shown in console but not added to inventory
 **Severity:** high
-**Status:** open
+**Status:** fixed
 **Category:** Combat
 **Description:** At the end of combat the console correctly reports looted items (e.g. `You looted: Scrap Metal (x4)`) but the items are not present in the player's inventory. The loot message is generated but the item grant is either not persisted or not reflected in the inventory view.
 **Steps:** Enter combat; defeat all NPCs; observe the console shows a loot message (e.g. `You looted: Scrap Metal (x4)`); open the Inventory tab — the looted items are absent.
-**Fix:** Investigate the post-combat loot grant path to determine whether items are being added to the session inventory and persisted. Ensure an updated `InventoryView` is pushed to the client immediately after the grant so the inventory panel reflects the new items without requiring a reconnect.
+**Fix:** Root cause: items were dropped to the room floor via `FloorManager` instead of being granted directly to each player's backpack. Replaced floor-drop with `distributeItemsLocked` in `CombatHandler`, which adds items to each participant's `Backpack`, persists via `saveInventoryFn` callback (wired to `charSaver.SaveInventory` in `grpc_service.go`), and calls `pushInventoryFn` to refresh the web UI. Materials still drop to the floor.
 
 ### BUG-95: Clicking motel keeper (Scrap Inn Clerk) shows examine result instead of rest modal
 **Severity:** high

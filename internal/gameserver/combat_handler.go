@@ -125,6 +125,9 @@ type CombatHandler struct {
 	// an updated InventoryView to the player so the web UI Inventory tab refreshes.
 	// May be nil; no-op when nil.
 	pushInventoryFn func(sess *session.PlayerSession)
+	// saveInventoryFn is an optional callback invoked after items are directly granted to a
+	// player's backpack to persist the new inventory state. May be nil; persistence is skipped.
+	saveInventoryFn func(sess *session.PlayerSession) error
 }
 
 // NewCombatHandler creates a CombatHandler with a round timer and broadcast function.
@@ -273,6 +276,16 @@ func (h *CombatHandler) SetPushCharacterSheetFn(fn func(sess *session.PlayerSess
 // Postcondition: fn is called once per currency award with the receiving session.
 func (h *CombatHandler) SetPushInventoryFn(fn func(sess *session.PlayerSession)) {
 	h.pushInventoryFn = fn
+}
+
+// SetSaveInventoryFn registers a callback invoked after items are directly granted to a
+// player's backpack during post-combat loot distribution. The callback should persist the
+// player's updated backpack to durable storage.
+//
+// Precondition: fn may be nil (persistence is skipped when nil).
+// Postcondition: fn is called once per player after their backpack is updated with loot.
+func (h *CombatHandler) SetSaveInventoryFn(fn func(sess *session.PlayerSession) error) {
+	h.saveInventoryFn = fn
 }
 
 // SetCurrencySaver registers the saver used to persist player currency after loot award.
@@ -3898,22 +3911,14 @@ func (h *CombatHandler) removeDeadNPCsLocked(cbt *combat.Combat) {
 			if totalCurrency > 0 {
 				h.pushCurrencyMessages(livingParticipants, totalCurrency, c.Name)
 			}
-			// Drop items on the room floor.
-			if h.floorMgr != nil {
-				for _, lootItem := range result.Items {
-					h.floorMgr.Drop(roomID, inventory.ItemInstance{
-						InstanceID: lootItem.InstanceID,
-						ItemDefID:  lootItem.ItemDefID,
-						Quantity:   lootItem.Quantity,
-					})
-				}
-				if len(result.Materials) > 0 {
-					h.floorMgr.DropMaterials(roomID, result.Materials)
-				}
-			}
-			// Notify each living participant of items dropped as loot (REQ-BUG67-1).
+			// Grant items directly to each living participant's backpack (REQ-BUG96-1).
 			if len(result.Items) > 0 {
+				h.distributeItemsLocked(livingParticipants, result.Items)
 				h.pushLootMessages(livingParticipants, result.Items)
+			}
+			// Materials still drop to the floor (not directly granted).
+			if h.floorMgr != nil && len(result.Materials) > 0 {
+				h.floorMgr.DropMaterials(roomID, result.Materials)
 			}
 		} else if inst.Currency > 0 {
 			// No loot table but NPC has rob wallet — distribute to living participants.
@@ -4178,6 +4183,45 @@ func (h *CombatHandler) pushQuestMessages(sess *session.PlayerSession, msgs []st
 // Postcondition: Each participant whose Entity is non-nil receives one MessageEvent
 // with content "You looted: <name> (xN), ..." using display names from invRegistry
 // when available, falling back to ItemDefID when the registry is nil or the item is unknown.
+// distributeItemsLocked adds each loot item directly to every living participant's
+// backpack, persists via saveInventoryFn, and pushes an InventoryView refresh.
+//
+// Precondition: livingParticipants and items must both be non-empty.
+// Postcondition: Each participant's Backpack contains the looted items; persistence
+// and UI refresh are attempted for each participant (errors are logged, not returned).
+func (h *CombatHandler) distributeItemsLocked(livingParticipants []*session.PlayerSession, items []npc.LootItem) {
+	if len(items) == 0 || len(livingParticipants) == 0 || h.invRegistry == nil {
+		return
+	}
+	for _, p := range livingParticipants {
+		if p.Backpack == nil {
+			continue
+		}
+		for _, lootItem := range items {
+			if _, err := p.Backpack.Add(lootItem.ItemDefID, lootItem.Quantity, h.invRegistry); err != nil {
+				if h.logger != nil {
+					h.logger.Warn("distributeItemsLocked: failed to add item to backpack",
+						zap.String("uid", p.UID),
+						zap.String("item", lootItem.ItemDefID),
+						zap.Error(err),
+					)
+				}
+			}
+		}
+		if h.saveInventoryFn != nil {
+			if err := h.saveInventoryFn(p); err != nil && h.logger != nil {
+				h.logger.Warn("distributeItemsLocked: save inventory failed",
+					zap.String("uid", p.UID),
+					zap.Error(err),
+				)
+			}
+		}
+		if h.pushInventoryFn != nil {
+			h.pushInventoryFn(p)
+		}
+	}
+}
+
 func (h *CombatHandler) pushLootMessages(livingParticipants []*session.PlayerSession, items []npc.LootItem) {
 	if len(items) == 0 || len(livingParticipants) == 0 {
 		return

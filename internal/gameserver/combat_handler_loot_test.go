@@ -49,6 +49,23 @@ func makeLootHandler(
 	broadcastFn func(string, []*gamev1.CombatEvent),
 ) *gameserver.CombatHandler {
 	t.Helper()
+	return makeLootHandlerWithRegistry(t, npcMgr, sessMgr, respawnMgr, floorMgr, broadcastFn, nil)
+}
+
+// makeLootHandlerWithRegistry constructs a CombatHandler with an explicit invRegistry.
+//
+// Precondition: npcMgr and sessMgr must be non-nil.
+// Postcondition: Returns a non-nil CombatHandler.
+func makeLootHandlerWithRegistry(
+	t *testing.T,
+	npcMgr *npc.Manager,
+	sessMgr *session.Manager,
+	respawnMgr *npc.RespawnManager,
+	floorMgr *inventory.FloorManager,
+	broadcastFn func(string, []*gamev1.CombatEvent),
+	invRegistry *inventory.Registry,
+) *gameserver.CombatHandler {
+	t.Helper()
 	logger := zap.NewNop()
 	src := dice.NewCryptoSource()
 	roller := dice.NewLoggedRoller(src, logger)
@@ -57,7 +74,7 @@ func makeLootHandler(
 		engine, npcMgr, sessMgr, roller, broadcastFn,
 		lootTestRoundDuration,
 		makeRespawnTestConditionRegistry(),
-		nil, nil, nil, nil,
+		nil, nil, invRegistry, nil,
 		respawnMgr,
 		floorMgr,
 		nil, // mentalStateMgr
@@ -66,9 +83,9 @@ func makeLootHandler(
 
 // TestCombatHandler_LootGeneration_CurrencyAndItems verifies that when an NPC
 // with a guaranteed loot table dies in combat, currency is awarded to the
-// surviving player and items are dropped on the room floor.
+// surviving player and items are granted directly to the player's backpack.
 //
-// Postcondition: Player currency increases by the loot table amount; floor
+// Postcondition: Player currency increases by the loot table amount; backpack
 // contains the expected item; NPC instance is removed from npcMgr.
 func TestCombatHandler_LootGeneration_CurrencyAndItems(t *testing.T) {
 	npcMgr := npc.NewManager()
@@ -77,6 +94,12 @@ func TestCombatHandler_LootGeneration_CurrencyAndItems(t *testing.T) {
 
 	const roomID = "room-loot-1"
 	const templateID = "loot-ganger"
+
+	reg := inventory.NewRegistry()
+	require.NoError(t, reg.RegisterItem(&inventory.ItemDef{
+		ID: "junk-scrap", Name: "Junk Scrap", Kind: inventory.KindJunk,
+		MaxStack: 10, Stackable: true,
+	}))
 
 	tmpl := &npc.Template{
 		ID:           templateID,
@@ -101,7 +124,7 @@ func TestCombatHandler_LootGeneration_CurrencyAndItems(t *testing.T) {
 	respawnMgr := npc.NewRespawnManager(spawns, templates, nil, nil)
 
 	broadcastFn, getEvents := makeBroadcastCapture()
-	h := makeLootHandler(t, npcMgr, sessMgr, respawnMgr, floorMgr, broadcastFn)
+	h := makeLootHandlerWithRegistry(t, npcMgr, sessMgr, respawnMgr, floorMgr, broadcastFn, reg)
 
 	inst, err := npcMgr.Spawn(tmpl, roomID)
 	require.NoError(t, err)
@@ -124,12 +147,14 @@ func TestCombatHandler_LootGeneration_CurrencyAndItems(t *testing.T) {
 	// Player must have received currency.
 	assert.Equal(t, initialCurrency+100, sess.Currency, "expected player to receive 100 currency from loot")
 
-	// Floor must have the dropped item.
-	items := floorMgr.ItemsInRoom(roomID)
-	require.Len(t, items, 1, "expected exactly one item on the floor")
-	assert.Equal(t, "junk-scrap", items[0].ItemDefID)
-	assert.Equal(t, 1, items[0].Quantity)
-	assert.NotEmpty(t, items[0].InstanceID, "expected item to have a non-empty InstanceID")
+	// Items must be granted directly to the player's backpack (REQ-BUG96-1).
+	backpackItems := sess.Backpack.FindByItemDefID("junk-scrap")
+	require.Len(t, backpackItems, 1, "expected exactly one junk-scrap stack in backpack")
+	assert.Equal(t, 1, backpackItems[0].Quantity)
+
+	// Floor must be empty — items are no longer dropped to the floor.
+	floorItems := floorMgr.ItemsInRoom(roomID)
+	assert.Empty(t, floorItems, "expected no items on the floor after direct grant")
 }
 
 // TestCombatHandler_LootGeneration_NilFloorMgr_NoPanic verifies that loot
