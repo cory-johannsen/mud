@@ -1490,7 +1490,7 @@ func (h *CombatHandler) startPursuitCombatLocked(playerSess *session.PlayerSessi
 	const dexMod = 1
 	var playerAC int
 	if h.invRegistry != nil {
-		defStats := playerSess.Equipment.ComputedDefensesWithSetBonuses(h.invRegistry, dexMod, playerSess.SetBonusSummary) // REQ-EM-35
+		defStats := playerSess.Equipment.ComputedDefensesWithProficienciesAndSetBonuses(h.invRegistry, dexMod, playerSess.Proficiencies, playerSess.Level, playerSess.SetBonusSummary) // REQ-EM-35
 		playerAC = 10 + defStats.ACBonus + defStats.EffectiveDex
 	} else {
 		playerAC = 10 + dexMod
@@ -2539,7 +2539,7 @@ func buildPlayerCombatant(sess *session.PlayerSession, h *CombatHandler) *combat
 	const dexMod = 1
 	var playerAC int
 	if h.invRegistry != nil {
-		defStats := sess.Equipment.ComputedDefensesWithSetBonuses(h.invRegistry, dexMod, sess.SetBonusSummary) // REQ-EM-35
+		defStats := sess.Equipment.ComputedDefensesWithProficienciesAndSetBonuses(h.invRegistry, dexMod, sess.Proficiencies, sess.Level, sess.SetBonusSummary) // REQ-EM-35
 		playerAC = 10 + defStats.ACBonus + defStats.EffectiveDex
 	} else {
 		playerAC = 10 + dexMod

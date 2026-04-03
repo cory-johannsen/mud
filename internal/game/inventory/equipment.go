@@ -202,3 +202,100 @@ func (e *Equipment) ComputedDefensesWithSetBonuses(reg *Registry, dexMod int, sb
 	stats.ACBonus += sb.ACBonus
 	return stats
 }
+
+// armorProfBonus returns the PF2E proficiency bonus for the given rank at the given level.
+func armorProfBonus(level int, rank string) int {
+	switch rank {
+	case "trained":
+		return level + 2
+	case "expert":
+		return level + 4
+	case "master":
+		return level + 6
+	case "legendary":
+		return level + 8
+	}
+	return 0
+}
+
+// ComputedDefensesWithProficiencies aggregates defense stats, applying armor proficiency rules:
+// - For armor in a category the player is trained in: add proficiency bonus to ACBonus; skip check/speed penalties.
+// - For armor in an untrained category: apply check/speed penalties; no proficiency bonus.
+//
+// Precondition: reg must be non-nil; profs may be nil (treated as all untrained).
+// Postcondition: ACBonus includes per-slot proficiency bonus for trained categories.
+func (e *Equipment) ComputedDefensesWithProficiencies(reg *Registry, dexMod int, profs map[string]string, level int) DefenseStats {
+	stats := DefenseStats{
+		EffectiveDex: dexMod,
+		Resistances:  make(map[string]int),
+		Weaknesses:   make(map[string]int),
+	}
+	hasDexCap := false
+	for _, slotted := range e.Armor {
+		if slotted == nil {
+			continue
+		}
+		if slotted.InstanceID != "" && slotted.Durability == 0 {
+			continue
+		}
+		def, ok := reg.Armor(slotted.ItemDefID)
+		if !ok {
+			continue
+		}
+		slotAC := def.ACBonus
+		switch slotted.Modifier {
+		case "tuned":
+			slotAC++
+		case "defective":
+			slotAC--
+		case "cursed":
+			slotAC -= 2
+		}
+		stats.ACBonus += slotAC
+
+		// Apply proficiency-based rules.
+		rank := ""
+		if profs != nil {
+			rank = profs[def.ProficiencyCategory]
+		}
+		if rank != "" {
+			// Trained: proficiency bonus, no penalties.
+			stats.ACBonus += armorProfBonus(level, rank)
+		} else {
+			// Untrained: apply check and speed penalties.
+			stats.CheckPenalty += def.CheckPenalty
+			stats.SpeedPenalty += def.SpeedPenalty
+		}
+
+		if def.StrengthReq > stats.StrengthReq {
+			stats.StrengthReq = def.StrengthReq
+		}
+		if !hasDexCap || def.DexCap < stats.EffectiveDex {
+			stats.EffectiveDex = def.DexCap
+			hasDexCap = true
+		}
+		for dmgType, val := range def.Resistances {
+			if val > stats.Resistances[dmgType] {
+				stats.Resistances[dmgType] = val
+			}
+		}
+		for dmgType, val := range def.Weaknesses {
+			stats.Weaknesses[dmgType] += val
+		}
+	}
+	if stats.EffectiveDex > dexMod {
+		stats.EffectiveDex = dexMod
+	}
+	return stats
+}
+
+// ComputedDefensesWithProficienciesAndSetBonuses computes proficiency-aware defense stats
+// and applies the active set bonus ACBonus on top (REQ-EM-35).
+//
+// Precondition: reg must be non-nil; profs may be nil (treated as all untrained).
+// Postcondition: ACBonus includes per-slot proficiency bonus for trained categories and sb.ACBonus.
+func (e *Equipment) ComputedDefensesWithProficienciesAndSetBonuses(reg *Registry, dexMod int, profs map[string]string, level int, sb SetBonusSummary) DefenseStats {
+	stats := e.ComputedDefensesWithProficiencies(reg, dexMod, profs, level)
+	stats.ACBonus += sb.ACBonus
+	return stats
+}

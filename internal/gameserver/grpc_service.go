@@ -1028,7 +1028,7 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 		{
 			loginDexMod := (sess.Abilities.Quickness - 10) / 2
 			session.RecomputeSetBonuses(sess, s.setRegistry)
-			loginDef := sess.Equipment.ComputedDefensesWithSetBonuses(s.invRegistry, loginDexMod, sess.SetBonusSummary)
+			loginDef := sess.Equipment.ComputedDefensesWithProficienciesAndSetBonuses(s.invRegistry, loginDexMod, sess.Proficiencies, sess.Level, sess.SetBonusSummary)
 			sess.Resistances = loginDef.Resistances
 			sess.Weaknesses = loginDef.Weaknesses
 		}
@@ -5696,7 +5696,7 @@ func (s *GameServiceServer) handleChar(uid string) (*gamev1.ServerEvent, error) 
 
 	// Defense stats (dex mod from Quickness). REQ-EM-35: apply set bonuses.
 	dexMod := (sess.Abilities.Quickness - 10) / 2
-	def := sess.Equipment.ComputedDefensesWithSetBonuses(s.invRegistry, dexMod, sess.SetBonusSummary)
+	def := sess.Equipment.ComputedDefensesWithProficienciesAndSetBonuses(s.invRegistry, dexMod, sess.Proficiencies, sess.Level, sess.SetBonusSummary)
 	view.AcBonus = int32(def.ACBonus)
 	view.CheckPenalty = int32(def.CheckPenalty)
 	view.SpeedPenalty = int32(def.SpeedPenalty)
