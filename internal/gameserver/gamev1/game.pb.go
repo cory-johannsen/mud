@@ -4340,8 +4340,10 @@ type ShopItem struct {
 	ArmorCheckPenalty int32  `protobuf:"varint,14,opt,name=armor_check_penalty,json=armorCheckPenalty,proto3" json:"armor_check_penalty,omitempty"`
 	ArmorSpeedPenalty int32  `protobuf:"varint,15,opt,name=armor_speed_penalty,json=armorSpeedPenalty,proto3" json:"armor_speed_penalty,omitempty"`
 	ArmorProfCategory string `protobuf:"bytes,16,opt,name=armor_prof_category,json=armorProfCategory,proto3" json:"armor_prof_category,omitempty"`
-	unknownFields     protoimpl.UnknownFields
-	sizeCache         protoimpl.SizeCache
+	// Consumable stats (populated when kind == "consumable").
+	EffectsSummary string `protobuf:"bytes,17,opt,name=effects_summary,json=effectsSummary,proto3" json:"effects_summary,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
 }
 
 func (x *ShopItem) Reset() {
@@ -4482,6 +4484,13 @@ func (x *ShopItem) GetArmorSpeedPenalty() int32 {
 func (x *ShopItem) GetArmorProfCategory() string {
 	if x != nil {
 		return x.ArmorProfCategory
+	}
+	return ""
+}
+
+func (x *ShopItem) GetEffectsSummary() string {
+	if x != nil {
+		return x.EffectsSummary
 	}
 	return ""
 }
@@ -8170,8 +8179,10 @@ type InventoryItem struct {
 	ItemDefId     string                 `protobuf:"bytes,6,opt,name=item_def_id,json=itemDefId,proto3" json:"item_def_id,omitempty"`           // ItemDef ID used by equip/wear commands
 	ArmorSlot     string                 `protobuf:"bytes,7,opt,name=armor_slot,json=armorSlot,proto3" json:"armor_slot,omitempty"`             // ArmorDef.Slot (head/torso/etc.) when kind == "armor"
 	ArmorCategory string                 `protobuf:"bytes,8,opt,name=armor_category,json=armorCategory,proto3" json:"armor_category,omitempty"` // "light", "medium", or "heavy" when kind == "armor"
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	// Consumable stats (populated when kind == "consumable").
+	EffectsSummary string `protobuf:"bytes,9,opt,name=effects_summary,json=effectsSummary,proto3" json:"effects_summary,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
 }
 
 func (x *InventoryItem) Reset() {
@@ -8256,6 +8267,13 @@ func (x *InventoryItem) GetArmorSlot() string {
 func (x *InventoryItem) GetArmorCategory() string {
 	if x != nil {
 		return x.ArmorCategory
+	}
+	return ""
+}
+
+func (x *InventoryItem) GetEffectsSummary() string {
+	if x != nil {
+		return x.EffectsSummary
 	}
 	return ""
 }
@@ -13911,7 +13929,7 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\ftrainer_view\x18\x1f \x01(\v2\x14.game.v1.TrainerViewH\x00R\vtrainerView\x121\n" +
 	"\aweather\x18  \x01(\v2\x15.game.v1.WeatherEventH\x00R\aweather\x129\n" +
 	"\floadout_view\x18! \x01(\v2\x14.game.v1.LoadoutViewH\x00R\vloadoutViewB\t\n" +
-	"\apayload\"\xaf\x04\n" +
+	"\apayload\"\xd8\x04\n" +
 	"\bShopItem\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x17\n" +
 	"\aitem_id\x18\x02 \x01(\tR\x06itemId\x12\x1b\n" +
@@ -13931,7 +13949,8 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"armor_slot\x18\r \x01(\tR\tarmorSlot\x12.\n" +
 	"\x13armor_check_penalty\x18\x0e \x01(\x05R\x11armorCheckPenalty\x12.\n" +
 	"\x13armor_speed_penalty\x18\x0f \x01(\x05R\x11armorSpeedPenalty\x12.\n" +
-	"\x13armor_prof_category\x18\x10 \x01(\tR\x11armorProfCategory\"N\n" +
+	"\x13armor_prof_category\x18\x10 \x01(\tR\x11armorProfCategory\x12'\n" +
+	"\x0feffects_summary\x18\x11 \x01(\tR\x0eeffectsSummary\"N\n" +
 	"\bShopView\x12\x19\n" +
 	"\bnpc_name\x18\x01 \x01(\tR\anpcName\x12'\n" +
 	"\x05items\x18\x02 \x03(\v2\x11.game.v1.ShopItemR\x05items\"\x92\x01\n" +
@@ -14203,7 +14222,7 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\tmax_count\x18\x03 \x01(\x05R\bmaxCount\x12\x18\n" +
 	"\arespawn\x18\x04 \x01(\tR\arespawn\x12\x1c\n" +
 	"\timmovable\x18\x05 \x01(\bR\timmovable\x12\x16\n" +
-	"\x06script\x18\x06 \x01(\tR\x06script\"\xf2\x01\n" +
+	"\x06script\x18\x06 \x01(\tR\x06script\"\x9b\x02\n" +
 	"\rInventoryItem\x12\x1f\n" +
 	"\vinstance_id\x18\x01 \x01(\tR\n" +
 	"instanceId\x12\x12\n" +
@@ -14214,7 +14233,8 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\vitem_def_id\x18\x06 \x01(\tR\titemDefId\x12\x1d\n" +
 	"\n" +
 	"armor_slot\x18\a \x01(\tR\tarmorSlot\x12%\n" +
-	"\x0earmor_category\x18\b \x01(\tR\rarmorCategory\"\xfa\x01\n" +
+	"\x0earmor_category\x18\b \x01(\tR\rarmorCategory\x12'\n" +
+	"\x0feffects_summary\x18\t \x01(\tR\x0eeffectsSummary\"\xfa\x01\n" +
 	"\rInventoryView\x12,\n" +
 	"\x05items\x18\x01 \x03(\v2\x16.game.v1.InventoryItemR\x05items\x12\x1d\n" +
 	"\n" +

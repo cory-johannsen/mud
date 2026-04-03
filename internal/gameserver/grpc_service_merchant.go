@@ -12,6 +12,7 @@ import (
 	"go.uber.org/zap"
 	"google.golang.org/protobuf/proto"
 
+	"github.com/cory-johannsen/mud/internal/game/inventory"
 	"github.com/cory-johannsen/mud/internal/game/npc"
 	"github.com/cory-johannsen/mud/internal/game/session"
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
@@ -144,6 +145,9 @@ func (s *GameServiceServer) handleBrowse(uid string, req *gamev1.BrowseRequest) 
 						shopItem.ArmorSpeedPenalty = int32(arm.SpeedPenalty)
 						shopItem.ArmorProfCategory = arm.ProficiencyCategory
 					}
+				}
+				if def.Kind == inventory.KindConsumable {
+					shopItem.EffectsSummary = buildConsumableEffectsSummary(def)
 				}
 			}
 		}

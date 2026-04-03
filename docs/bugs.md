@@ -652,6 +652,30 @@
 **Steps:** Open the web client; engage and complete combat; observe the XP granted message in the console; navigate to the Stats tab and observe that the XP value has not updated.
 **Fix:** `CombatHandler.pushXPMessages` was sending XP grant text messages but never pushing a `CharacterSheetView` to the client. The `StatsDrawer` reads XP from `state.characterSheet`, which is only updated when a `CharacterSheetView` arrives. Added a `pushCharacterSheetFn func(*session.PlayerSession)` callback field to `CombatHandler` with `SetPushCharacterSheetFn`, called unconditionally at the end of `pushXPMessages`. Wired `s.pushCharacterSheet` as the callback in `grpc_service.go`.
 
+### BUG-99: Web UI periodically sends map request during combat, producing spurious error messages
+**Severity:** medium
+**Status:** open
+**Category:** UI
+**Description:** During combat the console periodically displays `You cannot use the map while in combat` even though the player is not interacting with the map. The web client is automatically issuing map requests in the background (likely a polling or auto-refresh mechanism) that are rejected by the server during combat.
+**Steps:** Enter combat; do not interact with the map; observe the console — `You cannot use the map while in combat` appears periodically without player input.
+**Fix:** Identify the background map polling or auto-refresh call in the web client and suppress it when the client is in combat state.
+
+### BUG-98: Clicking quest giver NPC shows examine modal instead of quest selection
+**Severity:** high
+**Status:** open
+**Category:** UI
+**Description:** Clicking a quest giver NPC in the web UI opens the generic examine modal instead of a quest interaction modal. The player should be shown a list of available quests to accept, or a message indicating no quests are currently available.
+**Steps:** Navigate to a room with a quest giver NPC; click the NPC; observe the generic examine description is shown instead of a quest modal.
+**Fix:** Wire the quest giver NPC click handler to open a quest interaction modal that lists available quests with accept controls, or displays a "no quests available" message, rather than falling through to the generic examine display.
+
+### BUG-97: Rest technology preparation prompts appear as console text with no interactive modal
+**Severity:** high
+**Status:** open
+**Category:** UI
+**Description:** When resting, technology slot preparation prompts (e.g. "Level 1, slot 1: choose from pool") are printed as plain console messages with no way for the player to act on them. The player must be presented with a modal allowing them to select technologies for each slot before the rest completes.
+**Steps:** Visit a motel keeper; pay to rest; observe the console — preparation slot prompts appear as text only (e.g. `Level 1, slot 1: choose from pool`, `Level 1, slot 2: choose from pool`) with no modal or interactive control to make selections.
+**Fix:** Detect the technology preparation prompt in the web client's event stream and display a modal for each slot choice, analogous to the `FeatureChoiceModal` used for reaction prompts, so the player can select technologies before the rest finalises.
+
 ### BUG-96: Post-combat item loot shown in console but not added to inventory
 **Severity:** high
 **Status:** open
@@ -670,19 +694,19 @@
 
 ### BUG-94: Consumable merchant inventory shows item IDs instead of display names; no hover description
 **Severity:** medium
-**Status:** open
+**Status:** fixed
 **Category:** UI
 **Description:** The consumable merchant shop displays raw item IDs instead of human-readable display names. Additionally, hovering over an item shows no tooltip with the item's description and effects.
 **Steps:** Visit a consumable merchant; open the shop; observe item IDs listed instead of names; hover over an item and observe no description or effects tooltip.
-**Fix:** Look up each item's definition by ID and render its display name in the shop list. Add a hover tooltip showing the item's description and effects, consistent with other merchant types.
+**Fix:** Added `effects_summary` field to `ShopItem` proto (field 17). In `handleBrowse`, when `def.Kind == consumable`, populate `EffectsSummary` via the new `buildConsumableEffectsSummary` helper. Added `else if (kind === 'consumable')` block to `ItemTooltip` in `NpcModal.tsx` that renders the effects summary. The display name was already being populated correctly from `def.Name`; the investigation confirmed the root cause was the tooltip lacking a consumable branch.
 
 ### BUG-93: Hovering Consume button on consumable item shows no effect description tooltip
 **Severity:** low
-**Status:** open
+**Status:** fixed
 **Category:** UI
 **Description:** In the Inventory panel, hovering over the Consume button on a consumable item shows no tooltip. A popup describing the item's effects should appear on hover so the player knows what they are about to consume before clicking.
 **Steps:** Open the Inventory tab; hover over the Consume button on a consumable item; observe no tooltip or popup appears.
-**Fix:** Add a hover tooltip to the Consume button that renders the consumable item's description and effects, consistent with the hover behaviour on other item controls.
+**Fix:** Added `effects_summary` field to `InventoryItem` proto (field 9). In `handleInventory`, populate `EffectsSummary` for consumable items via `buildConsumableEffectsSummary`. Added `title` attribute to the Consume button in `InventoryDrawer.tsx` using the effects summary, falling back to "Consume {name}".
 
 ### BUG-92: Post-combat loot grant not notified and inventory not refreshed in web UI
 **Severity:** high

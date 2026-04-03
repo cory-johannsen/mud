@@ -31,6 +31,7 @@ function ConsumableRow({
           disabled={qty <= 0}
           onClick={handleConsume}
           type="button"
+          title={item.effectsSummary ?? item.effects_summary ?? `Consume ${item.name}`}
         >
           Consume
         </button>

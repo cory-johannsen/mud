@@ -258,6 +258,8 @@ export interface InventoryItem {
   armor_slot?: string
   armorCategory?: string
   armor_category?: string
+  effectsSummary?: string
+  effects_summary?: string
 }
 
 export interface InventoryView {
@@ -387,6 +389,9 @@ export interface ShopItem {
   armor_speed_penalty?: number
   armorProfCategory?: string
   armor_prof_category?: string
+  // Consumable stats (when kind == "consumable")
+  effectsSummary?: string
+  effects_summary?: string
 }
 
 export interface ShopView {

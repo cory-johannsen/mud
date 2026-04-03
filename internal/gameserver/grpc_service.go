@@ -4592,6 +4592,32 @@ func backpackToInventoryItems(bp *inventory.Backpack) []inventory.InventoryItem 
 // Postcondition: Returns a non-nil ServerEvent.
 // armorProfCategoryLabel converts an ArmorDef.ProficiencyCategory value like
 // "light_armor" into a short display label ("light", "medium", "heavy").
+// buildConsumableEffectsSummary returns a human-readable one-liner describing
+// the effects of a consumable ItemDef, used to populate tooltip text in the
+// shop and inventory UIs. Falls back to the item description if no structured
+// effects are configured.
+func buildConsumableEffectsSummary(def *inventory.ItemDef) string {
+	if def == nil {
+		return ""
+	}
+	var parts []string
+	if def.Effect != nil {
+		if def.Effect.Heal != "" {
+			parts = append(parts, "Heal: "+def.Effect.Heal)
+		}
+		for _, c := range def.Effect.Conditions {
+			parts = append(parts, "Applies "+c.ConditionID+" ("+c.Duration+")")
+		}
+		for _, r := range def.Effect.RemoveConditions {
+			parts = append(parts, "Removes: "+r)
+		}
+	}
+	if len(parts) > 0 {
+		return strings.Join(parts, "; ")
+	}
+	return def.Description
+}
+
 func armorProfCategoryLabel(category string) string {
 	switch category {
 	case "light_armor":
@@ -5305,6 +5331,7 @@ func (s *GameServiceServer) handleInventory(uid string) (*gamev1.ServerEvent, er
 		weight := 0.0
 		armorSlot := ""
 		armorCategory := ""
+		effectsSummary := ""
 		if s.invRegistry != nil {
 			if def, ok := s.invRegistry.Item(inst.ItemDefID); ok {
 				name = def.Name
@@ -5316,17 +5343,21 @@ func (s *GameServiceServer) handleInventory(uid string) (*gamev1.ServerEvent, er
 						armorCategory = armorProfCategoryLabel(string(armorDef.ProficiencyCategory))
 					}
 				}
+				if def.Kind == inventory.KindConsumable {
+					effectsSummary = buildConsumableEffectsSummary(def)
+				}
 			}
 		}
 		items = append(items, &gamev1.InventoryItem{
-			InstanceId:    inst.InstanceID,
-			Name:          name,
-			Kind:          kind,
-			Quantity:      int32(inst.Quantity),
-			Weight:        weight * float64(inst.Quantity),
-			ItemDefId:     inst.ItemDefID,
-			ArmorSlot:     armorSlot,
-			ArmorCategory: armorCategory,
+			InstanceId:     inst.InstanceID,
+			Name:           name,
+			Kind:           kind,
+			Quantity:       int32(inst.Quantity),
+			Weight:         weight * float64(inst.Quantity),
+			ItemDefId:      inst.ItemDefID,
+			ArmorSlot:      armorSlot,
+			ArmorCategory:  armorCategory,
+			EffectsSummary: effectsSummary,
 		})
 	}
 	var totalWeight float64

@@ -354,6 +354,8 @@ message ShopItem {
   int32  armor_check_penalty   = 14;
   int32  armor_speed_penalty   = 15;
   string armor_prof_category   = 16;
+  // Consumable stats (populated when kind == "consumable").
+  string effects_summary       = 17;
 }
 
 // ShopView delivers structured merchant inventory in response to BrowseRequest.
@@ -806,6 +808,8 @@ message InventoryItem {
   string item_def_id = 6;  // ItemDef ID used by equip/wear commands
   string armor_slot     = 7;   // ArmorDef.Slot (head/torso/etc.) when kind == "armor"
   string armor_category = 8;   // "light", "medium", or "heavy" when kind == "armor"
+  // Consumable stats (populated when kind == "consumable").
+  string effects_summary = 9;
 }
 
 // InventoryView shows the player's backpack and currency.

@@ -29,6 +29,9 @@ function ItemTooltip({ item, pos }: { item: ShopItem; pos: { x: number; y: numbe
     if (chk !== 0) lines.push({ label: 'Check Penalty', value: `${chk}` })
     if (spd !== 0) lines.push({ label: 'Speed Penalty', value: `${spd} ft` })
     if (prof) lines.push({ label: 'Proficiency', value: prof.replace(/_/g, ' ') })
+  } else if (kind === 'consumable') {
+    const effects = item.effectsSummary ?? item.effects_summary ?? ''
+    if (effects) lines.push({ label: 'Effects', value: effects })
   }
 
   return ReactDOM.createPortal(
