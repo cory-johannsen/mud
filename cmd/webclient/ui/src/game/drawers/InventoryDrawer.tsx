@@ -21,7 +21,7 @@ function ConsumableRow({
 
   return (
     <tr>
-      <td>{item.name}</td>
+      <td title={item.effectsSummary ?? item.effects_summary ?? undefined}>{item.name}</td>
       <td>{item.kind}</td>
       <td>{qty}</td>
       <td>{(item.weight ?? 0).toFixed(1)}</td>
