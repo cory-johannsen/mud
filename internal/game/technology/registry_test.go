@@ -264,6 +264,105 @@ effects:
 	assert.Contains(t, err.Error(), "tech_alpha")
 }
 
+// REQ-TSN-11b (property): Load() always errors on duplicate short names across any two technologies.
+func TestProperty_Load_DuplicateShortName_AlwaysErrors(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		sn := rapid.StringMatching(`[a-z][a-z0-9_]{1,30}[a-z0-9]`).Draw(rt, "shortName")
+		id1 := rapid.StringMatching(`[a-z][a-z0-9]{3,10}`).Draw(rt, "id1")
+		id2 := rapid.StringMatching(`[a-z][a-z0-9]{3,10}`).Draw(rt, "id2")
+		if id1 == id2 {
+			rt.Skip() // IDs must be distinct
+		}
+		if id1 == sn || id2 == sn {
+			rt.Skip() // IDs must not equal the short name (REQ-TSN-2c via Validate)
+		}
+		dir := t.TempDir()
+		writeTechYAML(t, dir, "tech1.yaml", fmt.Sprintf(`id: %s
+name: Tech One
+tradition: technical
+level: 1
+usage_type: hardwired
+action_cost: 1
+range: self
+targets: single
+duration: instant
+resolution: none
+short_name: %s
+effects:
+  on_apply:
+    - type: utility
+      utility_type: unlock
+`, id1, sn))
+		writeTechYAML(t, dir, "tech2.yaml", fmt.Sprintf(`id: %s
+name: Tech Two
+tradition: neural
+level: 1
+usage_type: hardwired
+action_cost: 1
+range: self
+targets: single
+duration: instant
+resolution: none
+short_name: %s
+effects:
+  on_apply:
+    - type: utility
+      utility_type: unlock
+`, id2, sn))
+		_, err := technology.Load(dir)
+		require.Error(rt, err, "Load() must error on duplicate short_name %q", sn)
+		assert.Contains(rt, err.Error(), sn, "error must contain the duplicate short_name")
+	})
+}
+
+// REQ-TSN-11c (property): Load() always errors when a short_name equals another technology's id.
+func TestProperty_Load_ShortNameCollidesWithID_AlwaysErrors(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		id1 := rapid.StringMatching(`[a-z][a-z0-9]{3,10}`).Draw(rt, "id1")
+		id2 := rapid.StringMatching(`[a-z][a-z0-9]{3,10}`).Draw(rt, "id2")
+		if id1 == id2 {
+			rt.Skip() // IDs must be distinct
+		}
+		// id2 will be used as short_name for the first tech
+		// This must collide with id2's own ID
+		dir := t.TempDir()
+		writeTechYAML(t, dir, "tech1.yaml", fmt.Sprintf(`id: %s
+name: Tech One
+tradition: technical
+level: 1
+usage_type: hardwired
+action_cost: 1
+range: self
+targets: single
+duration: instant
+resolution: none
+short_name: %s
+effects:
+  on_apply:
+    - type: utility
+      utility_type: unlock
+`, id1, id2))
+		writeTechYAML(t, dir, "tech2.yaml", fmt.Sprintf(`id: %s
+name: Tech Two
+tradition: neural
+level: 1
+usage_type: hardwired
+action_cost: 1
+range: self
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+    - type: utility
+      utility_type: unlock
+`, id2))
+		_, err := technology.Load(dir)
+		require.Error(rt, err, "Load() must error when short_name %q equals tech id %q", id2, id2)
+		assert.Contains(rt, err.Error(), id2, "error must mention the colliding id")
+	})
+}
+
 // REQ-TSN-11a (property): GetByShortName returns the correct def for any loaded short name.
 func TestProperty_Registry_GetByShortName_RoundTrip(t *testing.T) {
 	rapid.Check(t, func(rt *rapid.T) {
