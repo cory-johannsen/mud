@@ -7,3 +7,45 @@ hit_points_per_level: 10
 ability_boosts:
   fixed: [brutality, grit]
   free: 2
+
+level_up_feat_grants:
+  2:
+    choices:
+      pool: [reactive_block, overpower, snap_shot, adrenaline_surge, raging_threat, cover_fire, dual_draw, combat_read, hit_the_dirt]
+      count: 1
+  4:
+    choices:
+      pool: [reactive_block, overpower, snap_shot, adrenaline_surge, raging_threat, cover_fire, dual_draw, combat_read, hit_the_dirt]
+      count: 1
+  6:
+    choices:
+      pool: [reactive_block, overpower, snap_shot, adrenaline_surge, raging_threat, cover_fire, dual_draw, combat_read, hit_the_dirt]
+      count: 1
+  8:
+    choices:
+      pool: [reactive_block, overpower, snap_shot, adrenaline_surge, raging_threat, cover_fire, dual_draw, combat_read, hit_the_dirt]
+      count: 1
+  10:
+    choices:
+      pool: [reactive_block, overpower, snap_shot, adrenaline_surge, raging_threat, cover_fire, dual_draw, combat_read, hit_the_dirt]
+      count: 1
+  12:
+    choices:
+      pool: [reactive_block, overpower, snap_shot, adrenaline_surge, raging_threat, cover_fire, dual_draw, combat_read, hit_the_dirt]
+      count: 1
+  14:
+    choices:
+      pool: [reactive_block, overpower, snap_shot, adrenaline_surge, raging_threat, cover_fire, dual_draw, combat_read, hit_the_dirt]
+      count: 1
+  16:
+    choices:
+      pool: [reactive_block, overpower, snap_shot, adrenaline_surge, raging_threat, cover_fire, dual_draw, combat_read, hit_the_dirt]
+      count: 1
+  18:
+    choices:
+      pool: [reactive_block, overpower, snap_shot, adrenaline_surge, raging_threat, cover_fire, dual_draw, combat_read, hit_the_dirt]
+      count: 1
+  20:
+    choices:
+      pool: [reactive_block, overpower, snap_shot, adrenaline_surge, raging_threat, cover_fire, dual_draw, combat_read, hit_the_dirt]
+      count: 1
