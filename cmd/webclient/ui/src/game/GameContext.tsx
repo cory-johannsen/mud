@@ -359,6 +359,9 @@ export function GameProvider({ children }: { children: ReactNode }) {
           const tMaxHp = ce.targetMaxHp ?? ce.target_max_hp
           if (ce.target && tHp !== undefined && tMaxHp !== undefined && tMaxHp > 0) {
             dispatch({ type: 'UPDATE_COMBATANT_HP', name: ce.target, current: tHp, max: tMaxHp })
+            if (state.characterInfo?.name === ce.target) {
+              dispatch({ type: 'UPDATE_PLAYER_HP', current: tHp, max: tMaxHp })
+            }
           }
           const text = ce.narrative
             ? ce.narrative
