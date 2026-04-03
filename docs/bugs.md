@@ -702,11 +702,11 @@
 
 ### BUG-98: Clicking quest giver NPC shows examine modal instead of quest selection
 **Severity:** high
-**Status:** open
+**Status:** fixed
 **Category:** UI
 **Description:** Clicking a quest giver NPC in the web UI opens the generic examine modal instead of a quest interaction modal. The player should be shown a list of available quests to accept, or a message indicating no quests are currently available.
 **Steps:** Navigate to a room with a quest giver NPC; click the NPC; observe the generic examine description is shown instead of a quest modal.
-**Fix:** Wire the quest giver NPC click handler to open a quest interaction modal that lists available quests with accept controls, or displays a "no quests available" message, rather than falling through to the generic examine display.
+**Fix:** Root cause: RoomPanel.tsx only had special-case routing for merchant NPCs; all others fell through to ExamineRequest. Added `quest_giver` case that sends `TalkRequest` with the NPC name. The server's existing handleTalk returns quest list and accept instructions as a console message instead of opening an examine modal.
 
 ### BUG-97: Rest technology preparation prompts appear as console text with no interactive modal
 **Severity:** high
@@ -726,11 +726,11 @@
 
 ### BUG-95: Clicking motel keeper (Scrap Inn Clerk) shows examine result instead of rest modal
 **Severity:** high
-**Status:** open
+**Status:** fixed
 **Category:** UI
 **Description:** Clicking the motel keeper NPC in the web UI opens a panel showing the examine/description output instead of a rest interaction modal. The player should be presented with a modal to purchase a rest (showing cost and available options) when clicking a motel keeper.
 **Steps:** Navigate to a room with a motel keeper; click the NPC; observe the examine description is displayed instead of a rest modal.
-**Fix:** Wire the motel keeper NPC click handler to open a rest interaction modal (equivalent to the `rest` command flow), rather than falling through to the generic examine display.
+**Fix:** Root cause: RoomPanel.tsx only had special-case routing for merchant NPCs; all others fell through to ExamineRequest. Added `motel_keeper` case that sends `RestRequest`. The server's existing handleRest processes the rest flow and returns console messages, preventing the examine modal from opening.
 
 ### BUG-94: Consumable merchant inventory shows item IDs instead of display names; no hover description
 **Severity:** medium
