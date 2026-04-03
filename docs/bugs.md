@@ -686,11 +686,11 @@
 
 ### BUG-100: Player death outside combat does not trigger respawn at zone spawn point
 **Severity:** critical
-**Status:** open
+**Status:** fixed
 **Category:** Combat
 **Description:** If a player dies outside of combat (e.g. from a trap, environmental effect, or other non-combat damage source) they do not respawn at the zone spawn point. Respawn must always occur at the zone spawn point regardless of how the player died.
 **Steps:** Cause the player to die outside of combat; observe the player does not respawn and remains in a dead/stuck state.
-**Fix:** Ensure the death handler is invoked for all damage sources, not only in-combat damage. The respawn path (move player to zone spawn point, restore HP to minimum viable amount, notify player) must be called unconditionally whenever HP reaches zero.
+**Fix:** Added `checkNonCombatDeath(uid, sess)` helper to `GameServiceServer` which sets `sess.Dead = true` and calls `go respawnPlayer(uid)` when `sess.CurrentHP <= 0`. Called from all 7 non-combat damage sites: trap damage (grpc_service_trap.go), continuous drown (dispatch loop), radiation tick, skill-check effect damage, reactive-strike tumble damage, fall damage (handleClimb), and swim drown damage (handleSwim).
 
 ### BUG-99: Web UI periodically sends map request during combat, producing spurious error messages
 **Severity:** medium

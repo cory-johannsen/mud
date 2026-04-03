@@ -1995,6 +1995,7 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 		if sess.CurrentHP < 0 {
 			sess.CurrentHP = 0
 		}
+		s.checkNonCombatDeath(uid, sess) // REQ-BUG100-1
 	}
 
 	// DETAINED: block action commands but permit informational queries.
@@ -4904,6 +4905,7 @@ func (s *GameServiceServer) StartCarrierRadHook() {
 					if sess.CurrentHP < 0 {
 						sess.CurrentHP = 0
 					}
+					s.checkNonCombatDeath(sess.UID, sess) // REQ-BUG100-1
 					s.pushMessageToUID(sess.UID, fmt.Sprintf(
 						"Your Rad-Core implant irradiates you for %d radiation damage.", dmg))
 				}
@@ -7767,6 +7769,7 @@ func (s *GameServiceServer) applySkillCheckEffect(sess *session.PlayerSession, e
 		if sess.CurrentHP < 0 {
 			sess.CurrentHP = 0
 		}
+		s.checkNonCombatDeath(sess.UID, sess) // REQ-BUG100-1
 	case "condition":
 		if effect.ID == "" || sess.Conditions == nil || s.condRegistry == nil {
 			return
@@ -9106,6 +9109,7 @@ func (s *GameServiceServer) handleTumble(uid string, req *gamev1.TumbleRequest) 
 		if sess.CurrentHP < 0 {
 			sess.CurrentHP = 0
 		}
+		s.checkNonCombatDeath(uid, sess) // REQ-BUG100-1
 		rsNarrative += fmt.Sprintf(" (hit for %d damage! You have %d HP remaining)", dmg, sess.CurrentHP)
 	} else {
 		rsNarrative += " (miss)"
@@ -9650,6 +9654,22 @@ func (s *GameServiceServer) respawnPlayer(uid string) {
 		Payload: &gamev1.ServerEvent_RoomView{RoomView: rv},
 	}
 	s.pushEventToUID(uid, evt)
+}
+
+// checkNonCombatDeath detects when a player's HP has reached 0 outside of
+// combat and triggers the respawn path.  It must be called after every
+// non-combat damage application (trap, fall, drown, radiation, skill-check,
+// reactive-strike) to ensure consistent death handling (REQ-BUG100-1).
+//
+// Precondition: sess must be non-nil; uid must match sess.UID.
+// Postcondition: If sess.CurrentHP <= 0, sess.Dead is set and respawnPlayer is
+// called asynchronously; otherwise this is a no-op.
+func (s *GameServiceServer) checkNonCombatDeath(uid string, sess *session.PlayerSession) {
+	if sess.CurrentHP > 0 {
+		return
+	}
+	sess.Dead = true
+	go s.respawnPlayer(uid)
 }
 
 // applyMentalChangesToSession applies mental state condition swaps directly to a session.
@@ -10254,6 +10274,7 @@ func (s *GameServiceServer) handleClimb(uid string, req *gamev1.ClimbRequest) (*
 		if sess.CurrentHP < 0 {
 			sess.CurrentHP = 0
 		}
+		s.checkNonCombatDeath(uid, sess) // REQ-BUG100-1
 		msg := fmt.Sprintf(
 			"You fall! (rolled %d+%d=%d vs DC %d) Taking %d falling damage.",
 			roll, bonus, total, dc, dmg,
@@ -10394,6 +10415,7 @@ func (s *GameServiceServer) handleSwim(uid string, req *gamev1.SwimRequest) (*ga
 		if sess.CurrentHP < 0 {
 			sess.CurrentHP = 0
 		}
+		s.checkNonCombatDeath(uid, sess) // REQ-BUG100-1
 		msg := fmt.Sprintf(
 			"You are pulled under! (rolled %d+%d=%d vs DC %d) Taking %d drowning damage.",
 			roll, bonus, total, dc, dmg,

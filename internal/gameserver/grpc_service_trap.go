@@ -132,6 +132,7 @@ func (s *GameServiceServer) fireTrap(uid string, sess *session.PlayerSession, tm
 
 	// Apply to triggering player.
 	applyToPlayer(sess, result.Narrative)
+	s.checkNonCombatDeath(uid, sess)
 	// REQ-AH-22: apply substance if trap payload has a substance_id.
 	if result.SubstanceID != "" {
 		_ = s.ApplySubstanceByID(uid, result.SubstanceID)
@@ -144,6 +145,7 @@ func (s *GameServiceServer) fireTrap(uid string, sess *session.PlayerSession, tm
 				continue
 			}
 			applyToPlayer(other, fmt.Sprintf("A %s goes off nearby!", tmpl.Name))
+			s.checkNonCombatDeath(other.UID, other)
 			// REQ-AH-22: apply substance to AoE targets as well.
 			if result.SubstanceID != "" {
 				_ = s.ApplySubstanceByID(other.UID, result.SubstanceID)
