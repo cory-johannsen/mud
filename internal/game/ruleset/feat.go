@@ -163,3 +163,59 @@ func (r *FeatRegistry) SkillFeatsForTrainedSkills(trained map[string]string) []*
 	}
 	return out
 }
+
+// MergeFeatGrants merges two FeatGrants into a single combined grant.
+// Fixed lists are unioned; Choices pools are unioned with summed counts.
+//
+// Precondition: either or both arguments may be nil.
+// Postcondition: returned grant contains all fixed IDs and all pool entries from both inputs.
+func MergeFeatGrants(a, b *FeatGrants) *FeatGrants {
+	if a == nil && b == nil {
+		return nil
+	}
+	if a == nil {
+		return b
+	}
+	if b == nil {
+		return a
+	}
+	merged := &FeatGrants{
+		GeneralCount: a.GeneralCount + b.GeneralCount,
+		Fixed:        append(append([]string(nil), a.Fixed...), b.Fixed...),
+	}
+	if a.Choices != nil || b.Choices != nil {
+		merged.Choices = &FeatChoices{}
+		if a.Choices != nil {
+			merged.Choices.Count += a.Choices.Count
+			merged.Choices.Pool = append(merged.Choices.Pool, a.Choices.Pool...)
+		}
+		if b.Choices != nil {
+			merged.Choices.Count += b.Choices.Count
+			merged.Choices.Pool = append(merged.Choices.Pool, b.Choices.Pool...)
+		}
+	}
+	return merged
+}
+
+// MergeFeatLevelUpGrants merges two level-keyed feat grant maps.
+// Keys present in both are merged via MergeFeatGrants.
+//
+// Precondition: either or both arguments may be nil.
+// Postcondition: returned map contains all keys from both inputs.
+func MergeFeatLevelUpGrants(archetype, job map[int]*FeatGrants) map[int]*FeatGrants {
+	if len(archetype) == 0 && len(job) == 0 {
+		return nil
+	}
+	out := make(map[int]*FeatGrants)
+	for lvl, g := range archetype {
+		out[lvl] = g
+	}
+	for lvl, g := range job {
+		if existing, ok := out[lvl]; ok {
+			out[lvl] = MergeFeatGrants(existing, g)
+		} else {
+			out[lvl] = g
+		}
+	}
+	return out
+}
