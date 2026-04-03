@@ -8,16 +8,18 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
 	"go.uber.org/zap"
 
+	"gopkg.in/yaml.v3"
+
 	"github.com/cory-johannsen/mud/cmd/webclient/handlers"
 	"github.com/cory-johannsen/mud/internal/config"
 	"github.com/cory-johannsen/mud/internal/game/ruleset"
 	"github.com/cory-johannsen/mud/internal/game/technology"
-	"github.com/cory-johannsen/mud/internal/game/world"
 	"github.com/cory-johannsen/mud/internal/observability"
 	"github.com/cory-johannsen/mud/internal/storage/postgres"
 )
@@ -95,16 +97,7 @@ func main() {
 	}
 
 	// Build a room ID → "Zone Name — Room Title" lookup for the character list.
-	roomLookup := make(map[string]string)
-	if zones, zonesErr := world.LoadZonesFromDir(*zonesDir); zonesErr != nil {
-		logger.Warn("loading zones for character location display", zap.Error(zonesErr))
-	} else {
-		for _, z := range zones {
-			for roomID, room := range z.Rooms {
-				roomLookup[roomID] = z.Name + " \u2014 " + room.Title
-			}
-		}
-	}
+	roomLookup := buildRoomLookup(*zonesDir, logger)
 
 	var charOpts *handlers.CharacterOptions
 	if jobs != nil && regions != nil && archetypes != nil && teams != nil {
@@ -177,4 +170,52 @@ func getEnv(key, fallback string) string {
 		return v
 	}
 	return fallback
+}
+
+// zoneFileSummary is a minimal YAML struct for extracting zone name and room titles
+// without requiring all the game-server-specific fields (e.g. map_x/map_y).
+type zoneFileSummary struct {
+	Zone struct {
+		Name  string `yaml:"name"`
+		Rooms []struct {
+			ID    string `yaml:"id"`
+			Title string `yaml:"title"`
+		} `yaml:"rooms"`
+	} `yaml:"zone"`
+}
+
+// buildRoomLookup reads zone YAML files from dir and returns a map of
+// room ID → "Zone Name — Room Title". Logs a warning and returns an empty map on error.
+func buildRoomLookup(dir string, logger *zap.Logger) map[string]string {
+	lookup := make(map[string]string)
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		logger.Warn("reading zones directory for location display", zap.String("dir", dir), zap.Error(err))
+		return lookup
+	}
+	for _, entry := range entries {
+		if entry.IsDir() || (!strings.HasSuffix(entry.Name(), ".yaml") && !strings.HasSuffix(entry.Name(), ".yml")) {
+			continue
+		}
+		data, err := os.ReadFile(dir + "/" + entry.Name())
+		if err != nil {
+			logger.Warn("reading zone file", zap.String("file", entry.Name()), zap.Error(err))
+			continue
+		}
+		var zf zoneFileSummary
+		if err := yaml.Unmarshal(data, &zf); err != nil {
+			logger.Warn("parsing zone file", zap.String("file", entry.Name()), zap.Error(err))
+			continue
+		}
+		zoneName := zf.Zone.Name
+		if zoneName == "" {
+			continue
+		}
+		for _, r := range zf.Zone.Rooms {
+			if r.ID != "" && r.Title != "" {
+				lookup[r.ID] = zoneName + " \u2014 " + r.Title
+			}
+		}
+	}
+	return lookup
 }
