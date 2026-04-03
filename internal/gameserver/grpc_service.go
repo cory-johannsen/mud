@@ -7096,6 +7096,13 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string) (*gamev1.
 		}
 	}
 
+	// REQ-TSN-6: resolve short name to canonical tech ID before all lookup paths.
+	if s.techRegistry != nil {
+		if def, ok := s.techRegistry.GetByShortName(abilityID); ok {
+			abilityID = def.ID
+		}
+	}
+
 	if s.characterFeatsRepo == nil && s.characterClassFeaturesRepo == nil && s.preparedTechRepo == nil && s.spontaneousUsePoolRepo == nil && s.innateTechRepo == nil && len(sess.SpontaneousTechs) == 0 && len(sess.InnateTechs) == 0 {
 		return messageEvent("Ability data is not available."), nil
 	}
