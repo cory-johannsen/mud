@@ -4722,6 +4722,12 @@ func (s *GameServiceServer) handleWear(uid string, req *gamev1.WearRequest) (*ga
 		}
 	}
 
+	// REQ-BUG101-1: push inventory refresh after wear so the web UI removes the item.
+	if strings.HasPrefix(result, "Wore ") {
+		if sess2, ok2 := s.sessions.GetPlayer(uid); ok2 {
+			s.pushInventory(sess2)
+		}
+	}
 	return messageEvent(result), nil
 }
 

@@ -678,11 +678,11 @@
 
 ### BUG-101: Equipped armor item remains visible in Inventory tab after wearing
 **Severity:** medium
-**Status:** open
+**Status:** fixed
 **Category:** UI
 **Description:** After clicking "Wear" on an armor item in the Inventory tab, the item correctly appears in the Equipment tab but is not removed from the Inventory tab. The item is double-displayed — once as equipped and once as still in the backpack.
 **Steps:** Purchase an armor item; open the Inventory tab; click "Wear"; observe the item appears in the Equipment tab; return to the Inventory tab — the item is still listed there.
-**Fix:** After a successful WearRequest, push an updated `InventoryView` to the client so the inventory panel removes the item, or handle the equip event in the web client to remove the item from the inventory list without a full refresh.
+**Fix:** Added `pushInventory(sess)` call in `handleWear` after a successful "Wore ..." result so the web UI receives a fresh InventoryView immediately after equipping.
 
 ### BUG-100: Player death outside combat does not trigger respawn at zone spawn point
 **Severity:** critical
@@ -694,11 +694,11 @@
 
 ### BUG-99: Web UI periodically sends map request during combat, producing spurious error messages
 **Severity:** medium
-**Status:** open
+**Status:** fixed
 **Category:** UI
 **Description:** During combat the console periodically displays `You cannot use the map while in combat` even though the player is not interacting with the map. The web client is automatically issuing map requests in the background (likely a polling or auto-refresh mechanism) that are rejected by the server during combat.
 **Steps:** Enter combat; do not interact with the map; observe the console — `You cannot use the map while in combat` appears periodically without player input.
-**Fix:** Identify the background map polling or auto-refresh call in the web client and suppress it when the client is in combat state.
+**Fix:** Root cause: `MapPanel.tsx` useEffect fired on every `state.connected` change including when combat starts/ends. Added `state.combatRound === null` guard and added `state.combatRound` to the dependency array so the auto-request only fires when connected AND not in combat.
 
 ### BUG-98: Clicking quest giver NPC shows examine modal instead of quest selection
 **Severity:** high

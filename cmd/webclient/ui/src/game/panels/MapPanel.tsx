@@ -198,11 +198,11 @@ export function MapPanel() {
   }
 
   useEffect(() => {
-    if (state.connected) {
+    if (state.connected && state.combatRound === null) {
       sendMessage('MapRequest', { view: 'zone' })
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state.connected])
+  }, [state.connected, state.combatRound])
 
   const inCombat = state.combatRound !== null
 
