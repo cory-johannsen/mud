@@ -80,7 +80,7 @@ function GameLayout() {
               {'\u26C8'} {activeWeather}
             </div>
           )}
-          {(['inventory', 'equipment', 'skills', 'feats', 'stats', 'technology'] as DrawerType[]).map((d) => (
+          {(['inventory', 'equipment', 'skills', 'feats', 'stats', 'technology', 'job'] as DrawerType[]).map((d) => (
             <button
               key={d}
               className={`toolbar-btn${openDrawer === d ? ' active' : ''}`}

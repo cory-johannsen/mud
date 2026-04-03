@@ -686,11 +686,11 @@
 
 ### BUG-103: Web UI has no Job tab
 **Severity:** high
-**Status:** open
+**Status:** fixed
 **Category:** UI
 **Description:** The web UI has no Job tab. Players have no way to view their current job, job progression, or available job advancement options from the web UI.
 **Steps:** Log in; browse all tabs in the web UI — no Job tab exists.
-**Fix:** Add a Job tab to the web UI displaying the player's current job, tier, level requirements, and available advancement options, drawing from the character sheet and job definition data.
+**Fix:** Added a Job drawer to the web UI toolbar displaying the player's current job name, archetype, team badge, level, XP bar with current/max XP, and notices for pending ability boosts and skill increases.
 
 ### BUG-102: Merchant stock quantity does not update in web UI after purchase
 **Severity:** medium
