@@ -17,6 +17,7 @@ import (
 	"github.com/cory-johannsen/mud/internal/config"
 	"github.com/cory-johannsen/mud/internal/game/ruleset"
 	"github.com/cory-johannsen/mud/internal/game/technology"
+	"github.com/cory-johannsen/mud/internal/game/world"
 	"github.com/cory-johannsen/mud/internal/observability"
 	"github.com/cory-johannsen/mud/internal/storage/postgres"
 )
@@ -32,6 +33,7 @@ func main() {
 	featsFile     := flag.String("feats-file", "content/feats.yaml", "path to feats YAML file")
 	skillsFile    := flag.String("skills-file", "content/skills.yaml", "path to skills YAML file")
 	techDir       := flag.String("tech-dir", "content/technologies", "path to technology YAML directory")
+	zonesDir      := flag.String("zones-dir", "content/zones", "path to zone YAML definitions (used for character location display)")
 	flag.Parse()
 
 	cfg, err := config.Load(*configPath)
@@ -92,6 +94,18 @@ func main() {
 		logger.Warn("loading technology for character wizard", zap.Error(techErr))
 	}
 
+	// Build a room ID → "Zone Name — Room Title" lookup for the character list.
+	roomLookup := make(map[string]string)
+	if zones, zonesErr := world.LoadZonesFromDir(*zonesDir); zonesErr != nil {
+		logger.Warn("loading zones for character location display", zap.Error(zonesErr))
+	} else {
+		for _, z := range zones {
+			for roomID, room := range z.Rooms {
+				roomLookup[roomID] = z.Name + " \u2014 " + room.Title
+			}
+		}
+	}
+
 	var charOpts *handlers.CharacterOptions
 	if jobs != nil && regions != nil && archetypes != nil && teams != nil {
 		charOpts = &handlers.CharacterOptions{
@@ -114,7 +128,7 @@ func main() {
 		preparedTech:  preparedTechRepo,
 	}
 
-	srv, err := New(cfg.Web, cfg.GameServer.Addr(), accountRepo, charRepo, charOpts, creationRepos, logger)
+	srv, err := New(cfg.Web, cfg.GameServer.Addr(), accountRepo, charRepo, charOpts, creationRepos, roomLookup, logger)
 	if err != nil {
 		logger.Fatal("initializing web server", zap.Error(err))
 	}

@@ -393,7 +393,7 @@ func applyAllMigrations(pool *pgxpool.Pool) error {
 			ON weather_events (active)
 			WHERE active = TRUE;
 
-		-- Migration 002: zones and rooms (required by ListByAccount JOIN)
+		-- Migration 002: zones and rooms schema (matches 002_zones_rooms.up.sql)
 		CREATE TABLE IF NOT EXISTS zones (
 			id          TEXT PRIMARY KEY,
 			name        TEXT NOT NULL,
@@ -409,14 +409,6 @@ func applyAllMigrations(pool *pgxpool.Pool) error {
 			properties  JSONB NOT NULL DEFAULT '{}',
 			created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
 		);
-		-- Seed the default test room so ListByAccount can resolve location display names.
-		INSERT INTO zones (id, name, description, start_room)
-			VALUES ('test_zone', 'Test Zone', 'Test zone', 'grinders_row')
-			ON CONFLICT DO NOTHING;
-		INSERT INTO rooms (id, zone_id, title, description)
-			VALUES ('grinders_row', 'test_zone', 'Grinders Row', 'A test room'),
-			       ('battle_infirmary', 'test_zone', 'Battle Infirmary', 'A test room')
-			ON CONFLICT DO NOTHING;
 	`)
 	return err
 }

@@ -116,21 +116,30 @@ type CharacterHandler struct {
 	creator        CharacterCreator
 	checker        NameChecker
 	getter         CharacterGetter
-	deleter        CharacterDeleter      // may be nil
+	deleter        CharacterDeleter         // may be nil
 	options        *CharacterOptions
 	jwtSecret      string
-	boostsAdder    AbilityBoostsAdder    // may be nil
-	skillsSetter   SkillsSetter          // may be nil
-	featsSetter    FeatsSetter           // may be nil
-	hwTechSetter   HardwiredTechSetter   // may be nil
-	spontAdder     SpontaneousTechAdder  // may be nil
-	preparedSetter PreparedTechSetter    // may be nil
+	boostsAdder    AbilityBoostsAdder       // may be nil
+	skillsSetter   SkillsSetter             // may be nil
+	featsSetter    FeatsSetter              // may be nil
+	hwTechSetter   HardwiredTechSetter      // may be nil
+	spontAdder     SpontaneousTechAdder     // may be nil
+	preparedSetter PreparedTechSetter       // may be nil
 	registry       *ActiveCharacterRegistry // may be nil
+	// roomLookup maps room ID → "Zone Name — Room Title". May be nil (falls back to raw room ID).
+	roomLookup     map[string]string
 }
 
 // NewCharacterHandler creates a CharacterHandler.
 func NewCharacterHandler(lister CharacterLister, creator CharacterCreator, checker NameChecker) *CharacterHandler {
 	return &CharacterHandler{lister: lister, creator: creator, checker: checker}
+}
+
+// WithRoomLookup attaches a map of room ID → "Zone Name — Room Title" so the
+// character list can display a human-readable location instead of the raw room ID.
+func (h *CharacterHandler) WithRoomLookup(lookup map[string]string) *CharacterHandler {
+	h.roomLookup = lookup
+	return h
 }
 
 // WithJWTSecret attaches the JWT secret so HandlePlay can issue character-scoped tokens.
@@ -208,7 +217,7 @@ func (h *CharacterHandler) ListCharacters(w http.ResponseWriter, r *http.Request
 	}
 	resp := make([]CharacterResponse, 0, len(chars))
 	for _, c := range chars {
-		resp = append(resp, characterToResponse(c, h.options, h.registry))
+		resp = append(resp, characterToResponse(c, h.options, h.registry, h.roomLookup))
 	}
 	w.Header().Set("Content-Type", "application/json")
 	_ = json.NewEncoder(w).Encode(resp)
@@ -217,7 +226,8 @@ func (h *CharacterHandler) ListCharacters(w http.ResponseWriter, r *http.Request
 // characterToResponse maps a Character domain object to its API response shape.
 // If opts is non-nil, job/region/team IDs are resolved to display names.
 // If reg is non-nil, IsOnline is populated from the registry.
-func characterToResponse(c *character.Character, opts *CharacterOptions, reg *ActiveCharacterRegistry) CharacterResponse {
+// If roomLookup is non-nil, Location is resolved from raw room ID to "Zone — Room" display string.
+func characterToResponse(c *character.Character, opts *CharacterOptions, reg *ActiveCharacterRegistry, roomLookup map[string]string) CharacterResponse {
 	job := c.Class
 	region := c.Region
 	archetype := c.Team
@@ -245,6 +255,12 @@ func characterToResponse(c *character.Character, opts *CharacterOptions, reg *Ac
 	if reg != nil {
 		isOnline = reg.IsActive(c.ID)
 	}
+	location := c.Location
+	if roomLookup != nil {
+		if display, ok := roomLookup[c.Location]; ok {
+			location = display
+		}
+	}
 	return CharacterResponse{
 		ID:        c.ID,
 		Name:      c.Name,
@@ -254,7 +270,7 @@ func characterToResponse(c *character.Character, opts *CharacterOptions, reg *Ac
 		MaxHP:     int32(c.MaxHP),
 		Region:    region,
 		Archetype: archetype,
-		Location:  c.Location,
+		Location:  location,
 		IsOnline:  isOnline,
 	}
 }
@@ -391,7 +407,7 @@ func (h *CharacterHandler) CreateCharacter(w http.ResponseWriter, r *http.Reques
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	_ = json.NewEncoder(w).Encode(map[string]any{"character": characterToResponse(created, h.options, h.registry)})
+	_ = json.NewEncoder(w).Encode(map[string]any{"character": characterToResponse(created, h.options, h.registry, h.roomLookup)})
 }
 
 // persistCharacterChoices persists ability boosts, skills, feats, and technology

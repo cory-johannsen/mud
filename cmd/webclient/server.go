@@ -44,6 +44,7 @@ type Server struct {
 	charOptions       *handlers.CharacterOptions
 	charCreationRepos *charCreationRepos             // may be nil if not configured
 	activeRegistry    *handlers.ActiveCharacterRegistry
+	roomLookup        map[string]string              // may be nil; maps room ID → "Zone — Room" display string
 }
 
 // New constructs a Server, establishes the gRPC connection, and registers routes.
@@ -58,6 +59,7 @@ func New(
 	charRepo *postgres.CharacterRepository,
 	charOptions *handlers.CharacterOptions,
 	creationRepos *charCreationRepos,
+	roomLookup map[string]string,
 	logger *zap.Logger,
 ) (*Server, error) {
 	conn, err := grpc.NewClient(gameserverAddr,
@@ -80,6 +82,7 @@ func New(
 		charOptions:       charOptions,
 		charCreationRepos: creationRepos,
 		activeRegistry:    handlers.NewActiveCharacterRegistry(),
+		roomLookup:        roomLookup,
 	}
 
 	mux := http.NewServeMux()
@@ -216,7 +219,8 @@ func (s *Server) registerRoutes(mux *http.ServeMux) {
 		WithGetter(s.charRepo).
 		WithDeleter(s.charRepo).
 		WithOptions(s.charOptions).
-		WithRegistry(s.activeRegistry)
+		WithRegistry(s.activeRegistry).
+		WithRoomLookup(s.roomLookup)
 	if s.charCreationRepos != nil {
 		charHandler = charHandler.WithPersistenceRepos(
 			s.charCreationRepos.abilityBoosts,
