@@ -37,24 +37,87 @@ export function RoomPanel() {
       <h2 className="room-title">{title}</h2>
       <p className="room-description">{description}</p>
 
-      {exits.length > 0 && (
-        <>
-          <div className="room-section-label">Exits</div>
-          <div className="room-exits">
-            {exits
-              .filter((ex) => !ex.hidden)
-              .map((ex) => (
-                <button
-                  key={ex.direction}
-                  className="exit-btn"
-                  onClick={() => sendMessage('MoveRequest', { direction: ex.direction })}
-                >
-                  {ex.locked ? `${ex.direction}*` : ex.direction}
-                </button>
-              ))}
-          </div>
-        </>
-      )}
+      {exits.length > 0 && (() => {
+        const visibleExits = exits.filter((ex) => !ex.hidden)
+        // Build a lookup map keyed by normalized (lowercase) direction
+        const exitMap = new Map(visibleExits.map((ex) => [ex.direction.toLowerCase(), ex]))
+
+        // 3x3 compass grid: [row][col] = normalized direction key
+        const compassGrid: (string | null)[][] = [
+          ['nw', 'n', 'ne'],
+          ['w',  null, 'e'],
+          ['sw', 's', 'se'],
+        ]
+
+        // Aliases: short forms map to canonical keys used in compassGrid
+        const aliases: Record<string, string> = {
+          northwest: 'nw',
+          north:     'n',
+          northeast: 'ne',
+          west:      'w',
+          east:      'e',
+          southwest: 'sw',
+          south:     's',
+          southeast: 'se',
+        }
+
+        // Resolve exit for a compass key: check key directly then aliases
+        function resolveExit(key: string) {
+          if (exitMap.has(key)) return exitMap.get(key)!
+          for (const [alias, canonical] of Object.entries(aliases)) {
+            if (canonical === key && exitMap.has(alias)) return exitMap.get(alias)!
+          }
+          return null
+        }
+
+        // Vertical exits: up / down (and long-form aliases)
+        const verticalKeys = ['up', 'down', 'u', 'd']
+        const verticalExits = visibleExits.filter((ex) =>
+          verticalKeys.includes(ex.direction.toLowerCase())
+        )
+
+        return (
+          <>
+            <div className="room-section-label">Exits</div>
+            <div className="room-exits">
+              {compassGrid.map((row, ri) =>
+                row.map((key, ci) => {
+                  if (key === null) {
+                    // Center cell — always empty
+                    return <div key={`${ri}-${ci}`} className="exit-cell-empty" />
+                  }
+                  const ex = resolveExit(key)
+                  if (!ex) {
+                    return <div key={`${ri}-${ci}`} className="exit-cell-empty" />
+                  }
+                  return (
+                    <button
+                      key={`${ri}-${ci}`}
+                      className="exit-btn"
+                      onClick={() => sendMessage('MoveRequest', { direction: ex.direction })}
+                    >
+                      {ex.locked ? `${ex.direction}*` : ex.direction}
+                    </button>
+                  )
+                })
+              )}
+            </div>
+            {verticalExits.length > 0 && (
+              <div className="room-exits-vertical">
+                {verticalExits.map((ex) => (
+                  <button
+                    key={ex.direction}
+                    className="exit-btn"
+                    onClick={() => sendMessage('MoveRequest', { direction: ex.direction })}
+                  >
+                    {ex.locked ? `${ex.direction}*` : ex.direction}
+                  </button>
+                ))}
+              </div>
+            )}
+          </>
+        )
+      })()}
 
       {npcs.length > 0 && (
         <>
