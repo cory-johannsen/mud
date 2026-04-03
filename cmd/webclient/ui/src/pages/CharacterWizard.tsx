@@ -1260,7 +1260,8 @@ function capitalize(s: string): string {
 
 const styles: Record<string, React.CSSProperties> = {
   container: {
-    minHeight: '100vh',
+    maxHeight: '100vh',
+    overflowY: 'auto',
     background: '#0d0d0d',
     color: '#ccc',
     fontFamily: 'monospace',
@@ -1307,6 +1308,8 @@ const styles: Record<string, React.CSSProperties> = {
     gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
     gap: '0.75rem',
     marginBottom: '1.5rem',
+    maxHeight: '55vh',
+    overflowY: 'auto',
   },
   optionCard: {
     background: '#1a1a1a',
