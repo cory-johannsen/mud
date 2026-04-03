@@ -1747,6 +1747,29 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 		}
 	}
 
+	// Retroactively backfill any feat level-up grants never applied.
+	// Runs before feat loading so newly-granted feats are included in session state.
+	// BackfillLevelUpFeats is idempotent: only missing grants are applied.
+	if s.characterFeatsRepo != nil && s.jobRegistry != nil && characterID > 0 && sess.Level >= 2 {
+		if job, ok := s.jobRegistry.Job(sess.Class); ok {
+			var archFeatGrants map[int]*ruleset.FeatGrants
+			if job.Archetype != "" {
+				if arch, archOK := s.archetypes[job.Archetype]; archOK {
+					archFeatGrants = arch.LevelUpFeatGrants
+				}
+			}
+			mergedFeatGrants := ruleset.MergeFeatLevelUpGrants(archFeatGrants, job.LevelUpFeatGrants)
+			if err := BackfillLevelUpFeats(stream.Context(), sess, characterID,
+				mergedFeatGrants, s.featRegistry, s.characterFeatsRepo,
+			); err != nil {
+				s.logger.Warn("BackfillLevelUpFeats failed",
+					zap.Int64("character_id", characterID),
+					zap.Error(err),
+				)
+			}
+		}
+	}
+
 	// REQ-RXN15: register reactions from feats; also populate ActiveFeatUses for limited active feats.
 	if s.characterFeatsRepo != nil && s.featRegistry != nil && characterID > 0 {
 		if featIDs, featErr := s.characterFeatsRepo.GetAll(stream.Context(), characterID); featErr != nil {
