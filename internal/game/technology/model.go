@@ -2,9 +2,13 @@ package technology
 
 import (
 	"fmt"
+	"regexp"
+	"strings"
 
 	"github.com/cory-johannsen/mud/internal/game/reaction"
 )
+
+var shortNameRE = regexp.MustCompile(`^[a-z0-9_]+$`)
 
 type Tradition string
 type UsageType string
@@ -169,8 +173,9 @@ func (te TieredEffects) AllEffects() []TechEffect {
 // Duration, and at least one Effect must all be set.
 // Postcondition: Validate() returns nil iff all required fields are present and valid.
 type TechnologyDef struct {
-	ID          string    `yaml:"id"`
-	Name        string    `yaml:"name"`
+	ID        string `yaml:"id"`
+	ShortName string `yaml:"short_name,omitempty"`
+	Name      string `yaml:"name"`
 	Description string    `yaml:"description,omitempty"`
 	Tradition   Tradition `yaml:"tradition"`
 	Level       int       `yaml:"level"`
@@ -202,6 +207,20 @@ type TechnologyDef struct {
 func (t *TechnologyDef) Validate() error {
 	if t.ID == "" {
 		return fmt.Errorf("id must not be empty")
+	}
+	if t.ShortName != "" {
+		if len(t.ShortName) < 2 || len(t.ShortName) > 32 {
+			return fmt.Errorf("short_name %q must be between 2 and 32 characters", t.ShortName)
+		}
+		if !shortNameRE.MatchString(t.ShortName) {
+			return fmt.Errorf("short_name %q must contain only lowercase letters, digits, and underscores", t.ShortName)
+		}
+		if strings.HasPrefix(t.ShortName, "_") || strings.HasSuffix(t.ShortName, "_") {
+			return fmt.Errorf("short_name %q must not begin or end with an underscore", t.ShortName)
+		}
+		if t.ShortName == t.ID {
+			return fmt.Errorf("short_name %q must not be identical to the technology id", t.ShortName)
+		}
 	}
 	if t.Name == "" {
 		return fmt.Errorf("name must not be empty")

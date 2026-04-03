@@ -2,6 +2,7 @@ package technology_test
 
 import (
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/cory-johannsen/mud/internal/game/reaction"
@@ -565,6 +566,50 @@ func TestTechnologyDef_Validate_FocusCostNotPassive(t *testing.T) {
 	tech.FocusCost = true
 	err := tech.Validate()
 	assert.NoError(t, err)
+}
+
+// REQ-TSN-2: Validate() enforces short_name format constraints.
+func TestValidate_ShortName_InvalidCases(t *testing.T) {
+	cases := []struct {
+		name      string
+		shortName string
+	}{
+		{"too_short", "a"},
+		{"too_long", strings.Repeat("a", 33)},
+		{"uppercase", "NeuralShock"},
+		{"space", "neural shock"},
+		{"leading_underscore", "_neural"},
+		{"trailing_underscore", "neural_"},
+		{"dash_disallowed", "neural-shock"},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			def := validDef()
+			def.ShortName = tc.shortName
+			err := def.Validate()
+			assert.Error(t, err, "expected error for short_name %q", tc.shortName)
+		})
+	}
+
+	t.Run("same_as_id", func(t *testing.T) {
+		def := validDef()
+		def.ID = "neural"
+		def.ShortName = "neural"
+		err := def.Validate()
+		assert.Error(t, err, "expected error when short_name equals id")
+	})
+}
+
+// REQ-TSN-11d: property test — Validate() accepts all well-formed short names.
+func TestProperty_Validate_ShortName_ValidAccepted(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		sn := rapid.StringMatching(`[a-z0-9][a-z0-9_]{0,30}[a-z0-9]`).Draw(rt, "shortName")
+		def := validDef()
+		def.ShortName = sn
+		def.ID = "different_id"
+		err := def.Validate()
+		assert.NoError(rt, err, "valid short_name %q should pass Validate()", sn)
+	})
 }
 
 // REQ-CRX10: chrome_reflex.yaml loads correctly with both reaction triggers.
