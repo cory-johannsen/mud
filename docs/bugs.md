@@ -654,11 +654,11 @@
 
 ### BUG-107: Player respawn does not restore full HP, clear conditions, or recharge Feats and Technologies
 **Severity:** high
-**Status:** open
+**Status:** fixed
 **Category:** Combat
 **Description:** When a player respawns after death they are not fully restored. On respawn the player should receive the equivalent of a full rest: HP restored to maximum, all conditions removed, and all Feat and Technology uses recharged. This ensures the player can continue playing immediately without being stuck in a degraded state.
 **Steps:** Die in combat or from any damage source; observe the respawn state — HP is not full, conditions may persist, and Feat/Technology uses are not recharged.
-**Fix:** In the respawn handler, apply a full-rest reset: set current HP to max HP, clear all active conditions, recharge all Feat and Technology uses, and push updated CharacterSheetView and InventoryView to the client.
+**Fix:** respawnPlayer now sets CurrentHP to MaxHP (was hardcoded to 1), clears all conditions via ClearAll() (was only clearing encounter-duration conditions via ClearEncounter()), restores spontaneous use pools and innate tech slots via DB repos, un-expends all prepared tech slots, restores active feat uses to their PreparedUses maximum, and restores focus points to MaxFocusPoints. Added ClearAll() method to condition.ActiveSet.
 
 ### BUG-106: Player HP damage not immediately reflected in Character panel during combat
 **Severity:** high

@@ -219,6 +219,35 @@ func TestClearEncounter_RemovesEncounterConditions(t *testing.T) {
 	assert.True(t, s.Has("prone"), "permanent condition should remain")
 }
 
+func TestClearAll_RemovesAllConditions(t *testing.T) {
+	s := condition.NewActiveSet()
+	enc := &condition.ConditionDef{ID: "surge", Name: "Surge", DurationType: "encounter", MaxStacks: 0}
+	perm := &condition.ConditionDef{ID: "prone", Name: "Prone", DurationType: "permanent", MaxStacks: 0}
+	require.NoError(t, s.Apply("uid", enc, 1, -1))
+	require.NoError(t, s.Apply("uid", perm, 1, -1))
+	require.Len(t, s.All(), 2)
+
+	s.ClearAll()
+
+	assert.Empty(t, s.All(), "ClearAll should remove all conditions regardless of duration type")
+}
+
+func TestClearAll_EmptySet_NoPanic(t *testing.T) {
+	s := condition.NewActiveSet()
+	assert.NotPanics(t, func() { s.ClearAll() })
+}
+
+func TestProperty_ClearAll_AlwaysEmptiesSet(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		durType := rapid.SampledFrom([]string{"permanent", "rounds", "until_save", "encounter"}).Draw(rt, "dur")
+		s := condition.NewActiveSet()
+		def := &condition.ConditionDef{ID: "c1", Name: "C1", DurationType: durType, MaxStacks: 0}
+		_ = s.Apply("uid", def, 1, -1)
+		s.ClearAll()
+		assert.Empty(t, s.All(), "ClearAll must remove all conditions regardless of duration type")
+	})
+}
+
 func TestActiveSet_ApplyTagged_SetsSource(t *testing.T) {
 	set := condition.NewActiveSet()
 	def := &condition.ConditionDef{ID: "frightened", DurationType: "permanent"}

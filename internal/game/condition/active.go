@@ -169,6 +169,17 @@ func (s *ActiveSet) ClearEncounter() {
 	}
 }
 
+// ClearAll removes every active condition regardless of duration type.
+// Called on respawn to fully reset the condition state of a character.
+//
+// Precondition: s must not be nil.
+// Postcondition: len(s.All()) == 0.
+func (s *ActiveSet) ClearAll() {
+	for id := range s.conditions {
+		delete(s.conditions, id)
+	}
+}
+
 // ApplyTagged is like Apply but attaches a source tag to the condition.
 //
 // Precondition: def must not be nil; source may be empty.

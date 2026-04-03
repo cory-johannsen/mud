@@ -9641,18 +9641,74 @@ func (s *GameServiceServer) respawnPlayer(uid string) {
 
 	oldRoomID := sess.RoomID
 	sess.Dead = false
-	sess.CurrentHP = 1
+	sess.CurrentHP = sess.MaxHP
 	sess.RoomID = spawnRoomID
 
-	// Clear any encounter conditions from the death.
+	// Clear all conditions (encounter, permanent, rounds, until_save) on respawn.
 	if sess.Conditions != nil {
-		sess.Conditions.ClearEncounter()
+		sess.Conditions.ClearAll()
 	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	// Restore spontaneous tech use pools via DB then reload into session.
+	if s.spontaneousUsePoolRepo != nil && sess.CharacterID != 0 {
+		if err := s.spontaneousUsePoolRepo.RestoreAll(ctx, sess.CharacterID); err != nil {
+			s.logger.Warn("respawnPlayer: restore spontaneous use pools failed", zap.String("uid", uid), zap.Error(err))
+		} else {
+			pools, err := s.spontaneousUsePoolRepo.GetAll(ctx, sess.CharacterID)
+			if err != nil {
+				s.logger.Warn("respawnPlayer: reload spontaneous use pools failed", zap.String("uid", uid), zap.Error(err))
+			} else {
+				sess.SpontaneousUsePools = pools
+			}
+		}
+	}
+
+	// Restore innate tech use slots via DB then reload into session.
+	if s.innateTechRepo != nil && sess.CharacterID != 0 {
+		if err := s.innateTechRepo.RestoreAll(ctx, sess.CharacterID); err != nil {
+			s.logger.Warn("respawnPlayer: restore innate tech slots failed", zap.String("uid", uid), zap.Error(err))
+		} else {
+			innates, err := s.innateTechRepo.GetAll(ctx, sess.CharacterID)
+			if err != nil {
+				s.logger.Warn("respawnPlayer: reload innate tech slots failed", zap.String("uid", uid), zap.Error(err))
+			} else {
+				sess.InnateTechs = innates
+			}
+		}
+	}
+
+	// Un-expend all prepared tech slots in-memory.
+	for _, slots := range sess.PreparedTechs {
+		for _, slot := range slots {
+			if slot != nil {
+				slot.Expended = false
+			}
+		}
+	}
+
+	// Restore active feat uses to their PreparedUses maximum.
+	if s.characterFeatsRepo != nil && s.featRegistry != nil && sess.ActiveFeatUses != nil && sess.CharacterID != 0 {
+		if featIDs, err := s.characterFeatsRepo.GetAll(ctx, sess.CharacterID); err != nil {
+			s.logger.Warn("respawnPlayer: failed to load feats for use restoration", zap.String("uid", uid), zap.Error(err))
+		} else {
+			for _, id := range featIDs {
+				f, ok := s.featRegistry.Feat(id)
+				if !ok || !f.Active || f.PreparedUses <= 0 {
+					continue
+				}
+				sess.ActiveFeatUses[id] = f.PreparedUses
+			}
+		}
+	}
+
+	// Restore focus points to maximum.
+	sess.FocusPoints = sess.MaxFocusPoints
 
 	// Persist new location and HP.
 	if s.charSaver != nil && sess.CharacterID != 0 {
-		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-		defer cancel()
 		if err := s.charSaver.SaveState(ctx, sess.CharacterID, spawnRoomID, sess.CurrentHP); err != nil {
 			s.logger.Warn("respawnPlayer: SaveState failed", zap.String("uid", uid), zap.Error(err))
 		}
