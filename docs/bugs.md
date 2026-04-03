@@ -652,6 +652,22 @@
 **Steps:** Open the web client; engage and complete combat; observe the XP granted message in the console; navigate to the Stats tab and observe that the XP value has not updated.
 **Fix:** `CombatHandler.pushXPMessages` was sending XP grant text messages but never pushing a `CharacterSheetView` to the client. The `StatsDrawer` reads XP from `state.characterSheet`, which is only updated when a `CharacterSheetView` arrives. Added a `pushCharacterSheetFn func(*session.PlayerSession)` callback field to `CombatHandler` with `SetPushCharacterSheetFn`, called unconditionally at the end of `pushXPMessages`. Wired `s.pushCharacterSheet` as the callback in `grpc_service.go`.
 
+### BUG-110: Technology panel "Add to hotbar" inline slot selector overflows screen; should use modal
+**Severity:** medium
+**Status:** fixed
+**Category:** UI
+**Description:** In the Technology panel, clicking "Add to hotbar" renders an inline hotbar slot selector that can be wider than the panel, causing it to extend off the side of the screen. The selector should instead open a modal displaying the full hotbar so the user can select a slot without layout overflow.
+**Steps:** Open the Technology tab; click "Add to hotbar" on any technology; observe the inline slot selector extends beyond the panel edge and off-screen.
+**Fix:** Converted SlotPicker from an inline div to a fixed-position overlay modal (position:fixed, z-index:300, centered flex). Modal uses width:max-content with maxWidth:95vw so it auto-expands to fit slot command text without clipping. Clicking the overlay dismisses the modal.
+
+### BUG-109: Armor Training feat in Feats tab does not display the selected armor category
+**Severity:** low
+**Status:** open
+**Category:** UI
+**Description:** In the Feats tab, the Armor Training passive feat is displayed without indicating which armor category the player selected during training (e.g. "Light", "Medium", "Heavy"). The player has no way to see their trained armor type from the UI.
+**Steps:** Have a character with Armor Training trained to a category; open the Feats tab; observe the Armor Training entry — no armor category is shown.
+**Fix:** Include the trained armor category in the Armor Training feat display, e.g. "Armor Training (Medium)".
+
 ### BUG-108: Web UI character creation not scrollable on mobile browsers
 **Severity:** high
 **Status:** open
