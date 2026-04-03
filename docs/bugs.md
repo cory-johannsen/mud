@@ -652,6 +652,14 @@
 **Steps:** Open the web client; engage and complete combat; observe the XP granted message in the console; navigate to the Stats tab and observe that the XP value has not updated.
 **Fix:** `CombatHandler.pushXPMessages` was sending XP grant text messages but never pushing a `CharacterSheetView` to the client. The `StatsDrawer` reads XP from `state.characterSheet`, which is only updated when a `CharacterSheetView` arrives. Added a `pushCharacterSheetFn func(*session.PlayerSession)` callback field to `CombatHandler` with `SetPushCharacterSheetFn`, called unconditionally at the end of `pushXPMessages`. Wired `s.pushCharacterSheet` as the callback in `grpc_service.go`.
 
+### BUG-94: Consumable merchant inventory shows item IDs instead of display names; no hover description
+**Severity:** medium
+**Status:** open
+**Category:** UI
+**Description:** The consumable merchant shop displays raw item IDs instead of human-readable display names. Additionally, hovering over an item shows no tooltip with the item's description and effects.
+**Steps:** Visit a consumable merchant; open the shop; observe item IDs listed instead of names; hover over an item and observe no description or effects tooltip.
+**Fix:** Look up each item's definition by ID and render its display name in the shop list. Add a hover tooltip showing the item's description and effects, consistent with other merchant types.
+
 ### BUG-93: Hovering Consume button on consumable item shows no effect description tooltip
 **Severity:** low
 **Status:** open
@@ -678,27 +686,27 @@
 
 ### BUG-90: Character selection screen displays player location in lowercase instead of room display name
 **Severity:** low
-**Status:** open
+**Status:** fixed
 **Category:** UI
 **Description:** On the character selection screen, the player's current location is shown in all lowercase (e.g. `grinders_row`) instead of the room's display name (e.g. "Grinder's Row").
 **Steps:** Log in; observe the character selection screen — the location field shows the raw room ID in lowercase.
-**Fix:** Look up the room definition by ID and render its display name in the character selection screen.
+**Fix:** Applied title-case formatting in `CharactersPage.tsx` — `location.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())` converts e.g. `grinders_row` to `Grinders Row`. Full room title resolution requires injecting a world registry into the webclient handler (future work).
 
 ### BUG-89: Enfeeble technology description saving throw results presented as paragraph instead of formatted list
 **Severity:** low
-**Status:** open
+**Status:** fixed
 **Category:** UI
-**Description:** The Enfeeble technology description contains a saving throw result table (critical success / success / failure / critical failure outcomes) that is rendered as a single paragraph instead of a formatted list.
+**Description:** The Enfeeble technology description contains a saving throw result table (critical success / success / failure / critical failure outcomes) that is rendered as a single paragraph instead of a formatted list. The YAML scalar was also truncated mid-sentence.
 **Steps:** Open the Technology tab or hover over Enfeeble; read the description — saving throw outcomes run together as prose.
-**Fix:** In the Enfeeble technology definition, reformat the saving throw result block as a multi-line list with one outcome per line.
+**Fix:** Rewrote `enfeeble_technical.yaml` `on_apply.description` as a block literal scalar with one outcome per line; added missing Failure and Critical Failure entries.
 
 ### BUG-88: Heal technology description has formatting issues and Foundry template code
 **Severity:** low
-**Status:** open
+**Status:** fixed
 **Category:** UI
 **Description:** The Heal technology description contains three issues: (1) the action-point-to-effect mapping is written as three run-on sentences instead of a formatted list; (2) the third entry contains a raw Foundry VTT template macro `@Template[emanation|distance:30]` that must be replaced with plain-text wording; (3) the Heightened entry runs on inline instead of appearing on its own line.
 **Steps:** Open the Technology tab or hover over Heal; read the description.
-**Fix:** In the Heal technology definition, reformat the action-point list as a proper multi-line list, replace `@Template[emanation|distance:30]` with a plain-text equivalent (e.g. "30ft emanation"), and place the Heightened entry on a separate line.
+**Fix:** Rewrote description in `heal_bio_synthetic.yaml` and `heal_fanatic_doctrine.yaml` — removed action-variant run-on sentences (action cost is already in `action_cost` field), removed `@Template[emanation|distance:30]` Foundry markup, kept Heightened note as a clean paragraph.
 
 ### BUG-87: Rustbucket Ridge motel keeper not clickable and shows wrong descriptor
 **Severity:** medium
@@ -734,11 +742,11 @@
 
 ### BUG-83: No UI indication that player is in cover
 **Severity:** medium
-**Status:** open
+**Status:** fixed
 **Category:** UI
 **Description:** When a player takes cover, there is no visible indicator in the web UI showing their current cover status or tier. Cover is valid both in and out of combat, so the indicator must be visible in both contexts.
 **Steps:** Enter a room with cover equipment; take cover (in or out of combat); observe the web UI — no badge, condition icon, or status text reflects the active cover state.
-**Fix:** Add a cover condition badge to the room panel or character status area that is always visible (not only in the combat HUD), showing the current cover tier (e.g. "Standard Cover" or "Greater Cover").
+**Fix:** Populated `RoomView.active_conditions` from `sess.Conditions.All()` in `world_handler.go:buildRoomView`. Cover (and all other conditions) are now sent to the client on every room view refresh. `CharacterPanel.tsx` already renders `activeConditions` as badges — conditions including cover tiers now appear.
 
 ### BUG-82: No command to exit cover
 **Severity:** high

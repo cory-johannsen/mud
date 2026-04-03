@@ -257,16 +257,29 @@ func (h *WorldHandler) buildRoomView(uid string, room *world.Room) *gamev1.RoomV
 		zoneName = zone.Name
 	}
 
+	var activeConditions []*gamev1.ConditionInfo
+	if sess != nil && sess.Conditions != nil {
+		for _, ac := range sess.Conditions.All() {
+			activeConditions = append(activeConditions, &gamev1.ConditionInfo{
+				Id:                ac.Def.ID,
+				Name:              ac.Def.Name,
+				Stacks:            int32(ac.Stacks),
+				DurationRemaining: int32(ac.DurationRemaining),
+			})
+		}
+	}
+
 	return &gamev1.RoomView{
-		RoomId:      room.ID,
-		Title:       room.Title,
-		Description: description,
-		Exits:       exitInfos,
-		Players:     otherPlayers,
-		Npcs:        npcInfos,
-		Hour:        int32(hour),
-		Period:      string(period),
-		Equipment:   equipInfos,
-		ZoneName:    zoneName,
+		RoomId:           room.ID,
+		Title:            room.Title,
+		Description:      description,
+		Exits:            exitInfos,
+		Players:          otherPlayers,
+		Npcs:             npcInfos,
+		Hour:             int32(hour),
+		Period:           string(period),
+		Equipment:        equipInfos,
+		ZoneName:         zoneName,
+		ActiveConditions: activeConditions,
 	}
 }

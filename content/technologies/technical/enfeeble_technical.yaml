@@ -15,11 +15,9 @@ effects:
   on_apply:
   - type: utility
     dc: 0
-    description: 'You sap the target''s strength, depending on its Toughness save.
-
-
-      Critical Success The target is unaffected.
-
-      Success The target is Enfeebled 1 until the start of your next turn.
-
-      Failure The target is E'
+    description: |-
+      Toughness save results:
+      Critical Success: The target is unaffected.
+      Success: The target is Enfeebled 1 until the start of your next turn.
+      Failure: The target is Enfeebled 2 until the end of your next turn.
+      Critical Failure: The target is Enfeebled 3 for 1 minute.
