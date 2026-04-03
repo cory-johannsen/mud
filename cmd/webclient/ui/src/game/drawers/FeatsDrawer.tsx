@@ -14,26 +14,30 @@ function SlotPicker({
   onCancel: () => void
 }) {
   return (
-    <div style={styles.slotPicker}>
-      <span style={styles.slotPickerLabel}>Pick a hotbar slot:</span>
-      <div style={styles.slotPickerGrid}>
-        {SLOT_KEYS.map((key, i) => {
-          const current = hotbarSlots[i] ?? ''
-          return (
-            <button
-              key={key}
-              style={{ ...styles.slotBtn, ...(current ? styles.slotBtnOccupied : {}) }}
-              onClick={() => onPick(i + 1)}
-              title={current ? `Replace: ${current}` : `Slot ${key} (empty)`}
-              type="button"
-            >
-              <span style={styles.slotBtnKey}>{key}</span>
-              {current && <span style={styles.slotBtnCurrent}>{current}</span>}
-            </button>
-          )
-        })}
+    <div style={styles.slotPickerOverlay} onClick={onCancel}>
+      <div style={styles.slotPickerModal} onClick={(e) => e.stopPropagation()}>
+        <div style={styles.slotPickerHeader}>
+          <span style={styles.slotPickerLabel}>Add to Hotbar</span>
+          <button style={styles.cancelBtn} onClick={onCancel} type="button">✕</button>
+        </div>
+        <div style={styles.slotPickerGrid}>
+          {SLOT_KEYS.map((key, i) => {
+            const current = hotbarSlots[i] ?? ''
+            return (
+              <button
+                key={key}
+                style={{ ...styles.slotBtn, ...(current ? styles.slotBtnOccupied : {}) }}
+                onClick={() => onPick(i + 1)}
+                title={current ? `Replace: ${current}` : `Slot ${key} (empty)`}
+                type="button"
+              >
+                <span style={styles.slotBtnKey}>{key}</span>
+                {current && <span style={styles.slotBtnCurrent}>{current}</span>}
+              </button>
+            )
+          })}
+        </div>
       </div>
-      <button style={styles.cancelBtn} onClick={onCancel} type="button">Cancel</button>
     </div>
   )
 }
@@ -217,38 +221,53 @@ const styles: Record<string, React.CSSProperties> = {
     fontFamily: 'monospace',
     fontSize: '0.75rem',
   },
-  slotPicker: {
-    marginTop: '0.3rem',
+  slotPickerOverlay: {
+    position: 'fixed' as const,
+    inset: 0,
+    background: 'rgba(0,0,0,0.75)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 300,
+  },
+  slotPickerModal: {
     background: '#111',
     border: '1px solid #333',
-    borderRadius: '4px',
-    padding: '0.5rem',
+    borderRadius: '6px',
+    padding: '1rem',
+    maxWidth: '95vw',
+    width: 'max-content',
   },
-  slotPickerLabel: { color: '#888', fontSize: '0.75rem', display: 'block', marginBottom: '0.4rem' },
-  slotPickerGrid: { display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '3px', marginBottom: '0.4rem' },
+  slotPickerHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: '0.75rem',
+  },
+  slotPickerLabel: { color: '#ccc', fontSize: '0.85rem', fontFamily: 'monospace' },
+  slotPickerGrid: { display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '6px' },
   slotBtn: {
     display: 'flex',
     flexDirection: 'column' as const,
     alignItems: 'center',
-    padding: '0.2rem',
+    padding: '0.3rem 0.4rem',
     background: '#1a1a1a',
     border: '1px solid #333',
     borderRadius: '3px',
     cursor: 'pointer',
     fontFamily: 'monospace',
-    minHeight: '32px',
-    gap: '1px',
+    minHeight: '40px',
+    minWidth: '60px',
+    gap: '2px',
   },
   slotBtnOccupied: { borderColor: '#555', background: '#222' },
   slotBtnKey: { color: '#666', fontSize: '0.6rem', lineHeight: 1 },
   slotBtnCurrent: {
     color: '#999',
     fontSize: '0.6rem',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap' as const,
-    maxWidth: '100%',
     lineHeight: 1.2,
+    textAlign: 'center' as const,
+    wordBreak: 'break-word' as const,
   },
   cancelBtn: {
     padding: '0.15rem 0.5rem',
