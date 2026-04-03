@@ -1,0 +1,144 @@
+---
+name: Technology ID Refactor — Gunchete Names
+description: Two-phase CLI tool to rename all technology IDs from PF2E-sourced names to snake_case Gunchete names, with YAML file renames, reference updates, and DB migration.
+type: spec
+---
+
+# Technology ID Refactor — Gunchete Names
+
+## Problem
+
+Technology IDs currently expose PF2E source spell names (e.g. `acid_arrow_technical`, `daze_neural`, `stinking_cloud_technical`). The Gunchete-lore names are already defined in each tech's `name` field (e.g. "Corrosive Projectile", "Cranial Shock"). This refactor makes the `id` field match the Gunchete name, eliminating all PF2E leakage from IDs.
+
+## Scope
+
+- REQ-TIR-1: All 2,425 technology YAML `id:` fields MUST be updated to `snake_case(name)`.
+- REQ-TIR-2: Tradition suffixes (`_technical`, `_neural`, `_bio_synthetic`, `_fanatic_doctrine`) MUST be dropped; tradition is already encoded in the `tradition:` field.
+- REQ-TIR-3: YAML filenames MUST be renamed to match the new ID (e.g. `acid_arrow_technical.yaml` → `corrosive_projectile.yaml`).
+- REQ-TIR-4: All references to renamed IDs in job and archetype YAML files MUST be updated.
+- REQ-TIR-5: All hardcoded tech ID string literals in Go source files MUST be updated.
+- REQ-TIR-6: A DB migration MUST update all stored tech IDs across the four affected tables.
+- REQ-TIR-7: Names that still appear to be PF2E-sourced MUST be flagged in the rename map for human review before the apply pass is run.
+- REQ-TIR-8: IDs that are already correct (old_id == new_id) MUST be skipped in the apply pass.
+
+## Approach
+
+Two-phase CLI tool (`cmd/rename-tech-ids`):
+
+1. **Generate** — scan all tech YAMLs, derive new IDs, emit `tools/rename_map.yaml` for human review.
+2. **Apply** — read the approved map, rename files, rewrite IDs, update references, emit DB migration.
+
+## Architecture
+
+### Phase 1: Generate (`--generate` flag)
+
+The CLI reads every `.yaml` file under `content/technologies/`, derives `new_id` per the rule below, and writes `tools/rename_map.yaml`.
+
+Each entry in the map:
+
+```yaml
+renames:
+  - old_id: acid_arrow_technical
+    new_id: corrosive_projectile
+    name: "Corrosive Projectile"
+    file: content/technologies/technical/acid_arrow_technical.yaml
+    skip: false        # true if old_id == new_id (already correct)
+    pf2e_flag: false   # true if name looks PF2E-sourced (advisory, not blocking)
+    collision: false   # true if new_id collides with another tech's new_id
+```
+
+The apply pass refuses to run if any entry has `collision: true`. It proceeds with `pf2e_flag: true` entries (the flag is advisory only — the reviewer must fix source names before applying if desired).
+
+### ID Derivation Rule
+
+```
+new_id = snake_case(name)
+       = strings.ToLower(
+           regexp.MustCompile(`[^a-z0-9 ]`).ReplaceAllString(
+             strings.ToLower(name), ""))
+         with spaces replaced by underscores, collapsed runs of underscores to one
+```
+
+Examples:
+- `"Corrosive Projectile"` → `corrosive_projectile`
+- `"Cranial Shock"` → `cranial_shock`
+- `"K'galaserke's Axes"` → `kgalaserkes_axes`
+- `"Chrome Reflex"` → `chrome_reflex` (skip: true — already correct)
+
+### PF2E Flag Heuristic
+
+A name is flagged `pf2e_flag: true` if any of:
+- REQ-TIR-PF1: The normalized name matches a curated deny-list of known PF2E spell terms embedded in the tool.
+- REQ-TIR-PF2: The derived `new_id` matches the `old_id` after stripping the tradition suffix (i.e. the name was never localized — it is identical to the PF2E source name).
+- REQ-TIR-PF3: The name contains any of a short keyword list: `"Firebolt"`, `"Fireball"`, `"Magic Missile"`, `"Telekinesis"`, `"Bestow Curse"`, `"Mage Hand"`, `"Shillelagh"`, `"Prestidigitation"`, `"Tongues"`, `"Scrying"`, `"Antimagic"` (expandable).
+
+### Phase 2: Apply (`--apply` flag)
+
+Reads `tools/rename_map.yaml`. For each entry where `skip: false` and `collision: false`:
+
+1. **YAML file rename** — `os.Rename(old_path, new_path)` where `new_path` replaces the filename stem with `new_id`.
+2. **YAML id rewrite** — open the renamed file, replace the `id: <old_id>` line with `id: <new_id>`.
+3. **Job/archetype reference update** — scan all `content/jobs/*.yaml` and `content/archetypes/*.yaml` for all occurrences of `id: <old_id>` and replace with `id: <new_id>`.
+4. **Go source update** — pattern-match backtick and double-quoted string literals equal to `<old_id>` in:
+   - `internal/importer/static_localizer.go`
+   - All `internal/**/*_test.go` files
+   Replace with `<new_id>`.
+5. **DB migration emit** — write `migrations/058_rename_tech_ids.up.sql` and `migrations/058_rename_tech_ids.down.sql` (see below).
+
+After all renames, the CLI runs a validation pass: loads the full `Registry` via `technology.Load()` and asserts zero errors. On failure, it prints the offending files and exits non-zero.
+
+### DB Migration
+
+`migrations/058_rename_tech_ids.up.sql`:
+```sql
+-- Generated by cmd/rename-tech-ids --apply
+UPDATE character_hardwired_technologies  SET tech_id = 'corrosive_projectile' WHERE tech_id = 'acid_arrow_technical';
+UPDATE character_innate_technologies     SET tech_id = 'corrosive_projectile' WHERE tech_id = 'acid_arrow_technical';
+UPDATE character_spontaneous_technologies SET tech_id = 'corrosive_projectile' WHERE tech_id = 'acid_arrow_technical';
+UPDATE character_prepared_technologies   SET tech_id = 'corrosive_projectile' WHERE tech_id = 'acid_arrow_technical';
+-- ... one block per renamed ID
+```
+
+`migrations/058_rename_tech_ids.down.sql`: inverse of the above (new_id → old_id).
+
+Tables covered:
+- `character_hardwired_technologies.tech_id`
+- `character_innate_technologies.tech_id`
+- `character_spontaneous_technologies.tech_id`
+- `character_prepared_technologies.tech_id`
+
+## Feature Index Entry
+
+Slug: `technology-id-refactor`
+Category: `technology`
+Effort: `M`
+Dependencies: `technology`, `technology-short-names`
+
+## Testing
+
+- REQ-TIR-T1: `snake_case()` conversion MUST be tested with apostrophes, hyphens, numbers, multi-word names, and unicode edge cases.
+- REQ-TIR-T2: PF2E flag heuristic MUST be tested: known-PF2E name → flagged; already-Gunchete name → not flagged.
+- REQ-TIR-T3: Collision detection MUST be tested: two techs deriving the same `new_id` → both flagged `collision: true`.
+- REQ-TIR-T4: No-op detection MUST be tested: `old_id == new_id` → `skip: true`, excluded from apply.
+- REQ-TIR-T5: Apply pass idempotency MUST be tested: running apply twice produces no changes on second pass.
+- REQ-TIR-T6: Validation pass MUST be tested: a deliberately broken rename (reference not updated) → non-zero exit.
+
+## Files
+
+| File | Action |
+|------|--------|
+| `cmd/rename-tech-ids/main.go` | Create — CLI entry point (`--generate` / `--apply`) |
+| `cmd/rename-tech-ids/rename.go` | Create — ID derivation, PF2E flag, collision detection, map I/O |
+| `cmd/rename-tech-ids/rename_test.go` | Create — property tests for all derivation/detection logic |
+| `cmd/rename-tech-ids/apply.go` | Create — apply pass: file renames, YAML rewrites, Go updates, migration emit |
+| `cmd/rename-tech-ids/apply_test.go` | Create — apply pass idempotency and validation tests |
+| `tools/rename_map.yaml` | Created by `--generate`, edited by human, consumed by `--apply` |
+| `migrations/058_rename_tech_ids.up.sql` | Created by `--apply` |
+| `migrations/058_rename_tech_ids.down.sql` | Created by `--apply` |
+| `content/technologies/**/*.yaml` | Modified by `--apply` (id field + filename) |
+| `content/jobs/*.yaml` | Modified by `--apply` (tech ID references) |
+| `content/archetypes/*.yaml` | Modified by `--apply` (tech ID references) |
+| `internal/importer/static_localizer.go` | Modified by `--apply` (string literal replacements) |
+| `internal/**/*_test.go` | Modified by `--apply` (string literal replacements) |
+| `docs/features/technology-id-refactor.md` | Create — feature doc |
+| `docs/features/index.yaml` | Modify — add entry |
