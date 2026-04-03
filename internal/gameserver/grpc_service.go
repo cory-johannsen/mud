@@ -1647,15 +1647,23 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 	}
 
 	// Load pending tech levels from DB and reconstruct PendingTechGrants.
+	// Uses merged archetype+job grants (not job-only) so archetype level_up_grants are included.
 	if sess.CharacterID > 0 && s.progressRepo != nil && s.jobRegistry != nil {
 		if pendingLevels, err := s.progressRepo.GetPendingTechLevels(stream.Context(), sess.CharacterID); err == nil {
 			if len(pendingLevels) > 0 {
 				if job, ok := s.jobRegistry.Job(sess.Class); ok {
+					var archetypeLUG map[int]*ruleset.TechnologyGrants
+					if job.Archetype != "" {
+						if arch, aOK := s.archetypes[job.Archetype]; aOK {
+							archetypeLUG = arch.LevelUpGrants
+						}
+					}
+					mergedLUG := ruleset.MergeLevelUpGrants(archetypeLUG, job.LevelUpGrants)
 					if sess.PendingTechGrants == nil {
 						sess.PendingTechGrants = make(map[int]*ruleset.TechnologyGrants)
 					}
 					for _, lvl := range pendingLevels {
-						if grants, ok := job.LevelUpGrants[lvl]; ok && grants != nil {
+						if grants, gOK := mergedLUG[lvl]; gOK && grants != nil {
 							_, deferred := PartitionTechGrants(grants)
 							if deferred != nil {
 								sess.PendingTechGrants[lvl] = deferred
@@ -1675,6 +1683,32 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 			s.hardwiredTechRepo, s.preparedTechRepo, s.spontaneousTechRepo, s.innateTechRepo, s.spontaneousUsePoolRepo,
 		); techErr != nil {
 			s.logger.Warn("loading technologies", zap.Int64("character_id", characterID), zap.Error(techErr))
+		}
+	}
+
+	// Retroactively backfill any technology level-up grants that were never applied.
+	// This covers characters created before the archetype level_up_grants bug was fixed.
+	// BackfillLevelUpTechnologies is idempotent: only missing grants (delta > 0) are applied.
+	if s.hardwiredTechRepo != nil && s.preparedTechRepo != nil && s.jobRegistry != nil && characterID > 0 && sess.Level >= 2 {
+		if job, ok := s.jobRegistry.Job(sess.Class); ok {
+			var archetype *ruleset.Archetype
+			if job.Archetype != "" {
+				archetype = s.archetypes[job.Archetype]
+			}
+			var archetypeLUG map[int]*ruleset.TechnologyGrants
+			if archetype != nil {
+				archetypeLUG = archetype.LevelUpGrants
+			}
+			mergedLUG := ruleset.MergeLevelUpGrants(archetypeLUG, job.LevelUpGrants)
+			if err := BackfillLevelUpTechnologies(stream.Context(), sess, characterID,
+				job, archetype, mergedLUG, s.techRegistry,
+				s.hardwiredTechRepo, s.preparedTechRepo, s.spontaneousTechRepo, s.innateTechRepo, s.spontaneousUsePoolRepo,
+			); err != nil {
+				s.logger.Warn("BackfillLevelUpTechnologies failed",
+					zap.Int64("character_id", characterID),
+					zap.Error(err),
+				)
+			}
 		}
 	}
 

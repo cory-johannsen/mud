@@ -933,3 +933,162 @@ func removeSpontaneousByID(entries []ruleset.SpontaneousEntry, id string) []rule
 	}
 	return entries
 }
+
+// BackfillLevelUpTechnologies applies any technology level-up grants the player
+// should have earned for levels 2..sess.Level but does not yet have. It is safe
+// to call on every login: expected vs. actual slot counts are compared and only
+// missing grants are applied. Grants are auto-assigned (first-option fallback).
+//
+// Precondition: characterID > 0; sess.Level >= 1; prepRepo non-nil.
+// Postcondition: missing prepared slots are filled and persisted; missing
+// hardwired IDs are appended and persisted.
+func BackfillLevelUpTechnologies(
+	ctx context.Context,
+	sess *session.PlayerSession,
+	characterID int64,
+	job *ruleset.Job,
+	archetype *ruleset.Archetype,
+	mergedLevelUpGrants map[int]*ruleset.TechnologyGrants,
+	techReg *technology.Registry,
+	hwRepo HardwiredTechRepo,
+	prepRepo PreparedTechRepo,
+	spontRepo SpontaneousTechRepo,
+	innateRepo InnateTechRepo,
+	usePoolRepo SpontaneousUsePoolRepo,
+) error {
+	if characterID == 0 || sess.Level < 2 || len(mergedLevelUpGrants) == 0 {
+		return nil
+	}
+
+	// --- Prepared slots backfill ---
+	if prepRepo != nil {
+		// Compute expected total prepared slots per spell level:
+		// creation grants (job + archetype) + all level_up grants through sess.Level.
+		type spellAgg struct {
+			expectedSlots int
+			pool          []ruleset.PreparedEntry
+			fixed         []ruleset.PreparedEntry
+		}
+		bySpellLevel := make(map[int]*spellAgg)
+
+		addPrepGrant := func(pg *ruleset.PreparedGrants, countSlots bool) {
+			if pg == nil {
+				return
+			}
+			if countSlots {
+				for sl, n := range pg.SlotsByLevel {
+					a := bySpellLevel[sl]
+					if a == nil {
+						a = &spellAgg{}
+						bySpellLevel[sl] = a
+					}
+					a.expectedSlots += n
+				}
+			}
+			for _, e := range pg.Pool {
+				a := bySpellLevel[e.Level]
+				if a == nil {
+					a = &spellAgg{}
+					bySpellLevel[e.Level] = a
+				}
+				a.pool = append(a.pool, e)
+			}
+			for _, e := range pg.Fixed {
+				a := bySpellLevel[e.Level]
+				if a == nil {
+					a = &spellAgg{}
+					bySpellLevel[e.Level] = a
+				}
+				a.fixed = append(a.fixed, e)
+			}
+		}
+
+		// Creation grants contribute to the expected total but their pool entries
+		// were already assigned — they are not added to the delta pool.
+		if job != nil && job.TechnologyGrants != nil {
+			addPrepGrant(job.TechnologyGrants.Prepared, true)
+		}
+		if archetype != nil && archetype.TechnologyGrants != nil {
+			addPrepGrant(archetype.TechnologyGrants.Prepared, true)
+		}
+
+		// Level-up grants: count slots AND add pool entries for auto-fill.
+		for lvl := 2; lvl <= sess.Level; lvl++ {
+			g := mergedLevelUpGrants[lvl]
+			if g == nil || g.Prepared == nil {
+				continue
+			}
+			addPrepGrant(g.Prepared, true)
+		}
+
+		// Read actual state.
+		existingPrep, err := prepRepo.GetAll(ctx, characterID)
+		if err != nil {
+			return fmt.Errorf("BackfillLevelUpTechnologies GetAll: %w", err)
+		}
+
+		// Sort spell levels for deterministic order.
+		spellLevels := make([]int, 0, len(bySpellLevel))
+		for sl := range bySpellLevel {
+			spellLevels = append(spellLevels, sl)
+		}
+		sort.Ints(spellLevels)
+
+		for _, spellLvl := range spellLevels {
+			agg := bySpellLevel[spellLvl]
+			actual := len(existingPrep[spellLvl])
+			delta := agg.expectedSlots - actual
+			if delta <= 0 {
+				continue
+			}
+			deltaGrant := &ruleset.TechnologyGrants{
+				Prepared: &ruleset.PreparedGrants{
+					SlotsByLevel: map[int]int{spellLvl: delta},
+					Pool:         agg.pool,
+					Fixed:        agg.fixed,
+				},
+			}
+			if applyErr := LevelUpTechnologies(ctx, sess, characterID, deltaGrant, techReg, nil,
+				hwRepo, prepRepo, spontRepo, innateRepo, usePoolRepo,
+			); applyErr != nil {
+				return fmt.Errorf("BackfillLevelUpTechnologies prepared spell level %d: %w", spellLvl, applyErr)
+			}
+			// Refresh for next spell level's delta check.
+			existingPrep, err = prepRepo.GetAll(ctx, characterID)
+			if err != nil {
+				return fmt.Errorf("BackfillLevelUpTechnologies refresh GetAll: %w", err)
+			}
+		}
+	}
+
+	// --- Hardwired techs backfill ---
+	if hwRepo != nil {
+		existing := make(map[string]bool, len(sess.HardwiredTechs))
+		for _, id := range sess.HardwiredTechs {
+			existing[id] = true
+		}
+		var missing []string
+		for lvl := 2; lvl <= sess.Level; lvl++ {
+			g := mergedLevelUpGrants[lvl]
+			if g == nil {
+				continue
+			}
+			for _, id := range g.Hardwired {
+				if !existing[id] {
+					missing = append(missing, id)
+					existing[id] = true
+				}
+			}
+		}
+		if len(missing) > 0 {
+			hwGrant := &ruleset.TechnologyGrants{Hardwired: missing}
+			if applyErr := LevelUpTechnologies(ctx, sess, characterID, hwGrant, techReg, nil,
+				hwRepo, prepRepo, spontRepo, innateRepo, usePoolRepo,
+			); applyErr != nil {
+				return fmt.Errorf("BackfillLevelUpTechnologies hardwired: %w", applyErr)
+			}
+		}
+	}
+
+	return nil
+}
