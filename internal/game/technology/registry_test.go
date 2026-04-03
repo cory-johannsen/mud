@@ -1,6 +1,7 @@
 package technology_test
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -8,6 +9,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"pgregory.net/rapid"
 
 	"github.com/cory-johannsen/mud/internal/game/technology"
 )
@@ -174,4 +176,152 @@ func TestLoad_MalformedYAMLReturnsError(t *testing.T) {
 	assert.Error(t, err)
 	assert.Nil(t, reg)
 	assert.Contains(t, err.Error(), badPath)
+}
+
+// helper: write a single YAML file to a temp dir.
+func writeTechYAML(t *testing.T, dir, filename, content string) {
+	t.Helper()
+	err := os.WriteFile(filepath.Join(dir, filename), []byte(content), 0600)
+	require.NoError(t, err)
+}
+
+const baseTechYAML = `id: tech_alpha
+name: Alpha Tech
+tradition: technical
+level: 1
+usage_type: hardwired
+action_cost: 1
+range: self
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+    - type: utility
+      utility_type: unlock
+`
+
+// REQ-TSN-11a: Load() with valid short_name indexes the tech by short name.
+func TestLoad_ShortName_IndexedCorrectly(t *testing.T) {
+	dir := t.TempDir()
+	writeTechYAML(t, dir, "alpha.yaml", baseTechYAML+`short_name: ta
+`)
+	reg, err := technology.Load(dir)
+	require.NoError(t, err)
+	def, ok := reg.GetByShortName("ta")
+	require.True(t, ok)
+	assert.Equal(t, "tech_alpha", def.ID)
+}
+
+// REQ-TSN-11b: Load() returns error on duplicate short names.
+func TestLoad_ShortName_DuplicateReturnsError(t *testing.T) {
+	dir := t.TempDir()
+	writeTechYAML(t, dir, "alpha.yaml", baseTechYAML+`short_name: ta
+`)
+	writeTechYAML(t, dir, "beta.yaml", `id: tech_beta
+name: Beta Tech
+tradition: neural
+level: 1
+usage_type: hardwired
+action_cost: 1
+range: self
+targets: single
+duration: instant
+resolution: none
+short_name: ta
+effects:
+  on_apply:
+    - type: utility
+      utility_type: unlock
+`)
+	_, err := technology.Load(dir)
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "ta")
+}
+
+// REQ-TSN-11c: Load() returns error when short_name equals another tech's id.
+func TestLoad_ShortName_CollidesWithOtherID_ReturnsError(t *testing.T) {
+	dir := t.TempDir()
+	writeTechYAML(t, dir, "alpha.yaml", baseTechYAML)
+	writeTechYAML(t, dir, "beta.yaml", `id: tech_beta
+name: Beta Tech
+tradition: neural
+level: 1
+usage_type: hardwired
+action_cost: 1
+range: self
+targets: single
+duration: instant
+resolution: none
+short_name: tech_alpha
+effects:
+  on_apply:
+    - type: utility
+      utility_type: unlock
+`)
+	_, err := technology.Load(dir)
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "tech_alpha")
+}
+
+// REQ-TSN-11a (property): GetByShortName returns the correct def for any loaded short name.
+func TestProperty_Registry_GetByShortName_RoundTrip(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		sn := rapid.StringMatching(`[a-z][a-z0-9_]{1,30}[a-z0-9]`).Draw(rt, "shortName")
+		dir := t.TempDir()
+		writeTechYAML(t, dir, "tech.yaml", fmt.Sprintf(`id: tech_roundtrip
+name: Roundtrip Tech
+tradition: technical
+level: 1
+usage_type: hardwired
+action_cost: 1
+range: self
+targets: single
+duration: instant
+resolution: none
+short_name: %s
+effects:
+  on_apply:
+    - type: utility
+      utility_type: unlock
+`, sn))
+		reg, err := technology.Load(dir)
+		require.NoError(rt, err)
+		def, ok := reg.GetByShortName(sn)
+		assert.True(rt, ok)
+		if ok {
+			assert.Equal(rt, "tech_roundtrip", def.ID)
+		}
+	})
+}
+
+// GetByShortName returns (nil, false) for unknown short name.
+func TestGetByShortName_Unknown_ReturnsFalse(t *testing.T) {
+	reg := technology.NewRegistry()
+	def, ok := reg.GetByShortName("nope")
+	assert.False(t, ok)
+	assert.Nil(t, def)
+}
+
+// Register() populates byShortName when ShortName is set.
+func TestRegister_PopulatesShortNameIndex(t *testing.T) {
+	reg := technology.NewRegistry()
+	def := &technology.TechnologyDef{
+		ID:        "tech_reg",
+		ShortName: "tr",
+		Name:      "Reg Tech",
+		Tradition: technology.TraditionTechnical,
+		Level:     1,
+		UsageType: technology.UsageHardwired,
+		Range:     technology.RangeSelf,
+		Targets:   technology.TargetsSingle,
+		Duration:  "instant",
+		Effects: technology.TieredEffects{
+			OnApply: []technology.TechEffect{{Type: technology.EffectUtility, UtilityType: "unlock"}},
+		},
+	}
+	reg.Register(def)
+	got, ok := reg.GetByShortName("tr")
+	require.True(t, ok)
+	assert.Equal(t, "tech_reg", got.ID)
 }

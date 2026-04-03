@@ -21,6 +21,7 @@ type Registry struct {
 	byTradition map[Tradition][]*TechnologyDef
 	byLevel     map[int][]*TechnologyDef
 	byUsage     map[UsageType][]*TechnologyDef
+	byShortName map[string]*TechnologyDef
 }
 
 // NewRegistry returns an empty Registry.
@@ -30,14 +31,21 @@ func NewRegistry() *Registry {
 		byTradition: make(map[Tradition][]*TechnologyDef),
 		byLevel:     make(map[int][]*TechnologyDef),
 		byUsage:     make(map[UsageType][]*TechnologyDef),
+		byShortName: make(map[string]*TechnologyDef),
 	}
 }
 
 // Load walks dir recursively, parses all YAML files, validates each def,
 // and returns a populated Registry. Returns an error on the first invalid
-// file; the error message includes the file path.
+// file; the error message includes the file path. Duplicate short names or
+// short names that collide with an existing technology ID are also errors.
+//
+// Precondition: dir must be a valid, existing directory path.
+// Postcondition: returned Registry has all secondary indexes fully populated;
+// nil is returned on any error.
 func Load(dir string) (*Registry, error) {
-	r := NewRegistry()
+	// First pass: parse and validate all defs.
+	var defs []*TechnologyDef
 	err := filepath.WalkDir(dir, func(path string, d os.DirEntry, err error) error {
 		if err != nil {
 			return fmt.Errorf("walking %q: %w", path, err)
@@ -58,14 +66,34 @@ func Load(dir string) (*Registry, error) {
 		if err := def.Validate(); err != nil {
 			return fmt.Errorf("validating %q: %w", path, err)
 		}
-		r.byID[def.ID] = &def
-		r.byTradition[def.Tradition] = append(r.byTradition[def.Tradition], &def)
-		r.byLevel[def.Level] = append(r.byLevel[def.Level], &def)
-		r.byUsage[def.UsageType] = append(r.byUsage[def.UsageType], &def)
+		defs = append(defs, &def)
 		return nil
 	})
 	if err != nil {
 		return nil, err
+	}
+
+	r := NewRegistry()
+	// Build byID first so second pass can check short_name vs. all IDs.
+	for _, def := range defs {
+		r.byID[def.ID] = def
+	}
+	// Second pass: populate secondary indexes; enforce short_name uniqueness and ID collision.
+	for _, def := range defs {
+		r.byTradition[def.Tradition] = append(r.byTradition[def.Tradition], def)
+		r.byLevel[def.Level] = append(r.byLevel[def.Level], def)
+		r.byUsage[def.UsageType] = append(r.byUsage[def.UsageType], def)
+		if def.ShortName == "" {
+			continue
+		}
+		if existing, dup := r.byShortName[def.ShortName]; dup {
+			return nil, fmt.Errorf("duplicate short_name %q on %q and %q", def.ShortName, existing.ID, def.ID)
+		}
+		// Validate() already enforces ShortName != ID, so this check never triggers on def itself.
+		if other, col := r.byID[def.ShortName]; col {
+			return nil, fmt.Errorf("short_name %q on %q collides with existing technology id %q", def.ShortName, def.ID, other.ID)
+		}
+		r.byShortName[def.ShortName] = def
 	}
 	return r, nil
 }
@@ -76,13 +104,23 @@ func (r *Registry) Get(id string) (*TechnologyDef, bool) {
 	return d, ok
 }
 
+// GetByShortName returns the TechnologyDef for the given short name, or (nil, false) if not found.
+func (r *Registry) GetByShortName(short string) (*TechnologyDef, bool) {
+	d, ok := r.byShortName[short]
+	return d, ok
+}
+
 // Register adds or replaces a TechnologyDef in the registry by its ID.
 // Intended for use in tests and programmatic registry population.
 //
 // Precondition: def must be non-nil.
-// Postcondition: def is retrievable via Get(def.ID).
+// Postcondition: def is retrievable via Get(def.ID). If def.ShortName is non-empty,
+// def is also retrievable via GetByShortName(def.ShortName).
 func (r *Registry) Register(def *TechnologyDef) {
 	r.byID[def.ID] = def
+	if def.ShortName != "" {
+		r.byShortName[def.ShortName] = def
+	}
 }
 
 // All returns all loaded TechnologyDefs sorted by tradition ascending (lexicographic:
