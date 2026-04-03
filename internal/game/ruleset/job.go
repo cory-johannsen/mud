@@ -76,25 +76,25 @@ type FeatGrants struct {
 // Precondition: ID, Name, Archetype, KeyAbility, HitPointsPerLevel, and Tier must be non-zero after loading.
 // REQ-DTQ-13: Tier must be present in the YAML; missing or zero value is a fatal load error.
 type Job struct {
-	ID                 string                             `yaml:"id"`
-	Name               string                             `yaml:"name"`
-	Archetype          string                             `yaml:"archetype"`
-	Tier               int                                `yaml:"tier"`               // REQ-DTQ-13: required; 1=entry, 2=skilled, 3=specialist
-	Team               string                             `yaml:"team"` // empty = all teams; "gun" or "machete" = exclusive
-	Description        string                             `yaml:"description"`
-	KeyAbility         string                             `yaml:"key_ability"`
-	HitPointsPerLevel  int                                `yaml:"hit_points_per_level"`
-	Proficiencies      map[string]string                  `yaml:"proficiencies"`
-	SkillGrants        *SkillGrants                       `yaml:"skills"`
-	FeatGrants         *FeatGrants                        `yaml:"feats"`
-	ClassFeatureGrants []string                           `yaml:"class_features"`
-	Features           []JobFeature                       `yaml:"features"`
+	ID                      string                             `yaml:"id"`
+	Name                    string                             `yaml:"name"`
+	Archetype               string                             `yaml:"archetype"`
+	Tier                    int                                `yaml:"tier"` // REQ-DTQ-13: required; 1=entry, 2=skilled, 3=specialist
+	Team                    string                             `yaml:"team"` // empty = all teams; "gun" or "machete" = exclusive
+	Description             string                             `yaml:"description"`
+	KeyAbility              string                             `yaml:"key_ability"`
+	HitPointsPerLevel       int                                `yaml:"hit_points_per_level"`
+	Proficiencies           map[string]string                  `yaml:"proficiencies"`
+	SkillGrants             *SkillGrants                       `yaml:"skills"`
+	FeatGrants              *FeatGrants                        `yaml:"feats"`
+	ClassFeatureGrants      []string                           `yaml:"class_features"`
+	Features                []JobFeature                       `yaml:"features"`
 	AdvancementRequirements AdvancementRequirements            `yaml:"advancement_requirements,omitempty"`
 	Drawbacks               []DrawbackDef                      `yaml:"drawbacks,omitempty"`
-	StartingInventory  *inventory.StartingLoadoutOverride `yaml:"starting_inventory"`
-	TechnologyGrants   *TechnologyGrants                  `yaml:"technology_grants,omitempty"`
-	LevelUpGrants      map[int]*TechnologyGrants          `yaml:"level_up_grants,omitempty"`
-	LevelUpFeatGrants  map[int]*FeatGrants                `yaml:"level_up_feat_grants,omitempty"`
+	StartingInventory       *inventory.StartingLoadoutOverride `yaml:"starting_inventory"`
+	TechnologyGrants        *TechnologyGrants                  `yaml:"technology_grants,omitempty"`
+	LevelUpGrants           map[int]*TechnologyGrants          `yaml:"level_up_grants,omitempty"`
+	LevelUpFeatGrants       map[int]*FeatGrants                `yaml:"level_up_feat_grants,omitempty"`
 }
 
 // LoadJobs reads all .yaml files in dir and parses each as a Job.
