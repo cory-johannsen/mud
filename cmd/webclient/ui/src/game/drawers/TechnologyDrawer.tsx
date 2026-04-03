@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { useGame } from '../GameContext'
 import type {
   HardwiredSlotView,
@@ -45,7 +46,7 @@ function SlotPicker({
   onPick: (slot: number) => void
   onCancel: () => void
 }) {
-  return (
+  return createPortal(
     <div style={styles.slotPickerOverlay} onClick={onCancel}>
       <div style={styles.slotPickerModal} onClick={(e) => e.stopPropagation()}>
         <div style={styles.slotPickerHeader}>
@@ -70,7 +71,8 @@ function SlotPicker({
           })}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }
 
