@@ -788,7 +788,7 @@ features:
 
   - slug: technology-short-names
     name: Technology Short Names
-    status: planned
+    status: done
     priority: 483
     category: ui
     file: docs/features/technology-short-names.md
@@ -807,6 +807,16 @@ features:
     dependencies:
       - actions
 
+  - slug: hotbar-context-aware
+    name: Hotbar — Context-Aware Slots
+    status: spec
+    priority: 487
+    category: ui
+    file: docs/features/hotbar-context-aware.md
+    effort: "M"  # typed HotbarSlot model; proto change; DB migration; web UI display name + hover tooltips; inventory Add to hotbar buttons
+    dependencies:
+      - hotbar
+
   - slug: currency-refactor
     name: Currency Refactor — Crypto
     status: done
@@ -822,3 +832,14 @@ features:
     category: world
     file: docs/features/beginner-zone-rebalance.md
     effort: "M"  # zone danger levels, safe room NPC audit, combat NPC difficulty rebalance for both beginner zones
+
+  - slug: technology-id-refactor
+    name: Technology ID Refactor — Gunchete Names
+    status: spec
+    priority: 488
+    category: technology
+    file: docs/features/technology-id-refactor.md
+    effort: "M"  # two-phase CLI tool: generate rename map + apply; YAML renames, reference updates, DB migration for 2,425 tech IDs
+    dependencies:
+      - technology
+      - technology-short-names
