@@ -702,35 +702,35 @@
 
 ### BUG-87: Rustbucket Ridge motel keeper not clickable and shows wrong descriptor
 **Severity:** medium
-**Status:** open
+**Status:** fixed
 **Category:** UI
 **Description:** The motel keeper NPC in Rustbucket Ridge is not clickable in the web UI room panel, and displays the descriptor `Scrap Inn Clerk (unharmed)` instead of their name. Non-combat NPCs should be clickable to interact, and should display their defined name, not a generic role label with a health suffix.
 **Steps:** Navigate to Grinder's Row in Rustbucket Ridge; observe the motel keeper in the NPC list — displayed as `Scrap Inn Clerk (unharmed)` and not clickable.
-**Fix:** Ensure non-combat NPCs render their `name` field in the room panel and are wired to the NPC interaction click handler. Investigate why the health suffix `(unharmed)` is being appended to a non-combat NPC.
+**Fix:** Added `case 'motel_keeper': return '[motel]'` to `npcTypeTag()` in `RoomPanel.tsx`. The motel_keeper type was absent from the switch, causing it to fall through to the combat NPC path which adds the health suffix and omits the click handler.
 
 ### BUG-86: Player AC not displayed on character sheet
 **Severity:** medium
-**Status:** open
+**Status:** fixed
 **Category:** UI
 **Description:** The character sheet does not display the player's Armor Class. AC should be shown beneath the hit points field.
 **Steps:** Open the character sheet; observe that AC is absent.
-**Fix:** Add an AC row to the character sheet, positioned below hit points, populated from the character sheet data sent by the server.
+**Fix:** Added `AC {characterSheet.totalAc}` display to `CharacterPanel.tsx` immediately after the HP text, using the `totalAc` field already present in `CharacterSheetView`.
 
 ### BUG-85: Technology "Chrome Reflex" is a Reaction but has an "active" tag
 **Severity:** medium
-**Status:** open
+**Status:** fixed
 **Category:** Combat
 **Description:** The Chrome Reflex technology is a Reaction but is incorrectly tagged as `active` in its definition, causing it to appear in the Active category instead of the Reactions category.
 **Steps:** Equip Chrome Reflex; open the Feats/Technologies tab in the web UI; observe Chrome Reflex is listed as Active instead of Reaction.
-**Fix:** In the Chrome Reflex technology definition, remove the `active` tag and ensure it is correctly categorised as a reaction (matching BUG-68's fix pattern).
+**Fix:** Updated `InnateItem` in `TechnologyDrawer.tsx` to render a "reaction" badge (blue) when `slot.isReaction` is true, instead of always rendering the "active" badge (green). Added `badgeReaction` style to the styles map.
 
 ### BUG-84: Web UI character sheet displays job ID instead of job display name
 **Severity:** medium
-**Status:** open
+**Status:** fixed
 **Category:** UI
 **Description:** The character sheet in the web UI shows the raw job ID (e.g. `street_fighter`) instead of the human-readable display name (e.g. "Street Fighter").
 **Steps:** Log in; open the character sheet; observe the job field.
-**Fix:** Look up the job definition by ID and render its display name in the character sheet component.
+**Fix:** Reordered the `className` fallback chain in `CharacterPanel.tsx` to prefer `characterSheet?.job` (the server-resolved display name) over `characterInfo?.class` (the raw ID). New order: `characterSheet?.job ?? characterInfo?.className ?? characterInfo?.class_name ?? characterInfo?.class ?? ''`.
 
 ### BUG-83: No UI indication that player is in cover
 **Severity:** medium
@@ -742,19 +742,19 @@
 
 ### BUG-82: No command to exit cover
 **Severity:** high
-**Status:** open
+**Status:** fixed
 **Category:** Combat
 **Description:** Once a player takes cover there is no command or UI control to leave cover. The cover condition persists with no way to remove it voluntarily. Cover is valid both in and out of combat, so the exit mechanism must work in both contexts.
 **Steps:** Take cover (in or out of combat); attempt to find a command or button to exit cover — none exists.
-**Fix:** Implement an `uncover` command (and corresponding web UI button) that removes the active cover condition from the player regardless of combat state.
+**Fix:** Added `uncover` command (alias `uc`). Added `UncoverRequest` proto message (field 135), `HandleUncover` in `command/take_cover.go`, `handleUncover` in `grpc_service.go` (calls existing `clearPlayerCover`), wired into `commands.go`, `bridge_handlers.go`, and `websocket_dispatch.go`. Returns "You are not taking cover." if no cover active, otherwise "You leave cover."
 
 ### BUG-81: Cover message references "Stealth" instead of "Ghosting"
 **Severity:** low
-**Status:** open
+**Status:** fixed
 **Category:** Combat
 **Description:** The console message shown when taking cover reads `You take standard cover. (+2 AC, +2 Stealth)` but the correct in-game skill name is Ghosting, not Stealth.
 **Steps:** Enter a room with cover equipment; click the cover item or use the cover command; observe the console message.
-**Fix:** In `internal/gameserver/grpc_service.go:8252`, change the format string from `+%d Stealth` to `+%d Ghosting`.
+**Fix:** Changed format string in `grpc_service.go:handleTakeCover` from `+%d Stealth` to `+%d Ghosting`.
 
 ### BUG-80: Web UI "Wear" button does nothing for armor items
 **Severity:** high

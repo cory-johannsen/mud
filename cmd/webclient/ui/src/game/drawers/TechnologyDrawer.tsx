@@ -138,7 +138,9 @@ function InnateItem({
     <li style={styles.techItem}>
       <div style={styles.techHeader}>
         <strong style={{ color: exhausted ? '#666' : '#e0c060' }}>{name}</strong>
-        <span style={styles.badgeActive}>active</span>
+        {slot.isReaction
+          ? <span style={styles.badgeReaction}>reaction</span>
+          : <span style={styles.badgeActive}>active</span>}
         {max > 0 && <UsePips remaining={remaining} max={max} />}
       </div>
       {slot.description && <p style={styles.techDesc}>{slot.description}</p>}
@@ -404,6 +406,15 @@ const styles: Record<string, React.CSSProperties> = {
     background: '#2a3a1a',
     border: '1px solid #4a6a2a',
     color: '#8d4',
+    whiteSpace: 'nowrap' as const,
+  },
+  badgeReaction: {
+    fontSize: '0.65rem',
+    padding: '0.1rem 0.4rem',
+    borderRadius: '3px',
+    background: '#1a2a3a',
+    border: '1px solid #2a5a8a',
+    color: '#68d',
     whiteSpace: 'nowrap' as const,
   },
   badgePassive: {

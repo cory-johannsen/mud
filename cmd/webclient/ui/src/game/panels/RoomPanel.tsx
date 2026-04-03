@@ -9,8 +9,9 @@ function npcTypeTag(npcType: string): string {
     case 'quest_giver': return '[quest]'
     case 'guard':      return '[guard]'
     case 'fixer':      return '[fixer]'
-    case 'hireling':   return '[hire]'
-    default:           return ''
+    case 'hireling':     return '[hire]'
+    case 'motel_keeper': return '[motel]'
+    default:             return ''
   }
 }
 

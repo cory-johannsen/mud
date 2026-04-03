@@ -76,6 +76,7 @@ const (
 	HandlerAction             = "action"
 	HandlerRaiseShield        = "raise_shield"
 	HandlerTakeCover          = "take_cover"
+	HandlerUncover            = "uncover"
 	HandlerFirstAid           = "first_aid"
 	HandlerFeint              = "feint"
 	HandlerDemoralize         = "demoralize"
@@ -287,6 +288,7 @@ func BuiltinCommands() []Command {
 		{Name: "action", Aliases: []string{"act"}, Help: "Activate an archetype or job action. Usage: action [name] [target]", Category: CategoryCombat, Handler: HandlerAction},
 		{Name: "raise", Aliases: []string{"rs"}, Help: "Raise your shield (+2 AC until start of next turn). Requires a shield in the off-hand slot.", Category: CategoryCombat, Handler: HandlerRaiseShield},
 		{Name: "cover", Aliases: []string{"tc"}, Help: "Take cover (+2 AC for the encounter). Costs 1 AP in combat.", Category: CategoryCombat, Handler: HandlerTakeCover},
+		{Name: "uncover", Aliases: []string{"uc"}, Help: "Leave cover, removing any active cover condition.", Category: CategoryCombat, Handler: HandlerUncover},
 		{Name: "aid", Aliases: []string{"fa"}, Help: "Aid an ally (DC 20 check; crit +3, success +2, fail 0, crit fail -1 to ally attack). Costs 2 AP.", Category: CategoryCombat, Handler: HandlerAid},
 		{Name: "feint", Aliases: nil, Help: "Feint against a target (grift vs Perception DC; success applies flat_footed -2 AC for 1 round). Combat only, costs 1 AP.", Category: CategoryCombat, Handler: HandlerFeint},
 		{Name: "demoralize", Aliases: []string{"dem"}, Help: "Demoralize a target (smooth_talk vs Level+10 DC; success applies -1 AC and -1 attack for the encounter). Combat only, costs 1 AP.", Category: CategoryCombat, Handler: HandlerDemoralize},

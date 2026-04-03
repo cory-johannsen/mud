@@ -149,8 +149,12 @@ message ClientMessage {
     SpawnCharRequest     spawn_char_request    = 132;
     DeleteCharRequest    delete_char_request   = 133;
     KillNPCRequest       kill_npc_request      = 134;
+    UncoverRequest       uncover_request       = 135;
   }
 }
+
+// UncoverRequest asks the server to drop the player's current cover condition.
+message UncoverRequest {}
 
 // RestRequest asks the server to rest the player and rearrange prepared technology slots.
 message RestRequest {}

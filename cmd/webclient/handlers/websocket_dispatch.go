@@ -156,6 +156,9 @@ func buildMessageFromCommand(bctx *webBridgeContext) (*gamev1.ClientMessage, err
 	case command.HandlerTakeCover:
 		return &gamev1.ClientMessage{RequestId: reqID,
 			Payload: &gamev1.ClientMessage_TakeCover{TakeCover: &gamev1.TakeCoverRequest{}}}, nil
+	case command.HandlerUncover:
+		return &gamev1.ClientMessage{RequestId: reqID,
+			Payload: &gamev1.ClientMessage_UncoverRequest{UncoverRequest: &gamev1.UncoverRequest{}}}, nil
 	case command.HandlerFirstAid:
 		return &gamev1.ClientMessage{RequestId: reqID,
 			Payload: &gamev1.ClientMessage_FirstAid{FirstAid: &gamev1.FirstAidRequest{}}}, nil
@@ -825,6 +828,7 @@ func protoMessageByName(name string) (proto.Message, error) {
 		"StashWithdrawRequest":   func() proto.Message { return &gamev1.StashWithdrawRequest{} },
 		"StashBalanceRequest":    func() proto.Message { return &gamev1.StashBalanceRequest{} },
 		"TakeCoverRequest":       func() proto.Message { return &gamev1.TakeCoverRequest{} },
+		"UncoverRequest":         func() proto.Message { return &gamev1.UncoverRequest{} },
 		"EquipRequest":           func() proto.Message { return &gamev1.EquipRequest{} },
 		"WearRequest":            func() proto.Message { return &gamev1.WearRequest{} },
 		"LevelUpRequest":         func() proto.Message { return &gamev1.LevelUpRequest{} },
@@ -902,6 +906,8 @@ func wrapProtoAsClientMessage(reqID, typeName string, msg proto.Message) (*gamev
 		cm.Payload = &gamev1.ClientMessage_StashBalance{StashBalance: m}
 	case *gamev1.TakeCoverRequest:
 		cm.Payload = &gamev1.ClientMessage_TakeCover{TakeCover: m}
+	case *gamev1.UncoverRequest:
+		cm.Payload = &gamev1.ClientMessage_UncoverRequest{UncoverRequest: m}
 	case *gamev1.EquipRequest:
 		cm.Payload = &gamev1.ClientMessage_Equip{Equip: m}
 	case *gamev1.WearRequest:

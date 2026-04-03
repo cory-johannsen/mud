@@ -171,7 +171,7 @@ export function CharacterPanel() {
   }
 
   const name = characterInfo?.name ?? characterSheet?.name ?? ''
-  const className = characterInfo?.className ?? characterInfo?.class_name ?? characterInfo?.class ?? characterSheet?.className ?? characterSheet?.class_name ?? characterSheet?.job ?? ''
+  const className = characterSheet?.job ?? characterInfo?.className ?? characterInfo?.class_name ?? characterInfo?.class ?? ''
   const level = characterInfo?.level ?? characterSheet?.level ?? 0
   const currentHp = characterInfo?.currentHp ?? characterInfo?.current_hp ?? 0
   const maxHp = characterInfo?.maxHp ?? characterInfo?.max_hp ?? characterSheet?.maxHp ?? characterSheet?.max_hp ?? 0
@@ -204,6 +204,10 @@ export function CharacterPanel() {
           />
         </div>
         <span className="hp-text">{currentHp} / {maxHp} HP</span>
+
+        {(characterSheet?.totalAc ?? 0) > 0 && (
+          <span className="hp-text" style={{ marginLeft: '0.5rem' }}>AC {characterSheet!.totalAc}</span>
+        )}
 
         {conditions.length > 0 && (
           <div className="conditions">

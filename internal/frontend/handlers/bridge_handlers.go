@@ -106,6 +106,7 @@ var bridgeHandlerMap = map[string]bridgeHandlerFunc{
 	command.HandlerAction:             bridgeAction,
 	command.HandlerRaiseShield:        bridgeRaiseShield,
 	command.HandlerTakeCover:          bridgeTakeCover,
+	command.HandlerUncover:            bridgeUncover,
 	command.HandlerFirstAid:           bridgeFirstAid,
 	command.HandlerFeint:              bridgeFeint,
 	command.HandlerDemoralize:         bridgeDemoralize,
@@ -1047,6 +1048,16 @@ func bridgeTakeCover(bctx *bridgeContext) (bridgeResult, error) {
 	return bridgeResult{msg: &gamev1.ClientMessage{
 		RequestId: bctx.reqID,
 		Payload:   &gamev1.ClientMessage_TakeCover{TakeCover: &gamev1.TakeCoverRequest{}},
+	}}, nil
+}
+
+// bridgeUncover builds an UncoverRequest.
+// Precondition: bctx must be non-nil with a valid reqID.
+// Postcondition: returns a non-nil msg containing an UncoverRequest; done is false.
+func bridgeUncover(bctx *bridgeContext) (bridgeResult, error) {
+	return bridgeResult{msg: &gamev1.ClientMessage{
+		RequestId: bctx.reqID,
+		Payload:   &gamev1.ClientMessage_UncoverRequest{UncoverRequest: &gamev1.UncoverRequest{}},
 	}}, nil
 }
 

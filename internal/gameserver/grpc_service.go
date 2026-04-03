@@ -2268,6 +2268,8 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 		return s.handleDeleteChar(uid, p.DeleteCharRequest)
 	case *gamev1.ClientMessage_KillNpcRequest:
 		return s.handleKillNPC(uid, p.KillNpcRequest)
+	case *gamev1.ClientMessage_UncoverRequest:
+		return s.handleUncover(uid)
 	case *gamev1.ClientMessage_HotbarRequest:
 		evt, hbErr := s.handleHotbar(uid, p.HotbarRequest)
 		if hbErr != nil {
@@ -8254,8 +8256,33 @@ func (s *GameServiceServer) handleTakeCover(uid string) (*gamev1.ServerEvent, er
 		s.logger.Warn("handleTakeCover: Apply failed", zap.String("uid", uid), zap.Error(err))
 	}
 
-	return messageEvent(fmt.Sprintf("You take %s cover. (+%d AC, +%d Stealth)",
+	return messageEvent(fmt.Sprintf("You take %s cover. (+%d AC, +%d Ghosting)",
 		bestTier, def.ACPenalty, def.StealthBonus)), nil
+}
+
+// handleUncover drops the player's current cover condition.
+//
+// Precondition: uid must identify a valid player session.
+// Postcondition: All cover conditions removed; combatant cover cleared if in combat.
+func (s *GameServiceServer) handleUncover(uid string) (*gamev1.ServerEvent, error) {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return nil, fmt.Errorf("player %q not found", uid)
+	}
+	hasCover := false
+	if sess.Conditions != nil {
+		for _, coverID := range []string{"greater_cover", "standard_cover", "lesser_cover"} {
+			if sess.Conditions.Has(coverID) {
+				hasCover = true
+				break
+			}
+		}
+	}
+	if !hasCover {
+		return messageEvent("You are not taking cover."), nil
+	}
+	s.clearPlayerCover(uid, sess)
+	return messageEvent("You leave cover."), nil
 }
 
 // handleFirstAid performs a patch_job skill check (DC 15).
