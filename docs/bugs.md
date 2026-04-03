@@ -652,9 +652,41 @@
 **Steps:** Open the web client; engage and complete combat; observe the XP granted message in the console; navigate to the Stats tab and observe that the XP value has not updated.
 **Fix:** `CombatHandler.pushXPMessages` was sending XP grant text messages but never pushing a `CharacterSheetView` to the client. The `StatsDrawer` reads XP from `state.characterSheet`, which is only updated when a `CharacterSheetView` arrives. Added a `pushCharacterSheetFn func(*session.PlayerSession)` callback field to `CombatHandler` with `SetPushCharacterSheetFn`, called unconditionally at the end of `pushXPMessages`. Wired `s.pushCharacterSheet` as the callback in `grpc_service.go`.
 
+### BUG-118: Boot job displays team designator in name instead of plain "Boot"
+**Severity:** low
+**Status:** fixed
+**Category:** UI
+**Description:** The starter jobs "Boot (Machete)" and "Boot (Gun)" expose the internal team designator in their display name. Players should see the name "Boot" only — the team affinity is internal information and must not appear in any player-facing display (job selection, character sheet, trainer UI, web UI Job tab).
+**Steps:** Create a character or view the job trainer; observe the job name is shown as "Boot (Machete)" or "Boot (Gun)" instead of "Boot".
+**Fix:** Set the display name of both Boot job definitions to "Boot". The team designator should remain in the internal ID or a non-displayed field only.
+
+### BUG-117: Web UI map POI legend does not use multiple columns when width is available
+**Severity:** low
+**Status:** fixed
+**Category:** UI
+**Description:** The Points of Interest legend in the web UI map panel renders as a single column regardless of available width. When the panel is wide enough, the POI legend entries should flow into multiple columns to make better use of space and reduce vertical scrolling.
+**Steps:** Open the map panel in the web UI at a wide viewport; observe the POI legend renders as a single column.
+**Fix:** Apply a multi-column layout to the POI legend (e.g. CSS `column-count` or a responsive grid) so POI entries flow into additional columns when the available width allows.
+
+### BUG-116: Player attack narrative never includes weapon name; unarmed damage type is empty
+**Severity:** medium
+**Status:** fixed
+**Category:** Combat
+**Description:** Two related combat narrative gaps: (1) `buildPlayerCombatant()` in `combat_handler.go:2574` only sets `WeaponDamageType` from the equipped weapon but never sets `WeaponName`, so attack narratives for all players — armed or unarmed — omit the weapon name (e.g. "Player strikes Target" instead of "Player strikes Target with a Riot Shotgun"); (2) unarmed attacks have an empty `DamageType`, which produces incomplete damage log entries.
+**Steps:** Equip any weapon; enter combat; attack — observe the narrative contains no weapon name. Remove all weapons; attack — observe the narrative is identical and damage type is absent.
+**Fix:** In `buildPlayerCombatant()` (`combat_handler.go`), set `WeaponName` from `Loadout.MainHand.Def.Name` when a weapon is equipped. For unarmed attacks, set `WeaponName` to "fists" and `WeaponDamageType` to "bludgeoning".
+
+### BUG-115: Armor Training AC bonus not applied; untrained armor penalty not applied
+**Severity:** critical
+**Status:** fixed
+**Category:** Combat
+**Description:** Two related Armor Training mechanics are not functioning: (1) the AC bonus granted by Armor Training for the trained armor category is not applied to the player's effective AC; (2) the check penalty and speed penalty for equipping armor in a category the player is not trained in are not applied. Players receive neither the benefit of training nor the penalty for lacking it.
+**Steps:** Train Armor Training for a category (e.g. Medium); equip armor of that category; observe AC is unchanged. Equip armor of an untrained category; observe no check or speed penalty is applied.
+**Fix:** In the AC and penalty calculation paths, check the player's Armor Training feat and trained category against the equipped armor category. Apply the trained AC bonus when the categories match; apply the untrained check and speed penalties when they do not.
+
 ### BUG-114: Hovering consumable items in Inventory tab shows no details tooltip
 **Severity:** low
-**Status:** open
+**Status:** fixed
 **Category:** UI
 **Description:** Hovering over a consumable item in the web UI Inventory tab does not display a tooltip with the item's description and effects. Other item types show hover details; consumables do not.
 **Steps:** Open the Inventory tab; hover over a consumable item — no tooltip appears.
@@ -662,7 +694,7 @@
 
 ### BUG-113: Mobile web UI region selection during character creation not scrollable
 **Severity:** high
-**Status:** open
+**Status:** fixed
 **Category:** UI
 **Description:** On mobile browsers the region selection step during character creation cannot be scrolled, preventing the user from reaching and selecting a region. This is a second instance of the mobile scrolling issue first reported in BUG-108 (which covered character creation generally); this specifically identifies the region selection screen as a non-scrollable blocker.
 **Steps:** Open the web UI on a mobile browser; begin character creation; reach the region selection step; attempt to scroll to view all regions and make a selection — scrolling does not work.
@@ -670,7 +702,7 @@
 
 ### BUG-112: Web UI room exits not displayed as 8-point compass navigation control
 **Severity:** medium
-**Status:** open
+**Status:** fixed
 **Category:** UI
 **Description:** Room exit controls in the web UI are not arranged as a compass. They should be displayed in a fixed 8-point compass layout (N, NE, E, SE, S, SW, W, NW) with North at the top center. If no exit exists for a compass point the position should be left empty, preserving the layout so the player can immediately understand available directions spatially.
 **Steps:** Enter any room with exits; observe the exit controls — exits are listed without compass orientation rather than in a fixed 8-point grid.
@@ -694,7 +726,7 @@
 
 ### BUG-109: Armor Training feat in Feats tab does not display the selected armor category
 **Severity:** low
-**Status:** open
+**Status:** fixed
 **Category:** UI
 **Description:** In the Feats tab, the Armor Training passive feat is displayed without indicating which armor category the player selected during training (e.g. "Light", "Medium", "Heavy"). The player has no way to see their trained armor type from the UI.
 **Steps:** Have a character with Armor Training trained to a category; open the Feats tab; observe the Armor Training entry — no armor category is shown.
@@ -702,7 +734,7 @@
 
 ### BUG-108: Web UI character creation not scrollable on mobile browsers
 **Severity:** high
-**Status:** open
+**Status:** fixed
 **Category:** UI
 **Description:** On mobile browsers the character creation flow cannot be scrolled, making it impossible to reach controls below the visible viewport and complete character creation.
 **Steps:** Open the web UI in a mobile browser; begin character creation; attempt to scroll down to reach lower sections or buttons — scrolling does not work and controls are unreachable.
