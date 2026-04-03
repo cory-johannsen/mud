@@ -923,13 +923,14 @@ message FeatsRequest {}
 
 // FeatEntry represents one feat with its details.
 message FeatEntry {
-  string feat_id       = 1;
-  string name          = 2;
-  string category      = 3;
-  bool   active        = 4;
-  string description   = 5;
-  string activate_text = 6;
-  bool   is_reaction   = 7;
+  string feat_id        = 1;
+  string name           = 2;
+  string category       = 3;
+  bool   active         = 4;
+  string description    = 5;
+  string activate_text  = 6;
+  bool   is_reaction    = 7;
+  string armor_category = 8;
 }
 
 // FeatsResponse contains all feat entries for the character.

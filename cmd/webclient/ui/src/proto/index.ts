@@ -118,6 +118,7 @@ export interface FeatEntry {
   description?: string
   activateText?: string
   isReaction?: boolean
+  armorCategory?: string
 }
 
 export interface PreparedSlotView {

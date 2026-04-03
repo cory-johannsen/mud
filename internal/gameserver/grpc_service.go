@@ -6752,14 +6752,19 @@ func (s *GameServiceServer) handleFeats(uid string) (*gamev1.ServerEvent, error)
 		if !ok {
 			continue
 		}
+		armorCat := ""
+		if f.ID == "armor_training" && sess.FeatureChoices != nil {
+			armorCat = armorProfCategoryLabel(sess.FeatureChoices["armor_training"]["armor_category"])
+		}
 		entries = append(entries, &gamev1.FeatEntry{
-			FeatId:       f.ID,
-			Name:         f.Name,
-			Category:     f.Category,
-			Active:       f.Active,
-			Description:  f.Description,
-			ActivateText: f.ActivateText,
-			IsReaction:   f.Reaction != nil,
+			FeatId:        f.ID,
+			Name:          f.Name,
+			Category:      f.Category,
+			Active:        f.Active,
+			Description:   f.Description,
+			ActivateText:  f.ActivateText,
+			IsReaction:    f.Reaction != nil,
+			ArmorCategory: armorCat,
 		})
 	}
 	return &gamev1.ServerEvent{

@@ -65,7 +65,7 @@ function FeatItem({
     <li style={styles.featItem}>
       <div style={styles.featHeader}>
         <strong style={{ color: feat.isReaction ? '#f0a050' : feat.active ? '#e0c060' : '#aaa' }}>
-          {feat.name ?? ''}
+          {feat.name ?? ''}{feat.armorCategory ? ` (${feat.armorCategory})` : ''}
         </strong>
         <span style={feat.isReaction ? styles.badgeReaction : feat.active ? styles.badgeActive : styles.badgePassive}>
           {feat.isReaction ? 'reaction' : feat.active ? 'active' : 'passive'}
