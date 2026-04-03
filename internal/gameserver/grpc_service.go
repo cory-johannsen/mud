@@ -560,6 +560,8 @@ func NewGameServiceServer(
 		}
 		// REQ-BUG61-1: wire pushCharacterSheet so the web UI Stats tab updates after XP award.
 		s.combatH.SetPushCharacterSheetFn(s.pushCharacterSheet)
+		// REQ-BUG92-1: wire pushInventory so the web UI Inventory tab updates after currency award.
+		s.combatH.SetPushInventoryFn(s.pushInventory)
 	}
 	s.merchantRuntimeStates = make(map[string]*npc.MerchantRuntimeState)
 	s.bankerRuntimeStates = make(map[string]*npc.BankerRuntimeState)
@@ -5482,6 +5484,31 @@ func (s *GameServiceServer) pushCharacterSheet(sess *session.PlayerSession) {
 	}
 	if err := sess.Entity.Push(data); err != nil {
 		s.logger.Warn("pushCharacterSheet: push failed", zap.String("uid", sess.UID), zap.Error(err))
+	}
+}
+
+// pushInventory pushes a fresh InventoryView event to the given player session.
+// It is wired into CombatHandler via SetPushInventoryFn so the web UI Inventory
+// tab updates immediately when currency is distributed after combat.
+//
+// Precondition: sess must be non-nil and have a non-nil Entity.
+// Postcondition: An InventoryView event is marshaled and pushed; errors are
+// logged and silently dropped so the calling handler is unaffected.
+func (s *GameServiceServer) pushInventory(sess *session.PlayerSession) {
+	if sess == nil || sess.Entity == nil {
+		return
+	}
+	evt, err := s.handleInventory(sess.UID)
+	if err != nil || evt == nil {
+		return
+	}
+	data, err := proto.Marshal(evt)
+	if err != nil {
+		s.logger.Warn("pushInventory: marshal failed", zap.Error(err))
+		return
+	}
+	if err := sess.Entity.Push(data); err != nil {
+		s.logger.Warn("pushInventory: push failed", zap.String("uid", sess.UID), zap.Error(err))
 	}
 }
 

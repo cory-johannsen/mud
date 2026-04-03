@@ -121,6 +121,10 @@ type CombatHandler struct {
 	// an updated CharacterSheetView to the player so the web UI Stats tab refreshes.
 	// May be nil; no-op when nil.
 	pushCharacterSheetFn func(sess *session.PlayerSession)
+	// pushInventoryFn is an optional callback invoked after currency loot is awarded to push
+	// an updated InventoryView to the player so the web UI Inventory tab refreshes.
+	// May be nil; no-op when nil.
+	pushInventoryFn func(sess *session.PlayerSession)
 }
 
 // NewCombatHandler creates a CombatHandler with a round timer and broadcast function.
@@ -260,6 +264,15 @@ func (h *CombatHandler) SetQuestService(svc *quest.Service) {
 // Postcondition: fn is called once per XP award with the receiving session.
 func (h *CombatHandler) SetPushCharacterSheetFn(fn func(sess *session.PlayerSession)) {
 	h.pushCharacterSheetFn = fn
+}
+
+// SetPushInventoryFn registers a callback called after currency loot is distributed
+// to push an updated InventoryView to the player so the web UI reflects the new balance.
+//
+// Precondition: fn may be nil (no-op when nil).
+// Postcondition: fn is called once per currency award with the receiving session.
+func (h *CombatHandler) SetPushInventoryFn(fn func(sess *session.PlayerSession)) {
+	h.pushInventoryFn = fn
 }
 
 // SetCurrencySaver registers the saver used to persist player currency after loot award.
@@ -3882,6 +3895,9 @@ func (h *CombatHandler) removeDeadNPCsLocked(cbt *combat.Combat) {
 			inst.Currency = 0
 			livingParticipants := h.livingParticipantSessions(cbt)
 			h.distributeCurrencyLocked(context.Background(), livingParticipants, totalCurrency)
+			if totalCurrency > 0 {
+				h.pushCurrencyMessages(livingParticipants, totalCurrency, c.Name)
+			}
 			// Drop items on the room floor.
 			if h.floorMgr != nil {
 				for _, lootItem := range result.Items {
@@ -3905,6 +3921,7 @@ func (h *CombatHandler) removeDeadNPCsLocked(cbt *combat.Combat) {
 			inst.Currency = 0
 			livingParticipants := h.livingParticipantSessions(cbt)
 			h.distributeCurrencyLocked(context.Background(), livingParticipants, totalCurrency)
+			h.pushCurrencyMessages(livingParticipants, totalCurrency, c.Name)
 		}
 		// Announce NPC death in the console.
 		deathNarrative := fmt.Sprintf("%s is dead!", c.Name)
@@ -4195,6 +4212,42 @@ func (h *CombatHandler) pushLootMessages(livingParticipants []*session.PlayerSes
 		}
 		if data, marshalErr := proto.Marshal(evt); marshalErr == nil {
 			_ = p.Entity.Push(data)
+		}
+	}
+}
+
+// pushCurrencyMessages sends a currency grant notification and an InventoryView refresh
+// to each living combat participant after currency loot is distributed.
+//
+// Precondition: livingParticipants must not be nil; totalCurrency must be > 0.
+// Postcondition: Each participant whose Entity is non-nil receives one MessageEvent
+// describing their individual currency share, and pushInventoryFn is called so the
+// web UI Inventory tab reflects the updated balance.
+func (h *CombatHandler) pushCurrencyMessages(livingParticipants []*session.PlayerSession, totalCurrency int, npcName string) {
+	if totalCurrency == 0 || len(livingParticipants) == 0 {
+		return
+	}
+	share := totalCurrency / len(livingParticipants)
+	if share == 0 {
+		share = 1
+	}
+	for _, p := range livingParticipants {
+		if p.Entity == nil {
+			continue
+		}
+		evt := &gamev1.ServerEvent{
+			Payload: &gamev1.ServerEvent_Message{
+				Message: &gamev1.MessageEvent{
+					Content: fmt.Sprintf("You gain %s from %s.", inventory.FormatCrypto(share), npcName),
+					Type:    gamev1.MessageType_MESSAGE_TYPE_UNSPECIFIED,
+				},
+			},
+		}
+		if data, marshalErr := proto.Marshal(evt); marshalErr == nil {
+			_ = p.Entity.Push(data)
+		}
+		if h.pushInventoryFn != nil {
+			h.pushInventoryFn(p)
 		}
 	}
 }

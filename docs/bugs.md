@@ -652,6 +652,22 @@
 **Steps:** Open the web client; engage and complete combat; observe the XP granted message in the console; navigate to the Stats tab and observe that the XP value has not updated.
 **Fix:** `CombatHandler.pushXPMessages` was sending XP grant text messages but never pushing a `CharacterSheetView` to the client. The `StatsDrawer` reads XP from `state.characterSheet`, which is only updated when a `CharacterSheetView` arrives. Added a `pushCharacterSheetFn func(*session.PlayerSession)` callback field to `CombatHandler` with `SetPushCharacterSheetFn`, called unconditionally at the end of `pushXPMessages`. Wired `s.pushCharacterSheet` as the callback in `grpc_service.go`.
 
+### BUG-96: Post-combat item loot shown in console but not added to inventory
+**Severity:** high
+**Status:** open
+**Category:** Combat
+**Description:** At the end of combat the console correctly reports looted items (e.g. `You looted: Scrap Metal (x4)`) but the items are not present in the player's inventory. The loot message is generated but the item grant is either not persisted or not reflected in the inventory view.
+**Steps:** Enter combat; defeat all NPCs; observe the console shows a loot message (e.g. `You looted: Scrap Metal (x4)`); open the Inventory tab — the looted items are absent.
+**Fix:** Investigate the post-combat loot grant path to determine whether items are being added to the session inventory and persisted. Ensure an updated `InventoryView` is pushed to the client immediately after the grant so the inventory panel reflects the new items without requiring a reconnect.
+
+### BUG-95: Clicking motel keeper (Scrap Inn Clerk) shows examine result instead of rest modal
+**Severity:** high
+**Status:** open
+**Category:** UI
+**Description:** Clicking the motel keeper NPC in the web UI opens a panel showing the examine/description output instead of a rest interaction modal. The player should be presented with a modal to purchase a rest (showing cost and available options) when clicking a motel keeper.
+**Steps:** Navigate to a room with a motel keeper; click the NPC; observe the examine description is displayed instead of a rest modal.
+**Fix:** Wire the motel keeper NPC click handler to open a rest interaction modal (equivalent to the `rest` command flow), rather than falling through to the generic examine display.
+
 ### BUG-94: Consumable merchant inventory shows item IDs instead of display names; no hover description
 **Severity:** medium
 **Status:** open
@@ -670,11 +686,11 @@
 
 ### BUG-92: Post-combat loot grant not notified and inventory not refreshed in web UI
 **Severity:** high
-**Status:** open
+**Status:** fixed
 **Category:** UI
 **Description:** After defeating NPCs the player receives no loot notification in the console and the inventory panel does not update to reflect the Crypto gain. The Crypto was in fact awarded — logging out and back in shows the correct balance. The server-side loot grant is correct; the client is not being told about it.
 **Steps:** Enter combat; defeat all NPCs; observe the end-of-combat console — no loot message appears and the inventory Crypto total is unchanged; log out and log back in; observe the inventory now shows the correct Crypto balance.
-**Fix:** In the post-combat loot resolution path, ensure a console message is pushed to the player for each Crypto grant and that an updated `InventoryView` (or `CharacterSheetView`) is pushed immediately after the grant so the web UI reflects the new balance without requiring a reconnect.
+**Fix:** Added `pushCurrencyMessages` to `CombatHandler` which sends a console message and calls the new `pushInventoryFn` callback for each surviving participant after `distributeCurrencyLocked`. Added `pushInventory` to `GameServiceServer` (parallel to `pushCharacterSheet`) and wired it via `SetPushInventoryFn` during combat handler initialization.
 
 ### BUG-91: Same character can be selected by multiple concurrent sessions; no active-session indicators or force-logout control
 **Severity:** critical
