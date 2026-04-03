@@ -103,6 +103,11 @@ func applyFeatGrantWithBaseline(
 // should have earned for levels 2..sess.Level but does not yet have. Auto-assigns
 // by first-available pool order. Safe to call on every login (idempotent).
 //
+// levelGrantsRepo, when non-nil, is consulted to determine whether a given level
+// has already been processed. This prevents re-granting when creation feats share
+// a pool with level-up feats. After granting, each processed level is marked in
+// the repo. Pass nil to skip level-grant tracking (for tests or legacy callers).
+//
 // Precondition: characterID > 0; featsRepo non-nil.
 // Postcondition: character_feats table contains all expected level-up feats.
 func BackfillLevelUpFeats(
@@ -112,6 +117,7 @@ func BackfillLevelUpFeats(
 	mergedFeatGrants map[int]*ruleset.FeatGrants,
 	featReg *ruleset.FeatRegistry,
 	featsRepo CharacterFeatsRepo,
+	levelGrantsRepo CharacterFeatLevelGrantsRepo,
 ) error {
 	if characterID == 0 || sess.Level < 2 || len(mergedFeatGrants) == 0 {
 		return nil
@@ -135,21 +141,35 @@ func BackfillLevelUpFeats(
 	}
 	sort.Ints(levels)
 
-	// preExisting is a frozen snapshot of what was in the DB before this run.
-	// It is used by applyFeatGrantWithBaseline to count "already satisfied" quota
-	// independently of feats granted earlier in the same backfill run.
-	preExisting := make(map[string]bool, len(existing))
-	for id := range existing {
-		preExisting[id] = true
-	}
-
 	for _, lvl := range levels {
+		// Skip levels already processed — prevents re-granting when creation
+		// feats overlap with level-up pools.
+		if levelGrantsRepo != nil {
+			granted, gErr := levelGrantsRepo.IsLevelGranted(ctx, characterID, lvl)
+			if gErr != nil {
+				return gErr
+			}
+			if granted {
+				continue
+			}
+		}
+
 		grants := mergedFeatGrants[lvl]
 		if grants == nil {
 			continue
 		}
-		if _, err := applyFeatGrantWithBaseline(ctx, characterID, existing, preExisting, grants, featReg, featsRepo); err != nil {
+		// Use an empty preExisting baseline so that pool quota counts only
+		// feats granted in THIS run, not creation feats.
+		if _, err := applyFeatGrantWithBaseline(ctx, characterID,
+			existing, make(map[string]bool), grants, featReg, featsRepo,
+		); err != nil {
 			return err
+		}
+
+		if levelGrantsRepo != nil {
+			if mErr := levelGrantsRepo.MarkLevelGranted(ctx, characterID, lvl); mErr != nil {
+				return mErr
+			}
 		}
 	}
 	return nil

@@ -31,6 +31,7 @@ type StorageDeps struct {
 	SkillsRepo             CharacterSkillsRepository
 	ProficienciesRepo      CharacterProficienciesRepository
 	FeatsRepo              CharacterFeatsRepo
+	FeatLevelGrantsRepo    CharacterFeatLevelGrantsRepo
 	ClassFeaturesRepo      CharacterClassFeaturesGetter
 	FeatureChoicesRepo     CharacterFeatureChoicesRepository
 	AbilityBoostsRepo      postgres.CharacterAbilityBoostsRepository

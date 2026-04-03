@@ -60,12 +60,14 @@ func Initialize(ctx context.Context, cfg *AppConfig, clock *gameserver.GameClock
 	characterMaterialsRepository := postgres.NewCharacterMaterialsRepository(pgxpoolPool)
 	characterDowntimeRepository := postgres.NewCharacterDowntimeRepository(pgxpoolPool)
 	characterDowntimeQueueRepository := postgres.NewCharacterDowntimeQueueRepository(pgxpoolPool)
+	characterFeatLevelGrantsRepository := postgres.NewCharacterFeatLevelGrantsRepository(pgxpoolPool)
 	storageDeps := gameserver.StorageDeps{
 		CharRepo:               characterRepository,
 		AccountRepo:            accountRepoAdapter,
 		SkillsRepo:             characterSkillsRepository,
 		ProficienciesRepo:      characterProficienciesRepository,
 		FeatsRepo:              characterFeatsRepository,
+		FeatLevelGrantsRepo:    characterFeatLevelGrantsRepository,
 		ClassFeaturesRepo:      characterClassFeaturesRepository,
 		FeatureChoicesRepo:     characterFeatureChoicesRepo,
 		AbilityBoostsRepo:      postgresCharacterAbilityBoostsRepository,

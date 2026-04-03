@@ -393,6 +393,13 @@ func applyAllMigrations(pool *pgxpool.Pool) error {
 			ON weather_events (active)
 			WHERE active = TRUE;
 
+		-- Migration 058
+		CREATE TABLE IF NOT EXISTS character_feat_level_grants (
+			character_id BIGINT NOT NULL REFERENCES characters(id) ON DELETE CASCADE,
+			level        INT    NOT NULL,
+			PRIMARY KEY  (character_id, level)
+		);
+
 		-- Migration 002: zones and rooms schema (matches 002_zones_rooms.up.sql)
 		CREATE TABLE IF NOT EXISTS zones (
 			id          TEXT PRIMARY KEY,

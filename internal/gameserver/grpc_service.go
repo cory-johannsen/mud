@@ -187,6 +187,15 @@ type CharacterFeatsRepo interface {
 	Add(ctx context.Context, characterID int64, featID string) error
 }
 
+// CharacterFeatLevelGrantsRepo tracks which character levels have had their
+// feat level-up grants applied, preventing re-processing when pools overlap.
+//
+// Precondition: characterID > 0; level >= 2.
+type CharacterFeatLevelGrantsRepo interface {
+	IsLevelGranted(ctx context.Context, characterID int64, level int) (bool, error)
+	MarkLevelGranted(ctx context.Context, characterID int64, level int) error
+}
+
 // CharacterClassFeaturesGetter retrieves the class feature IDs assigned to a character.
 //
 // Precondition: characterID must be > 0.
@@ -241,6 +250,7 @@ type GameServiceServer struct {
 	allFeats                   []*ruleset.Feat
 	featRegistry               *ruleset.FeatRegistry
 	characterFeatsRepo         CharacterFeatsRepo
+	featLevelGrantsRepo        CharacterFeatLevelGrantsRepo
 	allClassFeatures           []*ruleset.ClassFeature
 	classFeatureRegistry       *ruleset.ClassFeatureRegistry
 	characterClassFeaturesRepo CharacterClassFeaturesGetter
@@ -486,6 +496,7 @@ func NewGameServiceServer(
 		allFeats:                   content.AllFeats,
 		featRegistry:               content.FeatRegistry,
 		characterFeatsRepo:         storage.FeatsRepo,
+		featLevelGrantsRepo:        storage.FeatLevelGrantsRepo,
 		allClassFeatures:           content.ClassFeatures,
 		classFeatureRegistry:       content.ClassFeatureRegistry,
 		characterClassFeaturesRepo: storage.ClassFeaturesRepo,
@@ -1760,7 +1771,7 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 			}
 			mergedFeatGrants := ruleset.MergeFeatLevelUpGrants(archFeatGrants, job.LevelUpFeatGrants)
 			if err := BackfillLevelUpFeats(stream.Context(), sess, characterID,
-				mergedFeatGrants, s.featRegistry, s.characterFeatsRepo,
+				mergedFeatGrants, s.featRegistry, s.characterFeatsRepo, s.featLevelGrantsRepo,
 			); err != nil {
 				s.logger.Warn("BackfillLevelUpFeats failed",
 					zap.Int64("character_id", characterID),
@@ -10293,6 +10304,15 @@ func (s *GameServiceServer) handleGrant(uid string, req *gamev1.GrantRequest) (*
 										zap.Int("level", lvl),
 										zap.Error(applyErr),
 									)
+								}
+								if s.featLevelGrantsRepo != nil {
+									if mErr := s.featLevelGrantsRepo.MarkLevelGranted(ctx, target.CharacterID, lvl); mErr != nil {
+										s.logger.Warn("MarkLevelGranted failed",
+											zap.Int64("character_id", target.CharacterID),
+											zap.Int("level", lvl),
+											zap.Error(mErr),
+										)
+									}
 								}
 								for _, id := range grantedIDs {
 									f, _ := s.featRegistry.Feat(id)

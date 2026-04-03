@@ -34,6 +34,26 @@ func (r *fakeFeatsRepo) Add(_ context.Context, _ int64, featID string) error {
 }
 
 // ---------------------------------------------------------------------------
+// Test double for CharacterFeatLevelGrantsRepo
+// ---------------------------------------------------------------------------
+
+type fakeLevelGrantsRepo struct{ granted map[int]bool }
+
+func (r *fakeLevelGrantsRepo) IsLevelGranted(_ context.Context, _ int64, level int) (bool, error) {
+	if r.granted == nil {
+		return false, nil
+	}
+	return r.granted[level], nil
+}
+func (r *fakeLevelGrantsRepo) MarkLevelGranted(_ context.Context, _ int64, level int) error {
+	if r.granted == nil {
+		r.granted = make(map[int]bool)
+	}
+	r.granted[level] = true
+	return nil
+}
+
+// ---------------------------------------------------------------------------
 // Tests for ApplyFeatGrant
 // ---------------------------------------------------------------------------
 
@@ -124,7 +144,7 @@ func TestBackfillLevelUpFeats_NoOpAtLevelOne(t *testing.T) {
 	grants := map[int]*ruleset.FeatGrants{
 		2: {Fixed: []string{"snap_shot"}},
 	}
-	err := BackfillLevelUpFeats(context.Background(), sess, 1, grants, nil, repo)
+	err := BackfillLevelUpFeats(context.Background(), sess, 1, grants, nil, repo, &fakeLevelGrantsRepo{})
 	require.NoError(t, err)
 	assert.Empty(t, repo.feats)
 }
@@ -137,7 +157,7 @@ func TestBackfillLevelUpFeats_GrantsMissingFeats(t *testing.T) {
 		2: {Choices: &ruleset.FeatChoices{Pool: []string{"feat_a", "feat_b"}, Count: 1}},
 		4: {Choices: &ruleset.FeatChoices{Pool: []string{"feat_a", "feat_b", "feat_c"}, Count: 1}},
 	}
-	err := BackfillLevelUpFeats(context.Background(), sess, 1, grants, nil, repo)
+	err := BackfillLevelUpFeats(context.Background(), sess, 1, grants, nil, repo, &fakeLevelGrantsRepo{})
 	require.NoError(t, err)
 	// Should have granted 2 feats (1 per level), plus creation_feat.
 	assert.Len(t, repo.feats, 3)
@@ -145,16 +165,18 @@ func TestBackfillLevelUpFeats_GrantsMissingFeats(t *testing.T) {
 
 func TestBackfillLevelUpFeats_IdempotentWhenAlreadyGranted(t *testing.T) {
 	t.Parallel()
-	// Player already has feats from levels 2 and 4.
+	// Player already has feats from levels 2 and 4 — both levels are recorded in
+	// levelGrantsRepo as already processed, so no further grants occur.
 	repo := &fakeFeatsRepo{feats: map[string]bool{"feat_a": true, "feat_b": true}}
 	sess := &session.PlayerSession{Level: 4}
 	grants := map[int]*ruleset.FeatGrants{
 		2: {Choices: &ruleset.FeatChoices{Pool: []string{"feat_a", "feat_c"}, Count: 1}},
 		4: {Choices: &ruleset.FeatChoices{Pool: []string{"feat_b", "feat_d"}, Count: 1}},
 	}
-	err := BackfillLevelUpFeats(context.Background(), sess, 1, grants, nil, repo)
+	lgr := &fakeLevelGrantsRepo{granted: map[int]bool{2: true, 4: true}}
+	err := BackfillLevelUpFeats(context.Background(), sess, 1, grants, nil, repo, lgr)
 	require.NoError(t, err)
-	// No new feats added — already has 1 from each pool.
+	// No new feats added — both levels are already marked as granted.
 	assert.Len(t, repo.feats, 2)
 }
 
@@ -166,10 +188,32 @@ func TestBackfillLevelUpFeats_SkipsHigherLevels(t *testing.T) {
 		2: {Fixed: []string{"feat_lvl2"}},
 		4: {Fixed: []string{"feat_lvl4"}}, // above current level
 	}
-	err := BackfillLevelUpFeats(context.Background(), sess, 1, grants, nil, repo)
+	err := BackfillLevelUpFeats(context.Background(), sess, 1, grants, nil, repo, &fakeLevelGrantsRepo{})
 	require.NoError(t, err)
 	assert.True(t, repo.feats["feat_lvl2"])
 	assert.False(t, repo.feats["feat_lvl4"])
+}
+
+// TestBackfillLevelUpFeats_CreationFeatPoolOverlap is the regression test for
+// BUG: creation feats in same pool as level-up feats must not block level grants.
+func TestBackfillLevelUpFeats_CreationFeatPoolOverlap(t *testing.T) {
+	t.Parallel()
+	// Character got reactive_block at creation; the level-2 pool also contains it.
+	// Without the fix, alreadyOwned=1 satisfied count=1 → remaining=0 → no grant.
+	// With the fix, levelGrantsRepo controls idempotency: level 2 is not yet granted,
+	// so BackfillLevelUpFeats grants from pool (skipping reactive_block since it's in
+	// existing) and picks overpower instead.
+	repo := &fakeFeatsRepo{feats: map[string]bool{"reactive_block": true}}
+	sess := &session.PlayerSession{Level: 2}
+	grants := map[int]*ruleset.FeatGrants{
+		2: {Choices: &ruleset.FeatChoices{Pool: []string{"reactive_block", "overpower"}, Count: 1}},
+	}
+	lgr := &fakeLevelGrantsRepo{}
+	err := BackfillLevelUpFeats(context.Background(), sess, 1, grants, nil, repo, lgr)
+	require.NoError(t, err)
+	// Should have granted overpower (reactive_block already owned, pool picks next).
+	assert.True(t, repo.feats["overpower"], "expected overpower to be granted as level-2 feat")
+	assert.True(t, lgr.granted[2], "expected level 2 to be marked as granted")
 }
 
 func TestProperty_BackfillLevelUpFeats_Idempotent(t *testing.T) {
@@ -190,11 +234,12 @@ func TestProperty_BackfillLevelUpFeats_Idempotent(t *testing.T) {
 		ctx := context.Background()
 
 		// First call.
-		require.NoError(rt, BackfillLevelUpFeats(ctx, sess, 1, grants, nil, repo))
+		lgr := &fakeLevelGrantsRepo{}
+		require.NoError(rt, BackfillLevelUpFeats(ctx, sess, 1, grants, nil, repo, lgr))
 		countAfterFirst := len(repo.feats)
 
 		// Second call must be idempotent.
-		require.NoError(rt, BackfillLevelUpFeats(ctx, sess, 1, grants, nil, repo))
+		require.NoError(rt, BackfillLevelUpFeats(ctx, sess, 1, grants, nil, repo, lgr))
 		assert.Equal(rt, countAfterFirst, len(repo.feats), "second call must not add more feats")
 	})
 }
