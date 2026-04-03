@@ -247,10 +247,20 @@ export function renderMapTiles(tiles: MapTile[]): MapRenderResult {
 
   if (presentPOIs.size > 0) {
     legendLines.push(plainLine('Points of Interest'))
-    for (const pt of POI_TYPES) {
-      if (presentPOIs.has(pt.id)) {
-        legendLines.push([seg('  '), seg(pt.symbol, pt.color), seg(`  ${pt.label}`)])
+    const poiEntries = POI_TYPES.filter(pt => presentPOIs.has(pt.id))
+    const POI_LABEL_WIDTH = LEGEND_COL_WIDTH - 3  // 3 = symbol(1) + "  "(2)
+    for (let i = 0; i < poiEntries.length; i += LEGEND_COLS) {
+      const rowSegs: ColoredLine = []
+      for (let col = 0; col < LEGEND_COLS; col++) {
+        const pt = poiEntries[i + col]
+        if (!pt) break
+        const label = pt.label.length > POI_LABEL_WIDTH
+          ? pt.label.slice(0, POI_LABEL_WIDTH)
+          : pt.label.padEnd(POI_LABEL_WIDTH)
+        rowSegs.push(seg(pt.symbol, pt.color))
+        rowSegs.push(seg(`  ${label}`))
       }
+      legendLines.push(rowSegs)
     }
   }
 
