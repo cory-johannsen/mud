@@ -133,7 +133,7 @@ function CharacterCard({ char, onPlay, onDelete, onForceLogout }: {
       <div style={styles.cardSub}>{char.region}</div>
       {char.location && (
         <div style={styles.cardSub}>
-          Location: {char.location.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())}
+          Location: {char.location}
         </div>
       )}
       <div style={styles.hpBar}>

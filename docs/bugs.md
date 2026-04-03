@@ -652,6 +652,14 @@
 **Steps:** Open the web client; engage and complete combat; observe the XP granted message in the console; navigate to the Stats tab and observe that the XP value has not updated.
 **Fix:** `CombatHandler.pushXPMessages` was sending XP grant text messages but never pushing a `CharacterSheetView` to the client. The `StatsDrawer` reads XP from `state.characterSheet`, which is only updated when a `CharacterSheetView` arrives. Added a `pushCharacterSheetFn func(*session.PlayerSession)` callback field to `CombatHandler` with `SetPushCharacterSheetFn`, called unconditionally at the end of `pushXPMessages`. Wired `s.pushCharacterSheet` as the callback in `grpc_service.go`.
 
+### BUG-108: Web UI character creation not scrollable on mobile browsers
+**Severity:** high
+**Status:** open
+**Category:** UI
+**Description:** On mobile browsers the character creation flow cannot be scrolled, making it impossible to reach controls below the visible viewport and complete character creation.
+**Steps:** Open the web UI in a mobile browser; begin character creation; attempt to scroll down to reach lower sections or buttons — scrolling does not work and controls are unreachable.
+**Fix:** Ensure the character creation screens use scrollable containers (e.g. `overflow-y: auto` with appropriate height constraints) so all content and action buttons are reachable on small-screen mobile viewports.
+
 ### BUG-107: Player respawn does not restore full HP, clear conditions, or recharge Feats and Technologies
 **Severity:** high
 **Status:** fixed
@@ -678,11 +686,11 @@
 
 ### BUG-104: Character selection screen location shows room only, not zone and room
 **Severity:** low
-**Status:** open
+**Status:** fixed
 **Category:** UI
 **Description:** The Location field on the character selection screen displays only the room name. It should display both the zone and the room (e.g. "Rustbucket Ridge — Grinder's Row").
 **Steps:** Log in; observe the character selection screen — the Location field shows only the room name with no zone.
-**Fix:** Include the zone display name alongside the room display name in the character selection location field.
+**Fix:** Updated `ListByAccount()` in `internal/storage/postgres/character.go` to JOIN rooms and zones tables, formatting Location as "Zone Name — Room Name". Updated `CharactersPage.tsx` to render the pre-formatted location string directly instead of applying raw-ID text transforms. Added rooms and zones tables to the postgres test setup so integration tests pass.
 
 ### BUG-103: Web UI has no Job tab
 **Severity:** high

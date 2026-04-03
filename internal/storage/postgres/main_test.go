@@ -392,6 +392,31 @@ func applyAllMigrations(pool *pgxpool.Pool) error {
 		CREATE UNIQUE INDEX IF NOT EXISTS weather_events_one_active
 			ON weather_events (active)
 			WHERE active = TRUE;
+
+		-- Migration 002: zones and rooms (required by ListByAccount JOIN)
+		CREATE TABLE IF NOT EXISTS zones (
+			id          TEXT PRIMARY KEY,
+			name        TEXT NOT NULL,
+			description TEXT NOT NULL DEFAULT '',
+			start_room  TEXT NOT NULL DEFAULT '',
+			created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+		);
+		CREATE TABLE IF NOT EXISTS rooms (
+			id          TEXT PRIMARY KEY,
+			zone_id     TEXT NOT NULL REFERENCES zones(id),
+			title       TEXT NOT NULL,
+			description TEXT NOT NULL DEFAULT '',
+			properties  JSONB NOT NULL DEFAULT '{}',
+			created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+		);
+		-- Seed the default test room so ListByAccount can resolve location display names.
+		INSERT INTO zones (id, name, description, start_room)
+			VALUES ('test_zone', 'Test Zone', 'Test zone', 'grinders_row')
+			ON CONFLICT DO NOTHING;
+		INSERT INTO rooms (id, zone_id, title, description)
+			VALUES ('grinders_row', 'test_zone', 'Grinders Row', 'A test room'),
+			       ('battle_infirmary', 'test_zone', 'Battle Infirmary', 'A test room')
+			ON CONFLICT DO NOTHING;
 	`)
 	return err
 }

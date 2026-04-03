@@ -75,15 +75,23 @@ func (r *CharacterRepository) Create(ctx context.Context, c *character.Character
 }
 
 // ListByAccount returns all characters for the given account ID, ordered by created_at.
+// The Location field is populated as "Zone Name — Room Name" by joining the rooms and zones tables.
+// If the room or zone cannot be resolved (e.g. data inconsistency), the raw room ID is used as a fallback.
 //
 // Precondition: accountID must be > 0.
 // Postcondition: Returns a slice (may be empty) or a non-nil error.
 func (r *CharacterRepository) ListByAccount(ctx context.Context, accountID int64) ([]*character.Character, error) {
 	rows, err := r.db.Query(ctx, `
-		SELECT id, account_id, name, region, class, team, level, experience, location,
-		       brutality, quickness, grit, reasoning, savvy, flair,
-		       max_hp, current_hp, created_at, updated_at, default_combat_action, gender, faction_id
-		FROM characters WHERE account_id = $1 ORDER BY created_at ASC`,
+		SELECT ch.id, ch.account_id, ch.name, ch.region, ch.class, ch.team, ch.level, ch.experience,
+		       ch.location,
+		       COALESCE(z.name, ''), COALESCE(rm.title, ''),
+		       ch.brutality, ch.quickness, ch.grit, ch.reasoning, ch.savvy, ch.flair,
+		       ch.max_hp, ch.current_hp, ch.created_at, ch.updated_at, ch.default_combat_action, ch.gender, ch.faction_id
+		FROM characters ch
+		LEFT JOIN rooms rm ON rm.id = ch.location
+		LEFT JOIN zones z  ON z.id  = rm.zone_id
+		WHERE ch.account_id = $1
+		ORDER BY ch.created_at ASC`,
 		accountID,
 	)
 	if err != nil {
@@ -94,14 +102,21 @@ func (r *CharacterRepository) ListByAccount(ctx context.Context, accountID int64
 	chars := make([]*character.Character, 0)
 	for rows.Next() {
 		var c character.Character
+		var roomID, zoneName, roomTitle string
 		if err := rows.Scan(
 			&c.ID, &c.AccountID, &c.Name, &c.Region, &c.Class, &c.Team,
-			&c.Level, &c.Experience, &c.Location,
+			&c.Level, &c.Experience, &roomID,
+			&zoneName, &roomTitle,
 			&c.Abilities.Brutality, &c.Abilities.Quickness, &c.Abilities.Grit,
 			&c.Abilities.Reasoning, &c.Abilities.Savvy, &c.Abilities.Flair,
 			&c.MaxHP, &c.CurrentHP, &c.CreatedAt, &c.UpdatedAt, &c.DefaultCombatAction, &c.Gender, &c.FactionID,
 		); err != nil {
 			return nil, fmt.Errorf("scanning character row: %w", err)
+		}
+		if zoneName != "" && roomTitle != "" {
+			c.Location = zoneName + " \u2014 " + roomTitle
+		} else {
+			c.Location = roomID
 		}
 		chars = append(chars, &c)
 	}
