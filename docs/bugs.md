@@ -652,6 +652,38 @@
 **Steps:** Open the web client; engage and complete combat; observe the XP granted message in the console; navigate to the Stats tab and observe that the XP value has not updated.
 **Fix:** `CombatHandler.pushXPMessages` was sending XP grant text messages but never pushing a `CharacterSheetView` to the client. The `StatsDrawer` reads XP from `state.characterSheet`, which is only updated when a `CharacterSheetView` arrives. Added a `pushCharacterSheetFn func(*session.PlayerSession)` callback field to `CombatHandler` with `SetPushCharacterSheetFn`, called unconditionally at the end of `pushXPMessages`. Wired `s.pushCharacterSheet` as the callback in `grpc_service.go`.
 
+### BUG-114: Hovering consumable items in Inventory tab shows no details tooltip
+**Severity:** low
+**Status:** open
+**Category:** UI
+**Description:** Hovering over a consumable item in the web UI Inventory tab does not display a tooltip with the item's description and effects. Other item types show hover details; consumables do not.
+**Steps:** Open the Inventory tab; hover over a consumable item — no tooltip appears.
+**Fix:** Add a hover tooltip to consumable inventory rows that renders the item's description and effects, consistent with hover behaviour on other item types.
+
+### BUG-113: Mobile web UI region selection during character creation not scrollable
+**Severity:** high
+**Status:** open
+**Category:** UI
+**Description:** On mobile browsers the region selection step during character creation cannot be scrolled, preventing the user from reaching and selecting a region. This is a second instance of the mobile scrolling issue first reported in BUG-108 (which covered character creation generally); this specifically identifies the region selection screen as a non-scrollable blocker.
+**Steps:** Open the web UI on a mobile browser; begin character creation; reach the region selection step; attempt to scroll to view all regions and make a selection — scrolling does not work.
+**Fix:** Apply scrollable container styling (`overflow-y: auto` with constrained height) to the region selection screen, and audit all remaining character creation steps for the same issue.
+
+### BUG-112: Web UI room exits not displayed as 8-point compass navigation control
+**Severity:** medium
+**Status:** open
+**Category:** UI
+**Description:** Room exit controls in the web UI are not arranged as a compass. They should be displayed in a fixed 8-point compass layout (N, NE, E, SE, S, SW, W, NW) with North at the top center. If no exit exists for a compass point the position should be left empty, preserving the layout so the player can immediately understand available directions spatially.
+**Steps:** Enter any room with exits; observe the exit controls — exits are listed without compass orientation rather than in a fixed 8-point grid.
+**Fix:** Replace the exit list with a 3x3 compass grid component (center cell unused). Each cell corresponds to a compass direction; populate it with a clickable exit button if that exit exists, or leave it empty if not.
+
+### BUG-111: Job levelling does not grant new Feats and Technologies
+**Severity:** critical
+**Status:** fixed
+**Category:** Character
+**Description:** Advancing in job level does not grant the Feats and Technologies that should be awarded at each level. A player at job level 6 only has the Feats and Technologies granted at character creation, with none of the intervening level-up grants applied.
+**Steps:** Advance a character to job level 2 or higher via training; open the Feats and Technologies tabs — only creation-time grants are present; no level-up grants have been applied.
+**Fix:** `handleGrant()` was iterating `job.LevelUpGrants[lvl]` — but no job YAML defines level_up_grants; all level-up tech grants live on archetypes. Fixed by looking up the job's archetype via `s.archetypes[job.Archetype]` and merging its `LevelUpGrants` with the job's via `ruleset.MergeLevelUpGrants()`. The merged map is now iterated for each gained level so archetype technology grants are applied on level-up.
+
 ### BUG-110: Technology panel "Add to hotbar" inline slot selector overflows screen; should use modal
 **Severity:** medium
 **Status:** fixed

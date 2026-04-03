@@ -10115,16 +10115,24 @@ func (s *GameServiceServer) handleGrant(uid string, req *gamev1.GrantRequest) (*
 				}
 				levelMsgs = append(levelMsgs, "You earned 1 hero point!")
 				// Apply technology level-up grants for each level gained (ascending order).
+				// Grants come from the archetype (primary) and job (secondary), merged per level.
 				// Immediate grants (pool <= open slots) are auto-assigned and a notification is
 				// pushed to the target. Deferred grants (pool > open slots, player must choose)
 				// are stored in PendingTechGrants and persisted via progressRepo.
 				if s.hardwiredTechRepo != nil && s.jobRegistry != nil && target.CharacterID > 0 {
 					if job, ok := s.jobRegistry.Job(target.Class); ok {
+						var archetypeLevelUpGrants map[int]*ruleset.TechnologyGrants
+						if job.Archetype != "" {
+							if archetype, archetypeOK := s.archetypes[job.Archetype]; archetypeOK {
+								archetypeLevelUpGrants = archetype.LevelUpGrants
+							}
+						}
+						mergedLevelUpGrants := ruleset.MergeLevelUpGrants(archetypeLevelUpGrants, job.LevelUpGrants)
 						if target.PendingTechGrants == nil {
 							target.PendingTechGrants = make(map[int]*ruleset.TechnologyGrants)
 						}
 						for lvl := oldLevel + 1; lvl <= result.NewLevel; lvl++ {
-							techGrants, hasGrants := job.LevelUpGrants[lvl]
+							techGrants, hasGrants := mergedLevelUpGrants[lvl]
 							if !hasGrants {
 								continue
 							}
