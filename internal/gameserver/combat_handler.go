@@ -1523,8 +1523,14 @@ func (h *CombatHandler) startPursuitCombatLocked(playerSess *session.PlayerSessi
 		}
 	}
 	playerCbt.WeaponProficiencyRank = weaponProfRank
+
+	// Wire weapon name and damage type from equipped main-hand weapon.
 	if playerCbt.Loadout != nil && playerCbt.Loadout.MainHand != nil && playerCbt.Loadout.MainHand.Def != nil {
+		playerCbt.WeaponName = playerCbt.Loadout.MainHand.Def.Name
 		playerCbt.WeaponDamageType = playerCbt.Loadout.MainHand.Def.DamageType
+	} else {
+		playerCbt.WeaponName = "fists"
+		playerCbt.WeaponDamageType = "bludgeoning"
 	}
 
 	// Resistances / weaknesses.
@@ -2571,9 +2577,13 @@ func buildPlayerCombatant(sess *session.PlayerSession, h *CombatHandler) *combat
 	}
 	playerCbt.WeaponProficiencyRank = weaponProfRank
 
-	// Wire weapon damage type from equipped main-hand weapon.
+	// Wire weapon name and damage type from equipped main-hand weapon.
 	if playerCbt.Loadout != nil && playerCbt.Loadout.MainHand != nil && playerCbt.Loadout.MainHand.Def != nil {
+		playerCbt.WeaponName = playerCbt.Loadout.MainHand.Def.Name
 		playerCbt.WeaponDamageType = playerCbt.Loadout.MainHand.Def.DamageType
+	} else {
+		playerCbt.WeaponName = "fists"
+		playerCbt.WeaponDamageType = "bludgeoning"
 	}
 
 	// Wire player resistances/weaknesses from equipped armor.
