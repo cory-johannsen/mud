@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"strings"
 	"testing"
 	"time"
 
@@ -19,6 +20,7 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/npc"
 	"github.com/cory-johannsen/mud/internal/game/ruleset"
 	"github.com/cory-johannsen/mud/internal/game/session"
+	"github.com/cory-johannsen/mud/internal/game/technology"
 	"github.com/cory-johannsen/mud/internal/game/world"
 	"github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 )
@@ -973,4 +975,131 @@ func TestHandleRest_RepairFull_RestoresAllEquipmentDurability(t *testing.T) {
 	require.NotNil(t, si)
 	assert.Equal(t, 40, si.Durability,
 		"armor durability should be restored to MaxDurability (40) on rest")
+}
+
+// TestHandleRest_MotelRest_SendsInteractiveChoicePrompt verifies REQ-BUG97-1:
+// when a motel rest requires tech slot preparation and pool size > open slots,
+// handleRest MUST send a sentinel-encoded FeatureChoicePrompt via the stream
+// instead of auto-selecting.
+//
+// Precondition: safe room; motel NPC with RestCost=20; player.Currency=100;
+// player.Class has prepared grants with 2 pool options for 1 slot (must prompt);
+// stream has "1" pre-queued as the choice response.
+// Postcondition: stream.sent contains at least one event whose MessageEvent content
+// begins with "\x00choice\x00"; the tech slot is filled with one of the pool entries.
+func TestHandleRest_MotelRest_SendsInteractiveChoicePrompt(t *testing.T) {
+	zone := &world.Zone{
+		ID:          "safe_zone_tech",
+		Name:        "Safe Zone Tech",
+		Description: "A safe zone.",
+		StartRoom:   "room_safe_tech",
+		DangerLevel: "safe",
+		Rooms: map[string]*world.Room{
+			"room_safe_tech": {
+				ID:          "room_safe_tech",
+				ZoneID:      "safe_zone_tech",
+				Title:       "Safe Room",
+				Description: "A safe room.",
+				Exits:       []world.Exit{},
+				Properties:  map[string]string{},
+				DangerLevel: "safe",
+			},
+		},
+	}
+	worldMgr, err := world.NewManager([]*world.Zone{zone})
+	require.NoError(t, err)
+	sessMgr := session.NewManager()
+	npcMgr := npc.NewManager()
+
+	// Job with 2 pool options for 1 slot: pool size > slots → must prompt.
+	job := &ruleset.Job{
+		ID: "test_psion",
+		TechnologyGrants: &ruleset.TechnologyGrants{
+			Prepared: &ruleset.PreparedGrants{
+				SlotsByLevel: map[int]int{1: 1},
+				Pool: []ruleset.PreparedEntry{
+					{ID: "tech_alpha", Level: 1},
+					{ID: "tech_beta", Level: 1},
+				},
+			},
+		},
+	}
+	jobReg := ruleset.NewJobRegistry()
+	jobReg.Register(job)
+
+	techReg := technology.NewRegistry()
+	techReg.Register(&technology.TechnologyDef{ID: "tech_alpha", Name: "Tech Alpha", Level: 1})
+	techReg.Register(&technology.TechnologyDef{ID: "tech_beta", Name: "Tech Beta", Level: 1})
+
+	prepRepo := &fakePreparedRepoRest{}
+
+	logger := zaptest.NewLogger(t)
+	svc := newTestGameServiceServer(
+		worldMgr, sessMgr,
+		command.DefaultRegistry(),
+		NewWorldHandler(worldMgr, sessMgr, npcMgr, nil, nil, nil),
+		NewChatHandler(sessMgr),
+		logger,
+		nil, nil, nil, npcMgr, nil, nil,
+		nil, nil, nil, nil, nil, nil,
+		nil, jobReg, nil, techReg,
+		nil, prepRepo, nil, nil, "",
+		nil, nil, nil,
+		nil, nil, nil,
+		nil, nil, nil, nil, nil, nil, nil,
+		nil, nil,
+		nil,
+		nil,
+		nil, nil,
+	)
+
+	sess, addErr := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID:         "rest-motel-tech",
+		Username:    "rest-motel-tech",
+		CharName:    "rest-motel-tech",
+		CharacterID: 1,
+		RoomID:      "room_safe_tech",
+		CurrentHP:   5,
+		MaxHP:       20,
+		Abilities:   character.AbilityScores{},
+		Role:        "player",
+	})
+	require.NoError(t, addErr)
+	sess.Status = int32(gamev1.CombatStatus_COMBAT_STATUS_IDLE)
+	sess.Class = "test_psion"
+	sess.Currency = 100
+	sess.Level = 1
+	// Pre-populate PreparedTechs so RearrangePreparedTechs runs (non-empty check).
+	sess.PreparedTechs = map[int][]*session.PreparedSlot{
+		1: {{TechID: "tech_alpha"}},
+	}
+
+	tmpl := &npc.Template{
+		ID:      "motel_clerk_tech",
+		Name:    "Motel Clerk",
+		NPCType: "motel_keeper",
+		MaxHP:   10,
+		Level:   1,
+	}
+	inst, spawnErr := npcMgr.Spawn(tmpl, "room_safe_tech")
+	require.NoError(t, spawnErr)
+	inst.RestCost = 20
+
+	// Pre-queue choice "1" (selects first pool option).
+	stream := &fakeSessionStream{
+		recv: []*gamev1.ClientMessage{moveMsg("1")},
+	}
+
+	require.NoError(t, svc.handleRest("rest-motel-tech", "req", stream))
+
+	const sentinel = "\x00choice\x00"
+	var foundPrompt bool
+	for _, evt := range stream.sent {
+		if content := evt.GetMessage().GetContent(); strings.HasPrefix(content, sentinel) {
+			foundPrompt = true
+			break
+		}
+	}
+	assert.True(t, foundPrompt,
+		"handleRest motel path must send a sentinel-encoded choice prompt; got %d sent events", len(stream.sent))
 }

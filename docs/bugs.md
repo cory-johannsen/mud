@@ -710,11 +710,11 @@
 
 ### BUG-97: Rest technology preparation prompts appear as console text with no interactive modal
 **Severity:** high
-**Status:** open
+**Status:** fixed
 **Category:** UI
 **Description:** When resting, technology slot preparation prompts (e.g. "Level 1, slot 1: choose from pool") are printed as plain console messages with no way for the player to act on them. The player must be presented with a modal allowing them to select technologies for each slot before the rest completes.
 **Steps:** Visit a motel keeper; pay to rest; observe the console — preparation slot prompts appear as text only (e.g. `Level 1, slot 1: choose from pool`, `Level 1, slot 2: choose from pool`) with no modal or interactive control to make selections.
-**Fix:** Detect the technology preparation prompt in the web client's event stream and display a modal for each slot choice, analogous to the `FeatureChoiceModal` used for reaction prompts, so the player can select technologies before the rest finalises.
+**Fix:** Root cause: `handleMotelRest` used an auto-select `promptFn` (picking `options[0]`) with no stream access, so the sentinel-encoded `FeatureChoicePrompt` was never sent. Updated `handleMotelRest` to accept `requestID` and `stream`, and replaced the auto-select `promptFn` with `s.promptFeatureChoice(stream, "tech_choice", ...)`, mirroring `applyFullLongRest`. The stream context is now used for the rest operation. Added test `TestHandleRest_MotelRest_SendsInteractiveChoicePrompt` to verify the sentinel is sent and the prompt resolves via user input.
 
 ### BUG-96: Post-combat item loot shown in console but not added to inventory
 **Severity:** high

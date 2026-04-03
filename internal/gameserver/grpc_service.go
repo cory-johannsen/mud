@@ -3571,7 +3571,7 @@ func (s *GameServiceServer) handleRest(uid string, requestID string, stream game
 		if s.npcMgr != nil {
 			for _, npcInst := range s.npcMgr.InstancesInRoom(sess.RoomID) {
 				if npcInst.RestCost > 0 {
-					return s.handleMotelRest(uid, sess, npcInst, sendMsg)
+					return s.handleMotelRest(uid, sess, npcInst, sendMsg, requestID, stream)
 				}
 			}
 		}
@@ -3593,15 +3593,16 @@ func (s *GameServiceServer) handleRest(uid string, requestID string, stream game
 
 // handleMotelRest performs an instant full rest at a motel NPC (REQ-REST-2/5/6/7/9).
 //
-// Precondition: motelNPC.RestCost > 0 and room is safe.
-// Postcondition: player HP + tech pools fully restored; motelNPC.RestCost deducted from Currency.
-func (s *GameServiceServer) handleMotelRest(uid string, sess *session.PlayerSession, motelNPC *npc.Instance, sendMsg func(string) error) error {
+// Precondition: motelNPC.RestCost > 0 and room is safe; stream is non-nil.
+// Postcondition: player HP + tech pools fully restored; motelNPC.RestCost deducted from Currency;
+// if tech preparation requires player choice, a sentinel-encoded FeatureChoicePrompt is sent.
+func (s *GameServiceServer) handleMotelRest(uid string, sess *session.PlayerSession, motelNPC *npc.Instance, sendMsg func(string) error, requestID string, stream gamev1.GameService_SessionServer) error {
 	cost := motelNPC.RestCost
 	if sess.Currency < cost {
 		return sendMsg(fmt.Sprintf("A night here costs %d credits. You only have %d.", cost, sess.Currency))
 	}
 	sess.Currency -= cost
-	ctx := context.Background()
+	ctx := stream.Context()
 	if s.charSaver != nil {
 		if err := s.charSaver.SaveCurrency(ctx, sess.CharacterID, sess.Currency); err != nil {
 			s.logger.Warn("handleMotelRest: failed to save currency", zap.Error(err))
@@ -3610,12 +3611,14 @@ func (s *GameServiceServer) handleMotelRest(uid string, sess *session.PlayerSess
 	if err := sendMsg(fmt.Sprintf("You pay %d credits and settle in for the night.", cost)); err != nil {
 		return err
 	}
-	// Motel rest uses auto-select promptFn (no interactive stream available).
+	headless := sess.Headless
 	promptFn := func(options []string) (string, error) {
-		if len(options) == 0 {
-			return "", nil
+		choices := &ruleset.FeatureChoices{
+			Prompt:  "Choose a technology to prepare:",
+			Options: options,
+			Key:     "tech_choice",
 		}
-		return options[0], nil
+		return s.promptFeatureChoice(stream, "tech_choice", choices, headless)
 	}
 	return s.applyFullLongRestCtx(uid, sess, ctx, sendMsg, promptFn)
 }
