@@ -1,6 +1,7 @@
 package gameserver
 
 import (
+	"math"
 	"sort"
 
 	"github.com/cory-johannsen/mud/internal/game/npc"
@@ -124,6 +125,69 @@ func (s *GameServiceServer) buildTrainerView(uid string, inst *npc.Instance) (*g
 				Description:    inst.Description,
 				Jobs:           jobEntries,
 				PlayerCurrency: int32(sess.Currency),
+			},
+		},
+	}, nil
+}
+
+// buildFixerView constructs a FixerView ServerEvent for a fixer NPC examine.
+//
+// Precondition: uid identifies an active player session; inst is a fixer NPC.
+// Postcondition: Returns a non-nil ServerEvent wrapping FixerView; error is always nil.
+// bribe_costs maps each clearable wanted level (1..min(currentWanted,maxWanted)) to its
+// computed cost: floor(baseCost × zoneMultiplier × npcVariance).
+func (s *GameServiceServer) buildFixerView(uid string, inst *npc.Instance) (*gamev1.ServerEvent, error) {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return messageEvent("player not found"), nil
+	}
+
+	room, roomOK := s.world.GetRoom(sess.RoomID)
+	dangerLevel := ""
+	zoneID := ""
+	if roomOK {
+		zoneID = room.ZoneID
+		dangerLevel = room.DangerLevel
+		if dangerLevel == "" {
+			if zone, zoneOK := s.world.GetZone(zoneID); zoneOK {
+				dangerLevel = zone.DangerLevel
+			}
+		}
+	}
+	mult := zoneMultiplier(dangerLevel)
+
+	wantedLevel := 0
+	if zoneID != "" {
+		wantedLevel = sess.WantedLevel[zoneID]
+	}
+
+	tmpl := s.npcMgr.TemplateByID(inst.TemplateID)
+	maxWanted := 0
+	bribeCosts := make(map[int32]int32)
+	if tmpl != nil && tmpl.Fixer != nil {
+		maxWanted = tmpl.Fixer.MaxWantedLevel
+		variance := tmpl.Fixer.NPCVariance
+		cap := wantedLevel
+		if maxWanted < cap {
+			cap = maxWanted
+		}
+		for level := 1; level <= cap; level++ {
+			if baseCost, hasCost := tmpl.Fixer.BaseCosts[level]; hasCost {
+				cost := int32(math.Floor(float64(baseCost) * mult * variance))
+				bribeCosts[int32(level)] = cost
+			}
+		}
+	}
+
+	return &gamev1.ServerEvent{
+		Payload: &gamev1.ServerEvent_FixerView{
+			FixerView: &gamev1.FixerView{
+				NpcName:        inst.Name(),
+				Description:    inst.Description,
+				CurrentWanted:  int32(wantedLevel),
+				MaxWanted:      int32(maxWanted),
+				PlayerCurrency: int32(sess.Currency),
+				BribeCosts:     bribeCosts,
 			},
 		},
 	}, nil

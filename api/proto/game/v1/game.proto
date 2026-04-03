@@ -330,6 +330,7 @@ message ServerEvent {
     TrainerView          trainer_view           = 31;
     WeatherEvent         weather                = 32;
     LoadoutView          loadout_view           = 33;
+    FixerView            fixer_view             = 34;
   }
 }
 
@@ -595,6 +596,17 @@ message TrainerView {
   string description          = 2;
   repeated JobOfferEntry jobs = 3;
   int32  player_currency      = 4;
+}
+
+// FixerView delivers structured fixer NPC information in response to examine.
+// bribe_costs maps wanted level (1–4) to the computed bribe cost in credits.
+message FixerView {
+  string npc_name           = 1;
+  string description        = 2;
+  int32  current_wanted     = 3;
+  int32  max_wanted         = 4;
+  int32  player_currency    = 5;
+  map<int32, int32> bribe_costs = 6;
 }
 
 // AttackRequest asks the server to attack a named target.

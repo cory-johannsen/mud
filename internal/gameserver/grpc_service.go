@@ -3162,6 +3162,8 @@ func (s *GameServiceServer) handleExamine(uid string, req *gamev1.ExamineRequest
 				return s.buildHealerView(uid, inst)
 			case "job_trainer":
 				return s.buildTrainerView(uid, inst)
+			case "fixer":
+				return s.buildFixerView(uid, inst)
 			}
 		}
 		view, err := s.npcH.Examine(uid, req.Target)

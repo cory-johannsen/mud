@@ -366,6 +366,20 @@ export interface TrainerView {
   player_currency?: number
 }
 
+export interface FixerView {
+  npcName?: string
+  npc_name?: string
+  description?: string
+  currentWanted?: number
+  current_wanted?: number
+  maxWanted?: number
+  max_wanted?: number
+  playerCurrency?: number
+  player_currency?: number
+  bribeCosts?: Record<number, number>
+  bribe_costs?: Record<number, number>
+}
+
 export interface ShopItem {
   name?: string
   itemId?: string

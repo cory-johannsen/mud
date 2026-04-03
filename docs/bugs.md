@@ -670,11 +670,11 @@
 
 ### BUG-105: Clicking Fixer NPC shows examine output instead of Fixer interaction modal
 **Severity:** high
-**Status:** open
+**Status:** fixed
 **Category:** UI
 **Description:** Clicking a Fixer NPC (e.g. Dex in Rotgut Alley) in the web UI displays the generic examine output instead of a Fixer interaction modal. The player should be shown a modal with Fixer-specific options (e.g. wanted level clearing, black market services).
 **Steps:** Navigate to Rotgut Alley; click Dex; observe the generic examine description is shown instead of a Fixer modal.
-**Fix:** Wire the Fixer NPC click handler to open a Fixer interaction modal, consistent with the fix needed for BUG-95 (motel keeper), BUG-98 (quest giver) — all non-combat NPC types need type-specific modal routing.
+**Fix:** Added FixerView proto message; added buildFixerView server handler in grpc_service_npc_examine.go; added case "fixer" to handleExamine switch in grpc_service.go; added FixerView TypeScript interface to proto/index.ts; added SET_FIXER_VIEW action and fixerView state to GameContext.tsx; added FixerModal component to NpcInteractModal.tsx.
 
 ### BUG-104: Character selection screen location shows room only, not zone and room
 **Severity:** low

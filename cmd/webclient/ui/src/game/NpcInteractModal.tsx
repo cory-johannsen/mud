@@ -1,8 +1,8 @@
 // NpcInteractModal renders modals for non-combat NPC interactions:
-// HealerModal, TrainerModal, BankerModal, and GenericNpcModal.
+// HealerModal, TrainerModal, FixerModal, BankerModal, and GenericNpcModal.
 import { useState } from 'react'
 import { useGame } from './GameContext'
-import type { HealerView, TrainerView, JobOfferEntry } from '../proto'
+import type { HealerView, TrainerView, FixerView, JobOfferEntry } from '../proto'
 
 // ---------- Healer Modal ----------
 
@@ -177,6 +177,76 @@ function TrainerModal({ view, onClose }: { view: TrainerView; onClose: () => voi
   )
 }
 
+// ---------- Fixer Modal ----------
+
+function FixerModal({ view, onClose }: { view: FixerView; onClose: () => void }) {
+  const { sendMessage } = useGame()
+  const npcName = view.npcName ?? view.npc_name ?? 'Fixer'
+  const currentWanted = view.currentWanted ?? view.current_wanted ?? 0
+  const playerCurrency = view.playerCurrency ?? view.player_currency ?? 0
+  const bribeCosts = view.bribeCosts ?? view.bribe_costs ?? {}
+
+  function handleBribe(level: number) {
+    sendMessage('BribeRequest', { npc_name: npcName, level })
+    onClose()
+  }
+
+  const clearableLevels = Object.keys(bribeCosts)
+    .map(Number)
+    .filter((lvl) => lvl >= 1 && lvl <= currentWanted)
+    .sort((a, b) => a - b)
+
+  return (
+    <div style={styles.overlay} onClick={onClose}>
+      <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
+        <div style={styles.header}>
+          <div style={styles.headerLeft}>
+            <h3 style={styles.title}>{npcName}</h3>
+            <span style={styles.npcTypeBadge}>Fixer</span>
+          </div>
+          <button style={styles.closeBtn} onClick={onClose} type="button">✕</button>
+        </div>
+        <div style={styles.body}>
+          {view.description && <p style={styles.desc}>{view.description}</p>}
+          <div style={styles.infoGrid}>
+            <div style={styles.infoRow}>
+              <span style={styles.infoLabel}>Wanted Level</span>
+              <span style={styles.infoValue}>{currentWanted}</span>
+            </div>
+            <div style={styles.infoRow}>
+              <span style={styles.infoLabel}>Your Crypto</span>
+              <span style={styles.infoValue}>{playerCurrency} Crypto</span>
+            </div>
+          </div>
+          {currentWanted === 0 ? (
+            <p style={styles.notice}>You are not wanted here. There is nothing to clear.</p>
+          ) : clearableLevels.length === 0 ? (
+            <p style={styles.notice}>{npcName} cannot help you at your current wanted level.</p>
+          ) : (
+            <div style={styles.actions}>
+              {clearableLevels.map((level) => {
+                const cost = bribeCosts[level] ?? 0
+                const canAfford = playerCurrency >= cost
+                return (
+                  <button
+                    key={level}
+                    style={{ ...styles.actionBtn, ...(canAfford ? styles.actionBtnGreen : styles.actionBtnDisabled) }}
+                    onClick={() => handleBribe(level)}
+                    disabled={!canAfford}
+                    type="button"
+                  >
+                    Clear wanted level {level} — {cost} Crypto
+                  </button>
+                )
+              })}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ---------- Banker Modal ----------
 
 function BankerModal({
@@ -321,13 +391,16 @@ function GenericNpcModal({
 // ---------- Root export ----------
 
 export function NpcInteractModal() {
-  const { state, clearHealer, clearTrainer, clearNpcView } = useGame()
+  const { state, clearHealer, clearTrainer, clearFixer, clearNpcView } = useGame()
 
   if (state.healerView) {
     return <HealerModal view={state.healerView} onClose={clearHealer} />
   }
   if (state.trainerView) {
     return <TrainerModal view={state.trainerView} onClose={clearTrainer} />
+  }
+  if (state.fixerView) {
+    return <FixerModal view={state.fixerView} onClose={clearFixer} />
   }
   if (state.npcView) {
     if (state.npcView.npcType === 'banker') {

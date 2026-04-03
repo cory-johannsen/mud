@@ -83,6 +83,7 @@ export interface GameState {
   shopView: ShopView | null
   healerView: import('../proto').HealerView | null
   trainerView: import('../proto').TrainerView | null
+  fixerView: import('../proto').FixerView | null
   npcView: { name: string; description: string; npcType: string; level: number; health: string } | null
   loadoutView: LoadoutView | null
   choicePrompt: ChoicePrompt | null
@@ -109,6 +110,7 @@ type Action =
   | { type: 'SET_SHOP_VIEW'; shop: ShopView | null }
   | { type: 'SET_HEALER_VIEW'; view: import('../proto').HealerView | null }
   | { type: 'SET_TRAINER_VIEW'; view: import('../proto').TrainerView | null }
+  | { type: 'SET_FIXER_VIEW'; view: import('../proto').FixerView | null }
   | { type: 'SET_NPC_VIEW'; view: { name: string; description: string; npcType: string; level: number; health: string } | null }
   | { type: 'SET_LOADOUT_VIEW'; view: LoadoutView | null }
   | { type: 'SET_CHOICE_PROMPT'; prompt: ChoicePrompt }
@@ -159,6 +161,8 @@ function reducer(state: GameState, action: Action): GameState {
       return { ...state, healerView: action.view }
     case 'SET_TRAINER_VIEW':
       return { ...state, trainerView: action.view }
+    case 'SET_FIXER_VIEW':
+      return { ...state, fixerView: action.view }
     case 'SET_NPC_VIEW':
       return { ...state, npcView: action.view }
     case 'SET_LOADOUT_VIEW':
@@ -199,6 +203,7 @@ const initialState: GameState = {
   shopView: null,
   healerView: null,
   trainerView: null,
+  fixerView: null,
   npcView: null,
   loadoutView: null,
   choicePrompt: null,
@@ -211,6 +216,7 @@ interface GameContextValue {
   clearShop: () => void
   clearHealer: () => void
   clearTrainer: () => void
+  clearFixer: () => void
   clearNpcView: () => void
   clearLoadout: () => void
   clearChoicePrompt: () => void
@@ -456,6 +462,10 @@ export function GameProvider({ children }: { children: ReactNode }) {
           dispatch({ type: 'SET_TRAINER_VIEW', view: payload as import('../proto').TrainerView })
           break
         }
+        case 'FixerView': {
+          dispatch({ type: 'SET_FIXER_VIEW', view: payload as import('../proto').FixerView })
+          break
+        }
         case 'LoadoutView': {
           dispatch({ type: 'SET_LOADOUT_VIEW', view: payload as LoadoutView })
           break
@@ -524,6 +534,10 @@ export function GameProvider({ children }: { children: ReactNode }) {
     dispatch({ type: 'SET_TRAINER_VIEW', view: null })
   }, [])
 
+  const clearFixer = useCallback(() => {
+    dispatch({ type: 'SET_FIXER_VIEW', view: null })
+  }, [])
+
   const clearNpcView = useCallback(() => {
     dispatch({ type: 'SET_NPC_VIEW', view: null })
   }, [])
@@ -537,7 +551,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   }, [])
 
   return (
-    <GameContext.Provider value={{ state, sendMessage, sendCommand, clearShop, clearHealer, clearTrainer, clearNpcView, clearLoadout, clearChoicePrompt }}>
+    <GameContext.Provider value={{ state, sendMessage, sendCommand, clearShop, clearHealer, clearTrainer, clearFixer, clearNpcView, clearLoadout, clearChoicePrompt }}>
       {children}
     </GameContext.Provider>
   )
