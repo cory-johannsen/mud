@@ -10237,6 +10237,56 @@ func (s *GameServiceServer) handleGrant(uid string, req *gamev1.GrantRequest) (*
 					}
 				}
 			}
+				// Apply feat level-up grants for each level gained.
+				// Fixed feats are granted immediately; choice feats are auto-picked
+				// from the pool (first available not already owned).
+				if s.characterFeatsRepo != nil && s.jobRegistry != nil && target.CharacterID > 0 {
+					if job, ok := s.jobRegistry.Job(target.Class); ok {
+						var archetypeFeatGrants map[int]*ruleset.FeatGrants
+						if job.Archetype != "" {
+							if arch, archOK := s.archetypes[job.Archetype]; archOK {
+								archetypeFeatGrants = arch.LevelUpFeatGrants
+							}
+						}
+						mergedFeatGrants := ruleset.MergeFeatLevelUpGrants(archetypeFeatGrants, job.LevelUpFeatGrants)
+						if len(mergedFeatGrants) > 0 {
+							existingFeatIDs, featGetErr := s.characterFeatsRepo.GetAll(ctx, target.CharacterID)
+							if featGetErr != nil {
+								s.logger.Warn("handleGrant: GetAll feats failed", zap.Error(featGetErr))
+							} else {
+								existing := make(map[string]bool, len(existingFeatIDs))
+								for _, id := range existingFeatIDs {
+									existing[id] = true
+								}
+								for lvl := oldLevel + 1; lvl <= result.NewLevel; lvl++ {
+									fg, hasFG := mergedFeatGrants[lvl]
+									if !hasFG || fg == nil {
+										continue
+									}
+									grantedIDs, applyErr := ApplyFeatGrant(ctx, target.CharacterID, existing, fg, s.featRegistry, s.characterFeatsRepo)
+									if applyErr != nil {
+										s.logger.Warn("handleGrant: ApplyFeatGrant failed",
+											zap.Int64("character_id", target.CharacterID),
+											zap.Int("level", lvl),
+											zap.Error(applyErr),
+										)
+									}
+									for _, id := range grantedIDs {
+										f, _ := s.featRegistry.Feat(id)
+										name := id
+										if f != nil && f.Name != "" {
+											name = f.Name
+										}
+										notifMsg := messageEvent(fmt.Sprintf("You gained the feat: %s!", name))
+										if data, mErr := proto.Marshal(notifMsg); mErr == nil {
+											_ = target.Entity.Push(data)
+										}
+									}
+								}
+							}
+						}
+					}
+				}
 		} else {
 			target.Experience += amount
 			if s.charSaver != nil && target.CharacterID > 0 {
