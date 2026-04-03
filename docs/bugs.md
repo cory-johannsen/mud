@@ -652,6 +652,30 @@
 **Steps:** Open the web client; engage and complete combat; observe the XP granted message in the console; navigate to the Stats tab and observe that the XP value has not updated.
 **Fix:** `CombatHandler.pushXPMessages` was sending XP grant text messages but never pushing a `CharacterSheetView` to the client. The `StatsDrawer` reads XP from `state.characterSheet`, which is only updated when a `CharacterSheetView` arrives. Added a `pushCharacterSheetFn func(*session.PlayerSession)` callback field to `CombatHandler` with `SetPushCharacterSheetFn`, called unconditionally at the end of `pushXPMessages`. Wired `s.pushCharacterSheet` as the callback in `grpc_service.go`.
 
+### BUG-107: Player respawn does not restore full HP, clear conditions, or recharge Feats and Technologies
+**Severity:** high
+**Status:** open
+**Category:** Combat
+**Description:** When a player respawns after death they are not fully restored. On respawn the player should receive the equivalent of a full rest: HP restored to maximum, all conditions removed, and all Feat and Technology uses recharged. This ensures the player can continue playing immediately without being stuck in a degraded state.
+**Steps:** Die in combat or from any damage source; observe the respawn state — HP is not full, conditions may persist, and Feat/Technology uses are not recharged.
+**Fix:** In the respawn handler, apply a full-rest reset: set current HP to max HP, clear all active conditions, recharge all Feat and Technology uses, and push updated CharacterSheetView and InventoryView to the client.
+
+### BUG-106: Player HP damage not immediately reflected in Character panel during combat
+**Severity:** high
+**Status:** fixed
+**Category:** UI
+**Description:** During combat, when the player takes damage their current HP in the Character panel updates with a noticeable delay rather than immediately when the damage event is received. The HP value lags behind the actual game state.
+**Steps:** Enter combat; take damage from an NPC attack; observe the Character panel HP — it does not update immediately and reflects the correct value only after a delay.
+**Fix:** Added UPDATE_PLAYER_HP dispatch to the CombatEvent handler in GameContext.tsx when the combat target matches the player's name, so player HP updates immediately without waiting for the next CharacterInfo event.
+
+### BUG-105: Clicking Fixer NPC shows examine output instead of Fixer interaction modal
+**Severity:** high
+**Status:** open
+**Category:** UI
+**Description:** Clicking a Fixer NPC (e.g. Dex in Rotgut Alley) in the web UI displays the generic examine output instead of a Fixer interaction modal. The player should be shown a modal with Fixer-specific options (e.g. wanted level clearing, black market services).
+**Steps:** Navigate to Rotgut Alley; click Dex; observe the generic examine description is shown instead of a Fixer modal.
+**Fix:** Wire the Fixer NPC click handler to open a Fixer interaction modal, consistent with the fix needed for BUG-95 (motel keeper), BUG-98 (quest giver) — all non-combat NPC types need type-specific modal routing.
+
 ### BUG-104: Character selection screen location shows room only, not zone and room
 **Severity:** low
 **Status:** open
