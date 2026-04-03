@@ -694,11 +694,11 @@
 
 ### BUG-102: Merchant stock quantity does not update in web UI after purchase
 **Severity:** medium
-**Status:** open
+**Status:** fixed
 **Category:** UI
 **Description:** After buying an item from a merchant in the web UI, the stock quantity displayed in the merchant screen does not decrease. The purchase is processed correctly server-side but the merchant view is not refreshed in the client.
 **Steps:** Open a merchant shop; note the stock quantity of an item; purchase the item; observe the stock quantity is unchanged in the UI.
-**Fix:** After a successful buy transaction, push an updated merchant view to the client so the stock quantity reflects the purchase without requiring the player to close and reopen the shop.
+**Fix:** Extracted `buildShopView` helper from `handleBrowse` in `grpc_service_merchant.go`. After the InventoryView push in `handleBuy`, an updated ShopView is now pushed via `sess.Entity.PushBlocking` so the client immediately reflects the new stock quantities. Test `TestHandleBuy_PushesUpdatedShopViewAfterPurchase` added to verify the behaviour.
 
 ### BUG-101: Equipped armor item remains visible in Inventory tab after wearing
 **Severity:** medium

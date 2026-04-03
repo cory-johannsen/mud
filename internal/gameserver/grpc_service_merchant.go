@@ -91,22 +91,22 @@ func (s *GameServiceServer) wantedSurchargeFor(sess *session.PlayerSession, _ *n
 	return 1.0
 }
 
-// handleBrowse lists a merchant's inventory with current prices for the requesting player.
+// buildShopView constructs a ShopView ServerEvent for the named merchant NPC in the player's room.
 //
-// Precondition: uid identifies an active player session; req is non-nil.
-// Postcondition: Returns a non-nil ServerEvent; error is always nil.
-func (s *GameServiceServer) handleBrowse(uid string, req *gamev1.BrowseRequest) (*gamev1.ServerEvent, error) {
+// Precondition: uid identifies an active player session; npcName is non-empty.
+// Postcondition: Returns a non-nil ServerEvent on success; (nil, nil) when the merchant is absent or has no inventory.
+func (s *GameServiceServer) buildShopView(uid string, npcName string) (*gamev1.ServerEvent, error) {
 	sess, ok := s.sessions.GetPlayer(uid)
 	if !ok {
-		return messageEvent("player not found"), nil
+		return nil, nil
 	}
-	inst, errMsg := s.findMerchantInRoom(sess.RoomID, req.GetNpcName())
+	inst, _ := s.findMerchantInRoom(sess.RoomID, npcName)
 	if inst == nil {
-		return messageEvent(errMsg), nil
+		return nil, nil
 	}
 	tmpl := s.npcMgr.TemplateByID(inst.TemplateID)
 	if tmpl == nil || tmpl.Merchant == nil {
-		return messageEvent("This merchant has no inventory configured."), nil
+		return nil, nil
 	}
 	state := s.merchantStateFor(inst.ID)
 	if state == nil {
@@ -161,6 +161,30 @@ func (s *GameServiceServer) handleBrowse(uid string, req *gamev1.BrowseRequest) 
 			},
 		},
 	}, nil
+}
+
+// handleBrowse lists a merchant's inventory with current prices for the requesting player.
+//
+// Precondition: uid identifies an active player session; req is non-nil.
+// Postcondition: Returns a non-nil ServerEvent; error is always nil.
+func (s *GameServiceServer) handleBrowse(uid string, req *gamev1.BrowseRequest) (*gamev1.ServerEvent, error) {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return messageEvent("player not found"), nil
+	}
+	inst, errMsg := s.findMerchantInRoom(sess.RoomID, req.GetNpcName())
+	if inst == nil {
+		return messageEvent(errMsg), nil
+	}
+	tmpl := s.npcMgr.TemplateByID(inst.TemplateID)
+	if tmpl == nil || tmpl.Merchant == nil {
+		return messageEvent("This merchant has no inventory configured."), nil
+	}
+	evt, err := s.buildShopView(uid, req.GetNpcName())
+	if err != nil || evt == nil {
+		return messageEvent("This merchant has no inventory configured."), nil
+	}
+	return evt, nil
 }
 
 // handleBuy executes a player purchase from a merchant.
@@ -301,6 +325,15 @@ func (s *GameServiceServer) handleBuy(uid string, req *gamev1.BuyRequest) (*game
 	if invEvt, _ := s.handleInventory(uid); invEvt != nil && sess.Entity != nil {
 		if data, marshalErr := proto.Marshal(invEvt); marshalErr == nil {
 			_ = sess.Entity.PushBlocking(data, time.Second)
+		}
+	}
+
+	// Push updated ShopView so client reflects new stock quantities (BUG-102).
+	if shopEvt, shopErr := s.buildShopView(uid, req.GetNpcName()); shopErr == nil && shopEvt != nil {
+		if sess.Entity != nil {
+			if data, marshalErr := proto.Marshal(shopEvt); marshalErr == nil {
+				_ = sess.Entity.PushBlocking(data, time.Second)
+			}
 		}
 	}
 

@@ -6,6 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap/zaptest"
+	"google.golang.org/protobuf/proto"
 	"pgregory.net/rapid"
 
 	"github.com/cory-johannsen/mud/internal/game/command"
@@ -410,6 +411,47 @@ func TestHandleBuy_Material_NilRegistry(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, evt)
 	assert.Contains(t, evt.GetMessage().Content, "doesn't sell")
+}
+
+// REQ-NPC-BUY-3: A successful purchase MUST push an updated ShopView to the client
+// so the web UI reflects the decremented stock without requiring the player to
+// close and reopen the shop (BUG-102).
+func TestHandleBuy_PushesUpdatedShopViewAfterPurchase(t *testing.T) {
+	svc, uid, inst := newMerchantTestServer(t)
+
+	sess, ok := svc.sessions.GetPlayer(uid)
+	require.True(t, ok)
+
+	// Attach a BridgeEntity so push calls are capturable.
+	entity := session.NewBridgeEntity(uid, 32)
+	sess.Entity = entity
+
+	_, err := svc.handleBuy(uid, &gamev1.BuyRequest{
+		NpcName:  inst.Name(),
+		ItemId:   "stim_pack",
+		Quantity: 1,
+	})
+	require.NoError(t, err)
+
+	// Drain all pushed events and look for a ShopView.
+	entity.Close()
+	var foundShopView bool
+	for data := range entity.Events() {
+		var evt gamev1.ServerEvent
+		if unmarshalErr := proto.Unmarshal(data, &evt); unmarshalErr != nil {
+			continue
+		}
+		if sv := evt.GetShopView(); sv != nil {
+			foundShopView = true
+			// The stock for stim_pack must be 2 (initial 3 minus 1 purchased).
+			for _, item := range sv.Items {
+				if item.ItemId == "stim_pack" {
+					assert.Equal(t, int32(2), item.Stock, "ShopView must reflect decremented stock after purchase")
+				}
+			}
+		}
+	}
+	assert.True(t, foundShopView, "handleBuy must push a ShopView event after a successful purchase")
 }
 
 func TestProperty_HandleBuy_MaterialStock_NeverPanics(t *testing.T) {
