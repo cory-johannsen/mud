@@ -36,7 +36,7 @@ func buildTabCompleteServer(
 	chatHandler := NewChatHandler(sessMgr)
 
 	var featRegistry *ruleset.FeatRegistry
-	var featsRepo CharacterFeatsGetter
+	var featsRepo CharacterFeatsRepo
 	if len(feats) > 0 {
 		featRegistry = ruleset.NewFeatRegistry(feats)
 		ids := make([]string, len(feats))

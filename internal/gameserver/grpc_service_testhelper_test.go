@@ -59,7 +59,7 @@ func newTestGameServiceServer(
 	characterProficienciesRepo CharacterProficienciesRepository,
 	allFeats []*ruleset.Feat,
 	featRegistry *ruleset.FeatRegistry,
-	characterFeatsRepo CharacterFeatsGetter,
+	characterFeatsRepo CharacterFeatsRepo,
 	allClassFeatures []*ruleset.ClassFeature,
 	classFeatureRegistry *ruleset.ClassFeatureRegistry,
 	characterClassFeaturesRepo CharacterClassFeaturesGetter,
