@@ -70,13 +70,23 @@ func (r *stubSkillsRepo) UpgradeSkill(_ context.Context, characterID int64, skil
 	return nil
 }
 
-// stubFeatsRepo is an in-memory implementation of CharacterFeatsGetter for testing.
+// stubFeatsRepo is an in-memory implementation of CharacterFeatsRepo for testing.
 type stubFeatsRepo struct {
 	data map[int64][]string
 }
 
 func (r *stubFeatsRepo) GetAll(_ context.Context, characterID int64) ([]string, error) {
 	return r.data[characterID], nil
+}
+
+func (r *stubFeatsRepo) Add(_ context.Context, characterID int64, featID string) error {
+	for _, id := range r.data[characterID] {
+		if id == featID {
+			return nil
+		}
+	}
+	r.data[characterID] = append(r.data[characterID], featID)
+	return nil
 }
 
 // stubClassFeaturesRepo is an in-memory implementation of CharacterClassFeaturesGetter for testing.

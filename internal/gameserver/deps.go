@@ -30,7 +30,7 @@ type StorageDeps struct {
 	AccountRepo            AccountAdmin
 	SkillsRepo             CharacterSkillsRepository
 	ProficienciesRepo      CharacterProficienciesRepository
-	FeatsRepo              CharacterFeatsGetter
+	FeatsRepo              CharacterFeatsRepo
 	ClassFeaturesRepo      CharacterClassFeaturesGetter
 	FeatureChoicesRepo     CharacterFeatureChoicesRepository
 	AbilityBoostsRepo      postgres.CharacterAbilityBoostsRepository

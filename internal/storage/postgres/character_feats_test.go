@@ -106,3 +106,56 @@ func TestCharacterFeatsRepository_SetAll_IsIdempotent(t *testing.T) {
 		t.Errorf("expected only [quick_dodge] after second SetAll, got %v", got)
 	}
 }
+
+func TestCharacterFeatsRepository_Add(t *testing.T) {
+	ctx := context.Background()
+	db := testDB(t)
+	charRepo := NewCharacterRepository(db)
+	ch := createTestCharacter(t, charRepo, ctx)
+	repo := NewCharacterFeatsRepository(db)
+
+	// Initially empty.
+	got, err := repo.GetAll(ctx, ch.ID)
+	if err != nil {
+		t.Fatalf("initial GetAll: %v", err)
+	}
+	if len(got) != 0 {
+		t.Errorf("expected 0 feats initially, got %d", len(got))
+	}
+
+	// Add feat_a.
+	if err := repo.Add(ctx, ch.ID, "feat_a"); err != nil {
+		t.Fatalf("Add feat_a: %v", err)
+	}
+	got, err = repo.GetAll(ctx, ch.ID)
+	if err != nil {
+		t.Fatalf("GetAll after first Add: %v", err)
+	}
+	if len(got) != 1 || got[0] != "feat_a" {
+		t.Errorf("expected [feat_a], got %v", got)
+	}
+
+	// Add feat_b.
+	if err := repo.Add(ctx, ch.ID, "feat_b"); err != nil {
+		t.Fatalf("Add feat_b: %v", err)
+	}
+	got, err = repo.GetAll(ctx, ch.ID)
+	if err != nil {
+		t.Fatalf("GetAll after second Add: %v", err)
+	}
+	if len(got) != 2 {
+		t.Errorf("expected 2 feats after adding feat_a and feat_b, got %d: %v", len(got), got)
+	}
+
+	// Duplicate Add of feat_a — must be idempotent.
+	if err := repo.Add(ctx, ch.ID, "feat_a"); err != nil {
+		t.Fatalf("duplicate Add feat_a: %v", err)
+	}
+	got, err = repo.GetAll(ctx, ch.ID)
+	if err != nil {
+		t.Fatalf("GetAll after duplicate Add: %v", err)
+	}
+	if len(got) != 2 {
+		t.Errorf("expected still 2 feats after duplicate Add, got %d: %v", len(got), got)
+	}
+}

@@ -58,6 +58,22 @@ func (r *CharacterFeatsRepository) GetAll(ctx context.Context, characterID int64
 	return out, rows.Err()
 }
 
+// Add inserts a single feat for a character. If the feat already exists, it is
+// a no-op (INSERT … ON CONFLICT DO NOTHING).
+//
+// Precondition: characterID > 0; featID non-empty.
+// Postcondition: feat_id row exists for this character.
+func (r *CharacterFeatsRepository) Add(ctx context.Context, characterID int64, featID string) error {
+	_, err := r.db.Exec(ctx,
+		`INSERT INTO character_feats (character_id, feat_id) VALUES ($1, $2) ON CONFLICT DO NOTHING`,
+		characterID, featID,
+	)
+	if err != nil {
+		return fmt.Errorf("Add feat %s: %w", featID, err)
+	}
+	return nil
+}
+
 // SetAll writes the complete feat list for a character, replacing any existing rows.
 //
 // Precondition: characterID > 0; feats must not be nil.

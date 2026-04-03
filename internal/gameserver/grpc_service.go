@@ -177,6 +177,16 @@ type CharacterFeatsGetter interface {
 	GetAll(ctx context.Context, characterID int64) ([]string, error)
 }
 
+// CharacterFeatsRepo extends CharacterFeatsGetter with mutation needed for
+// level-up feat grants.
+//
+// Precondition: characterID must be > 0; featID must be non-empty.
+// Postcondition: Add inserts a feat row; duplicate adds are no-ops.
+type CharacterFeatsRepo interface {
+	CharacterFeatsGetter
+	Add(ctx context.Context, characterID int64, featID string) error
+}
+
 // CharacterClassFeaturesGetter retrieves the class feature IDs assigned to a character.
 //
 // Precondition: characterID must be > 0.
@@ -230,7 +240,7 @@ type GameServiceServer struct {
 	characterProficienciesRepo CharacterProficienciesRepository
 	allFeats                   []*ruleset.Feat
 	featRegistry               *ruleset.FeatRegistry
-	characterFeatsRepo         CharacterFeatsGetter
+	characterFeatsRepo         CharacterFeatsRepo
 	allClassFeatures           []*ruleset.ClassFeature
 	classFeatureRegistry       *ruleset.ClassFeatureRegistry
 	characterClassFeaturesRepo CharacterClassFeaturesGetter
