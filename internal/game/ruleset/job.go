@@ -94,6 +94,7 @@ type Job struct {
 	StartingInventory  *inventory.StartingLoadoutOverride `yaml:"starting_inventory"`
 	TechnologyGrants   *TechnologyGrants                  `yaml:"technology_grants,omitempty"`
 	LevelUpGrants      map[int]*TechnologyGrants          `yaml:"level_up_grants,omitempty"`
+	LevelUpFeatGrants  map[int]*FeatGrants                `yaml:"level_up_feat_grants,omitempty"`
 }
 
 // LoadJobs reads all .yaml files in dir and parses each as a Job.
