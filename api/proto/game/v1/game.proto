@@ -975,6 +975,7 @@ message PreparedSlotView {
     string tech_name        = 3;
     string description      = 4;
     string effects_summary  = 5;
+    string short_name       = 6;
 }
 
 // HardwiredSlotView represents one always-available hardwired technology.
@@ -983,6 +984,7 @@ message HardwiredSlotView {
     string tech_name        = 2;
     string description      = 3;
     string effects_summary  = 4;
+    string short_name       = 5;
 }
 
 // SpontaneousKnownEntry represents one tech known in the spontaneous pool with its name.
@@ -992,6 +994,7 @@ message SpontaneousKnownEntry {
     int32  tech_level       = 3;
     string description      = 4;
     string effects_summary  = 5;
+    string short_name       = 6;
 }
 
 // CharacterSheetView delivers the player's full character sheet.
@@ -1067,6 +1070,7 @@ message InnateSlotView {
     string description      = 5;
     bool   is_reaction      = 6;
     string effects_summary  = 7;
+    string short_name       = 8;
 }
 
 // SpontaneousUsePoolView delivers the daily use pool for one spontaneous tech level.
