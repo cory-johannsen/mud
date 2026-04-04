@@ -32,6 +32,7 @@ import type {
   ShopView,
   WeatherEvent,
   LoadoutView,
+  HotbarSlot,
 } from '../proto'
 
 const TOKEN_KEY = 'mud_token'
@@ -77,7 +78,7 @@ export interface GameState {
   combatRound: RoundStartEvent | null
   combatPositions: Record<string, number>
   combatantHp: Record<string, CombatantHp>
-  hotbarSlots: string[]
+  hotbarSlots: HotbarSlot[]
   timeOfDay: TimeOfDayEvent | null
   activeWeather: string | null
   shopView: ShopView | null
@@ -102,7 +103,7 @@ type Action =
   | { type: 'CLEAR_COMBAT_POSITIONS' }
   | { type: 'UPDATE_COMBATANT_HP'; name: string; current: number; max: number }
   | { type: 'CLEAR_COMBATANT_HP' }
-  | { type: 'SET_HOTBAR'; slots: string[] }
+  | { type: 'SET_HOTBAR'; slots: HotbarSlot[] }
   | { type: 'SET_TIME_OF_DAY'; tod: TimeOfDayEvent }
   | { type: 'SET_ACTIVE_WEATHER'; weather: string | null }
   | { type: 'UPDATE_PLAYER_HP'; current: number; max: number }
@@ -197,7 +198,7 @@ const initialState: GameState = {
   combatRound: null,
   combatPositions: {},
   combatantHp: {},
-  hotbarSlots: Array(10).fill(''),
+  hotbarSlots: Array(10).fill({ kind: 'command', ref: '' }) as HotbarSlot[],
   timeOfDay: null,
   activeWeather: null,
   shopView: null,
@@ -419,8 +420,11 @@ export function GameProvider({ children }: { children: ReactNode }) {
           break
         }
         case 'HotbarUpdate': {
-          const hu = payload as { slots?: string[] }
-          dispatch({ type: 'SET_HOTBAR', slots: Array.isArray(hu.slots) ? hu.slots : Array(10).fill('') })
+          const hu = payload as { slots?: HotbarSlot[] }
+          const slots = Array.isArray(hu.slots)
+            ? hu.slots
+            : (Array(10).fill({ kind: 'command', ref: '' }) as HotbarSlot[])
+          dispatch({ type: 'SET_HOTBAR', slots })
           break
         }
         case 'NpcView': {

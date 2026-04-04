@@ -11,6 +11,7 @@ import (
 
 	"github.com/cory-johannsen/mud/internal/game/character"
 	"github.com/cory-johannsen/mud/internal/game/inventory"
+	"github.com/cory-johannsen/mud/internal/game/session"
 	"github.com/cory-johannsen/mud/internal/game/xp"
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 )
@@ -85,9 +86,11 @@ func (m *heroPointCharSaver) LoadJobs(_ context.Context, _ int64) (map[string]in
 }
 func (m *heroPointCharSaver) LoadFocusPoints(_ context.Context, _ int64) (int, error) { return 0, nil }
 func (m *heroPointCharSaver) SaveFocusPoints(_ context.Context, _ int64, _ int) error { return nil }
-func (m *heroPointCharSaver) SaveHotbar(_ context.Context, _ int64, _ [10]string) error { return nil }
-func (m *heroPointCharSaver) LoadHotbar(_ context.Context, _ int64) ([10]string, error) {
-	return [10]string{}, nil
+func (m *heroPointCharSaver) SaveHotbar(_ context.Context, _ int64, _ [10]session.HotbarSlot) error {
+	return nil
+}
+func (m *heroPointCharSaver) LoadHotbar(_ context.Context, _ int64) ([10]session.HotbarSlot, error) {
+	return [10]session.HotbarSlot{}, nil
 }
 
 // TestHandleGrant_XP_LevelUp_AwardsHeroPoint verifies that when granting XP causes

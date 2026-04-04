@@ -137,6 +137,41 @@ would scroll the terminal at row H and corrupt the layout.
 `[scrolled back — N new message(s)]` appears at row H-1. Returning to live view
 (`scrollOffset == 0`) clears `pendingNew` and triggers `redrawConsole`.
 
+## Hotbar Row
+
+The hotbar is rendered as a fixed row at position H-1 (one row above the input prompt). The console scrollable area occupies rows 12 to H-2; the hotbar occupies H-1; the prompt occupies H.
+
+### Typed Slot Model (hotbar-context-aware)
+
+`currentHotbar` in `game_bridge.go` stores `[10]*gamev1.HotbarSlot` (typed proto structs). Each slot carries `kind`, `ref`, `display_name`, and `description`. Two pure helpers in `game_bridge.go` produce telnet-renderable output:
+
+- `hotbarSlotCommand(slot *gamev1.HotbarSlot) string` — maps kind to activation command verb (feat/technology/consumable → `use <ref>`, throwable → `throw <ref>`, command/default → `<ref>`).
+- `hotbarLabels(slots [10]*gamev1.HotbarSlot) [10]string` — returns `display_name` with `ref` as fallback for each slot, suitable for `WriteHotbar`.
+
+### Web Client Hotbar
+
+`HotbarPanel.tsx` exports three pure helpers:
+
+| Helper | Purpose |
+|--------|---------|
+| `slotActivationCommand(slot)` | Same kind→verb mapping as the telnet bridge |
+| `slotDisplayLabel(slot)` | `displayName ?? display_name ?? ref` |
+| `slotTooltip(slot)` | `"{ref} (right-click to edit)"` for commands; `"{name}\n{desc}\n(right-click to edit)"` for typed |
+
+Auto-combat-target: when `combatRound` is set, bare attack verbs (`attack`, `att`, `kill`, `strike`, `st`, `burst`, `bf`) with no argument are auto-suffixed with the first non-player name from `combatRound.turnOrder`.
+
+### Display Resolution Pipeline
+
+The server resolves `display_name` and `description` in `resolveHotbarSlotDisplay` before emitting `HotbarUpdateEvent`:
+
+```
+kind=feat        → featRegistry.Feat(ref) → (feat.Name, "")
+kind=technology  → techRegistry.Tech(ref) → (tech.ShortName ?? tech.Name, tech.Description)
+kind=consumable  → invRegistry.Item(ref)  → (item.Name, "")
+kind=throwable   → invRegistry.Item(ref)  → (item.Name, "")
+kind=command/""  → ("", "")
+```
+
 ## File Index
 
 | Path | Responsibility |
@@ -145,4 +180,4 @@ would scroll the terminal at row H and corrupt the layout.
 | `internal/frontend/telnet/conn.go` | `Conn` struct, Telnet IAC/NAWS parsing, `AwaitNAWS`, `ReadLineSplit`, `ResizeCh` |
 | `internal/frontend/telnet/ansi.go` | ANSI escape constants, `Colorize`, `Colorf`, `StripANSI` |
 | `internal/frontend/handlers/text_renderer.go` | `RenderRoomView`, `RenderCharacterSheet`, `renderExits`, `renderEquipment` |
-| `internal/frontend/handlers/game_bridge.go` | Session loop, resize goroutine, `lastRoomView atomic.Value`, prompt builder |
+| `internal/frontend/handlers/game_bridge.go` | Session loop, resize goroutine, `lastRoomView atomic.Value`, `currentHotbar atomic.Value`, prompt builder, `hotbarSlotCommand`, `hotbarLabels` |

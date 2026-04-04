@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useGame } from '../GameContext'
-import type { FeatEntry } from '../../proto'
+import type { FeatEntry, HotbarSlot } from '../../proto'
 
 const SLOT_KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0']
 
@@ -10,7 +10,7 @@ function SlotPicker({
   onPick,
   onCancel,
 }: {
-  hotbarSlots: string[]
+  hotbarSlots: HotbarSlot[]
   onPick: (slot: number) => void
   onCancel: () => void
 }) {
@@ -23,17 +23,19 @@ function SlotPicker({
         </div>
         <div style={styles.slotPickerGrid}>
           {SLOT_KEYS.map((key, i) => {
-            const current = hotbarSlots[i] ?? ''
+            const slot = hotbarSlots[i]
+            const current = slot?.ref ?? ''
+            const label = slot?.displayName ?? slot?.display_name ?? current
             return (
               <button
                 key={key}
                 style={{ ...styles.slotBtn, ...(current ? styles.slotBtnOccupied : {}) }}
                 onClick={() => onPick(i + 1)}
-                title={current ? `Replace: ${current}` : `Slot ${key} (empty)`}
+                title={current ? `Replace: ${label}` : `Slot ${key} (empty)`}
                 type="button"
               >
                 <span style={styles.slotBtnKey}>{key}</span>
-                {current && <span style={styles.slotBtnCurrent}>{current}</span>}
+                {current && <span style={styles.slotBtnCurrent}>{label}</span>}
               </button>
             )
           })}
@@ -50,14 +52,14 @@ function FeatItem({
   sendMessage,
 }: {
   feat: FeatEntry
-  hotbarSlots: string[]
+  hotbarSlots: HotbarSlot[]
   sendMessage: (type: string, payload: object) => void
 }) {
   const [picking, setPicking] = useState(false)
 
   function handlePick(slot: number) {
-    const cmd = feat.featId ? `use ${feat.featId}` : `use ${(feat.name ?? '').toLowerCase().replace(/\s+/g, '_')}`
-    sendMessage('HotbarRequest', { action: 'set', slot, text: cmd })
+    const ref = feat.featId ?? ''
+    sendMessage('HotbarRequest', { action: 'set', slot, kind: 'feat', ref })
     setPicking(false)
   }
 

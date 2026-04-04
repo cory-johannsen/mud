@@ -89,9 +89,11 @@ func (m *grantCharSaver) LoadJobs(_ context.Context, _ int64) (map[string]int, s
 }
 func (m *grantCharSaver) LoadFocusPoints(_ context.Context, _ int64) (int, error) { return 0, nil }
 func (m *grantCharSaver) SaveFocusPoints(_ context.Context, _ int64, _ int) error { return nil }
-func (m *grantCharSaver) SaveHotbar(_ context.Context, _ int64, _ [10]string) error { return nil }
-func (m *grantCharSaver) LoadHotbar(_ context.Context, _ int64) ([10]string, error) {
-	return [10]string{}, nil
+func (m *grantCharSaver) SaveHotbar(_ context.Context, _ int64, _ [10]session.HotbarSlot) error {
+	return nil
+}
+func (m *grantCharSaver) LoadHotbar(_ context.Context, _ int64) ([10]session.HotbarSlot, error) {
+	return [10]session.HotbarSlot{}, nil
 }
 
 // grantProgressRepo is a ProgressRepository test double that records SaveProgress and skill increase calls.

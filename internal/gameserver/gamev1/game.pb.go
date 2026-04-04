@@ -8283,6 +8283,7 @@ type InventoryItem struct {
 	ArmorCategory string                 `protobuf:"bytes,8,opt,name=armor_category,json=armorCategory,proto3" json:"armor_category,omitempty"` // "light", "medium", or "heavy" when kind == "armor"
 	// Consumable stats (populated when kind == "consumable").
 	EffectsSummary string `protobuf:"bytes,9,opt,name=effects_summary,json=effectsSummary,proto3" json:"effects_summary,omitempty"`
+	Throwable      bool   `protobuf:"varint,10,opt,name=throwable,proto3" json:"throwable,omitempty"` // true when item has "throwable" tag
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -8378,6 +8379,13 @@ func (x *InventoryItem) GetEffectsSummary() string {
 		return x.EffectsSummary
 	}
 	return ""
+}
+
+func (x *InventoryItem) GetThrowable() bool {
+	if x != nil {
+		return x.Throwable
+	}
+	return false
 }
 
 // InventoryView shows the player's backpack and currency.
@@ -13373,18 +13381,96 @@ func (x *SeduceRequest) GetTarget() string {
 	return ""
 }
 
+// HotbarSlot carries a typed hotbar slot reference.
+// kind: "command" | "feat" | "technology" | "throwable" | "consumable"
+// ref: command text (for "command") or item/feat/tech ID (for all others)
+// display_name: resolved by server from registries; empty falls back to ref
+// description: resolved by server; empty for command slots
+type HotbarSlot struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Kind          string                 `protobuf:"bytes,1,opt,name=kind,proto3" json:"kind,omitempty"`
+	Ref           string                 `protobuf:"bytes,2,opt,name=ref,proto3" json:"ref,omitempty"`
+	DisplayName   string                 `protobuf:"bytes,3,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
+	Description   string                 `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *HotbarSlot) Reset() {
+	*x = HotbarSlot{}
+	mi := &file_game_v1_game_proto_msgTypes[185]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *HotbarSlot) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*HotbarSlot) ProtoMessage() {}
+
+func (x *HotbarSlot) ProtoReflect() protoreflect.Message {
+	mi := &file_game_v1_game_proto_msgTypes[185]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use HotbarSlot.ProtoReflect.Descriptor instead.
+func (*HotbarSlot) Descriptor() ([]byte, []int) {
+	return file_game_v1_game_proto_rawDescGZIP(), []int{185}
+}
+
+func (x *HotbarSlot) GetKind() string {
+	if x != nil {
+		return x.Kind
+	}
+	return ""
+}
+
+func (x *HotbarSlot) GetRef() string {
+	if x != nil {
+		return x.Ref
+	}
+	return ""
+}
+
+func (x *HotbarSlot) GetDisplayName() string {
+	if x != nil {
+		return x.DisplayName
+	}
+	return ""
+}
+
+func (x *HotbarSlot) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+// HotbarRequest asks the server to set, clear, or show a hotbar slot.
+// For typed (UI-driven) assignment, set kind+ref and leave text empty.
+// For legacy command-text assignment (telnet hotbar command), set text and leave kind/ref empty.
 type HotbarRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Action        string                 `protobuf:"bytes,1,opt,name=action,proto3" json:"action,omitempty"` // "set", "clear", "show"
 	Slot          int32                  `protobuf:"varint,2,opt,name=slot,proto3" json:"slot,omitempty"`    // 1–10 for set/clear; ignored for show
-	Text          string                 `protobuf:"bytes,3,opt,name=text,proto3" json:"text,omitempty"`     // non-empty for set; ignored for clear/show
+	Text          string                 `protobuf:"bytes,3,opt,name=text,proto3" json:"text,omitempty"`     // backward-compat: non-empty for command-kind "set" via telnet
+	Kind          string                 `protobuf:"bytes,4,opt,name=kind,proto3" json:"kind,omitempty"`     // typed kind for UI-driven set
+	Ref           string                 `protobuf:"bytes,5,opt,name=ref,proto3" json:"ref,omitempty"`       // typed ref for UI-driven set
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *HotbarRequest) Reset() {
 	*x = HotbarRequest{}
-	mi := &file_game_v1_game_proto_msgTypes[185]
+	mi := &file_game_v1_game_proto_msgTypes[186]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -13396,7 +13482,7 @@ func (x *HotbarRequest) String() string {
 func (*HotbarRequest) ProtoMessage() {}
 
 func (x *HotbarRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_game_v1_game_proto_msgTypes[185]
+	mi := &file_game_v1_game_proto_msgTypes[186]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -13409,7 +13495,7 @@ func (x *HotbarRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use HotbarRequest.ProtoReflect.Descriptor instead.
 func (*HotbarRequest) Descriptor() ([]byte, []int) {
-	return file_game_v1_game_proto_rawDescGZIP(), []int{185}
+	return file_game_v1_game_proto_rawDescGZIP(), []int{186}
 }
 
 func (x *HotbarRequest) GetAction() string {
@@ -13433,18 +13519,33 @@ func (x *HotbarRequest) GetText() string {
 	return ""
 }
 
+func (x *HotbarRequest) GetKind() string {
+	if x != nil {
+		return x.Kind
+	}
+	return ""
+}
+
+func (x *HotbarRequest) GetRef() string {
+	if x != nil {
+		return x.Ref
+	}
+	return ""
+}
+
+// HotbarUpdateEvent pushes the player's full 10-slot hotbar to the client.
 type HotbarUpdateEvent struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Always exactly 10 entries; slots[0] = slot 1, slots[9] = slot 10.
-	// Empty string = unassigned slot.
-	Slots         []string `protobuf:"bytes,1,rep,name=slots,proto3" json:"slots,omitempty"`
+	// An empty HotbarSlot (kind="", ref="") means unassigned.
+	Slots         []*HotbarSlot `protobuf:"bytes,1,rep,name=slots,proto3" json:"slots,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *HotbarUpdateEvent) Reset() {
 	*x = HotbarUpdateEvent{}
-	mi := &file_game_v1_game_proto_msgTypes[186]
+	mi := &file_game_v1_game_proto_msgTypes[187]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -13456,7 +13557,7 @@ func (x *HotbarUpdateEvent) String() string {
 func (*HotbarUpdateEvent) ProtoMessage() {}
 
 func (x *HotbarUpdateEvent) ProtoReflect() protoreflect.Message {
-	mi := &file_game_v1_game_proto_msgTypes[186]
+	mi := &file_game_v1_game_proto_msgTypes[187]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -13469,10 +13570,10 @@ func (x *HotbarUpdateEvent) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use HotbarUpdateEvent.ProtoReflect.Descriptor instead.
 func (*HotbarUpdateEvent) Descriptor() ([]byte, []int) {
-	return file_game_v1_game_proto_rawDescGZIP(), []int{186}
+	return file_game_v1_game_proto_rawDescGZIP(), []int{187}
 }
 
-func (x *HotbarUpdateEvent) GetSlots() []string {
+func (x *HotbarUpdateEvent) GetSlots() []*HotbarSlot {
 	if x != nil {
 		return x.Slots
 	}
@@ -13490,7 +13591,7 @@ type DowntimeRequest struct {
 
 func (x *DowntimeRequest) Reset() {
 	*x = DowntimeRequest{}
-	mi := &file_game_v1_game_proto_msgTypes[187]
+	mi := &file_game_v1_game_proto_msgTypes[188]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -13502,7 +13603,7 @@ func (x *DowntimeRequest) String() string {
 func (*DowntimeRequest) ProtoMessage() {}
 
 func (x *DowntimeRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_game_v1_game_proto_msgTypes[187]
+	mi := &file_game_v1_game_proto_msgTypes[188]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -13515,7 +13616,7 @@ func (x *DowntimeRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DowntimeRequest.ProtoReflect.Descriptor instead.
 func (*DowntimeRequest) Descriptor() ([]byte, []int) {
-	return file_game_v1_game_proto_rawDescGZIP(), []int{187}
+	return file_game_v1_game_proto_rawDescGZIP(), []int{188}
 }
 
 func (x *DowntimeRequest) GetSubcommand() string {
@@ -13543,7 +13644,7 @@ type QuestRequest struct {
 
 func (x *QuestRequest) Reset() {
 	*x = QuestRequest{}
-	mi := &file_game_v1_game_proto_msgTypes[188]
+	mi := &file_game_v1_game_proto_msgTypes[189]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -13555,7 +13656,7 @@ func (x *QuestRequest) String() string {
 func (*QuestRequest) ProtoMessage() {}
 
 func (x *QuestRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_game_v1_game_proto_msgTypes[188]
+	mi := &file_game_v1_game_proto_msgTypes[189]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -13568,7 +13669,7 @@ func (x *QuestRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use QuestRequest.ProtoReflect.Descriptor instead.
 func (*QuestRequest) Descriptor() ([]byte, []int) {
-	return file_game_v1_game_proto_rawDescGZIP(), []int{188}
+	return file_game_v1_game_proto_rawDescGZIP(), []int{189}
 }
 
 func (x *QuestRequest) GetArgs() string {
@@ -13589,7 +13690,7 @@ type MaterialLoss struct {
 
 func (x *MaterialLoss) Reset() {
 	*x = MaterialLoss{}
-	mi := &file_game_v1_game_proto_msgTypes[189]
+	mi := &file_game_v1_game_proto_msgTypes[190]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -13601,7 +13702,7 @@ func (x *MaterialLoss) String() string {
 func (*MaterialLoss) ProtoMessage() {}
 
 func (x *MaterialLoss) ProtoReflect() protoreflect.Message {
-	mi := &file_game_v1_game_proto_msgTypes[189]
+	mi := &file_game_v1_game_proto_msgTypes[190]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -13614,7 +13715,7 @@ func (x *MaterialLoss) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MaterialLoss.ProtoReflect.Descriptor instead.
 func (*MaterialLoss) Descriptor() ([]byte, []int) {
-	return file_game_v1_game_proto_rawDescGZIP(), []int{189}
+	return file_game_v1_game_proto_rawDescGZIP(), []int{190}
 }
 
 func (x *MaterialLoss) GetMaterialId() string {
@@ -13644,7 +13745,7 @@ type CraftResultEvent struct {
 
 func (x *CraftResultEvent) Reset() {
 	*x = CraftResultEvent{}
-	mi := &file_game_v1_game_proto_msgTypes[190]
+	mi := &file_game_v1_game_proto_msgTypes[191]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -13656,7 +13757,7 @@ func (x *CraftResultEvent) String() string {
 func (*CraftResultEvent) ProtoMessage() {}
 
 func (x *CraftResultEvent) ProtoReflect() protoreflect.Message {
-	mi := &file_game_v1_game_proto_msgTypes[190]
+	mi := &file_game_v1_game_proto_msgTypes[191]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -13669,7 +13770,7 @@ func (x *CraftResultEvent) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CraftResultEvent.ProtoReflect.Descriptor instead.
 func (*CraftResultEvent) Descriptor() ([]byte, []int) {
-	return file_game_v1_game_proto_rawDescGZIP(), []int{190}
+	return file_game_v1_game_proto_rawDescGZIP(), []int{191}
 }
 
 func (x *CraftResultEvent) GetSuccess() bool {
@@ -13711,7 +13812,7 @@ type UncurseRequest struct {
 
 func (x *UncurseRequest) Reset() {
 	*x = UncurseRequest{}
-	mi := &file_game_v1_game_proto_msgTypes[191]
+	mi := &file_game_v1_game_proto_msgTypes[192]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -13723,7 +13824,7 @@ func (x *UncurseRequest) String() string {
 func (*UncurseRequest) ProtoMessage() {}
 
 func (x *UncurseRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_game_v1_game_proto_msgTypes[191]
+	mi := &file_game_v1_game_proto_msgTypes[192]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -13736,7 +13837,7 @@ func (x *UncurseRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UncurseRequest.ProtoReflect.Descriptor instead.
 func (*UncurseRequest) Descriptor() ([]byte, []int) {
-	return file_game_v1_game_proto_rawDescGZIP(), []int{191}
+	return file_game_v1_game_proto_rawDescGZIP(), []int{192}
 }
 
 func (x *UncurseRequest) GetNpcName() string {
@@ -13764,7 +13865,7 @@ type WeatherEvent struct {
 
 func (x *WeatherEvent) Reset() {
 	*x = WeatherEvent{}
-	mi := &file_game_v1_game_proto_msgTypes[192]
+	mi := &file_game_v1_game_proto_msgTypes[193]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -13776,7 +13877,7 @@ func (x *WeatherEvent) String() string {
 func (*WeatherEvent) ProtoMessage() {}
 
 func (x *WeatherEvent) ProtoReflect() protoreflect.Message {
-	mi := &file_game_v1_game_proto_msgTypes[192]
+	mi := &file_game_v1_game_proto_msgTypes[193]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -13789,7 +13890,7 @@ func (x *WeatherEvent) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use WeatherEvent.ProtoReflect.Descriptor instead.
 func (*WeatherEvent) Descriptor() ([]byte, []int) {
-	return file_game_v1_game_proto_rawDescGZIP(), []int{192}
+	return file_game_v1_game_proto_rawDescGZIP(), []int{193}
 }
 
 func (x *WeatherEvent) GetWeatherName() string {
@@ -14378,7 +14479,7 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\tmax_count\x18\x03 \x01(\x05R\bmaxCount\x12\x18\n" +
 	"\arespawn\x18\x04 \x01(\tR\arespawn\x12\x1c\n" +
 	"\timmovable\x18\x05 \x01(\bR\timmovable\x12\x16\n" +
-	"\x06script\x18\x06 \x01(\tR\x06script\"\x9b\x02\n" +
+	"\x06script\x18\x06 \x01(\tR\x06script\"\xb9\x02\n" +
 	"\rInventoryItem\x12\x1f\n" +
 	"\vinstance_id\x18\x01 \x01(\tR\n" +
 	"instanceId\x12\x12\n" +
@@ -14390,7 +14491,9 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\n" +
 	"armor_slot\x18\a \x01(\tR\tarmorSlot\x12%\n" +
 	"\x0earmor_category\x18\b \x01(\tR\rarmorCategory\x12'\n" +
-	"\x0feffects_summary\x18\t \x01(\tR\x0eeffectsSummary\"\xfa\x01\n" +
+	"\x0feffects_summary\x18\t \x01(\tR\x0eeffectsSummary\x12\x1c\n" +
+	"\tthrowable\x18\n" +
+	" \x01(\bR\tthrowable\"\xfa\x01\n" +
 	"\rInventoryView\x12,\n" +
 	"\x05items\x18\x01 \x03(\v2\x16.game.v1.InventoryItemR\x05items\x12\x1d\n" +
 	"\n" +
@@ -14730,13 +14833,21 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\rshadow_target\x18\x02 \x01(\tR\fshadowTarget\"\x10\n" +
 	"\x0eRefocusRequest\"'\n" +
 	"\rSeduceRequest\x12\x16\n" +
-	"\x06target\x18\x01 \x01(\tR\x06target\"O\n" +
+	"\x06target\x18\x01 \x01(\tR\x06target\"w\n" +
+	"\n" +
+	"HotbarSlot\x12\x12\n" +
+	"\x04kind\x18\x01 \x01(\tR\x04kind\x12\x10\n" +
+	"\x03ref\x18\x02 \x01(\tR\x03ref\x12!\n" +
+	"\fdisplay_name\x18\x03 \x01(\tR\vdisplayName\x12 \n" +
+	"\vdescription\x18\x04 \x01(\tR\vdescription\"u\n" +
 	"\rHotbarRequest\x12\x16\n" +
 	"\x06action\x18\x01 \x01(\tR\x06action\x12\x12\n" +
 	"\x04slot\x18\x02 \x01(\x05R\x04slot\x12\x12\n" +
-	"\x04text\x18\x03 \x01(\tR\x04text\")\n" +
-	"\x11HotbarUpdateEvent\x12\x14\n" +
-	"\x05slots\x18\x01 \x03(\tR\x05slots\"E\n" +
+	"\x04text\x18\x03 \x01(\tR\x04text\x12\x12\n" +
+	"\x04kind\x18\x04 \x01(\tR\x04kind\x12\x10\n" +
+	"\x03ref\x18\x05 \x01(\tR\x03ref\">\n" +
+	"\x11HotbarUpdateEvent\x12)\n" +
+	"\x05slots\x18\x01 \x03(\v2\x13.game.v1.HotbarSlotR\x05slots\"E\n" +
 	"\x0fDowntimeRequest\x12\x1e\n" +
 	"\n" +
 	"subcommand\x18\x01 \x01(\tR\n" +
@@ -14800,7 +14911,7 @@ func file_game_v1_game_proto_rawDescGZIP() []byte {
 }
 
 var file_game_v1_game_proto_enumTypes = make([]protoimpl.EnumInfo, 4)
-var file_game_v1_game_proto_msgTypes = make([]protoimpl.MessageInfo, 197)
+var file_game_v1_game_proto_msgTypes = make([]protoimpl.MessageInfo, 198)
 var file_game_v1_game_proto_goTypes = []any{
 	(MessageType)(0),                  // 0: game.v1.MessageType
 	(RoomEventType)(0),                // 1: game.v1.RoomEventType
@@ -14991,18 +15102,19 @@ var file_game_v1_game_proto_goTypes = []any{
 	(*ExploreRequest)(nil),            // 186: game.v1.ExploreRequest
 	(*RefocusRequest)(nil),            // 187: game.v1.RefocusRequest
 	(*SeduceRequest)(nil),             // 188: game.v1.SeduceRequest
-	(*HotbarRequest)(nil),             // 189: game.v1.HotbarRequest
-	(*HotbarUpdateEvent)(nil),         // 190: game.v1.HotbarUpdateEvent
-	(*DowntimeRequest)(nil),           // 191: game.v1.DowntimeRequest
-	(*QuestRequest)(nil),              // 192: game.v1.QuestRequest
-	(*MaterialLoss)(nil),              // 193: game.v1.MaterialLoss
-	(*CraftResultEvent)(nil),          // 194: game.v1.CraftResultEvent
-	(*UncurseRequest)(nil),            // 195: game.v1.UncurseRequest
-	(*WeatherEvent)(nil),              // 196: game.v1.WeatherEvent
-	nil,                               // 197: game.v1.FixerView.BribeCostsEntry
-	nil,                               // 198: game.v1.CharacterSheetView.ArmorEntry
-	nil,                               // 199: game.v1.CharacterSheetView.AccessoriesEntry
-	nil,                               // 200: game.v1.CharacterSheetView.ArmorCategoriesEntry
+	(*HotbarSlot)(nil),                // 189: game.v1.HotbarSlot
+	(*HotbarRequest)(nil),             // 190: game.v1.HotbarRequest
+	(*HotbarUpdateEvent)(nil),         // 191: game.v1.HotbarUpdateEvent
+	(*DowntimeRequest)(nil),           // 192: game.v1.DowntimeRequest
+	(*QuestRequest)(nil),              // 193: game.v1.QuestRequest
+	(*MaterialLoss)(nil),              // 194: game.v1.MaterialLoss
+	(*CraftResultEvent)(nil),          // 195: game.v1.CraftResultEvent
+	(*UncurseRequest)(nil),            // 196: game.v1.UncurseRequest
+	(*WeatherEvent)(nil),              // 197: game.v1.WeatherEvent
+	nil,                               // 198: game.v1.FixerView.BribeCostsEntry
+	nil,                               // 199: game.v1.CharacterSheetView.ArmorEntry
+	nil,                               // 200: game.v1.CharacterSheetView.AccessoriesEntry
+	nil,                               // 201: game.v1.CharacterSheetView.ArmorCategoriesEntry
 }
 var file_game_v1_game_proto_depIdxs = []int32{
 	37,  // 0: game.v1.ClientMessage.join_world:type_name -> game.v1.JoinWorldRequest
@@ -15129,12 +15241,12 @@ var file_game_v1_game_proto_depIdxs = []int32{
 	184, // 121: game.v1.ClientMessage.scavenge_request:type_name -> game.v1.ScavengeRequest
 	185, // 122: game.v1.ClientMessage.affix_request:type_name -> game.v1.AffixRequest
 	186, // 123: game.v1.ClientMessage.explore_request:type_name -> game.v1.ExploreRequest
-	192, // 124: game.v1.ClientMessage.quest_request:type_name -> game.v1.QuestRequest
-	195, // 125: game.v1.ClientMessage.uncurse_request:type_name -> game.v1.UncurseRequest
-	191, // 126: game.v1.ClientMessage.downtime_request:type_name -> game.v1.DowntimeRequest
+	193, // 124: game.v1.ClientMessage.quest_request:type_name -> game.v1.QuestRequest
+	196, // 125: game.v1.ClientMessage.uncurse_request:type_name -> game.v1.UncurseRequest
+	192, // 126: game.v1.ClientMessage.downtime_request:type_name -> game.v1.DowntimeRequest
 	187, // 127: game.v1.ClientMessage.refocus_request:type_name -> game.v1.RefocusRequest
 	188, // 128: game.v1.ClientMessage.seduce_request:type_name -> game.v1.SeduceRequest
-	189, // 129: game.v1.ClientMessage.hotbar_request:type_name -> game.v1.HotbarRequest
+	190, // 129: game.v1.ClientMessage.hotbar_request:type_name -> game.v1.HotbarRequest
 	172, // 130: game.v1.ClientMessage.spawn_char_request:type_name -> game.v1.SpawnCharRequest
 	173, // 131: game.v1.ClientMessage.delete_char_request:type_name -> game.v1.DeleteCharRequest
 	166, // 132: game.v1.ClientMessage.kill_npc_request:type_name -> game.v1.KillNPCRequest
@@ -15164,12 +15276,12 @@ var file_game_v1_game_proto_depIdxs = []int32{
 	128, // 156: game.v1.ServerEvent.proficiencies_response:type_name -> game.v1.ProficienciesResponse
 	36,  // 157: game.v1.ServerEvent.hp_update:type_name -> game.v1.HpUpdateEvent
 	179, // 158: game.v1.ServerEvent.tab_complete:type_name -> game.v1.TabCompleteResponse
-	194, // 159: game.v1.ServerEvent.craft_result:type_name -> game.v1.CraftResultEvent
-	190, // 160: game.v1.ServerEvent.hotbar_update:type_name -> game.v1.HotbarUpdateEvent
+	195, // 159: game.v1.ServerEvent.craft_result:type_name -> game.v1.CraftResultEvent
+	191, // 160: game.v1.ServerEvent.hotbar_update:type_name -> game.v1.HotbarUpdateEvent
 	35,  // 161: game.v1.ServerEvent.shop_view:type_name -> game.v1.ShopView
 	60,  // 162: game.v1.ServerEvent.healer_view:type_name -> game.v1.HealerView
 	62,  // 163: game.v1.ServerEvent.trainer_view:type_name -> game.v1.TrainerView
-	196, // 164: game.v1.ServerEvent.weather:type_name -> game.v1.WeatherEvent
+	197, // 164: game.v1.ServerEvent.weather:type_name -> game.v1.WeatherEvent
 	80,  // 165: game.v1.ServerEvent.loadout_view:type_name -> game.v1.LoadoutView
 	63,  // 166: game.v1.ServerEvent.fixer_view:type_name -> game.v1.FixerView
 	34,  // 167: game.v1.ShopView.items:type_name -> game.v1.ShopItem
@@ -15184,7 +15296,7 @@ var file_game_v1_game_proto_depIdxs = []int32{
 	2,   // 176: game.v1.PlayerInfo.status:type_name -> game.v1.CombatStatus
 	47,  // 177: game.v1.ExitList.exits:type_name -> game.v1.ExitInfo
 	61,  // 178: game.v1.TrainerView.jobs:type_name -> game.v1.JobOfferEntry
-	197, // 179: game.v1.FixerView.bribe_costs:type_name -> game.v1.FixerView.BribeCostsEntry
+	198, // 179: game.v1.FixerView.bribe_costs:type_name -> game.v1.FixerView.BribeCostsEntry
 	79,  // 180: game.v1.LoadoutView.presets:type_name -> game.v1.LoadoutWeaponPreset
 	89,  // 181: game.v1.MapTile.poi_npcs:type_name -> game.v1.PoiWithNpc
 	90,  // 182: game.v1.MapResponse.tiles:type_name -> game.v1.MapTile
@@ -15196,8 +15308,8 @@ var file_game_v1_game_proto_depIdxs = []int32{
 	113, // 188: game.v1.ClassFeaturesResponse.archetype_features:type_name -> game.v1.ClassFeatureEntry
 	113, // 189: game.v1.ClassFeaturesResponse.job_features:type_name -> game.v1.ClassFeatureEntry
 	110, // 190: game.v1.UseResponse.choices:type_name -> game.v1.FeatEntry
-	198, // 191: game.v1.CharacterSheetView.armor:type_name -> game.v1.CharacterSheetView.ArmorEntry
-	199, // 192: game.v1.CharacterSheetView.accessories:type_name -> game.v1.CharacterSheetView.AccessoriesEntry
+	199, // 191: game.v1.CharacterSheetView.armor:type_name -> game.v1.CharacterSheetView.ArmorEntry
+	200, // 192: game.v1.CharacterSheetView.accessories:type_name -> game.v1.CharacterSheetView.AccessoriesEntry
 	125, // 193: game.v1.CharacterSheetView.player_resistances:type_name -> game.v1.ResistanceEntry
 	125, // 194: game.v1.CharacterSheetView.player_weaknesses:type_name -> game.v1.ResistanceEntry
 	94,  // 195: game.v1.CharacterSheetView.skills:type_name -> game.v1.SkillEntry
@@ -15209,16 +15321,17 @@ var file_game_v1_game_proto_depIdxs = []int32{
 	123, // 201: game.v1.CharacterSheetView.innate_slots:type_name -> game.v1.InnateSlotView
 	120, // 202: game.v1.CharacterSheetView.hardwired_slots:type_name -> game.v1.HardwiredSlotView
 	121, // 203: game.v1.CharacterSheetView.spontaneous_known:type_name -> game.v1.SpontaneousKnownEntry
-	200, // 204: game.v1.CharacterSheetView.armor_categories:type_name -> game.v1.CharacterSheetView.ArmorCategoriesEntry
+	201, // 204: game.v1.CharacterSheetView.armor_categories:type_name -> game.v1.CharacterSheetView.ArmorCategoriesEntry
 	127, // 205: game.v1.ProficienciesResponse.proficiencies:type_name -> game.v1.ProficiencyEntry
-	193, // 206: game.v1.CraftResultEvent.materials_lost:type_name -> game.v1.MaterialLoss
-	4,   // 207: game.v1.GameService.Session:input_type -> game.v1.ClientMessage
-	33,  // 208: game.v1.GameService.Session:output_type -> game.v1.ServerEvent
-	208, // [208:209] is the sub-list for method output_type
-	207, // [207:208] is the sub-list for method input_type
-	207, // [207:207] is the sub-list for extension type_name
-	207, // [207:207] is the sub-list for extension extendee
-	0,   // [0:207] is the sub-list for field type_name
+	189, // 206: game.v1.HotbarUpdateEvent.slots:type_name -> game.v1.HotbarSlot
+	194, // 207: game.v1.CraftResultEvent.materials_lost:type_name -> game.v1.MaterialLoss
+	4,   // 208: game.v1.GameService.Session:input_type -> game.v1.ClientMessage
+	33,  // 209: game.v1.GameService.Session:output_type -> game.v1.ServerEvent
+	209, // [209:210] is the sub-list for method output_type
+	208, // [208:209] is the sub-list for method input_type
+	208, // [208:208] is the sub-list for extension type_name
+	208, // [208:208] is the sub-list for extension extendee
+	0,   // [0:208] is the sub-list for field type_name
 }
 
 func init() { file_game_v1_game_proto_init() }
@@ -15403,7 +15516,7 @@ func file_game_v1_game_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_game_v1_game_proto_rawDesc), len(file_game_v1_game_proto_rawDesc)),
 			NumEnums:      4,
-			NumMessages:   197,
+			NumMessages:   198,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

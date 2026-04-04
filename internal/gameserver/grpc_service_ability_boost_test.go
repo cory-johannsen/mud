@@ -118,11 +118,11 @@ func (m *mockCharSaverAbilityBoost) LoadFocusPoints(_ context.Context, _ int64) 
 func (m *mockCharSaverAbilityBoost) SaveFocusPoints(_ context.Context, _ int64, _ int) error {
 	return nil
 }
-func (m *mockCharSaverAbilityBoost) SaveHotbar(_ context.Context, _ int64, _ [10]string) error {
+func (m *mockCharSaverAbilityBoost) SaveHotbar(_ context.Context, _ int64, _ [10]session.HotbarSlot) error {
 	return nil
 }
-func (m *mockCharSaverAbilityBoost) LoadHotbar(_ context.Context, _ int64) ([10]string, error) {
-	return [10]string{}, nil
+func (m *mockCharSaverAbilityBoost) LoadHotbar(_ context.Context, _ int64) ([10]session.HotbarSlot, error) {
+	return [10]session.HotbarSlot{}, nil
 }
 
 // testGRPCServerWithAbilityBoosts starts an in-process gRPC server configured with

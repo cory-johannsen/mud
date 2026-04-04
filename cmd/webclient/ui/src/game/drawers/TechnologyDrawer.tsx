@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import { useGame } from '../GameContext'
 import type {
   HardwiredSlotView,
+  HotbarSlot,
   InnateSlotView,
   PreparedSlotView,
   SpontaneousKnownEntry,
@@ -42,7 +43,7 @@ function SlotPicker({
   onPick,
   onCancel,
 }: {
-  hotbarSlots: string[]
+  hotbarSlots: HotbarSlot[]
   onPick: (slot: number) => void
   onCancel: () => void
 }) {
@@ -55,17 +56,19 @@ function SlotPicker({
         </div>
         <div style={styles.slotPickerGrid}>
           {SLOT_KEYS.map((key, i) => {
-            const current = hotbarSlots[i] ?? ''
+            const slot = hotbarSlots[i]
+            const current = slot?.ref ?? ''
+            const label = slot?.displayName ?? slot?.display_name ?? current
             return (
               <button
                 key={key}
                 style={{ ...styles.slotBtn, ...(current ? styles.slotBtnOccupied : {}) }}
                 onClick={() => onPick(i + 1)}
-                title={current ? `Replace: ${current}` : `Slot ${key} (empty)`}
+                title={current ? `Replace: ${label}` : `Slot ${key} (empty)`}
                 type="button"
               >
                 <span style={styles.slotBtnKey}>{key}</span>
-                {current && <span style={styles.slotBtnCurrent}>{current}</span>}
+                {current && <span style={styles.slotBtnCurrent}>{label}</span>}
               </button>
             )
           })}
@@ -83,16 +86,15 @@ function PreparedItem({
   sendMessage,
 }: {
   slot: PreparedSlotView
-  hotbarSlots: string[]
+  hotbarSlots: HotbarSlot[]
   sendMessage: (type: string, payload: object) => void
 }) {
   const [picking, setPicking] = useState(false)
   const techId = slot.techId ?? slot.tech_id ?? ''
-  const shortName = slot.shortName ?? slot.short_name ?? ''
   const name = slot.techName ?? slot.tech_name ?? techId
 
   function handlePick(s: number) {
-    sendMessage('HotbarRequest', { action: 'set', slot: s, text: `use ${shortName || techId}` })
+    sendMessage('HotbarRequest', { action: 'set', slot: s, kind: 'technology', ref: techId })
     setPicking(false)
   }
 
@@ -126,19 +128,18 @@ function InnateItem({
   sendMessage,
 }: {
   slot: InnateSlotView
-  hotbarSlots: string[]
+  hotbarSlots: HotbarSlot[]
   sendMessage: (type: string, payload: object) => void
 }) {
   const [picking, setPicking] = useState(false)
   const techId = slot.techId ?? slot.tech_id ?? ''
-  const shortName = slot.shortName ?? slot.short_name ?? ''
   const name = slot.techName ?? slot.tech_name ?? techId
   const remaining = slot.usesRemaining ?? slot.uses_remaining ?? 0
   const max = slot.maxUses ?? slot.max_uses ?? 0
   const exhausted = max > 0 && remaining === 0
 
   function handlePick(s: number) {
-    sendMessage('HotbarRequest', { action: 'set', slot: s, text: `use ${shortName || techId}` })
+    sendMessage('HotbarRequest', { action: 'set', slot: s, kind: 'technology', ref: techId })
     setPicking(false)
   }
 
@@ -174,17 +175,16 @@ function SpontaneousItem({
 }: {
   entry: SpontaneousKnownEntry
   poolRemaining: number
-  hotbarSlots: string[]
+  hotbarSlots: HotbarSlot[]
   sendMessage: (type: string, payload: object) => void
 }) {
   const [picking, setPicking] = useState(false)
   const techId = entry.techId ?? entry.tech_id ?? ''
-  const shortName = entry.shortName ?? entry.short_name ?? ''
   const name = entry.techName ?? entry.tech_name ?? techId
   const exhausted = poolRemaining === 0
 
   function handlePick(s: number) {
-    sendMessage('HotbarRequest', { action: 'set', slot: s, text: `use ${shortName || techId}` })
+    sendMessage('HotbarRequest', { action: 'set', slot: s, kind: 'technology', ref: techId })
     setPicking(false)
   }
 
