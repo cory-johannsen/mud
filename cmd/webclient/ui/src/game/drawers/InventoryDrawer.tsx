@@ -1,42 +1,170 @@
 import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { useGame } from '../GameContext'
-import type { InventoryItem } from '../../proto'
+import type { InventoryItem, HotbarSlot } from '../../proto'
+
+const SLOT_KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0']
+
+function SlotPicker({
+  hotbarSlots,
+  onPick,
+  onCancel,
+}: {
+  hotbarSlots: HotbarSlot[]
+  onPick: (slot: number) => void
+  onCancel: () => void
+}) {
+  return createPortal(
+    <div style={slotPickerStyles.overlay} onClick={onCancel}>
+      <div style={slotPickerStyles.modal} onClick={(e) => e.stopPropagation()}>
+        <div style={slotPickerStyles.header}>
+          <span>Add to Hotbar</span>
+          <button onClick={onCancel} type="button" style={{ background: 'none', border: '1px solid #444', color: '#666', cursor: 'pointer', fontFamily: 'monospace', fontSize: '0.72rem', padding: '0.1rem 0.4rem', borderRadius: '3px' }}>✕</button>
+        </div>
+        <div style={slotPickerStyles.grid}>
+          {SLOT_KEYS.map((key, i) => {
+            const slot = hotbarSlots[i]
+            const current = slot?.ref ?? ''
+            const label = slot?.displayName ?? slot?.display_name ?? current
+            return (
+              <button
+                key={key}
+                style={{ padding: '0.2rem 0.4rem', background: current ? '#2a2a1a' : '#111', border: '1px solid #444', color: current ? '#e0c060' : '#555', borderRadius: '3px', cursor: 'pointer', fontFamily: 'monospace', fontSize: '0.75rem', minWidth: '60px' }}
+                onClick={() => onPick(i + 1)}
+                title={current ? `Replace: ${label}` : `Slot ${key} (empty)`}
+                type="button"
+              >
+                {key}{current ? `: ${label.slice(0, 8)}` : ''}
+              </button>
+            )
+          })}
+        </div>
+      </div>
+    </div>,
+    document.body
+  )
+}
+
+const slotPickerStyles: Record<string, React.CSSProperties> = {
+  overlay: { position: 'fixed', inset: 0, zIndex: 300, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center' },
+  modal: { background: '#1a1a1a', border: '1px solid #444', borderRadius: '6px', padding: '0.75rem', minWidth: '280px', fontFamily: 'monospace' },
+  header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem', color: '#7af', fontSize: '0.75rem', textTransform: 'uppercase' as const },
+  grid: { display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '0.3rem' },
+}
 
 function ConsumableRow({
   item,
   sendCommand,
   sendMessage,
+  hotbarSlots,
 }: {
   item: InventoryItem
   sendCommand: (raw: string) => void
   sendMessage: (type: string, payload: object) => void
+  hotbarSlots: HotbarSlot[]
 }) {
   const itemDefId = item.itemDefId ?? item.item_def_id ?? ''
   const qty = item.quantity ?? 1
+  const [picking, setPicking] = useState(false)
 
   function handleConsume() {
     sendCommand(`use ${itemDefId}`)
     sendMessage('InventoryRequest', {})
   }
 
+  function handleHotbarPick(slot: number) {
+    sendMessage('HotbarRequest', { action: 'set', slot, kind: 'consumable', ref: itemDefId })
+    setPicking(false)
+  }
+
   return (
-    <tr>
-      <td title={item.effectsSummary ?? item.effects_summary ?? undefined}>{item.name}</td>
-      <td>{item.kind}</td>
-      <td>{qty}</td>
-      <td>{(item.weight ?? 0).toFixed(1)}</td>
-      <td>
-        <button
-          style={{ ...styles.actionBtn, background: '#a74', ...(qty <= 0 ? styles.actionBtnDisabled : {}) }}
-          disabled={qty <= 0}
-          onClick={handleConsume}
-          type="button"
-          title={item.effectsSummary ?? item.effects_summary ?? `Consume ${item.name}`}
-        >
-          Consume
-        </button>
-      </td>
-    </tr>
+    <>
+      {picking && (
+        <SlotPicker hotbarSlots={hotbarSlots} onPick={handleHotbarPick} onCancel={() => setPicking(false)} />
+      )}
+      <tr>
+        <td title={item.effectsSummary ?? item.effects_summary ?? undefined}>{item.name}</td>
+        <td>{item.kind}</td>
+        <td>{qty}</td>
+        <td>{(item.weight ?? 0).toFixed(1)}</td>
+        <td style={{ display: 'flex', gap: '0.3rem', flexWrap: 'wrap' as const }}>
+          <button
+            style={{ ...styles.actionBtn, background: '#a74', ...(qty <= 0 ? styles.actionBtnDisabled : {}) }}
+            disabled={qty <= 0}
+            onClick={handleConsume}
+            type="button"
+            title={item.effectsSummary ?? item.effects_summary ?? `Consume ${item.name}`}
+          >
+            Consume
+          </button>
+          <button
+            style={{ ...styles.actionBtn, background: '#2a3a4a' }}
+            onClick={() => setPicking(true)}
+            type="button"
+            title={`Add ${item.name} to hotbar`}
+          >
+            + Hotbar
+          </button>
+        </td>
+      </tr>
+    </>
+  )
+}
+
+function ThrowableRow({
+  item,
+  sendCommand,
+  sendMessage,
+  hotbarSlots,
+}: {
+  item: InventoryItem
+  sendCommand: (raw: string) => void
+  sendMessage: (type: string, payload: object) => void
+  hotbarSlots: HotbarSlot[]
+}) {
+  const itemDefId = item.itemDefId ?? item.item_def_id ?? ''
+  const qty = item.quantity ?? 1
+  const [picking, setPicking] = useState(false)
+
+  function handleThrow() {
+    sendCommand(`throw ${itemDefId}`)
+  }
+
+  function handleHotbarPick(slot: number) {
+    sendMessage('HotbarRequest', { action: 'set', slot, kind: 'throwable', ref: itemDefId })
+    setPicking(false)
+  }
+
+  return (
+    <>
+      {picking && (
+        <SlotPicker hotbarSlots={hotbarSlots} onPick={handleHotbarPick} onCancel={() => setPicking(false)} />
+      )}
+      <tr>
+        <td>{item.name}</td>
+        <td>{item.kind}</td>
+        <td>{qty}</td>
+        <td>{(item.weight ?? 0).toFixed(1)}</td>
+        <td style={{ display: 'flex', gap: '0.3rem', flexWrap: 'wrap' as const }}>
+          <button
+            style={{ ...styles.actionBtn, background: '#6a3a2a', ...(qty <= 0 ? styles.actionBtnDisabled : {}) }}
+            disabled={qty <= 0}
+            onClick={handleThrow}
+            type="button"
+          >
+            Throw
+          </button>
+          <button
+            style={{ ...styles.actionBtn, background: '#2a3a4a' }}
+            onClick={() => setPicking(true)}
+            type="button"
+            title={`Add ${item.name} to hotbar`}
+          >
+            + Hotbar
+          </button>
+        </td>
+      </tr>
+    </>
   )
 }
 
@@ -162,6 +290,7 @@ function PlainRow({ item }: { item: InventoryItem }) {
 
 export function InventoryDrawer({ onClose }: { onClose: () => void }) {
   const { state, sendMessage, sendCommand } = useGame()
+  const { hotbarSlots } = state
 
   useEffect(() => {
     if (!state.inventoryView) {
@@ -207,7 +336,12 @@ export function InventoryDrawer({ onClose }: { onClose: () => void }) {
                   }
                   if (item.kind === 'consumable') {
                     return (
-                      <ConsumableRow key={i} item={item} sendCommand={sendCommand} sendMessage={sendMessage} />
+                      <ConsumableRow key={i} item={item} sendCommand={sendCommand} sendMessage={sendMessage} hotbarSlots={hotbarSlots} />
+                    )
+                  }
+                  if (item.throwable) {
+                    return (
+                      <ThrowableRow key={i} item={item} sendCommand={sendCommand} sendMessage={sendMessage} hotbarSlots={hotbarSlots} />
                     )
                   }
                   return <PlainRow key={i} item={item} />
