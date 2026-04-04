@@ -237,15 +237,16 @@ func TestResolveHotbarSlotDisplay_NilRegistriesReturnsEmpty(t *testing.T) {
 	}
 }
 
-// Property: set with valid slot 1–10 always writes to index slot-1.
+// Property: set with valid slot 1–10 and non-empty text always writes to index slot-1.
 func TestPropertyHandleHotbar_SetValidSlot(t *testing.T) {
 	rapid.Check(t, func(rt *rapid.T) {
 		slot := rapid.Int32Range(1, 10).Draw(rt, "slot")
-		text := rapid.StringOf(rapid.RuneFrom([]rune("abcdefghijklmnopqrstuvwxyz "))).Draw(rt, "text")
+		text := rapid.StringOfN(rapid.RuneFrom([]rune("abcdefghijklmnopqrstuvwxyz ")), 1, 40, -1).Draw(rt, "text")
 
 		svc, _, uid := testHotbarService(t)
-		_, err := svc.handleHotbar(uid, &gamev1.HotbarRequest{Action: "set", Slot: slot, Text: text})
+		evt, err := svc.handleHotbar(uid, &gamev1.HotbarRequest{Action: "set", Slot: slot, Text: text})
 		require.NoError(t, err)
+		require.NotNil(t, evt.GetHotbarUpdate(), "set must return HotbarUpdateEvent for non-empty text")
 
 		sess, ok := svc.sessions.GetPlayer(uid)
 		require.True(t, ok)
