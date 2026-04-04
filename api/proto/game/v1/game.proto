@@ -838,6 +838,13 @@ message InventoryView {
   int32 total_crypto = 7;
 }
 
+// CombatantPosition carries a combatant's name and 2D grid coordinates.
+message CombatantPosition {
+  string name = 1;
+  int32  x    = 2;
+  int32  y    = 3;
+}
+
 // RoundStartEvent is broadcast to all combatants when a new round begins.
 message RoundStartEvent {
   int32                      round             = 1;
@@ -850,13 +857,6 @@ message RoundStartEvent {
 // RoundEndEvent is broadcast when a round's actions have resolved.
 message RoundEndEvent {
   int32 round = 1;
-}
-
-// CombatantPosition carries a combatant's 2D grid coordinates for the initial position broadcast.
-message CombatantPosition {
-  string name = 1;
-  int32  x    = 2;
-  int32  y    = 3;
 }
 
 // CombatEvent delivers combat narration to all players in the room.
@@ -872,7 +872,7 @@ message CombatEvent {
   string narrative                 = 9;
   string weapon_name               = 10;
   int32  target_max_hp             = 11;
-  int32  attacker_position         = 12; // deprecated; use attacker_x and attacker_y
+  int32  attacker_position         = 12 [deprecated = true]; // use attacker_x and attacker_y
   int32  attacker_x                = 13;
   int32  attacker_y                = 14;
   bool   flanking                  = 15;
@@ -987,8 +987,8 @@ message InteractResponse {
 message UseRequest {
   string feat_id  = 1;
   string target   = 2;
-  int32  target_x = 3;
-  int32  target_y = 4;
+  int32  target_x = 3; // 0-based grid column (0–9); ignored unless feat has aoe_radius > 0
+  int32  target_y = 4; // 0-based grid row (0–9); ignored unless feat has aoe_radius > 0
 }
 
 // UseResponse carries the result of a feat activation or a list of active feats.

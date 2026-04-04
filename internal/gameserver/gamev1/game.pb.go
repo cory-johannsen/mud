@@ -8513,6 +8513,67 @@ func (x *InventoryView) GetTotalCrypto() int32 {
 	return 0
 }
 
+// CombatantPosition carries a combatant's name and 2D grid coordinates.
+type CombatantPosition struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	X             int32                  `protobuf:"varint,2,opt,name=x,proto3" json:"x,omitempty"`
+	Y             int32                  `protobuf:"varint,3,opt,name=y,proto3" json:"y,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CombatantPosition) Reset() {
+	*x = CombatantPosition{}
+	mi := &file_game_v1_game_proto_msgTypes[95]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CombatantPosition) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CombatantPosition) ProtoMessage() {}
+
+func (x *CombatantPosition) ProtoReflect() protoreflect.Message {
+	mi := &file_game_v1_game_proto_msgTypes[95]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CombatantPosition.ProtoReflect.Descriptor instead.
+func (*CombatantPosition) Descriptor() ([]byte, []int) {
+	return file_game_v1_game_proto_rawDescGZIP(), []int{95}
+}
+
+func (x *CombatantPosition) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *CombatantPosition) GetX() int32 {
+	if x != nil {
+		return x.X
+	}
+	return 0
+}
+
+func (x *CombatantPosition) GetY() int32 {
+	if x != nil {
+		return x.Y
+	}
+	return 0
+}
+
 // RoundStartEvent is broadcast to all combatants when a new round begins.
 type RoundStartEvent struct {
 	state            protoimpl.MessageState `protogen:"open.v1"`
@@ -8527,7 +8588,7 @@ type RoundStartEvent struct {
 
 func (x *RoundStartEvent) Reset() {
 	*x = RoundStartEvent{}
-	mi := &file_game_v1_game_proto_msgTypes[95]
+	mi := &file_game_v1_game_proto_msgTypes[96]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -8539,7 +8600,7 @@ func (x *RoundStartEvent) String() string {
 func (*RoundStartEvent) ProtoMessage() {}
 
 func (x *RoundStartEvent) ProtoReflect() protoreflect.Message {
-	mi := &file_game_v1_game_proto_msgTypes[95]
+	mi := &file_game_v1_game_proto_msgTypes[96]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -8552,7 +8613,7 @@ func (x *RoundStartEvent) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RoundStartEvent.ProtoReflect.Descriptor instead.
 func (*RoundStartEvent) Descriptor() ([]byte, []int) {
-	return file_game_v1_game_proto_rawDescGZIP(), []int{95}
+	return file_game_v1_game_proto_rawDescGZIP(), []int{96}
 }
 
 func (x *RoundStartEvent) GetRound() int32 {
@@ -8600,7 +8661,7 @@ type RoundEndEvent struct {
 
 func (x *RoundEndEvent) Reset() {
 	*x = RoundEndEvent{}
-	mi := &file_game_v1_game_proto_msgTypes[96]
+	mi := &file_game_v1_game_proto_msgTypes[97]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -8612,7 +8673,7 @@ func (x *RoundEndEvent) String() string {
 func (*RoundEndEvent) ProtoMessage() {}
 
 func (x *RoundEndEvent) ProtoReflect() protoreflect.Message {
-	mi := &file_game_v1_game_proto_msgTypes[96]
+	mi := &file_game_v1_game_proto_msgTypes[97]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -8625,7 +8686,7 @@ func (x *RoundEndEvent) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RoundEndEvent.ProtoReflect.Descriptor instead.
 func (*RoundEndEvent) Descriptor() ([]byte, []int) {
-	return file_game_v1_game_proto_rawDescGZIP(), []int{96}
+	return file_game_v1_game_proto_rawDescGZIP(), []int{97}
 }
 
 func (x *RoundEndEvent) GetRound() int32 {
@@ -8635,85 +8696,25 @@ func (x *RoundEndEvent) GetRound() int32 {
 	return 0
 }
 
-// CombatantPosition carries a combatant's 2D grid coordinates for the initial position broadcast.
-type CombatantPosition struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	X             int32                  `protobuf:"varint,2,opt,name=x,proto3" json:"x,omitempty"`
-	Y             int32                  `protobuf:"varint,3,opt,name=y,proto3" json:"y,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *CombatantPosition) Reset() {
-	*x = CombatantPosition{}
-	mi := &file_game_v1_game_proto_msgTypes[97]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *CombatantPosition) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*CombatantPosition) ProtoMessage() {}
-
-func (x *CombatantPosition) ProtoReflect() protoreflect.Message {
-	mi := &file_game_v1_game_proto_msgTypes[97]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use CombatantPosition.ProtoReflect.Descriptor instead.
-func (*CombatantPosition) Descriptor() ([]byte, []int) {
-	return file_game_v1_game_proto_rawDescGZIP(), []int{97}
-}
-
-func (x *CombatantPosition) GetName() string {
-	if x != nil {
-		return x.Name
-	}
-	return ""
-}
-
-func (x *CombatantPosition) GetX() int32 {
-	if x != nil {
-		return x.X
-	}
-	return 0
-}
-
-func (x *CombatantPosition) GetY() int32 {
-	if x != nil {
-		return x.Y
-	}
-	return 0
-}
-
 // CombatEvent delivers combat narration to all players in the room.
 type CombatEvent struct {
-	state            protoimpl.MessageState `protogen:"open.v1"`
-	Type             CombatEventType        `protobuf:"varint,1,opt,name=type,proto3,enum=game.v1.CombatEventType" json:"type,omitempty"`
-	Attacker         string                 `protobuf:"bytes,2,opt,name=attacker,proto3" json:"attacker,omitempty"`
-	Target           string                 `protobuf:"bytes,3,opt,name=target,proto3" json:"target,omitempty"`
-	AttackRoll       int32                  `protobuf:"varint,4,opt,name=attack_roll,json=attackRoll,proto3" json:"attack_roll,omitempty"`
-	AttackTotal      int32                  `protobuf:"varint,5,opt,name=attack_total,json=attackTotal,proto3" json:"attack_total,omitempty"`
-	Outcome          string                 `protobuf:"bytes,6,opt,name=outcome,proto3" json:"outcome,omitempty"`
-	Damage           int32                  `protobuf:"varint,7,opt,name=damage,proto3" json:"damage,omitempty"`
-	TargetHp         int32                  `protobuf:"varint,8,opt,name=target_hp,json=targetHp,proto3" json:"target_hp,omitempty"`
-	Narrative        string                 `protobuf:"bytes,9,opt,name=narrative,proto3" json:"narrative,omitempty"`
-	WeaponName       string                 `protobuf:"bytes,10,opt,name=weapon_name,json=weaponName,proto3" json:"weapon_name,omitempty"`
-	TargetMaxHp      int32                  `protobuf:"varint,11,opt,name=target_max_hp,json=targetMaxHp,proto3" json:"target_max_hp,omitempty"`
-	AttackerPosition int32                  `protobuf:"varint,12,opt,name=attacker_position,json=attackerPosition,proto3" json:"attacker_position,omitempty"` // deprecated; use attacker_x and attacker_y
-	AttackerX        int32                  `protobuf:"varint,13,opt,name=attacker_x,json=attackerX,proto3" json:"attacker_x,omitempty"`
-	AttackerY        int32                  `protobuf:"varint,14,opt,name=attacker_y,json=attackerY,proto3" json:"attacker_y,omitempty"`
-	Flanking         bool                   `protobuf:"varint,15,opt,name=flanking,proto3" json:"flanking,omitempty"`
+	state       protoimpl.MessageState `protogen:"open.v1"`
+	Type        CombatEventType        `protobuf:"varint,1,opt,name=type,proto3,enum=game.v1.CombatEventType" json:"type,omitempty"`
+	Attacker    string                 `protobuf:"bytes,2,opt,name=attacker,proto3" json:"attacker,omitempty"`
+	Target      string                 `protobuf:"bytes,3,opt,name=target,proto3" json:"target,omitempty"`
+	AttackRoll  int32                  `protobuf:"varint,4,opt,name=attack_roll,json=attackRoll,proto3" json:"attack_roll,omitempty"`
+	AttackTotal int32                  `protobuf:"varint,5,opt,name=attack_total,json=attackTotal,proto3" json:"attack_total,omitempty"`
+	Outcome     string                 `protobuf:"bytes,6,opt,name=outcome,proto3" json:"outcome,omitempty"`
+	Damage      int32                  `protobuf:"varint,7,opt,name=damage,proto3" json:"damage,omitempty"`
+	TargetHp    int32                  `protobuf:"varint,8,opt,name=target_hp,json=targetHp,proto3" json:"target_hp,omitempty"`
+	Narrative   string                 `protobuf:"bytes,9,opt,name=narrative,proto3" json:"narrative,omitempty"`
+	WeaponName  string                 `protobuf:"bytes,10,opt,name=weapon_name,json=weaponName,proto3" json:"weapon_name,omitempty"`
+	TargetMaxHp int32                  `protobuf:"varint,11,opt,name=target_max_hp,json=targetMaxHp,proto3" json:"target_max_hp,omitempty"`
+	// Deprecated: Marked as deprecated in game/v1/game.proto.
+	AttackerPosition int32 `protobuf:"varint,12,opt,name=attacker_position,json=attackerPosition,proto3" json:"attacker_position,omitempty"` // use attacker_x and attacker_y
+	AttackerX        int32 `protobuf:"varint,13,opt,name=attacker_x,json=attackerX,proto3" json:"attacker_x,omitempty"`
+	AttackerY        int32 `protobuf:"varint,14,opt,name=attacker_y,json=attackerY,proto3" json:"attacker_y,omitempty"`
+	Flanking         bool  `protobuf:"varint,15,opt,name=flanking,proto3" json:"flanking,omitempty"`
 	unknownFields    protoimpl.UnknownFields
 	sizeCache        protoimpl.SizeCache
 }
@@ -8825,6 +8826,7 @@ func (x *CombatEvent) GetTargetMaxHp() int32 {
 	return 0
 }
 
+// Deprecated: Marked as deprecated in game/v1/game.proto.
 func (x *CombatEvent) GetAttackerPosition() int32 {
 	if x != nil {
 		return x.AttackerPosition
@@ -9686,8 +9688,8 @@ type UseRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	FeatId        string                 `protobuf:"bytes,1,opt,name=feat_id,json=featId,proto3" json:"feat_id,omitempty"`
 	Target        string                 `protobuf:"bytes,2,opt,name=target,proto3" json:"target,omitempty"`
-	TargetX       int32                  `protobuf:"varint,3,opt,name=target_x,json=targetX,proto3" json:"target_x,omitempty"`
-	TargetY       int32                  `protobuf:"varint,4,opt,name=target_y,json=targetY,proto3" json:"target_y,omitempty"`
+	TargetX       int32                  `protobuf:"varint,3,opt,name=target_x,json=targetX,proto3" json:"target_x,omitempty"` // 0-based grid column (0–9); ignored unless feat has aoe_radius > 0
+	TargetY       int32                  `protobuf:"varint,4,opt,name=target_y,json=targetY,proto3" json:"target_y,omitempty"` // 0-based grid row (0–9); ignored unless feat has aoe_radius > 0
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -14874,7 +14876,11 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\n" +
 	"max_weight\x18\x05 \x01(\x01R\tmaxWeight\x12\x1a\n" +
 	"\bcurrency\x18\x06 \x01(\tR\bcurrency\x12!\n" +
-	"\ftotal_crypto\x18\a \x01(\x05R\vtotalCrypto\"\xda\x01\n" +
+	"\ftotal_crypto\x18\a \x01(\x05R\vtotalCrypto\"C\n" +
+	"\x11CombatantPosition\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12\f\n" +
+	"\x01x\x18\x02 \x01(\x05R\x01x\x12\f\n" +
+	"\x01y\x18\x03 \x01(\x05R\x01y\"\xda\x01\n" +
 	"\x0fRoundStartEvent\x12\x14\n" +
 	"\x05round\x18\x01 \x01(\x05R\x05round\x12(\n" +
 	"\x10actions_per_turn\x18\x02 \x01(\x05R\x0eactionsPerTurn\x12\x1f\n" +
@@ -14884,11 +14890,7 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"turn_order\x18\x04 \x03(\tR\tturnOrder\x12G\n" +
 	"\x11initial_positions\x18\x05 \x03(\v2\x1a.game.v1.CombatantPositionR\x10initialPositions\"%\n" +
 	"\rRoundEndEvent\x12\x14\n" +
-	"\x05round\x18\x01 \x01(\x05R\x05round\"C\n" +
-	"\x11CombatantPosition\x12\x12\n" +
-	"\x04name\x18\x01 \x01(\tR\x04name\x12\f\n" +
-	"\x01x\x18\x02 \x01(\x05R\x01x\x12\f\n" +
-	"\x01y\x18\x03 \x01(\x05R\x01y\"\xec\x03\n" +
+	"\x05round\x18\x01 \x01(\x05R\x05round\"\xf0\x03\n" +
 	"\vCombatEvent\x12,\n" +
 	"\x04type\x18\x01 \x01(\x0e2\x18.game.v1.CombatEventTypeR\x04type\x12\x1a\n" +
 	"\battacker\x18\x02 \x01(\tR\battacker\x12\x16\n" +
@@ -14903,8 +14905,8 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\vweapon_name\x18\n" +
 	" \x01(\tR\n" +
 	"weaponName\x12\"\n" +
-	"\rtarget_max_hp\x18\v \x01(\x05R\vtargetMaxHp\x12+\n" +
-	"\x11attacker_position\x18\f \x01(\x05R\x10attackerPosition\x12\x1d\n" +
+	"\rtarget_max_hp\x18\v \x01(\x05R\vtargetMaxHp\x12/\n" +
+	"\x11attacker_position\x18\f \x01(\x05B\x02\x18\x01R\x10attackerPosition\x12\x1d\n" +
 	"\n" +
 	"attacker_x\x18\r \x01(\x05R\tattackerX\x12\x1d\n" +
 	"\n" +
@@ -15414,9 +15416,9 @@ var file_game_v1_game_proto_goTypes = []any{
 	(*RoomEquipRequest)(nil),          // 96: game.v1.RoomEquipRequest
 	(*InventoryItem)(nil),             // 97: game.v1.InventoryItem
 	(*InventoryView)(nil),             // 98: game.v1.InventoryView
-	(*RoundStartEvent)(nil),           // 99: game.v1.RoundStartEvent
-	(*RoundEndEvent)(nil),             // 100: game.v1.RoundEndEvent
-	(*CombatantPosition)(nil),         // 101: game.v1.CombatantPosition
+	(*CombatantPosition)(nil),         // 99: game.v1.CombatantPosition
+	(*RoundStartEvent)(nil),           // 100: game.v1.RoundStartEvent
+	(*RoundEndEvent)(nil),             // 101: game.v1.RoundEndEvent
 	(*CombatEvent)(nil),               // 102: game.v1.CombatEvent
 	(*StatusRequest)(nil),             // 103: game.v1.StatusRequest
 	(*ConditionEvent)(nil),            // 104: game.v1.ConditionEvent
@@ -15669,8 +15671,8 @@ var file_game_v1_game_proto_depIdxs = []int32{
 	56,  // 142: game.v1.ServerEvent.character_info:type_name -> game.v1.CharacterInfo
 	59,  // 143: game.v1.ServerEvent.npc_view:type_name -> game.v1.NpcView
 	102, // 144: game.v1.ServerEvent.combat_event:type_name -> game.v1.CombatEvent
-	99,  // 145: game.v1.ServerEvent.round_start:type_name -> game.v1.RoundStartEvent
-	100, // 146: game.v1.ServerEvent.round_end:type_name -> game.v1.RoundEndEvent
+	100, // 145: game.v1.ServerEvent.round_start:type_name -> game.v1.RoundStartEvent
+	101, // 146: game.v1.ServerEvent.round_end:type_name -> game.v1.RoundEndEvent
 	104, // 147: game.v1.ServerEvent.condition_event:type_name -> game.v1.ConditionEvent
 	98,  // 148: game.v1.ServerEvent.inventory_view:type_name -> game.v1.InventoryView
 	55,  // 149: game.v1.ServerEvent.time_of_day:type_name -> game.v1.TimeOfDayEvent
@@ -15712,7 +15714,7 @@ var file_game_v1_game_proto_depIdxs = []int32{
 	91,  // 185: game.v1.MapResponse.world_tiles:type_name -> game.v1.WorldZoneTile
 	94,  // 186: game.v1.SkillsResponse.skills:type_name -> game.v1.SkillEntry
 	97,  // 187: game.v1.InventoryView.items:type_name -> game.v1.InventoryItem
-	101, // 188: game.v1.RoundStartEvent.initial_positions:type_name -> game.v1.CombatantPosition
+	99,  // 188: game.v1.RoundStartEvent.initial_positions:type_name -> game.v1.CombatantPosition
 	3,   // 189: game.v1.CombatEvent.type:type_name -> game.v1.CombatEventType
 	111, // 190: game.v1.FeatsResponse.feats:type_name -> game.v1.FeatEntry
 	114, // 191: game.v1.ClassFeaturesResponse.archetype_features:type_name -> game.v1.ClassFeatureEntry
