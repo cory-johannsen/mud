@@ -233,7 +233,7 @@ func (h *AuthHandler) gameBridge(ctx context.Context, conn *telnet.Conn, acct po
 	lastRoomView.Store((*gamev1.RoomView)(nil))
 
 	var currentHotbar atomic.Value
-	currentHotbar.Store([10]string{})
+	currentHotbar.Store([10]*gamev1.HotbarSlot{})
 
 	// Receive initial room view
 	resp, err := stream.Recv()
@@ -488,15 +488,15 @@ func (h *AuthHandler) commandLoop(ctx context.Context, stream gamev1.GameService
 		// Slot activation intercept (REQ-HB-6, REQ-HB-13).
 		// Single-char digits 0–9 are unconditionally treated as hotbar slot activation.
 		if len(line) == 1 && line[0] >= '0' && line[0] <= '9' {
-			hb, _ := currentHotbar.Load().([10]string)
+			hb, _ := currentHotbar.Load().([10]*gamev1.HotbarSlot)
 			var idx int
 			if line[0] == '0' {
 				idx = 9 // key "0" → slot 10 → index 9
 			} else {
 				idx = int(line[0] - '1') // key "1"→index 0, "9"→index 8
 			}
-			stored := hb[idx]
-			if stored == "" {
+			cmd := hotbarSlotCommand(hb[idx])
+			if cmd == "" {
 				slotNum := idx + 1
 				msg := fmt.Sprintf("Slot %d is unassigned.", slotNum)
 				if conn.IsSplitScreen() {
@@ -508,8 +508,8 @@ func (h *AuthHandler) commandLoop(ctx context.Context, stream gamev1.GameService
 				}
 				continue
 			}
-			// Replace input with stored command and fall through to parse.
-			line = stored
+			// Replace input with activation command and fall through to parse.
+			line = cmd
 		}
 
 		line = strings.TrimSpace(line)
@@ -742,16 +742,16 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 					if mapResp != nil {
 						_ = conn.WriteConsole(renderMapConsole(mapResp, mapView, rw))
 					}
-					hb, _ := currentHotbar.Load().([10]string)
-					_ = conn.WriteHotbar(hb)
+					hb, _ := currentHotbar.Load().([10]*gamev1.HotbarSlot)
+					_ = conn.WriteHotbar(hotbarLabels(hb))
 					_ = conn.WritePromptSplit(session.CurrentPrompt())
 					continue
 				}
 				if session.Mode() == ModeCombat {
 					snap := combatHandler.SnapshotForRender()
 					_ = conn.WriteRoom(RenderCombatScreen(snap, rw))
-					hb, _ := currentHotbar.Load().([10]string)
-					_ = conn.WriteHotbar(hb)
+					hb, _ := currentHotbar.Load().([10]*gamev1.HotbarSlot)
+					_ = conn.WriteHotbar(hotbarLabels(hb))
 					_ = conn.WritePromptSplit(session.CurrentPrompt())
 					continue
 				}
@@ -760,8 +760,8 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 					aw, _ := activeWeather.Load().(string)
 					_ = conn.WriteRoom(RenderRoomView(rv, rw, telnet.RoomRegionRows, *dt, aw))
 				}
-				hb, _ := currentHotbar.Load().([10]string)
-				_ = conn.WriteHotbar(hb)
+				hb, _ := currentHotbar.Load().([10]*gamev1.HotbarSlot)
+				_ = conn.WriteHotbar(hotbarLabels(hb))
 				_ = conn.WritePromptSplit(session.CurrentPrompt())
 			}
 			continue
@@ -1077,14 +1077,14 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 				}
 				return
 			case *gamev1.ServerEvent_HotbarUpdate:
-				slots := p.HotbarUpdate.GetSlots()
-				var arr [10]string
-				for i := 0; i < len(slots) && i < 10; i++ {
-					arr[i] = slots[i]
+				protoSlots := p.HotbarUpdate.GetSlots()
+				var arr [10]*gamev1.HotbarSlot
+				for i := 0; i < len(protoSlots) && i < 10; i++ {
+					arr[i] = protoSlots[i]
 				}
 				currentHotbar.Store(arr)
 				if conn.IsSplitScreen() {
-					_ = conn.WriteHotbar(arr)
+					_ = conn.WriteHotbar(hotbarLabels(arr))
 				}
 				continue
 			case *gamev1.ServerEvent_TabComplete:
@@ -1152,6 +1152,45 @@ func (h *AuthHandler) archetypeForJob(jobID string) string {
 		}
 	}
 	return ""
+}
+
+// hotbarSlotCommand converts a proto HotbarSlot to the game command it activates.
+// Returns "" when slot is nil or has no ref.
+//
+// Precondition: slot may be nil.
+// Postcondition: Returns "" for nil or empty-ref slots; otherwise returns the activation command.
+func hotbarSlotCommand(slot *gamev1.HotbarSlot) string {
+	if slot == nil || slot.GetRef() == "" {
+		return ""
+	}
+	switch slot.GetKind() {
+	case "feat", "technology", "consumable":
+		return "use " + slot.GetRef()
+	case "throwable":
+		return "throw " + slot.GetRef()
+	default: // "command" or empty kind
+		return slot.GetRef()
+	}
+}
+
+// hotbarLabels extracts display labels from proto slots for WriteHotbar.
+// Uses display_name when available; falls back to ref.
+//
+// Precondition: slots is a [10]*gamev1.HotbarSlot (nil entries treated as empty).
+// Postcondition: Returns [10]string where each entry is the display name or "" if empty.
+func hotbarLabels(slots [10]*gamev1.HotbarSlot) [10]string {
+	var labels [10]string
+	for i, s := range slots {
+		if s == nil {
+			continue
+		}
+		if s.GetDisplayName() != "" {
+			labels[i] = s.GetDisplayName()
+		} else {
+			labels[i] = s.GetRef()
+		}
+	}
+	return labels
 }
 
 // showGameHelp displays in-game help organized by category.
