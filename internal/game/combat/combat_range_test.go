@@ -81,3 +81,37 @@ func TestIsFlanked_SameQuadrant(t *testing.T) {
 	}
 	assert.False(t, combat.IsFlanked(target, attackers))
 }
+
+// TestIsFlanked_CardinalNS verifies that directly-north and directly-south attackers
+// do NOT trigger flanking per REQ-2D-4b (row and column BOTH must differ by ≥1).
+func TestIsFlanked_CardinalNS(t *testing.T) {
+	target := combat.Combatant{GridX: 5, GridY: 5}
+	attackers := []combat.Combatant{
+		{GridX: 5, GridY: 3}, // directly north (same column, different row)
+		{GridX: 5, GridY: 7}, // directly south (same column, different row)
+	}
+	assert.False(t, combat.IsFlanked(target, attackers), "cardinal N/S does not meet diagonal quadrant requirement")
+}
+
+// TestIsFlanked_CardinalEW verifies that directly-east and directly-west attackers
+// do NOT trigger flanking per REQ-2D-4b.
+func TestIsFlanked_CardinalEW(t *testing.T) {
+	target := combat.Combatant{GridX: 5, GridY: 5}
+	attackers := []combat.Combatant{
+		{GridX: 3, GridY: 5}, // directly west (different column, same row)
+		{GridX: 7, GridY: 5}, // directly east (different column, same row)
+	}
+	assert.False(t, combat.IsFlanked(target, attackers), "cardinal E/W does not meet diagonal quadrant requirement")
+}
+
+// TestIsFlanked_MixedCardinalDiagonal verifies that one cardinal + one diagonal attacker
+// do NOT trigger flanking (neither forms an opposite-quadrant pair with a cardinal attacker).
+func TestIsFlanked_MixedCardinalDiagonal(t *testing.T) {
+	target := combat.Combatant{GridX: 5, GridY: 5}
+	attackers := []combat.Combatant{
+		{GridX: 5, GridY: 3}, // directly north (cardinal)
+		{GridX: 7, GridY: 7}, // southeast diagonal
+	}
+	// NW attacker (5,3) has dx=0, so guard requires both dx and dy non-zero → skipped.
+	assert.False(t, combat.IsFlanked(target, attackers), "cardinal + diagonal does not meet strict quadrant requirement")
+}

@@ -3,9 +3,11 @@ package combat
 
 import "github.com/cory-johannsen/mud/internal/game/inventory"
 
-// MaxCombatRange is the maximum allowed distance in feet between any two combatants
-// on the 10×10 grid (diagonal corner to corner = 9 squares × 5 ft = 45 ft; 100 ft
-// is retained as the upper bound for legacy range checks).
+// MaxCombatRange is the maximum engagement distance in feet.
+// Legacy value retained for ranged weapon checks. On the 10×10 grid the actual
+// maximum Chebyshev distance is 9 squares × 5 ft = 45 ft; the 100 ft cap is never
+// reached via grid movement but acts as a hard upper bound for ranged weapon
+// range-increment calculations inherited from the 1D system.
 const MaxCombatRange = 100
 
 // Kind distinguishes player combatants from NPC combatants.
@@ -280,7 +282,10 @@ func sign(n int) int {
 	if n > 0 {
 		return 1
 	}
-	return -1
+	if n < 0 {
+		return -1
+	}
+	return 0
 }
 
 // combatantDist returns the distance in feet between two combatants using the 1D Position field.
