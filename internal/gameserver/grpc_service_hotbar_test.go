@@ -51,24 +51,32 @@ func testHotbarService(t *testing.T) (*GameServiceServer, *session.Manager, stri
 	return svc, sessMgr, uid
 }
 
-// REQ-HB-3: set valid slot 1.
+// REQ-HB-3: set valid slot 1 returns HotbarUpdateEvent and writes command slot.
 func TestHandleHotbar_SetSlot1(t *testing.T) {
 	svc, _, uid := testHotbarService(t)
 	evt, err := svc.handleHotbar(uid, &gamev1.HotbarRequest{Action: "set", Slot: 1, Text: "look"})
 	require.NoError(t, err)
-	assert.Equal(t, "Slot 1 set.", evt.GetMessage().GetContent())
+	require.NotNil(t, evt)
+
+	hu := evt.GetHotbarUpdate()
+	require.NotNil(t, hu, "set must return HotbarUpdateEvent")
+	assert.Len(t, hu.Slots, 10)
 
 	sess, ok := svc.sessions.GetPlayer(uid)
 	require.True(t, ok)
 	assert.Equal(t, "look", sess.Hotbar[0].ActivationCommand())
 }
 
-// REQ-HB-3: set slot 10 (boundary).
+// REQ-HB-3: set slot 10 (boundary) returns HotbarUpdateEvent.
 func TestHandleHotbar_SetSlot10(t *testing.T) {
 	svc, _, uid := testHotbarService(t)
 	evt, err := svc.handleHotbar(uid, &gamev1.HotbarRequest{Action: "set", Slot: 10, Text: "status"})
 	require.NoError(t, err)
-	assert.Equal(t, "Slot 10 set.", evt.GetMessage().GetContent())
+	require.NotNil(t, evt)
+
+	hu := evt.GetHotbarUpdate()
+	require.NotNil(t, hu, "set must return HotbarUpdateEvent")
+	assert.Len(t, hu.Slots, 10)
 
 	sess, ok := svc.sessions.GetPlayer(uid)
 	require.True(t, ok)
@@ -95,7 +103,7 @@ func TestHandleHotbar_SetOutOfRangeHigh(t *testing.T) {
 	assert.Equal(t, [10]session.HotbarSlot{}, sess.Hotbar)
 }
 
-// REQ-HB-4: clear valid slot.
+// REQ-HB-4: clear valid slot returns HotbarUpdateEvent.
 func TestHandleHotbar_ClearSlot(t *testing.T) {
 	svc, _, uid := testHotbarService(t)
 	sess, _ := svc.sessions.GetPlayer(uid)
@@ -103,7 +111,10 @@ func TestHandleHotbar_ClearSlot(t *testing.T) {
 
 	evt, err := svc.handleHotbar(uid, &gamev1.HotbarRequest{Action: "clear", Slot: 3})
 	require.NoError(t, err)
-	assert.Equal(t, "Slot 3 cleared.", evt.GetMessage().GetContent())
+	require.NotNil(t, evt)
+
+	hu := evt.GetHotbarUpdate()
+	require.NotNil(t, hu, "clear must return HotbarUpdateEvent")
 	assert.True(t, sess.Hotbar[2].IsEmpty())
 }
 
@@ -127,13 +138,13 @@ func TestHandleHotbar_Show(t *testing.T) {
 	assert.Nil(t, evt)
 }
 
-// REQ-HB-TS-1: handleHotbar set returns MessageEvent.
+// REQ-HB-TS-1: handleHotbar set returns HotbarUpdateEvent (not MessageEvent).
 func TestHandleHotbar_SetSendsUpdateEvent(t *testing.T) {
 	svc, _, uid := testHotbarService(t)
 	evt, err := svc.handleHotbar(uid, &gamev1.HotbarRequest{Action: "set", Slot: 1, Text: "look"})
 	require.NoError(t, err)
-	_, isMsg := evt.Payload.(*gamev1.ServerEvent_Message)
-	assert.True(t, isMsg, "handleHotbar set should return a MessageEvent")
+	_, isUpdate := evt.Payload.(*gamev1.ServerEvent_HotbarUpdate)
+	assert.True(t, isUpdate, "handleHotbar set should return a HotbarUpdateEvent")
 }
 
 // REQ-HB-TS-1: SaveHotbar called with updated slots on set.
@@ -189,6 +200,41 @@ func TestHandleHotbar_PersistsOnClear(t *testing.T) {
 	saved, ok := saver.saved[55]
 	require.True(t, ok, "SaveHotbar must be called after clear")
 	assert.True(t, saved[2].IsEmpty())
+}
+
+// REQ-HB-TS-2: kind+ref creates a typed feat slot and returns HotbarUpdateEvent.
+func TestHandleHotbar_SetTypedFeatSlot(t *testing.T) {
+	svc, _, uid := testHotbarService(t)
+	evt, err := svc.handleHotbar(uid, &gamev1.HotbarRequest{Action: "set", Slot: 2, Kind: "feat", Ref: "power_strike"})
+	require.NoError(t, err)
+	require.NotNil(t, evt)
+
+	sess, ok := svc.sessions.GetPlayer(uid)
+	require.True(t, ok)
+	assert.Equal(t, session.HotbarSlot{Kind: session.HotbarSlotKindFeat, Ref: "power_strike"}, sess.Hotbar[1])
+	assert.Equal(t, "use power_strike", sess.Hotbar[1].ActivationCommand())
+
+	hu := evt.GetHotbarUpdate()
+	require.NotNil(t, hu)
+	assert.Len(t, hu.Slots, 10)
+	assert.Equal(t, "feat", hu.Slots[1].GetKind())
+	assert.Equal(t, "power_strike", hu.Slots[1].GetRef())
+}
+
+// REQ-HB-TS-3: resolveHotbarSlotDisplay returns empty strings when registries are nil.
+func TestResolveHotbarSlotDisplay_NilRegistriesReturnsEmpty(t *testing.T) {
+	t.Parallel()
+	svc := &GameServiceServer{} // nil registries
+	for _, kind := range []string{
+		session.HotbarSlotKindFeat,
+		session.HotbarSlotKindTechnology,
+		session.HotbarSlotKindThrowable,
+		session.HotbarSlotKindConsumable,
+	} {
+		name, desc := svc.resolveHotbarSlotDisplay(session.HotbarSlot{Kind: kind, Ref: "some_id"})
+		assert.Equal(t, "", name, "kind=%s", kind)
+		assert.Equal(t, "", desc, "kind=%s", kind)
+	}
 }
 
 // Property: set with valid slot 1–10 always writes to index slot-1.

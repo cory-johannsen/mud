@@ -1421,7 +1421,7 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 	}
 
 	// Send initial HotbarUpdateEvent so the frontend can render the hotbar row (REQ-HB-12).
-	if err := stream.Send(hotbarUpdateEvent(sess.Hotbar)); err != nil {
+	if err := stream.Send(s.hotbarUpdateEvent(sess.Hotbar)); err != nil {
 		s.logger.Warn("failed to send initial hotbar update", zap.Error(err))
 	}
 
@@ -2359,13 +2359,7 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 			return errorEvent(hbErr.Error()), nil
 		}
 		// handleHotbar "show" returns nil; events already pushed per-slot.
-		if evt == nil {
-			return nil, nil
-		}
-		// For set/clear: also push a HotbarUpdateEvent so the frontend redraws the row.
-		if sess, ok := s.sessions.GetPlayer(uid); ok {
-			s.pushEventToUID(uid, hotbarUpdateEvent(sess.Hotbar))
-		}
+		// For set/clear: handleHotbar already returns a HotbarUpdateEvent directly.
 		return evt, nil
 	default:
 		return nil, fmt.Errorf("unknown message type")
@@ -5425,11 +5419,13 @@ func (s *GameServiceServer) handleInventory(uid string) (*gamev1.ServerEvent, er
 		armorSlot := ""
 		armorCategory := ""
 		effectsSummary := ""
+		throwable := false
 		if s.invRegistry != nil {
 			if def, ok := s.invRegistry.Item(inst.ItemDefID); ok {
 				name = def.Name
 				kind = def.Kind
 				weight = def.Weight
+				throwable = def.HasTag("throwable")
 				if def.Kind == inventory.KindArmor && def.ArmorRef != "" {
 					if armorDef, ok := s.invRegistry.Armor(def.ArmorRef); ok {
 						armorSlot = string(armorDef.Slot)
@@ -5451,6 +5447,7 @@ func (s *GameServiceServer) handleInventory(uid string) (*gamev1.ServerEvent, er
 			ArmorSlot:      armorSlot,
 			ArmorCategory:  armorCategory,
 			EffectsSummary: effectsSummary,
+			Throwable:      throwable,
 		})
 	}
 	var totalWeight float64
