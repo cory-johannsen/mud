@@ -172,7 +172,8 @@ func executeReadiedStep(s *GameServiceServer, uid string, sess *session.PlayerSe
 		s.pushMessageToUID(uid, "Your readied Step fires — you move 5 feet.")
 		return
 	}
-	combatant.Position += 5
+	// Move one grid cell toward the nearest enemy (default: increase X by 1).
+	combatant.GridX++
 	s.pushMessageToUID(uid, "Your readied Step fires — you move 5 feet.")
 }
 

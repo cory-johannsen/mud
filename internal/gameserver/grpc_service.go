@@ -9147,79 +9147,96 @@ func (s *GameServiceServer) handleShove(uid string, req *gamev1.ShoveRequest) (*
 	return messageEvent(detail + fmt.Sprintf(" — success! %s is pushed back 5 ft.", inst.Name())), nil
 }
 
-// handleStride moves the player 25 ft toward the nearest living enemy.
-// Combat only; costs 1 AP. Direction is always "toward" — stride closes distance.
+// handleStride moves the player one grid cell in the requested direction.
+// Combat only; costs 1 AP. Defaults to "toward" the nearest enemy when no direction is given.
 //
 // Precondition: uid must be in active combat.
-// Postcondition: Player combatant's Position updated toward the nearest enemy; message event returned.
-// When the player strides away from adjacent NPCs, CheckReactiveStrikes fires
-// and the results are appended to the response message.
-func (s *GameServiceServer) handleStride(uid string, _ *gamev1.StrideRequest) (*gamev1.ServerEvent, error) {
+// Postcondition: Player combatant's GridX/GridY updated; CheckReactiveStrikes fires when leaving
+// an adjacent NPC; message event returned.
+func (s *GameServiceServer) handleStride(uid string, req *gamev1.StrideRequest) (*gamev1.ServerEvent, error) {
 	sess, ok := s.sessions.GetPlayer(uid)
 	if !ok {
 		return nil, fmt.Errorf("player %q not found", uid)
 	}
-
 	if sess.Status != statusInCombat {
 		return errorEvent("Stride is only available in combat."), nil
 	}
-
 	if s.combatH == nil {
 		return errorEvent("Combat handler unavailable."), nil
 	}
-
 	if err := s.combatH.SpendAP(uid, 1); err != nil {
 		return errorEvent(err.Error()), nil
 	}
-
 	cbt, ok := s.combatH.GetCombatForRoom(sess.RoomID)
 	if !ok {
 		return errorEvent("No active combat found."), nil
 	}
-
 	combatant := cbt.GetCombatant(uid)
 	if combatant == nil {
 		return errorEvent("You are not a combatant in this fight."), nil
 	}
 
-	oldPos := combatant.Position
+	oldX, oldY := combatant.GridX, combatant.GridY
 
-	// Find the nearest living enemy to determine stride direction.
+	dir := req.GetDirection()
+	if dir == "" {
+		dir = "toward"
+	}
+
+	validDirs := map[string]bool{
+		"n": true, "s": true, "e": true, "w": true,
+		"ne": true, "nw": true, "se": true, "sw": true,
+		"toward": true, "away": true,
+	}
+	if !validDirs[dir] {
+		return errorEvent(fmt.Sprintf("Unknown direction %q. Use a compass direction (n/s/e/w/ne/nw/se/sw) or 'toward'/'away'.", dir)), nil
+	}
+
+	// Find nearest enemy for toward/away directions.
 	var opponent *combat.Combatant
 	for _, c := range cbt.Combatants {
 		if c.Kind != combat.KindPlayer && !c.IsDead() {
-			if opponent == nil || combat.PosDist(combatant.Position, c.Position) < combat.PosDist(combatant.Position, opponent.Position) {
+			if opponent == nil || combat.CombatRange(*combatant, *c) < combat.CombatRange(*combatant, *opponent) {
 				opponent = c
 			}
 		}
 	}
 
-	// Always stride toward the enemy: move position toward opponent.
-	if opponent != nil && combatant.Position > opponent.Position {
-		// Player is ahead of (beyond) opponent — decrease to close gap.
-		if combatant.Position-25 < 0 {
-			combatant.Position = 0
-		} else {
-			combatant.Position -= 25
-		}
-	} else {
-		// Player is behind or at opponent — increase to close gap.
-		combatant.Position += 25
+	width, height := cbt.GridWidth, cbt.GridHeight
+	if width == 0 {
+		width = 10
 	}
+	if height == 0 {
+		height = 10
+	}
+	dx, dy := combat.CompassDelta(dir, combatant, opponent)
+	newX := combatant.GridX + dx
+	newY := combatant.GridY + dy
+	if newX < 0 {
+		newX = 0
+	} else if newX >= width {
+		newX = width - 1
+	}
+	if newY < 0 {
+		newY = 0
+	} else if newY >= height {
+		newY = height - 1
+	}
+	combatant.GridX = newX
+	combatant.GridY = newY
 
 	s.clearPlayerCover(uid, sess)
 
-	msg := "You stride toward your enemy."
+	msg := fmt.Sprintf("You stride %s.", dir)
 	rsUpdater := func(id string, hp int) {
 		if target, ok := s.sessions.GetPlayer(id); ok {
 			target.CurrentHP = hp
 		}
 	}
-	rsEvents := combat.CheckReactiveStrikes(cbt, uid, oldPos, globalRandSrc{}, rsUpdater)
+	rsEvents := combat.CheckReactiveStrikes(cbt, uid, oldX, oldY, globalRandSrc{}, rsUpdater)
 	for _, ev := range rsEvents {
 		msg += "\n" + ev.Narrative
 	}
-	// Pressure plate traps fire on stride during combat.
 	if room, ok := s.world.GetRoom(sess.RoomID); ok {
 		s.checkPressurePlateTraps(uid, sess, room)
 	}
@@ -9228,81 +9245,88 @@ func (s *GameServiceServer) handleStride(uid string, _ *gamev1.StrideRequest) (*
 	return messageEvent(msg), nil
 }
 
-// handleStep moves the player 5 ft toward or away from the combat target.
+// handleStep moves the player one grid cell in the requested direction without triggering Reactive Strikes.
 // Combat only; costs 1 AP. Step explicitly does NOT trigger Reactive Strikes.
 //
 // Precondition: uid must be in active combat.
-// Postcondition: Player combatant's Position updated by 5; message event returned.
+// Postcondition: Player combatant's GridX/GridY updated by one cell; message event returned.
 // No CheckReactiveStrikes is called — Step is safe from reactive strikes by rule.
 func (s *GameServiceServer) handleStep(uid string, req *gamev1.StepRequest) (*gamev1.ServerEvent, error) {
 	sess, ok := s.sessions.GetPlayer(uid)
 	if !ok {
 		return nil, fmt.Errorf("player %q not found", uid)
 	}
-
 	if sess.Status != statusInCombat {
 		return errorEvent("Step is only available in combat."), nil
 	}
-
 	if s.combatH == nil {
 		return errorEvent("Combat handler unavailable."), nil
 	}
-
 	if err := s.combatH.SpendAP(uid, 1); err != nil {
 		return errorEvent(err.Error()), nil
 	}
-
 	cbt, ok := s.combatH.GetCombatForRoom(sess.RoomID)
 	if !ok {
 		return errorEvent("No active combat found."), nil
 	}
-
 	combatant := cbt.GetCombatant(uid)
 	if combatant == nil {
 		return errorEvent("You are not a combatant in this fight."), nil
 	}
 
 	dir := req.GetDirection()
-	switch dir {
-	case "toward", "":
+	if dir == "" {
 		dir = "toward"
-		combatant.Position += 5 // toward NPC = increase position
-	case "away":
-		if combatant.Position-5 < 0 {
-			combatant.Position = 0
-		} else {
-			combatant.Position -= 5
-		}
-	default:
-		return errorEvent(fmt.Sprintf("Unknown direction %q. Use 'toward' or 'away'.", dir)), nil
 	}
+	validDirs := map[string]bool{
+		"n": true, "s": true, "e": true, "w": true,
+		"ne": true, "nw": true, "se": true, "sw": true,
+		"toward": true, "away": true,
+	}
+	if !validDirs[dir] {
+		return errorEvent(fmt.Sprintf("Unknown direction %q. Use 'toward', 'away', or a compass direction.", dir)), nil
+	}
+
+	// Find nearest enemy for toward/away.
+	var opponent *combat.Combatant
+	for _, c := range cbt.Combatants {
+		if c.Kind != combat.KindPlayer && !c.IsDead() {
+			if opponent == nil || combat.CombatRange(*combatant, *c) < combat.CombatRange(*combatant, *opponent) {
+				opponent = c
+			}
+		}
+	}
+
+	width, height := cbt.GridWidth, cbt.GridHeight
+	if width == 0 {
+		width = 10
+	}
+	if height == 0 {
+		height = 10
+	}
+	dx, dy := combat.CompassDelta(dir, combatant, opponent)
+	newX := combatant.GridX + dx
+	newY := combatant.GridY + dy
+	if newX < 0 {
+		newX = 0
+	} else if newX >= width {
+		newX = width - 1
+	}
+	if newY < 0 {
+		newY = 0
+	} else if newY >= height {
+		newY = height - 1
+	}
+	combatant.GridX = newX
+	combatant.GridY = newY
 
 	s.clearPlayerCover(uid, sess)
 
-	// Find the NPC combatant to compute distance; clamp if step would exceed MaxCombatRange.
 	dist := 0
-	for _, c := range cbt.Combatants {
-		if c.Kind == combat.KindNPC {
-			d := combat.PosDist(combatant.Position, c.Position)
-			if d > combat.MaxCombatRange {
-				// Push player back so distance equals MaxCombatRange.
-				if combatant.Position > c.Position {
-					combatant.Position = c.Position + combat.MaxCombatRange
-				} else {
-					combatant.Position = c.Position - combat.MaxCombatRange
-					if combatant.Position < 0 {
-						combatant.Position = 0
-					}
-				}
-				d = combat.MaxCombatRange
-			}
-			dist = d
-			break
-		}
+	if opponent != nil {
+		dist = combat.CombatRange(*combatant, *opponent)
 	}
-
 	msg := fmt.Sprintf("You step %s. Distance to target: %d ft.", dir, dist)
-	// Pressure plate traps fire on step during combat.
 	if room, ok := s.world.GetRoom(sess.RoomID); ok {
 		s.checkPressurePlateTraps(uid, sess, room)
 	}
@@ -9372,16 +9396,42 @@ func (s *GameServiceServer) handleTumble(uid string, req *gamev1.TumbleRequest) 
 		if combatant == nil {
 			return errorEvent("You are not a combatant in this fight."), nil
 		}
-		combatant.Position += 5
+		// Move player one grid cell toward the NPC by finding it and using CompassDelta.
+		var npcCbt *combat.Combatant
+		for _, c := range cbt.Combatants {
+			if c.Kind == combat.KindNPC && c.ID == inst.ID {
+				npcCbt = c
+				break
+			}
+		}
+		dx, dy := combat.CompassDelta("toward", combatant, npcCbt)
+		width, height := cbt.GridWidth, cbt.GridHeight
+		if width == 0 {
+			width = 10
+		}
+		if height == 0 {
+			height = 10
+		}
+		newX := combatant.GridX + dx
+		newY := combatant.GridY + dy
+		if newX < 0 {
+			newX = 0
+		} else if newX >= width {
+			newX = width - 1
+		}
+		if newY < 0 {
+			newY = 0
+		} else if newY >= height {
+			newY = height - 1
+		}
+		combatant.GridX = newX
+		combatant.GridY = newY
 		s.clearPlayerCover(uid, sess)
 
 		// Compute new distance to the target NPC.
 		dist := 0
-		for _, c := range cbt.Combatants {
-			if c.Kind == combat.KindNPC && c.ID == inst.ID {
-				dist = combat.PosDist(combatant.Position, c.Position)
-				break
-			}
+		if npcCbt != nil {
+			dist = combat.CombatRange(*combatant, *npcCbt)
 		}
 		return messageEvent(detail + fmt.Sprintf(" — success! You tumble through %s's space! Distance: %d ft.", inst.Name(), dist)), nil
 	}

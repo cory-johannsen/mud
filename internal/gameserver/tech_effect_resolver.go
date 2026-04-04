@@ -271,12 +271,17 @@ func applyEffect(
 		if target == nil {
 			return ""
 		}
+		// Convert feet to grid cells (1 cell = 5 ft), minimum 1 cell.
+		pushCells := e.Distance / 5
+		if pushCells < 1 {
+			pushCells = 1
+		}
 		if e.Direction == "away" {
-			target.Position += e.Distance
+			target.GridX += pushCells
 		} else if e.Direction == "toward" {
-			target.Position -= e.Distance
-			if target.Position < 0 {
-				target.Position = 0
+			target.GridX -= pushCells
+			if target.GridX < 0 {
+				target.GridX = 0
 			}
 		}
 		return fmt.Sprintf("Pushed %d feet %s.", e.Distance, e.Direction)

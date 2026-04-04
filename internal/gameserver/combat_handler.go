@@ -415,8 +415,9 @@ func (h *CombatHandler) FireCombatantMoved(roomID, uid string) {
 
 // CombatantPosition returns the current combat position (feet) of the given combatant in the given room.
 // Returns 0 if no combat is active for roomID or the combatant is not found.
+// In 2D combat, position is expressed as GridX * 5 to maintain compatibility with the 1D trap system.
 //
-// Postcondition: Returns 0 when no combat is active or combatant is absent; otherwise returns the combatant's position.
+// Postcondition: Returns 0 when no combat is active or combatant is absent; otherwise returns the combatant's GridX*5 position.
 func (h *CombatHandler) CombatantPosition(roomID, uid string) int {
 	h.combatMu.RLock()
 	defer h.combatMu.RUnlock()
@@ -428,7 +429,7 @@ func (h *CombatHandler) CombatantPosition(roomID, uid string) int {
 	if c == nil {
 		return 0
 	}
-	return c.Position
+	return c.GridX * 5
 }
 
 // CombatantsInRoom returns a copy of all combatants in the active combat for the given room.
@@ -983,9 +984,10 @@ func (h *CombatHandler) BroadcastAllPositions(roomID string) {
 	events := make([]*gamev1.CombatEvent, 0, len(cbt.Combatants))
 	for _, c := range cbt.Combatants {
 		events = append(events, &gamev1.CombatEvent{
-			Type:             gamev1.CombatEventType_COMBAT_EVENT_TYPE_POSITION,
-			Attacker:         c.Name,
-			AttackerPosition: int32(c.Position),
+			Type:      gamev1.CombatEventType_COMBAT_EVENT_TYPE_POSITION,
+			Attacker:  c.Name,
+			AttackerX: int32(c.GridX),
+			AttackerY: int32(c.GridY),
 		})
 	}
 	h.broadcastFn(roomID, events)
@@ -1045,6 +1047,15 @@ func (h *CombatHandler) JoinPendingNPCCombat(inst *npc.Instance, pendingRoomID s
 		AttackVerb:  inst.AttackVerb,
 	}
 	combat.RollInitiative([]*combat.Combatant{npcCbt}, h.dice.Src())
+	// Assign sequential X column on row 9 (NPC side).
+	existingNPCs := 0
+	for _, c := range cbt.Combatants {
+		if c.Kind == combat.KindNPC {
+			existingNPCs++
+		}
+	}
+	npcCbt.GridX = existingNPCs
+	npcCbt.GridY = 9
 	if addErr := h.engine.AddCombatant(pendingRoomID, npcCbt); addErr != nil {
 		h.logger.Warn("JoinPendingNPCCombat: AddCombatant failed",
 			zap.String("npc_id", inst.ID),
@@ -1545,10 +1556,12 @@ func (h *CombatHandler) startPursuitCombatLocked(playerSess *session.PlayerSessi
 	playerCbt.HustleRank = combat.DefaultSaveRank(playerSess.Proficiencies["hustle"])
 	playerCbt.CoolRank = combat.DefaultSaveRank(playerSess.Proficiencies["cool"])
 
-	playerCbt.Position = 0
+	// Player starts at row 0 (player side), column 0.
+	playerCbt.GridX = 0
+	playerCbt.GridY = 0
 
 	combatants := []*combat.Combatant{playerCbt}
-	for _, inst := range insts {
+	for i, inst := range insts {
 		npcWeaponName := ""
 		if inst.WeaponID != "" && h.invRegistry != nil {
 			if wDef := h.invRegistry.Weapon(inst.WeaponID); wDef != nil {
@@ -1570,7 +1583,9 @@ func (h *CombatHandler) startPursuitCombatLocked(playerSess *session.PlayerSessi
 			Weaknesses:  inst.Weaknesses,
 			WeaponName:  npcWeaponName,
 			AttackVerb:  inst.AttackVerb,
-			Position:    50,
+			// NPC starts at row 9 (NPC side), sequential column per NPC.
+			GridX: i,
+			GridY: 9,
 		}
 		combatants = append(combatants, npcCbt)
 	}
@@ -1662,12 +1677,12 @@ func (h *CombatHandler) startPursuitCombatLocked(playerSess *session.PlayerSessi
 	return events, nil
 }
 
-// SetActiveCombatDistance sets the player combatant's Position so that the computed
+// SetActiveCombatDistance sets the player combatant's grid position so that the computed
 // distance to the NPC equals dist.
 // Returns an error if the player has no session or is not in active combat.
 //
 // Precondition: uid must be non-empty; dist >= 0.
-// Postcondition: Player combatant's Position is updated so combatantDist(player, npc) == dist.
+// Postcondition: Player combatant's GridX is updated so CombatRange(player, npc) == dist.
 func (h *CombatHandler) SetActiveCombatDistance(uid string, dist int) error {
 	sess, ok := h.sessions.GetPlayer(uid)
 	if !ok {
@@ -1683,19 +1698,24 @@ func (h *CombatHandler) SetActiveCombatDistance(uid string, dist int) error {
 	if playerCbt == nil {
 		return fmt.Errorf("player %q is not a combatant", uid)
 	}
-	// Find NPC position (default 25).
-	npcPos := 25
+	// Find nearest NPC grid position (default column 5, row 9).
+	npcGridX := 5
+	npcGridY := 9
 	for _, c := range cbt.Combatants {
 		if c.Kind == combat.KindNPC {
-			npcPos = c.Position
+			npcGridX = c.GridX
+			npcGridY = c.GridY
 			break
 		}
 	}
-	newPos := npcPos - dist
-	if newPos < 0 {
-		newPos = 0
+	// Place the player on the same row as the NPC, dist/5 columns away.
+	// Clamp to zero minimum.
+	newGridX := npcGridX - dist/5
+	if newGridX < 0 {
+		newGridX = 0
 	}
-	playerCbt.Position = newPos
+	playerCbt.GridX = newGridX
+	playerCbt.GridY = npcGridY
 	return nil
 }
 
@@ -2479,7 +2499,7 @@ func (h *CombatHandler) resolveAndAdvanceLocked(roomID string, cbt *combat.Comba
 		if npcTarget == nil {
 			continue
 		}
-		dist := combat.PosDist(pc.Position, npcTarget.Position)
+		dist := combat.CombatRange(*pc, *npcTarget)
 		var rangeLabel string
 		if dist <= 5 {
 			rangeLabel = fmt.Sprintf("%d ft (melee range)", dist)
@@ -2502,26 +2522,28 @@ func (h *CombatHandler) resolveAndAdvanceLocked(roomID string, cbt *combat.Comba
 	roundStartEvents = append(roundStartEvents, condCombatEvents...)
 	roundStartEvents = append(roundStartEvents, drowningEvents...)
 	roundStartEvents = append(roundStartEvents, hazardEvents...)
-	for _, c := range cbt.Combatants {
-		roundStartEvents = append(roundStartEvents, &gamev1.CombatEvent{
-			Type:             gamev1.CombatEventType_COMBAT_EVENT_TYPE_POSITION,
-			Attacker:         c.Name,
-			AttackerPosition: int32(c.Position),
-		})
-	}
 	h.broadcastFn(roomID, roundStartEvents)
 
-	// Broadcast RoundStartEvent so the frontend can activate/update combat mode (REQ-IMR-19).
+	// Broadcast RoundStartEvent with InitialPositions so the frontend can activate/update combat mode (REQ-IMR-19).
 	if h.roundStartBroadcastFn != nil {
 		nextTurnOrder := make([]string, 0, len(cbt.Combatants))
 		for _, c := range cbt.Combatants {
 			nextTurnOrder = append(nextTurnOrder, c.Name)
 		}
+		initialPositions := make([]*gamev1.CombatantPosition, 0, len(cbt.Combatants))
+		for _, c := range cbt.Combatants {
+			initialPositions = append(initialPositions, &gamev1.CombatantPosition{
+				Name: c.Name,
+				X:    int32(c.GridX),
+				Y:    int32(c.GridY),
+			})
+		}
 		h.roundStartBroadcastFn(roomID, &gamev1.RoundStartEvent{
-			Round:          int32(cbt.Round),
-			ActionsPerTurn: 3,
-			DurationMs:     int32(h.roundDuration.Milliseconds()),
-			TurnOrder:      nextTurnOrder,
+			Round:            int32(cbt.Round),
+			ActionsPerTurn:   3,
+			DurationMs:       int32(h.roundDuration.Milliseconds()),
+			TurnOrder:        nextTurnOrder,
+			InitialPositions: initialPositions,
 		})
 	}
 
@@ -2661,8 +2683,12 @@ func (h *CombatHandler) startCombatLocked(sess *session.PlayerSession, inst *npc
 			zoneID = room.ZoneID
 		}
 	}
-	playerCbt.Position = 0  // player starts at near end
-	npcCbt.Position = 50    // NPC starts 50ft away
+	// Player starts at row 0 (player side), column 0.
+	playerCbt.GridX = 0
+	playerCbt.GridY = 0
+	// NPC starts at row 9 (NPC side), column 5 (middle).
+	npcCbt.GridX = 5
+	npcCbt.GridY = 9
 	cbt, err := h.engine.StartCombat(sess.RoomID, combatants, h.condRegistry, scriptMgr, zoneID)
 	if err != nil {
 		return nil, nil, fmt.Errorf("starting combat: %w", err)
@@ -2686,6 +2712,15 @@ func (h *CombatHandler) startCombatLocked(sess *session.PlayerSession, inst *npc
 			memberCbt := buildPlayerCombatant(memberSess, h)
 			combat.RollInitiative([]*combat.Combatant{memberCbt}, h.dice.Src())
 			if memberSess.RoomID == roomID {
+				// Assign sequential X column on row 0 (player side).
+				existingPlayers := 0
+				for _, c := range cbt.Combatants {
+					if c.Kind == combat.KindPlayer {
+						existingPlayers++
+					}
+				}
+				memberCbt.GridX = existingPlayers
+				memberCbt.GridY = 0
 				if addErr := h.engine.AddCombatant(roomID, memberCbt); addErr != nil {
 					h.logger.Warn("auto-join group member failed",
 						zap.String("uid", memberUID),
@@ -2793,7 +2828,7 @@ func (h *CombatHandler) startCombatLocked(sess *session.PlayerSession, inst *npc
 		if npcTarget == nil {
 			continue
 		}
-		dist := combat.PosDist(pc.Position, npcTarget.Position)
+		dist := combat.CombatRange(*pc, *npcTarget)
 		var rangeLabel string
 		if dist <= 5 {
 			rangeLabel = fmt.Sprintf("%d ft (melee range)", dist)
@@ -2812,19 +2847,29 @@ func (h *CombatHandler) startCombatLocked(sess *session.PlayerSession, inst *npc
 	// Include initial position events so the battle map populates immediately.
 	for _, c := range cbt.Combatants {
 		events = append(events, &gamev1.CombatEvent{
-			Type:             gamev1.CombatEventType_COMBAT_EVENT_TYPE_POSITION,
-			Attacker:         c.Name,
-			AttackerPosition: int32(c.Position),
+			Type:      gamev1.CombatEventType_COMBAT_EVENT_TYPE_POSITION,
+			Attacker:  c.Name,
+			AttackerX: int32(c.GridX),
+			AttackerY: int32(c.GridY),
 		})
 	}
 
-	// Broadcast RoundStartEvent so the frontend can activate combat mode (REQ-IMR-19).
+	// Broadcast RoundStartEvent with InitialPositions so the frontend can activate combat mode (REQ-IMR-19).
 	if h.roundStartBroadcastFn != nil {
+		initialPositions := make([]*gamev1.CombatantPosition, 0, len(cbt.Combatants))
+		for _, c := range cbt.Combatants {
+			initialPositions = append(initialPositions, &gamev1.CombatantPosition{
+				Name: c.Name,
+				X:    int32(c.GridX),
+				Y:    int32(c.GridY),
+			})
+		}
 		h.roundStartBroadcastFn(sess.RoomID, &gamev1.RoundStartEvent{
-			Round:          int32(cbt.Round),
-			ActionsPerTurn: 3,
-			DurationMs:     int32(h.roundDuration.Milliseconds()),
-			TurnOrder:      turnOrder,
+			Round:            int32(cbt.Round),
+			ActionsPerTurn:   3,
+			DurationMs:       int32(h.roundDuration.Milliseconds()),
+			TurnOrder:        turnOrder,
+			InitialPositions: initialPositions,
 		})
 	}
 
@@ -3671,11 +3716,7 @@ func (h *CombatHandler) npcMovementStrideLocked(cbt *combat.Combat, c *combat.Co
 	playerDist := 25 // fallback if no living player found
 	for _, comb := range cbt.Combatants {
 		if comb.Kind == combat.KindPlayer && !comb.IsDead() {
-			d := c.Position - comb.Position
-			if d < 0 {
-				d = -d
-			}
-			playerDist = d
+			playerDist = combat.CombatRange(*c, *comb)
 			break
 		}
 	}
@@ -4496,11 +4537,11 @@ func (h *CombatHandler) DisarmNPC(uid, npcInstID string) (weaponItemID string, e
 	return weaponItemID, nil
 }
 
-// ShoveNPC adjusts the NPC combatant's position by the given push distance.
-// The direction of the push is away from the player (increases NPC position when NPC is ahead of player).
+// ShoveNPC adjusts the NPC combatant's grid position by the given push distance (in feet).
+// The direction of the push is away from the player along the X axis.
 //
 // Precondition: uid must be a valid connected player in active combat; npcInstID must be a combatant in that combat.
-// Postcondition: NPC Position is increased by pushFt if NPC.Position > player.Position, otherwise decreased by pushFt (floored at 0).
+// Postcondition: NPC GridX is increased by pushFt/5 cells if NPC.GridX >= player.GridX, otherwise decreased (floored at 0).
 func (h *CombatHandler) ShoveNPC(uid, npcInstID string, pushFt int) error {
 	sess, ok := h.sessions.GetPlayer(uid)
 	if !ok {
@@ -4532,12 +4573,17 @@ func (h *CombatHandler) ShoveNPC(uid, npcInstID string, pushFt int) error {
 		return fmt.Errorf("NPC combatant %q not found", npcInstID)
 	}
 
-	if npcCbt.Position >= playerCbt.Position {
-		npcCbt.Position += pushFt
+	// Convert feet to grid cells (1 cell = 5 ft), minimum 1 cell.
+	pushCells := pushFt / 5
+	if pushCells < 1 {
+		pushCells = 1
+	}
+	if npcCbt.GridX >= playerCbt.GridX {
+		npcCbt.GridX += pushCells
 	} else {
-		npcCbt.Position -= pushFt
-		if npcCbt.Position < 0 {
-			npcCbt.Position = 0
+		npcCbt.GridX -= pushCells
+		if npcCbt.GridX < 0 {
+			npcCbt.GridX = 0
 		}
 	}
 	return nil
