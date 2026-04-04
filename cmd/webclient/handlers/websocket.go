@@ -325,6 +325,8 @@ func serverEventInner(event *gamev1.ServerEvent) (proto.Message, string) {
 		return p.TimeOfDay, "TimeOfDay"
 	case *gamev1.ServerEvent_HotbarUpdate:
 		return p.HotbarUpdate, "HotbarUpdate"
+	case *gamev1.ServerEvent_UseResponse:
+		return p.UseResponse, "UseResponse"
 	case *gamev1.ServerEvent_ShopView:
 		return p.ShopView, "ShopView"
 	case *gamev1.ServerEvent_HealerView:

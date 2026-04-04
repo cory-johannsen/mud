@@ -1011,3 +1011,11 @@
 **Description:** Activating the `tamper` technology via `use tamper` produces no output and applies no game effect.
 **Steps:** Play a character with the tamper technology; in combat or outside, run `use tamper`; observe no console feedback and no effect applied.
 **Fix:**
+
+### BUG-124: Web UI feat/ability hotbar activation shows no feedback
+**Severity:** high
+**Status:** fixed
+**Category:** UI
+**Description:** Clicking a hotbar slot assigned to a feat or ability in the web client shows no visible feedback even though the feat is activated server-side.
+**Steps:** Add an active feat to a hotbar slot via the Feats drawer; click the hotbar slot; observe no message or effect in the console feed.
+**Fix:** `UseResponse` was missing from `serverEventInner` in `cmd/webclient/handlers/websocket.go`, causing the server's activation feedback to be silently dropped. Added `case *gamev1.ServerEvent_UseResponse:` returning `(p.UseResponse, "UseResponse")`. Added `case 'UseResponse':` handler in `GameContext.tsx` that appends the message to the feed (or lists available abilities when `choices` is populated).

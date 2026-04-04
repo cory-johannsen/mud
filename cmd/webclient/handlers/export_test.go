@@ -3,6 +3,8 @@ package handlers
 import (
 	"encoding/json"
 
+	"google.golang.org/protobuf/proto"
+
 	"github.com/cory-johannsen/mud/internal/game/command"
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 )
@@ -21,4 +23,9 @@ func DispatchWSMessageForTest(env wsMessage, reqID string, registry *command.Reg
 // ServerEventEncodedChoiceForTest exposes serverEventEncodedChoice for unit tests.
 func ServerEventEncodedChoiceForTest(event *gamev1.ServerEvent) (json.RawMessage, string) {
 	return serverEventEncodedChoice(event)
+}
+
+// ServerEventInnerForTest exposes serverEventInner for unit tests.
+func ServerEventInnerForTest(event *gamev1.ServerEvent) (proto.Message, string) {
+	return serverEventInner(event)
 }

@@ -427,6 +427,16 @@ export function GameProvider({ children }: { children: ReactNode }) {
           dispatch({ type: 'SET_HOTBAR', slots })
           break
         }
+        case 'UseResponse': {
+          const ur = payload as { message?: string; choices?: Array<{ name?: string; featId?: string }> }
+          if (ur.message) {
+            dispatch({ type: 'APPEND_FEED', entry: makeFeedEntry('system', ur.message) })
+          } else if (Array.isArray(ur.choices) && ur.choices.length > 0) {
+            const names = ur.choices.map((c) => c.name ?? c.featId ?? '?').join(', ')
+            dispatch({ type: 'APPEND_FEED', entry: makeFeedEntry('system', `Available: ${names}`) })
+          }
+          break
+        }
         case 'NpcView': {
           const nv = payload as { name?: string; description?: string; healthDescription?: string; health_description?: string; level?: number; npcType?: string; npc_type?: string }
           const npcType = nv.npcType ?? nv.npc_type ?? ''
