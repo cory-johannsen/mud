@@ -972,6 +972,14 @@
 **Steps:** Log in; open Equipment tab; click Switch on a loadout preset; click Switch again; observe the error.
 **Fix:** In `handleLoadout`, reset `SwappedThisRound` before swapping when the player is not in combat. The once-per-round limit only applies during combat rounds; outside combat no round ever resets the flag.
 
+### BUG-120: Web UI inventory consume routes item through prepared tech handler
+**Severity:** high
+**Status:** open
+**Category:** UI
+**Description:** Consuming an item via the web UI Inventory tab triggers the prepared technology use path instead of the item consume path, producing `No prepared uses of <item_id> remaining.`
+**Steps:** Log in via web UI; open Inventory tab; click Consume on a consumable item (e.g. canadian_bacon); observe console message `No prepared uses of canadian_bacon remaining.`
+**Fix:**
+
 ### BUG-119: `use tamper` has no effect
 **Severity:** high
 **Status:** open
