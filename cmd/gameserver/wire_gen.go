@@ -280,6 +280,7 @@ func Initialize(ctx context.Context, cfg *AppConfig, clock *gameserver.GameClock
 		weatherTypes, wtErr := gameserver.LoadWeatherTypes(cfg.WeatherFile)
 		if wtErr != nil {
 			// File missing or unreadable — run without weather (e.g. e2e tests).
+			logger.Warn("weather types failed to load; running without weather", zap.Error(wtErr))
 			weatherTypes = nil
 		}
 		if weatherTypes != nil {

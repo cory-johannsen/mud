@@ -145,6 +145,10 @@ func (wm *WeatherManager) OnTick(dt GameDateTime) {
 				},
 			},
 		})
+		// REQ-BUG123: broadcast the human-readable announce text to all players.
+		if wt.Announce != "" {
+			wm.broadcaster.BroadcastAll(messageEvent(wt.Announce))
+		}
 	}
 }
 
@@ -155,6 +159,16 @@ func (wm *WeatherManager) endEvent(ctx context.Context, currentTick int64) {
 	cooldownEnd := currentTick + cooldownHours
 
 	_ = wm.repo.EndEvent(ctx, cooldownEnd)
+
+	// Capture announce text before clearing activeName.
+	// activeName may be the type Name (set in OnTick) or the ID (loaded from DB via LoadState).
+	var endAnnounce string
+	for _, wt := range wm.weatherTypes {
+		if wt.Name == wm.activeName || wt.ID == wm.activeName {
+			endAnnounce = wt.EndAnnounce
+			break
+		}
+	}
 
 	name := wm.activeName
 	wm.activeName = ""
@@ -170,6 +184,10 @@ func (wm *WeatherManager) endEvent(ctx context.Context, currentTick int64) {
 				},
 			},
 		})
+		// REQ-BUG123: broadcast the human-readable end-announce text to all players.
+		if endAnnounce != "" {
+			wm.broadcaster.BroadcastAll(messageEvent(endAnnounce))
+		}
 	}
 }
 

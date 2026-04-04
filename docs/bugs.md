@@ -974,11 +974,11 @@
 
 ### BUG-123: Weather effects not active — no weather observed across multiple seasons
 **Severity:** high
-**Status:** open
+**Status:** fixed
 **Category:** World
 **Description:** Seasonal weather effects are not being applied or displayed in-game; no weather events have been observed across multiple in-game seasons despite the WeatherManager feature being implemented.
 **Steps:** Play through multiple in-game seasons; observe that no weather effects (console messages, UI indicators, room effects) appear at any point.
-**Fix:**
+**Fix:** The WeatherManager was broadcasting a WeatherEvent on start/end but never the human-readable Announce/EndAnnounce text. Added MessageEvent broadcasts in OnTick (start) and endEvent (end) using the announce strings from weather.yaml. Also fixed endEvent to match the active weather by Name or ID since LoadState stores the ID while OnTick sets the Name. Added warn log in wire_gen.go when LoadWeatherTypes fails.
 
 ### BUG-122: Job tab does not show feat and technology grants with grant level
 **Severity:** medium
