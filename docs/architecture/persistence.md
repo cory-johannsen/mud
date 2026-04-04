@@ -41,6 +41,7 @@ graph TD
         SUP["CharacterSpontaneousUsePoolRepository"]
         INN["CharacterInnateTechRepository"]
         AMAP["AutomapRepository"]
+        HOTBAR["CharacterHotbarRepository"]
     end
 
     subgraph "Database"
@@ -85,6 +86,7 @@ graph TD
     SUP --> PG
     INN --> PG
     AMAP --> PG
+    HOTBAR --> PG
 
     MIG -->|"applied by"| MIGRATE
     MIGRATE --> PG
@@ -139,6 +141,46 @@ sequenceDiagram
    constructor, and methods using parameterized SQL.
 4. **Wire in service constructor** — instantiate `New<Name>Repository(pool.DB())` in
    the gameserver wiring and pass it to the domain service that declares the interface.
+
+---
+
+## Hotbar Persistence
+
+`CharacterHotbarRepository` (`internal/storage/postgres/character_hotbar.go`) stores and loads typed hotbar slots.
+
+### JSON Format
+
+Slots are stored as a `TEXT` column `hotbar` on `characters` (NULL = all empty). Current format is a JSON array of 10 objects:
+
+```json
+[{"kind":"command","ref":"look"},{"kind":"feat","ref":"power_strike"},...]
+```
+
+Empty slots are represented as `{}` (zero-value object). A `NULL` column value means all slots are empty.
+
+### Legacy Migration
+
+`LoadHotbar` auto-migrates the legacy format (JSON array of plain strings) on read:
+
+1. Attempt to unmarshal as `[]struct{Kind,Ref string}`.
+2. If that fails (e.g. the array contains strings not objects), attempt to unmarshal as `[]string`.
+3. Each non-empty string becomes a `CommandSlot(text)`.
+4. Slots beyond index 9 are silently discarded.
+
+No explicit DB migration is required for the format change — the migration is transparent at read time.
+
+### CharacterSaver Interface
+
+The `gameserver` package declares:
+
+```go
+type CharacterSaver interface {
+    SaveHotbar(ctx context.Context, characterID int64, slots [10]session.HotbarSlot) error
+    LoadHotbar(ctx context.Context, characterID int64) ([10]session.HotbarSlot, error)
+}
+```
+
+`GameServiceServer` holds a `charSaver CharacterSaver` field wired to `CharacterHotbarRepository` at startup.
 
 ---
 
