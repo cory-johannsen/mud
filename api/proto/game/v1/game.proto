@@ -822,6 +822,7 @@ message InventoryItem {
   string armor_category = 8;   // "light", "medium", or "heavy" when kind == "armor"
   // Consumable stats (populated when kind == "consumable").
   string effects_summary = 9;
+  bool   throwable       = 10;  // true when item has "throwable" tag
 }
 
 // InventoryView shows the player's backpack and currency.
@@ -1382,16 +1383,34 @@ message SeduceRequest {
     string target = 1;
 }
 
-message HotbarRequest {
-  string action = 1;  // "set", "clear", "show"
-  int32 slot = 2;     // 1–10 for set/clear; ignored for show
-  string text = 3;    // non-empty for set; ignored for clear/show
+// HotbarSlot carries a typed hotbar slot reference.
+// kind: "command" | "feat" | "technology" | "throwable" | "consumable"
+// ref: command text (for "command") or item/feat/tech ID (for all others)
+// display_name: resolved by server from registries; empty falls back to ref
+// description: resolved by server; empty for command slots
+message HotbarSlot {
+  string kind         = 1;
+  string ref          = 2;
+  string display_name = 3;
+  string description  = 4;
 }
 
+// HotbarRequest asks the server to set, clear, or show a hotbar slot.
+// For typed (UI-driven) assignment, set kind+ref and leave text empty.
+// For legacy command-text assignment (telnet hotbar command), set text and leave kind/ref empty.
+message HotbarRequest {
+  string action = 1;  // "set", "clear", "show"
+  int32  slot   = 2;  // 1–10 for set/clear; ignored for show
+  string text   = 3;  // backward-compat: non-empty for command-kind "set" via telnet
+  string kind   = 4;  // typed kind for UI-driven set
+  string ref    = 5;  // typed ref for UI-driven set
+}
+
+// HotbarUpdateEvent pushes the player's full 10-slot hotbar to the client.
 message HotbarUpdateEvent {
   // Always exactly 10 entries; slots[0] = slot 1, slots[9] = slot 10.
-  // Empty string = unassigned slot.
-  repeated string slots = 1;
+  // An empty HotbarSlot (kind="", ref="") means unassigned.
+  repeated HotbarSlot slots = 1;
 }
 
 // DowntimeRequest dispatches downtime subcommands: list, cancel, or an activity alias with optional args.
