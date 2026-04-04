@@ -972,6 +972,14 @@
 **Steps:** Log in; open Equipment tab; click Switch on a loadout preset; click Switch again; observe the error.
 **Fix:** In `handleLoadout`, reset `SwappedThisRound` before swapping when the player is not in combat. The once-per-round limit only applies during combat rounds; outside combat no round ever resets the flag.
 
+### BUG-121: Feat Snap Shot is not implemented as a passive feat
+**Severity:** medium
+**Status:** open
+**Category:** Character
+**Description:** The Snap Shot feat should be passive and apply its effect automatically; it currently requires manual activation or does not apply passively.
+**Steps:** Grant a character the Snap Shot feat; observe that its benefit is not applied automatically without player action.
+**Fix:**
+
 ### BUG-120: Web UI inventory consume routes item through prepared tech handler
 **Severity:** high
 **Status:** open
