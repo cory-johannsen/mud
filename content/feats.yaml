@@ -2367,8 +2367,8 @@ feats:
     category: job
     archetype: aggressor
     pf2e: exacting_strike
-    active: true
-    activate_text: "You squeeze the trigger the moment you have a bead."
+    active: false
+    activate_text: ""
     description: "A missed attack counts as only one hit for multi-attack penalty purposes."
 
   - id: adrenaline_surge

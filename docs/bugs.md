@@ -990,11 +990,11 @@
 
 ### BUG-121: Feat Snap Shot is not implemented as a passive feat
 **Severity:** medium
-**Status:** open
+**Status:** fixed
 **Category:** Character
 **Description:** The Snap Shot feat should be passive and apply its effect automatically; it currently requires manual activation or does not apply passively.
 **Steps:** Grant a character the Snap Shot feat; observe that its benefit is not applied automatically without player action.
-**Fix:**
+**Fix:** Changed snap_shot in feats.yaml from active:true to active:false. Added loop in grpc_service.go to populate sess.PassiveFeats from characterFeatsRepo (not just class features). Added MAP waiver in round.go ActionStrike: if first strike missed and actor has snap_shot passive feat, the -5 MAP on the second strike is restored.
 
 ### BUG-120: Web UI inventory consume routes item through prepared tech handler
 **Severity:** high

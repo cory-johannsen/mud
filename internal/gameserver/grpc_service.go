@@ -1316,6 +1316,19 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 			}
 		}
 	}
+	// Populate passive feat cache from player feats (e.g. snap_shot).
+	if characterID > 0 && s.characterFeatsRepo != nil && s.featRegistry != nil {
+		pfIDs, pfErr := s.characterFeatsRepo.GetAll(stream.Context(), characterID)
+		if pfErr != nil {
+			s.logger.Warn("loading feats for passive feat cache", zap.Error(pfErr))
+		} else {
+			for _, id := range pfIDs {
+				if f, ok := s.featRegistry.Feat(id); ok && !f.Active {
+					sess.PassiveFeats[id] = true
+				}
+			}
+		}
+	}
 
 	// Load and compute Focus Points (REQ-FP-1, REQ-FP-11).
 	if characterID > 0 && s.charSaver != nil {

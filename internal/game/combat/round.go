@@ -818,6 +818,12 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 				r2.AttackTotal += acBonus2
 				r2.AttackTotal += actor.InitiativeBonus
 				r2.AttackTotal -= 5
+				// REQ-BUG121: snap_shot waives the MAP penalty when the first strike missed.
+				if (r1.Outcome == Failure || r1.Outcome == CritFailure) && cbt.sessionGetter != nil {
+					if ps, ok := cbt.sessionGetter(actor.ID); ok && ps.PassiveFeats["snap_shot"] {
+						r2.AttackTotal += 5
+					}
+				}
 				effectiveAC2 := target.AC + target.InitiativeBonus
 				r2.AttackTotal = hookAttackRoll(cbt, actor, target, r2.AttackTotal)
 				r2.Outcome = OutcomeFor(r2.AttackTotal, effectiveAC2)
