@@ -369,12 +369,12 @@ func TestRollInitiative_Property_InitiativeAtLeastOnePlusMod(t *testing.T) {
 	})
 }
 
-// TestPropertyCombatant_Position_ZeroValue verifies that the zero value of Combatant.Position is 0.
-func TestPropertyCombatant_Position_ZeroValue(t *testing.T) {
+// TestPropertyCombatant_GridPosition_ZeroValue verifies that the zero value of Combatant.GridX and GridY is 0.
+func TestPropertyCombatant_GridPosition_ZeroValue(t *testing.T) {
 	rapid.Check(t, func(rt *rapid.T) {
 		c := &combat.Combatant{}
-		if c.Position != 0 {
-			rt.Fatal("Combatant.Position zero value must be 0")
+		if c.GridX != 0 || c.GridY != 0 {
+			rt.Fatal("Combatant.GridX and GridY zero values must be 0")
 		}
 	})
 }

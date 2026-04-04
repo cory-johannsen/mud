@@ -127,12 +127,6 @@ type Combatant struct {
 	GridX int
 	// GridY is the row position on the combat grid (0 = player side, GridHeight-1 = NPC side).
 	GridY int
-	// Position is the distance in feet along the combat axis from the player's starting point (0).
-	//
-	// Deprecated: use GridX/GridY for 2D positioning. Retained for compatibility with round.go
-	// until the 1D motion system is fully replaced in Task 2.
-	// Player combatants are initialized to 0; NPC combatants are initialized to 50.
-	Position int
 	// CoverEquipmentID is the ItemID of the room equipment object this combatant is
 	// using for cover. Empty string means the combatant is not in cover.
 	CoverEquipmentID string
@@ -288,29 +282,3 @@ func sign(n int) int {
 	return 0
 }
 
-// combatantDist returns the distance in feet between two combatants using the 1D Position field.
-//
-// Deprecated: use CombatRange with GridX/GridY positions instead.
-// Precondition: a and b must be non-nil.
-// Postcondition: Returns abs(a.Position - b.Position).
-func combatantDist(a, b *Combatant) int {
-	return posDist(a.Position, b.Position)
-}
-
-// PosDist returns the absolute distance between two raw position values.
-//
-// Deprecated: use CombatRange with GridX/GridY positions instead.
-// Precondition: none.
-// Postcondition: Returns abs(a - b).
-func PosDist(a, b int) int {
-	d := a - b
-	if d < 0 {
-		d = -d
-	}
-	return d
-}
-
-// posDist is the unexported alias for PosDist, kept for internal use.
-//
-// Deprecated: use CombatRange with GridX/GridY positions instead.
-func posDist(a, b int) int { return PosDist(a, b) }
