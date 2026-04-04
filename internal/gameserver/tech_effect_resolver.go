@@ -276,13 +276,35 @@ func applyEffect(
 		if pushCells < 1 {
 			pushCells = 1
 		}
-		if e.Direction == "away" {
-			target.GridX += pushCells
-		} else if e.Direction == "toward" {
-			target.GridX -= pushCells
-			if target.GridX < 0 {
-				target.GridX = 0
+		// Resolve direction using the activating player's combatant as the source reference.
+		var source *combat.Combatant
+		if cbt != nil {
+			source = cbt.GetCombatant(sess.UID)
+		}
+		width := 10
+		height := 10
+		if cbt != nil && cbt.GridWidth > 0 {
+			width = cbt.GridWidth
+		}
+		if cbt != nil && cbt.GridHeight > 0 {
+			height = cbt.GridHeight
+		}
+		for i := 0; i < pushCells; i++ {
+			dx, dy := combat.CompassDelta(e.Direction, target, source)
+			newX := target.GridX + dx
+			newY := target.GridY + dy
+			if newX < 0 {
+				newX = 0
+			} else if newX >= width {
+				newX = width - 1
 			}
+			if newY < 0 {
+				newY = 0
+			} else if newY >= height {
+				newY = height - 1
+			}
+			target.GridX = newX
+			target.GridY = newY
 		}
 		return fmt.Sprintf("Pushed %d feet %s.", e.Distance, e.Direction)
 

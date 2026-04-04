@@ -1659,17 +1659,26 @@ func (h *CombatHandler) startPursuitCombatLocked(playerSess *session.PlayerSessi
 		Narrative: fmt.Sprintf("Pursuit! Round %d begins!", cbt.Round),
 	})
 
-	// Broadcast RoundStartEvent so the frontend can activate combat mode (REQ-IMR-19).
+	// Broadcast RoundStartEvent with InitialPositions so the frontend can activate combat mode (REQ-IMR-19).
 	if h.roundStartBroadcastFn != nil {
 		pursuitTurnOrder := make([]string, 0, len(cbt.Combatants))
 		for _, c := range cbt.Combatants {
 			pursuitTurnOrder = append(pursuitTurnOrder, c.Name)
 		}
+		initialPositions := make([]*gamev1.CombatantPosition, 0, len(cbt.Combatants))
+		for _, c := range cbt.Combatants {
+			initialPositions = append(initialPositions, &gamev1.CombatantPosition{
+				Name: c.Name,
+				X:    int32(c.GridX),
+				Y:    int32(c.GridY),
+			})
+		}
 		h.roundStartBroadcastFn(playerSess.RoomID, &gamev1.RoundStartEvent{
-			Round:          int32(cbt.Round),
-			ActionsPerTurn: 3,
-			DurationMs:     int32(h.roundDuration.Milliseconds()),
-			TurnOrder:      pursuitTurnOrder,
+			Round:            int32(cbt.Round),
+			ActionsPerTurn:   3,
+			DurationMs:       int32(h.roundDuration.Milliseconds()),
+			TurnOrder:        pursuitTurnOrder,
+			InitialPositions: initialPositions,
 		})
 	}
 

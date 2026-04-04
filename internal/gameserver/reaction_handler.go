@@ -172,8 +172,37 @@ func executeReadiedStep(s *GameServiceServer, uid string, sess *session.PlayerSe
 		s.pushMessageToUID(uid, "Your readied Step fires — you move 5 feet.")
 		return
 	}
-	// Move one grid cell toward the nearest enemy (default: increase X by 1).
-	combatant.GridX++
+	// Find nearest living enemy and move one grid cell toward them.
+	var nearestEnemy *combat.Combatant
+	for _, c := range cbt.Combatants {
+		if c.Kind != combatant.Kind && !c.IsDead() {
+			if nearestEnemy == nil || combat.CombatRange(*combatant, *c) < combat.CombatRange(*combatant, *nearestEnemy) {
+				nearestEnemy = c
+			}
+		}
+	}
+	dx, dy := combat.CompassDelta("toward", combatant, nearestEnemy)
+	width, height := cbt.GridWidth, cbt.GridHeight
+	if width == 0 {
+		width = 10
+	}
+	if height == 0 {
+		height = 10
+	}
+	newX := combatant.GridX + dx
+	newY := combatant.GridY + dy
+	if newX < 0 {
+		newX = 0
+	} else if newX >= width {
+		newX = width - 1
+	}
+	if newY < 0 {
+		newY = 0
+	} else if newY >= height {
+		newY = height - 1
+	}
+	combatant.GridX = newX
+	combatant.GridY = newY
 	s.pushMessageToUID(uid, "Your readied Step fires — you move 5 feet.")
 }
 
