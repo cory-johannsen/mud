@@ -840,10 +840,11 @@ message InventoryView {
 
 // RoundStartEvent is broadcast to all combatants when a new round begins.
 message RoundStartEvent {
-  int32           round            = 1;
-  int32           actions_per_turn = 2;
-  int32           duration_ms      = 3;
-  repeated string turn_order       = 4;
+  int32                      round             = 1;
+  int32                      actions_per_turn  = 2;
+  int32                      duration_ms       = 3;
+  repeated string            turn_order        = 4;
+  repeated CombatantPosition initial_positions = 5;
 }
 
 // RoundEndEvent is broadcast when a round's actions have resolved.
@@ -851,20 +852,30 @@ message RoundEndEvent {
   int32 round = 1;
 }
 
+// CombatantPosition carries a combatant's 2D grid coordinates for the initial position broadcast.
+message CombatantPosition {
+  string name = 1;
+  int32  x    = 2;
+  int32  y    = 3;
+}
+
 // CombatEvent delivers combat narration to all players in the room.
 message CombatEvent {
-  CombatEventType type    = 1;
-  string attacker         = 2;
-  string target           = 3;
-  int32  attack_roll      = 4;
-  int32  attack_total     = 5;
-  string outcome          = 6;
-  int32  damage           = 7;
-  int32  target_hp        = 8;
-  string narrative        = 9;
-  string weapon_name      = 10;
-  int32  target_max_hp    = 11;
-  int32  attacker_position = 12;
+  CombatEventType type             = 1;
+  string attacker                  = 2;
+  string target                    = 3;
+  int32  attack_roll               = 4;
+  int32  attack_total              = 5;
+  string outcome                   = 6;
+  int32  damage                    = 7;
+  int32  target_hp                 = 8;
+  string narrative                 = 9;
+  string weapon_name               = 10;
+  int32  target_max_hp             = 11;
+  int32  attacker_position         = 12; // deprecated; use attacker_x and attacker_y
+  int32  attacker_x                = 13;
+  int32  attacker_y                = 14;
+  bool   flanking                  = 15;
 }
 
 // CombatEventType distinguishes combat narration events.
@@ -974,8 +985,10 @@ message InteractResponse {
 // UseRequest asks the server to activate an active feat.
 // An empty feat_id causes the server to return the list of available active feats.
 message UseRequest {
-  string feat_id = 1;
-  string target  = 2;
+  string feat_id  = 1;
+  string target   = 2;
+  int32  target_x = 3;
+  int32  target_y = 4;
 }
 
 // UseResponse carries the result of a feat activation or a list of active feats.
