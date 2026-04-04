@@ -19,7 +19,7 @@ function SlotPicker({
       <div style={slotPickerStyles.modal} onClick={(e) => e.stopPropagation()}>
         <div style={slotPickerStyles.header}>
           <span>Add to Hotbar</span>
-          <button onClick={onCancel} type="button" style={{ background: 'none', border: '1px solid #444', color: '#666', cursor: 'pointer', fontFamily: 'monospace', fontSize: '0.72rem', padding: '0.1rem 0.4rem', borderRadius: '3px' }}>✕</button>
+          <button onClick={onCancel} type="button" style={slotPickerStyles.cancelBtn}>✕</button>
         </div>
         <div style={slotPickerStyles.grid}>
           {SLOT_KEYS.map((key, i) => {
@@ -34,7 +34,7 @@ function SlotPicker({
                 title={current ? `Replace: ${label}` : `Slot ${key} (empty)`}
                 type="button"
               >
-                {key}{current ? `: ${label.slice(0, 8)}` : ''}
+                {key}{current ? `: ${label}` : ''}
               </button>
             )
           })}
@@ -50,6 +50,7 @@ const slotPickerStyles: Record<string, React.CSSProperties> = {
   modal: { background: '#1a1a1a', border: '1px solid #444', borderRadius: '6px', padding: '0.75rem', minWidth: '280px', fontFamily: 'monospace' },
   header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem', color: '#7af', fontSize: '0.75rem', textTransform: 'uppercase' as const },
   grid: { display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '0.3rem' },
+  cancelBtn: { background: 'none', border: '1px solid #444', color: '#666', cursor: 'pointer', fontFamily: 'monospace', fontSize: '0.72rem', padding: '0.1rem 0.4rem', borderRadius: '3px' },
 }
 
 function ConsumableRow({
