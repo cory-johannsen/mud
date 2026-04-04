@@ -972,6 +972,14 @@
 **Steps:** Log in; open Equipment tab; click Switch on a loadout preset; click Switch again; observe the error.
 **Fix:** In `handleLoadout`, reset `SwappedThisRound` before swapping when the player is not in combat. The once-per-round limit only applies during combat rounds; outside combat no round ever resets the flag.
 
+### BUG-122: Job tab does not show feat and technology grants with grant level
+**Severity:** medium
+**Status:** open
+**Category:** UI
+**Description:** The Job tab on the character sheet displays the job but omits the feat and technology selections granted by that job, along with the level at which each was granted.
+**Steps:** Log in via web UI; open the Job tab; observe that feat and technology grants (and their grant levels) are not displayed.
+**Fix:**
+
 ### BUG-121: Feat Snap Shot is not implemented as a passive feat
 **Severity:** medium
 **Status:** open
