@@ -971,3 +971,11 @@
 **Description:** Outside of combat, clicking the Switch button on a loadout preset works the first time but returns "You have already swapped loadouts this round." on subsequent clicks.
 **Steps:** Log in; open Equipment tab; click Switch on a loadout preset; click Switch again; observe the error.
 **Fix:** In `handleLoadout`, reset `SwappedThisRound` before swapping when the player is not in combat. The once-per-round limit only applies during combat rounds; outside combat no round ever resets the flag.
+
+### BUG-119: `use tamper` has no effect
+**Severity:** high
+**Status:** open
+**Category:** Combat
+**Description:** Activating the `tamper` technology via `use tamper` produces no output and applies no game effect.
+**Steps:** Play a character with the tamper technology; in combat or outside, run `use tamper`; observe no console feedback and no effect applied.
+**Fix:**
