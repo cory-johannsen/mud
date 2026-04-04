@@ -7191,6 +7191,28 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string) (*gamev1.
 		}
 	}
 
+	// BUG-120: if abilityID matches a plain consumable item in the backpack (Kind==consumable,
+	// no SubstanceID), apply its Effect (if any) and remove one from backpack.
+	if abilityID != "" && s.invRegistry != nil && sess.Backpack != nil {
+		if itemDef, itemOK := s.invRegistry.Item(abilityID); itemOK && itemDef.Kind == inventory.KindConsumable && itemDef.SubstanceID == "" {
+			instances := sess.Backpack.FindByItemDefID(abilityID)
+			if len(instances) > 0 {
+				if itemDef.Effect != nil {
+					adapter := &playerActivateAdapter{sess: sess, svc: s}
+					var rng inventory.Roller
+					if s.dice != nil {
+						rng = &diceRollerAdapter{r: s.dice}
+					} else {
+						rng = &DurabilityRoller{}
+					}
+					inventory.ApplyConsumable(adapter, itemDef, rng)
+				}
+				_ = sess.Backpack.Remove(instances[0].InstanceID, 1)
+				return messageEvent(fmt.Sprintf("You use the %s.", itemDef.Name)), nil
+			}
+		}
+	}
+
 	// REQ-TSN-6: resolve short name to canonical tech ID before all lookup paths.
 	if s.techRegistry != nil {
 		if def, ok := s.techRegistry.GetByShortName(abilityID); ok {

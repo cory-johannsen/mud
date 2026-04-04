@@ -998,11 +998,11 @@
 
 ### BUG-120: Web UI inventory consume routes item through prepared tech handler
 **Severity:** high
-**Status:** open
+**Status:** fixed
 **Category:** UI
 **Description:** Consuming an item via the web UI Inventory tab triggers the prepared technology use path instead of the item consume path, producing `No prepared uses of <item_id> remaining.`
 **Steps:** Log in via web UI; open Inventory tab; click Consume on a consumable item (e.g. canadian_bacon); observe console message `No prepared uses of canadian_bacon remaining.`
-**Fix:**
+**Fix:** Added plain-consumable path to handleUse in grpc_service.go: if abilityID matches a backpack item with Kind==consumable and no SubstanceID, apply its Effect (if any) via ApplyConsumable, remove one unit from backpack, and return a success message — before the prepared-tech fallback loop is reached.
 
 ### BUG-119: `use tamper` has no effect
 **Severity:** high
