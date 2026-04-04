@@ -84,28 +84,18 @@ func TestProperty_HotbarSlot_ActivationCommand_NeverPanic(t *testing.T) {
 
 func TestProperty_HotbarSlot_EmptyRefAlwaysReturnsEmpty(t *testing.T) {
 	t.Parallel()
-	kinds := []string{
-		session.HotbarSlotKindCommand,
-		session.HotbarSlotKindFeat,
-		session.HotbarSlotKindTechnology,
-		session.HotbarSlotKindThrowable,
-		session.HotbarSlotKindConsumable,
-	}
 	rapid.Check(t, func(rt *rapid.T) {
-		kind := kinds[rapid.IntRange(0, len(kinds)-1).Draw(rt, "kind")]
+		kind := rapid.String().Draw(rt, "kind") // any kind, including unknown values
 		s := session.HotbarSlot{Kind: kind, Ref: ""}
 		assert.True(rt, s.IsEmpty())
-		assert.Equal(rt, "", s.ActivationCommand(), "empty ref must produce empty command for kind=%s", kind)
+		assert.Equal(rt, "", s.ActivationCommand(), "empty ref must produce empty command for kind=%q", kind)
 	})
 }
 
 func TestProperty_HotbarSlot_CommandKindReturnsRefExactly(t *testing.T) {
 	t.Parallel()
 	rapid.Check(t, func(rt *rapid.T) {
-		ref := rapid.StringMatching(`[a-z_]+`).Draw(rt, "ref")
-		if ref == "" {
-			return // skip empty ref (covered by other test)
-		}
+		ref := rapid.String().Filter(func(s string) bool { return s != "" }).Draw(rt, "ref")
 		s := session.HotbarSlot{Kind: session.HotbarSlotKindCommand, Ref: ref}
 		assert.Equal(rt, ref, s.ActivationCommand(), "command kind must return Ref exactly")
 	})
