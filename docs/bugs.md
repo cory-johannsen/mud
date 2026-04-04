@@ -972,6 +972,14 @@
 **Steps:** Log in; open Equipment tab; click Switch on a loadout preset; click Switch again; observe the error.
 **Fix:** In `handleLoadout`, reset `SwappedThisRound` before swapping when the player is not in combat. The once-per-round limit only applies during combat rounds; outside combat no round ever resets the flag.
 
+### BUG-123: Weather effects not active — no weather observed across multiple seasons
+**Severity:** high
+**Status:** open
+**Category:** World
+**Description:** Seasonal weather effects are not being applied or displayed in-game; no weather events have been observed across multiple in-game seasons despite the WeatherManager feature being implemented.
+**Steps:** Play through multiple in-game seasons; observe that no weather effects (console messages, UI indicators, room effects) appear at any point.
+**Fix:**
+
 ### BUG-122: Job tab does not show feat and technology grants with grant level
 **Severity:** medium
 **Status:** open
