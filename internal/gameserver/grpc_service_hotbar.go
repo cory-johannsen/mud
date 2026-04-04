@@ -16,6 +16,9 @@ import (
 //
 // Precondition: uid identifies a connected player; req is non-nil.
 // Postcondition: On "set"/"clear", sess.Hotbar updated, SaveHotbar called, HotbarUpdateEvent returned.
+//
+//	On "show", per-slot MessageEvents pushed to entity; nil returned.
+//	On out-of-range slot or empty set payload, MessageEvent returned with no side effects.
 func (s *GameServiceServer) handleHotbar(uid string, req *gamev1.HotbarRequest) (*gamev1.ServerEvent, error) {
 	sess, ok := s.sessions.GetPlayer(uid)
 	if !ok {

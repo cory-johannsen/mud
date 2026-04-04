@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"pgregory.net/rapid"
 
+	"github.com/cory-johannsen/mud/internal/game/inventory"
 	"github.com/cory-johannsen/mud/internal/game/session"
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 )
@@ -235,6 +236,81 @@ func TestResolveHotbarSlotDisplay_NilRegistriesReturnsEmpty(t *testing.T) {
 		assert.Equal(t, "", name, "kind=%s", kind)
 		assert.Equal(t, "", desc, "kind=%s", kind)
 	}
+}
+
+// REQ-HB-INV-1: handleInventory sets Throwable=true for items tagged "throwable".
+//
+// Precondition: invRegistry has a throwable item; player backpack contains one instance.
+// Postcondition: InventoryView contains the item with Throwable=true; non-throwable items have Throwable=false.
+func TestHandleInventory_ThrowableFlag(t *testing.T) {
+	t.Parallel()
+	sessMgr := session.NewManager()
+	reg := inventory.NewRegistry()
+	require.NoError(t, reg.RegisterItem(&inventory.ItemDef{
+		ID:       "grenade",
+		Name:     "Frag Grenade",
+		Kind:     "consumable",
+		Tags:     []string{"throwable"},
+		MaxStack: 10,
+	}))
+	require.NoError(t, reg.RegisterItem(&inventory.ItemDef{
+		ID:       "stimpak",
+		Name:     "Stimpak",
+		Kind:     "consumable",
+		MaxStack: 10,
+	}))
+
+	svc := newTestGameServiceServer(
+		nil, sessMgr, nil,
+		nil, nil, nil,
+		nil, nil, nil, nil, nil, nil,
+		nil, nil, nil, nil, reg,
+		nil, nil, nil, nil, nil, nil, nil, nil, nil, "",
+		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
+		nil, nil,
+		nil,
+		nil,
+		nil, nil,
+	)
+	require.NotNil(t, svc)
+
+	uid := "inv-throwable-uid"
+	_, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID:         uid,
+		Username:    "tester",
+		CharName:    "Tester",
+		CharacterID: 99,
+		RoomID:      "room_a",
+		Role:        "player",
+	})
+	require.NoError(t, err)
+
+	sess, ok := sessMgr.GetPlayer(uid)
+	require.True(t, ok)
+
+	_, err = sess.Backpack.Add("grenade", 1, reg)
+	require.NoError(t, err)
+	_, err = sess.Backpack.Add("stimpak", 1, reg)
+	require.NoError(t, err)
+
+	evt, err := svc.handleInventory(uid)
+	require.NoError(t, err)
+	require.NotNil(t, evt)
+
+	view := evt.GetInventoryView()
+	require.NotNil(t, view)
+	require.Len(t, view.Items, 2)
+
+	itemsByID := make(map[string]*gamev1.InventoryItem)
+	for _, item := range view.Items {
+		itemsByID[item.ItemDefId] = item
+	}
+
+	require.Contains(t, itemsByID, "grenade")
+	assert.True(t, itemsByID["grenade"].Throwable, "grenade must have Throwable=true")
+
+	require.Contains(t, itemsByID, "stimpak")
+	assert.False(t, itemsByID["stimpak"].Throwable, "stimpak must have Throwable=false")
 }
 
 // Property: set with valid slot 1–10 and non-empty text always writes to index slot-1.
