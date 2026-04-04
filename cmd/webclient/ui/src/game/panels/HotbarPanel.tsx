@@ -14,7 +14,7 @@ const COMBAT_TARGET_CMDS = new Set([
   'burst', 'bf',
 ])
 
-function slotActivationCommand(slot: HotbarSlot): string {
+export function slotActivationCommand(slot: HotbarSlot): string {
   if (!slot.ref) return ''
   switch (slot.kind) {
     case 'feat':
@@ -28,11 +28,11 @@ function slotActivationCommand(slot: HotbarSlot): string {
   }
 }
 
-function slotDisplayLabel(slot: HotbarSlot): string {
+export function slotDisplayLabel(slot: HotbarSlot): string {
   return slot.displayName ?? slot.display_name ?? slot.ref ?? ''
 }
 
-function slotTooltip(slot: HotbarSlot): string {
+export function slotTooltip(slot: HotbarSlot): string {
   if (!slot.ref) return 'empty'
   if (slot.kind === 'command' || !slot.kind) {
     return `${slot.ref} (right-click to edit)`
