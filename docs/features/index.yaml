@@ -843,3 +843,17 @@ features:
     dependencies:
       - technology
       - technology-short-names
+
+  - slug: brothel-expansion
+    name: Brothel Expansion
+    status: spec
+    priority: 489
+    category: world
+    file: docs/features/brothel-expansion.md
+    effort: "L"  # brothel_keeper NPC type; BrothelConfig; handleBrothelRest; 10 disease substances; flair_bonus_1 condition; black_market merchant type; motel/brothel map POI symbols; 16 zone rooms + NPC content
+    dependencies:
+      - resting
+      - advanced-health
+      - factions
+      - non-combat-npcs
+      - map-poi
