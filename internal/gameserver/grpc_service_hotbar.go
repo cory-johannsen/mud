@@ -6,6 +6,7 @@ import (
 
 	"go.uber.org/zap"
 
+	"github.com/cory-johannsen/mud/internal/game/session"
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 )
 
@@ -30,7 +31,7 @@ func (s *GameServiceServer) handleHotbar(uid string, req *gamev1.HotbarRequest) 
 			return messageEvent("Slot out of range (1-10)."), nil
 		}
 		idx := int(req.Slot) - 1
-		sess.Hotbar[idx] = req.Text
+		sess.Hotbar[idx] = session.CommandSlot(req.Text)
 		if s.charSaver != nil && sess.CharacterID > 0 {
 			if err := s.charSaver.SaveHotbar(context.Background(), sess.CharacterID, sess.Hotbar); err != nil {
 				s.logger.Warn("SaveHotbar failed", zap.String("uid", uid), zap.Error(err))
@@ -43,7 +44,7 @@ func (s *GameServiceServer) handleHotbar(uid string, req *gamev1.HotbarRequest) 
 			return messageEvent("Slot out of range (1-10)."), nil
 		}
 		idx := int(req.Slot) - 1
-		sess.Hotbar[idx] = ""
+		sess.Hotbar[idx] = session.HotbarSlot{}
 		if s.charSaver != nil && sess.CharacterID > 0 {
 			if err := s.charSaver.SaveHotbar(context.Background(), sess.CharacterID, sess.Hotbar); err != nil {
 				s.logger.Warn("SaveHotbar failed", zap.String("uid", uid), zap.Error(err))
@@ -54,10 +55,9 @@ func (s *GameServiceServer) handleHotbar(uid string, req *gamev1.HotbarRequest) 
 	case "show":
 		for i := 0; i < 10; i++ {
 			slotNum := i + 1
-			text := sess.Hotbar[i]
 			display := "---"
-			if text != "" {
-				display = text
+			if cmd := sess.Hotbar[i].ActivationCommand(); cmd != "" {
+				display = cmd
 			}
 			line := fmt.Sprintf("[%d] %s", slotNum, display)
 			s.pushMessageToUID(uid, line)
@@ -69,17 +69,20 @@ func (s *GameServiceServer) handleHotbar(uid string, req *gamev1.HotbarRequest) 
 	}
 }
 
-// hotbarUpdateEvent builds a HotbarUpdateEvent from a [10]string slot array.
+// hotbarUpdateEvent builds a HotbarUpdateEvent from a [10]HotbarSlot array.
 //
-// Postcondition: Returns a non-nil ServerEvent with exactly 10 slot strings.
-func hotbarUpdateEvent(slots [10]string) *gamev1.ServerEvent {
-	s := make([]string, 10)
+// Postcondition: Returns a non-nil ServerEvent with exactly 10 proto HotbarSlot entries.
+func hotbarUpdateEvent(slots [10]session.HotbarSlot) *gamev1.ServerEvent {
+	protoSlots := make([]*gamev1.HotbarSlot, 10)
 	for i, v := range slots {
-		s[i] = v
+		protoSlots[i] = &gamev1.HotbarSlot{
+			Kind: v.Kind,
+			Ref:  v.Ref,
+		}
 	}
 	return &gamev1.ServerEvent{
 		Payload: &gamev1.ServerEvent_HotbarUpdate{
-			HotbarUpdate: &gamev1.HotbarUpdateEvent{Slots: s},
+			HotbarUpdate: &gamev1.HotbarUpdateEvent{Slots: protoSlots},
 		},
 	}
 }

@@ -15,21 +15,21 @@ import (
 // hotbarCharSaver is a CharacterSaver test double that records SaveHotbar calls.
 type hotbarCharSaver struct {
 	fakeCharSaver // embed the rest_test.go stub for all other methods
-	saved   map[int64][10]string
+	saved   map[int64][10]session.HotbarSlot
 	loadErr error
 }
 
 func newHotbarCharSaver() *hotbarCharSaver {
-	return &hotbarCharSaver{saved: make(map[int64][10]string)}
+	return &hotbarCharSaver{saved: make(map[int64][10]session.HotbarSlot)}
 }
 
-func (h *hotbarCharSaver) SaveHotbar(_ context.Context, characterID int64, slots [10]string) error {
+func (h *hotbarCharSaver) SaveHotbar(_ context.Context, characterID int64, slots [10]session.HotbarSlot) error {
 	h.saved[characterID] = slots
 	return nil
 }
 
-func (h *hotbarCharSaver) LoadHotbar(_ context.Context, _ int64) ([10]string, error) {
-	return [10]string{}, h.loadErr
+func (h *hotbarCharSaver) LoadHotbar(_ context.Context, _ int64) ([10]session.HotbarSlot, error) {
+	return [10]session.HotbarSlot{}, h.loadErr
 }
 
 func testHotbarService(t *testing.T) (*GameServiceServer, *session.Manager, string) {
@@ -60,7 +60,7 @@ func TestHandleHotbar_SetSlot1(t *testing.T) {
 
 	sess, ok := svc.sessions.GetPlayer(uid)
 	require.True(t, ok)
-	assert.Equal(t, "look", sess.Hotbar[0])
+	assert.Equal(t, "look", sess.Hotbar[0].ActivationCommand())
 }
 
 // REQ-HB-3: set slot 10 (boundary).
@@ -72,7 +72,7 @@ func TestHandleHotbar_SetSlot10(t *testing.T) {
 
 	sess, ok := svc.sessions.GetPlayer(uid)
 	require.True(t, ok)
-	assert.Equal(t, "status", sess.Hotbar[9])
+	assert.Equal(t, "status", sess.Hotbar[9].ActivationCommand())
 }
 
 // REQ-HB-3: set out-of-range slot (0) returns error message with no side effect.
@@ -92,19 +92,19 @@ func TestHandleHotbar_SetOutOfRangeHigh(t *testing.T) {
 
 	sess, ok := svc.sessions.GetPlayer(uid)
 	require.True(t, ok)
-	assert.Equal(t, [10]string{}, sess.Hotbar)
+	assert.Equal(t, [10]session.HotbarSlot{}, sess.Hotbar)
 }
 
 // REQ-HB-4: clear valid slot.
 func TestHandleHotbar_ClearSlot(t *testing.T) {
 	svc, _, uid := testHotbarService(t)
 	sess, _ := svc.sessions.GetPlayer(uid)
-	sess.Hotbar[2] = "heal"
+	sess.Hotbar[2] = session.CommandSlot("heal")
 
 	evt, err := svc.handleHotbar(uid, &gamev1.HotbarRequest{Action: "clear", Slot: 3})
 	require.NoError(t, err)
 	assert.Equal(t, "Slot 3 cleared.", evt.GetMessage().GetContent())
-	assert.Equal(t, "", sess.Hotbar[2])
+	assert.True(t, sess.Hotbar[2].IsEmpty())
 }
 
 // REQ-HB-4: clear out-of-range slot returns error message.
@@ -119,8 +119,8 @@ func TestHandleHotbar_ClearOutOfRange(t *testing.T) {
 func TestHandleHotbar_Show(t *testing.T) {
 	svc, _, uid := testHotbarService(t)
 	sess, _ := svc.sessions.GetPlayer(uid)
-	sess.Hotbar[0] = "look"
-	sess.Hotbar[9] = "status"
+	sess.Hotbar[0] = session.CommandSlot("look")
+	sess.Hotbar[9] = session.CommandSlot("status")
 
 	evt, err := svc.handleHotbar(uid, &gamev1.HotbarRequest{Action: "show"})
 	require.NoError(t, err)
@@ -159,7 +159,7 @@ func TestHandleHotbar_PersistsOnSet(t *testing.T) {
 
 	saved, ok := saver.saved[42]
 	require.True(t, ok, "SaveHotbar must be called with characterID 42")
-	assert.Equal(t, "attack goblin", saved[4])
+	assert.Equal(t, "attack goblin", saved[4].ActivationCommand())
 }
 
 // REQ-HB-TS-1: SaveHotbar called after clear.
@@ -181,14 +181,14 @@ func TestHandleHotbar_PersistsOnClear(t *testing.T) {
 	require.NoError(t, err)
 
 	sess, _ := sessMgr.GetPlayer(uid)
-	sess.Hotbar[2] = "heal"
+	sess.Hotbar[2] = session.CommandSlot("heal")
 
 	_, err = svc.handleHotbar(uid, &gamev1.HotbarRequest{Action: "clear", Slot: 3})
 	require.NoError(t, err)
 
 	saved, ok := saver.saved[55]
 	require.True(t, ok, "SaveHotbar must be called after clear")
-	assert.Equal(t, "", saved[2])
+	assert.True(t, saved[2].IsEmpty())
 }
 
 // Property: set with valid slot 1–10 always writes to index slot-1.
@@ -203,6 +203,6 @@ func TestPropertyHandleHotbar_SetValidSlot(t *testing.T) {
 
 		sess, ok := svc.sessions.GetPlayer(uid)
 		require.True(t, ok)
-		require.Equal(t, text, sess.Hotbar[slot-1])
+		require.Equal(t, text, sess.Hotbar[slot-1].ActivationCommand())
 	})
 }
