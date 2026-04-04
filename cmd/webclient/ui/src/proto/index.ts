@@ -483,6 +483,35 @@ export interface WeatherEvent {
   active?: boolean
 }
 
+export interface JobFeatGrant {
+  grantLevel?: number
+  grant_level?: number
+  featId?: string
+  feat_id?: string
+  featName?: string
+  feat_name?: string
+}
+
+export interface JobTechGrant {
+  grantLevel?: number
+  grant_level?: number
+  techId?: string
+  tech_id?: string
+  techName?: string
+  tech_name?: string
+  techLevel?: number
+  tech_level?: number
+  techType?: string
+  tech_type?: string
+}
+
+export interface JobGrantsResponse {
+  featGrants?: JobFeatGrant[]
+  feat_grants?: JobFeatGrant[]
+  techGrants?: JobTechGrant[]
+  tech_grants?: JobTechGrant[]
+}
+
 export interface LoadoutWeaponPreset {
   mainHand?: string
   offHand?: string
@@ -527,4 +556,5 @@ export type ServerEvent =
   | { type: 'ErrorEvent'; payload: ErrorEvent }
   | { type: 'Disconnected'; payload: Record<string, never> }
   | { type: 'WeatherEvent'; payload: WeatherEvent }
+  | { type: 'JobGrantsResponse'; payload: JobGrantsResponse }
   | { type: string; payload: unknown }

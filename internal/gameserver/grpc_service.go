@@ -2366,6 +2366,8 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 		return s.handleKillNPC(uid, p.KillNpcRequest)
 	case *gamev1.ClientMessage_UncoverRequest:
 		return s.handleUncover(uid)
+	case *gamev1.ClientMessage_JobGrantsRequest:
+		return s.handleJobGrants(uid)
 	case *gamev1.ClientMessage_HotbarRequest:
 		evt, hbErr := s.handleHotbar(uid, p.HotbarRequest)
 		if hbErr != nil {
@@ -6830,6 +6832,118 @@ func (s *GameServiceServer) handleClassFeatures(uid string) (*gamev1.ServerEvent
 			ClassFeaturesResponse: &gamev1.ClassFeaturesResponse{
 				ArchetypeFeatures: archetypeFeatures,
 				JobFeatures:       jobFeatures,
+			},
+		},
+	}, nil
+}
+
+// handleJobGrants returns the job's feat and technology grant table for the player's current job.
+//
+// Precondition: uid must resolve to an active session with a loaded character and job.
+// Postcondition: Returns a JobGrantsResponse with fixed feat/tech grants at each level.
+func (s *GameServiceServer) handleJobGrants(uid string) (*gamev1.ServerEvent, error) {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return nil, fmt.Errorf("player %q not found", uid)
+	}
+	if s.jobRegistry == nil || sess.Class == "" {
+		return messageEvent("Job grant data is not available."), nil
+	}
+	job, ok := s.jobRegistry.Job(sess.Class)
+	if !ok {
+		return messageEvent("Job definition not found."), nil
+	}
+
+	var featGrants []*gamev1.JobFeatGrant
+	var techGrants []*gamev1.JobTechGrant
+
+	// Helper to resolve feat name from registry.
+	featName := func(id string) string {
+		if s.featRegistry != nil {
+			if f, ok := s.featRegistry.Feat(id); ok {
+				return f.Name
+			}
+		}
+		return id
+	}
+	// Helper to resolve tech name from technology registry.
+	techName := func(id string) string {
+		if s.techRegistry != nil {
+			if t, ok := s.techRegistry.Get(id); ok {
+				return t.Name
+			}
+		}
+		return id
+	}
+	// Collect fixed feat grants from a FeatGrants at a given level.
+	addFeatGrants := func(fg *ruleset.FeatGrants, level int) {
+		if fg == nil {
+			return
+		}
+		for _, id := range fg.Fixed {
+			featGrants = append(featGrants, &gamev1.JobFeatGrant{
+				GrantLevel: int32(level),
+				FeatId:     id,
+				FeatName:   featName(id),
+			})
+		}
+	}
+	// Collect tech grants from a TechnologyGrants at a given level.
+	addTechGrants := func(tg *ruleset.TechnologyGrants, level int) {
+		if tg == nil {
+			return
+		}
+		for _, id := range tg.Hardwired {
+			techGrants = append(techGrants, &gamev1.JobTechGrant{
+				GrantLevel: int32(level),
+				TechId:     id,
+				TechName:   techName(id),
+				TechType:   "hardwired",
+			})
+		}
+		if tg.Prepared != nil {
+			for _, e := range tg.Prepared.Fixed {
+				techGrants = append(techGrants, &gamev1.JobTechGrant{
+					GrantLevel: int32(level),
+					TechId:     e.ID,
+					TechName:   techName(e.ID),
+					TechLevel:  int32(e.Level),
+					TechType:   "prepared",
+				})
+			}
+		}
+		if tg.Spontaneous != nil {
+			for _, e := range tg.Spontaneous.Fixed {
+				techGrants = append(techGrants, &gamev1.JobTechGrant{
+					GrantLevel: int32(level),
+					TechId:     e.ID,
+					TechName:   techName(e.ID),
+					TechLevel:  int32(e.Level),
+					TechType:   "spontaneous",
+				})
+			}
+		}
+	}
+
+	// Level 1 (character creation) grants.
+	addFeatGrants(job.FeatGrants, 1)
+	addTechGrants(job.TechnologyGrants, 1)
+
+	// Level-up feat grants (sorted by level for consistent ordering).
+	for level := 2; level <= 20; level++ {
+		if fg, ok := job.LevelUpFeatGrants[level]; ok {
+			addFeatGrants(fg, level)
+		}
+		if tg, ok := job.LevelUpGrants[level]; ok {
+			addTechGrants(tg, level)
+		}
+	}
+
+	return &gamev1.ServerEvent{
+		Payload: &gamev1.ServerEvent_JobGrantsResponse{
+			JobGrantsResponse: &gamev1.JobGrantsResponse{
+				FeatGrants: featGrants,
+				TechGrants: techGrants,
 			},
 		},
 	}, nil

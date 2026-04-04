@@ -150,6 +150,7 @@ message ClientMessage {
     DeleteCharRequest    delete_char_request   = 133;
     KillNPCRequest       kill_npc_request      = 134;
     UncoverRequest       uncover_request       = 135;
+    JobGrantsRequest     job_grants_request    = 136;
   }
 }
 
@@ -331,6 +332,7 @@ message ServerEvent {
     WeatherEvent         weather                = 32;
     LoadoutView          loadout_view           = 33;
     FixerView            fixer_view             = 34;
+    JobGrantsResponse    job_grants_response    = 35;
   }
 }
 
@@ -1449,4 +1451,29 @@ message UncurseRequest {
 message WeatherEvent {
   string weather_name = 1; // display name of the weather event
   bool   active       = 2; // true = event started, false = event ended
+}
+
+// JobGrantsRequest asks the server for the character's job feat and technology grant table.
+message JobGrantsRequest {}
+
+// JobFeatGrant describes a single feat granted by the job at a specific level.
+message JobFeatGrant {
+  int32  grant_level = 1; // character level when this feat is granted (1 = character creation)
+  string feat_id     = 2;
+  string feat_name   = 3;
+}
+
+// JobTechGrant describes a single technology granted by the job at a specific level.
+message JobTechGrant {
+  int32  grant_level = 1; // character level when this tech is granted (1 = character creation)
+  string tech_id     = 2;
+  string tech_name   = 3;
+  int32  tech_level  = 4; // technology power level
+  string tech_type   = 5; // "hardwired", "prepared", "spontaneous"
+}
+
+// JobGrantsResponse delivers the job's feat and technology grant table to the client.
+message JobGrantsResponse {
+  repeated JobFeatGrant feat_grants = 1;
+  repeated JobTechGrant tech_grants = 2;
 }

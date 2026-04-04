@@ -33,6 +33,7 @@ import type {
   WeatherEvent,
   LoadoutView,
   HotbarSlot,
+  JobGrantsResponse,
 } from '../proto'
 
 const TOKEN_KEY = 'mud_token'
@@ -88,6 +89,7 @@ export interface GameState {
   npcView: { name: string; description: string; npcType: string; level: number; health: string } | null
   loadoutView: LoadoutView | null
   choicePrompt: ChoicePrompt | null
+  jobGrants: JobGrantsResponse | null
 }
 
 type Action =
@@ -116,6 +118,7 @@ type Action =
   | { type: 'SET_LOADOUT_VIEW'; view: LoadoutView | null }
   | { type: 'SET_CHOICE_PROMPT'; prompt: ChoicePrompt }
   | { type: 'CLEAR_CHOICE_PROMPT' }
+  | { type: 'SET_JOB_GRANTS'; grants: JobGrantsResponse | null }
 
 function reducer(state: GameState, action: Action): GameState {
   switch (action.type) {
@@ -172,6 +175,8 @@ function reducer(state: GameState, action: Action): GameState {
       return { ...state, choicePrompt: action.prompt }
     case 'CLEAR_CHOICE_PROMPT':
       return { ...state, choicePrompt: null }
+    case 'SET_JOB_GRANTS':
+      return { ...state, jobGrants: action.grants }
     case 'APPEND_FEED': {
       const updated = [...state.feedEntries, action.entry]
       return {
@@ -208,6 +213,7 @@ const initialState: GameState = {
   npcView: null,
   loadoutView: null,
   choicePrompt: null,
+  jobGrants: null,
 }
 
 interface GameContextValue {
@@ -482,6 +488,10 @@ export function GameProvider({ children }: { children: ReactNode }) {
         }
         case 'LoadoutView': {
           dispatch({ type: 'SET_LOADOUT_VIEW', view: payload as LoadoutView })
+          break
+        }
+        case 'JobGrantsResponse': {
+          dispatch({ type: 'SET_JOB_GRANTS', grants: payload as JobGrantsResponse })
           break
         }
         case 'FeatureChoicePrompt': {

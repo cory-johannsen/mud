@@ -982,11 +982,11 @@
 
 ### BUG-122: Job tab does not show feat and technology grants with grant level
 **Severity:** medium
-**Status:** open
+**Status:** fixed
 **Category:** UI
 **Description:** The Job tab on the character sheet displays the job but omits the feat and technology selections granted by that job, along with the level at which each was granted.
 **Steps:** Log in via web UI; open the Job tab; observe that feat and technology grants (and their grant levels) are not displayed.
-**Fix:**
+**Fix:** Added JobGrantsRequest/JobGrantsResponse proto messages and a handleJobGrants server handler that reads fixed feat and tech grants (initial + level-up) from the Job registry. JobDrawer now sends JobGrantsRequest on mount and renders a "Job Grants" section grouped by level, showing feat/tech name with type badge (feat, hardwired, prepared, spontaneous) and grant level.
 
 ### BUG-121: Feat Snap Shot is not implemented as a passive feat
 **Severity:** medium

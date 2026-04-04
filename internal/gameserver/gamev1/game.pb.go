@@ -388,6 +388,7 @@ type ClientMessage struct {
 	//	*ClientMessage_DeleteCharRequest
 	//	*ClientMessage_KillNpcRequest
 	//	*ClientMessage_UncoverRequest
+	//	*ClientMessage_JobGrantsRequest
 	Payload       isClientMessage_Payload `protobuf_oneof:"payload"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -1643,6 +1644,15 @@ func (x *ClientMessage) GetUncoverRequest() *UncoverRequest {
 	return nil
 }
 
+func (x *ClientMessage) GetJobGrantsRequest() *JobGrantsRequest {
+	if x != nil {
+		if x, ok := x.Payload.(*ClientMessage_JobGrantsRequest); ok {
+			return x.JobGrantsRequest
+		}
+	}
+	return nil
+}
+
 type isClientMessage_Payload interface {
 	isClientMessage_Payload()
 }
@@ -2183,6 +2193,10 @@ type ClientMessage_UncoverRequest struct {
 	UncoverRequest *UncoverRequest `protobuf:"bytes,135,opt,name=uncover_request,json=uncoverRequest,proto3,oneof"`
 }
 
+type ClientMessage_JobGrantsRequest struct {
+	JobGrantsRequest *JobGrantsRequest `protobuf:"bytes,136,opt,name=job_grants_request,json=jobGrantsRequest,proto3,oneof"`
+}
+
 func (*ClientMessage_JoinWorld) isClientMessage_Payload() {}
 
 func (*ClientMessage_Move) isClientMessage_Payload() {}
@@ -2450,6 +2464,8 @@ func (*ClientMessage_DeleteCharRequest) isClientMessage_Payload() {}
 func (*ClientMessage_KillNpcRequest) isClientMessage_Payload() {}
 
 func (*ClientMessage_UncoverRequest) isClientMessage_Payload() {}
+
+func (*ClientMessage_JobGrantsRequest) isClientMessage_Payload() {}
 
 // UncoverRequest asks the server to drop the player's current cover condition.
 type UncoverRequest struct {
@@ -3786,6 +3802,7 @@ type ServerEvent struct {
 	//	*ServerEvent_Weather
 	//	*ServerEvent_LoadoutView
 	//	*ServerEvent_FixerView
+	//	*ServerEvent_JobGrantsResponse
 	Payload       isServerEvent_Payload `protobuf_oneof:"payload"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -4132,6 +4149,15 @@ func (x *ServerEvent) GetFixerView() *FixerView {
 	return nil
 }
 
+func (x *ServerEvent) GetJobGrantsResponse() *JobGrantsResponse {
+	if x != nil {
+		if x, ok := x.Payload.(*ServerEvent_JobGrantsResponse); ok {
+			return x.JobGrantsResponse
+		}
+	}
+	return nil
+}
+
 type isServerEvent_Payload interface {
 	isServerEvent_Payload()
 }
@@ -4268,6 +4294,10 @@ type ServerEvent_FixerView struct {
 	FixerView *FixerView `protobuf:"bytes,34,opt,name=fixer_view,json=fixerView,proto3,oneof"`
 }
 
+type ServerEvent_JobGrantsResponse struct {
+	JobGrantsResponse *JobGrantsResponse `protobuf:"bytes,35,opt,name=job_grants_response,json=jobGrantsResponse,proto3,oneof"`
+}
+
 func (*ServerEvent_RoomView) isServerEvent_Payload() {}
 
 func (*ServerEvent_Message) isServerEvent_Payload() {}
@@ -4333,6 +4363,8 @@ func (*ServerEvent_Weather) isServerEvent_Payload() {}
 func (*ServerEvent_LoadoutView) isServerEvent_Payload() {}
 
 func (*ServerEvent_FixerView) isServerEvent_Payload() {}
+
+func (*ServerEvent_JobGrantsResponse) isServerEvent_Payload() {}
 
 // ShopItem represents a single item row in a merchant's shop listing.
 type ShopItem struct {
@@ -13907,11 +13939,239 @@ func (x *WeatherEvent) GetActive() bool {
 	return false
 }
 
+// JobGrantsRequest asks the server for the character's job feat and technology grant table.
+type JobGrantsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *JobGrantsRequest) Reset() {
+	*x = JobGrantsRequest{}
+	mi := &file_game_v1_game_proto_msgTypes[194]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *JobGrantsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*JobGrantsRequest) ProtoMessage() {}
+
+func (x *JobGrantsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_game_v1_game_proto_msgTypes[194]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use JobGrantsRequest.ProtoReflect.Descriptor instead.
+func (*JobGrantsRequest) Descriptor() ([]byte, []int) {
+	return file_game_v1_game_proto_rawDescGZIP(), []int{194}
+}
+
+// JobFeatGrant describes a single feat granted by the job at a specific level.
+type JobFeatGrant struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	GrantLevel    int32                  `protobuf:"varint,1,opt,name=grant_level,json=grantLevel,proto3" json:"grant_level,omitempty"` // character level when this feat is granted (1 = character creation)
+	FeatId        string                 `protobuf:"bytes,2,opt,name=feat_id,json=featId,proto3" json:"feat_id,omitempty"`
+	FeatName      string                 `protobuf:"bytes,3,opt,name=feat_name,json=featName,proto3" json:"feat_name,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *JobFeatGrant) Reset() {
+	*x = JobFeatGrant{}
+	mi := &file_game_v1_game_proto_msgTypes[195]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *JobFeatGrant) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*JobFeatGrant) ProtoMessage() {}
+
+func (x *JobFeatGrant) ProtoReflect() protoreflect.Message {
+	mi := &file_game_v1_game_proto_msgTypes[195]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use JobFeatGrant.ProtoReflect.Descriptor instead.
+func (*JobFeatGrant) Descriptor() ([]byte, []int) {
+	return file_game_v1_game_proto_rawDescGZIP(), []int{195}
+}
+
+func (x *JobFeatGrant) GetGrantLevel() int32 {
+	if x != nil {
+		return x.GrantLevel
+	}
+	return 0
+}
+
+func (x *JobFeatGrant) GetFeatId() string {
+	if x != nil {
+		return x.FeatId
+	}
+	return ""
+}
+
+func (x *JobFeatGrant) GetFeatName() string {
+	if x != nil {
+		return x.FeatName
+	}
+	return ""
+}
+
+// JobTechGrant describes a single technology granted by the job at a specific level.
+type JobTechGrant struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	GrantLevel    int32                  `protobuf:"varint,1,opt,name=grant_level,json=grantLevel,proto3" json:"grant_level,omitempty"` // character level when this tech is granted (1 = character creation)
+	TechId        string                 `protobuf:"bytes,2,opt,name=tech_id,json=techId,proto3" json:"tech_id,omitempty"`
+	TechName      string                 `protobuf:"bytes,3,opt,name=tech_name,json=techName,proto3" json:"tech_name,omitempty"`
+	TechLevel     int32                  `protobuf:"varint,4,opt,name=tech_level,json=techLevel,proto3" json:"tech_level,omitempty"` // technology power level
+	TechType      string                 `protobuf:"bytes,5,opt,name=tech_type,json=techType,proto3" json:"tech_type,omitempty"`     // "hardwired", "prepared", "spontaneous"
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *JobTechGrant) Reset() {
+	*x = JobTechGrant{}
+	mi := &file_game_v1_game_proto_msgTypes[196]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *JobTechGrant) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*JobTechGrant) ProtoMessage() {}
+
+func (x *JobTechGrant) ProtoReflect() protoreflect.Message {
+	mi := &file_game_v1_game_proto_msgTypes[196]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use JobTechGrant.ProtoReflect.Descriptor instead.
+func (*JobTechGrant) Descriptor() ([]byte, []int) {
+	return file_game_v1_game_proto_rawDescGZIP(), []int{196}
+}
+
+func (x *JobTechGrant) GetGrantLevel() int32 {
+	if x != nil {
+		return x.GrantLevel
+	}
+	return 0
+}
+
+func (x *JobTechGrant) GetTechId() string {
+	if x != nil {
+		return x.TechId
+	}
+	return ""
+}
+
+func (x *JobTechGrant) GetTechName() string {
+	if x != nil {
+		return x.TechName
+	}
+	return ""
+}
+
+func (x *JobTechGrant) GetTechLevel() int32 {
+	if x != nil {
+		return x.TechLevel
+	}
+	return 0
+}
+
+func (x *JobTechGrant) GetTechType() string {
+	if x != nil {
+		return x.TechType
+	}
+	return ""
+}
+
+// JobGrantsResponse delivers the job's feat and technology grant table to the client.
+type JobGrantsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	FeatGrants    []*JobFeatGrant        `protobuf:"bytes,1,rep,name=feat_grants,json=featGrants,proto3" json:"feat_grants,omitempty"`
+	TechGrants    []*JobTechGrant        `protobuf:"bytes,2,rep,name=tech_grants,json=techGrants,proto3" json:"tech_grants,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *JobGrantsResponse) Reset() {
+	*x = JobGrantsResponse{}
+	mi := &file_game_v1_game_proto_msgTypes[197]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *JobGrantsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*JobGrantsResponse) ProtoMessage() {}
+
+func (x *JobGrantsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_game_v1_game_proto_msgTypes[197]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use JobGrantsResponse.ProtoReflect.Descriptor instead.
+func (*JobGrantsResponse) Descriptor() ([]byte, []int) {
+	return file_game_v1_game_proto_rawDescGZIP(), []int{197}
+}
+
+func (x *JobGrantsResponse) GetFeatGrants() []*JobFeatGrant {
+	if x != nil {
+		return x.FeatGrants
+	}
+	return nil
+}
+
+func (x *JobGrantsResponse) GetTechGrants() []*JobTechGrant {
+	if x != nil {
+		return x.TechGrants
+	}
+	return nil
+}
+
 var File_game_v1_game_proto protoreflect.FileDescriptor
 
 const file_game_v1_game_proto_rawDesc = "" +
 	"\n" +
-	"\x12game/v1/game.proto\x12\agame.v1\"\x98=\n" +
+	"\x12game/v1/game.proto\x12\agame.v1\"\xe4=\n" +
 	"\rClientMessage\x12\x1d\n" +
 	"\n" +
 	"request_id\x18\x01 \x01(\tR\trequestId\x12:\n" +
@@ -14066,7 +14326,8 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\x12spawn_char_request\x18\x84\x01 \x01(\v2\x19.game.v1.SpawnCharRequestH\x00R\x10spawnCharRequest\x12M\n" +
 	"\x13delete_char_request\x18\x85\x01 \x01(\v2\x1a.game.v1.DeleteCharRequestH\x00R\x11deleteCharRequest\x12D\n" +
 	"\x10kill_npc_request\x18\x86\x01 \x01(\v2\x17.game.v1.KillNPCRequestH\x00R\x0ekillNpcRequest\x12C\n" +
-	"\x0funcover_request\x18\x87\x01 \x01(\v2\x17.game.v1.UncoverRequestH\x00R\x0euncoverRequestB\t\n" +
+	"\x0funcover_request\x18\x87\x01 \x01(\v2\x17.game.v1.UncoverRequestH\x00R\x0euncoverRequest\x12J\n" +
+	"\x12job_grants_request\x18\x88\x01 \x01(\v2\x19.game.v1.JobGrantsRequestH\x00R\x10jobGrantsRequestB\t\n" +
 	"\apayload\"\x10\n" +
 	"\x0eUncoverRequest\"\r\n" +
 	"\vRestRequest\"\x13\n" +
@@ -14131,7 +14392,7 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\azone_id\x18\x01 \x01(\tR\x06zoneId\"4\n" +
 	"\x13ActivateItemRequest\x12\x1d\n" +
 	"\n" +
-	"item_query\x18\x01 \x01(\tR\titemQuery\"\xf8\x0f\n" +
+	"item_query\x18\x01 \x01(\tR\titemQuery\"\xc6\x10\n" +
 	"\vServerEvent\x12\x1d\n" +
 	"\n" +
 	"request_id\x18\x01 \x01(\tR\trequestId\x120\n" +
@@ -14173,7 +14434,8 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\aweather\x18  \x01(\v2\x15.game.v1.WeatherEventH\x00R\aweather\x129\n" +
 	"\floadout_view\x18! \x01(\v2\x14.game.v1.LoadoutViewH\x00R\vloadoutView\x123\n" +
 	"\n" +
-	"fixer_view\x18\" \x01(\v2\x12.game.v1.FixerViewH\x00R\tfixerViewB\t\n" +
+	"fixer_view\x18\" \x01(\v2\x12.game.v1.FixerViewH\x00R\tfixerView\x12L\n" +
+	"\x13job_grants_response\x18# \x01(\v2\x1a.game.v1.JobGrantsResponseH\x00R\x11jobGrantsResponseB\t\n" +
 	"\apayload\"\xd8\x04\n" +
 	"\bShopItem\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x17\n" +
@@ -14869,7 +15131,26 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\titem_name\x18\x02 \x01(\tR\bitemName\"I\n" +
 	"\fWeatherEvent\x12!\n" +
 	"\fweather_name\x18\x01 \x01(\tR\vweatherName\x12\x16\n" +
-	"\x06active\x18\x02 \x01(\bR\x06active*Y\n" +
+	"\x06active\x18\x02 \x01(\bR\x06active\"\x12\n" +
+	"\x10JobGrantsRequest\"e\n" +
+	"\fJobFeatGrant\x12\x1f\n" +
+	"\vgrant_level\x18\x01 \x01(\x05R\n" +
+	"grantLevel\x12\x17\n" +
+	"\afeat_id\x18\x02 \x01(\tR\x06featId\x12\x1b\n" +
+	"\tfeat_name\x18\x03 \x01(\tR\bfeatName\"\xa1\x01\n" +
+	"\fJobTechGrant\x12\x1f\n" +
+	"\vgrant_level\x18\x01 \x01(\x05R\n" +
+	"grantLevel\x12\x17\n" +
+	"\atech_id\x18\x02 \x01(\tR\x06techId\x12\x1b\n" +
+	"\ttech_name\x18\x03 \x01(\tR\btechName\x12\x1d\n" +
+	"\n" +
+	"tech_level\x18\x04 \x01(\x05R\ttechLevel\x12\x1b\n" +
+	"\ttech_type\x18\x05 \x01(\tR\btechType\"\x83\x01\n" +
+	"\x11JobGrantsResponse\x126\n" +
+	"\vfeat_grants\x18\x01 \x03(\v2\x15.game.v1.JobFeatGrantR\n" +
+	"featGrants\x126\n" +
+	"\vtech_grants\x18\x02 \x03(\v2\x15.game.v1.JobTechGrantR\n" +
+	"techGrants*Y\n" +
 	"\vMessageType\x12\x1c\n" +
 	"\x18MESSAGE_TYPE_UNSPECIFIED\x10\x00\x12\x14\n" +
 	"\x10MESSAGE_TYPE_SAY\x10\x01\x12\x16\n" +
@@ -14911,7 +15192,7 @@ func file_game_v1_game_proto_rawDescGZIP() []byte {
 }
 
 var file_game_v1_game_proto_enumTypes = make([]protoimpl.EnumInfo, 4)
-var file_game_v1_game_proto_msgTypes = make([]protoimpl.MessageInfo, 198)
+var file_game_v1_game_proto_msgTypes = make([]protoimpl.MessageInfo, 202)
 var file_game_v1_game_proto_goTypes = []any{
 	(MessageType)(0),                  // 0: game.v1.MessageType
 	(RoomEventType)(0),                // 1: game.v1.RoomEventType
@@ -15111,10 +15392,14 @@ var file_game_v1_game_proto_goTypes = []any{
 	(*CraftResultEvent)(nil),          // 195: game.v1.CraftResultEvent
 	(*UncurseRequest)(nil),            // 196: game.v1.UncurseRequest
 	(*WeatherEvent)(nil),              // 197: game.v1.WeatherEvent
-	nil,                               // 198: game.v1.FixerView.BribeCostsEntry
-	nil,                               // 199: game.v1.CharacterSheetView.ArmorEntry
-	nil,                               // 200: game.v1.CharacterSheetView.AccessoriesEntry
-	nil,                               // 201: game.v1.CharacterSheetView.ArmorCategoriesEntry
+	(*JobGrantsRequest)(nil),          // 198: game.v1.JobGrantsRequest
+	(*JobFeatGrant)(nil),              // 199: game.v1.JobFeatGrant
+	(*JobTechGrant)(nil),              // 200: game.v1.JobTechGrant
+	(*JobGrantsResponse)(nil),         // 201: game.v1.JobGrantsResponse
+	nil,                               // 202: game.v1.FixerView.BribeCostsEntry
+	nil,                               // 203: game.v1.CharacterSheetView.ArmorEntry
+	nil,                               // 204: game.v1.CharacterSheetView.AccessoriesEntry
+	nil,                               // 205: game.v1.CharacterSheetView.ArmorCategoriesEntry
 }
 var file_game_v1_game_proto_depIdxs = []int32{
 	37,  // 0: game.v1.ClientMessage.join_world:type_name -> game.v1.JoinWorldRequest
@@ -15251,87 +15536,91 @@ var file_game_v1_game_proto_depIdxs = []int32{
 	173, // 131: game.v1.ClientMessage.delete_char_request:type_name -> game.v1.DeleteCharRequest
 	166, // 132: game.v1.ClientMessage.kill_npc_request:type_name -> game.v1.KillNPCRequest
 	5,   // 133: game.v1.ClientMessage.uncover_request:type_name -> game.v1.UncoverRequest
-	46,  // 134: game.v1.ServerEvent.room_view:type_name -> game.v1.RoomView
-	48,  // 135: game.v1.ServerEvent.message:type_name -> game.v1.MessageEvent
-	49,  // 136: game.v1.ServerEvent.room_event:type_name -> game.v1.RoomEvent
-	50,  // 137: game.v1.ServerEvent.player_list:type_name -> game.v1.PlayerList
-	52,  // 138: game.v1.ServerEvent.exit_list:type_name -> game.v1.ExitList
-	53,  // 139: game.v1.ServerEvent.error:type_name -> game.v1.ErrorEvent
-	54,  // 140: game.v1.ServerEvent.disconnected:type_name -> game.v1.Disconnected
-	56,  // 141: game.v1.ServerEvent.character_info:type_name -> game.v1.CharacterInfo
-	59,  // 142: game.v1.ServerEvent.npc_view:type_name -> game.v1.NpcView
-	101, // 143: game.v1.ServerEvent.combat_event:type_name -> game.v1.CombatEvent
-	99,  // 144: game.v1.ServerEvent.round_start:type_name -> game.v1.RoundStartEvent
-	100, // 145: game.v1.ServerEvent.round_end:type_name -> game.v1.RoundEndEvent
-	103, // 146: game.v1.ServerEvent.condition_event:type_name -> game.v1.ConditionEvent
-	98,  // 147: game.v1.ServerEvent.inventory_view:type_name -> game.v1.InventoryView
-	55,  // 148: game.v1.ServerEvent.time_of_day:type_name -> game.v1.TimeOfDayEvent
-	122, // 149: game.v1.ServerEvent.character_sheet:type_name -> game.v1.CharacterSheetView
-	92,  // 150: game.v1.ServerEvent.map:type_name -> game.v1.MapResponse
-	95,  // 151: game.v1.ServerEvent.skills_response:type_name -> game.v1.SkillsResponse
-	111, // 152: game.v1.ServerEvent.feats_response:type_name -> game.v1.FeatsResponse
-	116, // 153: game.v1.ServerEvent.interact_response:type_name -> game.v1.InteractResponse
-	118, // 154: game.v1.ServerEvent.use_response:type_name -> game.v1.UseResponse
-	114, // 155: game.v1.ServerEvent.class_features_response:type_name -> game.v1.ClassFeaturesResponse
-	128, // 156: game.v1.ServerEvent.proficiencies_response:type_name -> game.v1.ProficienciesResponse
-	36,  // 157: game.v1.ServerEvent.hp_update:type_name -> game.v1.HpUpdateEvent
-	179, // 158: game.v1.ServerEvent.tab_complete:type_name -> game.v1.TabCompleteResponse
-	195, // 159: game.v1.ServerEvent.craft_result:type_name -> game.v1.CraftResultEvent
-	191, // 160: game.v1.ServerEvent.hotbar_update:type_name -> game.v1.HotbarUpdateEvent
-	35,  // 161: game.v1.ServerEvent.shop_view:type_name -> game.v1.ShopView
-	60,  // 162: game.v1.ServerEvent.healer_view:type_name -> game.v1.HealerView
-	62,  // 163: game.v1.ServerEvent.trainer_view:type_name -> game.v1.TrainerView
-	197, // 164: game.v1.ServerEvent.weather:type_name -> game.v1.WeatherEvent
-	80,  // 165: game.v1.ServerEvent.loadout_view:type_name -> game.v1.LoadoutView
-	63,  // 166: game.v1.ServerEvent.fixer_view:type_name -> game.v1.FixerView
-	34,  // 167: game.v1.ShopView.items:type_name -> game.v1.ShopItem
-	47,  // 168: game.v1.RoomView.exits:type_name -> game.v1.ExitInfo
-	57,  // 169: game.v1.RoomView.npcs:type_name -> game.v1.NpcInfo
-	106, // 170: game.v1.RoomView.active_conditions:type_name -> game.v1.ConditionInfo
-	85,  // 171: game.v1.RoomView.floor_items:type_name -> game.v1.FloorItem
-	86,  // 172: game.v1.RoomView.equipment:type_name -> game.v1.RoomEquipmentItem
-	0,   // 173: game.v1.MessageEvent.type:type_name -> game.v1.MessageType
-	1,   // 174: game.v1.RoomEvent.type:type_name -> game.v1.RoomEventType
-	51,  // 175: game.v1.PlayerList.players:type_name -> game.v1.PlayerInfo
-	2,   // 176: game.v1.PlayerInfo.status:type_name -> game.v1.CombatStatus
-	47,  // 177: game.v1.ExitList.exits:type_name -> game.v1.ExitInfo
-	61,  // 178: game.v1.TrainerView.jobs:type_name -> game.v1.JobOfferEntry
-	198, // 179: game.v1.FixerView.bribe_costs:type_name -> game.v1.FixerView.BribeCostsEntry
-	79,  // 180: game.v1.LoadoutView.presets:type_name -> game.v1.LoadoutWeaponPreset
-	89,  // 181: game.v1.MapTile.poi_npcs:type_name -> game.v1.PoiWithNpc
-	90,  // 182: game.v1.MapResponse.tiles:type_name -> game.v1.MapTile
-	91,  // 183: game.v1.MapResponse.world_tiles:type_name -> game.v1.WorldZoneTile
-	94,  // 184: game.v1.SkillsResponse.skills:type_name -> game.v1.SkillEntry
-	97,  // 185: game.v1.InventoryView.items:type_name -> game.v1.InventoryItem
-	3,   // 186: game.v1.CombatEvent.type:type_name -> game.v1.CombatEventType
-	110, // 187: game.v1.FeatsResponse.feats:type_name -> game.v1.FeatEntry
-	113, // 188: game.v1.ClassFeaturesResponse.archetype_features:type_name -> game.v1.ClassFeatureEntry
-	113, // 189: game.v1.ClassFeaturesResponse.job_features:type_name -> game.v1.ClassFeatureEntry
-	110, // 190: game.v1.UseResponse.choices:type_name -> game.v1.FeatEntry
-	199, // 191: game.v1.CharacterSheetView.armor:type_name -> game.v1.CharacterSheetView.ArmorEntry
-	200, // 192: game.v1.CharacterSheetView.accessories:type_name -> game.v1.CharacterSheetView.AccessoriesEntry
-	125, // 193: game.v1.CharacterSheetView.player_resistances:type_name -> game.v1.ResistanceEntry
-	125, // 194: game.v1.CharacterSheetView.player_weaknesses:type_name -> game.v1.ResistanceEntry
-	94,  // 195: game.v1.CharacterSheetView.skills:type_name -> game.v1.SkillEntry
-	110, // 196: game.v1.CharacterSheetView.feats:type_name -> game.v1.FeatEntry
-	113, // 197: game.v1.CharacterSheetView.class_features:type_name -> game.v1.ClassFeatureEntry
-	127, // 198: game.v1.CharacterSheetView.proficiencies:type_name -> game.v1.ProficiencyEntry
-	119, // 199: game.v1.CharacterSheetView.prepared_slots:type_name -> game.v1.PreparedSlotView
-	124, // 200: game.v1.CharacterSheetView.spontaneous_use_pools:type_name -> game.v1.SpontaneousUsePoolView
-	123, // 201: game.v1.CharacterSheetView.innate_slots:type_name -> game.v1.InnateSlotView
-	120, // 202: game.v1.CharacterSheetView.hardwired_slots:type_name -> game.v1.HardwiredSlotView
-	121, // 203: game.v1.CharacterSheetView.spontaneous_known:type_name -> game.v1.SpontaneousKnownEntry
-	201, // 204: game.v1.CharacterSheetView.armor_categories:type_name -> game.v1.CharacterSheetView.ArmorCategoriesEntry
-	127, // 205: game.v1.ProficienciesResponse.proficiencies:type_name -> game.v1.ProficiencyEntry
-	189, // 206: game.v1.HotbarUpdateEvent.slots:type_name -> game.v1.HotbarSlot
-	194, // 207: game.v1.CraftResultEvent.materials_lost:type_name -> game.v1.MaterialLoss
-	4,   // 208: game.v1.GameService.Session:input_type -> game.v1.ClientMessage
-	33,  // 209: game.v1.GameService.Session:output_type -> game.v1.ServerEvent
-	209, // [209:210] is the sub-list for method output_type
-	208, // [208:209] is the sub-list for method input_type
-	208, // [208:208] is the sub-list for extension type_name
-	208, // [208:208] is the sub-list for extension extendee
-	0,   // [0:208] is the sub-list for field type_name
+	198, // 134: game.v1.ClientMessage.job_grants_request:type_name -> game.v1.JobGrantsRequest
+	46,  // 135: game.v1.ServerEvent.room_view:type_name -> game.v1.RoomView
+	48,  // 136: game.v1.ServerEvent.message:type_name -> game.v1.MessageEvent
+	49,  // 137: game.v1.ServerEvent.room_event:type_name -> game.v1.RoomEvent
+	50,  // 138: game.v1.ServerEvent.player_list:type_name -> game.v1.PlayerList
+	52,  // 139: game.v1.ServerEvent.exit_list:type_name -> game.v1.ExitList
+	53,  // 140: game.v1.ServerEvent.error:type_name -> game.v1.ErrorEvent
+	54,  // 141: game.v1.ServerEvent.disconnected:type_name -> game.v1.Disconnected
+	56,  // 142: game.v1.ServerEvent.character_info:type_name -> game.v1.CharacterInfo
+	59,  // 143: game.v1.ServerEvent.npc_view:type_name -> game.v1.NpcView
+	101, // 144: game.v1.ServerEvent.combat_event:type_name -> game.v1.CombatEvent
+	99,  // 145: game.v1.ServerEvent.round_start:type_name -> game.v1.RoundStartEvent
+	100, // 146: game.v1.ServerEvent.round_end:type_name -> game.v1.RoundEndEvent
+	103, // 147: game.v1.ServerEvent.condition_event:type_name -> game.v1.ConditionEvent
+	98,  // 148: game.v1.ServerEvent.inventory_view:type_name -> game.v1.InventoryView
+	55,  // 149: game.v1.ServerEvent.time_of_day:type_name -> game.v1.TimeOfDayEvent
+	122, // 150: game.v1.ServerEvent.character_sheet:type_name -> game.v1.CharacterSheetView
+	92,  // 151: game.v1.ServerEvent.map:type_name -> game.v1.MapResponse
+	95,  // 152: game.v1.ServerEvent.skills_response:type_name -> game.v1.SkillsResponse
+	111, // 153: game.v1.ServerEvent.feats_response:type_name -> game.v1.FeatsResponse
+	116, // 154: game.v1.ServerEvent.interact_response:type_name -> game.v1.InteractResponse
+	118, // 155: game.v1.ServerEvent.use_response:type_name -> game.v1.UseResponse
+	114, // 156: game.v1.ServerEvent.class_features_response:type_name -> game.v1.ClassFeaturesResponse
+	128, // 157: game.v1.ServerEvent.proficiencies_response:type_name -> game.v1.ProficienciesResponse
+	36,  // 158: game.v1.ServerEvent.hp_update:type_name -> game.v1.HpUpdateEvent
+	179, // 159: game.v1.ServerEvent.tab_complete:type_name -> game.v1.TabCompleteResponse
+	195, // 160: game.v1.ServerEvent.craft_result:type_name -> game.v1.CraftResultEvent
+	191, // 161: game.v1.ServerEvent.hotbar_update:type_name -> game.v1.HotbarUpdateEvent
+	35,  // 162: game.v1.ServerEvent.shop_view:type_name -> game.v1.ShopView
+	60,  // 163: game.v1.ServerEvent.healer_view:type_name -> game.v1.HealerView
+	62,  // 164: game.v1.ServerEvent.trainer_view:type_name -> game.v1.TrainerView
+	197, // 165: game.v1.ServerEvent.weather:type_name -> game.v1.WeatherEvent
+	80,  // 166: game.v1.ServerEvent.loadout_view:type_name -> game.v1.LoadoutView
+	63,  // 167: game.v1.ServerEvent.fixer_view:type_name -> game.v1.FixerView
+	201, // 168: game.v1.ServerEvent.job_grants_response:type_name -> game.v1.JobGrantsResponse
+	34,  // 169: game.v1.ShopView.items:type_name -> game.v1.ShopItem
+	47,  // 170: game.v1.RoomView.exits:type_name -> game.v1.ExitInfo
+	57,  // 171: game.v1.RoomView.npcs:type_name -> game.v1.NpcInfo
+	106, // 172: game.v1.RoomView.active_conditions:type_name -> game.v1.ConditionInfo
+	85,  // 173: game.v1.RoomView.floor_items:type_name -> game.v1.FloorItem
+	86,  // 174: game.v1.RoomView.equipment:type_name -> game.v1.RoomEquipmentItem
+	0,   // 175: game.v1.MessageEvent.type:type_name -> game.v1.MessageType
+	1,   // 176: game.v1.RoomEvent.type:type_name -> game.v1.RoomEventType
+	51,  // 177: game.v1.PlayerList.players:type_name -> game.v1.PlayerInfo
+	2,   // 178: game.v1.PlayerInfo.status:type_name -> game.v1.CombatStatus
+	47,  // 179: game.v1.ExitList.exits:type_name -> game.v1.ExitInfo
+	61,  // 180: game.v1.TrainerView.jobs:type_name -> game.v1.JobOfferEntry
+	202, // 181: game.v1.FixerView.bribe_costs:type_name -> game.v1.FixerView.BribeCostsEntry
+	79,  // 182: game.v1.LoadoutView.presets:type_name -> game.v1.LoadoutWeaponPreset
+	89,  // 183: game.v1.MapTile.poi_npcs:type_name -> game.v1.PoiWithNpc
+	90,  // 184: game.v1.MapResponse.tiles:type_name -> game.v1.MapTile
+	91,  // 185: game.v1.MapResponse.world_tiles:type_name -> game.v1.WorldZoneTile
+	94,  // 186: game.v1.SkillsResponse.skills:type_name -> game.v1.SkillEntry
+	97,  // 187: game.v1.InventoryView.items:type_name -> game.v1.InventoryItem
+	3,   // 188: game.v1.CombatEvent.type:type_name -> game.v1.CombatEventType
+	110, // 189: game.v1.FeatsResponse.feats:type_name -> game.v1.FeatEntry
+	113, // 190: game.v1.ClassFeaturesResponse.archetype_features:type_name -> game.v1.ClassFeatureEntry
+	113, // 191: game.v1.ClassFeaturesResponse.job_features:type_name -> game.v1.ClassFeatureEntry
+	110, // 192: game.v1.UseResponse.choices:type_name -> game.v1.FeatEntry
+	203, // 193: game.v1.CharacterSheetView.armor:type_name -> game.v1.CharacterSheetView.ArmorEntry
+	204, // 194: game.v1.CharacterSheetView.accessories:type_name -> game.v1.CharacterSheetView.AccessoriesEntry
+	125, // 195: game.v1.CharacterSheetView.player_resistances:type_name -> game.v1.ResistanceEntry
+	125, // 196: game.v1.CharacterSheetView.player_weaknesses:type_name -> game.v1.ResistanceEntry
+	94,  // 197: game.v1.CharacterSheetView.skills:type_name -> game.v1.SkillEntry
+	110, // 198: game.v1.CharacterSheetView.feats:type_name -> game.v1.FeatEntry
+	113, // 199: game.v1.CharacterSheetView.class_features:type_name -> game.v1.ClassFeatureEntry
+	127, // 200: game.v1.CharacterSheetView.proficiencies:type_name -> game.v1.ProficiencyEntry
+	119, // 201: game.v1.CharacterSheetView.prepared_slots:type_name -> game.v1.PreparedSlotView
+	124, // 202: game.v1.CharacterSheetView.spontaneous_use_pools:type_name -> game.v1.SpontaneousUsePoolView
+	123, // 203: game.v1.CharacterSheetView.innate_slots:type_name -> game.v1.InnateSlotView
+	120, // 204: game.v1.CharacterSheetView.hardwired_slots:type_name -> game.v1.HardwiredSlotView
+	121, // 205: game.v1.CharacterSheetView.spontaneous_known:type_name -> game.v1.SpontaneousKnownEntry
+	205, // 206: game.v1.CharacterSheetView.armor_categories:type_name -> game.v1.CharacterSheetView.ArmorCategoriesEntry
+	127, // 207: game.v1.ProficienciesResponse.proficiencies:type_name -> game.v1.ProficiencyEntry
+	189, // 208: game.v1.HotbarUpdateEvent.slots:type_name -> game.v1.HotbarSlot
+	194, // 209: game.v1.CraftResultEvent.materials_lost:type_name -> game.v1.MaterialLoss
+	199, // 210: game.v1.JobGrantsResponse.feat_grants:type_name -> game.v1.JobFeatGrant
+	200, // 211: game.v1.JobGrantsResponse.tech_grants:type_name -> game.v1.JobTechGrant
+	4,   // 212: game.v1.GameService.Session:input_type -> game.v1.ClientMessage
+	33,  // 213: game.v1.GameService.Session:output_type -> game.v1.ServerEvent
+	213, // [213:214] is the sub-list for method output_type
+	212, // [212:213] is the sub-list for method input_type
+	212, // [212:212] is the sub-list for extension type_name
+	212, // [212:212] is the sub-list for extension extendee
+	0,   // [0:212] is the sub-list for field type_name
 }
 
 func init() { file_game_v1_game_proto_init() }
@@ -15474,6 +15763,7 @@ func file_game_v1_game_proto_init() {
 		(*ClientMessage_DeleteCharRequest)(nil),
 		(*ClientMessage_KillNpcRequest)(nil),
 		(*ClientMessage_UncoverRequest)(nil),
+		(*ClientMessage_JobGrantsRequest)(nil),
 	}
 	file_game_v1_game_proto_msgTypes[29].OneofWrappers = []any{
 		(*ServerEvent_RoomView)(nil),
@@ -15509,6 +15799,7 @@ func file_game_v1_game_proto_init() {
 		(*ServerEvent_Weather)(nil),
 		(*ServerEvent_LoadoutView)(nil),
 		(*ServerEvent_FixerView)(nil),
+		(*ServerEvent_JobGrantsResponse)(nil),
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -15516,7 +15807,7 @@ func file_game_v1_game_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_game_v1_game_proto_rawDesc), len(file_game_v1_game_proto_rawDesc)),
 			NumEnums:      4,
-			NumMessages:   198,
+			NumMessages:   202,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
