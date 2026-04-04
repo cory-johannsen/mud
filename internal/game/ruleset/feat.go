@@ -23,7 +23,8 @@ type Feat struct {
 	PF2E         string          `yaml:"pf2e"`
 	Active       bool            `yaml:"active"`
 	ActivateText string          `yaml:"activate_text"`
-	ConditionID  string          `yaml:"condition_id"` // optional; non-empty means Use applies this condition
+	ConditionID     string `yaml:"condition_id"`     // optional; non-empty means Use applies this condition
+	ConditionTarget string `yaml:"condition_target"` // "foe" = apply to combat target; "" or "self" = apply to self
 	Description  string          `yaml:"description"`
 	Choices      *FeatureChoices `yaml:"choices"`
 	// PreparedUses is the number of times per long rest this active feat may be activated.

@@ -2646,8 +2646,10 @@ feats:
     archetype: nerd
     pf2e: tamper
     active: true
-    activate_text: "You make a small, invisible adjustment."
-    description: "Sabotage a foe's weapon or armor; -2 to attack or AC until they clear it."
+    activate_text: "You make a small, invisible adjustment to their gear."
+    condition_id: tamper_debuff
+    condition_target: foe
+    description: "Sabotage a foe's weapon or armor; -2 to attack until cleared."
 
   - id: jury_rig
     name: Jury Rig

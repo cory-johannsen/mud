@@ -7406,18 +7406,62 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string) (*gamev1.
 					sess.ActiveFeatUses[f.ID] = remaining - 1
 				}
 				condID := f.ConditionID
-				if condID != "" && sess.Conditions != nil && s.condRegistry != nil {
-					if def, ok := s.condRegistry.Get(condID); ok {
-						if err := sess.Conditions.Apply(sess.UID, def, 1, -1); err != nil {
-							s.logger.Warn("failed to apply feat condition",
+				if condID != "" && s.condRegistry != nil {
+					if f.ConditionTarget == "foe" {
+						// Apply condition to the combat target (foe).
+						foeID := targetID
+						if foeID == "" {
+							foeID = sess.LastCombatTarget
+						}
+						if foeID == "" {
+							return messageEvent(fmt.Sprintf("You need a target to use %s.", f.Name)), nil
+						}
+						var cbt *combat.Combat
+						if s.combatH != nil {
+							cbt = s.combatH.ActiveCombatForPlayer(uid)
+						}
+						if cbt == nil {
+							return messageEvent(fmt.Sprintf("You must be in combat to use %s.", f.Name)), nil
+						}
+						var foe *combat.Combatant
+						for _, c := range cbt.Combatants {
+							if c.ID == foeID || strings.EqualFold(c.Name, foeID) {
+								foe = c
+								break
+							}
+						}
+						if foe == nil {
+							return messageEvent("Target not found in combat."), nil
+						}
+						if def, ok := s.condRegistry.Get(condID); ok {
+							if condSet := cbt.Conditions[foe.ID]; condSet != nil {
+								if err := condSet.Apply(foe.ID, def, 1, -1); err != nil {
+									s.logger.Warn("failed to apply feat condition to foe",
+										zap.String("foe_id", foe.ID),
+										zap.String("condition_id", condID),
+										zap.Error(err),
+									)
+								}
+							}
+						} else {
+							s.logger.Warn("feat foe condition not found in registry",
 								zap.String("condition_id", condID),
-								zap.Error(err),
 							)
 						}
-					} else {
-						s.logger.Warn("feat condition not found in registry",
-							zap.String("condition_id", condID),
-						)
+					} else if sess.Conditions != nil {
+						// Apply condition to self (default).
+						if def, ok := s.condRegistry.Get(condID); ok {
+							if err := sess.Conditions.Apply(sess.UID, def, 1, -1); err != nil {
+								s.logger.Warn("failed to apply feat condition",
+									zap.String("condition_id", condID),
+									zap.Error(err),
+								)
+							}
+						} else {
+							s.logger.Warn("feat condition not found in registry",
+								zap.String("condition_id", condID),
+							)
+						}
 					}
 				}
 				msg := f.ActivateText

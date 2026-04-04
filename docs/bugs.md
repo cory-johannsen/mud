@@ -1006,11 +1006,11 @@
 
 ### BUG-119: `use tamper` has no effect
 **Severity:** high
-**Status:** open
+**Status:** fixed
 **Category:** Combat
 **Description:** Activating the `tamper` technology via `use tamper` produces no output and applies no game effect.
 **Steps:** Play a character with the tamper technology; in combat or outside, run `use tamper`; observe no console feedback and no effect applied.
-**Fix:**
+**Fix:** Added ConditionTarget field to Feat struct ("foe" = apply to combat target). Created tamper_debuff condition (-2 attack penalty, encounter duration). Updated tamper feat with condition_id: tamper_debuff and condition_target: foe. Modified handleUse to route foe-targeted conditions to the enemy's combat condition set using LastCombatTarget.
 
 ### BUG-124: Web UI feat/ability hotbar activation shows no feedback
 **Severity:** high

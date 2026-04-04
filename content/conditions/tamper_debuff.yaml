@@ -1,0 +1,15 @@
+id: tamper_debuff
+name: Tampered
+description: |
+  This foe's weapon or armor has been sabotaged. -2 to attack rolls until the
+  tamper is cleared.
+duration_type: encounter
+max_stacks: 1
+attack_penalty: 2
+ac_penalty: 0
+damage_bonus: 0
+speed_penalty: 0
+restrict_actions: []
+lua_on_apply: ""
+lua_on_remove: ""
+lua_on_tick: ""
