@@ -44,6 +44,10 @@ type Combat struct {
 	// DamageDealt maps combatant UID → total damage dealt this combat.
 	// Initialized in StartCombat. Used for highest_damage_enemy target selection.
 	DamageDealt map[string]int
+	// GridWidth is the number of columns in the combat grid. Default: 10.
+	GridWidth int
+	// GridHeight is the number of rows in the combat grid. Default: 10.
+	GridHeight int
 }
 
 // RoundConditionEvent records a condition applied or removed during round startup.
@@ -419,6 +423,8 @@ func (e *Engine) StartCombat(roomID string, combatants []*Combatant, condRegistr
 		scriptMgr:    scriptMgr,
 		zoneID:       zoneID,
 	}
+	cbt.GridWidth = 10
+	cbt.GridHeight = 10
 	for _, c := range sorted {
 		set := condition.NewActiveSet()
 		if scriptMgr != nil {
