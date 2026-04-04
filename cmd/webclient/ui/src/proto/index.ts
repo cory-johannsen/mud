@@ -269,6 +269,7 @@ export interface InventoryItem {
   armor_category?: string
   effectsSummary?: string
   effects_summary?: string
+  throwable?: boolean
 }
 
 export interface InventoryView {
@@ -492,6 +493,14 @@ export interface LoadoutWeaponPreset {
 export interface LoadoutView {
   presets?: LoadoutWeaponPreset[]
   activeIndex?: number
+}
+
+export interface HotbarSlot {
+  kind: string        // "command" | "feat" | "technology" | "throwable" | "consumable"
+  ref: string         // command text or item/feat/tech ID
+  displayName?: string
+  display_name?: string
+  description?: string
 }
 
 export interface ConditionEvent {
