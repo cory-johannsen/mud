@@ -1,39 +1,70 @@
 // HotbarPanel renders the 10 hotbar slots (keys 1–9, 0) and executes the bound
-// command when a slot is clicked. Right-clicking or clicking an occupied slot
-// opens an inline edit popup to change or clear the slot's command.
+// command when a slot is clicked.
+// REQ-HCA-7: web slot displays display_name (not raw ref).
+// REQ-HCA-8: hover tooltip shows display_name + description for typed; raw ref for command.
 import { useEffect, useRef, useState } from 'react'
 import { useGame } from '../GameContext'
+import type { HotbarSlot } from '../../proto'
 
 const KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0']
 
-// Commands that require a target argument. When fired from the hotbar during
-// combat and no argument is present, the first NPC in turn order is appended.
 const COMBAT_TARGET_CMDS = new Set([
   'attack', 'att', 'kill',
   'strike', 'st',
   'burst', 'bf',
 ])
 
+function slotActivationCommand(slot: HotbarSlot): string {
+  if (!slot.ref) return ''
+  switch (slot.kind) {
+    case 'feat':
+    case 'technology':
+    case 'consumable':
+      return `use ${slot.ref}`
+    case 'throwable':
+      return `throw ${slot.ref}`
+    default: // 'command' or ''
+      return slot.ref
+  }
+}
+
+function slotDisplayLabel(slot: HotbarSlot): string {
+  return slot.displayName ?? slot.display_name ?? slot.ref ?? ''
+}
+
+function slotTooltip(slot: HotbarSlot): string {
+  if (!slot.ref) return 'empty'
+  if (slot.kind === 'command' || !slot.kind) {
+    return `${slot.ref} (right-click to edit)`
+  }
+  const name = slot.displayName ?? slot.display_name ?? slot.ref
+  const desc = slot.description ? `\n${slot.description}` : ''
+  return `${name}${desc}\n(right-click to edit)`
+}
+
 interface EditPopupProps {
-  slotIndex: number        // 0-based
-  currentText: string
+  slotIndex: number
+  slot: HotbarSlot
   onSave: (slot: number, text: string) => void
   onClear: (slot: number) => void
   onCancel: () => void
 }
 
-function EditPopup({ slotIndex, currentText, onSave, onClear, onCancel }: EditPopupProps) {
-  const [text, setText] = useState(currentText)
+function EditPopup({ slotIndex, slot, onSave, onClear, onCancel }: EditPopupProps) {
+  const isCommand = !slot.kind || slot.kind === 'command'
+  const [text, setText] = useState(isCommand ? (slot.ref ?? '') : '')
   const inputRef = useRef<HTMLInputElement>(null)
   const slotKey = KEYS[slotIndex]
 
   useEffect(() => {
-    inputRef.current?.focus()
-    inputRef.current?.select()
-  }, [])
+    if (isCommand) {
+      inputRef.current?.focus()
+      inputRef.current?.select()
+    }
+  }, [isCommand])
 
   function handleKeyDown(e: React.KeyboardEvent) {
-    if (e.key === 'Enter') {
+    if (e.key === 'Enter' && isCommand) {
       e.preventDefault()
       if (text.trim()) onSave(slotIndex + 1, text.trim())
     } else if (e.key === 'Escape') {
@@ -42,33 +73,40 @@ function EditPopup({ slotIndex, currentText, onSave, onClear, onCancel }: EditPo
     }
   }
 
+  const label = isCommand ? `Slot ${slotKey}` : `Slot ${slotKey}: ${slotDisplayLabel(slot)}`
+
   return (
     <div style={styles.popupOverlay} onClick={onCancel}>
       <div style={styles.popup} onClick={(e) => e.stopPropagation()}>
-        <div style={styles.popupTitle}>Slot {slotKey}</div>
-        <input
-          ref={inputRef}
-          style={styles.popupInput}
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder="command…"
-          spellCheck={false}
-        />
+        <div style={styles.popupTitle}>{label}</div>
+        {isCommand && (
+          <input
+            ref={inputRef}
+            style={styles.popupInput}
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="command…"
+            spellCheck={false}
+          />
+        )}
+        {!isCommand && (
+          <div style={{ color: '#888', fontSize: '0.78rem', fontFamily: 'monospace' }}>
+            {slot.description ?? 'Typed slot — use the Feats/Tech/Inventory drawer to reassign.'}
+          </div>
+        )}
         <div style={styles.popupButtons}>
-          <button
-            style={styles.saveBtn}
-            onClick={() => { if (text.trim()) onSave(slotIndex + 1, text.trim()) }}
-            disabled={!text.trim()}
-            type="button"
-          >
-            Save
-          </button>
-          <button
-            style={styles.clearBtn}
-            onClick={() => onClear(slotIndex + 1)}
-            type="button"
-          >
+          {isCommand && (
+            <button
+              style={styles.saveBtn}
+              onClick={() => { if (text.trim()) onSave(slotIndex + 1, text.trim()) }}
+              disabled={!text.trim()}
+              type="button"
+            >
+              Save
+            </button>
+          )}
+          <button style={styles.clearBtn} onClick={() => onClear(slotIndex + 1)} type="button">
             Clear
           </button>
           <button style={styles.cancelBtn} onClick={onCancel} type="button">
@@ -86,7 +124,10 @@ export function HotbarPanel() {
   const [editingSlot, setEditingSlot] = useState<number | null>(null)
 
   function activate(idx: number) {
-    let cmd = hotbarSlots[idx]
+    const slot = hotbarSlots[idx]
+    if (!slot?.ref) return
+
+    let cmd = slotActivationCommand(slot)
     if (!cmd) return
 
     // Auto-fill combat target when the command has no argument and we're in combat.
@@ -106,24 +147,13 @@ export function HotbarPanel() {
     sendCommand(cmd)
   }
 
-  function handleSlotClick(idx: number) {
-    const label = hotbarSlots[idx] ?? ''
-    if (label) {
-      // Occupied: open edit popup
-      setEditingSlot(idx)
-    } else {
-      // Empty: open edit popup to set a new command
-      setEditingSlot(idx)
-    }
-  }
-
   function handleSave(slot: number, text: string) {
     sendMessage('HotbarRequest', { action: 'set', slot, text })
     setEditingSlot(null)
   }
 
   function handleClear(slot: number) {
-    sendMessage('HotbarRequest', { action: 'clear', slot, text: '' })
+    sendMessage('HotbarRequest', { action: 'clear', slot })
     setEditingSlot(null)
   }
 
@@ -132,7 +162,7 @@ export function HotbarPanel() {
       {editingSlot !== null && (
         <EditPopup
           slotIndex={editingSlot}
-          currentText={hotbarSlots[editingSlot] ?? ''}
+          slot={hotbarSlots[editingSlot] ?? { kind: 'command', ref: '' }}
           onSave={handleSave}
           onClear={handleClear}
           onCancel={() => setEditingSlot(null)}
@@ -140,14 +170,16 @@ export function HotbarPanel() {
       )}
       <div className="hotbar">
         {KEYS.map((key, i) => {
-          const label = hotbarSlots[i] ?? ''
+          const slot = hotbarSlots[i] ?? { kind: 'command', ref: '' }
+          const label = slotDisplayLabel(slot)
+          const isEmpty = !slot.ref
           return (
             <button
               key={key}
-              className={`hotbar-slot${label ? '' : ' hotbar-slot-empty'}`}
+              className={`hotbar-slot${isEmpty ? ' hotbar-slot-empty' : ''}`}
               onClick={() => activate(i)}
-              onContextMenu={(e) => { e.preventDefault(); handleSlotClick(i) }}
-              title={label ? `${label} (right-click to edit)` : `Slot ${key} — empty (right-click to set)`}
+              onContextMenu={(e) => { e.preventDefault(); setEditingSlot(i) }}
+              title={slotTooltip(slot)}
               type="button"
             >
               <span className="hotbar-key">{key}</span>
@@ -182,12 +214,7 @@ const styles: Record<string, React.CSSProperties> = {
     gap: '0.5rem',
     fontFamily: 'monospace',
   },
-  popupTitle: {
-    color: '#7af',
-    fontSize: '0.75rem',
-    textTransform: 'uppercase',
-    letterSpacing: '0.08em',
-  },
+  popupTitle: { color: '#7af', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.08em' },
   popupInput: {
     background: '#111',
     border: '1px solid #555',
@@ -200,39 +227,8 @@ const styles: Record<string, React.CSSProperties> = {
     width: '100%',
     boxSizing: 'border-box' as const,
   },
-  popupButtons: {
-    display: 'flex',
-    gap: '0.4rem',
-  },
-  saveBtn: {
-    padding: '0.2rem 0.6rem',
-    background: '#1a2a1a',
-    border: '1px solid #4a6a2a',
-    color: '#8d4',
-    borderRadius: '3px',
-    cursor: 'pointer',
-    fontFamily: 'monospace',
-    fontSize: '0.78rem',
-  },
-  clearBtn: {
-    padding: '0.2rem 0.6rem',
-    background: '#2a1a1a',
-    border: '1px solid #5a2a2a',
-    color: '#c66',
-    borderRadius: '3px',
-    cursor: 'pointer',
-    fontFamily: 'monospace',
-    fontSize: '0.78rem',
-  },
-  cancelBtn: {
-    padding: '0.2rem 0.6rem',
-    background: 'none',
-    border: '1px solid #444',
-    color: '#666',
-    borderRadius: '3px',
-    cursor: 'pointer',
-    fontFamily: 'monospace',
-    fontSize: '0.78rem',
-    marginLeft: 'auto',
-  },
+  popupButtons: { display: 'flex', gap: '0.4rem' },
+  saveBtn: { padding: '0.2rem 0.6rem', background: '#1a2a1a', border: '1px solid #4a6a2a', color: '#8d4', borderRadius: '3px', cursor: 'pointer', fontFamily: 'monospace', fontSize: '0.78rem' },
+  clearBtn: { padding: '0.2rem 0.6rem', background: '#2a1a1a', border: '1px solid #5a2a2a', color: '#c66', borderRadius: '3px', cursor: 'pointer', fontFamily: 'monospace', fontSize: '0.78rem' },
+  cancelBtn: { padding: '0.2rem 0.6rem', background: 'none', border: '1px solid #444', color: '#666', borderRadius: '3px', cursor: 'pointer', fontFamily: 'monospace', fontSize: '0.78rem', marginLeft: 'auto' },
 }
