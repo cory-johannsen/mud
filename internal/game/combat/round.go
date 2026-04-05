@@ -205,7 +205,9 @@ type RoundEvent struct {
 	// CoverEquipmentID is the item ID of the cover equipment hit in an ActionCoverHit event.
 	// Empty for all other event types.
 	CoverEquipmentID string
-	Narrative        string
+	Narrative string
+	// Flanking is true when the attacker benefits from the flanking +2 bonus on this attack.
+	Flanking bool
 }
 
 // findCombatantByName returns the first Combatant in cbt whose Name matches name, or nil.
@@ -624,6 +626,27 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 
 				atkBonus := condition.AttackBonus(cbt.Conditions[actor.ID])
 				acBonus := condition.ACBonus(cbt.Conditions[target.ID])
+
+				// Flanking check: gather all living combatants on the attacker's side.
+				// Flanking only applies to melee attacks (attacker must be adjacent).
+				flanked := false
+				flankBonus := 0
+				flankNote := ""
+				if isMelee {
+					var alliesAndSelf []Combatant
+					alliesAndSelf = append(alliesAndSelf, *actor)
+					for _, c := range cbt.Combatants {
+						if c.Kind == actor.Kind && c.ID != actor.ID && !c.IsDead() {
+							alliesAndSelf = append(alliesAndSelf, *c)
+						}
+					}
+					flanked = IsFlanked(*target, alliesAndSelf)
+					if flanked {
+						flankBonus = 2
+						flankNote = " (flanking +2)"
+					}
+				}
+
 				var r AttackResult
 				if !isMelee {
 					// Ranged attack: compute range increments from combat distance.
@@ -638,6 +661,7 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 				r.AttackTotal += atkBonus
 				r.AttackTotal += acBonus
 				r.AttackTotal += actor.InitiativeBonus
+				r.AttackTotal += flankBonus
 				effectiveAC := target.AC + target.InitiativeBonus
 				r.AttackTotal = hookAttackRoll(cbt, actor, target, r.AttackTotal)
 				r.Outcome = OutcomeFor(r.AttackTotal, effectiveAC)
@@ -709,12 +733,14 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 				if len(rwAnnotations) > 0 {
 					narrative += " (" + strings.Join(rwAnnotations, "; ") + ")"
 				}
+				narrative += flankNote
 				events = append(events, RoundEvent{
 					AttackResult: &r,
 					ActionType:   ActionAttack,
 					ActorID:      actor.ID,
 					ActorName:    actor.Name,
 					Narrative:    narrative,
+					Flanking:     flanked,
 				})
 				// Consume one round of ammo for ranged attacks.
 				if !isMelee && actor.Loadout != nil {

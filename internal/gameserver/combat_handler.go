@@ -3869,6 +3869,7 @@ func (h *CombatHandler) roundEventToProto(re combat.RoundEvent) *gamev1.CombatEv
 		Outcome:     r.Outcome.String(),
 		Damage:      int32(dmg),
 		Narrative:   re.Narrative,
+		Flanking:    re.Flanking,
 	}
 
 	// Resolve target name and HP from managers.
