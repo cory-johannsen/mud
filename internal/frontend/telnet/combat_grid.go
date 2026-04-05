@@ -13,12 +13,11 @@ const combatGridHeight = 10
 
 // RenderCombatGrid renders a 10×10 ASCII combat grid for telnet display.
 // positions is a slice of combatant positions (name, X, Y).
-// legend maps combatant names to their role: "player", "ally", or "enemy".
 // width is the terminal width (minimum 30 used if smaller).
 //
-// Precondition: positions may be empty; legend may be nil.
+// Precondition: positions may be empty or nil.
 // Postcondition: Returns a multi-line string with border, grid, and legend.
-func RenderCombatGrid(positions []*gamev1.CombatantPosition, legend map[string]string, width int) string {
+func RenderCombatGrid(positions []*gamev1.CombatantPosition, width int) string {
 	if width < 30 {
 		width = 30
 	}

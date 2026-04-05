@@ -875,7 +875,7 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 						cw, _ := conn.Dimensions()
 						snap := combatHandler.SnapshotForRender()
 						gridPositions := combatHandler.GridPositions()
-						gridStr := telnet.RenderCombatGrid(gridPositions, nil, cw)
+						gridStr := telnet.RenderCombatGrid(gridPositions, cw)
 						if conn.IsSplitScreen() {
 							_ = conn.WriteRoom(RenderCombatScreen(snap, cw) + gridStr)
 						}
@@ -958,7 +958,7 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 				cw, _ := conn.Dimensions()
 				snap := combatHandler.SnapshotForRender()
 				gridPositions := combatHandler.GridPositions()
-				gridStr := telnet.RenderCombatGrid(gridPositions, nil, cw)
+				gridStr := telnet.RenderCombatGrid(gridPositions, cw)
 				if conn.IsSplitScreen() {
 					_ = conn.WriteRoom(RenderCombatScreen(snap, cw) + gridStr)
 					_ = conn.WritePromptSplit(combatHandler.Prompt())

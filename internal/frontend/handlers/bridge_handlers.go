@@ -896,10 +896,13 @@ func bridgeUse(bctx *bridgeContext) (bridgeResult, error) {
 	if len(parts) >= 2 {
 		target = parts[1]
 	}
+	// Note: TargetX and TargetY are not populated here. The telnet client has no
+	// AoE targeting UI, so feats with aoe_radius will silently fall back to the
+	// single-target path. AoE targeting is supported via the web client only.
 	return bridgeResult{msg: &gamev1.ClientMessage{
 		RequestId: bctx.reqID,
 		Payload: &gamev1.ClientMessage_UseRequest{
-			UseRequest: &gamev1.UseRequest{FeatId: featID, Target: target},
+			UseRequest: &gamev1.UseRequest{FeatId: featID, Target: target, TargetX: -1, TargetY: -1},
 		},
 	}}, nil
 }
