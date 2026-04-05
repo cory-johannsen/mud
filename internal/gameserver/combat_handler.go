@@ -1707,13 +1707,11 @@ func (h *CombatHandler) SetActiveCombatDistance(uid string, dist int) error {
 	if playerCbt == nil {
 		return fmt.Errorf("player %q is not a combatant", uid)
 	}
-	// Find nearest NPC grid position (default column 5, row 9).
+	// Find nearest NPC grid position (default column 5).
 	npcGridX := 5
-	npcGridY := 9
 	for _, c := range cbt.Combatants {
 		if c.Kind == combat.KindNPC {
 			npcGridX = c.GridX
-			npcGridY = c.GridY
 			break
 		}
 	}
@@ -1724,7 +1722,7 @@ func (h *CombatHandler) SetActiveCombatDistance(uid string, dist int) error {
 		newGridX = 0
 	}
 	playerCbt.GridX = newGridX
-	playerCbt.GridY = npcGridY
+	playerCbt.GridY = 0
 	return nil
 }
 
@@ -4587,8 +4585,15 @@ func (h *CombatHandler) ShoveNPC(uid, npcInstID string, pushFt int) error {
 	if pushCells < 1 {
 		pushCells = 1
 	}
+	width := 10
+	if cbt.GridWidth > 0 {
+		width = cbt.GridWidth
+	}
 	if npcCbt.GridX >= playerCbt.GridX {
 		npcCbt.GridX += pushCells
+		if npcCbt.GridX >= width {
+			npcCbt.GridX = width - 1
+		}
 	} else {
 		npcCbt.GridX -= pushCells
 		if npcCbt.GridX < 0 {

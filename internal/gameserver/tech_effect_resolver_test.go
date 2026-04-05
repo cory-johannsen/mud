@@ -123,14 +123,14 @@ func TestResolveTechEffects_REQ_TER8_HealIncreasesHP(t *testing.T) {
 	assert.Greater(t, sess.CurrentHP, 10, "HP should have increased")
 }
 
-// REQ-TER10: Movement effect — target.Position increases when direction is "away".
+// REQ-TER10: Movement effect — target.GridX increases by 1 when direction is "e" (east).
 func TestResolveTechEffects_REQ_TER10_MovementPushesTarget(t *testing.T) {
 	sess := &session.PlayerSession{UID: "p1"}
 	target := makeTarget("npc1", 30, 30, 1) // easy hit
-	target.Position = 25
+	target.GridX = 5                         // target at column 5
 	tech := makeAttackTech(
 		[]technology.TechEffect{
-			{Type: technology.EffectMovement, Distance: 5, Direction: "away"},
+			{Type: technology.EffectMovement, Distance: 5, Direction: "e"},
 		},
 		nil,
 	)
@@ -138,7 +138,7 @@ func TestResolveTechEffects_REQ_TER10_MovementPushesTarget(t *testing.T) {
 
 	ResolveTechEffects(sess, tech, []*combat.Combatant{target}, nil, nil, src, nil)
 
-	assert.Equal(t, 30, target.Position, "target pushed 5 ft away from 25 → 30")
+	assert.Equal(t, 6, target.GridX, "target pushed 1 cell east: GridX 5 → 6")
 }
 
 // REQ-TER11: Attack tech — no effects on miss.

@@ -106,12 +106,12 @@ func TestHandleStride_NotInCombat(t *testing.T) {
 	assert.Contains(t, errEvt.Message, "only available in combat")
 }
 
-// TestHandleStride_TowardIncreasesPosition verifies that striding toward increases the
-// player's Position by 25, moving them closer to the NPC (which starts at Position=25).
+// TestHandleStride_TowardDecreasesDist verifies that striding "toward" moves the player
+// one grid cell closer to the NPC (Chebyshev distance decreases by 5ft).
 //
-// Precondition: player in combat at Position=0 (distance=25 from NPC at 25); direction=="toward".
-// Postcondition: player.Position becomes 25; distance to NPC becomes 0.
-func TestHandleStride_TowardIncreasesPosition(t *testing.T) {
+// Precondition: player at GridX=0, GridY=0; NPC at GridX=5, GridY=9 (default spawn); direction=="toward".
+// Postcondition: player.GridX==1 and player.GridY==1; Chebyshev distance decreases from 45ft to 40ft.
+func TestHandleStride_TowardDecreasesDist(t *testing.T) {
 	svc, sessMgr, npcMgr, combatHandler := newStrideSvcWithCombat(t)
 
 	const roomID = "room_str_tr"
@@ -134,10 +134,9 @@ func TestHandleStride_TowardIncreasesPosition(t *testing.T) {
 	cbt, ok := combatHandler.GetCombatForRoom(roomID)
 	require.True(t, ok)
 
-	// Player starts at Position=0, NPC at Position=50.
+	// Default spawn: player (0,0), NPC (5,9). Chebyshev dist = max(5,9)*5 = 45ft.
 	playerCbt := cbt.GetCombatant("u_str_tr")
 	require.NotNil(t, playerCbt)
-	playerCbt.Position = 0
 
 	event, err := svc.handleStride("u_str_tr", &gamev1.StrideRequest{Direction: "toward"})
 	require.NoError(t, err)
@@ -146,16 +145,17 @@ func TestHandleStride_TowardIncreasesPosition(t *testing.T) {
 	require.NotNil(t, msgEvt, "expected a message event")
 	assert.Contains(t, msgEvt.Content, "toward")
 
-	assert.Equal(t, 25, playerCbt.Position, "player.Position should be 25 after striding toward")
+	// towardDelta(0,0,5,9) = (1,1): player should be at (1,1).
+	assert.Equal(t, 1, playerCbt.GridX, "player.GridX should be 1 after striding toward")
+	assert.Equal(t, 1, playerCbt.GridY, "player.GridY should be 1 after striding toward")
 }
 
-// TestHandleStride_PlayerAheadOfEnemy_DecreasesPosition verifies that when the
-// player is ahead of (at a higher position than) the NPC, stride moves the player
-// toward the enemy by decreasing Position by 25.
+// TestHandleStride_TowardFromAnyPosition_DecreasesDist verifies that stride "toward"
+// decreases Chebyshev distance regardless of the player's starting position.
 //
-// Precondition: player at Position=75, NPC at Position=50 (player ahead); direction ignored.
-// Postcondition: player.Position becomes 50.
-func TestHandleStride_PlayerAheadOfEnemy_DecreasesPosition(t *testing.T) {
+// Precondition: player at GridX=5, GridY=5; NPC at GridX=0, GridY=0; direction=="toward".
+// Postcondition: player.GridX==4 and player.GridY==4; distance decreases from 25ft to 20ft.
+func TestHandleStride_TowardFromAnyPosition_DecreasesDist(t *testing.T) {
 	svc, sessMgr, npcMgr, combatHandler := newStrideSvcWithCombat(t)
 
 	const roomID = "room_str_ai"
@@ -180,8 +180,16 @@ func TestHandleStride_PlayerAheadOfEnemy_DecreasesPosition(t *testing.T) {
 
 	playerCbt := cbt.GetCombatant("u_str_ai")
 	require.NotNil(t, playerCbt)
-	// Place player at 75, NPC stays at default 50 — player is ahead of enemy.
-	playerCbt.Position = 75
+	// Place player at (5,5); override NPC to (0,0).
+	playerCbt.GridX = 5
+	playerCbt.GridY = 5
+	for _, c := range cbt.Combatants {
+		if c.Kind == combat.KindNPC {
+			c.GridX = 0
+			c.GridY = 0
+			break
+		}
+	}
 
 	event, err := svc.handleStride("u_str_ai", &gamev1.StrideRequest{Direction: "toward"})
 	require.NoError(t, err)
@@ -190,15 +198,17 @@ func TestHandleStride_PlayerAheadOfEnemy_DecreasesPosition(t *testing.T) {
 	require.NotNil(t, msgEvt, "expected a message event")
 	assert.Contains(t, msgEvt.Content, "toward")
 
-	assert.Equal(t, 50, playerCbt.Position, "player.Position should be 50 after striding toward enemy from 75")
+	// towardDelta(5,5,0,0) = (-1,-1): player should be at (4,4).
+	assert.Equal(t, 4, playerCbt.GridX, "player.GridX should be 4 after striding toward enemy from 5")
+	assert.Equal(t, 4, playerCbt.GridY, "player.GridY should be 4 after striding toward enemy from 5")
 }
 
-// TestHandleStride_FlooredAtZero verifies that stride does not reduce Position
-// below zero when the player is ahead of the enemy by less than 25 ft.
+// TestHandleStride_AwayAtBoundary_GridClampApplied verifies that stride "away" at the
+// grid boundary does not move the player off the grid (coordinates clamped to 0).
 //
-// Precondition: player at Position=10, NPC at Position=0 (player ahead by 10 ft).
-// Postcondition: player.Position is floored at 0 (10-25 would be negative).
-func TestHandleStride_FlooredAtZero(t *testing.T) {
+// Precondition: player at GridX=0, GridY=0 (grid corner); NPC at GridX=5, GridY=9; direction=="away".
+// Postcondition: player remains at GridX=0, GridY=0 (clamped from (-1,-1)).
+func TestHandleStride_AwayAtBoundary_GridClampApplied(t *testing.T) {
 	svc, sessMgr, npcMgr, combatHandler := newStrideSvcWithCombat(t)
 
 	const roomID = "room_str_cm"
@@ -223,28 +233,23 @@ func TestHandleStride_FlooredAtZero(t *testing.T) {
 
 	playerCbt := cbt.GetCombatant("u_str_cm")
 	require.NotNil(t, playerCbt)
-	// Place player at 10, NPC at 0 — player is ahead by only 10 ft (< 25), so floor fires.
-	playerCbt.Position = 10
-	for _, c := range cbt.Combatants {
-		if c.Kind == combat.KindNPC {
-			c.Position = 0
-			break
-		}
-	}
+	// Player already at (0,0) by default. NPC at (5,9) by default.
+	// away = -towardDelta(0,0,5,9) = -(1,1) = (-1,-1) → clamped to (0,0).
 
-	event, err := svc.handleStride("u_str_cm", &gamev1.StrideRequest{Direction: "toward"})
+	event, err := svc.handleStride("u_str_cm", &gamev1.StrideRequest{Direction: "away"})
 	require.NoError(t, err)
 	require.NotNil(t, event)
 	msgEvt := event.GetMessage()
 	require.NotNil(t, msgEvt, "expected a message event")
 
-	assert.Equal(t, 0, playerCbt.Position, "player.Position should be floored at 0 when ahead by < 25 ft")
+	assert.Equal(t, 0, playerCbt.GridX, "player.GridX should be clamped at 0 when striding away from grid boundary")
+	assert.Equal(t, 0, playerCbt.GridY, "player.GridY should be clamped at 0 when striding away from grid boundary")
 }
 
 // TestHandleStride_DefaultDirectionIsToward verifies that an empty direction defaults to toward.
 //
-// Precondition: player at Position=0; direction=="".
-// Postcondition: player.Position becomes 25.
+// Precondition: player at GridX=0, GridY=0; NPC at GridX=5, GridY=9; direction=="".
+// Postcondition: player.GridX==1 and player.GridY==1 (same as explicit "toward").
 func TestHandleStride_DefaultDirectionIsToward(t *testing.T) {
 	svc, sessMgr, npcMgr, combatHandler := newStrideSvcWithCombat(t)
 
@@ -270,7 +275,7 @@ func TestHandleStride_DefaultDirectionIsToward(t *testing.T) {
 
 	playerCbt := cbt.GetCombatant("u_str_cx")
 	require.NotNil(t, playerCbt)
-	playerCbt.Position = 0
+	// Default spawn: player (0,0), NPC (5,9).
 
 	event, err := svc.handleStride("u_str_cx", &gamev1.StrideRequest{Direction: ""})
 	require.NoError(t, err)
@@ -278,7 +283,9 @@ func TestHandleStride_DefaultDirectionIsToward(t *testing.T) {
 	msgEvt := event.GetMessage()
 	require.NotNil(t, msgEvt, "expected a message event")
 
-	assert.Equal(t, 25, playerCbt.Position, "empty direction should default to toward, increasing Position by 25")
+	// towardDelta(0,0,5,9) = (1,1): same as explicit "toward".
+	assert.Equal(t, 1, playerCbt.GridX, "empty direction should default to toward, GridX becomes 1")
+	assert.Equal(t, 1, playerCbt.GridY, "empty direction should default to toward, GridY becomes 1")
 }
 
 // newStrideSvcWithCombatAndRegistry builds a GameServiceServer and associated helpers with
@@ -319,10 +326,11 @@ func newStrideSvcWithCombatAndRegistry(t *testing.T, reg *inventory.Registry) (*
 	return svc, sessMgr, npcMgr, combatHandler
 }
 
-// TestNPCAutoStride_MeleeNPC_ClosesDistance verifies that a melee NPC at distance > 5
+// TestNPCAutoStride_MeleeNPC_ClosesDistance verifies that a melee NPC at distance > 5ft
 // has ActionStride{Direction:"toward"} prepended before ActionAttack in its queue.
 //
-// Precondition: NPC has no WeaponID (unarmed/melee); player at Position=0, NPC at Position=25.
+// Precondition: NPC has no WeaponID (unarmed/melee); player at GridX=0,GridY=0; NPC at GridX=2,GridY=0
+// (Chebyshev dist=10ft > 5ft).
 // Postcondition: NPC action queue contains ActionStride as first action.
 func TestNPCAutoStride_MeleeNPC_ClosesDistance(t *testing.T) {
 	_, sessMgr, npcMgr, combatHandler := newStrideSvcWithCombatAndRegistry(t, nil)
@@ -347,13 +355,15 @@ func TestNPCAutoStride_MeleeNPC_ClosesDistance(t *testing.T) {
 	combatHandler.combatMu.Lock()
 	cbt, ok := combatHandler.engine.GetCombat(roomID)
 	require.True(t, ok)
-	// Player at Position=0, NPC at Position=25 → distance=25 > 5 → NPC should stride.
+	// Player at (0,0), NPC at (2,0): Chebyshev dist = max(2,0)*5 = 10ft > 5ft → NPC should stride.
 	playerCbt := cbt.GetCombatant("u_npc_melee_stride")
 	require.NotNil(t, playerCbt)
-	playerCbt.Position = 0
+	playerCbt.GridX = 0
+	playerCbt.GridY = 0
 	npcCbt := cbt.GetCombatant(inst.ID)
 	require.NotNil(t, npcCbt)
-	npcCbt.Position = 25
+	npcCbt.GridX = 2
+	npcCbt.GridY = 0
 	// Reset queues so autoQueueNPCsLocked populates from a clean state.
 	cbt.StartRound(3)
 	combatHandler.autoQueueNPCsLocked(cbt)
@@ -369,9 +379,10 @@ func TestNPCAutoStride_MeleeNPC_ClosesDistance(t *testing.T) {
 }
 
 // TestNPCAutoStride_RangedNPC_DoesNotStride verifies that an NPC equipped with a
-// ranged weapon does NOT queue ActionStride even when distance > 5.
+// ranged weapon does NOT queue ActionStride even when distance > 5ft.
 //
-// Precondition: NPC WeaponID references a WeaponDef with RangeIncrement > 0; distance == 25.
+// Precondition: NPC WeaponID references a WeaponDef with RangeIncrement > 0; player at (0,0), NPC at (2,0)
+// (Chebyshev dist=10ft > 5ft).
 // Postcondition: NPC action queue starts directly with ActionAttack (no ActionStride).
 func TestNPCAutoStride_RangedNPC_DoesNotStride(t *testing.T) {
 	reg := inventory.NewRegistry()
@@ -406,12 +417,15 @@ func TestNPCAutoStride_RangedNPC_DoesNotStride(t *testing.T) {
 	combatHandler.combatMu.Lock()
 	cbt, ok := combatHandler.engine.GetCombat(roomID)
 	require.True(t, ok)
+	// Player at (0,0), NPC at (2,0): dist=10ft > 5ft. Ranged NPC should NOT stride.
 	playerCbt := cbt.GetCombatant("u_npc_ranged_stride")
 	require.NotNil(t, playerCbt)
-	playerCbt.Position = 0
+	playerCbt.GridX = 0
+	playerCbt.GridY = 0
 	npcCbt := cbt.GetCombatant(inst.ID)
 	require.NotNil(t, npcCbt)
-	npcCbt.Position = 25
+	npcCbt.GridX = 2
+	npcCbt.GridY = 0
 	cbt.StartRound(3)
 	combatHandler.autoQueueNPCsLocked(cbt)
 	q := cbt.ActionQueues[inst.ID]
@@ -424,11 +438,11 @@ func TestNPCAutoStride_RangedNPC_DoesNotStride(t *testing.T) {
 }
 
 // TestHandleStride_ReactiveStrike verifies that when a player strides away from an
-// adjacent NPC (within 5ft before the stride), the response message includes a
-// reactive strike narrative from that NPC.
+// adjacent NPC (Chebyshev dist ≤ 5ft before stride, > 5ft after), the response message
+// includes a reactive strike narrative from that NPC.
 //
-// Precondition: player in combat at Position=5 (adjacent to NPC at Position=0); direction=="away".
-// Postcondition: response message contains "reactive strike".
+// Precondition: player at GridX=1,GridY=0; NPC at GridX=0,GridY=0 (dist=5ft, adjacent); direction=="away".
+// Postcondition: player moves to GridX=2; response message contains "reactive strike".
 func TestHandleStride_ReactiveStrike(t *testing.T) {
 	svc, sessMgr, npcMgr, combatHandler := newStrideSvcWithCombat(t)
 
@@ -452,21 +466,22 @@ func TestHandleStride_ReactiveStrike(t *testing.T) {
 	cbt, ok := combatHandler.GetCombatForRoom(roomID)
 	require.True(t, ok)
 
-	// Place player at Position=30, NPC at Position=25 (dist=5 ≤ 5 → adjacent).
-	// handleStride "away" decreases Position by 25: 30-25=5. New dist = |5-25| = 20 > 5 → RS fires.
+	// Place player at (1,0), NPC at (0,0): Chebyshev dist = max(1,0)*5 = 5ft (adjacent).
+	// Stride "away": towardDelta(1,0,0,0) = (-1,0); away = (1,0).
+	// Player moves from (1,0) to (2,0). New dist = max(2,0)*5 = 10ft > 5ft → RS fires.
 	playerCbt := cbt.GetCombatant("u_str_rs")
 	require.NotNil(t, playerCbt)
-	playerCbt.Position = 30
+	playerCbt.GridX = 1
+	playerCbt.GridY = 0
 
-	// Place NPC at Position=25 (adjacent: dist = |30-25| = 5 ≤ 5).
 	for _, c := range cbt.Combatants {
 		if c.Kind == combat.KindNPC {
-			c.Position = 25
+			c.GridX = 0
+			c.GridY = 0
 			break
 		}
 	}
 
-	// Stride away: player moves from 30 to 5. Old dist=5, new dist=20 → RS fires.
 	event, err := svc.handleStride("u_str_rs", &gamev1.StrideRequest{Direction: "away"})
 	require.NoError(t, err)
 	require.NotNil(t, event)

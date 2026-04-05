@@ -160,12 +160,13 @@ func TestCombatantsInRoom_ReturnsCopy(t *testing.T) {
 	assert.Equal(t, original, second[0], "internal combat state must be unchanged after copy mutation")
 }
 
-// TestCombatantPosition_NPCStartsAt50 verifies that an NPC combatant is initialized at
-// position 50 (the default NPC starting position per the combat rules).
+// TestCombatantPosition_NPCStartsAt25 verifies that an NPC combatant is initialized at
+// GridX=5 (25ft from left edge), which is the default NPC starting column on the 2D grid.
+// CombatantPosition returns GridX*5, so the expected value is 25.
 //
 // Precondition: Combat started with one player and one NPC.
-// Postcondition: CombatantPosition returns 50 for the NPC combatant.
-func TestCombatantPosition_NPCStartsAt50(t *testing.T) {
+// Postcondition: CombatantPosition returns 25 (GridX=5 × 5ft/cell) for the NPC combatant.
+func TestCombatantPosition_NPCStartsAt25(t *testing.T) {
 	npcMgr := npc.NewManager()
 	sessMgr := session.NewManager()
 	h := makeHandlerWithManagers(t, npcMgr, sessMgr)
@@ -183,5 +184,6 @@ func TestCombatantPosition_NPCStartsAt50(t *testing.T) {
 		}
 	}
 	require.NotNil(t, npcCombatant, "NPC combatant must be present")
-	assert.Equal(t, 50, h.CombatantPosition("room_npc50", npcCombatant.ID))
+	// NPC spawns at GridX=5; CombatantPosition returns GridX*5 = 25.
+	assert.Equal(t, 25, h.CombatantPosition("room_npc50", npcCombatant.ID))
 }

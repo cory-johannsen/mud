@@ -9081,7 +9081,7 @@ func (s *GameServiceServer) handleDisarm(uid string, req *gamev1.DisarmRequest) 
 // Combat only; costs 1 AP.
 //
 // Precondition: uid must be in active combat; req.Target must name an NPC in the room.
-// Postcondition: On success, NPC combatant's Position is updated by 5ft (or 10ft on crit).
+// Postcondition: On success, NPC combatant's GridX is updated by 1 cell (5ft) or 2 cells (10ft on crit).
 func (s *GameServiceServer) handleShove(uid string, req *gamev1.ShoveRequest) (*gamev1.ServerEvent, error) {
 	sess, ok := s.sessions.GetPlayer(uid)
 	if !ok {
@@ -9341,7 +9341,7 @@ func (s *GameServiceServer) handleStep(uid string, req *gamev1.StepRequest) (*ga
 // Combat only; costs 1 AP.
 //
 // Precondition: uid must be in active combat; req.Target must name an NPC in the room.
-// Postcondition: On success, player combatant's Position increases by 5.
+// Postcondition: On success, player combatant's GridX/GridY updated by CompassDelta (1 cell toward target).
 // On failure, NPC makes a reactive strike that may reduce player HP; no position change.
 func (s *GameServiceServer) handleTumble(uid string, req *gamev1.TumbleRequest) (*gamev1.ServerEvent, error) {
 	sess, ok := s.sessions.GetPlayer(uid)
