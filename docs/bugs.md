@@ -1019,3 +1019,11 @@
 **Description:** Clicking a hotbar slot assigned to a feat or ability in the web client shows no visible feedback even though the feat is activated server-side.
 **Steps:** Add an active feat to a hotbar slot via the Feats drawer; click the hotbar slot; observe no message or effect in the console feed.
 **Fix:** `UseResponse` was missing from `serverEventInner` in `cmd/webclient/handlers/websocket.go`, causing the server's activation feedback to be silently dropped. Added `case *gamev1.ServerEvent_UseResponse:` returning `(p.UseResponse, "UseResponse")`. Added `case 'UseResponse':` handler in `GameContext.tsx` that appends the message to the feed (or lists available abilities when `choices` is populated).
+
+### BUG-125: Stale closure in GameContext.tsx ws.onmessage prevents player HP updates from CombatEvents
+**Severity:** medium
+**Status:** open
+**Category:** UI
+**Description:** The `ws.onmessage` handler in `connect` (useCallback with deps `[navigate]`) captures `state` at creation time. When a `CombatEvent` arrives with `ce.target == player name`, the `state.characterInfo?.name` check always fails because `state` is the initial null value, so `UPDATE_PLAYER_HP` is never dispatched.
+**Steps:** Enter combat; take damage from an NPC attack targeting your character; observe that HP in the UI does not update from combat events (only from explicit CharacterSheet refreshes).
+**Fix:** Move the player-name comparison to the reducer where `state` is always current, or use a ref for `characterInfo.name` that is updated outside the stale closure.
