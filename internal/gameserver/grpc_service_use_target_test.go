@@ -47,7 +47,7 @@ func TestHandleUse_REQ_TER15_OutOfCombatNoTarget_PromptForTarget(t *testing.T) {
 	}
 
 	// No targetID — svc.combatH is nil so player is "not in combat".
-	evt, err := svc.handleUse(uid, "neural_spike", "")
+	evt, err := svc.handleUse(uid, "neural_spike", "", 0, 0)
 	require.NoError(t, err)
 	require.NotNil(t, evt)
 
@@ -84,7 +84,7 @@ func TestHandleUse_REQ_TER16_OutOfCombatWithTarget_NotInCombatMessage(t *testing
 		"neural_spike": {MaxUses: 3, UsesRemaining: 3},
 	}
 
-	evt, err := svc.handleUse(uid, "neural_spike", "ganger")
+	evt, err := svc.handleUse(uid, "neural_spike", "ganger", 0, 0)
 	require.NoError(t, err)
 	require.NotNil(t, evt)
 
@@ -149,7 +149,7 @@ func TestHandleUse_REQ_TER17_SelfTargetingHeal_OutOfCombat(t *testing.T) {
 			"nano_repair": {MaxUses: 5, UsesRemaining: 5},
 		}
 
-		evt, err := svc.handleUse(uid, "nano_repair", "")
+		evt, err := svc.handleUse(uid, "nano_repair", "", 0, 0)
 		if err != nil {
 			rt.Fatalf("unexpected error: %v", err)
 		}

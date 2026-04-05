@@ -117,7 +117,7 @@ func TestTamper_AppliesConditionToFoeInCombat(t *testing.T) {
 	assert.False(t, cbt.Conditions[npcCombatantID].Has(condID), "tamper_debuff should not be on foe before use")
 
 	// Use tamper (target resolves from LastCombatTarget set during Attack).
-	resp, err := svc.handleUse(uid, featID, "")
+	resp, err := svc.handleUse(uid, featID, "", 0, 0)
 	require.NoError(t, err)
 	require.NotNil(t, resp)
 
@@ -179,7 +179,7 @@ func TestTamper_OutOfCombat_ReturnsError(t *testing.T) {
 	sess.Conditions = condition.NewActiveSet()
 	// No combat, no last target.
 
-	resp, err := svc.handleUse(uid, featID, "")
+	resp, err := svc.handleUse(uid, featID, "", 0, 0)
 	require.NoError(t, err)
 	require.NotNil(t, resp)
 

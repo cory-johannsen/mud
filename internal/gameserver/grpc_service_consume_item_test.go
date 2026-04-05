@@ -85,7 +85,7 @@ func TestHandleUse_PlainConsumable_ConsumesItemAndReturnsMessage(t *testing.T) {
 	require.Len(t, initialInstances, 1, "setup: one stacked instance in backpack")
 	require.Equal(t, 2, initialInstances[0].Quantity, "setup: 2 items in backpack")
 
-	event, err := svc.handleUse("u_consume_plain", "canadian_bacon", "")
+	event, err := svc.handleUse("u_consume_plain", "canadian_bacon", "", 0, 0)
 	require.NoError(t, err)
 	require.NotNil(t, event)
 
@@ -116,7 +116,7 @@ func TestHandleUse_PlainConsumable_LastItem_EmptiesSlot(t *testing.T) {
 
 	sess := addPlayerWithBackpack(t, sessMgr, "u_consume_last", item, 1, reg)
 
-	event, err := svc.handleUse("u_consume_last", "fresh_produce", "")
+	event, err := svc.handleUse("u_consume_last", "fresh_produce", "", 0, 0)
 	require.NoError(t, err)
 	require.NotNil(t, event)
 	require.NotNil(t, event.GetMessage())
@@ -143,7 +143,7 @@ func TestProperty_PlainConsumable_NeverReturnsPreparedTechError(t *testing.T) {
 		uid := "u_prop_consume"
 		addPlayerWithBackpack(t, sessMgr, uid, item, qty, reg)
 
-		event, err := svc.handleUse(uid, "prop_food", "")
+		event, err := svc.handleUse(uid, "prop_food", "", 0, 0)
 		if err != nil {
 			rt.Errorf("handleUse returned error: %v", err)
 			return

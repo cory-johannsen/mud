@@ -107,7 +107,7 @@ func TestHandleUse_FeatMatchFirst_EquipmentNotCalled(t *testing.T) {
 	svc := buildUseFallthroughService(t, sessMgr, feat, mgr)
 	addPlayerForFallthroughTest(t, sessMgr, "u_feat_first")
 
-	evt, err := svc.handleUse("u_feat_first", "push", "")
+	evt, err := svc.handleUse("u_feat_first", "push", "", 0, 0)
 	require.NoError(t, err)
 	require.NotNil(t, evt)
 
@@ -133,7 +133,7 @@ func TestHandleUse_NoFeatMatch_FallsThruToEquipment(t *testing.T) {
 	svc := buildUseFallthroughService(t, sessMgr, nil, mgr)
 	addPlayerForFallthroughTest(t, sessMgr, "u_fallthrough")
 
-	evt, err := svc.handleUse("u_fallthrough", "console", "")
+	evt, err := svc.handleUse("u_fallthrough", "console", "", 0, 0)
 	require.NoError(t, err)
 	require.NotNil(t, evt)
 
@@ -158,7 +158,7 @@ func TestHandleUse_NeitherMatch_ReturnsError(t *testing.T) {
 	svc := buildUseFallthroughService(t, sessMgr, nil, mgr)
 	addPlayerForFallthroughTest(t, sessMgr, "u_neither")
 
-	evt, err := svc.handleUse("u_neither", "mystery", "")
+	evt, err := svc.handleUse("u_neither", "mystery", "", 0, 0)
 	require.NoError(t, err)
 	require.NotNil(t, evt)
 

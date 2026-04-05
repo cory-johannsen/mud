@@ -426,7 +426,7 @@ func TestHandleUse_InnateReactionTech_HasIsReactionTrue(t *testing.T) {
 	}
 
 	// handleUse(uid, abilityID, targetID) — empty abilityID triggers the no-arg list mode.
-	event, err := svc.handleUse("u_use_react", "", "")
+	event, err := svc.handleUse("u_use_react", "", "", 0, 0)
 	require.NoError(t, err)
 	require.NotNil(t, event)
 

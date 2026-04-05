@@ -108,7 +108,7 @@ func TestBrutalSurge_AppliesConditionToCombatSet(t *testing.T) {
 	assert.False(t, cbt.Conditions[uid].Has(condID), "condition should not be present before use")
 
 	// Use brutal_surge.
-	resp, err := svc.handleUse(uid, featureID, "")
+	resp, err := svc.handleUse(uid, featureID, "", 0, 0)
 	require.NoError(t, err)
 	require.NotNil(t, resp)
 
@@ -175,7 +175,7 @@ func TestBrutalSurge_OutOfCombat_FallsBackToSessionConditions(t *testing.T) {
 	sess.Conditions = condition.NewActiveSet()
 	// Not in combat — Status remains default.
 
-	resp, err := svc.handleUse(uid, featureID, "")
+	resp, err := svc.handleUse(uid, featureID, "", 0, 0)
 	require.NoError(t, err)
 	require.NotNil(t, resp)
 

@@ -41,6 +41,10 @@ type Feat struct {
 	TargetTags []string `yaml:"target_tags"`
 	// GrantsFocusPoint when true means this feat grants one Focus Point slot to the character's pool.
 	GrantsFocusPoint bool `yaml:"grants_focus_point,omitempty"`
+	// AoeRadius is the radius in feet of an area-of-effect burst centered on the target grid square.
+	// 0 means single-target (default). When > 0 and UseRequest.target_x/target_y are non-zero,
+	// the feat's condition effect is applied to every combatant within Chebyshev distance AoeRadius.
+	AoeRadius int `yaml:"aoe_radius,omitempty"`
 }
 
 // featsFile is the top-level YAML structure for content/feats.yaml.

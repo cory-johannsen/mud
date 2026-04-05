@@ -145,7 +145,7 @@ func TestHandleUse_SpontaneousActivation_REQ_SUC1(t *testing.T) {
 		map[int]session.UsePool{1: {Remaining: 2, Max: 3}},
 	)
 
-	evt, err := svc.handleUse("u_spont_1", "mind_spike", "")
+	evt, err := svc.handleUse("u_spont_1", "mind_spike", "", 0, 0)
 	require.NoError(t, err)
 	require.NotNil(t, evt)
 
@@ -167,7 +167,7 @@ func TestHandleUse_SpontaneousNoUsesRemaining_REQ_SUC2(t *testing.T) {
 		map[int]session.UsePool{1: {Remaining: 0, Max: 3}},
 	)
 
-	evt, err := svc.handleUse("u_spont_2", "mind_spike", "")
+	evt, err := svc.handleUse("u_spont_2", "mind_spike", "", 0, 0)
 	require.NoError(t, err)
 	require.NotNil(t, evt)
 
@@ -188,7 +188,7 @@ func TestHandleUse_SpontaneousUnknownTech_REQ_SUC3(t *testing.T) {
 		map[int]session.UsePool{1: {Remaining: 2, Max: 3}},
 	)
 
-	evt, err := svc.handleUse("u_spont_3", "unknown_tech", "")
+	evt, err := svc.handleUse("u_spont_3", "unknown_tech", "", 0, 0)
 	require.NoError(t, err)
 	require.NotNil(t, evt)
 
@@ -209,7 +209,7 @@ func TestHandleUse_ListMode_IncludesSpontaneous_REQ_SUC4(t *testing.T) {
 		map[int]session.UsePool{1: {Remaining: 2, Max: 3}},
 	)
 
-	evt, err := svc.handleUse("u_spont_4", "", "")
+	evt, err := svc.handleUse("u_spont_4", "", "", 0, 0)
 	require.NoError(t, err)
 	require.NotNil(t, evt)
 
@@ -277,7 +277,7 @@ func TestHandleUse_SpontaneousProperty_REQ_SUC7(t *testing.T) {
 		)
 
 		for i := 0; i < n; i++ {
-			evt, err := svc.handleUse(uid, "mind_spike", "")
+			evt, err := svc.handleUse(uid, "mind_spike", "", 0, 0)
 			require.NoError(rt, err)
 			require.NotNil(rt, evt)
 			msg := evt.GetMessage().GetContent()
@@ -286,7 +286,7 @@ func TestHandleUse_SpontaneousProperty_REQ_SUC7(t *testing.T) {
 
 		assert.Equal(rt, 0, sess.SpontaneousUsePools[1].Remaining)
 
-		evt, err := svc.handleUse(uid, "mind_spike", "")
+		evt, err := svc.handleUse(uid, "mind_spike", "", 0, 0)
 		require.NoError(rt, err)
 		require.NotNil(rt, evt)
 		assert.Equal(rt, "No level 1 uses remaining.", evt.GetMessage().GetContent())
