@@ -987,8 +987,8 @@ message InteractResponse {
 message UseRequest {
   string feat_id  = 1;
   string target   = 2;
-  int32  target_x = 3; // 0-based grid column (0–9); ignored unless feat has aoe_radius > 0
-  int32  target_y = 4; // 0-based grid row (0–9); ignored unless feat has aoe_radius > 0
+  int32  target_x = 3; // 0-based grid column (0–9); -1 means unset / no AoE; ignored unless feat has aoe_radius > 0
+  int32  target_y = 4; // 0-based grid row (0–9); -1 means unset / no AoE; ignored unless feat has aoe_radius > 0
 }
 
 // UseResponse carries the result of a feat activation or a list of active feats.

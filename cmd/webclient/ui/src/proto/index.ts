@@ -556,8 +556,8 @@ export interface UseRequest {
   itemRef?: string
   targetName?: string
   target_name?: string
-  target_x?: number
-  target_y?: number
+  target_x?: number // 0-based grid column; -1 (or omit) means unset / no AoE
+  target_y?: number // 0-based grid row; -1 (or omit) means unset / no AoE
 }
 
 export type ServerEvent =

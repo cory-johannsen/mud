@@ -7289,7 +7289,7 @@ func (s *GameServiceServer) handleTabComplete(uid, prefix string) (*gamev1.Serve
 //
 // Precondition: uid must resolve to an active session with a loaded character.
 // Postcondition: Returns a ServerEvent with UseResponse containing choices or an activation message.
-// targetX and targetY are the 0-based grid coordinates of the AoE burst center; both zero means no AoE override.
+// targetX and targetY are the 0-based grid coordinates of the AoE burst center; -1 means unset / no AoE.
 func (s *GameServiceServer) handleUse(uid, abilityID, targetID string, targetX, targetY int32) (*gamev1.ServerEvent, error) {
 	sess, ok := s.sessions.GetPlayer(uid)
 	if !ok {
@@ -7525,7 +7525,8 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string, targetX, 
 					// REQ-AOE-2: When feat has aoe_radius > 0 and target coordinates are provided,
 					// apply the condition to every living combatant within Chebyshev distance aoe_radius.
 					// REQ-2D-5e: AoE does not distinguish friend from foe — all combatants in radius are affected.
-					if f.AoeRadius > 0 && (targetX != 0 || targetY != 0) {
+					// Sentinel: targetX < 0 or targetY < 0 means no AoE target (use single-target path instead).
+					if f.AoeRadius > 0 && (targetX >= 0 && targetY >= 0) {
 						var cbt *combat.Combat
 						if s.combatH != nil {
 							cbt = s.combatH.ActiveCombatForPlayer(uid)
@@ -7535,10 +7536,7 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string, targetX, 
 						}
 						center := combat.Combatant{GridX: int(targetX), GridY: int(targetY)}
 						if def, ok := s.condRegistry.Get(condID); ok {
-							for _, c := range cbt.Combatants {
-								if c.IsDead() || combat.CombatRange(*c, center) > f.AoeRadius {
-									continue
-								}
+							for _, c := range combat.CombatantsInRadius(cbt, center, f.AoeRadius) {
 								if condSet := cbt.Conditions[c.ID]; condSet != nil {
 									if err := condSet.Apply(c.ID, def, 1, -1); err != nil {
 										s.logger.Warn("failed to apply feat AoE condition",
@@ -7547,6 +7545,11 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string, targetX, 
 											zap.Error(err),
 										)
 									}
+								} else {
+									s.logger.Warn("feat AoE: no condition set for combatant, skipping",
+										zap.String("combatant_id", c.ID),
+										zap.String("condition_id", condID),
+									)
 								}
 							}
 						} else {
@@ -7936,15 +7939,12 @@ func (s *GameServiceServer) handleAmpedUse(
 
 	// REQ-AOE-1: When tech has aoe_radius > 0 and target coordinates are provided,
 	// collect all living combatants within Chebyshev distance aoe_radius of the target square.
+	// Sentinel: techTargetX < 0 or techTargetY < 0 means no AoE target (use single-target path instead).
 	var techTargets []*combat.Combatant
-	ampedTargetX, ampedTargetY := req.GetTargetX(), req.GetTargetY()
-	if resolvedTech.AoeRadius > 0 && (ampedTargetX != 0 || ampedTargetY != 0) && cbt != nil {
-		center := combat.Combatant{GridX: int(ampedTargetX), GridY: int(ampedTargetY)}
-		for _, c := range cbt.Combatants {
-			if !c.IsDead() && combat.CombatRange(*c, center) <= resolvedTech.AoeRadius {
-				techTargets = append(techTargets, c)
-			}
-		}
+	techTargetX, techTargetY := req.GetTargetX(), req.GetTargetY()
+	if resolvedTech.AoeRadius > 0 && (techTargetX >= 0 && techTargetY >= 0) && cbt != nil {
+		center := combat.Combatant{GridX: int(techTargetX), GridY: int(techTargetY)}
+		techTargets = combat.CombatantsInRadius(cbt, center, resolvedTech.AoeRadius)
 	} else {
 		target, errMsg := s.resolveUseTarget(uid, targetID, resolvedTech)
 		if errMsg != "" {
@@ -8027,7 +8027,7 @@ func (s *GameServiceServer) resolveUseTarget(uid, targetID string, tech *technol
 //   - abilityID must be a valid tech ID known to s.techRegistry (or may be absent for legacy feats).
 //   - fallbackMsg is returned verbatim when s.techRegistry is nil or the tech is not registered.
 //   - targetX and targetY are the 0-based grid coordinates of an AoE burst center;
-//     both zero means no AoE override (single-target or all-enemies resolution is used instead).
+//     -1 means unset / no AoE (single-target or all-enemies resolution is used instead).
 //
 // Postconditions:
 //   - If s.techRegistry is nil or the tech is not registered, falls back to fallbackMsg.
@@ -8062,13 +8062,10 @@ func (s *GameServiceServer) activateTechWithEffects(sess *session.PlayerSession,
 	var techTargets []*combat.Combatant
 	// REQ-AOE-1: When tech has aoe_radius > 0 and target coordinates are provided,
 	// collect all living combatants within Chebyshev distance aoe_radius of the target square.
-	if techDef.AoeRadius > 0 && (targetX != 0 || targetY != 0) && cbt != nil {
+	// Sentinel: targetX < 0 or targetY < 0 means no AoE target (use single-target path instead).
+	if techDef.AoeRadius > 0 && (targetX >= 0 && targetY >= 0) && cbt != nil {
 		center := combat.Combatant{GridX: int(targetX), GridY: int(targetY)}
-		for _, c := range cbt.Combatants {
-			if !c.IsDead() && combat.CombatRange(*c, center) <= techDef.AoeRadius {
-				techTargets = append(techTargets, c)
-			}
-		}
+		techTargets = combat.CombatantsInRadius(cbt, center, techDef.AoeRadius)
 	} else {
 		target, errMsg := s.resolveUseTarget(uid, targetID, techDef)
 		if errMsg != "" {
