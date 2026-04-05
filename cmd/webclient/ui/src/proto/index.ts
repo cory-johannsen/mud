@@ -438,6 +438,12 @@ export interface RoomEvent {
   message?: string
 }
 
+export interface CombatantPosition {
+  name: string
+  x: number
+  y: number
+}
+
 export interface CombatEvent {
   type?: string
   attacker?: string
@@ -450,7 +456,10 @@ export interface CombatEvent {
   narrative?: string
   weaponName?: string
   targetMaxHp?: number
-  attackerPosition?: number
+  attackerPosition?: number  // deprecated
+  attacker_x?: number
+  attacker_y?: number
+  flanking?: boolean
 }
 
 export interface RoundStartEvent {
@@ -460,6 +469,7 @@ export interface RoundStartEvent {
   durationMs?: number
   turnOrder?: string[]
   turn_order?: string[]
+  initial_positions?: CombatantPosition[]
 }
 
 export interface RoundEndEvent {
@@ -540,6 +550,14 @@ export interface ConditionEvent {
   condition_name?: string
   stacks?: number
   applied?: boolean
+}
+
+export interface UseRequest {
+  itemRef?: string
+  targetName?: string
+  target_name?: string
+  target_x?: number
+  target_y?: number
 }
 
 export type ServerEvent =

@@ -63,7 +63,7 @@ function CombatInitiativeList() {
               </span>
               {pos !== null && (
                 <span style={{ color: '#666', fontSize: '0.72rem', marginLeft: 'auto' }}>
-                  {pos}ft
+                  ({pos.x},{pos.y})
                 </span>
               )}
             </div>

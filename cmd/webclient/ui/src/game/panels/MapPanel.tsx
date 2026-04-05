@@ -42,32 +42,61 @@ function renderLines(lines: ColoredLine[], hover?: HoverHandlers): JSX.Element {
   )
 }
 
-function renderBattleMap(positions: Record<string, number>): JSX.Element {
-  const entries = Object.entries(positions).sort((a, b) => a[1] - b[1])
-  if (entries.length === 0) {
-    return <span className="map-empty">No combatants positioned.</span>
+function renderBattleGrid(
+  combatPositions: Record<string, { x: number; y: number }>,
+  playerName: string
+): JSX.Element {
+  const GRID_SIZE = 10
+  const CELL_PX = 28
+
+  const occupants: Record<string, string> = {}
+  for (const [name, pos] of Object.entries(combatPositions)) {
+    occupants[`${pos.x},${pos.y}`] = name
   }
-  const maxPos = entries[entries.length - 1][1]
-  const scale = maxPos > 0 ? maxPos : 1
-  const barWidth = 50
-  const ruler = Array(barWidth + 1).fill('─')
-  const labels: Array<{ col: number; name: string }> = entries.map(([name, pos]) => ({
-    col: Math.round((pos / scale) * barWidth),
-    name,
-  }))
-  for (const { col } of labels) {
-    ruler[Math.min(col, barWidth)] = '┼'
-  }
-  const rulerStr = ruler.join('')
-  return (
-    <div style={{ fontFamily: 'monospace', fontSize: '0.85em' }}>
-      <div style={{ marginBottom: '0.25rem', color: '#aaa' }}>Battlefield (1ft = 1 unit)</div>
-      <div>{rulerStr}</div>
-      {labels.map(({ col, name }, i) => (
-        <div key={i} style={{ paddingLeft: `${col}ch`, whiteSpace: 'nowrap' }}>
-          <span style={{ color: '#f0c040' }}>{`▲ ${name} (${entries[i][1]}ft)`}</span>
+
+  const cells: JSX.Element[] = []
+  for (let y = 0; y < GRID_SIZE; y++) {
+    for (let x = 0; x < GRID_SIZE; x++) {
+      const name = occupants[`${x},${y}`] ?? ''
+      const isPlayer = name === playerName
+      const isEnemy = name !== '' && !isPlayer
+      const bg = isPlayer ? '#1a3a6b' : isEnemy ? '#6b1a1a' : '#1a1a2e'
+      const token = name ? name[0].toUpperCase() : ''
+      cells.push(
+        <div
+          key={`${x},${y}`}
+          title={name ? `${name} (${x},${y})` : `(${x},${y})`}
+          style={{
+            width: CELL_PX,
+            height: CELL_PX,
+            background: bg,
+            border: '1px solid #333',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '0.75rem',
+            color: isPlayer ? '#7bb8ff' : isEnemy ? '#ff7b7b' : '#555',
+            fontWeight: 'bold',
+            cursor: 'default',
+            flexShrink: 0,
+          }}
+        >
+          {token}
         </div>
-      ))}
+      )
+    }
+  }
+
+  return (
+    <div
+      style={{
+        display: 'grid',
+        gridTemplateColumns: `repeat(${GRID_SIZE}, ${CELL_PX}px)`,
+        gap: 0,
+        border: '1px solid #555',
+      }}
+    >
+      {cells}
     </div>
   )
 }
@@ -220,7 +249,7 @@ export function MapPanel() {
           </button>
         </div>
         <div style={{ overflow: 'auto', padding: '0.5rem' }}>
-          {renderBattleMap(state.combatPositions)}
+          {renderBattleGrid(state.combatPositions, state.characterInfo?.name ?? '')}
         </div>
       </div>
     )
