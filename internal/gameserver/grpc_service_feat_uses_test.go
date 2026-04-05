@@ -82,7 +82,7 @@ func TestHandleUse_LimitedFeat_UsesDecrement_REQ_BUG12a(t *testing.T) {
 	// Simulate populated ActiveFeatUses as the login flow would produce.
 	sess.ActiveFeatUses = map[string]int{"berserk": 2}
 
-	event, err := svc.handleUse("u_feat_decrement", "berserk", "")
+	event, err := svc.handleUse("u_feat_decrement", "berserk", "", 0, 0)
 	require.NoError(t, err)
 	require.NotNil(t, event)
 
@@ -112,7 +112,7 @@ func TestHandleUse_LimitedFeat_ZeroUses_Rejected_REQ_BUG12b(t *testing.T) {
 
 	sess.ActiveFeatUses = map[string]int{"berserk": 0}
 
-	event, err := svc.handleUse("u_feat_zero", "berserk", "")
+	event, err := svc.handleUse("u_feat_zero", "berserk", "", 0, 0)
 	require.NoError(t, err)
 	require.NotNil(t, event)
 
@@ -172,7 +172,7 @@ func TestProperty_LimitedFeat_UsesNeverNegative_REQ_BUG12d(t *testing.T) {
 		sess.ActiveFeatUses = map[string]int{"prop-feat": 0}
 
 		for i := 0; i < attempts; i++ {
-			_, err := svc.handleUse("u_prop_feat_never_neg", "prop-feat", "")
+			_, err := svc.handleUse("u_prop_feat_never_neg", "prop-feat", "", 0, 0)
 			if err != nil {
 				rt.Fatalf("unexpected error on attempt %d: %v", i, err)
 			}
@@ -204,7 +204,7 @@ func TestHandleUse_UnlimitedFeat_NoUsesTracked_REQ_BUG12e(t *testing.T) {
 	// ActiveFeatUses is nil — unlimited feats are not tracked.
 	assert.Nil(t, sess.ActiveFeatUses)
 
-	event, err := svc.handleUse("u_feat_unlimited", "lightning-dash", "")
+	event, err := svc.handleUse("u_feat_unlimited", "lightning-dash", "", 0, 0)
 	require.NoError(t, err)
 	require.NotNil(t, event)
 
@@ -267,7 +267,7 @@ func TestHandleUse_ListMode_OmitsExhaustedFeat_REQ_BUG12f(t *testing.T) {
 	// berserk exhausted; quick-draw has no limit.
 	sess.ActiveFeatUses = map[string]int{"berserk": 0}
 
-	event, err := svc.handleUse("u_list_omit_exhausted", "", "")
+	event, err := svc.handleUse("u_list_omit_exhausted", "", "", 0, 0)
 	require.NoError(t, err)
 	require.NotNil(t, event)
 
@@ -301,7 +301,7 @@ func TestHandleUse_ListMode_ShowsRemainingUses_REQ_BUG12g(t *testing.T) {
 	sess := addPlayerForFeatTest(t, sessMgr, "u_list_show_uses")
 	sess.ActiveFeatUses = map[string]int{"berserk": 1}
 
-	event, err := svc.handleUse("u_list_show_uses", "", "")
+	event, err := svc.handleUse("u_list_show_uses", "", "", 0, 0)
 	require.NoError(t, err)
 	require.NotNil(t, event)
 
@@ -329,7 +329,7 @@ func TestHandleUse_LimitedFeat_MessageContainsRemainingCount_REQ_BUG12h(t *testi
 	sess := addPlayerForFeatTest(t, sessMgr, "u_feat_count_msg")
 	sess.ActiveFeatUses = map[string]int{"berserk": 2}
 
-	event, err := svc.handleUse("u_feat_count_msg", "berserk", "")
+	event, err := svc.handleUse("u_feat_count_msg", "berserk", "", 0, 0)
 	require.NoError(t, err)
 	require.NotNil(t, event)
 

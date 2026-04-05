@@ -218,7 +218,9 @@ func TestHandleTumble_RollAboveDC_Success(t *testing.T) {
 	require.True(t, ok)
 	combatant := cbt.GetCombatant("u_tbl_ra")
 	require.NotNil(t, combatant)
-	posBefore := combatant.Position
+	// Default spawn: player (0,0), NPC (5,9). CompassDelta toward NPC = (1,1).
+	beforeX := combatant.GridX
+	beforeY := combatant.GridY
 
 	event, err := svc.handleTumble("u_tbl_ra", &gamev1.TumbleRequest{Target: "Ganger"})
 	require.NoError(t, err)
@@ -227,8 +229,9 @@ func TestHandleTumble_RollAboveDC_Success(t *testing.T) {
 	require.NotNil(t, msgEvt, "expected a message event on successful tumble")
 	assert.Contains(t, msgEvt.Content, "tumble through")
 
-	posAfter := combatant.Position
-	assert.Equal(t, posBefore+5, posAfter, "player position must increase by 5 on success")
+	// On success the player moves 1 cell toward the target (CompassDelta "toward" from (0,0) to (5,9) = (1,1)).
+	assert.Equal(t, beforeX+1, combatant.GridX, "player.GridX must increase by 1 on successful tumble")
+	assert.Equal(t, beforeY+1, combatant.GridY, "player.GridY must increase by 1 on successful tumble")
 }
 
 // TestHandleTumble_RollBelowDC_Failure verifies that handleTumble returns a failure message
@@ -265,7 +268,8 @@ func TestHandleTumble_RollBelowDC_Failure(t *testing.T) {
 	require.True(t, ok)
 	combatant := cbt.GetCombatant("u_tbl_rb")
 	require.NotNil(t, combatant)
-	posBefore := combatant.Position
+	beforeX := combatant.GridX
+	beforeY := combatant.GridY
 
 	event, err := svc.handleTumble("u_tbl_rb", &gamev1.TumbleRequest{Target: "Bandit"})
 	require.NoError(t, err)
@@ -274,6 +278,7 @@ func TestHandleTumble_RollBelowDC_Failure(t *testing.T) {
 	require.NotNil(t, msgEvt, "expected a message event on failed tumble")
 	assert.Contains(t, msgEvt.Content, "reactive strike")
 
-	posAfter := combatant.Position
-	assert.Equal(t, posBefore, posAfter, "player position must not change on failure")
+	// On failure the player does not move.
+	assert.Equal(t, beforeX, combatant.GridX, "player.GridX must not change on failed tumble")
+	assert.Equal(t, beforeY, combatant.GridY, "player.GridY must not change on failed tumble")
 }

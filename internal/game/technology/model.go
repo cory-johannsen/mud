@@ -199,6 +199,10 @@ type TechnologyDef struct {
 	// Reaction declares this tech as a player reaction with the given trigger and effect.
 	// Only applicable to innate techs. Nil means this tech is not a reaction.
 	Reaction *reaction.ReactionDef `yaml:"reaction,omitempty"`
+	// AoeRadius is the radius in feet of an area-of-effect burst centered on the target grid square.
+	// 0 means single-target (default). When > 0 and UseRequest.target_x/target_y are >= 0 (not the -1 sentinel),
+	// effects are applied to every combatant within Chebyshev distance AoeRadius of the target square.
+	AoeRadius int `yaml:"aoe_radius,omitempty"`
 }
 
 // Validate returns an error if any required field is missing or invalid.
@@ -281,6 +285,9 @@ func (t *TechnologyDef) Validate() error {
 		if err := validateEffect(e, i); err != nil {
 			return err
 		}
+	}
+	if t.AoeRadius < 0 {
+		return fmt.Errorf("technology %q: aoe_radius must be >= 0, got %d", t.ID, t.AoeRadius)
 	}
 	if len(t.AmpedEffects.AllEffects()) > 0 && t.AmpedLevel == 0 {
 		return fmt.Errorf("amped_level must be > 0 when amped_effects is non-empty")

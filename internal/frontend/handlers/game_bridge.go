@@ -870,11 +870,14 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 				// Handle position events: update combatant position and re-render the battlefield.
 				if ce.GetType() == gamev1.CombatEventType_COMBAT_EVENT_TYPE_POSITION {
 					combatHandler.UpdatePosition(ce.GetAttacker(), int(ce.GetAttackerPosition()))
+					combatHandler.UpdatePosition2D(ce.GetAttacker(), ce.GetAttackerX(), ce.GetAttackerY())
 					if session.Mode() == ModeCombat {
 						cw, _ := conn.Dimensions()
 						snap := combatHandler.SnapshotForRender()
+						gridPositions := combatHandler.GridPositions()
+						gridStr := telnet.RenderCombatGrid(gridPositions, cw)
 						if conn.IsSplitScreen() {
-							_ = conn.WriteRoom(RenderCombatScreen(snap, cw))
+							_ = conn.WriteRoom(RenderCombatScreen(snap, cw) + gridStr)
 						}
 					}
 					continue
@@ -947,16 +950,20 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 				turnOrder := make([]string, len(rs.GetTurnOrder()))
 				copy(turnOrder, rs.GetTurnOrder())
 				combatHandler.UpdateRoundStart(int(rs.GetRound()), int(rs.GetActionsPerTurn()), turnOrder)
+				// Seed initial 2D grid positions from the round-start event.
+				combatHandler.SetInitialPositions(rs.GetInitialPositions())
 				// Seed player HP from stored values so the HP bar shows immediately.
 				combatHandler.UpdatePlayerHP(int(currentHP.Load()), int(maxHP.Load()))
-				// Render combat screen in room region.
+				// Render combat screen with grid in room region.
 				cw, _ := conn.Dimensions()
 				snap := combatHandler.SnapshotForRender()
+				gridPositions := combatHandler.GridPositions()
+				gridStr := telnet.RenderCombatGrid(gridPositions, cw)
 				if conn.IsSplitScreen() {
-					_ = conn.WriteRoom(RenderCombatScreen(snap, cw))
+					_ = conn.WriteRoom(RenderCombatScreen(snap, cw) + gridStr)
 					_ = conn.WritePromptSplit(combatHandler.Prompt())
 				} else {
-					_ = conn.WriteLine(RenderCombatScreen(snap, cw))
+					_ = conn.WriteLine(RenderCombatScreen(snap, cw) + gridStr)
 					_ = conn.WritePrompt(combatHandler.Prompt())
 				}
 				// Also write the text-mode round start to console for the combat log.

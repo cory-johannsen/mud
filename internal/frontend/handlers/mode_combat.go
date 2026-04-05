@@ -10,6 +10,11 @@ import (
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 )
 
+// combatGridCoord holds the 2D grid coordinates for a single combatant.
+type combatGridCoord struct {
+	X, Y int32
+}
+
 // maxCombatLogLines is the maximum number of narrative log lines retained.
 const maxCombatLogLines = 20
 
@@ -74,23 +79,25 @@ type CombatRenderSnapshot struct {
 // CombatModeHandler implements ModeHandler for the combat display.
 // REQ-IMR-19.
 type CombatModeHandler struct {
-	mu         sync.Mutex
-	playerName string
-	onExitFn   func()
-	round      int
-	maxAP      int
-	turnOrder  []string
-	combatants map[string]*CombatantState
-	log        []string
-	summary    string
+	mu            sync.Mutex
+	playerName    string
+	onExitFn      func()
+	round         int
+	maxAP         int
+	turnOrder     []string
+	combatants    map[string]*CombatantState
+	gridPositions map[string]combatGridCoord
+	log           []string
+	summary       string
 }
 
 // NewCombatModeHandler constructs a CombatModeHandler.
 func NewCombatModeHandler(playerName string, onExitFn func()) *CombatModeHandler {
 	return &CombatModeHandler{
-		playerName: playerName,
-		onExitFn:   onExitFn,
-		combatants: make(map[string]*CombatantState),
+		playerName:    playerName,
+		onExitFn:      onExitFn,
+		combatants:    make(map[string]*CombatantState),
+		gridPositions: make(map[string]combatGridCoord),
 	}
 }
 
@@ -197,13 +204,54 @@ func (h *CombatModeHandler) UpdateCombatEvent(attacker, target string, damage, t
 	}
 }
 
-// UpdatePosition updates a combatant's position (thread-safe).
+// UpdatePosition updates a combatant's 1D position (thread-safe).
 func (h *CombatModeHandler) UpdatePosition(name string, pos int) {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 	if c, ok := h.combatants[name]; ok {
 		c.Position = pos
 	}
+}
+
+// UpdatePosition2D updates a combatant's 2D grid coordinates (thread-safe).
+//
+// Precondition: name must be non-empty; x and y must be within [0, 9].
+// Postcondition: gridPositions[name] is updated to {X: x, Y: y}.
+func (h *CombatModeHandler) UpdatePosition2D(name string, x, y int32) {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+	h.gridPositions[name] = combatGridCoord{X: x, Y: y}
+}
+
+// SetInitialPositions seeds the grid position map from initial_positions.
+//
+// Precondition: positions may be nil or empty.
+// Postcondition: gridPositions is replaced with the supplied positions.
+func (h *CombatModeHandler) SetInitialPositions(positions []*gamev1.CombatantPosition) {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+	h.gridPositions = make(map[string]combatGridCoord, len(positions))
+	for _, p := range positions {
+		h.gridPositions[p.GetName()] = combatGridCoord{X: p.GetX(), Y: p.GetY()}
+	}
+}
+
+// GridPositions returns a snapshot of all combatant 2D positions as proto messages.
+//
+// Precondition: none.
+// Postcondition: returned slice length equals len(gridPositions).
+func (h *CombatModeHandler) GridPositions() []*gamev1.CombatantPosition {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+	result := make([]*gamev1.CombatantPosition, 0, len(h.gridPositions))
+	for name, coord := range h.gridPositions {
+		result = append(result, &gamev1.CombatantPosition{
+			Name: name,
+			X:    coord.X,
+			Y:    coord.Y,
+		})
+	}
+	return result
 }
 
 // UpdatePlayerHP updates the player combatant's HP and MaxHP.
@@ -337,6 +385,7 @@ func (h *CombatModeHandler) Reset() {
 	h.maxAP = 0
 	h.turnOrder = nil
 	h.combatants = make(map[string]*CombatantState)
+	h.gridPositions = make(map[string]combatGridCoord)
 	h.log = nil
 	h.summary = ""
 }

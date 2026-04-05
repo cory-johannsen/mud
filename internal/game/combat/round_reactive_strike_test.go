@@ -17,11 +17,12 @@ type fixedSrcRS struct{ val int }
 func (f fixedSrcRS) Intn(_ int) int { return f.val }
 
 // makeReactiveStrikeCombat builds a minimal combat for CheckReactiveStrikes tests.
-// The player starts at playerPos; each NPC starts at its provided position.
-func makeReactiveStrikeCombat(t *testing.T, playerPos int, npcs []struct {
-	id  string
-	pos int
-	hp  int
+// The player starts at (playerX, playerY); each NPC starts at its provided grid position.
+func makeReactiveStrikeCombat(t *testing.T, playerX, playerY int, npcs []struct {
+	id   string
+	gx   int
+	gy   int
+	hp   int
 }) (*combat.Combat, *combat.Combatant) {
 	t.Helper()
 	reg := condition.NewRegistry()
@@ -32,7 +33,7 @@ func makeReactiveStrikeCombat(t *testing.T, playerPos int, npcs []struct {
 	player := &combat.Combatant{
 		ID: "player1", Kind: combat.KindPlayer, Name: "Player",
 		CurrentHP: 30, MaxHP: 30, AC: 15, Level: 1,
-		Position: playerPos,
+		GridX: playerX, GridY: playerY,
 	}
 	combatants := []*combat.Combatant{player}
 	for _, n := range npcs {
@@ -43,7 +44,7 @@ func makeReactiveStrikeCombat(t *testing.T, playerPos int, npcs []struct {
 		combatants = append(combatants, &combat.Combatant{
 			ID: n.id, Kind: combat.KindNPC, Name: n.id,
 			CurrentHP: hp, MaxHP: 20, AC: 10, Level: 1,
-			Position: n.pos,
+			GridX: n.gx, GridY: n.gy,
 		})
 	}
 	eng := combat.NewEngine()
@@ -53,6 +54,7 @@ func makeReactiveStrikeCombat(t *testing.T, playerPos int, npcs []struct {
 }
 
 // TestCheckReactiveStrikes covers the core triggering rules.
+// Grid distances: 1 square = 5 ft; adjacent means CombatRange <= 5 ft (Chebyshev ≤ 1 square).
 func TestCheckReactiveStrikes(t *testing.T) {
 	// val=19 → Intn(20)=19 → d20=20; guaranteed hit against any reasonable AC.
 	hitSrc := fixedSrcRS{val: 19}
@@ -61,9 +63,12 @@ func TestCheckReactiveStrikes(t *testing.T) {
 
 	tests := []struct {
 		name       string
-		playerOld  int // player position BEFORE stride (oldPos)
-		playerNew  int // player position AFTER stride (new Position on combatant)
-		npcPos     int
+		playerNewX int // player GridX AFTER stride
+		playerNewY int // player GridY AFTER stride
+		playerOldX int // player GridX BEFORE stride
+		playerOldY int // player GridY BEFORE stride
+		npcGX      int // NPC GridX
+		npcGY      int // NPC GridY
 		npcHP      int // 0 = alive default
 		src        fixedSrcRS
 		wantEvents int
@@ -71,27 +76,27 @@ func TestCheckReactiveStrikes(t *testing.T) {
 	}{
 		{
 			name:       "adjacent NPC triggers RS when player moves away",
-			playerOld:  0,
-			playerNew:  25, // moved away from NPC at 5
-			npcPos:     5,  // was adjacent (dist=5 ≤ 5)
+			playerOldX: 1, playerOldY: 0, // player was at (1,0), dist to NPC at (1,0)=0 → adjacent
+			playerNewX: 6, playerNewY: 0, // moved to (6,0), dist = 5 squares = 25 ft > 5 ft
+			npcGX: 1, npcGY: 0,
 			src:        hitSrc,
 			wantEvents: 1,
 			desc:       "NPC adjacent before stride fires reactive strike",
 		},
 		{
 			name:       "non-adjacent NPC does NOT trigger RS",
-			playerOld:  0,
-			playerNew:  25,
-			npcPos:     20, // dist before = 20 > 5 → not adjacent
+			playerOldX: 0, playerOldY: 0, // player was at (0,0), dist to NPC at (5,0)=25ft > 5ft
+			playerNewX: 3, playerNewY: 0, // moved to (3,0)
+			npcGX: 5, npcGY: 0,
 			src:        hitSrc,
 			wantEvents: 0,
 			desc:       "NPC beyond 5ft before stride: no reactive strike",
 		},
 		{
 			name:       "dead NPC does NOT trigger RS",
-			playerOld:  0,
-			playerNew:  25,
-			npcPos:     5,
+			playerOldX: 1, playerOldY: 0,
+			playerNewX: 6, playerNewY: 0,
+			npcGX: 1, npcGY: 0,
 			npcHP:      -1, // IsDead for NPC: CurrentHP <= 0
 			src:        hitSrc,
 			wantEvents: 0,
@@ -99,18 +104,18 @@ func TestCheckReactiveStrikes(t *testing.T) {
 		},
 		{
 			name:       "adjacent NPC does NOT trigger RS when player moves toward (not away)",
-			playerOld:  10,
-			playerNew:  5,  // moved toward NPC at 5 (now distance=0, but moved closer)
-			npcPos:     5,  // was adjacent (dist=5 ≤ 5), new dist=0 — not moving away
+			playerOldX: 2, playerOldY: 0, // player was at (2,0), dist to NPC at (1,0)=5ft → adjacent
+			playerNewX: 1, playerNewY: 0, // moved to (1,0) — same cell as NPC → dist=0 ≤ 5
+			npcGX: 1, npcGY: 0,
 			src:        hitSrc,
 			wantEvents: 0,
 			desc:       "Player moving toward NPC: no reactive strike even if adjacent",
 		},
 		{
 			name:       "reactive strike rolls miss on low roll",
-			playerOld:  0,
-			playerNew:  25,
-			npcPos:     5,
+			playerOldX: 1, playerOldY: 0,
+			playerNewX: 6, playerNewY: 0,
+			npcGX: 1, npcGY: 0,
 			src:        missSrc,
 			wantEvents: 1, // event is still generated (miss narrative)
 			desc:       "Miss still generates an RS event",
@@ -123,14 +128,15 @@ func TestCheckReactiveStrikes(t *testing.T) {
 			if npcHP == 0 {
 				npcHP = 20 // alive
 			}
-			cbt, player := makeReactiveStrikeCombat(t, tc.playerNew, []struct {
-				id  string
-				pos int
-				hp  int
-			}{{"npc1", tc.npcPos, npcHP}})
+			cbt, player := makeReactiveStrikeCombat(t, tc.playerNewX, tc.playerNewY, []struct {
+				id   string
+				gx   int
+				gy   int
+				hp   int
+			}{{"npc1", tc.npcGX, tc.npcGY, npcHP}})
 
-			// Simulate: oldPos is where the player WAS before the stride.
-			events := combat.CheckReactiveStrikes(cbt, player.ID, tc.playerOld, tc.src, nil)
+			// Simulate: oldX/oldY is where the player WAS before the stride.
+			events := combat.CheckReactiveStrikes(cbt, player.ID, tc.playerOldX, tc.playerOldY, tc.src, nil)
 			assert.Len(t, events, tc.wantEvents, tc.desc)
 			for _, ev := range events {
 				assert.Equal(t, combat.ActionAttack, ev.ActionType)
@@ -155,36 +161,41 @@ func TestCheckReactiveStrikes_SelfNotTriggered(t *testing.T) {
 
 	player := &combat.Combatant{
 		ID: "solo", Kind: combat.KindPlayer, Name: "Solo",
-		CurrentHP: 30, MaxHP: 30, AC: 15, Level: 1, Position: 25,
+		CurrentHP: 30, MaxHP: 30, AC: 15, Level: 1, GridX: 5, GridY: 5,
 	}
 	eng := combat.NewEngine()
 	cbt, err := eng.StartCombat("room_solo", []*combat.Combatant{player}, reg, nil, "")
 	require.NoError(t, err)
 
-	events := combat.CheckReactiveStrikes(cbt, player.ID, 0, hitSrc, nil)
+	events := combat.CheckReactiveStrikes(cbt, player.ID, 0, 0, hitSrc, nil)
 	assert.Empty(t, events, "mover cannot trigger a reactive strike against themselves")
 }
 
 // TestPropertyReactiveStrike_NeverTriggersFromNonAdjacent verifies that when every NPC
-// is beyond 5ft of the player's old position, zero reactive strikes fire.
+// is beyond 5ft of the player's old grid position, zero reactive strikes fire.
 func TestPropertyReactiveStrike_NeverTriggersFromNonAdjacent(t *testing.T) {
 	rapid.Check(t, func(rt *rapid.T) {
-		// Generate a player old position and an NPC position such that |oldPos - npcPos| >= 6.
-		playerOldPos := rapid.IntRange(0, 100).Draw(rt, "playerOldPos")
-		// Generate NPC offset >= 6 in either direction.
-		npcOffset := rapid.IntRange(6, 50).Draw(rt, "npcOffset")
-		// Randomly choose direction.
-		direction := rapid.IntRange(0, 1).Draw(rt, "direction")
-		npcPos := playerOldPos + npcOffset
-		if direction == 1 {
-			npcPos = playerOldPos - npcOffset
-			if npcPos < 0 {
-				npcPos = playerOldPos + npcOffset
-			}
+		// Generate player old position on the grid.
+		playerOldX := rapid.IntRange(0, 5).Draw(rt, "playerOldX")
+		playerOldY := rapid.IntRange(0, 5).Draw(rt, "playerOldY")
+		// Generate NPC position at least 2 squares away (>5ft) from old player position.
+		npcOffX := rapid.IntRange(2, 4).Draw(rt, "npcOffX")
+		npcOffY := rapid.IntRange(2, 4).Draw(rt, "npcOffY")
+		npcGX := playerOldX + npcOffX
+		if npcGX > 9 {
+			npcGX = playerOldX - npcOffX
+		}
+		npcGY := playerOldY + npcOffY
+		if npcGY > 9 {
+			npcGY = playerOldY - npcOffY
 		}
 
-		// Player new position: moved 25ft away.
-		playerNewPos := playerOldPos + 25
+		// Player new position: moved 5 squares in X direction.
+		playerNewX := playerOldX + 5
+		if playerNewX > 9 {
+			playerNewX = 9
+		}
+		playerNewY := playerOldY
 
 		reg := condition.NewRegistry()
 		reg.Register(&condition.ConditionDef{ID: "dying", Name: "Dying", DurationType: "until_save", MaxStacks: 4})
@@ -193,11 +204,13 @@ func TestPropertyReactiveStrike_NeverTriggersFromNonAdjacent(t *testing.T) {
 
 		player := &combat.Combatant{
 			ID: "player", Kind: combat.KindPlayer, Name: "Player",
-			CurrentHP: 30, MaxHP: 30, AC: 15, Level: 1, Position: playerNewPos,
+			CurrentHP: 30, MaxHP: 30, AC: 15, Level: 1,
+			GridX: playerNewX, GridY: playerNewY,
 		}
 		npc := &combat.Combatant{
 			ID: "npc", Kind: combat.KindNPC, Name: "npc",
-			CurrentHP: 20, MaxHP: 20, AC: 10, Level: 1, Position: npcPos,
+			CurrentHP: 20, MaxHP: 20, AC: 10, Level: 1,
+			GridX: npcGX, GridY: npcGY,
 		}
 		eng := combat.NewEngine()
 		cbt, err := eng.StartCombat("room_prop", []*combat.Combatant{player, npc}, reg, nil, "")
@@ -206,19 +219,19 @@ func TestPropertyReactiveStrike_NeverTriggersFromNonAdjacent(t *testing.T) {
 		}
 
 		hitSrc := fixedSrcRS{val: 19}
-		events := combat.CheckReactiveStrikes(cbt, player.ID, playerOldPos, hitSrc, nil)
+		// Verify that NPC is more than 5ft from old position before testing.
+		oldMover := combat.Combatant{GridX: playerOldX, GridY: playerOldY}
+		distFromOld := combat.CombatRange(*npc, oldMover)
+		if distFromOld <= 5 {
+			rt.Skip("NPC ended up adjacent to old position; skipping this draw")
+		}
+
+		events := combat.CheckReactiveStrikes(cbt, player.ID, playerOldX, playerOldY, hitSrc, nil)
 		if len(events) != 0 {
-			rt.Fatalf("expected 0 reactive strikes when NPC dist=%d > 5 from oldPos=%d, got %d",
-				abs(npcPos-playerOldPos), playerOldPos, len(events))
+			rt.Fatalf("expected 0 reactive strikes when NPC dist=%d > 5 from oldPos=(%d,%d), got %d",
+				distFromOld, playerOldX, playerOldY, len(events))
 		}
 	})
-}
-
-func abs(x int) int {
-	if x < 0 {
-		return -x
-	}
-	return x
 }
 
 // TestPropertyReactiveStrike_AdjacentAlwaysTriggers verifies that when an NPC is adjacent
@@ -226,31 +239,27 @@ func abs(x int) int {
 // reactive strike event is always returned.
 func TestPropertyReactiveStrike_AdjacentAlwaysTriggers(t *testing.T) {
 	rapid.Check(t, func(rt *rapid.T) {
-		// Generate NPC position in [0, 100].
-		npcPos := rapid.IntRange(0, 100).Draw(rt, "npcPos")
-		// Generate oldPos such that |npcPos - oldPos| <= 5 (adjacent).
-		offset := rapid.IntRange(0, 5).Draw(rt, "offset")
-		sign := rapid.IntRange(0, 1).Draw(rt, "sign")
-		oldPos := npcPos + offset
-		if sign == 1 {
-			oldPos = npcPos - offset
-			if oldPos < 0 {
-				oldPos = npcPos + offset
-			}
+		// Generate NPC position in grid [0,8]x[0,8] to allow player to be adjacent.
+		npcGX := rapid.IntRange(0, 7).Draw(rt, "npcGX")
+		npcGY := rapid.IntRange(0, 7).Draw(rt, "npcGY")
+		// oldPos: player at same cell as NPC (adjacent, dist=0).
+		oldX := npcGX
+		oldY := npcGY
+		// newPos: player moved 2 squares right and 2 squares down (Chebyshev = 2, dist=10ft > 5ft).
+		newX := npcGX + 2
+		newY := npcGY + 2
+		if newX > 9 {
+			newX = 9
 		}
-		// Compute newPos such that |npcPos - newPos| > 5 (moved away).
-		// Move 25 ft in the direction away from the NPC.
-		newPos := oldPos + 25
-		if abs(npcPos-newPos) <= 5 {
-			// Fallback: move in the other direction.
-			newPos = oldPos - 25
-			if newPos < 0 {
-				newPos = oldPos + 25
-			}
+		if newY > 9 {
+			newY = 9
 		}
-		// If still not far enough (pathological npcPos placement), skip this draw.
-		if abs(npcPos-newPos) <= 5 {
-			rt.Skip("unable to construct valid newPos for this draw; skipping")
+
+		// Verify that new position is actually far enough (>5ft from NPC).
+		newMover := combat.Combatant{GridX: newX, GridY: newY}
+		npcC := combat.Combatant{GridX: npcGX, GridY: npcGY}
+		if combat.CombatRange(newMover, npcC) <= 5 {
+			rt.Skip("unable to construct valid newPos far enough from NPC; skipping")
 		}
 
 		reg := condition.NewRegistry()
@@ -260,11 +269,13 @@ func TestPropertyReactiveStrike_AdjacentAlwaysTriggers(t *testing.T) {
 
 		player := &combat.Combatant{
 			ID: "player", Kind: combat.KindPlayer, Name: "Player",
-			CurrentHP: 30, MaxHP: 30, AC: 15, Level: 1, Position: newPos,
+			CurrentHP: 30, MaxHP: 30, AC: 15, Level: 1,
+			GridX: newX, GridY: newY,
 		}
 		npc := &combat.Combatant{
 			ID: "npc", Kind: combat.KindNPC, Name: "npc",
-			CurrentHP: 20, MaxHP: 20, AC: 10, Level: 1, Position: npcPos,
+			CurrentHP: 20, MaxHP: 20, AC: 10, Level: 1,
+			GridX: npcGX, GridY: npcGY,
 		}
 		eng := combat.NewEngine()
 		cbt, err := eng.StartCombat("room_adj", []*combat.Combatant{player, npc}, reg, nil, "")
@@ -274,10 +285,10 @@ func TestPropertyReactiveStrike_AdjacentAlwaysTriggers(t *testing.T) {
 
 		// val=19 → d20=20; guaranteed hit against any reasonable AC.
 		hitSrc := fixedSrcRS{val: 19}
-		events := combat.CheckReactiveStrikes(cbt, player.ID, oldPos, hitSrc, nil)
+		events := combat.CheckReactiveStrikes(cbt, player.ID, oldX, oldY, hitSrc, nil)
 		if len(events) < 1 {
-			rt.Fatalf("expected at least 1 reactive strike when NPC at %d is adjacent to oldPos=%d and player moved to newPos=%d, got 0",
-				npcPos, oldPos, newPos)
+			rt.Fatalf("expected at least 1 reactive strike when NPC at (%d,%d) is adjacent to oldPos=(%d,%d) and player moved to (%d,%d), got 0",
+				npcGX, npcGY, oldX, oldY, newX, newY)
 		}
 	})
 }

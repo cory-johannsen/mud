@@ -41,12 +41,12 @@ func makeRangedCombat(t *testing.T, capacity int) (*combat.Combat, *combat.Comba
 	player := &combat.Combatant{
 		ID: "p1", Kind: combat.KindPlayer, Name: "Player",
 		CurrentHP: 20, MaxHP: 20, AC: 10, Level: 1, StrMod: 2, DexMod: 2,
-		Loadout: preset, Position: 0,
+		Loadout: preset, GridX: 0, GridY: 0,
 	}
 	npc := &combat.Combatant{
 		ID: "n1", Kind: combat.KindNPC, Name: "Ganger",
 		CurrentHP: 100, MaxHP: 100, AC: 5, Level: 1,
-		Position: 15,
+		GridX: 3, GridY: 0,
 	}
 
 	eng := combat.NewEngine()
@@ -115,12 +115,12 @@ func TestActionAttack_Melee_DoesNotConsumeAmmo(t *testing.T) {
 	player := &combat.Combatant{
 		ID: "p1", Kind: combat.KindPlayer, Name: "Player",
 		CurrentHP: 20, MaxHP: 20, AC: 10, Level: 1, StrMod: 2,
-		Position: 0,
+		GridX: 0, GridY: 0,
 	}
 	npc := &combat.Combatant{
 		ID: "n1", Kind: combat.KindNPC, Name: "Ganger",
 		CurrentHP: 100, MaxHP: 100, AC: 5, Level: 1,
-		Position: 5,
+		GridX: 1, GridY: 0,
 	}
 
 	eng := combat.NewEngine()
@@ -168,12 +168,12 @@ func TestProperty_ActionAttack_Ranged_AlwaysConsumesOneRound(t *testing.T) {
 		player := &combat.Combatant{
 			ID: "p1", Kind: combat.KindPlayer, Name: "Player",
 			CurrentHP: 20, MaxHP: 20, AC: 10, Level: 1, StrMod: 2, DexMod: 2,
-			Loadout: preset, Position: 0,
+			Loadout: preset, GridX: 0, GridY: 0,
 		}
 		npc := &combat.Combatant{
 			ID: "n1", Kind: combat.KindNPC, Name: "Ganger",
 			CurrentHP: 100, MaxHP: 100, AC: 5, Level: 1,
-			Position: 15,
+			GridX: 3, GridY: 0,
 		}
 
 		eng := combat.NewEngine()

@@ -112,7 +112,7 @@ func TestHandleUse_FocusTech_NoFP_Fails(t *testing.T) {
 	}
 	svc, charSaver, uid := setupFocusTechPlayer(t, techDef, 0, 1)
 
-	evt, err := svc.handleUse(uid, "ki_strike", "")
+	evt, err := svc.handleUse(uid, "ki_strike", "", 0, 0)
 	require.NoError(t, err)
 	require.NotNil(t, evt)
 
@@ -132,7 +132,7 @@ func TestHandleUse_FocusTech_WithFP_Succeeds(t *testing.T) {
 	}
 	svc, charSaver, uid := setupFocusTechPlayer(t, techDef, 1, 1)
 
-	evt, err := svc.handleUse(uid, "ki_strike", "")
+	evt, err := svc.handleUse(uid, "ki_strike", "", 0, 0)
 	require.NoError(t, err)
 	require.NotNil(t, evt)
 

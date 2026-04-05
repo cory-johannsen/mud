@@ -185,8 +185,8 @@ func TestHandleShove_TargetNotFound(t *testing.T) {
 // TestHandleShove_Failure verifies that handleShove returns a failure message
 // when the muscle roll total is below the target's Toughness DC.
 //
-// Precondition: player in combat; NPC Level=5 → DC=15 (Toughness DC: Level=5, Brutality=10, rank=untrained → 10+5+0+0=15); dice returns 0 (roll=1, bonus=0, total=1 < 15).
-// Postcondition: message event containing "failure"; NPC position unchanged.
+// Precondition: player in combat; NPC Level=5 → DC=15; dice returns 0 (roll=1, total=1 < 15).
+// Postcondition: message event containing "fail"; NPC GridX unchanged.
 func TestHandleShove_Failure(t *testing.T) {
 	logger := zaptest.NewLogger(t)
 	src := &fixedDiceSource{val: 0}
@@ -212,10 +212,10 @@ func TestHandleShove_Failure(t *testing.T) {
 	require.NoError(t, err)
 	combatHandler.cancelTimer(roomID)
 
-	// Record position before
+	// Record NPC grid position before the shove attempt.
 	npcCbt, ok := combatHandler.GetCombatant("u_shv_fail", inst.ID)
 	require.True(t, ok)
-	posBefore := npcCbt.Position
+	gridXBefore := npcCbt.GridX
 
 	event, err := svc.handleShove("u_shv_fail", &gamev1.ShoveRequest{Target: "Bandit"})
 	require.NoError(t, err)
@@ -224,17 +224,18 @@ func TestHandleShove_Failure(t *testing.T) {
 	require.NotNil(t, msgEvt, "expected a message event on failed shove")
 	assert.Contains(t, msgEvt.Content, "fail")
 
-	// NPC position must not change
-	assert.Equal(t, posBefore, npcCbt.Position, "NPC position must not change on failure")
+	// NPC GridX must not change on failure.
+	assert.Equal(t, gridXBefore, npcCbt.GridX, "NPC GridX must not change on shove failure")
 }
 
-// TestHandleShove_Success verifies that handleShove pushes the NPC 5ft on a standard success.
+// TestHandleShove_Success verifies that handleShove pushes the NPC 1 grid cell (5ft) on a standard success.
 //
-// Precondition: player in combat; NPC Level=1 → DC=11; dice returns 9 (roll=10, bonus=0, total=10 < 11 fails).
-// Use level=1 NPC, dice=10 for total 11 which exactly meets DC=11.
+// Precondition: player at GridX=0; NPC at GridX=1 (adjacent, melee range); NPC Level=1 → DC=11;
+// dice returns 10 (roll=11, total=11 >= 11, not crit).
+// Postcondition: NPC GridX increases by 1 (pushed away 5ft); message contains "5 ft".
 func TestHandleShove_Success(t *testing.T) {
 	logger := zaptest.NewLogger(t)
-	// NPC Level=1, DC=11; dice returns 10 → roll=11, total=11 >= 11, but < 11+10=21 (not crit)
+	// NPC Level=1, DC=11; dice returns 10 → roll=11, total=11 >= 11, but < 21 (not crit).
 	src := &fixedDiceSource{val: 10}
 	roller := dice.NewLoggedRoller(src, logger)
 
@@ -260,7 +261,17 @@ func TestHandleShove_Success(t *testing.T) {
 
 	npcCbt, ok := combatHandler.GetCombatant("u_shv_succ", inst.ID)
 	require.True(t, ok)
-	posBefore := npcCbt.Position
+
+	// Place player and NPC adjacent on X axis: player GridX=0, NPC GridX=1.
+	cbt, ok := combatHandler.GetCombatForRoom(roomID)
+	require.True(t, ok)
+	playerCbt := cbt.GetCombatant("u_shv_succ")
+	require.NotNil(t, playerCbt)
+	playerCbt.GridX = 0
+	playerCbt.GridY = 0
+	npcCbt.GridX = 1
+	npcCbt.GridY = 0
+	gridXBefore := npcCbt.GridX
 
 	event, err := svc.handleShove("u_shv_succ", &gamev1.ShoveRequest{Target: "Ganger"})
 	require.NoError(t, err)
@@ -269,18 +280,18 @@ func TestHandleShove_Success(t *testing.T) {
 	require.NotNil(t, msgEvt, "expected a message event on successful shove")
 	assert.Contains(t, msgEvt.Content, "5 ft")
 
-	// NPC must be pushed 5ft away from player
-	assert.Equal(t, posBefore+5, npcCbt.Position, "NPC must be pushed 5ft on success")
+	// NPC must be pushed 1 grid cell (5ft) away from player.
+	assert.Equal(t, gridXBefore+1, npcCbt.GridX, "NPC must be pushed 1 grid cell away on success")
 }
 
-// TestHandleShove_CriticalSuccess verifies that handleShove pushes the NPC 10ft on a critical success.
+// TestHandleShove_CriticalSuccess verifies that handleShove pushes the NPC 2 grid cells (10ft) on a critical success.
 //
-// Precondition: player in combat; NPC Level=1 → DC=11 (Toughness DC: Level=1, Brutality=10, rank=untrained → 10+1+0+0=11); dice returns 19 (roll=20, total=20 >= 21? No, 20 < 21).
-// Use Level=1, DC=11; dice=19 → roll=20, total=20 < 21 so not crit. Use Level=1, DC=11; dice returns enough.
-// beat DC by 10+: total >= DC+10=21, so need dice val 20 (roll=21). fixedDiceSource val=20.
+// Precondition: player at GridX=0; NPC at GridX=1 (adjacent); NPC Level=1 → DC=11;
+// dice returns 20 (roll=21, total=21 >= DC+10=21, critical success).
+// Postcondition: NPC GridX increases by 2 (pushed 10ft); message contains "10 ft".
 func TestHandleShove_CriticalSuccess(t *testing.T) {
 	logger := zaptest.NewLogger(t)
-	// NPC Level=1, DC=11; need total >= 21 for crit; fixedDiceSource.val=20 → roll=21, total=21 >= 21 (crit)
+	// NPC Level=1, DC=11; need total >= 21 for crit; fixedDiceSource.val=20 → roll=21, total=21 >= 21 (crit).
 	src := &fixedDiceSource{val: 20}
 	roller := dice.NewLoggedRoller(src, logger)
 
@@ -306,7 +317,17 @@ func TestHandleShove_CriticalSuccess(t *testing.T) {
 
 	npcCbt, ok := combatHandler.GetCombatant("u_shv_crit", inst.ID)
 	require.True(t, ok)
-	posBefore := npcCbt.Position
+
+	// Place player and NPC adjacent on X axis: player GridX=0, NPC GridX=1.
+	cbt, ok := combatHandler.GetCombatForRoom(roomID)
+	require.True(t, ok)
+	playerCbt := cbt.GetCombatant("u_shv_crit")
+	require.NotNil(t, playerCbt)
+	playerCbt.GridX = 0
+	playerCbt.GridY = 0
+	npcCbt.GridX = 1
+	npcCbt.GridY = 0
+	gridXBefore := npcCbt.GridX
 
 	event, err := svc.handleShove("u_shv_crit", &gamev1.ShoveRequest{Target: "Ganger"})
 	require.NoError(t, err)
@@ -315,6 +336,6 @@ func TestHandleShove_CriticalSuccess(t *testing.T) {
 	require.NotNil(t, msgEvt, "expected a message event on critical shove")
 	assert.Contains(t, msgEvt.Content, "10 ft")
 
-	// NPC must be pushed 10ft away from player
-	assert.Equal(t, posBefore+10, npcCbt.Position, "NPC must be pushed 10ft on critical success")
+	// NPC must be pushed 2 grid cells (10ft) away from player.
+	assert.Equal(t, gridXBefore+2, npcCbt.GridX, "NPC must be pushed 2 grid cells away on critical success")
 }

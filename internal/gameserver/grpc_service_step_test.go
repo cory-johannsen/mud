@@ -104,12 +104,12 @@ func TestHandleStep_NotInCombat(t *testing.T) {
 	assert.Contains(t, errEvt.Message, "only available in combat")
 }
 
-// TestHandleStep_TowardIncreasesPositionBy5 verifies that stepping toward increases
-// the player's Position by 5.
+// TestHandleStep_TowardDecreasesDistanceBy5 verifies that stepping toward decreases
+// the Chebyshev distance to the NPC by one grid cell (5ft).
 //
-// Precondition: player in combat at Position=0; direction=="toward".
-// Postcondition: player.Position becomes 5.
-func TestHandleStep_TowardIncreasesPositionBy5(t *testing.T) {
+// Precondition: player in combat at GridX=0, GridY=0; NPC at GridX=5, GridY=9; direction=="toward".
+// Postcondition: player GridX increases by 1 (moves toward NPC column), distance decreases.
+func TestHandleStep_TowardDecreasesDistanceBy5(t *testing.T) {
 	svc, sessMgr, npcMgr, combatHandler := newStepSvcWithCombat(t)
 
 	const roomID = "room_step_tr"
@@ -134,7 +134,22 @@ func TestHandleStep_TowardIncreasesPositionBy5(t *testing.T) {
 
 	playerCbt := cbt.GetCombatant("u_step_tr")
 	require.NotNil(t, playerCbt)
-	playerCbt.Position = 0
+	// Attack initializes player to GridX=0, GridY=0 and NPC to GridX=5, GridY=9.
+	playerCbt.GridX = 0
+	playerCbt.GridY = 0
+
+	var npcCbt *combat.Combatant
+	for _, c := range cbt.Combatants {
+		if c.Kind == combat.KindNPC {
+			npcCbt = c
+			break
+		}
+	}
+	require.NotNil(t, npcCbt)
+	npcCbt.GridX = 5
+	npcCbt.GridY = 9
+
+	distBefore := combat.CombatRange(*playerCbt, *npcCbt)
 
 	event, err := svc.handleStep("u_step_tr", &gamev1.StepRequest{Direction: "toward"})
 	require.NoError(t, err)
@@ -143,15 +158,17 @@ func TestHandleStep_TowardIncreasesPositionBy5(t *testing.T) {
 	require.NotNil(t, msgEvt, "expected a message event")
 	assert.Contains(t, msgEvt.Content, "toward")
 
-	assert.Equal(t, 5, playerCbt.Position, "player.Position should be 5 after stepping toward")
+	distAfter := combat.CombatRange(*playerCbt, *npcCbt)
+	assert.Less(t, distAfter, distBefore, "player should be closer to NPC after stepping toward")
+	assert.Equal(t, distBefore-5, distAfter, "distance should decrease by exactly 5ft (1 grid cell)")
 }
 
-// TestHandleStep_AwayDecreasesPositionBy5 verifies that stepping away decreases
-// the player's Position by 5.
+// TestHandleStep_AwayIncreasesDistanceBy5 verifies that stepping away increases
+// the Chebyshev distance to the NPC by one grid cell (5ft).
 //
-// Precondition: player in combat at Position=25; direction=="away".
-// Postcondition: player.Position becomes 20.
-func TestHandleStep_AwayDecreasesPositionBy5(t *testing.T) {
+// Precondition: player in combat at GridX=4, GridY=0; NPC at GridX=5, GridY=0; direction=="away".
+// Postcondition: player GridX decreases by 1 (moves away from NPC), distance increases.
+func TestHandleStep_AwayIncreasesDistanceBy5(t *testing.T) {
 	svc, sessMgr, npcMgr, combatHandler := newStepSvcWithCombat(t)
 
 	const roomID = "room_step_ai"
@@ -176,7 +193,21 @@ func TestHandleStep_AwayDecreasesPositionBy5(t *testing.T) {
 
 	playerCbt := cbt.GetCombatant("u_step_ai")
 	require.NotNil(t, playerCbt)
-	playerCbt.Position = 25
+	playerCbt.GridX = 4
+	playerCbt.GridY = 0
+
+	var npcCbt *combat.Combatant
+	for _, c := range cbt.Combatants {
+		if c.Kind == combat.KindNPC {
+			npcCbt = c
+			break
+		}
+	}
+	require.NotNil(t, npcCbt)
+	npcCbt.GridX = 5
+	npcCbt.GridY = 0
+
+	distBefore := combat.CombatRange(*playerCbt, *npcCbt)
 
 	event, err := svc.handleStep("u_step_ai", &gamev1.StepRequest{Direction: "away"})
 	require.NoError(t, err)
@@ -185,15 +216,17 @@ func TestHandleStep_AwayDecreasesPositionBy5(t *testing.T) {
 	require.NotNil(t, msgEvt, "expected a message event")
 	assert.Contains(t, msgEvt.Content, "away")
 
-	assert.Equal(t, 20, playerCbt.Position, "player.Position should be 20 after stepping away from 25")
+	distAfter := combat.CombatRange(*playerCbt, *npcCbt)
+	assert.Greater(t, distAfter, distBefore, "player should be farther from NPC after stepping away")
+	assert.Equal(t, distBefore+5, distAfter, "distance should increase by exactly 5ft (1 grid cell)")
 }
 
-// TestHandleStep_AwayFlooredAtZero verifies that stepping away from Position=0
-// does not go below zero.
+// TestHandleStep_AwayClampedAtGridBoundary verifies that stepping away when already
+// at the grid boundary (GridX=0) does not move the player off the grid.
 //
-// Precondition: player at Position=0; direction=="away".
-// Postcondition: player.Position remains 0.
-func TestHandleStep_AwayFlooredAtZero(t *testing.T) {
+// Precondition: player at GridX=0, GridY=0; NPC at GridX=5, GridY=0; direction=="away".
+// Postcondition: player GridX remains 0 (clamped at boundary).
+func TestHandleStep_AwayClampedAtGridBoundary(t *testing.T) {
 	svc, sessMgr, npcMgr, combatHandler := newStepSvcWithCombat(t)
 
 	const roomID = "room_step_fz"
@@ -218,7 +251,19 @@ func TestHandleStep_AwayFlooredAtZero(t *testing.T) {
 
 	playerCbt := cbt.GetCombatant("u_step_fz")
 	require.NotNil(t, playerCbt)
-	playerCbt.Position = 0
+	playerCbt.GridX = 0
+	playerCbt.GridY = 0
+
+	var npcCbt *combat.Combatant
+	for _, c := range cbt.Combatants {
+		if c.Kind == combat.KindNPC {
+			npcCbt = c
+			break
+		}
+	}
+	require.NotNil(t, npcCbt)
+	npcCbt.GridX = 5
+	npcCbt.GridY = 0
 
 	event, err := svc.handleStep("u_step_fz", &gamev1.StepRequest{Direction: "away"})
 	require.NoError(t, err)
@@ -226,13 +271,13 @@ func TestHandleStep_AwayFlooredAtZero(t *testing.T) {
 	msgEvt := event.GetMessage()
 	require.NotNil(t, msgEvt, "expected a message event")
 
-	assert.Equal(t, 0, playerCbt.Position, "player.Position should remain 0 when already at floor")
+	assert.Equal(t, 0, playerCbt.GridX, "player GridX should remain 0 when already at left boundary")
 }
 
 // TestHandleStep_NoReactiveStrikes verifies that stepping does NOT produce any
 // reactive strike narrative in the response, even when adjacent to an NPC.
 //
-// Precondition: player adjacent to NPC (dist <= 5); direction=="away".
+// Precondition: player adjacent to NPC (Chebyshev dist == 5ft); direction=="away".
 // Postcondition: response message does NOT contain "reactive strike".
 func TestHandleStep_NoReactiveStrikes(t *testing.T) {
 	svc, sessMgr, npcMgr, combatHandler := newStepSvcWithCombat(t)
@@ -257,19 +302,21 @@ func TestHandleStep_NoReactiveStrikes(t *testing.T) {
 	cbt, ok := combatHandler.GetCombatForRoom(roomID)
 	require.True(t, ok)
 
-	// Place player at Position=5, NPC at Position=0 (adjacent, dist=5 <= 5).
+	// Place player at GridX=1, GridY=0; NPC at GridX=2, GridY=0 (adjacent, dist=5ft).
 	playerCbt := cbt.GetCombatant("u_step_rs")
 	require.NotNil(t, playerCbt)
-	playerCbt.Position = 5
+	playerCbt.GridX = 1
+	playerCbt.GridY = 0
 
 	for _, c := range cbt.Combatants {
 		if c.Kind == combat.KindNPC {
-			c.Position = 0
+			c.GridX = 2
+			c.GridY = 0
 			break
 		}
 	}
 
-	// Step away: player moves from 5 to 0. Even though adjacent, NO reactive strike fires.
+	// Step away: player moves from GridX=1 to GridX=0. Even though adjacent, NO reactive strike fires.
 	event, err := svc.handleStep("u_step_rs", &gamev1.StepRequest{Direction: "away"})
 	require.NoError(t, err)
 	require.NotNil(t, event)
@@ -282,8 +329,8 @@ func TestHandleStep_NoReactiveStrikes(t *testing.T) {
 // TestHandleStep_MessageContainsDistance verifies that the response message includes
 // the distance to target after the step.
 //
-// Precondition: player at Position=0, NPC at Position=25; direction=="toward".
-// Postcondition: message contains distance text.
+// Precondition: player at GridX=0, GridY=0; NPC at GridX=5, GridY=0 (25ft); direction=="toward".
+// Postcondition: message contains "Distance to target" and the updated distance.
 func TestHandleStep_MessageContainsDistance(t *testing.T) {
 	svc, sessMgr, npcMgr, combatHandler := newStepSvcWithCombat(t)
 
@@ -309,11 +356,14 @@ func TestHandleStep_MessageContainsDistance(t *testing.T) {
 
 	playerCbt := cbt.GetCombatant("u_step_dist")
 	require.NotNil(t, playerCbt)
-	playerCbt.Position = 0
+	playerCbt.GridX = 0
+	playerCbt.GridY = 0
 
 	for _, c := range cbt.Combatants {
 		if c.Kind == combat.KindNPC {
-			c.Position = 25
+			// Place NPC 5 cells away on same row: dist = 5*5 = 25ft.
+			c.GridX = 5
+			c.GridY = 0
 			break
 		}
 	}
@@ -323,7 +373,7 @@ func TestHandleStep_MessageContainsDistance(t *testing.T) {
 	require.NotNil(t, event)
 	msgEvt := event.GetMessage()
 	require.NotNil(t, msgEvt, "expected a message event")
-	// After stepping toward from 0, player.Position = 5; NPC at 25; dist = 20.
+	// After stepping toward from GridX=0, player moves to GridX=1; NPC at GridX=5; dist = 4*5 = 20ft.
 	assert.Contains(t, msgEvt.Content, "Distance to target")
 	assert.Contains(t, msgEvt.Content, "20 ft")
 }

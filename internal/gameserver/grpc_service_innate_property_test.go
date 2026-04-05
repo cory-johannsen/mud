@@ -38,7 +38,7 @@ func TestPropertyInnateUse_ExactlyNActivationsConsumed(t *testing.T) {
 
 		// Activate N times — all should return an activation message containing "acid_spit"
 		for i := 0; i < n; i++ {
-			evt, err := svc.handleUse(uid, "acid_spit", "")
+			evt, err := svc.handleUse(uid, "acid_spit", "", 0, 0)
 			if err != nil {
 				rt.Fatalf("activation %d failed: %v", i, err)
 			}
@@ -52,7 +52,7 @@ func TestPropertyInnateUse_ExactlyNActivationsConsumed(t *testing.T) {
 		}
 
 		// (N+1)th activation must return "No uses remaining"
-		evt, err := svc.handleUse(uid, "acid_spit", "")
+		evt, err := svc.handleUse(uid, "acid_spit", "", 0, 0)
 		if err != nil {
 			rt.Fatalf("(N+1)th call failed: %v", err)
 		}

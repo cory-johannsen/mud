@@ -3,8 +3,11 @@ package combat
 
 import "github.com/cory-johannsen/mud/internal/game/inventory"
 
-// MaxCombatRange is the maximum allowed distance in feet between any two combatants.
-// Neither players nor NPCs may move beyond this range from their opponent.
+// MaxCombatRange is the maximum engagement distance in feet.
+// Legacy value retained for ranged weapon checks. On the 10×10 grid the actual
+// maximum Chebyshev distance is 9 squares × 5 ft = 45 ft; the 100 ft cap is never
+// reached via grid movement but acts as a hard upper bound for ranged weapon
+// range-increment calculations inherited from the 1D system.
 const MaxCombatRange = 100
 
 // Kind distinguishes player combatants from NPC combatants.
@@ -119,9 +122,11 @@ type Combatant struct {
 	// RevealedUntilRound suppresses the DC 11 flat check for attackers through this round number.
 	// Set by a successful Seek action to cbt.Round+1.
 	RevealedUntilRound int
-	// Position is the distance in feet along the combat axis from the player's starting point (0).
-	// Player combatants are initialized to 0; NPC combatants are initialized to 50.
-	Position int
+	// GridX is the column position on the combat grid (0 = leftmost, GridWidth-1 = rightmost).
+	// Player combatants spawn at the first available column in row 0.
+	GridX int
+	// GridY is the row position on the combat grid (0 = player side, GridHeight-1 = NPC side).
+	GridY int
 	// CoverEquipmentID is the ItemID of the room equipment object this combatant is
 	// using for cover. Empty string means the combatant is not in cover.
 	CoverEquipmentID string
@@ -223,25 +228,57 @@ func DefaultSaveRank(rank string) string {
 	return rank
 }
 
-// combatantDist returns the distance in feet between two combatants.
-//
-// Precondition: a and b must be non-nil.
-// Postcondition: Returns abs(a.Position - b.Position).
-func combatantDist(a, b *Combatant) int {
-	return posDist(a.Position, b.Position)
-}
-
-// PosDist returns the absolute distance between two raw position values.
+// CombatRange returns the Chebyshev (chessboard) distance in feet between two combatants.
+// Chebyshev distance = max(|dx|, |dy|) squares × 5 ft/square.
 //
 // Precondition: none.
-// Postcondition: Returns abs(a - b).
-func PosDist(a, b int) int {
-	d := a - b
-	if d < 0 {
-		d = -d
+// Postcondition: Returns non-negative distance in feet.
+func CombatRange(a, b Combatant) int {
+	dx := a.GridX - b.GridX
+	if dx < 0 {
+		dx = -dx
 	}
-	return d
+	dy := a.GridY - b.GridY
+	if dy < 0 {
+		dy = -dy
+	}
+	if dx > dy {
+		return dx * 5
+	}
+	return dy * 5
 }
 
-// posDist is the unexported alias for PosDist, kept for internal use.
-func posDist(a, b int) int { return PosDist(a, b) }
+// IsFlanked reports whether target is flanked by the given attackers.
+// A target is flanked when at least two attackers are in opposite quadrants:
+// both row and column differ by ≥1 in opposite directions relative to the target.
+//
+// Precondition: none.
+// Postcondition: Returns true iff the flanking condition is met.
+func IsFlanked(target Combatant, attackers []Combatant) bool {
+	for i := 0; i < len(attackers); i++ {
+		for j := i + 1; j < len(attackers); j++ {
+			a, b := attackers[i], attackers[j]
+			adx := a.GridX - target.GridX
+			ady := a.GridY - target.GridY
+			bdx := b.GridX - target.GridX
+			bdy := b.GridY - target.GridY
+			if adx != 0 && ady != 0 && bdx != 0 && bdy != 0 {
+				if sign(adx) != sign(bdx) && sign(ady) != sign(bdy) {
+					return true
+				}
+			}
+		}
+	}
+	return false
+}
+
+func sign(n int) int {
+	if n > 0 {
+		return 1
+	}
+	if n < 0 {
+		return -1
+	}
+	return 0
+}
+

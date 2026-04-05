@@ -73,7 +73,7 @@ func TestHandleUse_PreparedTech_ExpendsSlot(t *testing.T) {
 	}
 	svc, sessMgr, uid := setupUseTechPlayer(t, prepRepo)
 
-	evt, err := svc.handleUse(uid, "shock_grenade", "")
+	evt, err := svc.handleUse(uid, "shock_grenade", "", 0, 0)
 	require.NoError(t, err)
 	require.NotNil(t, evt)
 
@@ -96,7 +96,7 @@ func TestHandleUse_PreparedTech_AllExpended_ReturnsNoRemaining(t *testing.T) {
 	}
 	svc, _, uid := setupUseTechPlayer(t, prepRepo)
 
-	evt, err := svc.handleUse(uid, "shock_grenade", "")
+	evt, err := svc.handleUse(uid, "shock_grenade", "", 0, 0)
 	require.NoError(t, err)
 	require.NotNil(t, evt)
 
@@ -115,7 +115,7 @@ func TestHandleUse_PreparedTech_NoSlotForTech_ReturnsNoRemaining(t *testing.T) {
 	}
 	svc, _, uid := setupUseTechPlayer(t, prepRepo)
 
-	evt, err := svc.handleUse(uid, "shock_grenade", "")
+	evt, err := svc.handleUse(uid, "shock_grenade", "", 0, 0)
 	require.NoError(t, err)
 	require.NotNil(t, evt)
 
@@ -137,7 +137,7 @@ func TestHandleUse_NoArg_IncludesPreparedTechs(t *testing.T) {
 	}
 	svc, _, uid := setupUseTechPlayer(t, prepRepo)
 
-	evt, err := svc.handleUse(uid, "", "")
+	evt, err := svc.handleUse(uid, "", "", 0, 0)
 	require.NoError(t, err)
 	require.NotNil(t, evt)
 
@@ -187,7 +187,7 @@ func TestPropertyHandleUse_PreparedTech_ExpendsExactly(t *testing.T) {
 
 		// Call use n times — all should succeed.
 		for i := 0; i < n; i++ {
-			evt, err := svc.handleUse(uid, "test_tech", "")
+			evt, err := svc.handleUse(uid, "test_tech", "", 0, 0)
 			if err != nil {
 				rt.Fatalf("call %d: unexpected error: %v", i, err)
 			}
@@ -197,7 +197,7 @@ func TestPropertyHandleUse_PreparedTech_ExpendsExactly(t *testing.T) {
 		}
 
 		// (N+1)th call must return "no remaining".
-		evt, err := svc.handleUse(uid, "test_tech", "")
+		evt, err := svc.handleUse(uid, "test_tech", "", 0, 0)
 		if err != nil {
 			rt.Fatalf("(n+1)th call: unexpected error: %v", err)
 		}
@@ -249,7 +249,7 @@ func TestHandleUse_NoArg_PreparedTech_UsesDisplayName(t *testing.T) {
 	require.True(t, ok)
 	sess.PreparedTechs = prepRepo.slots
 
-	evt, err := svc.handleUse(uid, "", "")
+	evt, err := svc.handleUse(uid, "", "", 0, 0)
 	require.NoError(t, err)
 	require.NotNil(t, evt)
 
@@ -291,7 +291,7 @@ func TestHandleUse_NoArg_SpontaneousTech_UsesDisplayName(t *testing.T) {
 	sess.SpontaneousTechs = map[int][]string{1: {"neural_spike"}}
 	sess.SpontaneousUsePools = map[int]session.UsePool{1: {Remaining: 2, Max: 2}}
 
-	evt, err := svc.handleUse(uid, "", "")
+	evt, err := svc.handleUse(uid, "", "", 0, 0)
 	require.NoError(t, err)
 	require.NotNil(t, evt)
 
@@ -335,7 +335,7 @@ func TestHandleUse_NoArg_InnateTech_UsesDisplayName(t *testing.T) {
 		"bio_pulse": {MaxUses: 0, UsesRemaining: 0}, // unlimited
 	}
 
-	evt, err := svc.handleUse(uid, "", "")
+	evt, err := svc.handleUse(uid, "", "", 0, 0)
 	require.NoError(t, err)
 	require.NotNil(t, evt)
 

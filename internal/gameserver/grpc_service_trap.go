@@ -307,7 +307,7 @@ func (s *GameServiceServer) checkConsumableTraps(roomID, movedCombatantID string
 	if mover == nil {
 		return
 	}
-	movedPos := mover.Position
+	movedPos := mover.GridX * 5
 
 	instanceIDs := s.trapMgr.TrapsForRoom(zone.ID, roomID)
 	for _, instanceID := range instanceIDs {
@@ -333,7 +333,7 @@ func (s *GameServiceServer) checkConsumableTraps(roomID, movedCombatantID string
 			s.fireConsumableTrapOnCombatant(mover, tmpl, instanceID, dangerLevel, roomID)
 		} else {
 			for _, c := range combatants {
-				d := c.Position - inst.DeployPosition
+				d := c.GridX*5 - inst.DeployPosition
 				if d < 0 {
 					d = -d
 				}

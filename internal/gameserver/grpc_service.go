@@ -2182,7 +2182,7 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 	case *gamev1.ClientMessage_InteractRequest:
 		return s.handleInteract(uid, p.InteractRequest.InstanceId)
 	case *gamev1.ClientMessage_UseRequest:
-		return s.handleUse(uid, p.UseRequest.FeatId, p.UseRequest.GetTarget())
+		return s.handleUse(uid, p.UseRequest.FeatId, p.UseRequest.GetTarget(), p.UseRequest.GetTargetX(), p.UseRequest.GetTargetY())
 	case *gamev1.ClientMessage_Action:
 		return s.handleAction(uid, p.Action)
 	case *gamev1.ClientMessage_RaiseShield:
@@ -7289,7 +7289,8 @@ func (s *GameServiceServer) handleTabComplete(uid, prefix string) (*gamev1.Serve
 //
 // Precondition: uid must resolve to an active session with a loaded character.
 // Postcondition: Returns a ServerEvent with UseResponse containing choices or an activation message.
-func (s *GameServiceServer) handleUse(uid, abilityID, targetID string) (*gamev1.ServerEvent, error) {
+// targetX and targetY are the 0-based grid coordinates of the AoE burst center; -1 means unset / no AoE.
+func (s *GameServiceServer) handleUse(uid, abilityID, targetID string, targetX, targetY int32) (*gamev1.ServerEvent, error) {
 	sess, ok := s.sessions.GetPlayer(uid)
 	if !ok {
 		return nil, fmt.Errorf("player %q not found", uid)
@@ -7521,7 +7522,42 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string) (*gamev1.
 				}
 				condID := f.ConditionID
 				if condID != "" && s.condRegistry != nil {
-					if f.ConditionTarget == "foe" {
+					// REQ-AOE-2: When feat has aoe_radius > 0 and target coordinates are provided,
+					// apply the condition to every living combatant within Chebyshev distance aoe_radius.
+					// REQ-2D-5e: AoE does not distinguish friend from foe — all combatants in radius are affected.
+					// Sentinel: targetX < 0 or targetY < 0 means no AoE target (use single-target path instead).
+					if f.AoeRadius > 0 && (targetX >= 0 && targetY >= 0) {
+						var cbt *combat.Combat
+						if s.combatH != nil {
+							cbt = s.combatH.ActiveCombatForPlayer(uid)
+						}
+						if cbt == nil {
+							return messageEvent(fmt.Sprintf("You must be in combat to use %s.", f.Name)), nil
+						}
+						center := combat.Combatant{GridX: int(targetX), GridY: int(targetY)}
+						if def, ok := s.condRegistry.Get(condID); ok {
+							for _, c := range combat.CombatantsInRadius(cbt, center, f.AoeRadius) {
+								if condSet := cbt.Conditions[c.ID]; condSet != nil {
+									if err := condSet.Apply(c.ID, def, 1, -1); err != nil {
+										s.logger.Warn("failed to apply feat AoE condition",
+											zap.String("combatant_id", c.ID),
+											zap.String("condition_id", condID),
+											zap.Error(err),
+										)
+									}
+								} else {
+									s.logger.Warn("feat AoE: no condition set for combatant, skipping",
+										zap.String("combatant_id", c.ID),
+										zap.String("condition_id", condID),
+									)
+								}
+							}
+						} else {
+							s.logger.Warn("feat AoE condition not found in registry",
+								zap.String("condition_id", condID),
+							)
+						}
+					} else if f.ConditionTarget == "foe" {
 						// Apply condition to the combat target (foe).
 						foeID := targetID
 						if foeID == "" {
@@ -7658,7 +7694,7 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string) (*gamev1.
 						zap.Error(err))
 				}
 				sess.PreparedTechs[lvl][idx].Expended = true
-				return s.activateTechWithEffects(sess, uid, abilityID, targetID, fmt.Sprintf("You activate %s.", abilityID), nil)
+				return s.activateTechWithEffects(sess, uid, abilityID, targetID, fmt.Sprintf("You activate %s.", abilityID), nil, targetX, targetY)
 			}
 		}
 		// No non-expended slot found for this tech ID.
@@ -7708,7 +7744,7 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string) (*gamev1.
 		}
 		pool.Remaining--
 		sess.SpontaneousUsePools[foundLevel] = pool
-		return s.activateTechWithEffects(sess, uid, abilityID, targetID, fmt.Sprintf("You activate %s. (%d uses remaining at level %d.)", abilityID, pool.Remaining, foundLevel), nil)
+		return s.activateTechWithEffects(sess, uid, abilityID, targetID, fmt.Sprintf("You activate %s. (%d uses remaining at level %d.)", abilityID, pool.Remaining, foundLevel), nil, targetX, targetY)
 	}
 	// Innate tech activation
 	if s.innateTechRepo != nil {
@@ -7727,9 +7763,9 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string) (*gamev1.
 					return nil, fmt.Errorf("handleUse: decrement innate %s: %w", abilityID, err)
 				}
 				slot.UsesRemaining--
-				return s.activateTechWithEffects(sess, uid, abilityID, targetID, fmt.Sprintf("You activate %s. (%d uses remaining.)", abilityID, slot.UsesRemaining), nil)
+				return s.activateTechWithEffects(sess, uid, abilityID, targetID, fmt.Sprintf("You activate %s. (%d uses remaining.)", abilityID, slot.UsesRemaining), nil, targetX, targetY)
 			}
-			return s.activateTechWithEffects(sess, uid, abilityID, targetID, fmt.Sprintf("You activate %s.", abilityID), nil)
+			return s.activateTechWithEffects(sess, uid, abilityID, targetID, fmt.Sprintf("You activate %s.", abilityID), nil, targetX, targetY)
 		}
 		// REQ-USE-1: fall through to room equipment before reporting no match.
 		if evt, err := s.tryRoomEquipFallback(uid, sess.RoomID, abilityID); evt != nil || err != nil {
@@ -7896,23 +7932,33 @@ func (s *GameServiceServer) handleAmpedUse(
 	// Resolve tech (amped or base) and activate inline (avoids registry re-fetch).
 	resolvedTech := technology.TechAtSlotLevel(techDef, slotLevel)
 
-	target, errMsg := s.resolveUseTarget(uid, targetID, resolvedTech)
-	if errMsg != "" {
-		return messageEvent(errMsg), nil
-	}
 	var cbt *combat.Combat
 	if s.combatH != nil {
 		cbt = s.combatH.ActiveCombatForPlayer(uid)
 	}
+
+	// REQ-AOE-1: When tech has aoe_radius > 0 and target coordinates are provided,
+	// collect all living combatants within Chebyshev distance aoe_radius of the target square.
+	// Sentinel: techTargetX < 0 or techTargetY < 0 means no AoE target (use single-target path instead).
 	var techTargets []*combat.Combatant
-	if resolvedTech.Targets == technology.TargetsAllEnemies && cbt != nil {
-		for _, c := range cbt.Combatants {
-			if c.Kind == combat.KindNPC && !c.IsDead() {
-				techTargets = append(techTargets, c)
-			}
+	techTargetX, techTargetY := req.GetTargetX(), req.GetTargetY()
+	if resolvedTech.AoeRadius > 0 && (techTargetX >= 0 && techTargetY >= 0) && cbt != nil {
+		center := combat.Combatant{GridX: int(techTargetX), GridY: int(techTargetY)}
+		techTargets = combat.CombatantsInRadius(cbt, center, resolvedTech.AoeRadius)
+	} else {
+		target, errMsg := s.resolveUseTarget(uid, targetID, resolvedTech)
+		if errMsg != "" {
+			return messageEvent(errMsg), nil
 		}
-	} else if target != nil {
-		techTargets = []*combat.Combatant{target}
+		if resolvedTech.Targets == technology.TargetsAllEnemies && cbt != nil {
+			for _, c := range cbt.Combatants {
+				if c.Kind == combat.KindNPC && !c.IsDead() {
+					techTargets = append(techTargets, c)
+				}
+			}
+		} else if target != nil {
+			techTargets = []*combat.Combatant{target}
+		}
 	}
 
 	activationLine := fmt.Sprintf("%s activated. Level-%d uses remaining: %d.", resolvedTech.Name, slotLevel, pool.Remaining)
@@ -7980,11 +8026,13 @@ func (s *GameServiceServer) resolveUseTarget(uid, targetID string, tech *technol
 //   - uid must match sess.UID.
 //   - abilityID must be a valid tech ID known to s.techRegistry (or may be absent for legacy feats).
 //   - fallbackMsg is returned verbatim when s.techRegistry is nil or the tech is not registered.
+//   - targetX and targetY are the 0-based grid coordinates of an AoE burst center;
+//     -1 means unset / no AoE (single-target or all-enemies resolution is used instead).
 //
 // Postconditions:
 //   - If s.techRegistry is nil or the tech is not registered, falls back to fallbackMsg.
 //   - Returns a non-nil ServerEvent on success.
-func (s *GameServiceServer) activateTechWithEffects(sess *session.PlayerSession, uid, abilityID, targetID, fallbackMsg string, querier RoomQuerier) (*gamev1.ServerEvent, error) {
+func (s *GameServiceServer) activateTechWithEffects(sess *session.PlayerSession, uid, abilityID, targetID, fallbackMsg string, querier RoomQuerier, targetX, targetY int32) (*gamev1.ServerEvent, error) {
 	if s.techRegistry == nil {
 		return messageEvent(fallbackMsg), nil
 	}
@@ -8005,24 +8053,35 @@ func (s *GameServiceServer) activateTechWithEffects(sess *session.PlayerSession,
 			}
 		}
 	}
-	target, errMsg := s.resolveUseTarget(uid, targetID, techDef)
-	if errMsg != "" {
-		return messageEvent(errMsg), nil
-	}
+
 	var cbt *combat.Combat
 	if s.combatH != nil {
 		cbt = s.combatH.ActiveCombatForPlayer(uid)
 	}
+
 	var techTargets []*combat.Combatant
-	if techDef.Targets == technology.TargetsAllEnemies && cbt != nil { //nolint:gocritic
-		for _, c := range cbt.Combatants {
-			if c.Kind == combat.KindNPC && !c.IsDead() {
-				techTargets = append(techTargets, c)
-			}
+	// REQ-AOE-1: When tech has aoe_radius > 0 and target coordinates are provided,
+	// collect all living combatants within Chebyshev distance aoe_radius of the target square.
+	// Sentinel: targetX < 0 or targetY < 0 means no AoE target (use single-target path instead).
+	if techDef.AoeRadius > 0 && (targetX >= 0 && targetY >= 0) && cbt != nil {
+		center := combat.Combatant{GridX: int(targetX), GridY: int(targetY)}
+		techTargets = combat.CombatantsInRadius(cbt, center, techDef.AoeRadius)
+	} else {
+		target, errMsg := s.resolveUseTarget(uid, targetID, techDef)
+		if errMsg != "" {
+			return messageEvent(errMsg), nil
 		}
-	} else if target != nil {
-		techTargets = []*combat.Combatant{target}
+		if techDef.Targets == technology.TargetsAllEnemies && cbt != nil { //nolint:gocritic
+			for _, c := range cbt.Combatants {
+				if c.Kind == combat.KindNPC && !c.IsDead() {
+					techTargets = append(techTargets, c)
+				}
+			}
+		} else if target != nil {
+			techTargets = []*combat.Combatant{target}
+		}
 	}
+
 	msgs := ResolveTechEffects(sess, techDef, techTargets, cbt, s.condRegistry, globalRandSrc{}, querier)
 	return messageEvent(strings.Join(msgs, "\n")), nil
 }
@@ -9081,7 +9140,7 @@ func (s *GameServiceServer) handleDisarm(uid string, req *gamev1.DisarmRequest) 
 // Combat only; costs 1 AP.
 //
 // Precondition: uid must be in active combat; req.Target must name an NPC in the room.
-// Postcondition: On success, NPC combatant's Position is updated by 5ft (or 10ft on crit).
+// Postcondition: On success, NPC combatant's GridX is updated by 1 cell (5ft) or 2 cells (10ft on crit).
 func (s *GameServiceServer) handleShove(uid string, req *gamev1.ShoveRequest) (*gamev1.ServerEvent, error) {
 	sess, ok := s.sessions.GetPlayer(uid)
 	if !ok {
@@ -9147,79 +9206,96 @@ func (s *GameServiceServer) handleShove(uid string, req *gamev1.ShoveRequest) (*
 	return messageEvent(detail + fmt.Sprintf(" — success! %s is pushed back 5 ft.", inst.Name())), nil
 }
 
-// handleStride moves the player 25 ft toward the nearest living enemy.
-// Combat only; costs 1 AP. Direction is always "toward" — stride closes distance.
+// handleStride moves the player one grid cell in the requested direction.
+// Combat only; costs 1 AP. Defaults to "toward" the nearest enemy when no direction is given.
 //
 // Precondition: uid must be in active combat.
-// Postcondition: Player combatant's Position updated toward the nearest enemy; message event returned.
-// When the player strides away from adjacent NPCs, CheckReactiveStrikes fires
-// and the results are appended to the response message.
-func (s *GameServiceServer) handleStride(uid string, _ *gamev1.StrideRequest) (*gamev1.ServerEvent, error) {
+// Postcondition: Player combatant's GridX/GridY updated; CheckReactiveStrikes fires when leaving
+// an adjacent NPC; message event returned.
+func (s *GameServiceServer) handleStride(uid string, req *gamev1.StrideRequest) (*gamev1.ServerEvent, error) {
 	sess, ok := s.sessions.GetPlayer(uid)
 	if !ok {
 		return nil, fmt.Errorf("player %q not found", uid)
 	}
-
 	if sess.Status != statusInCombat {
 		return errorEvent("Stride is only available in combat."), nil
 	}
-
 	if s.combatH == nil {
 		return errorEvent("Combat handler unavailable."), nil
 	}
-
 	if err := s.combatH.SpendAP(uid, 1); err != nil {
 		return errorEvent(err.Error()), nil
 	}
-
 	cbt, ok := s.combatH.GetCombatForRoom(sess.RoomID)
 	if !ok {
 		return errorEvent("No active combat found."), nil
 	}
-
 	combatant := cbt.GetCombatant(uid)
 	if combatant == nil {
 		return errorEvent("You are not a combatant in this fight."), nil
 	}
 
-	oldPos := combatant.Position
+	oldX, oldY := combatant.GridX, combatant.GridY
 
-	// Find the nearest living enemy to determine stride direction.
+	dir := req.GetDirection()
+	if dir == "" {
+		dir = "toward"
+	}
+
+	validDirs := map[string]bool{
+		"n": true, "s": true, "e": true, "w": true,
+		"ne": true, "nw": true, "se": true, "sw": true,
+		"toward": true, "away": true,
+	}
+	if !validDirs[dir] {
+		return errorEvent(fmt.Sprintf("Unknown direction %q. Use a compass direction (n/s/e/w/ne/nw/se/sw) or 'toward'/'away'.", dir)), nil
+	}
+
+	// Find nearest enemy for toward/away directions.
 	var opponent *combat.Combatant
 	for _, c := range cbt.Combatants {
 		if c.Kind != combat.KindPlayer && !c.IsDead() {
-			if opponent == nil || combat.PosDist(combatant.Position, c.Position) < combat.PosDist(combatant.Position, opponent.Position) {
+			if opponent == nil || combat.CombatRange(*combatant, *c) < combat.CombatRange(*combatant, *opponent) {
 				opponent = c
 			}
 		}
 	}
 
-	// Always stride toward the enemy: move position toward opponent.
-	if opponent != nil && combatant.Position > opponent.Position {
-		// Player is ahead of (beyond) opponent — decrease to close gap.
-		if combatant.Position-25 < 0 {
-			combatant.Position = 0
-		} else {
-			combatant.Position -= 25
-		}
-	} else {
-		// Player is behind or at opponent — increase to close gap.
-		combatant.Position += 25
+	width, height := cbt.GridWidth, cbt.GridHeight
+	if width == 0 {
+		width = 10
 	}
+	if height == 0 {
+		height = 10
+	}
+	dx, dy := combat.CompassDelta(dir, combatant, opponent)
+	newX := combatant.GridX + dx
+	newY := combatant.GridY + dy
+	if newX < 0 {
+		newX = 0
+	} else if newX >= width {
+		newX = width - 1
+	}
+	if newY < 0 {
+		newY = 0
+	} else if newY >= height {
+		newY = height - 1
+	}
+	combatant.GridX = newX
+	combatant.GridY = newY
 
 	s.clearPlayerCover(uid, sess)
 
-	msg := "You stride toward your enemy."
+	msg := fmt.Sprintf("You stride %s.", dir)
 	rsUpdater := func(id string, hp int) {
 		if target, ok := s.sessions.GetPlayer(id); ok {
 			target.CurrentHP = hp
 		}
 	}
-	rsEvents := combat.CheckReactiveStrikes(cbt, uid, oldPos, globalRandSrc{}, rsUpdater)
+	rsEvents := combat.CheckReactiveStrikes(cbt, uid, oldX, oldY, globalRandSrc{}, rsUpdater)
 	for _, ev := range rsEvents {
 		msg += "\n" + ev.Narrative
 	}
-	// Pressure plate traps fire on stride during combat.
 	if room, ok := s.world.GetRoom(sess.RoomID); ok {
 		s.checkPressurePlateTraps(uid, sess, room)
 	}
@@ -9228,81 +9304,88 @@ func (s *GameServiceServer) handleStride(uid string, _ *gamev1.StrideRequest) (*
 	return messageEvent(msg), nil
 }
 
-// handleStep moves the player 5 ft toward or away from the combat target.
+// handleStep moves the player one grid cell in the requested direction without triggering Reactive Strikes.
 // Combat only; costs 1 AP. Step explicitly does NOT trigger Reactive Strikes.
 //
 // Precondition: uid must be in active combat.
-// Postcondition: Player combatant's Position updated by 5; message event returned.
+// Postcondition: Player combatant's GridX/GridY updated by one cell; message event returned.
 // No CheckReactiveStrikes is called — Step is safe from reactive strikes by rule.
 func (s *GameServiceServer) handleStep(uid string, req *gamev1.StepRequest) (*gamev1.ServerEvent, error) {
 	sess, ok := s.sessions.GetPlayer(uid)
 	if !ok {
 		return nil, fmt.Errorf("player %q not found", uid)
 	}
-
 	if sess.Status != statusInCombat {
 		return errorEvent("Step is only available in combat."), nil
 	}
-
 	if s.combatH == nil {
 		return errorEvent("Combat handler unavailable."), nil
 	}
-
 	if err := s.combatH.SpendAP(uid, 1); err != nil {
 		return errorEvent(err.Error()), nil
 	}
-
 	cbt, ok := s.combatH.GetCombatForRoom(sess.RoomID)
 	if !ok {
 		return errorEvent("No active combat found."), nil
 	}
-
 	combatant := cbt.GetCombatant(uid)
 	if combatant == nil {
 		return errorEvent("You are not a combatant in this fight."), nil
 	}
 
 	dir := req.GetDirection()
-	switch dir {
-	case "toward", "":
+	if dir == "" {
 		dir = "toward"
-		combatant.Position += 5 // toward NPC = increase position
-	case "away":
-		if combatant.Position-5 < 0 {
-			combatant.Position = 0
-		} else {
-			combatant.Position -= 5
-		}
-	default:
-		return errorEvent(fmt.Sprintf("Unknown direction %q. Use 'toward' or 'away'.", dir)), nil
 	}
+	validDirs := map[string]bool{
+		"n": true, "s": true, "e": true, "w": true,
+		"ne": true, "nw": true, "se": true, "sw": true,
+		"toward": true, "away": true,
+	}
+	if !validDirs[dir] {
+		return errorEvent(fmt.Sprintf("Unknown direction %q. Use 'toward', 'away', or a compass direction.", dir)), nil
+	}
+
+	// Find nearest enemy for toward/away.
+	var opponent *combat.Combatant
+	for _, c := range cbt.Combatants {
+		if c.Kind != combat.KindPlayer && !c.IsDead() {
+			if opponent == nil || combat.CombatRange(*combatant, *c) < combat.CombatRange(*combatant, *opponent) {
+				opponent = c
+			}
+		}
+	}
+
+	width, height := cbt.GridWidth, cbt.GridHeight
+	if width == 0 {
+		width = 10
+	}
+	if height == 0 {
+		height = 10
+	}
+	dx, dy := combat.CompassDelta(dir, combatant, opponent)
+	newX := combatant.GridX + dx
+	newY := combatant.GridY + dy
+	if newX < 0 {
+		newX = 0
+	} else if newX >= width {
+		newX = width - 1
+	}
+	if newY < 0 {
+		newY = 0
+	} else if newY >= height {
+		newY = height - 1
+	}
+	combatant.GridX = newX
+	combatant.GridY = newY
 
 	s.clearPlayerCover(uid, sess)
 
-	// Find the NPC combatant to compute distance; clamp if step would exceed MaxCombatRange.
 	dist := 0
-	for _, c := range cbt.Combatants {
-		if c.Kind == combat.KindNPC {
-			d := combat.PosDist(combatant.Position, c.Position)
-			if d > combat.MaxCombatRange {
-				// Push player back so distance equals MaxCombatRange.
-				if combatant.Position > c.Position {
-					combatant.Position = c.Position + combat.MaxCombatRange
-				} else {
-					combatant.Position = c.Position - combat.MaxCombatRange
-					if combatant.Position < 0 {
-						combatant.Position = 0
-					}
-				}
-				d = combat.MaxCombatRange
-			}
-			dist = d
-			break
-		}
+	if opponent != nil {
+		dist = combat.CombatRange(*combatant, *opponent)
 	}
-
 	msg := fmt.Sprintf("You step %s. Distance to target: %d ft.", dir, dist)
-	// Pressure plate traps fire on step during combat.
 	if room, ok := s.world.GetRoom(sess.RoomID); ok {
 		s.checkPressurePlateTraps(uid, sess, room)
 	}
@@ -9317,7 +9400,7 @@ func (s *GameServiceServer) handleStep(uid string, req *gamev1.StepRequest) (*ga
 // Combat only; costs 1 AP.
 //
 // Precondition: uid must be in active combat; req.Target must name an NPC in the room.
-// Postcondition: On success, player combatant's Position increases by 5.
+// Postcondition: On success, player combatant's GridX/GridY updated by CompassDelta (1 cell toward target).
 // On failure, NPC makes a reactive strike that may reduce player HP; no position change.
 func (s *GameServiceServer) handleTumble(uid string, req *gamev1.TumbleRequest) (*gamev1.ServerEvent, error) {
 	sess, ok := s.sessions.GetPlayer(uid)
@@ -9372,16 +9455,42 @@ func (s *GameServiceServer) handleTumble(uid string, req *gamev1.TumbleRequest) 
 		if combatant == nil {
 			return errorEvent("You are not a combatant in this fight."), nil
 		}
-		combatant.Position += 5
+		// Move player one grid cell toward the NPC by finding it and using CompassDelta.
+		var npcCbt *combat.Combatant
+		for _, c := range cbt.Combatants {
+			if c.Kind == combat.KindNPC && c.ID == inst.ID {
+				npcCbt = c
+				break
+			}
+		}
+		dx, dy := combat.CompassDelta("toward", combatant, npcCbt)
+		width, height := cbt.GridWidth, cbt.GridHeight
+		if width == 0 {
+			width = 10
+		}
+		if height == 0 {
+			height = 10
+		}
+		newX := combatant.GridX + dx
+		newY := combatant.GridY + dy
+		if newX < 0 {
+			newX = 0
+		} else if newX >= width {
+			newX = width - 1
+		}
+		if newY < 0 {
+			newY = 0
+		} else if newY >= height {
+			newY = height - 1
+		}
+		combatant.GridX = newX
+		combatant.GridY = newY
 		s.clearPlayerCover(uid, sess)
 
 		// Compute new distance to the target NPC.
 		dist := 0
-		for _, c := range cbt.Combatants {
-			if c.Kind == combat.KindNPC && c.ID == inst.ID {
-				dist = combat.PosDist(combatant.Position, c.Position)
-				break
-			}
+		if npcCbt != nil {
+			dist = combat.CombatRange(*combatant, *npcCbt)
 		}
 		return messageEvent(detail + fmt.Sprintf(" — success! You tumble through %s's space! Distance: %d ft.", inst.Name(), dist)), nil
 	}
@@ -11119,7 +11228,7 @@ func (s *GameServiceServer) triggerPassiveTechsForRoom(roomID string) {
 			if !def.Passive {
 				continue
 			}
-			evt, err := s.activateTechWithEffects(sess, sess.UID, techID, "", "", s)
+			evt, err := s.activateTechWithEffects(sess, sess.UID, techID, "", "", s, 0, 0)
 			if err != nil {
 				s.logger.Warn("passive tech activation error",
 					zap.String("uid", sess.UID),

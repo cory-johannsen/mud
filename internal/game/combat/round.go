@@ -15,10 +15,10 @@ import (
 // (≤5 ft) to mover before the stride and whose position did not change
 // (i.e., they were not the one striding).
 //
-// Precondition: cbt non-nil; moverID non-empty; oldPos is mover's position before stride.
+// Precondition: cbt non-nil; moverID non-empty; oldX/oldY is mover's grid position before stride.
 // Postcondition: Returns zero or more RoundEvent{ActionType: ActionAttack} events.
 // targetUpdater(id, hp) is called after each damage application; may be nil (no-op).
-func CheckReactiveStrikes(cbt *Combat, moverID string, oldPos int, rng Source, targetUpdater func(id string, hp int)) []RoundEvent {
+func CheckReactiveStrikes(cbt *Combat, moverID string, oldX, oldY int, rng Source, targetUpdater func(id string, hp int)) []RoundEvent {
 	if targetUpdater == nil {
 		targetUpdater = func(id string, hp int) {}
 	}
@@ -26,20 +26,22 @@ func CheckReactiveStrikes(cbt *Combat, moverID string, oldPos int, rng Source, t
 	if mover == nil {
 		return nil
 	}
-	newPos := mover.Position
+	newX, newY := mover.GridX, mover.GridY
 
 	var events []RoundEvent
 	for _, c := range cbt.Combatants {
 		if c.ID == moverID || c.IsDead() {
 			continue
 		}
-		// Distance before stride: use oldPos for the mover's position.
-		if posDist(c.Position, oldPos) > 5 {
+		// Distance before stride: use oldX/oldY for the mover's position.
+		oldMover := Combatant{GridX: oldX, GridY: oldY}
+		if CombatRange(*c, oldMover) > 5 {
 			// NPC was not adjacent before the stride — no reactive strike.
 			continue
 		}
 		// Check that the mover actually moved away (new distance > 5).
-		if posDist(c.Position, newPos) <= 5 {
+		newMover := Combatant{GridX: newX, GridY: newY}
+		if CombatRange(*c, newMover) <= 5 {
 			// Mover didn't move away from this combatant.
 			continue
 		}
@@ -80,6 +82,64 @@ func CheckReactiveStrikes(cbt *Combat, moverID string, oldPos int, rng Source, t
 		})
 	}
 	return events
+}
+
+// CompassDelta returns the (dx, dy) movement delta for one stride step.
+// Compass directions: n/s/e/w/ne/nw/se/sw move exactly 1 square.
+// "toward" moves one step toward the opponent (Y reduced first, then X).
+// "away" is the inverse of "toward".
+//
+// Precondition: opponent may be nil (only used for toward/away).
+// Postcondition: Returns (dx, dy) where each component is -1, 0, or 1.
+func CompassDelta(dir string, actor *Combatant, opponent *Combatant) (int, int) {
+	switch dir {
+	case "n":
+		return 0, -1
+	case "s":
+		return 0, 1
+	case "e":
+		return 1, 0
+	case "w":
+		return -1, 0
+	case "ne":
+		return 1, -1
+	case "nw":
+		return -1, -1
+	case "se":
+		return 1, 1
+	case "sw":
+		return -1, 1
+	case "toward":
+		if opponent == nil {
+			return 0, 0
+		}
+		return towardDelta(actor.GridX, actor.GridY, opponent.GridX, opponent.GridY)
+	case "away":
+		if opponent == nil {
+			return 0, 0
+		}
+		dx, dy := towardDelta(actor.GridX, actor.GridY, opponent.GridX, opponent.GridY)
+		return -dx, -dy
+	default:
+		return 0, 0
+	}
+}
+
+// towardDelta returns a (dx, dy) step of magnitude ≤1 toward (tx, ty) from (fx, fy).
+// Ties resolved by reducing Y distance first, then X.
+func towardDelta(fx, fy, tx, ty int) (int, int) {
+	dx, dy := 0, 0
+	if tx > fx {
+		dx = 1
+	} else if tx < fx {
+		dx = -1
+	}
+	if ty > fy {
+		dy = 1
+	} else if ty < fy {
+		dy = -1
+	}
+	return dx, dy
 }
 
 // attackNarrative builds a human-readable attack result string.
@@ -145,7 +205,9 @@ type RoundEvent struct {
 	// CoverEquipmentID is the item ID of the cover equipment hit in an ActionCoverHit event.
 	// Empty for all other event types.
 	CoverEquipmentID string
-	Narrative        string
+	Narrative string
+	// Flanking is true when the attacker benefits from the flanking +2 bonus on this attack.
+	Flanking bool
 }
 
 // findCombatantByName returns the first Combatant in cbt whose Name matches name, or nil.
@@ -414,7 +476,16 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 				if dir == "" {
 					dir = "toward"
 				}
-				// Find the first living opponent to determine relative stride direction.
+				width := cbt.GridWidth
+				if width == 0 {
+					width = 10
+				}
+				height := cbt.GridHeight
+				if height == 0 {
+					height = 10
+				}
+
+				// Find the first living opponent (used for "toward"/"away" legacy directions).
 				var opponent *Combatant
 				for _, c := range cbt.Combatants {
 					if c.ID != actor.ID && c.Kind != actor.Kind && !c.IsDead() {
@@ -422,49 +493,30 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 						break
 					}
 				}
-				// actorAhead is true when the actor is positioned beyond (greater than) the opponent.
-				actorAhead := opponent != nil && actor.Position > opponent.Position
-				if dir == "toward" {
-					// Move actor toward opponent.
-					if actorAhead {
-						// Actor is beyond opponent; decrease to close gap.
-						if actor.Position-25 < 0 {
-							actor.Position = 0
-						} else {
-							actor.Position -= 25
-						}
-					} else {
-						// Actor is behind (or at same level as) opponent; increase to close gap.
-						actor.Position += 25
-					}
-				} else { // "away"
-					// Move actor away from opponent (opposite of toward).
-					if actorAhead {
-						actor.Position += 25
-					} else {
-						if actor.Position-25 < 0 {
-							actor.Position = 0
-						} else {
-							actor.Position -= 25
-						}
-					}
-					// Clamp: distance to opponent must not exceed MaxCombatRange.
-					if opponent != nil && posDist(actor.Position, opponent.Position) > MaxCombatRange {
-						if actorAhead {
-							actor.Position = opponent.Position + MaxCombatRange
-						} else {
-							actor.Position = opponent.Position - MaxCombatRange
-							if actor.Position < 0 {
-								actor.Position = 0
-							}
-						}
-					}
+
+				dx, dy := CompassDelta(dir, actor, opponent)
+
+				newX := actor.GridX + dx
+				newY := actor.GridY + dy
+				// Clamp to grid bounds.
+				if newX < 0 {
+					newX = 0
+				} else if newX >= width {
+					newX = width - 1
 				}
+				if newY < 0 {
+					newY = 0
+				} else if newY >= height {
+					newY = height - 1
+				}
+				actor.GridX = newX
+				actor.GridY = newY
+
 				// REQ-RXN19: TriggerOnEnemyMoveAdjacent fires when an NPC moves into melee range of a player.
 				if actor.Kind == KindNPC {
 					for _, c := range cbt.Combatants {
 						if c.Kind == KindPlayer && !c.IsDead() {
-							if posDist(actor.Position, c.Position) <= 5 {
+							if CombatRange(*actor, *c) <= 5 {
 								fireReaction(c.ID, reaction.TriggerOnEnemyMoveAdjacent, reaction.ReactionContext{
 									TriggerUID: c.ID,
 									SourceUID:  actor.ID,
@@ -540,7 +592,7 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 				if actor.Loadout != nil && actor.Loadout.MainHand != nil {
 					mainHandDef = actor.Loadout.MainHand.Def
 				}
-				dist := combatantDist(actor, target)
+				dist := CombatRange(*actor, *target)
 				isMelee := mainHandDef == nil || mainHandDef.RangeIncrement == 0
 				if isMelee {
 					// Melee weapons (including unarmed) cannot attack beyond 5ft.
@@ -574,6 +626,21 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 
 				atkBonus := condition.AttackBonus(cbt.Conditions[actor.ID])
 				acBonus := condition.ACBonus(cbt.Conditions[target.ID])
+
+				// Flanking check: gather all living combatants on the attacker's side.
+				// Flanking only applies to melee attacks (attacker must be adjacent).
+				flanked := false
+				if isMelee {
+					var alliesAndSelf []Combatant
+					alliesAndSelf = append(alliesAndSelf, *actor)
+					for _, c := range cbt.Combatants {
+						if c.Kind == actor.Kind && c.ID != actor.ID && !c.IsDead() {
+							alliesAndSelf = append(alliesAndSelf, *c)
+						}
+					}
+					flanked = IsFlanked(*target, alliesAndSelf)
+				}
+
 				var r AttackResult
 				if !isMelee {
 					// Ranged attack: compute range increments from combat distance.
@@ -588,6 +655,9 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 				r.AttackTotal += atkBonus
 				r.AttackTotal += acBonus
 				r.AttackTotal += actor.InitiativeBonus
+				if flanked {
+					r.AttackTotal += 2
+				}
 				effectiveAC := target.AC + target.InitiativeBonus
 				r.AttackTotal = hookAttackRoll(cbt, actor, target, r.AttackTotal)
 				r.Outcome = OutcomeFor(r.AttackTotal, effectiveAC)
@@ -659,12 +729,16 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 				if len(rwAnnotations) > 0 {
 					narrative += " (" + strings.Join(rwAnnotations, "; ") + ")"
 				}
+				if flanked {
+					narrative += " (flanking +2)"
+				}
 				events = append(events, RoundEvent{
 					AttackResult: &r,
 					ActionType:   ActionAttack,
 					ActorID:      actor.ID,
 					ActorName:    actor.Name,
 					Narrative:    narrative,
+					Flanking:     flanked,
 				})
 				// Consume one round of ammo for ranged attacks.
 				if !isMelee && actor.Loadout != nil {

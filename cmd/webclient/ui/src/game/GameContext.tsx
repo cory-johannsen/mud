@@ -27,6 +27,7 @@ import type {
   MapTile,
   WorldZoneTile,
   RoundStartEvent,
+  CombatantPosition,
   ConditionEvent,
   TimeOfDayEvent,
   ShopView,
@@ -77,7 +78,7 @@ export interface GameState {
   worldTiles: WorldZoneTile[]
   feedEntries: FeedEntry[]
   combatRound: RoundStartEvent | null
-  combatPositions: Record<string, number>
+  combatPositions: Record<string, { x: number; y: number }>
   combatantHp: Record<string, CombatantHp>
   hotbarSlots: HotbarSlot[]
   timeOfDay: TimeOfDayEvent | null
@@ -101,7 +102,7 @@ type Action =
   | { type: 'SET_MAP_TILES'; tiles: MapTile[] }
   | { type: 'SET_WORLD_TILES'; tiles: WorldZoneTile[] }
   | { type: 'SET_COMBAT_ROUND'; round: RoundStartEvent | null }
-  | { type: 'UPDATE_COMBAT_POSITION'; name: string; position: number }
+  | { type: 'UPDATE_COMBAT_POSITION'; combatantName: string; x: number; y: number }
   | { type: 'CLEAR_COMBAT_POSITIONS' }
   | { type: 'UPDATE_COMBATANT_HP'; name: string; current: number; max: number }
   | { type: 'CLEAR_COMBATANT_HP' }
@@ -139,7 +140,7 @@ function reducer(state: GameState, action: Action): GameState {
     case 'SET_COMBAT_ROUND':
       return { ...state, combatRound: action.round }
     case 'UPDATE_COMBAT_POSITION':
-      return { ...state, combatPositions: { ...state.combatPositions, [action.name]: action.position } }
+      return { ...state, combatPositions: { ...state.combatPositions, [action.combatantName]: { x: action.x, y: action.y } } }
     case 'CLEAR_COMBAT_POSITIONS':
       return { ...state, combatPositions: {} }
     case 'UPDATE_COMBATANT_HP':
@@ -354,11 +355,15 @@ export function GameProvider({ children }: { children: ReactNode }) {
           break
         }
         case 'CombatEvent': {
-          const ce = payload as { type?: string; narrative?: string; attacker?: string; target?: string; damage?: number; attackerPosition?: number; attacker_position?: number; targetHp?: number; targetMaxHp?: number; target_hp?: number; target_max_hp?: number }
+          const ce = payload as { type?: string; narrative?: string; attacker?: string; target?: string; damage?: number; attackerPosition?: number; attacker_position?: number; attacker_x?: number; attacker_y?: number; flanking?: boolean; targetHp?: number; targetMaxHp?: number; target_hp?: number; target_max_hp?: number }
           if (ce.type === 'COMBAT_EVENT_TYPE_POSITION') {
             if (ce.attacker) {
-              const pos = ce.attackerPosition ?? ce.attacker_position ?? 0
-              dispatch({ type: 'UPDATE_COMBAT_POSITION', name: ce.attacker, position: pos })
+              dispatch({
+                type: 'UPDATE_COMBAT_POSITION',
+                combatantName: ce.attacker ?? '',
+                x: ce.attacker_x ?? 0,
+                y: ce.attacker_y ?? 0,
+              })
             }
             break
           }
@@ -385,6 +390,16 @@ export function GameProvider({ children }: { children: ReactNode }) {
         case 'RoundStartEvent': {
           const rs = payload as RoundStartEvent
           dispatch({ type: 'SET_COMBAT_ROUND', round: rs })
+          if (rs.initial_positions) {
+            for (const pos of rs.initial_positions as CombatantPosition[]) {
+              dispatch({
+                type: 'UPDATE_COMBAT_POSITION',
+                combatantName: pos.name,
+                x: pos.x,
+                y: pos.y,
+              })
+            }
+          }
           const order = Array.isArray(rs.turnOrder) ? rs.turnOrder.join(', ') : ''
           dispatch({
             type: 'APPEND_FEED',

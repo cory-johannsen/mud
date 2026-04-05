@@ -17,9 +17,9 @@ type fixedSrcDist struct{ val int }
 
 func (f fixedSrcDist) Intn(_ int) int { return f.val }
 
-// makeDistanceCombat creates a minimal two-combatant combat with combatantDist == distanceFt.
-// Player starts at Position=0; NPC at Position=distanceFt.
-// The player combatant has no loadout (unarmed / melee).
+// makeDistanceCombat creates a minimal two-combatant combat with CombatRange == distanceFt.
+// Player starts at GridX=0, GridY=0; NPC at GridX=distanceFt/5, GridY=0 (1D along X axis).
+// distanceFt must be a multiple of 5. The player combatant has no loadout (unarmed / melee).
 func makeDistanceCombat(t *testing.T, distanceFt int) (*combat.Combat, *combat.Combatant, *combat.Combatant) {
 	t.Helper()
 	reg := condition.NewRegistry()
@@ -30,12 +30,12 @@ func makeDistanceCombat(t *testing.T, distanceFt int) (*combat.Combat, *combat.C
 	attacker := &combat.Combatant{
 		ID: "p1", Kind: combat.KindPlayer, Name: "Player",
 		CurrentHP: 20, MaxHP: 20, AC: 10, Level: 1, StrMod: 2,
-		Position: 0,
+		GridX: 0, GridY: 0,
 	}
 	target := &combat.Combatant{
 		ID: "n1", Kind: combat.KindNPC, Name: "Ganger",
 		CurrentHP: 20, MaxHP: 20, AC: 10, Level: 1,
-		Position: distanceFt,
+		GridX: distanceFt / 5, GridY: 0,
 	}
 
 	eng := combat.NewEngine()
@@ -92,10 +92,12 @@ func TestRangeEnforcement_MeleeAttack_AtMeleeRange_CanResolve(t *testing.T) {
 }
 
 // TestRangeEnforcement_Property_MeleeAlwaysMissesIfDistanceOver5 is a property-based test
-// asserting that any unarmed melee attacker beyond 5ft always produces the range-miss event.
+// asserting that any unarmed melee attacker beyond 5ft (>1 grid square) always produces
+// the range-miss event.
 func TestRangeEnforcement_Property_MeleeAlwaysMissesIfDistanceOver5(t *testing.T) {
 	rapid.Check(t, func(rt *rapid.T) {
-		dist := rapid.IntRange(6, 100).Draw(rt, "distance")
+		// Draw grid squares from 2..9 (distance = squares*5 = 10..45 ft, all > 5 ft).
+		squares := rapid.IntRange(2, 9).Draw(rt, "squares")
 
 		reg := condition.NewRegistry()
 		reg.Register(&condition.ConditionDef{ID: "dying", Name: "Dying", DurationType: "until_save", MaxStacks: 4})
@@ -105,12 +107,12 @@ func TestRangeEnforcement_Property_MeleeAlwaysMissesIfDistanceOver5(t *testing.T
 		attacker := &combat.Combatant{
 			ID: "p1", Kind: combat.KindPlayer, Name: "Player",
 			CurrentHP: 20, MaxHP: 20, AC: 5, Level: 1, StrMod: 5,
-			Position: 0,
+			GridX: 0, GridY: 0,
 		}
 		target := &combat.Combatant{
 			ID: "n1", Kind: combat.KindNPC, Name: "T",
 			CurrentHP: 20, MaxHP: 20, AC: 5, Level: 1,
-			Position: dist,
+			GridX: squares, GridY: 0,
 		}
 		eng := combat.NewEngine()
 		cbt, err := eng.StartCombat("room_a", []*combat.Combatant{attacker, target}, reg, nil, "")
@@ -124,13 +126,14 @@ func TestRangeEnforcement_Property_MeleeAlwaysMissesIfDistanceOver5(t *testing.T
 		src := fixedSrcDist{val: 18}
 		events := combat.ResolveRound(cbt, src, func(_ string, _ int) {}, nil)
 
+		distFt := squares * 5
 		for _, e := range events {
 			if e.ActorID == "p1" && e.ActionType == combat.ActionAttack {
 				assert.Contains(rt, e.Narrative, "out of melee range",
-					"distance=%d: melee attack must miss beyond 5ft", dist)
+					"distanceFt=%d: melee attack must miss beyond 5ft", distFt)
 			}
 		}
-		assert.Equal(rt, 20, target.CurrentHP, "distance=%d: target must be unharmed", dist)
+		assert.Equal(rt, 20, target.CurrentHP, "distanceFt=%d: target must be unharmed", distFt)
 	})
 }
 
@@ -157,13 +160,13 @@ func TestRangeEnforcement_RangedWeapon_ExtremeRange_Misses(t *testing.T) {
 	attacker := &combat.Combatant{
 		ID: "p1", Kind: combat.KindPlayer, Name: "Player",
 		CurrentHP: 20, MaxHP: 20, AC: 10, Level: 1, StrMod: 2,
-		Loadout: preset, Position: 0,
+		Loadout: preset, GridX: 0, GridY: 0,
 	}
 	target := &combat.Combatant{
 		ID: "n1", Kind: combat.KindNPC, Name: "Ganger",
 		CurrentHP: 20, MaxHP: 20, AC: 10, Level: 1,
-		// 4 * 20 = 80; Position=85 means distance=85 (extreme range).
-		Position: 85,
+		// 4 * 20 = 80; GridX=17 means distance=17*5=85ft (extreme range).
+		GridX: 17, GridY: 0,
 	}
 
 	eng := combat.NewEngine()
@@ -210,13 +213,13 @@ func TestRangeEnforcement_RangedWeapon_WithinRange_CanResolve(t *testing.T) {
 	attacker := &combat.Combatant{
 		ID: "p1", Kind: combat.KindPlayer, Name: "Player",
 		CurrentHP: 20, MaxHP: 20, AC: 10, Level: 1, StrMod: 2,
-		Loadout: preset, Position: 0,
+		Loadout: preset, GridX: 0, GridY: 0,
 	}
 	target := &combat.Combatant{
 		ID: "n1", Kind: combat.KindNPC, Name: "Ganger",
 		CurrentHP: 20, MaxHP: 20, AC: 10, Level: 1,
-		// Distance 15 is within first range increment (20).
-		Position: 15,
+		// GridX=3 means distance=3*5=15ft (within first range increment of 20).
+		GridX: 3, GridY: 0,
 	}
 
 	eng := combat.NewEngine()
