@@ -1012,6 +1012,33 @@
 **Steps:** Play a character with the tamper technology; in combat or outside, run `use tamper`; observe no console feedback and no effect applied.
 **Fix:** Added ConditionTarget field to Feat struct ("foe" = apply to combat target). Created tamper_debuff condition (-2 attack penalty, encounter duration). Updated tamper feat with condition_id: tamper_debuff and condition_target: foe. Modified handleUse to route foe-targeted conditions to the enemy's combat condition set using LastCombatTarget.
 
+### BUG-127: Battle Fervor technology has no implemented effects
+
+**Severity:** high
+**Status:** open
+**Category:** Combat
+**Description:** Using Battle Fervor produces no mechanical effect — no buff, condition, or damage modifier is applied to the player.
+**Steps:** Prepare Battle Fervor; enter combat; use Battle Fervor; observe no change in player stats, conditions, or combat output.
+**Fix:**
+
+### BUG-126: Web UI Technology/Feat tab shows duplicate entries instead of grouped slots with use counters
+
+**Severity:** medium
+**Status:** open
+**Category:** UI
+**Description:** Technologies and Feats with multiple prepared slots appear as duplicate entries instead of being grouped by level with a per-level slot count and remaining-use counter.
+**Steps:** Log in as a level 2 Street Preacher (Zealot archetype); open the Technology tab; observe Battle Fervor listed twice with no level or use-count indicator instead of two grouped entries (e.g., "Battle Fervor — Level 1 ×2 uses", "Battle Fervor — Level 2 ×1 use").
+**Fix:**
+
+### BUG-125: Combat NPC names not clickable in web UI — clicking should initiate combat
+
+**Severity:** high
+**Status:** open
+**Category:** UI
+**Description:** Combat NPC names displayed in the room view are not clickable; clicking an NPC name should trigger combat against that NPC.
+**Steps:** Enter a room containing a combat NPC; observe NPC name in room panel; click the NPC name; observe no combat is initiated.
+**Fix:**
+
 ### BUG-124: Web UI feat/ability hotbar activation shows no feedback
 **Severity:** high
 **Status:** fixed
