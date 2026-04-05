@@ -7524,7 +7524,8 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string, targetX, 
 				if condID != "" && s.condRegistry != nil {
 					// REQ-AOE-2: When feat has aoe_radius > 0 and target coordinates are provided,
 					// apply the condition to every living combatant within Chebyshev distance aoe_radius.
-					if f.AoeRadius > 0 && (targetX != 0 || targetY != 0) && f.ConditionTarget == "foe" {
+					// REQ-2D-5e: AoE does not distinguish friend from foe — all combatants in radius are affected.
+					if f.AoeRadius > 0 && (targetX != 0 || targetY != 0) {
 						var cbt *combat.Combat
 						if s.combatH != nil {
 							cbt = s.combatH.ActiveCombatForPlayer(uid)
