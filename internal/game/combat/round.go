@@ -630,8 +630,6 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 				// Flanking check: gather all living combatants on the attacker's side.
 				// Flanking only applies to melee attacks (attacker must be adjacent).
 				flanked := false
-				flankBonus := 0
-				flankNote := ""
 				if isMelee {
 					var alliesAndSelf []Combatant
 					alliesAndSelf = append(alliesAndSelf, *actor)
@@ -641,10 +639,6 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 						}
 					}
 					flanked = IsFlanked(*target, alliesAndSelf)
-					if flanked {
-						flankBonus = 2
-						flankNote = " (flanking +2)"
-					}
 				}
 
 				var r AttackResult
@@ -661,7 +655,9 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 				r.AttackTotal += atkBonus
 				r.AttackTotal += acBonus
 				r.AttackTotal += actor.InitiativeBonus
-				r.AttackTotal += flankBonus
+				if flanked {
+					r.AttackTotal += 2
+				}
 				effectiveAC := target.AC + target.InitiativeBonus
 				r.AttackTotal = hookAttackRoll(cbt, actor, target, r.AttackTotal)
 				r.Outcome = OutcomeFor(r.AttackTotal, effectiveAC)
@@ -733,7 +729,9 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 				if len(rwAnnotations) > 0 {
 					narrative += " (" + strings.Join(rwAnnotations, "; ") + ")"
 				}
-				narrative += flankNote
+				if flanked {
+					narrative += " (flanking +2)"
+				}
 				events = append(events, RoundEvent{
 					AttackResult: &r,
 					ActionType:   ActionAttack,

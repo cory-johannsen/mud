@@ -5,6 +5,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"pgregory.net/rapid"
 
 	"github.com/cory-johannsen/mud/internal/game/combat"
 	"github.com/cory-johannsen/mud/internal/game/condition"
@@ -102,4 +103,51 @@ func TestFlanking_NoBonus_WhenNotFlanked(t *testing.T) {
 		assert.NotContains(t, atkEvent.Narrative, "flanking +2", "flanking bonus must NOT appear when not flanked")
 		assert.False(t, atkEvent.Flanking, "RoundEvent.Flanking must be false when not flanked")
 	}
+}
+
+// TestProperty_Flanking_DiagonalOpposite_AlwaysFlanks verifies that any two combatants
+// placed in strictly opposite diagonal quadrants relative to a target always trigger flanking.
+func TestProperty_Flanking_DiagonalOpposite_AlwaysFlanks(t *testing.T) {
+	rapid.Check(t, func(t *rapid.T) {
+		// Target at a random interior position (avoid edges so there's room for flankers).
+		tx := rapid.IntRange(1, 8).Draw(t, "tx")
+		ty := rapid.IntRange(1, 8).Draw(t, "ty")
+		// Attacker is always in a strictly diagonal quadrant: both dx and dy non-zero.
+		adx := rapid.SampledFrom([]int{-1, 1}).Draw(t, "adx")
+		ady := rapid.SampledFrom([]int{-1, 1}).Draw(t, "ady")
+		// Ally is in the opposite diagonal quadrant.
+		bdx := -adx
+		bdy := -ady
+
+		target := combat.Combatant{ID: "t", Kind: combat.KindNPC, GridX: tx, GridY: ty}
+		attacker := combat.Combatant{ID: "a", Kind: combat.KindPlayer, GridX: tx + adx, GridY: ty + ady}
+		ally := combat.Combatant{ID: "b", Kind: combat.KindPlayer, GridX: tx + bdx, GridY: ty + bdy}
+
+		flanked := combat.IsFlanked(target, []combat.Combatant{attacker, ally})
+		if !flanked {
+			t.Fatalf("expected flanking: target(%d,%d) attacker(%d,%d) ally(%d,%d)",
+				tx, ty, attacker.GridX, attacker.GridY, ally.GridX, ally.GridY)
+		}
+	})
+}
+
+// TestProperty_Flanking_CardinalOnly_NeverFlanks verifies that combatants placed
+// in purely cardinal positions (same row or same column as target) never trigger flanking.
+// REQ-2D-4b: flanking requires both row AND column to differ in opposite directions.
+func TestProperty_Flanking_CardinalOnly_NeverFlanks(t *testing.T) {
+	rapid.Check(t, func(t *rapid.T) {
+		tx := rapid.IntRange(1, 8).Draw(t, "tx")
+		ty := rapid.IntRange(1, 8).Draw(t, "ty")
+		// Attacker directly north (same column, different row).
+		attacker := combat.Combatant{ID: "a", Kind: combat.KindPlayer, GridX: tx, GridY: ty - 1}
+		// Ally directly south (same column, different row — opposite cardinal).
+		ally := combat.Combatant{ID: "b", Kind: combat.KindPlayer, GridX: tx, GridY: ty + 1}
+		target := combat.Combatant{ID: "t", Kind: combat.KindNPC, GridX: tx, GridY: ty}
+
+		flanked := combat.IsFlanked(target, []combat.Combatant{attacker, ally})
+		if flanked {
+			t.Fatalf("cardinal positions should not flank: target(%d,%d) attacker(%d,%d) ally(%d,%d)",
+				tx, ty, attacker.GridX, attacker.GridY, ally.GridX, ally.GridY)
+		}
+	})
 }
