@@ -355,14 +355,14 @@ export function GameProvider({ children }: { children: ReactNode }) {
           break
         }
         case 'CombatEvent': {
-          const ce = payload as { type?: string; narrative?: string; attacker?: string; target?: string; damage?: number; attackerPosition?: number; attacker_position?: number; attacker_x?: number; attacker_y?: number; flanking?: boolean; targetHp?: number; targetMaxHp?: number; target_hp?: number; target_max_hp?: number }
+          const ce = payload as { type?: string; narrative?: string; attacker?: string; target?: string; damage?: number; attackerPosition?: number; attacker_position?: number; attackerX?: number; attackerY?: number; flanking?: boolean; targetHp?: number; targetMaxHp?: number; target_hp?: number; target_max_hp?: number }
           if (ce.type === 'COMBAT_EVENT_TYPE_POSITION') {
             if (ce.attacker) {
               dispatch({
                 type: 'UPDATE_COMBAT_POSITION',
                 combatantName: ce.attacker ?? '',
-                x: ce.attacker_x ?? 0,
-                y: ce.attacker_y ?? 0,
+                x: ce.attackerX ?? 0,
+                y: ce.attackerY ?? 0,
               })
             }
             break
@@ -390,8 +390,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
         case 'RoundStartEvent': {
           const rs = payload as RoundStartEvent
           dispatch({ type: 'SET_COMBAT_ROUND', round: rs })
-          if (rs.initial_positions) {
-            for (const pos of rs.initial_positions as CombatantPosition[]) {
+          if (rs.initialPositions) {
+            for (const pos of rs.initialPositions as CombatantPosition[]) {
               dispatch({
                 type: 'UPDATE_COMBAT_POSITION',
                 combatantName: pos.name,

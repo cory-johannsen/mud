@@ -457,8 +457,8 @@ export interface CombatEvent {
   weaponName?: string
   targetMaxHp?: number
   attackerPosition?: number  // deprecated
-  attacker_x?: number
-  attacker_y?: number
+  attackerX?: number
+  attackerY?: number
   flanking?: boolean
 }
 
@@ -469,7 +469,7 @@ export interface RoundStartEvent {
   durationMs?: number
   turnOrder?: string[]
   turn_order?: string[]
-  initial_positions?: CombatantPosition[]
+  initialPositions?: CombatantPosition[]
 }
 
 export interface RoundEndEvent {
