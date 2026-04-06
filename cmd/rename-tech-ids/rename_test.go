@@ -69,3 +69,48 @@ func TestToSnakeCase_Property_NoConsecutiveUnderscores(t *testing.T) {
 		}
 	})
 }
+
+func TestStripTraditionSuffix(t *testing.T) {
+	cases := []struct {
+		input string
+		want  string
+	}{
+		{"acid_arrow_technical", "acid_arrow"},
+		{"daze_neural", "daze"},
+		{"sleep_bio_synthetic", "sleep"},
+		{"bless_fanatic_doctrine", "bless"},
+		{"chrome_reflex", "chrome_reflex"}, // no suffix
+		{"neural_static", "neural_static"}, // no suffix
+	}
+	for _, tc := range cases {
+		t.Run(tc.input, func(t *testing.T) {
+			assert.Equal(t, tc.want, stripTraditionSuffix(tc.input))
+		})
+	}
+}
+
+func TestIsPF2EFlagged(t *testing.T) {
+	cases := []struct {
+		name   string
+		oldID  string
+		wantFl bool
+		desc   string
+	}{
+		// REQ-TIR-PF2: name never localized — derived matches stripped old_id
+		{"Acid Arrow", "acid_arrow_technical", true, "PF2E name unchanged"},
+		{"Daze", "daze_neural", true, "PF2E name unchanged single word"},
+		// REQ-TIR-PF3: keyword deny-list
+		{"Antimagic Field", "antimagic_field_neural", true, "keyword: antimagic"},
+		{"Scrying Lens", "scrying_lens_neural", true, "keyword: scrying"},
+		// Already Gunchete — no flag
+		{"Corrosive Projectile", "acid_arrow_technical", false, "localized name"},
+		{"Cranial Shock", "daze_neural", false, "localized name"},
+		{"Chrome Reflex", "chrome_reflex", false, "innate already correct"},
+		{"Neural Static", "neural_static", false, "innate already correct"},
+	}
+	for _, tc := range cases {
+		t.Run(tc.desc, func(t *testing.T) {
+			assert.Equal(t, tc.wantFl, IsPF2EFlagged(tc.name, tc.oldID))
+		})
+	}
+}
