@@ -2583,9 +2583,9 @@ func (s *GameServiceServer) handleMove(uid string, req *gamev1.MoveRequest) (*ga
 		if sess.ExploredCache[zID] == nil {
 			sess.ExploredCache[zID] = make(map[string]bool)
 		}
-		// Always mark the room as physically explored so handleMap can show
-		// its danger level, regardless of whether it was already in AutomapCache
-		// (e.g. pre-loaded via zone reveal).
+		// Mark the room as physically explored (first physical entry only).
+		// XP and quest progress are awarded here so that rooms pre-loaded into
+		// AutomapCache via zone reveal still grant XP when first walked into.
 		if !sess.ExploredCache[zID][newRoom.ID] {
 			sess.ExploredCache[zID][newRoom.ID] = true
 			if s.automapRepo != nil {
@@ -2593,18 +2593,10 @@ func (s *GameServiceServer) handleMove(uid string, req *gamev1.MoveRequest) (*ga
 					s.logger.Warn("persisting exploration flag", zap.Error(err))
 				}
 			}
-		}
-		if !sess.AutomapCache[zID][newRoom.ID] {
-			sess.AutomapCache[zID][newRoom.ID] = true
-			if s.automapRepo != nil {
-				if err := s.automapRepo.Insert(context.Background(), sess.CharacterID, zID, newRoom.ID, true); err != nil {
-					s.logger.Warn("persisting map discovery", zap.Error(err))
-				}
-			}
 			if s.questSvc != nil {
 				_, _ = s.questSvc.RecordExplore(context.Background(), sess, sess.CharacterID, newRoom.ID)
 			}
-			// Award room discovery XP for newly discovered rooms.
+			// Award room discovery XP on first physical entry.
 			if s.xpSvc != nil {
 				if xpMsgs, xpErr := s.xpSvc.AwardRoomDiscovery(context.Background(), sess, sess.CharacterID); xpErr != nil {
 					s.logger.Warn("awarding room discovery XP", zap.String("uid", uid), zap.Error(xpErr))
@@ -2627,6 +2619,15 @@ func (s *GameServiceServer) handleMove(uid string, req *gamev1.MoveRequest) (*ga
 					if len(xpMsgs) > 0 {
 						s.pushHPUpdate(uid, sess)
 					}
+				}
+			}
+		}
+		// Mark the room as known on the automap (if not already via zone reveal or prior visit).
+		if !sess.AutomapCache[zID][newRoom.ID] {
+			sess.AutomapCache[zID][newRoom.ID] = true
+			if s.automapRepo != nil {
+				if err := s.automapRepo.Insert(context.Background(), sess.CharacterID, zID, newRoom.ID, false); err != nil {
+					s.logger.Warn("persisting map discovery", zap.Error(err))
 				}
 			}
 		}

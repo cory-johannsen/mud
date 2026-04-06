@@ -1051,11 +1051,11 @@
 ### BUG-136: Player earns no XP for exploring new rooms
 
 **Severity:** high
-**Status:** open
+**Status:** fixed
 **Category:** Character
 **Description:** Moving into a previously unexplored room grants no exploration XP to the player.
 **Steps:** Move into a room not yet visited; observe no XP gain message and no XP increase on the character sheet.
-**Fix:**
+**Fix:** Moved XP award and questSvc.RecordExplore from the AutomapCache block into the ExploredCache block in handleMove. XP is now granted on first physical entry only, not on zone-reveal pre-loading.
 
 ### BUG-135: NPC modals have no Steal option
 
