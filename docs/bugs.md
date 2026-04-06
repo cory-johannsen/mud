@@ -1012,6 +1012,105 @@
 **Steps:** Play a character with the tamper technology; in combat or outside, run `use tamper`; observe no console feedback and no effect applied.
 **Fix:** Added ConditionTarget field to Feat struct ("foe" = apply to combat target). Created tamper_debuff condition (-2 attack penalty, encounter duration). Updated tamper feat with condition_id: tamper_debuff and condition_target: foe. Modified handleUse to route foe-targeted conditions to the enemy's combat condition set using LastCombatTarget.
 
+### BUG-141: Battle map has no controls for Close Distance or Step
+
+**Severity:** medium
+**Status:** open
+**Category:** UI
+**Description:** The battle map UI does not provide buttons for the Close Distance and Step combat actions, forcing players to type these commands manually.
+**Steps:** Enter combat; observe the battle map; confirm no Close Distance or Step controls are present.
+**Fix:**
+
+### BUG-140: Web UI enters broken state on server redeploy — stream termination not handled with auto-reconnect
+
+**Severity:** high
+**Status:** open
+**Category:** UI
+**Description:** When a new server version is deployed the game stream is terminated, leaving the web UI in a broken/stale state with no recovery. The web UI should detect stream termination and automatically reconnect (with exponential backoff), restoring the session or redirecting to the character selection screen if the session cannot be resumed.
+**Steps:** Log in to the web UI; deploy a new server version; observe the UI becomes unresponsive or shows stale state with no reconnection attempt.
+**Fix:**
+
+### BUG-139: Zone exits not visually distinct on map, missing from legend, and no hover tooltip
+
+**Severity:** medium
+**Status:** open
+**Category:** UI
+**Description:** Zone exit rooms are not visually distinguished from normal rooms on the map, are absent from the map legend, and hovering a room with a zone exit shows no tooltip indicating the exit or its destination. Explored zone exits should show the destination zone name in the tooltip.
+**Steps:** Navigate to a room with a zone exit; open the map; observe the exit room looks identical to other rooms; check the legend for a zone exit entry (none present); hover the exit room and observe no zone exit information in the tooltip.
+**Fix:**
+
+### BUG-138: Web UI character selection cards do not display XP
+
+**Severity:** low
+**Status:** open
+**Category:** UI
+**Description:** Character selection screen cards do not show the character's current XP, leaving the player with no quick view of progression before logging in.
+**Steps:** Open the web UI; navigate to the character selection screen; observe character cards show no XP value.
+**Fix:**
+
+### BUG-136: Player earns no XP for exploring new rooms
+
+**Severity:** high
+**Status:** open
+**Category:** Character
+**Description:** Moving into a previously unexplored room grants no exploration XP to the player.
+**Steps:** Move into a room not yet visited; observe no XP gain message and no XP increase on the character sheet.
+**Fix:**
+
+### BUG-135: NPC modals have no Steal option
+
+**Severity:** medium
+**Status:** open
+**Category:** UI
+**Description:** NPC interaction modals do not include a Steal action, leaving players with no way to attempt theft through the web UI.
+**Steps:** Click any non-combat NPC to open their modal; observe no Steal button or prompt is present.
+**Fix:**
+
+### BUG-134: Merchant modals have no Negotiate button for price negotiation
+
+**Severity:** medium
+**Status:** open
+**Category:** UI
+**Description:** The merchant buy/sell modal does not include a Negotiate option, leaving players with no way to attempt to negotiate better prices through the web UI.
+**Steps:** Approach a merchant NPC; open the merchant modal; observe no Negotiate button or prompt is present.
+**Fix:**
+
+### BUG-133: Hotbar does not support Actions; built-in actions assigned to hotbar display as `-`
+
+**Severity:** medium
+**Status:** open
+**Category:** UI
+**Description:** The hotbar has no first-class support for built-in Actions (`stride`, `close`, `attack`, etc.); slots assigned to these actions render as `-` instead of a label. Additionally, the Help screen should provide a way for the player to add any Action directly to a hotbar slot.
+**Steps:** Assign `stride`, `close`, or `attack` to a hotbar slot; observe the slot displays `-` instead of the action name. Open the Help screen; observe no option to add actions to the hotbar.
+**Fix:**
+
+### BUG-132: Adrenaline Surge requires Enraged condition but no mechanism exists to trigger Enraged
+
+**Severity:** high
+**Status:** open
+**Category:** Combat
+**Description:** Adrenaline Surge has a prerequisite of the Enraged condition, but no technology, feat, or game event applies the Enraged condition, making Adrenaline Surge permanently unusable.
+**Steps:** Attempt to use Adrenaline Surge in combat; observe it is blocked due to missing Enraged condition; confirm no other ability grants Enraged.
+**Fix:**
+
+### BUG-131: Brutal Charge has no mechanical effect beyond AP cost and console text
+
+**Severity:** high
+**Status:** open
+**Category:** Combat
+**Description:** Using Brutal Charge deducts AP and prints a message but applies no damage, movement, or condition effect.
+**Steps:** Enter combat; use Brutal Charge; observe AP is spent and text appears in console but no mechanical effect is applied to target or player.
+**Fix:**
+
+### BUG-130: Overpower has no mechanical effect beyond console text
+
+**Severity:** high
+**Status:** open
+**Category:** Combat
+**Description:** Using Overpower prints a console message but applies no damage bonus, condition, or other mechanical effect.
+**Steps:** Enter combat; use Overpower; observe console text but no change in combat state, target conditions, or damage output.
+**Fix:**
+
 ### BUG-129: Web UI character creation screens do not expand to fill available screen space
 
 **Severity:** medium
@@ -1024,11 +1123,11 @@
 ### BUG-128: Web UI displays `9 / 0 HP` — max HP calculated as zero
 
 **Severity:** high
-**Status:** open
+**Status:** fixed
 **Category:** Character
 **Description:** Player HP is displayed as `<current> / 0 HP` in the web UI, indicating max HP is being reported as zero.
 **Steps:** Log in with an existing character; observe the HP display in the character panel showing a non-zero current HP over a zero max HP.
-**Fix:**
+**Fix:** `handleStatus` and `handleExamine` in `grpc_service.go` were building `CharacterInfo` responses without the `MaxHp` field, so the proto default of 0 was used. Added `MaxHp: int32(sess.MaxHP)` to both call sites. The `CharacterSheetView` and `pushHPUpdate` already set MaxHp correctly.
 
 ### BUG-127: Battle Fervor technology has no implemented effects
 
@@ -1065,7 +1164,7 @@
 **Steps:** Add an active feat to a hotbar slot via the Feats drawer; click the hotbar slot; observe no message or effect in the console feed.
 **Fix:** `UseResponse` was missing from `serverEventInner` in `cmd/webclient/handlers/websocket.go`, causing the server's activation feedback to be silently dropped. Added `case *gamev1.ServerEvent_UseResponse:` returning `(p.UseResponse, "UseResponse")`. Added `case 'UseResponse':` handler in `GameContext.tsx` that appends the message to the feed (or lists available abilities when `choices` is populated).
 
-### BUG-125: Stale closure in GameContext.tsx ws.onmessage prevents player HP updates from CombatEvents
+### BUG-137: Stale closure in GameContext.tsx ws.onmessage prevents player HP updates from CombatEvents
 **Severity:** medium
 **Status:** open
 **Category:** UI

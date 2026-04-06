@@ -3235,6 +3235,7 @@ func (s *GameServiceServer) handleExamine(uid string, req *gamev1.ExamineRequest
 					Class:       target.Class,
 					Level:       int32(target.Level),
 					CurrentHp:   int32(target.CurrentHP),
+					MaxHp:       int32(target.MaxHP),
 				},
 			},
 		}, nil
@@ -3566,6 +3567,7 @@ func (s *GameServiceServer) handleStatus(uid string, requestID string, stream ga
 				Class:       sess.Class,
 				Level:       int32(sess.Level),
 				CurrentHp:   int32(sess.CurrentHP),
+				MaxHp:       int32(sess.MaxHP),
 			},
 		},
 	}); err != nil {
