@@ -1096,11 +1096,11 @@
 ### BUG-131: Brutal Charge has no mechanical effect beyond AP cost and console text
 
 **Severity:** high
-**Status:** open
+**Status:** fixed
 **Category:** Combat
 **Description:** Using Brutal Charge deducts AP and prints a message but applies no damage, movement, or condition effect.
 **Steps:** Enter combat; use Brutal Charge; observe AP is spent and text appears in console but no mechanical effect is applied to target or player.
-**Fix:**
+**Fix:** Implemented handleBrutalCharge: spends 1 AP for movement discount (2 free strides toward nearest enemy) then attacks via combatH.Attack (1 AP) for 2 AP total. Reactive Strikes fire during the charge. Movement is broadcast to all players in the room.
 
 ### BUG-130: Overpower has no mechanical effect beyond console text
 

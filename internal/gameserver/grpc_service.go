@@ -7523,6 +7523,11 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string, targetX, 
 					}
 					sess.ActiveFeatUses[f.ID] = remaining - 1
 				}
+				// Feats with special sequenced actions are handled individually before the
+				// generic condition-application path.
+				if f.ID == "brutal_charge" {
+					return s.handleBrutalCharge(uid, targetID)
+				}
 				condID := f.ConditionID
 				if condID != "" && s.condRegistry != nil {
 					// REQ-AOE-2: When feat has aoe_radius > 0 and target coordinates are provided,
@@ -9352,6 +9357,142 @@ func (s *GameServiceServer) handleStride(uid string, req *gamev1.StrideRequest) 
 	s.combatH.FireCombatantMoved(sess.RoomID, uid)
 	s.combatH.BroadcastAllPositions(sess.RoomID)
 	return messageEvent(msg), nil
+}
+
+// handleBrutalCharge executes the Brutal Charge feat: advance twice and make a melee strike
+// as a single 2-AP sequence. The two strides are free (no additional AP); the final attack
+// costs 1 AP via the normal Attack path, giving a total cost of 2 AP.
+//
+// Precondition: uid must be in active combat; combatH must be non-nil.
+// Postcondition: Player moves up to 2×speed toward the nearest enemy and queues a melee attack.
+func (s *GameServiceServer) handleBrutalCharge(uid, targetID string) (*gamev1.ServerEvent, error) {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return nil, fmt.Errorf("player %q not found", uid)
+	}
+	if sess.Status != statusInCombat {
+		return messageEvent("Brutal Charge requires active combat."), nil
+	}
+	if s.combatH == nil {
+		return errorEvent("Combat handler unavailable."), nil
+	}
+	// Spend 1 AP for the movement discount (2 free strides instead of 2 AP).
+	if err := s.combatH.SpendAP(uid, 1); err != nil {
+		return errorEvent(err.Error()), nil
+	}
+	cbt, ok := s.combatH.GetCombatForRoom(sess.RoomID)
+	if !ok {
+		return errorEvent("No active combat found."), nil
+	}
+	combatant := cbt.GetCombatant(uid)
+	if combatant == nil {
+		return errorEvent("You are not a combatant in this fight."), nil
+	}
+	// Find nearest enemy.
+	var opponent *combat.Combatant
+	for _, c := range cbt.Combatants {
+		if c.Kind != combat.KindPlayer && !c.IsDead() {
+			if opponent == nil || combat.CombatRange(*combatant, *c) < combat.CombatRange(*combatant, *opponent) {
+				opponent = c
+			}
+		}
+	}
+	if opponent == nil {
+		return messageEvent("No targets to charge toward."), nil
+	}
+
+	width, height := cbt.GridWidth, cbt.GridHeight
+	if width == 0 {
+		width = 20
+	}
+	if height == 0 {
+		height = 20
+	}
+	speedFt := s.playerEffectiveSpeedFt(sess)
+	stepsPerStride := speedFt / 5
+	if stepsPerStride < 1 {
+		stepsPerStride = 1
+	}
+
+	rsUpdater := func(id string, hp int) {
+		if target, ok := s.sessions.GetPlayer(id); ok {
+			target.CurrentHP = hp
+		}
+	}
+
+	var allRSEvents []combat.RoundEvent
+	// Execute two strides at 0 additional AP cost.
+	for stride := 0; stride < 2; stride++ {
+		if combatant.IsDead() {
+			break
+		}
+		dx, dy := combat.CompassDelta("toward", combatant, opponent)
+		for step := 0; step < stepsPerStride; step++ {
+			if combat.CombatRange(*combatant, *opponent) <= 5 {
+				break
+			}
+			oldX, oldY := combatant.GridX, combatant.GridY
+			newX := oldX + dx
+			newY := oldY + dy
+			if newX < 0 {
+				newX = 0
+			} else if newX >= width {
+				newX = width - 1
+			}
+			if newY < 0 {
+				newY = 0
+			} else if newY >= height {
+				newY = height - 1
+			}
+			if newX == oldX && newY == oldY {
+				break
+			}
+			if combat.CellOccupied(cbt, uid, newX, newY) {
+				break
+			}
+			combatant.GridX = newX
+			combatant.GridY = newY
+			rsEvents := combat.CheckReactiveStrikes(cbt, uid, oldX, oldY, globalRandSrc{}, rsUpdater)
+			allRSEvents = append(allRSEvents, rsEvents...)
+			if combatant.IsDead() {
+				break
+			}
+		}
+	}
+
+	s.clearPlayerCover(uid, sess)
+	s.combatH.BroadcastAllPositions(sess.RoomID)
+
+	if combatant.IsDead() {
+		msg := "You charge forward but are cut down by a Reactive Strike!"
+		for _, ev := range allRSEvents {
+			msg += "\n" + ev.Narrative
+		}
+		return messageEvent(msg), nil
+	}
+
+	// Attack the opponent (costs 1 AP via QueueAction).
+	attackEvents, err := s.combatH.Attack(uid, opponent.Name)
+	if err != nil {
+		return messageEvent(fmt.Sprintf("You close the distance before they can react. (Attack failed: %v)", err)), nil
+	}
+	if len(attackEvents) == 0 {
+		return messageEvent("You close the distance before they can react."), nil
+	}
+	moveSuffix := fmt.Sprintf(" (charged %d ft)", 2*speedFt)
+	for _, ev := range allRSEvents {
+		moveSuffix += "\n" + ev.Narrative
+	}
+	// Append move narrative to the first attack event.
+	attackEvents[0].Narrative = "You close the distance before they can react." + moveSuffix + "\n" + attackEvents[0].GetNarrative()
+	// Broadcast additional attack events.
+	for _, evt := range attackEvents[1:] {
+		s.broadcastCombatEvent(sess.RoomID, uid, evt)
+	}
+	s.pushRoomViewToAllInRoom(sess.RoomID)
+	return &gamev1.ServerEvent{
+		Payload: &gamev1.ServerEvent_CombatEvent{CombatEvent: attackEvents[0]},
+	}, nil
 }
 
 // playerEffectiveSpeedFt returns the player's effective movement speed in feet.
