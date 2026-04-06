@@ -95,6 +95,7 @@ export function RoomPanel() {
                       key={`${ri}-${ci}`}
                       className="exit-btn"
                       onClick={() => sendMessage('MoveRequest', { direction: ex.direction })}
+                      onMouseEnter={() => sendCommand(`look ${ex.direction}`)}
                     >
                       {ex.locked ? `${ex.direction}*` : ex.direction}
                     </button>
@@ -109,6 +110,7 @@ export function RoomPanel() {
                     key={ex.direction}
                     className="exit-btn"
                     onClick={() => sendMessage('MoveRequest', { direction: ex.direction })}
+                    onMouseEnter={() => sendCommand(`look ${ex.direction}`)}
                   >
                     {ex.locked ? `${ex.direction}*` : ex.direction}
                   </button>

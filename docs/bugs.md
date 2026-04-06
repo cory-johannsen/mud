@@ -1194,11 +1194,11 @@
 ### BUG-144: Hovering a navigation direction control does not trigger look in that direction
 
 **Severity:** medium
-**Status:** open
+**Status:** fixed
 **Category:** UI
 **Description:** Hovering over a compass direction control on the navigation UI should issue a `look <direction>` command and display the result as a tooltip or console message, giving the player a preview of the adjacent room before moving.
 **Steps:** Open the web UI in a room with exits; hover over a direction button on the navigation control; observe no look output is produced.
-**Fix:**
+**Fix:** Added `onMouseEnter={() => sendCommand('look \${ex.direction}')}` to both compass grid buttons and vertical exits buttons in `RoomPanel.tsx`.
 
 ### BUG-143: Server reconnects produce noisy console messages and temporarily interrupt combat
 
