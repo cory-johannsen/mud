@@ -7542,6 +7542,16 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string, targetX, 
 				if f.ID == "brutal_charge" {
 					return s.handleBrutalCharge(uid, targetID)
 				}
+				if f.ID == "rage" {
+					return s.handleRage(uid)
+				}
+				// REQ-BUG-132: Adrenaline Surge requires the player to be Enraged.
+				if f.ID == "adrenaline_surge" && s.mentalStateMgr != nil {
+					sev := s.mentalStateMgr.CurrentSeverity(uid, mentalstate.TrackRage)
+					if sev < mentalstate.SeverityMod {
+						return messageEvent("You must be Enraged to use Adrenaline Surge."), nil
+					}
+				}
 				condID := f.ConditionID
 				if condID != "" && s.condRegistry != nil {
 					// REQ-AOE-2: When feat has aoe_radius > 0 and target coordinates are provided,
@@ -10083,6 +10093,46 @@ func formatResistanceMap(m map[string]int) string {
 		parts = append(parts, fmt.Sprintf("%s (%d)", k, m[k]))
 	}
 	return strings.Join(parts, ", ")
+}
+
+// handleRage processes the "rage" active feat, advancing the player's Rage mental
+// state track to SeverityMod (Enraged). In combat: costs 1 AP.
+//
+// Precondition: uid must be a valid player session; mentalStateMgr must be non-nil.
+// Postcondition: Rage track is at least SeverityMod; rage_enraged condition applied to session/combat.
+func (s *GameServiceServer) handleRage(uid string) (*gamev1.ServerEvent, error) {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return nil, fmt.Errorf("player %q not found", uid)
+	}
+	if s.mentalStateMgr == nil {
+		return errorEvent("Mental state system unavailable."), nil
+	}
+	current := s.mentalStateMgr.CurrentSeverity(uid, mentalstate.TrackRage)
+	if current >= mentalstate.SeverityMod {
+		return messageEvent("You are already enraged."), nil
+	}
+	// Spend 1 AP when in active combat.
+	if sess.Status == statusInCombat && s.combatH != nil {
+		if err := s.combatH.SpendAP(uid, 1); err != nil {
+			return errorEvent(err.Error()), nil
+		}
+	}
+	changes := s.mentalStateMgr.ApplyTrigger(uid, mentalstate.TrackRage, mentalstate.SeverityMod)
+	if sess.Status == statusInCombat && s.combatH != nil {
+		msgs := s.combatH.applyMentalStateChanges(uid, changes)
+		narrative := "Fury overtakes you. You stop holding back."
+		if len(msgs) > 0 && msgs[0] != "" {
+			narrative = msgs[0]
+		}
+		return messageEvent(narrative), nil
+	}
+	applyMentalChangesToSession(sess, uid, changes, s.condRegistry, s.logger)
+	narrative := "Fury overtakes you. You stop holding back."
+	if len(changes) > 0 && changes[0].Message != "" {
+		narrative = changes[0].Message
+	}
+	return messageEvent(narrative), nil
 }
 
 // handleCalm attempts to calm the player's worst active mental state via a Grit check.

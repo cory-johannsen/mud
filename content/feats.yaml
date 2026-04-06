@@ -2372,6 +2372,15 @@ feats:
     activate_text: ""
     description: "A missed attack counts as only one hit for multi-attack penalty purposes."
 
+  - id: rage
+    name: Rage
+    category: job
+    archetype: aggressor
+    pf2e: rage
+    active: true
+    activate_text: "Fury overtakes you. You stop holding back."
+    description: "Enter a state of Rage, gaining +2 damage and -2 AC. You cannot flee while Enraged."
+
   - id: adrenaline_surge
     name: Adrenaline Surge
     category: job
@@ -2379,7 +2388,7 @@ feats:
     pf2e: moment_of_clarity
     active: true
     activate_text: "The adrenaline cuts through the haze and you think clearly for a moment."
-    description: "Once per rage, use a focus action that normally can't be used while enraged."
+    description: "Once per rage, use a focus action that normally can't be used while enraged. Requires Enraged."
 
   - id: raging_threat
     name: Raging Threat

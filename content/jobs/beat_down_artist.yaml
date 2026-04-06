@@ -29,7 +29,7 @@ feats:
   fixed:
     - brutal_charge
   choices:
-    pool: [overpower, adrenaline_surge]
+    pool: [rage, overpower, adrenaline_surge]
     count: 1
 
 class_features:

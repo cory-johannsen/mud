@@ -1087,11 +1087,11 @@
 ### BUG-132: Adrenaline Surge requires Enraged condition but no mechanism exists to trigger Enraged
 
 **Severity:** high
-**Status:** open
+**Status:** fixed
 **Category:** Combat
 **Description:** Adrenaline Surge has a prerequisite of the Enraged condition, but no technology, feat, or game event applies the Enraged condition, making Adrenaline Surge permanently unusable.
 **Steps:** Attempt to use Adrenaline Surge in combat; observe it is blocked due to missing Enraged condition; confirm no other ability grants Enraged.
-**Fix:**
+**Fix:** Added a "Rage" active feat (id: rage) to the Aggressor archetype that calls `handleRage`, advancing the Mental State Rage track to SeverityMod (Enraged). Added precondition check in `handleUse` blocking Adrenaline Surge when not Enraged. Added rage to roid_rager (fixed), beat_down_artist, and street_fighter (choices) jobs, and all Aggressor archetype level-up pools.
 
 ### BUG-131: Brutal Charge has no mechanical effect beyond AP cost and console text
 

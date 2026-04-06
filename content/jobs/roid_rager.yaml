@@ -29,6 +29,7 @@ skills:
 feats:
   general_count: 1
   fixed:
+    - rage
     - adrenaline_surge
   choices:
     pool: [brutal_charge, overpower]
