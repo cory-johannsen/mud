@@ -729,7 +729,7 @@ features:
 
   - slug: 2d-combat-expansion
     name: 2D Grid Combat Expansion
-    status: planned
+    status: done
     priority: 470
     category: combat
     file: docs/features/2d-combat-expansion.md
@@ -799,7 +799,7 @@ features:
 
   - slug: reactive-block-fix
     name: Reactive Block Fix
-    status: planned
+    status: done
     priority: 484
     category: combat
     file: docs/features/reactive-block-fix.md
