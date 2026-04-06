@@ -1033,11 +1033,11 @@
 ### BUG-139: Zone exits not visually distinct on map, missing from legend, and no hover tooltip
 
 **Severity:** medium
-**Status:** open
+**Status:** fixed
 **Category:** UI
 **Description:** Zone exit rooms are not visually distinguished from normal rooms on the map, are absent from the map legend, and hovering a room with a zone exit shows no tooltip indicating the exit or its destination. Explored zone exits should show the destination zone name in the tooltip.
 **Steps:** Navigate to a room with a zone exit; open the map; observe the exit room looks identical to other rooms; check the legend for a zone exit entry (none present); hover the exit room and observe no zone exit information in the tooltip.
-**Fix:**
+**Fix:** Added `ZoneExitInfo` proto message and `zone_exits` field to `MapTile`. Server detects zone-crossing exits and populates destination zone name. Zone exit rooms render as `{NN}` in purple on the map. Legend shows marker key. Tooltip shows zone exit directions and destination zone names.
 
 ### BUG-138: Web UI character selection cards do not display XP
 

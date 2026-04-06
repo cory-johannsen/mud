@@ -6601,8 +6601,21 @@ func (s *GameServiceServer) handleMap(uid string, req *gamev1.MapRequest) (*game
 			continue
 		}
 		var exits []string
+		var zoneExits []*gamev1.ZoneExitInfo
 		for _, e := range r.Exits {
 			exits = append(exits, string(e.Direction))
+			if e.TargetRoom != "" {
+				if targetRoom, ok := s.world.GetRoom(e.TargetRoom); ok && targetRoom.ZoneID != r.ZoneID {
+					info := &gamev1.ZoneExitInfo{
+						Direction:  string(e.Direction),
+						DestZoneId: targetRoom.ZoneID,
+					}
+					if destZone, ok := s.world.GetZone(targetRoom.ZoneID); ok {
+						info.DestZoneName = destZone.Name
+					}
+					zoneExits = append(zoneExits, info)
+				}
+			}
 		}
 		// Gate danger level and POIs on physical exploration (BUG-27).
 		var effectiveLevelStr string
@@ -6660,6 +6673,7 @@ func (s *GameServiceServer) handleMap(uid string, req *gamev1.MapRequest) (*game
 			Pois:        poiSlice,
 			BossRoom:    r.BossRoom,
 			PoiNpcs:     poiNpcs,
+			ZoneExits:   zoneExits,
 		})
 	}
 	return &gamev1.ServerEvent{

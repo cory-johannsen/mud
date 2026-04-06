@@ -2,7 +2,7 @@
 //
 // Returns structured segments (text + CSS color) so MapPanel can render
 // colored spans inside <pre> blocks.
-import type { MapTile } from '../proto'
+import type { MapTile, ZoneExitInfo } from '../proto'
 
 const CELL_W = 4
 
@@ -15,6 +15,7 @@ export const DANGER_COLOR: Record<string, string> = {
 }
 const DEFAULT_ROOM_COLOR = '#8ab'  // light blue-gray (unexplored / unknown)
 const CURRENT_ROOM_COLOR = '#fff'  // bright white for current room
+export const ZONE_EXIT_COLOR = '#c8f'  // purple — zone crossing exit
 
 // POI type table — matches poi.go
 export const POI_TYPES: Array<{ id: string; symbol: string; color: string; label: string }> = [
@@ -50,6 +51,14 @@ function seg(text: string, color?: string, tile?: MapTile): Segment {
 function dangerColor(t: MapTile): string {
   const level = t.dangerLevel ?? t.danger_level
   return (level && DANGER_COLOR[level]) ?? DEFAULT_ROOM_COLOR
+}
+
+function tileZoneExits(t: MapTile): ZoneExitInfo[] {
+  return t.zoneExits ?? t.zone_exits ?? []
+}
+
+function hasZoneExit(t: MapTile): boolean {
+  return tileZoneExits(t).length > 0
 }
 
 function poiSymbols(pois: string[]): ColoredLine {
@@ -138,6 +147,8 @@ export function renderMapTiles(tiles: MapTile[]): MapRenderResult {
           row.push(seg(`<${String(num).padStart(2)}>`, CURRENT_ROOM_COLOR, t))
         } else if (t.boss === true || t.bossRoom === true) {
           row.push(seg('<BB>', dangerColor(t), t))
+        } else if (hasZoneExit(t)) {
+          row.push(seg(`{${String(num).padStart(2)}}`, ZONE_EXIT_COLOR, t))
         } else {
           row.push(seg(`[${String(num).padStart(2)}]`, dangerColor(t), t))
         }
@@ -245,6 +256,18 @@ export function renderMapTiles(tiles: MapTile[]): MapRenderResult {
 
   const legendLines: ColoredLine[] = [plainLine('Legend:')]
 
+  // Map key for room markers
+  legendLines.push([
+    seg('[##]', DEFAULT_ROOM_COLOR),
+    seg(' Room  '),
+    seg('{##}', ZONE_EXIT_COLOR),
+    seg(' Zone Exit  '),
+    seg('<##>', CURRENT_ROOM_COLOR),
+    seg(' Current  '),
+    seg('<BB>', '#f44'),
+    seg(' Boss'),
+  ])
+
   if (presentPOIs.size > 0) {
     legendLines.push(plainLine('Points of Interest'))
     const poiEntries = POI_TYPES.filter(pt => presentPOIs.has(pt.id))
@@ -275,7 +298,7 @@ export function renderMapTiles(tiles: MapTile[]): MapRenderResult {
         num,
         name: t.roomName ?? t.name ?? `Room ${num}`,
         current: t.current === true,
-        color: t.current === true ? CURRENT_ROOM_COLOR : dangerColor(t),
+        color: t.current === true ? CURRENT_ROOM_COLOR : hasZoneExit(t) ? ZONE_EXIT_COLOR : dangerColor(t),
       })
     }
   }

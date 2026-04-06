@@ -1,6 +1,6 @@
 import ReactDOM from 'react-dom'
-import type { MapTile, PoiWithNpc } from '../proto'
-import { POI_TYPES, DANGER_COLOR } from './mapRenderer'
+import type { MapTile, PoiWithNpc, ZoneExitInfo } from '../proto'
+import { POI_TYPES, DANGER_COLOR, ZONE_EXIT_COLOR } from './mapRenderer'
 
 interface RoomTooltipProps {
   tile: MapTile
@@ -14,6 +14,7 @@ export function RoomTooltip({ tile, pos }: RoomTooltipProps) {
   const pois = Array.isArray(tile.pois) ? tile.pois : []
   const poiNpcs: PoiWithNpc[] = tile.poiNpcs ?? tile.poi_npcs ?? []
   const exits = Array.isArray(tile.exits) ? tile.exits : []
+  const zoneExits: ZoneExitInfo[] = tile.zoneExits ?? tile.zone_exits ?? []
   const isCurrent = tile.current === true
 
   // Resolve tooltip position: appear below the hovered element, clamp to viewport.
@@ -89,6 +90,24 @@ export function RoomTooltip({ tile, pos }: RoomTooltipProps) {
               <span style={{ color: '#aac' }}>{e}</span>
             </span>
           ))}
+        </div>
+      )}
+
+      {/* Zone exits */}
+      {zoneExits.length > 0 && (
+        <div style={{ marginTop: '0.2rem' }}>
+          <div style={{ color: '#666', marginBottom: '0.1rem' }}>Zone Exits:</div>
+          {zoneExits.map((ze, i) => {
+            const dir = ze.direction ?? ''
+            const zoneName = ze.destZoneName ?? ze.dest_zone_name ?? ze.destZoneId ?? ze.dest_zone_id ?? 'Unknown Zone'
+            return (
+              <div key={i} style={{ paddingLeft: '0.5rem' }}>
+                <span style={{ color: ZONE_EXIT_COLOR }}>{dir}</span>
+                <span style={{ color: '#888' }}> → </span>
+                <span style={{ color: ZONE_EXIT_COLOR }}>{zoneName}</span>
+              </div>
+            )
+          })}
         </div>
       )}
     </div>,

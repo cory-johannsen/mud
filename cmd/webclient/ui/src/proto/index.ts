@@ -292,6 +292,14 @@ export interface PoiWithNpc {
   npc_name?: string
 }
 
+export interface ZoneExitInfo {
+  direction?: string
+  destZoneId?: string
+  dest_zone_id?: string
+  destZoneName?: string
+  dest_zone_name?: string
+}
+
 export interface MapTile {
   roomId?: string
   roomName?: string
@@ -307,6 +315,8 @@ export interface MapTile {
   name?: string
   poiNpcs?: PoiWithNpc[]
   poi_npcs?: PoiWithNpc[]
+  zoneExits?: ZoneExitInfo[]
+  zone_exits?: ZoneExitInfo[]
 }
 
 export interface WorldZoneTile {

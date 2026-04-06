@@ -752,6 +752,13 @@ message PoiWithNpc {
     string npc_name = 2; // NPC display name e.g. "Sgt. Mack"
 }
 
+// ZoneExitInfo describes a zone-crossing exit from a map tile.
+message ZoneExitInfo {
+    string direction       = 1; // compass direction of the exit, e.g. "north"
+    string dest_zone_id    = 2; // destination zone ID
+    string dest_zone_name  = 3; // destination zone display name (may be empty if undiscovered)
+}
+
 // MapTile represents one discovered room on the automap grid.
 message MapTile {
     string room_id   = 1;
@@ -764,6 +771,7 @@ message MapTile {
     repeated string pois = 8; // POI type IDs present in this room e.g. ["merchant", "equipment"]
     bool   boss_room     = 9; // true when this room is a boss arena (REQ-AE-24)
     repeated PoiWithNpc poi_npcs = 10; // NPC-backed POIs with display names; non-NPC POIs (equipment, map, cover) are absent. Every poi_id here appears in pois.
+    repeated ZoneExitInfo zone_exits = 11; // zone-crossing exits from this room
 }
 
 // WorldZoneTile represents one zone on the world map.
