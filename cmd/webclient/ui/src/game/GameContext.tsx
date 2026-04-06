@@ -6,7 +6,7 @@
 // REQ-CTX-5: On RoomView, update state.roomView AND append room_event feed entry.
 // REQ-CTX-6: On RoundStartEvent, set state.combatRound. On RoundEndEvent, set to null.
 // REQ-CTX-7: On Disconnected, navigate to /characters.
-// REQ-CTX-8: Auto-reconnect with backoff: 1s, 2s, 4s, 8s, max 30s.
+// REQ-CTX-8: Auto-reconnect with backoff: 1s, 2s, 4s, 8s, max 30s. Only code 1000 (client-initiated close) suppresses reconnect.
 // REQ-CTX-9: Provider wraps child panels.
 
 import {
@@ -245,6 +245,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const unmountedRef = useRef(false)
   const lastRoomIdRef = useRef<string | null>(null)
+  const hasConnectedRef = useRef(false)
 
   const sendMessage = useCallback((type: string, payload: object) => {
     const frame = JSON.stringify({ type, payload })
@@ -271,8 +272,17 @@ export function GameProvider({ children }: { children: ReactNode }) {
     wsRef.current = ws
 
     ws.onopen = () => {
+      const isReconnect = hasConnectedRef.current
+      hasConnectedRef.current = true
       dispatch({ type: 'SET_CONNECTED', connected: true })
       backoffRef.current = 1000
+      if (isReconnect) {
+        // Clear stale combat state from the previous session.
+        dispatch({ type: 'SET_COMBAT_ROUND', round: null })
+        dispatch({ type: 'CLEAR_COMBAT_POSITIONS' })
+        dispatch({ type: 'CLEAR_COMBATANT_HP' })
+        dispatch({ type: 'APPEND_FEED', entry: makeFeedEntry('system', '— Reconnected to server —') })
+      }
       while (queueRef.current.length > 0) {
         ws.send(queueRef.current.shift()!)
       }
@@ -284,7 +294,9 @@ export function GameProvider({ children }: { children: ReactNode }) {
     ws.onclose = (ev) => {
       dispatch({ type: 'SET_CONNECTED', connected: false })
       if (unmountedRef.current) return
-      if (ev.code === 1000 || ev.code === 1001) return
+      // Code 1000 = normal closure initiated by this client (e.g. unmount). Do not reconnect.
+      // Code 1001 = server going away (redeploy, restart). Reconnect with backoff.
+      if (ev.code === 1000) return
       const delay = backoffRef.current
       backoffRef.current = Math.min(backoffRef.current * 2, 30000)
       reconnectTimerRef.current = setTimeout(() => {

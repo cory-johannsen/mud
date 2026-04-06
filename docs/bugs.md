@@ -1024,11 +1024,11 @@
 ### BUG-140: Web UI enters broken state on server redeploy — stream termination not handled with auto-reconnect
 
 **Severity:** high
-**Status:** open
+**Status:** fixed
 **Category:** UI
 **Description:** When a new server version is deployed the game stream is terminated, leaving the web UI in a broken/stale state with no recovery. The web UI should detect stream termination and automatically reconnect (with exponential backoff), restoring the session or redirecting to the character selection screen if the session cannot be resumed.
 **Steps:** Log in to the web UI; deploy a new server version; observe the UI becomes unresponsive or shows stale state with no reconnection attempt.
-**Fix:**
+**Fix:** Removed code 1001 (CloseGoingAway) from the no-reconnect list in GameContext.tsx. Only code 1000 (explicit client-initiated close on unmount) now suppresses reconnect. On reconnect, stale combat state is cleared and a system feed entry is appended.
 
 ### BUG-139: Zone exits not visually distinct on map, missing from legend, and no hover tooltip
 
