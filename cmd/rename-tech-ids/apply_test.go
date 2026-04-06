@@ -149,3 +149,38 @@ func TestUpdateGoStringLiterals_DoubleQuotedStrings(t *testing.T) {
 	assert.NotContains(t, s, `"acid_arrow_technical"`)
 	assert.Contains(t, s, `"chrome_reflex"`)
 }
+
+func TestEmitMigration_UpAndDown(t *testing.T) {
+	dir := t.TempDir()
+	upFile := filepath.Join(dir, "058_rename_tech_ids.up.sql")
+	downFile := filepath.Join(dir, "058_rename_tech_ids.down.sql")
+
+	renames := []RenameEntry{
+		{OldID: "acid_arrow_technical", NewID: "corrosive_projectile", Skip: false},
+		{OldID: "daze_neural", NewID: "cranial_shock", Skip: false},
+		{OldID: "chrome_reflex", NewID: "chrome_reflex", Skip: true},
+	}
+
+	err := emitMigration(renames, upFile, downFile)
+	require.NoError(t, err)
+
+	up, err := os.ReadFile(upFile)
+	require.NoError(t, err)
+	upStr := string(up)
+	// Each non-skip entry gets UPDATE statements for all 4 tables
+	assert.Contains(t, upStr, "SET tech_id = 'corrosive_projectile' WHERE tech_id = 'acid_arrow_technical'")
+	assert.Contains(t, upStr, "SET tech_id = 'cranial_shock' WHERE tech_id = 'daze_neural'")
+	assert.NotContains(t, upStr, "chrome_reflex", "skip entries must not appear in migration")
+	// Must cover all 4 tables
+	assert.Contains(t, upStr, "character_hardwired_technologies")
+	assert.Contains(t, upStr, "character_innate_technologies")
+	assert.Contains(t, upStr, "character_spontaneous_technologies")
+	assert.Contains(t, upStr, "character_prepared_technologies")
+
+	down, err := os.ReadFile(downFile)
+	require.NoError(t, err)
+	downStr := string(down)
+	// Down is the inverse
+	assert.Contains(t, downStr, "SET tech_id = 'acid_arrow_technical' WHERE tech_id = 'corrosive_projectile'")
+	assert.Contains(t, downStr, "SET tech_id = 'daze_neural' WHERE tech_id = 'cranial_shock'")
+}
