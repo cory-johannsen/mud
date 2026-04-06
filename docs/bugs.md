@@ -1105,11 +1105,11 @@
 ### BUG-130: Overpower has no mechanical effect beyond console text
 
 **Severity:** high
-**Status:** open
+**Status:** fixed
 **Category:** Combat
 **Description:** Using Overpower prints a console message but applies no damage bonus, condition, or other mechanical effect.
 **Steps:** Enter combat; use Overpower; observe console text but no change in combat state, target conditions, or damage output.
-**Fix:**
+**Fix:** The feat self-condition path in handleUse only applied conditions to sess.Conditions (session-level), not cbt.Conditions[uid] (combat-level), so the brutal_surge_active condition (+2 damage, -2 AC) had no effect in combat. Fixed to apply to the combat condition set when in combat, falling back to session conditions outside combat.
 
 ### BUG-129: Web UI character creation screens do not expand to fill available screen space
 
@@ -1132,11 +1132,11 @@
 ### BUG-127: Battle Fervor technology has no implemented effects
 
 **Severity:** high
-**Status:** open
+**Status:** fixed
 **Category:** Combat
 **Description:** Using Battle Fervor produces no mechanical effect — no buff, condition, or damage modifier is applied to the player.
 **Steps:** Prepare Battle Fervor; enter combat; use Battle Fervor; observe no change in player stats, conditions, or combat output.
-**Fix:**
+**Fix:** Created missing content/conditions/battle_fervor_active.yaml condition definition (+2 damage, duration: 3 rounds). The technology YAML already referenced this condition ID and the tech effect resolver framework already applied conditions correctly — the definition was the only missing piece.
 
 ### BUG-126: Web UI Technology/Feat tab shows duplicate entries instead of grouped slots with use counters
 

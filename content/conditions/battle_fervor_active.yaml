@@ -1,0 +1,15 @@
+id: battle_fervor_active
+name: Battle Fervor Active
+description: |
+  Doctrinal conviction sharpens your combat focus. You strike with greater
+  precision and force. +2 damage for 3 rounds.
+duration_type: rounds
+max_stacks: 0
+attack_penalty: 0
+ac_penalty: 0
+damage_bonus: 2
+speed_penalty: 0
+restrict_actions: []
+lua_on_apply: ""
+lua_on_remove: ""
+lua_on_tick: ""

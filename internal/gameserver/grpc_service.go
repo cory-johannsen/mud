@@ -7601,13 +7601,27 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string, targetX, 
 								zap.String("condition_id", condID),
 							)
 						}
-					} else if sess.Conditions != nil {
+					} else {
 						// Apply condition to self (default).
+						// REQ-FEAT-COND: Apply to combat condition set when in combat so that
+						// AC/damage modifiers take effect immediately; fall back to session conditions.
 						if def, ok := s.condRegistry.Get(condID); ok {
-							if err := sess.Conditions.Apply(sess.UID, def, 1, -1); err != nil {
+							var applyErr error
+							var selfCbt *combat.Combat
+							if s.combatH != nil {
+								selfCbt = s.combatH.ActiveCombatForPlayer(uid)
+							}
+							if selfCbt != nil {
+								if applySet := selfCbt.Conditions[sess.UID]; applySet != nil {
+									applyErr = applySet.Apply(sess.UID, def, 1, -1)
+								}
+							} else if sess.Conditions != nil {
+								applyErr = sess.Conditions.Apply(sess.UID, def, 1, -1)
+							}
+							if applyErr != nil {
 								s.logger.Warn("failed to apply feat condition",
 									zap.String("condition_id", condID),
-									zap.Error(err),
+									zap.Error(applyErr),
 								)
 							}
 						} else {
