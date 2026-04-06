@@ -113,6 +113,105 @@ func TestApplyReactionEffect_ReduceDamage_NilDamagePending_Noop(t *testing.T) {
 	})
 }
 
+// REQ-RXN28: wielding_shield returns false when LoadoutSet is nil.
+func TestCheckReactionRequirement_WieldingShield_FalseWhenNoLoadout(t *testing.T) {
+	sess := &session.PlayerSession{} // LoadoutSet field is nil
+	assert.False(t, CheckReactionRequirement(sess, "wielding_shield"))
+}
+
+// REQ-RXN28: wielding_shield returns true when a shield is equipped in the off-hand.
+func TestCheckReactionRequirement_WieldingShield_TrueWhenShieldEquipped(t *testing.T) {
+	def := &inventory.WeaponDef{
+		ID:                  "scrap_shield",
+		Name:                "Scrap Shield",
+		DamageDice:          "1d4",
+		DamageType:          "bludgeoning",
+		Kind:                inventory.WeaponKindShield,
+		ProficiencyCategory: "simple_weapons",
+		Rarity:              "salvage",
+	}
+	ls := inventory.NewLoadoutSet()
+	if err := ls.ActivePreset().EquipOffHand(def); err != nil {
+		t.Fatalf("EquipOffHand failed: %v", err)
+	}
+	sess := &session.PlayerSession{LoadoutSet: ls}
+	assert.True(t, CheckReactionRequirement(sess, "wielding_shield"))
+}
+
+// REQ-RXN28: wielding_shield returns false when the off-hand holds a non-shield weapon.
+func TestCheckReactionRequirement_WieldingShield_FalseWhenOffHandNotShield(t *testing.T) {
+	def := &inventory.WeaponDef{
+		ID:                  "combat_knife",
+		Name:                "Combat Knife",
+		DamageDice:          "1d4",
+		DamageType:          "slashing",
+		Kind:                inventory.WeaponKindOneHanded,
+		ProficiencyCategory: "simple_weapons",
+		Rarity:              "salvage",
+	}
+	ls := inventory.NewLoadoutSet()
+	if err := ls.ActivePreset().EquipOffHand(def); err != nil {
+		t.Fatalf("EquipOffHand failed: %v", err)
+	}
+	sess := &session.PlayerSession{LoadoutSet: ls}
+	assert.False(t, CheckReactionRequirement(sess, "wielding_shield"))
+}
+
+// REQ-RXN29: shieldHardness returns the Hardness from the equipped off-hand shield.
+func TestShieldHardness_ReturnsHardnessFromOffHandShield(t *testing.T) {
+	def := &inventory.WeaponDef{
+		ID:                  "riot_shield",
+		Name:                "Riot Shield",
+		DamageDice:          "1d4",
+		DamageType:          "bludgeoning",
+		Kind:                inventory.WeaponKindShield,
+		ProficiencyCategory: "simple_weapons",
+		Rarity:              "salvage",
+		Hardness:            3,
+	}
+	ls := inventory.NewLoadoutSet()
+	if err := ls.ActivePreset().EquipOffHand(def); err != nil {
+		t.Fatalf("EquipOffHand failed: %v", err)
+	}
+	sess := &session.PlayerSession{LoadoutSet: ls}
+	ctx := reaction.ReactionContext{DamagePending: new(10)}
+	effect := reaction.ReactionEffect{Type: reaction.ReactionEffectReduceDamage}
+	ApplyReactionEffect(sess, effect, &ctx)
+	assert.Equal(t, 7, *ctx.DamagePending, "shieldHardness 3 should reduce 10 damage to 7")
+}
+
+// REQ-RXN29: shieldHardness returns 0 when OffHand is nil.
+func TestShieldHardness_ReturnsZeroWhenNoOffHand(t *testing.T) {
+	ls := inventory.NewLoadoutSet()
+	sess := &session.PlayerSession{LoadoutSet: ls}
+	ctx := reaction.ReactionContext{DamagePending: new(5)}
+	effect := reaction.ReactionEffect{Type: reaction.ReactionEffectReduceDamage}
+	ApplyReactionEffect(sess, effect, &ctx)
+	assert.Equal(t, 5, *ctx.DamagePending, "zero hardness must not reduce damage")
+}
+
+// REQ-RXN29: shieldHardness returns 0 when the off-hand holds a non-shield weapon.
+func TestShieldHardness_ReturnsZeroWhenOffHandNotShield(t *testing.T) {
+	def := &inventory.WeaponDef{
+		ID:                  "side_knife",
+		Name:                "Side Knife",
+		DamageDice:          "1d4",
+		DamageType:          "slashing",
+		Kind:                inventory.WeaponKindOneHanded,
+		ProficiencyCategory: "simple_weapons",
+		Rarity:              "salvage",
+	}
+	ls := inventory.NewLoadoutSet()
+	if err := ls.ActivePreset().EquipOffHand(def); err != nil {
+		t.Fatalf("EquipOffHand failed: %v", err)
+	}
+	sess := &session.PlayerSession{LoadoutSet: ls}
+	ctx := reaction.ReactionContext{DamagePending: new(5)}
+	effect := reaction.ReactionEffect{Type: reaction.ReactionEffectReduceDamage}
+	ApplyReactionEffect(sess, effect, &ctx)
+	assert.Equal(t, 5, *ctx.DamagePending, "off-hand non-shield must not reduce damage")
+}
+
 // REQ-READY-15: "enemy_enters" readied trigger matches TriggerOnEnemyEntersRoom.
 func TestMatchesReadyTrigger_EnemyEnters(t *testing.T) {
 	assert.True(t, matchesReadyTrigger("enemy_enters", reaction.TriggerOnEnemyEntersRoom))

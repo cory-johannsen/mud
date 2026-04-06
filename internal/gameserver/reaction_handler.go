@@ -1,10 +1,10 @@
 package gameserver
 
 import (
+	"fmt"
 	"math/rand"
 
 	"github.com/cory-johannsen/mud/internal/game/combat"
-	"github.com/cory-johannsen/mud/internal/game/inventory"
 	"github.com/cory-johannsen/mud/internal/game/reaction"
 	"github.com/cory-johannsen/mud/internal/game/ruleset"
 	"github.com/cory-johannsen/mud/internal/game/session"
@@ -39,6 +39,15 @@ func CheckReactionRequirement(sess *session.PlayerSession, req string) bool {
 			return false
 		}
 		return preset.MainHand.Def.IsMelee()
+	case "wielding_shield":
+		if sess.LoadoutSet == nil {
+			return false
+		}
+		preset := sess.LoadoutSet.ActivePreset()
+		if preset == nil || preset.OffHand == nil || preset.OffHand.Def == nil {
+			return false
+		}
+		return preset.OffHand.Def.IsShield()
 	default:
 		return false
 	}
@@ -80,8 +89,6 @@ func ApplyReactionEffect(sess *session.PlayerSession, effect reaction.ReactionEf
 }
 
 // shieldHardness returns the hardness of the player's equipped off-hand shield, or 0.
-// WeaponDef does not carry a Hardness field; a shield in the off-hand contributes 0 hardness
-// until the field is added to WeaponDef in a future iteration.
 //
 // Precondition: sess must not be nil.
 // Postcondition: Returns a non-negative integer.
@@ -93,11 +100,10 @@ func shieldHardness(sess *session.PlayerSession) int {
 	if preset == nil || preset.OffHand == nil || preset.OffHand.Def == nil {
 		return 0
 	}
-	if preset.OffHand.Def.Kind != inventory.WeaponKindShield {
+	if !preset.OffHand.Def.IsShield() {
 		return 0
 	}
-	// WeaponDef.Hardness is not yet modelled; return 0 until the field is added.
-	return 0
+	return preset.OffHand.Def.Hardness
 }
 
 // matchesReadyTrigger reports whether the player's readied trigger string corresponds to the
@@ -283,11 +289,23 @@ func (s *GameServiceServer) buildReactionCallback(
 		}
 
 		sess.ReactionsRemaining--
+		damageBeforeEffect := 0
+		if ctx.DamagePending != nil {
+			damageBeforeEffect = *ctx.DamagePending
+		}
 		// ctx is passed by value but DamagePending and SaveOutcome are pointers into the caller's
 		// data. ApplyReactionEffect mutates through these pointers, so effects propagate to the
 		// caller. Any future effect that assigns a new pointer field rather than dereferencing
 		// must pass ctx by pointer instead.
 		ApplyReactionEffect(sess, pr.Def.Effect, &ctx)
+		if pr.Def.Effect.Type == reaction.ReactionEffectReduceDamage && ctx.DamagePending != nil {
+			blocked := damageBeforeEffect - *ctx.DamagePending
+			if *ctx.DamagePending <= 0 {
+				s.pushMessageToUID(uid, "Reactive Block: fully blocked the attack.")
+			} else {
+				s.pushMessageToUID(uid, fmt.Sprintf("Reactive Block: blocked %d damage.", blocked))
+			}
+		}
 		return true, nil
 	}
 }

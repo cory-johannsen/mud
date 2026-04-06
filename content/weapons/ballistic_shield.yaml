@@ -1,0 +1,11 @@
+id: ballistic_shield
+name: Ballistic Shield
+description: A military-grade composite shield with reinforced edges, capable of stopping high-velocity projectiles. Advanced engineering and materials provide superior protection.
+damage_dice: 1d8
+damage_type: bludgeoning
+range_increment: 0
+kind: shield
+group: shield
+proficiency_category: martial_weapons
+rarity: mil_spec
+hardness: 5

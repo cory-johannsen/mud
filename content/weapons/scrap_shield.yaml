@@ -1,0 +1,11 @@
+id: scrap_shield
+name: Scrap Shield
+description: A makeshift defensive barrier fashioned from salvaged metal scraps, dented and poorly balanced but functional.
+damage_dice: 1d4
+damage_type: bludgeoning
+range_increment: 0
+kind: shield
+group: shield
+proficiency_category: simple_weapons
+rarity: salvage
+hardness: 2

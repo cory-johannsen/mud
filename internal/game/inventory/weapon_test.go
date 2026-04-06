@@ -280,6 +280,29 @@ rarity: salvage
 	assert.Nil(t, weapons[0].CrossTeamEffect)
 }
 
+// TestLoadWeapons_ShieldHardnessPopulated verifies that WeaponDef.Hardness is
+// correctly populated when loading a shield YAML that specifies hardness: 3.
+func TestLoadWeapons_ShieldHardnessPopulated(t *testing.T) {
+	dir := t.TempDir()
+	content := `id: test_shield
+name: Test Shield
+damage_dice: 1d4
+damage_type: bludgeoning
+range_increment: 0
+kind: shield
+group: shield
+proficiency_category: simple_weapons
+rarity: salvage
+hardness: 3
+`
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "test_shield.yaml"), []byte(content), 0644))
+	weapons, err := inventory.LoadWeapons(dir)
+	require.NoError(t, err)
+	require.Len(t, weapons, 1)
+	assert.Equal(t, 3, weapons[0].Hardness, "Hardness must be 3 as specified in YAML")
+	assert.True(t, weapons[0].IsShield(), "weapon must report IsShield true")
+}
+
 func TestAllWeaponsHaveProficiencyCategory(t *testing.T) {
 	weapons, err := inventory.LoadWeapons("../../../content/weapons")
 	require.NoError(t, err)

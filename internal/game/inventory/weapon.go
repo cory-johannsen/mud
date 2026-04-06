@@ -59,6 +59,7 @@ type WeaponDef struct {
 	// UpgradeSlots is the number of material upgrade slots available on this weapon.
 	// Derived from RarityDef.FeatureSlots at load time. NOT loaded from YAML.
 	UpgradeSlots int `yaml:"-"`
+	Hardness     int `yaml:"hardness"`
 }
 
 // IsMelee reports whether the weapon is a melee weapon (RangeIncrement == 0).

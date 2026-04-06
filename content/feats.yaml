@@ -2349,6 +2349,7 @@ feats:
     description: "When hit by a physical attack, raise your shield as a reaction to reduce damage."
     reaction:
       triggers: [on_damage_taken]
+      requirement: wielding_shield
       effect:
         type: reduce_damage
 

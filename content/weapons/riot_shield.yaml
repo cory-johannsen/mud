@@ -1,0 +1,11 @@
+id: riot_shield
+name: Riot Shield
+description: A polycarbonate shield standard-issue for law enforcement and security personnel, transparent reinforced design provides excellent visibility and protection.
+damage_dice: 1d6
+damage_type: bludgeoning
+range_increment: 0
+kind: shield
+group: shield
+proficiency_category: martial_weapons
+rarity: street
+hardness: 3
