@@ -395,8 +395,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
               dispatch({
                 type: 'UPDATE_COMBAT_POSITION',
                 combatantName: pos.name,
-                x: pos.x,
-                y: pos.y,
+                x: pos.x ?? 0,
+                y: pos.y ?? 0,
               })
             }
           }

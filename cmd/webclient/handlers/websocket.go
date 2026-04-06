@@ -379,7 +379,10 @@ func serverEventEncodedLoadout(event *gamev1.ServerEvent) (json.RawMessage, stri
 // grpcToWS reads ServerEvent protos from the gRPC stream and writes JSON frames to the WS.
 // If h.bus is non-nil, each event is also published to the EventBus for SSE fan-out.
 func (h *WSHandler) grpcToWS(ctx context.Context, stream gamev1.GameService_SessionClient, wsConn *websocket.Conn) {
-	marshaler := protojson.MarshalOptions{EmitUnpopulated: false}
+	// EmitUnpopulated: true is required so that zero-value int32 fields (e.g. GridX=0, GridY=0)
+	// are included in the JSON output. Without this, combatants at row 0 or column 0
+	// have their coordinates silently dropped, making them invisible on the battle map.
+	marshaler := protojson.MarshalOptions{EmitUnpopulated: true}
 	for {
 		event, err := stream.Recv()
 		if err != nil {
