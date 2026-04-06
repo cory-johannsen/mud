@@ -16,7 +16,7 @@ function npcTypeTag(npcType: string): string {
 }
 
 export function RoomPanel() {
-  const { state, sendMessage } = useGame()
+  const { state, sendMessage, sendCommand } = useGame()
   const room = state.roomView
 
   if (!room) {
@@ -147,10 +147,12 @@ export function RoomPanel() {
                   </li>
                 )
               }
-              // Combat NPC: Name (health) [fighting Target]
+              // Combat NPC: Name (health) [fighting Target] — clickable to attack
               return (
                 <li key={npc.id ?? npc.name}>
-                  {npc.name}{' '}
+                  <button className="item-link" onClick={() => sendCommand(`attack ${npc.name}`)}>
+                    {npc.name}
+                  </button>{' '}
                   <span style={{ color: '#666', fontSize: '0.75rem' }}>({health})</span>
                   {fightingTarget && <span style={{ color: '#f66' }}> fighting {fightingTarget}</span>}
                 </li>

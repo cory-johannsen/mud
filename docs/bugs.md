@@ -1150,11 +1150,11 @@
 ### BUG-125: Combat NPC names not clickable in web UI — clicking should initiate combat
 
 **Severity:** high
-**Status:** open
+**Status:** fixed
 **Category:** UI
 **Description:** Combat NPC names displayed in the room view are not clickable; clicking an NPC name should trigger combat against that NPC.
 **Steps:** Enter a room containing a combat NPC; observe NPC name in room panel; click the NPC name; observe no combat is initiated.
-**Fix:**
+**Fix:** Made combat NPC names clickable buttons in RoomPanel.tsx. Clicking sends `attack <name>` via sendCommand, which the server parses as an AttackRequest.
 
 ### BUG-124: Web UI feat/ability hotbar activation shows no feedback
 **Severity:** high
