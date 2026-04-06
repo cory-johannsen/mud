@@ -82,16 +82,21 @@ function SlotPicker({
 // Active tech item — Prepared
 function PreparedItem({
   slot,
+  total,
+  remaining,
   hotbarSlots,
   sendMessage,
 }: {
   slot: PreparedSlotView
+  total: number
+  remaining: number
   hotbarSlots: HotbarSlot[]
   sendMessage: (type: string, payload: object) => void
 }) {
   const [picking, setPicking] = useState(false)
   const techId = slot.techId ?? slot.tech_id ?? ''
   const name = slot.techName ?? slot.tech_name ?? techId
+  const exhausted = remaining === 0
 
   function handlePick(s: number) {
     sendMessage('HotbarRequest', { action: 'set', slot: s, kind: 'technology', ref: techId })
@@ -101,15 +106,17 @@ function PreparedItem({
   return (
     <li style={styles.techItem}>
       <div style={styles.techHeader}>
-        <strong style={{ color: slot.expended ? '#666' : '#e0c060', textDecoration: slot.expended ? 'line-through' : 'none' }}>
+        <strong style={{ color: exhausted ? '#666' : '#e0c060', textDecoration: exhausted ? 'line-through' : 'none' }}>
           {name}
         </strong>
         <span style={styles.badgeActive}>active</span>
-        {slot.expended && <span style={styles.expendedBadge}>expended</span>}
+        {total > 1
+          ? <UsePips remaining={remaining} max={total} />
+          : exhausted && <span style={styles.expendedBadge}>expended</span>}
       </div>
       {slot.description && <p style={styles.techDesc}>{slot.description}</p>}
       {slot.effectsSummary && <EffectsSummary text={slot.effectsSummary} />}
-      {!slot.expended && !picking && (
+      {!exhausted && !picking && (
         <button style={styles.hotbarBtn} onClick={() => setPicking(true)} type="button">
           + Add to Hotbar
         </button>
@@ -274,11 +281,26 @@ export function TechnologyDrawer({ onClose }: { onClose: () => void }) {
     knownByLevel.get(lvl)!.push(entry)
   }
 
+  // Group prepared slots by techId so that multiple slots for the same tech appear as one
+  // entry with a remaining-use counter rather than as duplicate rows.
+  const preparedGroupMap = new Map<string, { slot: PreparedSlotView; total: number; remaining: number }>()
+  for (const p of prepared) {
+    const id = p.techId ?? p.tech_id ?? ''
+    const existing = preparedGroupMap.get(id)
+    if (existing) {
+      existing.total++
+      if (!p.expended) existing.remaining++
+    } else {
+      preparedGroupMap.set(id, { slot: p, total: 1, remaining: p.expended ? 0 : 1 })
+    }
+  }
+  const preparedGroups = [...preparedGroupMap.values()]
+
   const reactionInnate = innate.filter((s) => s.isReaction)
   const normalInnate = innate.filter((s) => !s.isReaction)
 
   const hasReactions = reactionInnate.length > 0
-  const hasActive = prepared.length > 0 || normalInnate.length > 0 || spontKnown.length > 0
+  const hasActive = preparedGroups.length > 0 || normalInnate.length > 0 || spontKnown.length > 0
   const hasPassive = hardwired.length > 0
   const hasAny = hasReactions || hasActive || hasPassive
 
@@ -320,10 +342,12 @@ export function TechnologyDrawer({ onClose }: { onClose: () => void }) {
               <section style={styles.section}>
                 <SectionLabel label="Active" />
                 <ul style={styles.list}>
-                  {prepared.map((p, i) => (
+                  {preparedGroups.map((g) => (
                     <PreparedItem
-                      key={(p.techId ?? p.tech_id ?? '') + i}
-                      slot={p}
+                      key={g.slot.techId ?? g.slot.tech_id ?? g.slot.techName}
+                      slot={g.slot}
+                      total={g.total}
+                      remaining={g.remaining}
                       hotbarSlots={state.hotbarSlots}
                       sendMessage={sendMessage}
                     />

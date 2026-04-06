@@ -1114,11 +1114,11 @@
 ### BUG-129: Web UI character creation screens do not expand to fill available screen space
 
 **Severity:** medium
-**Status:** open
+**Status:** fixed
 **Category:** UI
 **Description:** Character creation screens are not full-height; they should always expand to fill the available viewport.
 **Steps:** Open the web UI; begin character creation; observe that creation screens do not fill the full screen height.
-**Fix:**
+**Fix:** Changed CharacterWizard container from maxHeight:100vh to height:100vh with box-sizing:border-box so it fills the full viewport. Increased optionGrid maxHeight from 55vh to 65vh to show more cards.
 
 ### BUG-128: Web UI displays `9 / 0 HP` — max HP calculated as zero
 
@@ -1141,11 +1141,11 @@
 ### BUG-126: Web UI Technology/Feat tab shows duplicate entries instead of grouped slots with use counters
 
 **Severity:** medium
-**Status:** open
+**Status:** fixed
 **Category:** UI
 **Description:** Technologies and Feats with multiple prepared slots appear as duplicate entries instead of being grouped by level with a per-level slot count and remaining-use counter.
 **Steps:** Log in as a level 2 Street Preacher (Zealot archetype); open the Technology tab; observe Battle Fervor listed twice with no level or use-count indicator instead of two grouped entries (e.g., "Battle Fervor — Level 1 ×2 uses", "Battle Fervor — Level 2 ×1 use").
-**Fix:**
+**Fix:** Added grouping of prepared slots by techId in TechnologyDrawer. Multiple slots for the same tech now display as a single entry with a remaining/total pip counter (e.g., ●●○ 2/3) instead of duplicate rows.
 
 ### BUG-125: Combat NPC names not clickable in web UI — clicking should initiate combat
 
