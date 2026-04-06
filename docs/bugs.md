@@ -1042,11 +1042,11 @@
 ### BUG-138: Web UI character selection cards do not display XP
 
 **Severity:** low
-**Status:** open
+**Status:** fixed
 **Category:** UI
 **Description:** Character selection screen cards do not show the character's current XP, leaving the player with no quick view of progression before logging in.
 **Steps:** Open the web UI; navigate to the character selection screen; observe character cards show no XP value.
-**Fix:**
+**Fix:** Added `experience` field to `CharacterResponse` struct and `characterToResponse()` in `characters.go`. Added `experience?` to TypeScript `Character` interface. Displayed XP below HP bar in `CharacterCard` component.
 
 ### BUG-136: Player earns no XP for exploring new rooms
 

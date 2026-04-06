@@ -207,6 +207,7 @@ export interface Character {
   archetype: string
   location?: string
   is_online?: boolean
+  experience?: number
 }
 
 export interface SpontaneousChoice {

@@ -142,6 +142,11 @@ function CharacterCard({ char, onPlay, onDelete, onForceLogout }: {
       <div style={styles.hpText}>
         {char.current_hp} / {char.max_hp} HP
       </div>
+      {char.experience !== undefined && (
+        <div style={{ ...styles.cardSub, marginTop: '0.25rem' }}>
+          XP: {char.experience.toLocaleString()}
+        </div>
+      )}
       <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.75rem' }}>
         {isOnline ? (
           <button style={{ ...styles.forceLogoutButton, flex: 1 }} onClick={() => onForceLogout(char)}>

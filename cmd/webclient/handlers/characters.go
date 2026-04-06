@@ -98,16 +98,17 @@ type PreparedTechSetter interface {
 
 // CharacterResponse is the JSON shape returned for a single character.
 type CharacterResponse struct {
-	ID        int64  `json:"id"`
-	Name      string `json:"name"`
-	Job       string `json:"job"`
-	Level     int    `json:"level"`
-	CurrentHP int32  `json:"current_hp"`
-	MaxHP     int32  `json:"max_hp"`
-	Region    string `json:"region"`
-	Archetype string `json:"archetype"`
-	Location  string `json:"location,omitempty"`
-	IsOnline  bool   `json:"is_online"`
+	ID         int64  `json:"id"`
+	Name       string `json:"name"`
+	Job        string `json:"job"`
+	Level      int    `json:"level"`
+	CurrentHP  int32  `json:"current_hp"`
+	MaxHP      int32  `json:"max_hp"`
+	Region     string `json:"region"`
+	Archetype  string `json:"archetype"`
+	Location   string `json:"location,omitempty"`
+	IsOnline   bool   `json:"is_online"`
+	Experience int    `json:"experience"`
 }
 
 // CharacterHandler serves all /api/characters endpoints.
@@ -262,16 +263,17 @@ func characterToResponse(c *character.Character, opts *CharacterOptions, reg *Ac
 		}
 	}
 	return CharacterResponse{
-		ID:        c.ID,
-		Name:      c.Name,
-		Job:       job,
-		Level:     c.Level,
-		CurrentHP: int32(c.CurrentHP),
-		MaxHP:     int32(c.MaxHP),
-		Region:    region,
-		Archetype: archetype,
-		Location:  location,
-		IsOnline:  isOnline,
+		ID:         c.ID,
+		Name:       c.Name,
+		Job:        job,
+		Level:      c.Level,
+		CurrentHP:  int32(c.CurrentHP),
+		MaxHP:      int32(c.MaxHP),
+		Region:     region,
+		Archetype:  archetype,
+		Location:   location,
+		IsOnline:   isOnline,
+		Experience: c.Experience,
 	}
 }
 
