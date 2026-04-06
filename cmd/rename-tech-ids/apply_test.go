@@ -150,6 +150,98 @@ func TestUpdateGoStringLiterals_DoubleQuotedStrings(t *testing.T) {
 	assert.Contains(t, s, `"chrome_reflex"`)
 }
 
+// buildApplyFixture creates a minimal valid fixture for RunApply tests.
+// Returns techDir, jobDir, archetypeDir, migrationsDir, goSourceDir, mapFile.
+func buildApplyFixture(t *testing.T) (techDir, jobDir, archetypeDir, migrationsDir, goSourceDir, mapFile string) {
+	t.Helper()
+	base := t.TempDir()
+	techDir = filepath.Join(base, "content", "technologies")
+	jobDir = filepath.Join(base, "content", "jobs")
+	archetypeDir = filepath.Join(base, "content", "archetypes")
+	migrationsDir = filepath.Join(base, "migrations")
+	goSourceDir = filepath.Join(base, "internal", "importer")
+	mapFile = filepath.Join(base, "tools", "rename_map.yaml")
+
+	for _, d := range []string{techDir, jobDir, archetypeDir, migrationsDir, goSourceDir} {
+		require.NoError(t, os.MkdirAll(d, 0755))
+	}
+
+	// Write a tech YAML
+	writeTechYAML(t, techDir, "technical", "acid_arrow_technical.yaml",
+		"acid_arrow_technical", "Corrosive Projectile")
+	// Write a skip-entry tech
+	writeTechYAML(t, techDir, "innate", "chrome_reflex.yaml",
+		"chrome_reflex", "Chrome Reflex")
+
+	// Write a job YAML referencing the tech
+	jobContent := "id: test_job\ntechnology_grants:\n  pool:\n    - { id: acid_arrow_technical, level: 1 }\n    - { id: chrome_reflex, level: 1 }\n"
+	require.NoError(t, os.WriteFile(filepath.Join(jobDir, "test_job.yaml"), []byte(jobContent), 0644))
+
+	// Write a static_localizer.go stub
+	locContent := "package importer\nvar m = map[string]x{\n\t`acid_arrow_technical`: {Name: `Corrosive Projectile`},\n}\n"
+	require.NoError(t, os.WriteFile(filepath.Join(goSourceDir, "static_localizer.go"), []byte(locContent), 0644))
+
+	// Generate the rename map
+	require.NoError(t, RunGenerate(techDir, mapFile))
+
+	return
+}
+
+func TestRunApply_RenamesFilesAndUpdatesRefs(t *testing.T) {
+	techDir, jobDir, archetypeDir, migrationsDir, goSourceDir, mapFile :=
+		buildApplyFixture(t)
+
+	err := RunApply(mapFile, techDir, jobDir, archetypeDir, goSourceDir, migrationsDir)
+	require.NoError(t, err)
+
+	// Tech YAML renamed
+	newTechPath := filepath.Join(techDir, "technical", "corrosive_projectile.yaml")
+	_, err = os.Stat(newTechPath)
+	assert.NoError(t, err, "renamed tech YAML must exist")
+	oldTechPath := filepath.Join(techDir, "technical", "acid_arrow_technical.yaml")
+	_, err = os.Stat(oldTechPath)
+	assert.True(t, os.IsNotExist(err), "old tech YAML must be gone")
+
+	// Job YAML reference updated
+	jobData, err := os.ReadFile(filepath.Join(jobDir, "test_job.yaml"))
+	require.NoError(t, err)
+	assert.Contains(t, string(jobData), "id: corrosive_projectile")
+	assert.NotContains(t, string(jobData), "acid_arrow_technical")
+
+	// Go source updated
+	locData, err := os.ReadFile(filepath.Join(goSourceDir, "static_localizer.go"))
+	require.NoError(t, err)
+	assert.Contains(t, string(locData), "`corrosive_projectile`")
+	assert.NotContains(t, string(locData), "`acid_arrow_technical`")
+
+	// Migration files emitted
+	_, err = os.Stat(filepath.Join(migrationsDir, "058_rename_tech_ids.up.sql"))
+	assert.NoError(t, err)
+	_, err = os.Stat(filepath.Join(migrationsDir, "058_rename_tech_ids.down.sql"))
+	assert.NoError(t, err)
+}
+
+func TestRunApply_RefusesOnUnresolvedCollision(t *testing.T) {
+	base := t.TempDir()
+	techDir := filepath.Join(base, "tech")
+	mapFile := filepath.Join(base, "rename_map.yaml")
+	require.NoError(t, os.MkdirAll(techDir, 0755))
+
+	// Two techs that derive the same new_id → collision
+	writeTechYAML(t, techDir, "technical", "a_technical.yaml", "a_technical", "Shock Wave")
+	writeTechYAML(t, techDir, "neural", "b_neural.yaml", "b_neural", "Shock Wave")
+	require.NoError(t, RunGenerate(techDir, mapFile))
+
+	err := RunApply(mapFile, techDir,
+		filepath.Join(base, "jobs"),
+		filepath.Join(base, "archetypes"),
+		filepath.Join(base, "go"),
+		filepath.Join(base, "migrations"),
+	)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "collision")
+}
+
 func TestEmitMigration_UpAndDown(t *testing.T) {
 	dir := t.TempDir()
 	upFile := filepath.Join(dir, "058_rename_tech_ids.up.sql")

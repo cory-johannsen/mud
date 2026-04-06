@@ -6,6 +6,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"gopkg.in/yaml.v3"
 )
 
 // renameYAMLFile renames the YAML file for entry from old_id stem to new_id stem,
@@ -130,14 +132,100 @@ func emitMigration(renames []RenameEntry, upFile, downFile string) error {
 	return nil
 }
 
-// RunApply reads the rename map at mapFile and applies all non-skip, non-collision renames.
-// Placeholder — full implementation added in subsequent tasks.
+// RunApply reads the rename map at mapFile and applies all renames:
+// 1. Renames tech YAML files and rewrites their id: fields.
+// 2. Updates all id references in job and archetype YAML files.
+// 3. Updates string literals in static_localizer.go and Go test files under goSourceDir.
+// 4. Emits DB migration files to migrationsDir.
+//
+// Refuses to run if any entry has Collision=true.
+//
+// Precondition: mapFile exists and contains a valid RenameMap.
+// Postcondition: all named files updated; migration files written.
 func RunApply(mapFile, techDir, jobDir, archetypeDir, goSourceDir, migrationsDir string) error {
-	_ = mapFile
-	_ = techDir
-	_ = jobDir
-	_ = archetypeDir
-	_ = goSourceDir
-	_ = migrationsDir
-	return fmt.Errorf("RunApply: not yet fully implemented")
+	data, err := os.ReadFile(mapFile)
+	if err != nil {
+		return fmt.Errorf("reading map file %q: %w", mapFile, err)
+	}
+	var rm RenameMap
+	if err := yaml.Unmarshal(data, &rm); err != nil {
+		return fmt.Errorf("parsing map file: %w", err)
+	}
+
+	// Refuse if any collision is unresolved.
+	for _, e := range rm.Renames {
+		if e.Collision {
+			return fmt.Errorf("collision: new_id %q is derived by multiple old IDs — resolve in %s before applying", e.NewID, mapFile)
+		}
+	}
+
+	// Build lookup: old_id → new_id (only non-skip entries).
+	renameMap := make(map[string]string)
+	for _, e := range rm.Renames {
+		if !e.Skip {
+			renameMap[e.OldID] = e.NewID
+		}
+	}
+
+	// Step 1: Rename tech YAML files and rewrite id: fields.
+	for _, e := range rm.Renames {
+		if _, err := renameYAMLFile(e); err != nil {
+			return fmt.Errorf("renaming YAML for %q: %w", e.OldID, err)
+		}
+	}
+
+	// Step 2: Update job and archetype YAML references.
+	for _, dir := range []string{jobDir, archetypeDir} {
+		entries, err := os.ReadDir(dir)
+		if err != nil {
+			if os.IsNotExist(err) {
+				continue
+			}
+			return fmt.Errorf("reading dir %q: %w", dir, err)
+		}
+		for _, de := range entries {
+			if de.IsDir() || !strings.HasSuffix(de.Name(), ".yaml") {
+				continue
+			}
+			path := filepath.Join(dir, de.Name())
+			if err := updateFileReferences(path, renameMap); err != nil {
+				return fmt.Errorf("updating refs in %q: %w", path, err)
+			}
+		}
+	}
+
+	// Step 3: Update Go string literals.
+	goFiles, err := collectGoFiles(goSourceDir)
+	if err != nil {
+		return fmt.Errorf("collecting Go files: %w", err)
+	}
+	for _, gf := range goFiles {
+		if err := updateGoStringLiterals(gf, renameMap); err != nil {
+			return fmt.Errorf("updating Go literals in %q: %w", gf, err)
+		}
+	}
+
+	// Step 4: Emit DB migration.
+	upFile := filepath.Join(migrationsDir, "058_rename_tech_ids.up.sql")
+	downFile := filepath.Join(migrationsDir, "058_rename_tech_ids.down.sql")
+	if err := emitMigration(rm.Renames, upFile, downFile); err != nil {
+		return fmt.Errorf("emitting migration: %w", err)
+	}
+
+	return nil
+}
+
+// collectGoFiles returns all .go files under dir (recursive).
+func collectGoFiles(dir string) ([]string, error) {
+	var files []string
+	err := filepath.WalkDir(dir, func(path string, d os.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if !d.IsDir() && strings.HasSuffix(d.Name(), ".go") {
+			files = append(files, path)
+		}
+		return nil
+	})
+	return files, err
 }
