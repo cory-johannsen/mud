@@ -18,7 +18,7 @@ func TestNpcRoleToPOIIDIntegration(t *testing.T) {
 		{"healer", "healer"},
 		{"job_trainer", "trainer"},
 		{"guard", "guard"},
-		{"quest_giver", "npc"},
+		{"quest_giver", "quest_giver"},
 		{"", ""},
 	}
 	for _, tc := range cases {

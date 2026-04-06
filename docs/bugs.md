@@ -1167,11 +1167,11 @@
 ### BUG-147: Quest giver NPC type has no map POI symbol — falls through to generic NPC marker
 
 **Severity:** medium
-**Status:** open
+**Status:** fixed
 **Category:** UI
 **Description:** `NpcRoleToPOIID()` has no mapping for `"quest_giver"`, so quest giver NPCs appear as generic white `N` markers on the map instead of a distinct POI symbol. `POITypes` also has no quest giver entry, so the map legend never lists them.
 **Steps:** Place a quest giver NPC in a zone; open the map; observe the NPC shows as a generic `N` with no quest giver legend entry.
-**Fix:** Add a `quest_giver` entry to `POITypes` in `internal/game/maputil/poi.go` with a distinct symbol and color, and add a `"quest_giver"` → `"quest_giver"` mapping in `NpcRoleToPOIID`.
+**Fix:** Added `{ID: "quest_giver", Symbol: 'Q', Color: "\033[93m", Label: "Quest"}` to `POITypes` in `internal/game/maputil/poi.go` between `guard` and `npc`. Added `"quest_giver"` case to `NpcRoleToPOIID` returning `"quest_giver"`. Updated `poi_test.go` and `handle_map_poi_test.go` to expect `"quest_giver"` instead of `"npc"` for quest giver role.
 
 ### BUG-146: Rustbucket Ridge has no quest giver NPC — no template or zone spawn defined
 
@@ -1185,11 +1185,11 @@
 ### BUG-145: Web UI Job tab does not show Feat and Technology grants
 
 **Severity:** medium
-**Status:** open
+**Status:** fixed
 **Category:** UI
 **Description:** The Job tab in the web UI does not display the Feat and Technology grants associated with the player's job, leaving the player with no visibility into what was granted and at which level.
 **Steps:** Open the web UI; navigate to the Job tab; observe no Feat or Technology grant information is shown.
-**Fix:**
+**Fix:** `JobGrantsRequest` was missing from `protoMessageByName` and `wrapProtoAsClientMessage` in `cmd/webclient/handlers/websocket_dispatch.go`. Added both entries so the WebSocket handler correctly routes `JobGrantsRequest` messages from the browser to the gRPC service.
 
 ### BUG-144: Hovering a navigation direction control does not trigger look in that direction
 
