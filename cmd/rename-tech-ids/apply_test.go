@@ -107,3 +107,45 @@ func TestUpdateFileReferences_Idempotent(t *testing.T) {
 	data2, _ := os.ReadFile(jobFile)
 	assert.Equal(t, string(data), string(data2), "second pass must be a no-op")
 }
+
+func TestUpdateGoStringLiterals_BacktickMapKeys(t *testing.T) {
+	dir := t.TempDir()
+	goFile := filepath.Join(dir, "static_localizer.go")
+	content := "var m = map[string]x{\n\t`acid_arrow_technical`: {Name: `Corrosive Projectile`},\n\t`daze_neural`: {Name: `Cranial Shock`},\n\t`chrome_reflex`: {Name: `Chrome Reflex`},\n}\n"
+	require.NoError(t, os.WriteFile(goFile, []byte(content), 0644))
+
+	renames := map[string]string{
+		"acid_arrow_technical": "corrosive_projectile",
+		"daze_neural":          "cranial_shock",
+	}
+	err := updateGoStringLiterals(goFile, renames)
+	require.NoError(t, err)
+
+	data, err := os.ReadFile(goFile)
+	require.NoError(t, err)
+	s := string(data)
+
+	assert.Contains(t, s, "`corrosive_projectile`:")
+	assert.Contains(t, s, "`cranial_shock`:")
+	assert.Contains(t, s, "`chrome_reflex`:", "unrenamed ID must be untouched")
+	assert.NotContains(t, s, "`acid_arrow_technical`")
+	assert.NotContains(t, s, "`daze_neural`")
+	// Value backtick strings must be untouched
+	assert.Contains(t, s, "`Corrosive Projectile`")
+}
+
+func TestUpdateGoStringLiterals_DoubleQuotedStrings(t *testing.T) {
+	dir := t.TempDir()
+	goFile := filepath.Join(dir, "service_test.go")
+	content := "techID := \"acid_arrow_technical\"\nother := \"chrome_reflex\"\n"
+	require.NoError(t, os.WriteFile(goFile, []byte(content), 0644))
+
+	renames := map[string]string{"acid_arrow_technical": "corrosive_projectile"}
+	require.NoError(t, updateGoStringLiterals(goFile, renames))
+
+	data, _ := os.ReadFile(goFile)
+	s := string(data)
+	assert.Contains(t, s, `"corrosive_projectile"`)
+	assert.NotContains(t, s, `"acid_arrow_technical"`)
+	assert.Contains(t, s, `"chrome_reflex"`)
+}

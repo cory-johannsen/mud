@@ -65,6 +65,29 @@ func updateFileReferences(file string, renames map[string]string) error {
 	return os.WriteFile(file, []byte(content), 0644)
 }
 
+// updateGoStringLiterals replaces backtick-quoted and double-quoted occurrences
+// of old tech IDs with new IDs in a Go source file.
+// Specifically replaces:
+//   - "`<old_id>`" → "`<new_id>`"  (map keys and string literals)
+//   - `"<old_id>"` → `"<new_id>"`  (double-quoted string literals)
+//
+// Precondition: file exists; renames maps old_id → new_id.
+// Postcondition: file updated in-place; idempotent.
+func updateGoStringLiterals(file string, renames map[string]string) error {
+	data, err := os.ReadFile(file)
+	if err != nil {
+		return fmt.Errorf("reading %q: %w", file, err)
+	}
+	content := string(data)
+	for oldID, newID := range renames {
+		// backtick-quoted: `old_id`
+		content = strings.ReplaceAll(content, "`"+oldID+"`", "`"+newID+"`")
+		// double-quoted: "old_id"
+		content = strings.ReplaceAll(content, `"`+oldID+`"`, `"`+newID+`"`)
+	}
+	return os.WriteFile(file, []byte(content), 0644)
+}
+
 // RunApply reads the rename map at mapFile and applies all non-skip, non-collision renames.
 // Placeholder — full implementation added in subsequent tasks.
 func RunApply(mapFile, techDir, jobDir, archetypeDir, goSourceDir, migrationsDir string) error {
