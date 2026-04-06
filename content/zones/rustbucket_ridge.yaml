@@ -1205,6 +1205,9 @@ zone:
     map_x: 4
     map_y: 0
     spawns:
+    - template: rustbucket_ridge_quest_giver
+      count: 1
+      respawn_after: 0s
     - template: rustbucket_ridge_healer
       count: 1
       respawn_after: 0s

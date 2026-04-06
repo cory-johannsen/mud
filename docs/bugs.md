@@ -1176,11 +1176,11 @@
 ### BUG-146: Rustbucket Ridge has no quest giver NPC — no template or zone spawn defined
 
 **Severity:** high
-**Status:** open
+**Status:** fixed
 **Category:** World
 **Description:** Rustbucket Ridge has no quest giver NPC template in `content/npcs/non_combat/rustbucket_ridge.yaml` and no quest giver spawn in `content/zones/rustbucket_ridge.yaml`, leaving the zone without any quest giver presence.
 **Steps:** Enter Rustbucket Ridge; observe no quest giver NPC in any safe room; confirm map shows no quest giver marker.
-**Fix:** Create a `rustbucket_ridge_quest_giver` NPC template and add a spawn for it in a safe room in the zone YAML.
+**Fix:** Added `rustbucket_ridge_quest_giver` ("Dispatch Board Operator") NPC template to `content/npcs/non_combat/rustbucket_ridge.yaml` and added a spawn for it in `rust_scrap_office` in the zone YAML.
 
 ### BUG-145: Web UI Job tab does not show Feat and Technology grants
 
