@@ -87,7 +87,8 @@ func drainMessageContents(t *testing.T, ch <-chan []byte, timeout time.Duration)
 }
 
 // equipLootTestPistol registers a pistol loadout for uid on handler h.
-// The pistol has RangeIncrement=30 so attacks succeed at the initial combat distance.
+// The pistol has RangeIncrement=100 so attacks succeed at the initial combat
+// distance of 95ft (19 squares × 5ft) without range penalty.
 //
 // Precondition: h and uid must be non-nil/non-empty.
 // Postcondition: uid's loadout is set to a pistol preset with a full magazine.
@@ -96,7 +97,7 @@ func equipLootTestPistol(t *testing.T, h *CombatHandler, uid string) {
 	def := &inventory.WeaponDef{
 		ID: "loot-test-pistol", Name: "Test Pistol",
 		DamageDice: "1d6", DamageType: "piercing",
-		RangeIncrement: 30, ReloadActions: 1, MagazineCapacity: 30,
+		RangeIncrement: 100, ReloadActions: 1, MagazineCapacity: 30,
 		FiringModes:         []inventory.FiringMode{inventory.FiringModeSingle},
 		ProficiencyCategory: "simple_ranged",
 		Rarity:              "salvage",

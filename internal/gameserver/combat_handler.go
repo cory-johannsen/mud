@@ -2384,6 +2384,19 @@ func (h *CombatHandler) resolveAndAdvanceLocked(roomID string, cbt *combat.Comba
 		return events
 	}
 
+	// Append position events for all combatants so the web client receives updated
+	// grid coordinates immediately after each timer-fired round (e.g., after NPC auto-stride).
+	// Note: we cannot call BroadcastAllPositions here because combatMu is already held —
+	// that would deadlock. Instead we append directly to the events slice before broadcasting.
+	for _, c := range cbt.Combatants {
+		events = append(events, &gamev1.CombatEvent{
+			Type:      gamev1.CombatEventType_COMBAT_EVENT_TYPE_POSITION,
+			Attacker:  c.Name,
+			AttackerX: int32(c.GridX),
+			AttackerY: int32(c.GridY),
+		})
+	}
+
 	h.broadcastFn(roomID, events)
 
 	// Start the next round.
