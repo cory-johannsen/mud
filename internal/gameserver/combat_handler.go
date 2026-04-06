@@ -1047,15 +1047,15 @@ func (h *CombatHandler) JoinPendingNPCCombat(inst *npc.Instance, pendingRoomID s
 		AttackVerb:  inst.AttackVerb,
 	}
 	combat.RollInitiative([]*combat.Combatant{npcCbt}, h.dice.Src())
-	// Assign sequential X column on row 9 (NPC side).
+	// Assign NPC on right edge, stacked vertically from center.
 	existingNPCs := 0
 	for _, c := range cbt.Combatants {
 		if c.Kind == combat.KindNPC {
 			existingNPCs++
 		}
 	}
-	npcCbt.GridX = existingNPCs
-	npcCbt.GridY = 9
+	npcCbt.GridX = 19
+	npcCbt.GridY = 10 + existingNPCs
 	if addErr := h.engine.AddCombatant(pendingRoomID, npcCbt); addErr != nil {
 		h.logger.Warn("JoinPendingNPCCombat: AddCombatant failed",
 			zap.String("npc_id", inst.ID),
@@ -1558,7 +1558,7 @@ func (h *CombatHandler) startPursuitCombatLocked(playerSess *session.PlayerSessi
 
 	// Player starts at row 0 (player side), column 0.
 	playerCbt.GridX = 0
-	playerCbt.GridY = 0
+	playerCbt.GridY = 10
 
 	combatants := []*combat.Combatant{playerCbt}
 	for i, inst := range insts {
@@ -1583,9 +1583,9 @@ func (h *CombatHandler) startPursuitCombatLocked(playerSess *session.PlayerSessi
 			Weaknesses:  inst.Weaknesses,
 			WeaponName:  npcWeaponName,
 			AttackVerb:  inst.AttackVerb,
-			// NPC starts at row 9 (NPC side), sequential column per NPC.
-			GridX: i,
-			GridY: 9,
+			// NPC starts on the right edge, stacked vertically from center.
+			GridX: 19,
+			GridY: 10 + i,
 		}
 		combatants = append(combatants, npcCbt)
 	}
@@ -1707,8 +1707,8 @@ func (h *CombatHandler) SetActiveCombatDistance(uid string, dist int) error {
 	if playerCbt == nil {
 		return fmt.Errorf("player %q is not a combatant", uid)
 	}
-	// Find nearest NPC grid position (default column 5).
-	npcGridX := 5
+	// Find nearest NPC grid position (default column 19, right edge of 20×20 grid).
+	npcGridX := 19
 	for _, c := range cbt.Combatants {
 		if c.Kind == combat.KindNPC {
 			npcGridX = c.GridX
@@ -1722,7 +1722,7 @@ func (h *CombatHandler) SetActiveCombatDistance(uid string, dist int) error {
 		newGridX = 0
 	}
 	playerCbt.GridX = newGridX
-	playerCbt.GridY = 0
+	playerCbt.GridY = 10
 	return nil
 }
 
@@ -2690,12 +2690,12 @@ func (h *CombatHandler) startCombatLocked(sess *session.PlayerSession, inst *npc
 			zoneID = room.ZoneID
 		}
 	}
-	// Player starts at row 0 (player side), column 0.
+	// Player starts on the left edge, vertically centered (column 0, row 10).
 	playerCbt.GridX = 0
-	playerCbt.GridY = 0
-	// NPC starts at row 9 (NPC side), column 5 (middle).
-	npcCbt.GridX = 5
-	npcCbt.GridY = 9
+	playerCbt.GridY = 10
+	// NPC starts on the right edge, vertically centered (column 19, row 10).
+	npcCbt.GridX = 19
+	npcCbt.GridY = 10
 	cbt, err := h.engine.StartCombat(sess.RoomID, combatants, h.condRegistry, scriptMgr, zoneID)
 	if err != nil {
 		return nil, nil, fmt.Errorf("starting combat: %w", err)
@@ -2727,7 +2727,7 @@ func (h *CombatHandler) startCombatLocked(sess *session.PlayerSession, inst *npc
 					}
 				}
 				memberCbt.GridX = existingPlayers
-				memberCbt.GridY = 0
+				memberCbt.GridY = 10
 				if addErr := h.engine.AddCombatant(roomID, memberCbt); addErr != nil {
 					h.logger.Warn("auto-join group member failed",
 						zap.String("uid", memberUID),

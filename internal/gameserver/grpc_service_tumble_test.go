@@ -218,7 +218,7 @@ func TestHandleTumble_RollAboveDC_Success(t *testing.T) {
 	require.True(t, ok)
 	combatant := cbt.GetCombatant("u_tbl_ra")
 	require.NotNil(t, combatant)
-	// Default spawn: player (0,0), NPC (5,9). CompassDelta toward NPC = (1,1).
+	// Default spawn: player (0,10), NPC (19,10). CompassDelta toward NPC = (1,0).
 	beforeX := combatant.GridX
 	beforeY := combatant.GridY
 
@@ -229,9 +229,9 @@ func TestHandleTumble_RollAboveDC_Success(t *testing.T) {
 	require.NotNil(t, msgEvt, "expected a message event on successful tumble")
 	assert.Contains(t, msgEvt.Content, "tumble through")
 
-	// On success the player moves 1 cell toward the target (CompassDelta "toward" from (0,0) to (5,9) = (1,1)).
+	// On success the player moves 1 cell toward the target (CompassDelta "toward" from (0,10) to (19,10) = (1,0)).
 	assert.Equal(t, beforeX+1, combatant.GridX, "player.GridX must increase by 1 on successful tumble")
-	assert.Equal(t, beforeY+1, combatant.GridY, "player.GridY must increase by 1 on successful tumble")
+	assert.Equal(t, beforeY, combatant.GridY, "player.GridY must not change on successful tumble (same row)")
 }
 
 // TestHandleTumble_RollBelowDC_Failure verifies that handleTumble returns a failure message

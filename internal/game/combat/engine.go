@@ -423,8 +423,8 @@ func (e *Engine) StartCombat(roomID string, combatants []*Combatant, condRegistr
 		scriptMgr:    scriptMgr,
 		zoneID:       zoneID,
 	}
-	cbt.GridWidth = 10
-	cbt.GridHeight = 10
+	cbt.GridWidth = 20
+	cbt.GridHeight = 20
 	for _, c := range sorted {
 		set := condition.NewActiveSet()
 		if scriptMgr != nil {

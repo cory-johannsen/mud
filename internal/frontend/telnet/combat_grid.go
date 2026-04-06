@@ -8,10 +8,10 @@ import (
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 )
 
-const combatGridWidth = 10
-const combatGridHeight = 10
+const combatGridWidth = 20
+const combatGridHeight = 20
 
-// RenderCombatGrid renders a 10×10 ASCII combat grid for telnet display.
+// RenderCombatGrid renders a 20×20 ASCII combat grid for telnet display.
 // positions is a slice of combatant positions (name, X, Y).
 // width is the terminal width (minimum 30 used if smaller).
 //
@@ -22,7 +22,7 @@ func RenderCombatGrid(positions []*gamev1.CombatantPosition, width int) string {
 		width = 30
 	}
 
-	// Build a 10×10 grid of tokens (first letter of name, uppercase).
+	// Build a 20×20 grid of tokens (first letter of name, uppercase).
 	grid := [combatGridHeight][combatGridWidth]rune{}
 	for y := 0; y < combatGridHeight; y++ {
 		for x := 0; x < combatGridWidth; x++ {
@@ -48,7 +48,7 @@ func RenderCombatGrid(positions []*gamev1.CombatantPosition, width int) string {
 	}
 	sb.WriteString("-+\n")
 
-	// Grid rows (row 0 at top = player side, row 9 at bottom = NPC side).
+	// Grid rows (row 0 at top, row 19 at bottom).
 	for y := 0; y < combatGridHeight; y++ {
 		sb.WriteString("|")
 		for x := 0; x < combatGridWidth; x++ {

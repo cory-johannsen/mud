@@ -40,11 +40,11 @@ func TestMaxCombatRange_Constant(t *testing.T) {
 }
 
 // TestStride_Away_GridBoundClamped verifies that an NPC striding away from a
-// player at the corner cannot move beyond the 10×10 grid boundary.
+// player at the corner cannot move beyond the 20×20 grid boundary.
 func TestStride_Away_GridBoundClamped(t *testing.T) {
-	// NPC at (9,9) — top-right corner of the 10x10 grid. Player at (0,0).
+	// NPC at (19,19) — top-right corner of the 20x20 grid. Player at (0,0).
 	// Striding "away" would try to increase both X and Y, but they're already at max.
-	cbt := makeMaxRangeCombat(t, 0, 0, 9, 9)
+	cbt := makeMaxRangeCombat(t, 0, 0, 19, 19)
 	_ = cbt.StartRound(3)
 	err := cbt.QueueAction("npc1", combat.QueuedAction{Type: combat.ActionStride, Direction: "away"})
 	require.NoError(t, err)
@@ -55,9 +55,9 @@ func TestStride_Away_GridBoundClamped(t *testing.T) {
 	npc := cbt.GetCombatant("npc1")
 	require.NotNil(t, npc)
 	assert.GreaterOrEqual(t, npc.GridX, 0, "GridX must be >= 0")
-	assert.LessOrEqual(t, npc.GridX, 9, "GridX must be <= 9")
+	assert.LessOrEqual(t, npc.GridX, 19, "GridX must be <= 19")
 	assert.GreaterOrEqual(t, npc.GridY, 0, "GridY must be >= 0")
-	assert.LessOrEqual(t, npc.GridY, 9, "GridY must be <= 9")
+	assert.LessOrEqual(t, npc.GridY, 19, "GridY must be <= 19")
 }
 
 // TestStride_Away_BelowMaxRange_NotClamped verifies that striding away within
@@ -81,9 +81,9 @@ func TestStride_Away_BelowMaxRange_NotClamped(t *testing.T) {
 // TestStride_Away_MaxGridDistance_StaysInBounds verifies that an NPC at maximum
 // grid distance stays in bounds after striding away.
 func TestStride_Away_MaxGridDistance_StaysInBounds(t *testing.T) {
-	// NPC at (8,8), player at (0,0). Max Chebyshev distance = 9 squares = 45 ft.
-	// Stride away increases both X and Y by 1 — clamped to (9,9).
-	cbt := makeMaxRangeCombat(t, 0, 0, 8, 8)
+	// NPC at (18,18), player at (0,0). Max Chebyshev distance = 19 squares = 95 ft.
+	// Stride away increases both X and Y by 1 — clamped to (19,19).
+	cbt := makeMaxRangeCombat(t, 0, 0, 18, 18)
 	_ = cbt.StartRound(3)
 	err := cbt.QueueAction("npc1", combat.QueuedAction{Type: combat.ActionStride, Direction: "away"})
 	require.NoError(t, err)
@@ -96,11 +96,11 @@ func TestStride_Away_MaxGridDistance_StaysInBounds(t *testing.T) {
 	player := cbt.GetCombatant("player1")
 	require.NotNil(t, player)
 	dist := combat.CombatRange(*npc, *player)
-	maxGridDist := 9 * 5 // 9 squares × 5 ft
+	maxGridDist := 19 * 5 // 19 squares × 5 ft
 	assert.LessOrEqual(t, dist, maxGridDist,
 		"NPC distance from player must not exceed max grid distance (%d ft)", maxGridDist)
 	assert.GreaterOrEqual(t, npc.GridX, 0)
-	assert.LessOrEqual(t, npc.GridX, 9)
+	assert.LessOrEqual(t, npc.GridX, 19)
 	assert.GreaterOrEqual(t, npc.GridY, 0)
-	assert.LessOrEqual(t, npc.GridY, 9)
+	assert.LessOrEqual(t, npc.GridY, 19)
 }

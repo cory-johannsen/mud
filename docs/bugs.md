@@ -1012,6 +1012,24 @@
 **Steps:** Play a character with the tamper technology; in combat or outside, run `use tamper`; observe no console feedback and no effect applied.
 **Fix:** Added ConditionTarget field to Feat struct ("foe" = apply to combat target). Created tamper_debuff condition (-2 attack penalty, encounter duration). Updated tamper feat with condition_id: tamper_debuff and condition_target: foe. Modified handleUse to route foe-targeted conditions to the enemy's combat condition set using LastCombatTarget.
 
+### BUG-129: Web UI character creation screens do not expand to fill available screen space
+
+**Severity:** medium
+**Status:** open
+**Category:** UI
+**Description:** Character creation screens are not full-height; they should always expand to fill the available viewport.
+**Steps:** Open the web UI; begin character creation; observe that creation screens do not fill the full screen height.
+**Fix:**
+
+### BUG-128: Web UI displays `9 / 0 HP` — max HP calculated as zero
+
+**Severity:** high
+**Status:** open
+**Category:** Character
+**Description:** Player HP is displayed as `<current> / 0 HP` in the web UI, indicating max HP is being reported as zero.
+**Steps:** Log in with an existing character; observe the HP display in the character panel showing a non-zero current HP over a zero max HP.
+**Fix:**
+
 ### BUG-127: Battle Fervor technology has no implemented effects
 
 **Severity:** high

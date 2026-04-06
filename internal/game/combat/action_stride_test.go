@@ -117,20 +117,20 @@ func TestStride_CompassDirections(t *testing.T) {
 }
 
 // TestProperty_Stride_GridBoundsRespected verifies that no direction places a combatant
-// outside the 10×10 grid (GridX in [0,9], GridY in [0,9]).
+// outside the 20×20 grid (GridX in [0,19], GridY in [0,19]).
 func TestProperty_Stride_GridBoundsRespected(t *testing.T) {
 	directions := []string{"n", "s", "e", "w", "ne", "nw", "se", "sw", "toward", "away"}
 	rapid.Check(t, func(rt *rapid.T) {
-		startX := rapid.IntRange(0, 9).Draw(rt, "startX")
-		startY := rapid.IntRange(0, 9).Draw(rt, "startY")
+		startX := rapid.IntRange(0, 19).Draw(rt, "startX")
+		startY := rapid.IntRange(0, 19).Draw(rt, "startY")
 		dir := directions[rapid.IntRange(0, len(directions)-1).Draw(rt, "dirIdx")]
 
 		// NPC at the opposite corner to ensure toward/away have a valid opponent.
-		npcX := 9 - startX
-		npcY := 9 - startY
+		npcX := 19 - startX
+		npcY := 19 - startY
 		if npcX == startX && npcY == startY {
-			npcX = (startX + 5) % 10
-			npcY = (startY + 5) % 10
+			npcX = (startX + 10) % 20
+			npcY = (startY + 10) % 20
 		}
 
 		reg := condition.NewRegistry()
@@ -160,8 +160,8 @@ func TestProperty_Stride_GridBoundsRespected(t *testing.T) {
 		_ = cbt.QueueAction("n1", combat.QueuedAction{Type: combat.ActionPass})
 		_ = combat.ResolveRound(cbt, src, func(id string, hp int) {}, nil)
 
-		if player.GridX < 0 || player.GridX > 9 || player.GridY < 0 || player.GridY > 9 {
-			rt.Fatalf("after stride %q from (%d,%d), player ended at (%d,%d) — outside 10x10 grid",
+		if player.GridX < 0 || player.GridX > 19 || player.GridY < 0 || player.GridY > 19 {
+			rt.Fatalf("after stride %q from (%d,%d), player ended at (%d,%d) — outside 20x20 grid",
 				dir, startX, startY, player.GridX, player.GridY)
 		}
 	})

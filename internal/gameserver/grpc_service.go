@@ -9263,10 +9263,10 @@ func (s *GameServiceServer) handleStride(uid string, req *gamev1.StrideRequest) 
 
 	width, height := cbt.GridWidth, cbt.GridHeight
 	if width == 0 {
-		width = 10
+		width = 20
 	}
 	if height == 0 {
-		height = 10
+		height = 20
 	}
 
 	// Compute effective speed: 25 ft base minus armor speed penalty (min 5 ft).
@@ -9406,10 +9406,10 @@ func (s *GameServiceServer) handleStep(uid string, req *gamev1.StepRequest) (*ga
 
 	width, height := cbt.GridWidth, cbt.GridHeight
 	if width == 0 {
-		width = 10
+		width = 20
 	}
 	if height == 0 {
-		height = 10
+		height = 20
 	}
 	dx, dy := combat.CompassDelta(dir, combatant, opponent)
 	newX := combatant.GridX + dx
@@ -9514,10 +9514,10 @@ func (s *GameServiceServer) handleTumble(uid string, req *gamev1.TumbleRequest) 
 		dx, dy := combat.CompassDelta("toward", combatant, npcCbt)
 		width, height := cbt.GridWidth, cbt.GridHeight
 		if width == 0 {
-			width = 10
+			width = 20
 		}
 		if height == 0 {
-			height = 10
+			height = 20
 		}
 		newX := combatant.GridX + dx
 		newY := combatant.GridY + dy

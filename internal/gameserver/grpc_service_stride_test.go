@@ -109,8 +109,8 @@ func TestHandleStride_NotInCombat(t *testing.T) {
 // TestHandleStride_TowardDecreasesDist verifies that striding "toward" moves the player
 // their full speed (25 ft = 5 cells) toward the NPC.
 //
-// Precondition: player at GridX=0, GridY=0; NPC at GridX=5, GridY=9 (default spawn); direction=="toward".
-// Postcondition: player.GridX==5 and player.GridY==5 (5 diagonal steps of delta(1,1)).
+// Precondition: player at GridX=0, GridY=10; NPC at GridX=19, GridY=10 (default spawn); direction=="toward".
+// Postcondition: player.GridX==5 and player.GridY==10 (5 horizontal steps of delta(1,0)).
 func TestHandleStride_TowardDecreasesDist(t *testing.T) {
 	svc, sessMgr, npcMgr, combatHandler := newStrideSvcWithCombat(t)
 
@@ -134,7 +134,7 @@ func TestHandleStride_TowardDecreasesDist(t *testing.T) {
 	cbt, ok := combatHandler.GetCombatForRoom(roomID)
 	require.True(t, ok)
 
-	// Default spawn: player (0,0), NPC (5,9). Chebyshev dist = max(5,9)*5 = 45ft.
+	// Default spawn: player (0,10), NPC (19,10). Manhattan dist = 19 cols * 5ft = 95ft.
 	playerCbt := cbt.GetCombatant("u_str_tr")
 	require.NotNil(t, playerCbt)
 
@@ -145,9 +145,9 @@ func TestHandleStride_TowardDecreasesDist(t *testing.T) {
 	require.NotNil(t, msgEvt, "expected a message event")
 	assert.Contains(t, msgEvt.Content, "toward")
 
-	// towardDelta(0,0,5,9) = (1,1); 5 steps (25 ft) → player at (5,5).
+	// towardDelta(0,10,19,10) = (1,0); 5 steps (25 ft) → player at (5,10).
 	assert.Equal(t, 5, playerCbt.GridX, "player.GridX should be 5 after striding toward (25 ft)")
-	assert.Equal(t, 5, playerCbt.GridY, "player.GridY should be 5 after striding toward (25 ft)")
+	assert.Equal(t, 10, playerCbt.GridY, "player.GridY should remain 10 after striding toward (25 ft)")
 }
 
 // TestHandleStride_TowardFromAnyPosition_DecreasesDist verifies that stride "toward"
@@ -206,8 +206,8 @@ func TestHandleStride_TowardFromAnyPosition_DecreasesDist(t *testing.T) {
 // TestHandleStride_AwayAtBoundary_GridClampApplied verifies that stride "away" at the
 // grid boundary does not move the player off the grid (coordinates clamped to 0).
 //
-// Precondition: player at GridX=0, GridY=0 (grid corner); NPC at GridX=5, GridY=9; direction=="away".
-// Postcondition: player remains at GridX=0, GridY=0 (clamped from (-1,-1)).
+// Precondition: player at GridX=0, GridY=10 (left edge, center row); NPC at GridX=19, GridY=10 (default spawn); direction=="away".
+// Postcondition: player remains at GridX=0, GridY=10 (clamped from (-1,10)).
 func TestHandleStride_AwayAtBoundary_GridClampApplied(t *testing.T) {
 	svc, sessMgr, npcMgr, combatHandler := newStrideSvcWithCombat(t)
 
@@ -233,8 +233,8 @@ func TestHandleStride_AwayAtBoundary_GridClampApplied(t *testing.T) {
 
 	playerCbt := cbt.GetCombatant("u_str_cm")
 	require.NotNil(t, playerCbt)
-	// Player already at (0,0) by default. NPC at (5,9) by default.
-	// away = -towardDelta(0,0,5,9) = -(1,1) = (-1,-1) → clamped to (0,0).
+	// Player at (0,10) by default. NPC at (19,10) by default.
+	// away = -towardDelta(0,10,19,10) = -(1,0) = (-1,0) → clamped to (0,10).
 
 	event, err := svc.handleStride("u_str_cm", &gamev1.StrideRequest{Direction: "away"})
 	require.NoError(t, err)
@@ -243,13 +243,13 @@ func TestHandleStride_AwayAtBoundary_GridClampApplied(t *testing.T) {
 	require.NotNil(t, msgEvt, "expected a message event")
 
 	assert.Equal(t, 0, playerCbt.GridX, "player.GridX should be clamped at 0 when striding away from grid boundary")
-	assert.Equal(t, 0, playerCbt.GridY, "player.GridY should be clamped at 0 when striding away from grid boundary")
+	assert.Equal(t, 10, playerCbt.GridY, "player.GridY should remain 10 when striding away from grid boundary")
 }
 
 // TestHandleStride_DefaultDirectionIsToward verifies that an empty direction defaults to toward.
 //
-// Precondition: player at GridX=0, GridY=0; NPC at GridX=5, GridY=9; direction=="".
-// Postcondition: player.GridX==5 and player.GridY==5 (same as explicit "toward", 25 ft).
+// Precondition: player at GridX=0, GridY=10; NPC at GridX=19, GridY=10 (default spawn); direction=="".
+// Postcondition: player.GridX==5 and player.GridY==10 (same as explicit "toward", 25 ft).
 func TestHandleStride_DefaultDirectionIsToward(t *testing.T) {
 	svc, sessMgr, npcMgr, combatHandler := newStrideSvcWithCombat(t)
 
@@ -275,7 +275,7 @@ func TestHandleStride_DefaultDirectionIsToward(t *testing.T) {
 
 	playerCbt := cbt.GetCombatant("u_str_cx")
 	require.NotNil(t, playerCbt)
-	// Default spawn: player (0,0), NPC (5,9).
+	// Default spawn: player (0,10), NPC (19,10).
 
 	event, err := svc.handleStride("u_str_cx", &gamev1.StrideRequest{Direction: ""})
 	require.NoError(t, err)
@@ -283,9 +283,9 @@ func TestHandleStride_DefaultDirectionIsToward(t *testing.T) {
 	msgEvt := event.GetMessage()
 	require.NotNil(t, msgEvt, "expected a message event")
 
-	// towardDelta(0,0,5,9) = (1,1); 5 steps (25 ft) → same as explicit "toward".
+	// towardDelta(0,10,19,10) = (1,0); 5 steps (25 ft) → same as explicit "toward".
 	assert.Equal(t, 5, playerCbt.GridX, "empty direction should default to toward, GridX becomes 5")
-	assert.Equal(t, 5, playerCbt.GridY, "empty direction should default to toward, GridY becomes 5")
+	assert.Equal(t, 10, playerCbt.GridY, "empty direction should default to toward, GridY stays 10")
 }
 
 // newStrideSvcWithCombatAndRegistry builds a GameServiceServer and associated helpers with

@@ -46,8 +46,8 @@ function renderBattleGrid(
   combatPositions: Record<string, { x: number; y: number }>,
   playerName: string
 ): JSX.Element {
-  const GRID_SIZE = 10
-  const CELL_PX = 28
+  const GRID_SIZE = 20
+  const CELL_PX = 16
 
   const occupants: Record<string, string> = {}
   for (const [name, pos] of Object.entries(combatPositions)) {
