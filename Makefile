@@ -1,4 +1,4 @@
-.PHONY: build test test-fast test-postgres test-cover test-e2e migrate run-dev docker-up docker-down clean lint proto build-import-content build-devserver kind-up kind-down docker-push helm-install helm-upgrade helm-uninstall k8s-up k8s-down k8s-redeploy k8s-metallb deps wire wire-check ui-install ui-build proto-ts build-webclient check-fresh-version
+.PHONY: build test test-fast test-postgres test-cover test-e2e migrate run-dev docker-up docker-down clean lint proto build-import-content build-devserver kind-up kind-down docker-push helm-install helm-upgrade helm-uninstall k8s-up k8s-down k8s-redeploy k8s-metallb deps wire wire-check ui-install ui-build proto-ts build-webclient check-fresh-version build-rename-tech-ids
 
 deps:
 	$(GO) mod tidy
@@ -25,7 +25,7 @@ PROTO_GO_OUT := .
 PROTO_MODULE := github.com/cory-johannsen/mud
 
 # Build targets
-build: proto build-frontend build-gameserver build-devserver build-migrate build-import-content build-setrole build-seed-claude-accounts build-webclient
+build: proto build-frontend build-gameserver build-devserver build-migrate build-import-content build-setrole build-seed-claude-accounts build-webclient build-rename-tech-ids
 
 build-devserver: proto
 	$(GO) build $(GOFLAGS) -o $(BIN_DIR)/devserver ./cmd/devserver
@@ -41,6 +41,9 @@ build-migrate: proto
 
 build-import-content:
 	$(GO) build $(GOFLAGS) -o $(BIN_DIR)/import-content ./cmd/import-content
+
+build-rename-tech-ids:
+	$(GO) build $(GOFLAGS) -o $(BIN_DIR)/rename-tech-ids ./cmd/rename-tech-ids
 
 build-setrole: proto
 	$(GO) build $(GOFLAGS) -o $(BIN_DIR)/setrole ./cmd/setrole

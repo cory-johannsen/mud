@@ -242,6 +242,26 @@ func TestRunApply_RefusesOnUnresolvedCollision(t *testing.T) {
 	assert.Contains(t, err.Error(), "collision")
 }
 
+func TestRunApply_Idempotent(t *testing.T) {
+	techDir, jobDir, archetypeDir, migrationsDir, goSourceDir, mapFile :=
+		buildApplyFixture(t)
+
+	// First apply
+	require.NoError(t, RunApply(mapFile, techDir, jobDir, archetypeDir, goSourceDir, migrationsDir))
+
+	// Re-generate map after first apply (ids are now correct, all skip=true)
+	require.NoError(t, RunGenerate(techDir, mapFile))
+
+	// Second apply must be a no-op (no errors, no changes to already-renamed files)
+	require.NoError(t, RunApply(mapFile, techDir, jobDir, archetypeDir, goSourceDir, migrationsDir))
+
+	// tech YAML still has correct id
+	newTechPath := filepath.Join(techDir, "technical", "corrosive_projectile.yaml")
+	data, err := os.ReadFile(newTechPath)
+	require.NoError(t, err)
+	assert.Contains(t, string(data), "id: corrosive_projectile")
+}
+
 func TestEmitMigration_UpAndDown(t *testing.T) {
 	dir := t.TempDir()
 	upFile := filepath.Join(dir, "058_rename_tech_ids.up.sql")
