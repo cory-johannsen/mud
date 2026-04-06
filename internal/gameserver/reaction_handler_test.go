@@ -93,8 +93,6 @@ func TestApplyReactionEffect_RerollSave_NilSaveOutcome_Noop(t *testing.T) {
 }
 
 // TestApplyReactionEffect_ReduceDamage_ClampsAtZero verifies nil-safety and the zero-damage floor.
-// Note: shieldHardness() returns 0 until WeaponDef.Hardness is modeled. This test only exercises
-// the nil DamagePending guard and the >= 0 clamp when hardness is 0.
 func TestApplyReactionEffect_ReduceDamage_ClampsAtZero(t *testing.T) {
 	ctx := reaction.ReactionContext{DamagePending: new(2)}
 	effect := reaction.ReactionEffect{Type: reaction.ReactionEffectReduceDamage}
