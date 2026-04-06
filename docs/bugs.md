@@ -1060,20 +1060,20 @@
 ### BUG-135: NPC modals have no Steal option
 
 **Severity:** medium
-**Status:** open
+**Status:** fixed
 **Category:** UI
 **Description:** NPC interaction modals do not include a Steal action, leaving players with no way to attempt theft through the web UI.
 **Steps:** Click any non-combat NPC to open their modal; observe no Steal button or prompt is present.
-**Fix:**
+**Fix:** Added Steal button to GenericNpcModal in NpcInteractModal.tsx. Clicking Steal sends `steal <npc_name>` command and closes the modal.
 
 ### BUG-134: Merchant modals have no Negotiate button for price negotiation
 
 **Severity:** medium
-**Status:** open
+**Status:** fixed
 **Category:** UI
 **Description:** The merchant buy/sell modal does not include a Negotiate option, leaving players with no way to attempt to negotiate better prices through the web UI.
 **Steps:** Approach a merchant NPC; open the merchant modal; observe no Negotiate button or prompt is present.
-**Fix:**
+**Fix:** Added Negotiate button to ShopModal in NpcModal.tsx. Clicking Negotiate sends `negotiate <npc_name>` command and closes the modal.
 
 ### BUG-133: Hotbar does not support Actions; built-in actions assigned to hotbar display as `-`
 

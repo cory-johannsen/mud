@@ -149,13 +149,18 @@ interface ShopModalProps {
 }
 
 function ShopModal({ shop, onClose }: ShopModalProps) {
-  const { state, sendMessage } = useGame()
+  const { state, sendMessage, sendCommand } = useGame()
   const npcName = shop.npcName ?? shop.npc_name ?? 'Merchant'
   const items = shop.items ?? []
   const currency = state.characterSheet?.currency ?? state.inventoryView?.currency ?? null
 
   function handleBuy(itemId: string, quantity: number) {
     sendMessage('BuyRequest', { npc_name: npcName, item_id: itemId, quantity })
+  }
+
+  function handleNegotiate() {
+    sendCommand(`negotiate ${npcName}`)
+    onClose()
   }
 
   return (
@@ -194,6 +199,11 @@ function ShopModal({ shop, onClose }: ShopModalProps) {
               </tbody>
             </table>
           )}
+          <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.75rem', flexWrap: 'wrap' }}>
+            <button style={styles.negotiateBtn} onClick={handleNegotiate} type="button">
+              Negotiate
+            </button>
+          </div>
           <p style={styles.hint}>Type <code>sell &lt;item&gt;</code> to sell items to this merchant.</p>
         </div>
       </div>
@@ -334,10 +344,20 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: '0.75rem',
   },
   hint: {
-    marginTop: '0.75rem',
+    marginTop: '0.5rem',
     color: '#555',
     fontSize: '0.75rem',
     fontFamily: 'monospace',
+  },
+  negotiateBtn: {
+    padding: '0.25rem 0.75rem',
+    background: '#1a1a2a',
+    border: '1px solid #3a3a8a',
+    color: '#88c',
+    borderRadius: '3px',
+    cursor: 'pointer',
+    fontFamily: 'monospace',
+    fontSize: '0.8rem',
   },
   // Tooltip
   tooltip: {
