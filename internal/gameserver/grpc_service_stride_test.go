@@ -151,10 +151,11 @@ func TestHandleStride_TowardDecreasesDist(t *testing.T) {
 }
 
 // TestHandleStride_TowardFromAnyPosition_DecreasesDist verifies that stride "toward"
-// moves the player their full speed toward the NPC regardless of starting position.
+// moves the player toward the NPC and stops when adjacent (≤ 5 ft away).
 //
 // Precondition: player at GridX=5, GridY=5; NPC at GridX=0, GridY=0; direction=="toward".
-// Postcondition: player.GridX==0 and player.GridY==0 (5 diagonal steps of delta(-1,-1)).
+// Postcondition: player.GridX==1 and player.GridY==1 (4 diagonal steps; 5th step blocked
+// because Chebyshev distance reaches 5 ft = adjacency before the 5th step executes).
 func TestHandleStride_TowardFromAnyPosition_DecreasesDist(t *testing.T) {
 	svc, sessMgr, npcMgr, combatHandler := newStrideSvcWithCombat(t)
 
@@ -198,9 +199,10 @@ func TestHandleStride_TowardFromAnyPosition_DecreasesDist(t *testing.T) {
 	require.NotNil(t, msgEvt, "expected a message event")
 	assert.Contains(t, msgEvt.Content, "toward")
 
-	// towardDelta(5,5,0,0) = (-1,-1); 5 steps (25 ft) → player at (0,0).
-	assert.Equal(t, 0, playerCbt.GridX, "player.GridX should be 0 after striding toward enemy (25 ft)")
-	assert.Equal(t, 0, playerCbt.GridY, "player.GridY should be 0 after striding toward enemy (25 ft)")
+	// towardDelta(5,5,0,0) = (-1,-1). Steps 1-4 execute (player reaches (1,1), dist=5ft).
+	// Step 5 is blocked because player is now adjacent (dist ≤ 5 ft). Player ends at (1,1).
+	assert.Equal(t, 1, playerCbt.GridX, "player.GridX should be 1 (adjacent to NPC at 0,0) after striding toward")
+	assert.Equal(t, 1, playerCbt.GridY, "player.GridY should be 1 (adjacent to NPC at 0,0) after striding toward")
 }
 
 // TestHandleStride_AwayAtBoundary_GridClampApplied verifies that stride "away" at the

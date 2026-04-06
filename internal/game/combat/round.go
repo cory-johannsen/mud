@@ -496,6 +496,12 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 
 				dx, dy := CompassDelta(dir, actor, opponent)
 
+				// REQ-STRIDE-STOP: For "toward" strides, do not move if already adjacent (≤ 5 ft).
+				// Prevents moving onto the opponent's cell when at distance 1.
+				if dir == "toward" && opponent != nil && CombatRange(*actor, *opponent) <= 5 {
+					dx, dy = 0, 0
+				}
+
 				newX := actor.GridX + dx
 				newY := actor.GridY + dy
 				// Clamp to grid bounds.
@@ -508,6 +514,11 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 					newY = 0
 				} else if newY >= height {
 					newY = height - 1
+				}
+				// REQ-STRIDE-NOOVERLAP: Do not move onto a cell occupied by another living combatant.
+				if CellOccupied(cbt, actor.ID, newX, newY) {
+					newX = actor.GridX
+					newY = actor.GridY
 				}
 				actor.GridX = newX
 				actor.GridY = newY

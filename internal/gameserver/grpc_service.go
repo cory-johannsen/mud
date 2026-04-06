@@ -9288,6 +9288,10 @@ func (s *GameServiceServer) handleStride(uid string, req *gamev1.StrideRequest) 
 	var allRSEvents []combat.RoundEvent
 	// Move one cell at a time so Reactive Strikes fire at each threatened-square exit.
 	for step := 0; step < steps; step++ {
+		// REQ-STRIDE-STOP: For "toward" strides, stop when already adjacent (≤ 5 ft).
+		if dir == "toward" && opponent != nil && combat.CombatRange(*combatant, *opponent) <= 5 {
+			break
+		}
 		oldX, oldY := combatant.GridX, combatant.GridY
 		newX := oldX + dx
 		newY := oldY + dy
@@ -9303,6 +9307,10 @@ func (s *GameServiceServer) handleStride(uid string, req *gamev1.StrideRequest) 
 		}
 		// If clamped to same cell, no more movement possible in this direction.
 		if newX == oldX && newY == oldY {
+			break
+		}
+		// REQ-STRIDE-NOOVERLAP: Do not move onto a cell occupied by another living combatant.
+		if combat.CellOccupied(cbt, uid, newX, newY) {
 			break
 		}
 		combatant.GridX = newX
@@ -9412,6 +9420,10 @@ func (s *GameServiceServer) handleStep(uid string, req *gamev1.StepRequest) (*ga
 		height = 20
 	}
 	dx, dy := combat.CompassDelta(dir, combatant, opponent)
+	// REQ-STEP-STOP: For "toward" steps, do not move if already adjacent (≤ 5 ft).
+	if dir == "toward" && opponent != nil && combat.CombatRange(*combatant, *opponent) <= 5 {
+		dx, dy = 0, 0
+	}
 	newX := combatant.GridX + dx
 	newY := combatant.GridY + dy
 	if newX < 0 {
@@ -9423,6 +9435,11 @@ func (s *GameServiceServer) handleStep(uid string, req *gamev1.StepRequest) (*ga
 		newY = 0
 	} else if newY >= height {
 		newY = height - 1
+	}
+	// REQ-STEP-NOOVERLAP: Do not move onto a cell occupied by another living combatant.
+	if combat.CellOccupied(cbt, uid, newX, newY) {
+		newX = combatant.GridX
+		newY = combatant.GridY
 	}
 	combatant.GridX = newX
 	combatant.GridY = newY
@@ -9530,6 +9547,11 @@ func (s *GameServiceServer) handleTumble(uid string, req *gamev1.TumbleRequest) 
 			newY = 0
 		} else if newY >= height {
 			newY = height - 1
+		}
+		// REQ-TUMBLE-NOOVERLAP: Do not land on a cell occupied by another living combatant.
+		if combat.CellOccupied(cbt, uid, newX, newY) {
+			newX = combatant.GridX
+			newY = combatant.GridY
 		}
 		combatant.GridX = newX
 		combatant.GridY = newY

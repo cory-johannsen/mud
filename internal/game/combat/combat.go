@@ -248,6 +248,20 @@ func CombatRange(a, b Combatant) int {
 	return dy * 5
 }
 
+// CellOccupied reports whether any living combatant other than actorID occupies
+// grid position (x, y).
+//
+// Precondition: cbt must not be nil.
+// Postcondition: Returns true iff a living combatant other than actorID is at (x, y).
+func CellOccupied(cbt *Combat, actorID string, x, y int) bool {
+	for _, c := range cbt.Combatants {
+		if c.ID != actorID && !c.IsDead() && c.GridX == x && c.GridY == y {
+			return true
+		}
+	}
+	return false
+}
+
 // IsFlanked reports whether target is flanked by the given attackers.
 // A target is flanked when at least two attackers are in opposite quadrants:
 // both row and column differ by ≥1 in opposite directions relative to the target.
