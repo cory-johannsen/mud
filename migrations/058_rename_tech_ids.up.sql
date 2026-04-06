@@ -10853,7 +10853,10 @@ UPDATE character_innate_technologies SET tech_id = 'ground_sense' WHERE tech_id 
 UPDATE character_spontaneous_technologies SET tech_id = 'ground_sense' WHERE tech_id = 'tremorsense_bio_synthetic';
 UPDATE character_prepared_technologies SET tech_id = 'ground_sense' WHERE tech_id = 'tremorsense_bio_synthetic';
 
--- tremorsense_neural kept as-is (collision with existing innate seismic_sense id)
+UPDATE character_hardwired_technologies SET tech_id = 'vibration_echo' WHERE tech_id = 'tremorsense_neural';
+UPDATE character_innate_technologies SET tech_id = 'vibration_echo' WHERE tech_id = 'tremorsense_neural';
+UPDATE character_spontaneous_technologies SET tech_id = 'vibration_echo' WHERE tech_id = 'tremorsense_neural';
+UPDATE character_prepared_technologies SET tech_id = 'vibration_echo' WHERE tech_id = 'tremorsense_neural';
 
 UPDATE character_hardwired_technologies SET tech_id = 'seismic_sensor' WHERE tech_id = 'tremorsense_technical';
 UPDATE character_innate_technologies SET tech_id = 'seismic_sensor' WHERE tech_id = 'tremorsense_technical';

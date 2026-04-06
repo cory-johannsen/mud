@@ -10853,7 +10853,10 @@ UPDATE character_innate_technologies SET tech_id = 'tremorsense_bio_synthetic' W
 UPDATE character_spontaneous_technologies SET tech_id = 'tremorsense_bio_synthetic' WHERE tech_id = 'ground_sense';
 UPDATE character_prepared_technologies SET tech_id = 'tremorsense_bio_synthetic' WHERE tech_id = 'ground_sense';
 
--- no-op: tremorsense_neural was not migrated (collision guard)
+UPDATE character_hardwired_technologies SET tech_id = 'tremorsense_neural' WHERE tech_id = 'vibration_echo';
+UPDATE character_innate_technologies SET tech_id = 'tremorsense_neural' WHERE tech_id = 'vibration_echo';
+UPDATE character_spontaneous_technologies SET tech_id = 'tremorsense_neural' WHERE tech_id = 'vibration_echo';
+UPDATE character_prepared_technologies SET tech_id = 'tremorsense_neural' WHERE tech_id = 'vibration_echo';
 
 UPDATE character_hardwired_technologies SET tech_id = 'tremorsense_technical' WHERE tech_id = 'seismic_sensor';
 UPDATE character_innate_technologies SET tech_id = 'tremorsense_technical' WHERE tech_id = 'seismic_sensor';

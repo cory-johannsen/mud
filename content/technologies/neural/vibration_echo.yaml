@@ -1,5 +1,5 @@
-id: tremorsense_neural
-name: Seismic Sense
+id: vibration_echo
+name: Vibration Echo
 description: You grant the target psychic sensitivity to vibrations. The target gains
   tremorsense out to 30 feet for the duration, allowing it to sense creatures and
   objects in contact with the same surface.

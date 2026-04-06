@@ -15463,12 +15463,12 @@ renames:
       pf2e_flag: false
       collision: false
     - old_id: tremorsense_neural
-      new_id: seismic_sense
-      name: Seismic Sense
-      file: content/technologies/neural/tremorsense_neural.yaml
-      skip: true
+      new_id: vibration_echo
+      name: Vibration Echo
+      file: content/technologies/neural/vibration_echo.yaml
+      skip: false
       pf2e_flag: false
-      collision: true
+      collision: false
     - old_id: tremorsense_technical
       new_id: seismic_sensor
       name: Seismic Sensor
