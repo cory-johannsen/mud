@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 // renameYAMLFile renames the YAML file for entry from old_id stem to new_id stem,
@@ -43,6 +44,25 @@ func renameYAMLFile(entry RenameEntry) (string, error) {
 	}
 
 	return newPath, nil
+}
+
+// updateFileReferences replaces all occurrences of "id: <old>" with "id: <new>"
+// in the named file for every entry in the renames map.
+// The replacement is performed as a plain string substitution; it is safe
+// because tech IDs consist only of [a-z0-9_] and always follow "id: ".
+//
+// Precondition: file exists; renames maps old_id → new_id.
+// Postcondition: file content updated in-place; idempotent (second call is a no-op).
+func updateFileReferences(file string, renames map[string]string) error {
+	data, err := os.ReadFile(file)
+	if err != nil {
+		return fmt.Errorf("reading %q: %w", file, err)
+	}
+	content := string(data)
+	for oldID, newID := range renames {
+		content = strings.ReplaceAll(content, "id: "+oldID, "id: "+newID)
+	}
+	return os.WriteFile(file, []byte(content), 0644)
 }
 
 // RunApply reads the rename map at mapFile and applies all non-skip, non-collision renames.

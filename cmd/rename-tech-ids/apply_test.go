@@ -53,3 +53,57 @@ func TestRenameYAMLFile_SkipEntry_NoOp(t *testing.T) {
 	require.NoError(t, err)
 	assert.Contains(t, string(data), "id: chrome_reflex")
 }
+
+func TestUpdateFileReferences_ReplacesAllOccurrences(t *testing.T) {
+	dir := t.TempDir()
+	jobFile := filepath.Join(dir, "illusionist.yaml")
+	content := `id: illusionist
+technology_grants:
+  prepared:
+    pool:
+      - { id: acid_arrow_technical, level: 1 }
+      - { id: daze_neural, level: 1 }
+      - { id: chrome_reflex, level: 1 }
+level_up_grants:
+  3:
+    prepared:
+      pool:
+        - id: acid_arrow_technical
+          level: 2
+`
+	require.NoError(t, os.WriteFile(jobFile, []byte(content), 0644))
+
+	renames := map[string]string{
+		"acid_arrow_technical": "corrosive_projectile",
+		"daze_neural":          "cranial_shock",
+	}
+	err := updateFileReferences(jobFile, renames)
+	require.NoError(t, err)
+
+	data, err := os.ReadFile(jobFile)
+	require.NoError(t, err)
+	s := string(data)
+
+	assert.Contains(t, s, "id: corrosive_projectile")
+	assert.Contains(t, s, "id: cranial_shock")
+	assert.Contains(t, s, "id: chrome_reflex", "unrenamed IDs must be untouched")
+	assert.NotContains(t, s, "acid_arrow_technical")
+	assert.NotContains(t, s, "daze_neural")
+	// Job id line must not be renamed
+	assert.Contains(t, s, "id: illusionist")
+}
+
+func TestUpdateFileReferences_Idempotent(t *testing.T) {
+	dir := t.TempDir()
+	jobFile := filepath.Join(dir, "job.yaml")
+	content := "id: job\ntechnology_grants:\n  pool:\n    - { id: corrosive_projectile, level: 1 }\n"
+	require.NoError(t, os.WriteFile(jobFile, []byte(content), 0644))
+
+	renames := map[string]string{"acid_arrow_technical": "corrosive_projectile"}
+	require.NoError(t, updateFileReferences(jobFile, renames))
+
+	data, _ := os.ReadFile(jobFile)
+	require.NoError(t, updateFileReferences(jobFile, renames))
+	data2, _ := os.ReadFile(jobFile)
+	assert.Equal(t, string(data), string(data2), "second pass must be a no-op")
+}
