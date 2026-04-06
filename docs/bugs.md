@@ -1166,8 +1166,8 @@
 
 ### BUG-137: Stale closure in GameContext.tsx ws.onmessage prevents player HP updates from CombatEvents
 **Severity:** medium
-**Status:** open
+**Status:** fixed
 **Category:** UI
 **Description:** The `ws.onmessage` handler in `connect` (useCallback with deps `[navigate]`) captures `state` at creation time. When a `CombatEvent` arrives with `ce.target == player name`, the `state.characterInfo?.name` check always fails because `state` is the initial null value, so `UPDATE_PLAYER_HP` is never dispatched.
 **Steps:** Enter combat; take damage from an NPC attack targeting your character; observe that HP in the UI does not update from combat events (only from explicit CharacterSheet refreshes).
-**Fix:** Move the player-name comparison to the reducer where `state` is always current, or use a ref for `characterInfo.name` that is updated outside the stale closure.
+**Fix:** Moved the player-name comparison into the UPDATE_COMBATANT_HP reducer case where state is always current. The reducer now also updates characterInfo HP when the combatant name matches the player's name, eliminating the stale closure entirely.

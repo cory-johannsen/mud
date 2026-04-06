@@ -143,8 +143,17 @@ function reducer(state: GameState, action: Action): GameState {
       return { ...state, combatPositions: { ...state.combatPositions, [action.combatantName]: { x: action.x, y: action.y } } }
     case 'CLEAR_COMBAT_POSITIONS':
       return { ...state, combatPositions: {} }
-    case 'UPDATE_COMBATANT_HP':
-      return { ...state, combatantHp: { ...state.combatantHp, [action.name]: { current: action.current, max: action.max } } }
+    case 'UPDATE_COMBATANT_HP': {
+      const newHp = { ...state.combatantHp, [action.name]: { current: action.current, max: action.max } }
+      const isPlayer = state.characterInfo?.name === action.name
+      return {
+        ...state,
+        combatantHp: newHp,
+        characterInfo: isPlayer && state.characterInfo
+          ? { ...state.characterInfo, currentHp: action.current, current_hp: action.current, maxHp: action.max, max_hp: action.max }
+          : state.characterInfo,
+      }
+    }
     case 'CLEAR_COMBATANT_HP':
       return { ...state, combatantHp: {} }
     case 'SET_HOTBAR':
@@ -388,10 +397,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
           const tHp = ce.targetHp ?? ce.target_hp
           const tMaxHp = ce.targetMaxHp ?? ce.target_max_hp
           if (ce.target && tHp !== undefined && tMaxHp !== undefined && tMaxHp > 0) {
+            // UPDATE_COMBATANT_HP also updates characterInfo HP when the target is the player.
             dispatch({ type: 'UPDATE_COMBATANT_HP', name: ce.target, current: tHp, max: tMaxHp })
-            if (state.characterInfo?.name === ce.target) {
-              dispatch({ type: 'UPDATE_PLAYER_HP', current: tHp, max: tMaxHp })
-            }
           }
           const text = ce.narrative
             ? ce.narrative
