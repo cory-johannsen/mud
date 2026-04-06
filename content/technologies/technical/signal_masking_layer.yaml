@@ -1,0 +1,17 @@
+id: signal_masking_layer
+name: Signal Masking Layer
+description: Apply an EM-dampening skin to hide technological emissions from scanner detection.
+tradition: technical
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You alter how an item's or spell's magical aura appears to effects like detect magic. You can hide the auras
+      entirely, have an item register as a common item of lower level, or make a spell register a

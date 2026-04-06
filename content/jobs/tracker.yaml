@@ -40,11 +40,11 @@ class_features:
 technology_grants:
   prepared:
     pool:
-      - id: breadcrumbs_bio_synthetic
+      - id: bio_scent_trail_marker
         level: 1
       - id: vanishing_tracks
         level: 1
-      - id: pest_form_bio_synthetic
+      - id: bio_morph_shrink
         level: 1
 drawbacks:
   - id: trail_obsession

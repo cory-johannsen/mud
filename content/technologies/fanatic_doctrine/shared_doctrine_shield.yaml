@@ -1,0 +1,17 @@
+id: shared_doctrine_shield
+name: Shared Doctrine Shield
+description: You extend the Doctrine's protective blessing over a nearby ally, granting them temporary AC protection.
+tradition: fanatic_doctrine
+level: 1
+usage_type: prepared
+action_cost: 1
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You extend your aura, as a magical shield that protects your eidolon or minion. The target gains a +1 circumstance
+      bonus to AC until the start of your next turn. You gain the @UUID[Compendium.pf2e.act

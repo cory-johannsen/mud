@@ -1,0 +1,22 @@
+id: seismic_destabilizer
+name: Seismic Destabilizer
+description: You activate a seismic device that causes the ground to heave. The area
+  becomes difficult terrain. Creatures standing in it must attempt a Reflex save or
+  fall Prone.
+tradition: technical
+level: 3
+usage_type: prepared
+action_cost: 3
+range: zone
+targets: zone
+duration: minutes:1
+save_type: hustle
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: Area (continued) a horizontal earthen or sandy surface within a 20-foot
+      burstYou cause the surface to heave. The area becomes difficult terrain, and
+      any tracks in the area are destroyed by the churnin

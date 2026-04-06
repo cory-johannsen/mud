@@ -1,0 +1,22 @@
+id: override_reanimant
+name: Override Reanimant
+description: With a psychic command pulse, you seize control of the target's cybernetic
+  remnants. It gains the minion trait. If you or an ally uses any hostile actions
+  against the target, the spell ends.
+tradition: neural
+level: 3
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'With a word of power, you seize control of the target. It gains
+      the minion trait. If you or an ally uses any hostile actions against the target,
+      the spell ends.
+
+      @UUID[Compendium.pf2e.spell-effects.Ite'

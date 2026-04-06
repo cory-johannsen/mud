@@ -1,0 +1,27 @@
+id: ablative_armor_protocol
+name: Ablative Armor Protocol
+description: 'The target receives an ablative armor coating. It gains resistance 5
+  to physical damage, except adamantine. Each hit by a physical attack reduces duration
+  by 1 minute.
+
+
+  Heightened (6th) Resistance 10.
+
+  Heightened (8th) Resistance 15.
+
+  Heightened (10th) Resistance 20.'
+tradition: technical
+level: 4
+usage_type: prepared
+action_cost: 2
+range: melee
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: The target's skin hardens like the stone of a mountain face. It gains
+      resistance 5 to physical damage, except adamantine. Each time the target is
+      hit by a bludgeoning, piercing, or slashing attack, mo

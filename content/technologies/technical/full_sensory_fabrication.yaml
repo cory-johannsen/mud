@@ -1,0 +1,32 @@
+id: full_sensory_fabrication
+name: Full Sensory Fabrication
+description: 'You flood a target''s sensory feeds with fabricated data. The target
+  must attempt a Willpower save. On a failure: frightened 4 and unable to trust its own
+  sensors. On a critical failure: frightened 6. The target attempts a Willpower save at
+  end of each turn to reduce frightened by 1.'
+tradition: technical
+level: 9
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+  on_success:
+  - type: damage
+    dice: 16d3
+    damage_type: mental
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 16d6
+    damage_type: mental
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 32d6
+    damage_type: mental
+    dc: 0

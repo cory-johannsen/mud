@@ -1,0 +1,30 @@
+id: sensory_barrage
+name: Sensory Barrage
+description: 'You deploy a barrage of simulated explosions, tracer rounds, and weapon
+  discharges as an overwhelming torrent of sensory data. Enemies in the area must
+  attempt a Willpower save.
+
+  Critical Success Unaffected.
+
+  Success Frightened 1.
+
+  Failure Frightened 2.
+
+  Critical Failure Frightened 3 and Fleeing for 1 round.'
+tradition: technical
+level: 5
+usage_type: prepared
+action_cost: 3
+range: zone
+targets: zone
+duration: rounds:1
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You create the illusion of cannons exploding, bullets and arrows
+      flying, and magical ballistics firing, as an overwhelming torrent of information,
+      both visual and auditory. Enemies in the area must at

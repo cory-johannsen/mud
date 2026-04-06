@@ -1,0 +1,18 @@
+id: bioscan_assist_signal
+name: Bioscan Assist Signal
+description: You run a rapid bio-scan of the situation and feed tactical data to a target, granting +1 to their next skill
+  check.
+tradition: bio_synthetic
+level: 1
+usage_type: prepared
+action_cost: 1
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You ask for the guidance of supernatural entities, granting the target a +1 status bonus to one attack roll,
+      Perception check, saving throw, or skill check the target attempts before the duration ends

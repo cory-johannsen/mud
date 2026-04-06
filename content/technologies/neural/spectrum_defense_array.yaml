@@ -1,0 +1,23 @@
+id: spectrum_defense_array
+name: Spectrum Defense Array
+description: 'A shimmering multifrequency defense array surrounds you, cycling through
+  seven distinct protection protocols. Any creature that strikes you in melee or targets
+  you with a spell must attempt a Fortitude or Willpower save (your choice) or suffer a
+  random spectrum effect: paralysis, mental confusion, petrification, blindness, or
+  instant annihilation.'
+tradition: neural
+level: 9
+usage_type: prepared
+action_cost: 1
+range: self
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'Shield-sized shards of multicolored light manifest in the air around
+      you, each rotating quickly to intercept attacks.
+
+      Melee attacks against you impact a randomly colored shard, subjecting the attacker'

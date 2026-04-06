@@ -1,0 +1,23 @@
+id: doctrine_regen_pool
+name: Doctrine Regen Pool
+description: 'You call forth a well of doctrinal healing energy. The well appears
+  as a disc of shimmering light on the ground. At any time during the duration, an
+  adjacent ally can Interact to tap into the well''s power, regaining 4d8 Hit Points.
+  The pool can be tapped 3 times before it is exhausted.
+
+
+  Heightened (+1) The healing increases by 1d8.'
+tradition: fanatic_doctrine
+level: 5
+usage_type: prepared
+action_cost: 3
+range: ranged
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: damage
+    dice: 4d8
+    damage_type: untyped
+    dc: 0

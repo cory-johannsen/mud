@@ -1,0 +1,17 @@
+id: combat_analysis_gland
+name: Combat Analysis Gland
+description: You activate a situational analysis gland that feeds you real-time combat data on the target's patterns.
+tradition: bio_synthetic
+level: 1
+usage_type: prepared
+action_cost: 1
+range: self
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You pull a large handful of guts from your midsection. Removing these guts doesn't harm you. You can use
+      the guts as 50 feet of rope to help you @UUID[Compendium.pf2e.actionspf2e.Item.Climb], and they

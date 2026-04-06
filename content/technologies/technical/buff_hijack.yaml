@@ -1,0 +1,20 @@
+id: buff_hijack
+name: Buff Hijack
+description: Seeing another creature benefit from enhancement tech, you hack in and
+  redirect the benefits to yourself. Attempt a counteract check against the target
+  effect. On success, you gain the benefits.
+tradition: technical
+level: 3
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: Seeing another creature improve themself with magic, you reach out
+      and seize its benefits for yourself. Attempt a counteract check against the
+      target spell effect. If you successfully counteract the e

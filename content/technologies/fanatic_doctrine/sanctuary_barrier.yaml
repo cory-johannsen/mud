@@ -1,0 +1,17 @@
+id: sanctuary_barrier
+name: Sanctuary Barrier
+description: You surround an ally with a doctrinal protective field, making it harder for enemies to strike them.
+tradition: fanatic_doctrine
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You ward an ally against the attacks and hostile spells from the target enemy. The target ally gains a +1
+      status bonus to Armor Class and saving throws against the target enemy's attacks, spells, and

@@ -1,0 +1,19 @@
+id: bio_level
+name: Bio-Level
+description: You deploy organisms that flatten and compact the terrain. Difficult
+  terrain in the area becomes normal terrain for the duration.
+tradition: bio_synthetic
+level: 2
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You even out the ground and push aside low obstacles. Non-magical
+      difficult terrain or greater difficult terrain composed of earth, rubble, sand,
+      and the like in the area becomes normal terrain. You c

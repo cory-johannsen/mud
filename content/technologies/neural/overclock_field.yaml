@@ -1,0 +1,22 @@
+id: overclock_field
+name: Overclock Field
+description: You accelerate local temporal flow, pushing everything in the area into
+  overdrive. Any creature that begins its turn in the area is Quickened until the
+  end of its turn and can use the extra action only to Stride or Strike. Unfortunately,
+  speeding up time has consequences; any creature in the area that attempts to Cast
+  a tech must succeed at a DC 5 flat check or the spell is disrupted.
+tradition: neural
+level: 5
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You speed up the time stream in an area, stretching and pulling it
+      until time flows swift and wild. Any creature that begins its turn in the area
+      is @UUID[Compendium.pf2e.conditionitems.Item.Quickened

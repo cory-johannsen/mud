@@ -1,0 +1,31 @@
+id: laser_grid
+name: Laser Grid
+description: You deploy a thin wall of criss-crossing laser beams in a line up to
+  60 feet long and 10 feet high. Creatures passing through take 2d6 fire damage. The
+  grid provides bright light in a 30-foot radius.
+tradition: technical
+level: 3
+usage_type: prepared
+action_cost: 3
+range: ranged
+targets: single
+duration: minutes:1
+save_type: toughness
+save_dc: 15
+resolution: save
+effects:
+  on_success:
+  - type: damage
+    dice: 2d3
+    damage_type: fire
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 2d6
+    damage_type: fire
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 4d6
+    damage_type: fire
+    dc: 0

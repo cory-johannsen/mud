@@ -1,0 +1,21 @@
+id: comm_flood
+name: Comm Flood
+description: You flood the target's communication channels with overlapping transmissions,
+  static bursts, and false signals, making concentration nearly impossible.
+tradition: technical
+level: 3
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You bombard a target with distracting auditory illusions, surrounding
+      them with a tumultuous cacophony of overlapping speech, whispers, screams, and
+      muttering. The target is @UUID[Compendium.pf2e.cond

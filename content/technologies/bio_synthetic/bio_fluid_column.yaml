@@ -1,0 +1,20 @@
+id: bio_fluid_column
+name: Bio-Fluid Column
+description: You create a large cylinder of contained bio-fluid. You choose the radius
+  and height, to a maximum radius of 15 feet and height of 40 feet. Creatures inside
+  can breathe normally but treat the area as underwater.
+tradition: bio_synthetic
+level: 3
+usage_type: prepared
+action_cost: 3
+range: ranged
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You create a large, self-contained cylinder of still, clear fresh
+      water. You choose the radius and height of the pillar, to a maximum radius of
+      15 feet and a maximum height of 60 feet. Creatures insid

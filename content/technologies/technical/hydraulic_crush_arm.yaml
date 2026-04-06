@@ -1,0 +1,31 @@
+id: hydraulic_crush_arm
+name: Hydraulic Crush Arm
+description: You deploy a device that projects crushing mechanical arms from a nearby
+  surface, dealing 8d6 force damage and attempting to restrain a creature. All mechanical
+  effects remain identical to the base protocol.
+tradition: technical
+level: 4
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+save_type: hustle
+save_dc: 15
+resolution: save
+effects:
+  on_success:
+  - type: damage
+    dice: 8d3
+    damage_type: force
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 8d6
+    damage_type: force
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 16d6
+    damage_type: force
+    dc: 0

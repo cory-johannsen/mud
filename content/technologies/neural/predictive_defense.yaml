@@ -1,0 +1,20 @@
+id: predictive_defense
+name: Predictive Defense
+description: Leaving nothing to chance, you weave predictive algorithms into the target's
+  neural feed, alerting them to danger. Once during the duration, when the target
+  would be Surprised, they can act normally instead.
+tradition: neural
+level: 3
+usage_type: prepared
+action_cost: 3
+range: melee
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: Leaving nothing to chance, you weave divinatory precautions against
+      an ambush, alerting the target to danger. Once during the duration of this tech,
+      the target can roll one Perception, Arcana, Crafti

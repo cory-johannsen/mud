@@ -41,11 +41,11 @@ class_features:
 technology_grants:
   prepared:
     pool:
-      - id: briny_bolt_bio_synthetic
+      - id: saline_venom_spitter
         level: 1
-      - id: hydraulic_push_bio_synthetic
+      - id: hydro_pressure_organ
         level: 1
-      - id: aqueous_blast_bio_synthetic
+      - id: hydro_pressure_gland
         level: 1
 drawbacks:
   - id: maritime_notoriety

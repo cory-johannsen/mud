@@ -1,0 +1,25 @@
+id: rite_of_interrogation
+name: Rite of Interrogation
+description: You perform a doctrinal rite over a corpse, extracting answers to three
+  questions from its residual memory traces. The corpse must be mostly intact. If
+  this rite has been performed on the corpse in the last week, it automatically fails.
+  The corpse can attempt a Willpower save using the original creature's statistics at time
+  of death. All mechanical effects (success degrees) remain identical to the base
+  protocol.
+tradition: fanatic_doctrine
+level: 4
+usage_type: prepared
+action_cost: 2
+range: melee
+targets: single
+duration: instant
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You grant the target corpse a semblance of life, which it uses to
+      speak the answers to three questions posed to it. This spell calls on the physical
+      body's latent memories rather than summoning back t

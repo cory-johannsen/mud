@@ -1,0 +1,17 @@
+id: root_anchor_system
+name: Root Anchor System
+description: You grow rapid anchor roots into the terrain, stabilizing yourself or an ally against knockback and forced movement.
+tradition: bio_synthetic
+level: 1
+usage_type: prepared
+action_cost: 1
+range: ranged
+targets: single
+duration: rounds:1
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: Roots sprout from the flesh of the target and coil across the floor or around objects, reinforcing their
+      stance or grip. The targeted creature gains a +1 circumstance bonus to their Fortitude DC again

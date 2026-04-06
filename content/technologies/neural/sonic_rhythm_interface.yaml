@@ -1,0 +1,17 @@
+id: sonic_rhythm_interface
+name: Sonic Rhythm Interface
+description: You project an ambient musical rhythm through nearby receivers, granting bonuses to performance-related actions.
+tradition: neural
+level: 1
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You're surrounded by orchestral music that shifts and changes to match your behavior. This music provides
+      a +1 status bonus to Performance checks. At the GM's discretion, it provides this bonus to Dec

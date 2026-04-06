@@ -1,0 +1,40 @@
+id: spike_launcher
+name: Spike Launcher
+description: 'You deploy a concealed spike launcher that fires a massive projectile
+  from the ground beneath a target. The spike deals 8d6 piercing damage. The target
+  must attempt a Reflex save.
+
+
+  Critical Success Unaffected.
+
+  Success Half damage.
+
+  Failure Full damage and Immobilized for 1 round.
+
+  Critical Failure Double damage and Immobilized for 1 minute.'
+tradition: technical
+level: 5
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: minutes:1
+save_type: hustle
+save_dc: 15
+resolution: save
+effects:
+  on_success:
+  - type: damage
+    dice: 8d3
+    damage_type: piercing
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 8d6
+    damage_type: piercing
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 16d6
+    damage_type: piercing
+    dc: 0

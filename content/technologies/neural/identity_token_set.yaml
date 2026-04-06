@@ -1,0 +1,32 @@
+id: identity_token_set
+name: Identity Token Set
+description: 'You fabricate four holographic identity tokens, each capable of storing
+  a single disguise profile. These tokens have negligible Bulk and remain active for
+  the duration. As an Interact action, you can slot one into your neural interface
+  or remove it. When active, the token projects a complete holographic disguise over
+  you, including altered voice and scent patterns. The disguise is typically good
+  enough to hide your identity but not to impersonate a specific individual.
+
+  When you slot a token for the first time, you determine the disguise it projects.
+  For the duration, this token is linked to that appearance. Selecting a token''s
+  appearance counts as setting up a disguise for the Impersonate use of Deception;
+  attempt this Deception check at mythic proficiency.
+
+  You can only use one token at a time. Removing a token reverts you to your true
+  appearance. If you give a token to another creature, it can no longer project a
+  disguise.'
+tradition: neural
+level: 4
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You conjure four magic feathers, each with the potential to hold
+      a single illusory guise. These feathers have negligible Bulk and remain potent
+      for the duration. As an Interact action, you can place o

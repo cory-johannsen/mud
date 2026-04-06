@@ -1,0 +1,27 @@
+id: toxin_filter_gland
+name: Toxin Filter Gland
+description: 'Trigger You''re exposed to a poison or disease that has the inhaled
+  trait, and you''re aware of the exposure
+
+  Requirements You breathe air.
+
+  You activate a bio-synthetic filtration organ in your lungs that automatically scrubs
+  harmful molecules from the air you breathe. For the duration, you get the outcome
+  one degree of success higher on your saving throws against inhaled poisons and diseases.'
+tradition: bio_synthetic
+level: 4
+usage_type: prepared
+action_cost: 0
+range: self
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'Trigger You''re exposed to a poison or disease that has the inhaled
+      trait, and you''re aware of the exposure
+
+      Requirements You breathe air.You suck in a rough breath of air, and your body
+      automatically f'

@@ -1,0 +1,18 @@
+id: drone_swarm
+name: Drone Swarm
+description: You deploy six small combat drones. They're Small or Medium, occupy space,
+  and can flank. Each is destroyed by any amount of damage.
+tradition: technical
+level: 3
+usage_type: prepared
+action_cost: 3
+range: zone
+targets: zone
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: damage
+    dice: 1d4
+    damage_type: untyped
+    dc: 0

@@ -1,0 +1,20 @@
+id: predictive_analytics
+name: Predictive Analytics
+description: You run advanced predictive algorithms, scanning for hidden threats and
+  opportunities. You attempt Perception checks to detect hidden creatures and objects
+  within 60 feet, gaining a +2 status bonus.
+tradition: technical
+level: 3
+usage_type: prepared
+action_cost: 1
+range: self
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You open your mind to the grand design of existence, enabling you
+      to view the threads of fate in all their complex, tangled glory. You attempt
+      Perception checks and Reflex saving throws at mythic prof

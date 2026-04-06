@@ -1,0 +1,57 @@
+id: mycotoxin_decomposition_beam
+name: Mycotoxin Decomposition Beam
+description: 'You unleash a sickly gray beam of concentrated mycotoxin at your target.
+  Make a tech attack against the target. If you hit a non-synthetic object made of
+  organic material (such as wood or bone), it decomposes into foul-smelling sludge.
+  A single activation can destroy no more than a 10-foot cube of matter.
+
+  If you hit a creature, it takes 6d12 poison damage and 6d12 spirit damage with a
+  basic Toughness save. If you critically hit, the target gets a result one degree
+  of success worse than the outcome of its Toughness save.Critical Success The target
+  is unaffected.
+
+  Success The target takes half damage.
+
+  Failure The target takes full damage. Fungal tendrils swiftly digest the body and
+  reduce it to sludge—the target takes @Damage[2d12[persistent,acid]] damage.
+
+  Critical Failure As failure, but the target takes double damage, plus @Damage[4d12[persistent,acid]]
+  damage.Heightened (+1) The poison damage and spirit damage each increase by 1d12.'
+tradition: bio_synthetic
+level: 7
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+save_type: toughness
+save_dc: 15
+resolution: save
+effects:
+  on_success:
+  - type: damage
+    dice: 6d8
+    damage_type: spirit
+    dc: 0
+  - type: damage
+    dice: 6d8
+    damage_type: poison
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 6d12
+    damage_type: spirit
+    dc: 0
+  - type: damage
+    dice: 6d12
+    damage_type: poison
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 12d12
+    damage_type: spirit
+    dc: 0
+  - type: damage
+    dice: 12d12
+    damage_type: poison
+    dc: 0

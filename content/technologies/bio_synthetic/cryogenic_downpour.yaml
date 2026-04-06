@@ -1,0 +1,38 @@
+id: cryogenic_downpour
+name: Cryogenic Downpour
+description: 'A sudden downpour of cryogenic fluid drenches the area. The driving
+  rain and pooling liquid make the area difficult terrain and extinguish non-magical
+  fires.
+
+  On subsequent rounds, the first time you Sustain the tech each round, you can shift
+  the rain to freezing sleet, coating surfaces in ice. Creatures in the area must
+  attempt a Reflex save or fall Prone.
+
+
+  Heightened (+2) The area increases by 10 feet in each dimension.'
+tradition: bio_synthetic
+level: 5
+usage_type: prepared
+action_cost: 3
+range: zone
+targets: zone
+duration: instant
+save_type: hustle
+save_dc: 15
+resolution: save
+effects:
+  on_success:
+  - type: damage
+    dice: 4d3
+    damage_type: cold
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 4d6
+    damage_type: cold
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 8d6
+    damage_type: cold
+    dc: 0

@@ -39,9 +39,9 @@ class_features:
 technology_grants:
   prepared:
     pool:
-      - { id: dj_vu_technical, level: 1 }
-      - { id: tether_technical, level: 1 }
-      - { id: signal_skyrocket_technical, level: 1 }
+      - { id: memory_loop_injection, level: 1 }
+      - { id: electrostatic_tether_line, level: 1 }
+      - { id: flare_launcher, level: 1 }
 drawbacks:
   - id: known_informant
     type: passive

@@ -1,0 +1,23 @@
+id: instant_evolution
+name: Instant Evolution
+description: 'You trigger rapid biological adaptation in the target. Choose one of
+  the following: the target gains a swim Speed of 15 feet, a climb Speed of 15 feet,
+  or resistance 5 to one energy type. The adaptation lasts for the duration.
+
+
+  Heightened (4th) You can choose two adaptations.'
+tradition: bio_synthetic
+level: 2
+usage_type: prepared
+action_cost: 2
+range: melee
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You flood the target with energy from the terrain around it, compressing
+      centuries of evolution into a single moment. The target gains one of the following
+      natural adaptations based on the surrounding

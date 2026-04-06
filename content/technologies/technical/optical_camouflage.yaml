@@ -1,0 +1,23 @@
+id: optical_camouflage
+name: Optical Camouflage
+description: 'You activate an optical camouflage system that renders the target @UUID[Compendium.pf2e.conditionitems.Item.Invisible]
+  for the duration. The spell ends if the target uses a hostile action.
+
+
+  Heightened (4th) The spell lasts 1 minute and doesn''t end when the target uses
+  hostile actions.'
+tradition: technical
+level: 2
+usage_type: prepared
+action_cost: 2
+range: melee
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: Illusions bend light around the target, rendering it @UUID[Compendium.pf2e.conditionitems.Item.Invisible].
+      This makes it @UUID[Compendium.pf2e.conditionitems.Item.Undetected] to all creatures,
+      though

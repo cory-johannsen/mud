@@ -1,0 +1,21 @@
+id: visual_cortex_overload
+name: Visual Cortex Overload
+description: Just as a creature is about to attack you, you assault them with a barrage
+  of contradictory visual data, flooding their optic nerves with blinding cascades
+  of noise. When the spell is complete, you gain the Overload Vision reaction; once
+  you use the reaction, the spell ends.
+tradition: neural
+level: 4
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: Just as a creature is about to attack you, you assault them with
+      jarring illusions, completely surrounding their eyes with blinding flashes of
+      motion and color. When the spell is complete, you gain th

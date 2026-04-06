@@ -1,0 +1,25 @@
+id: heart_of_the_zealot
+name: Heart of the Zealot
+description: 'You invoke a fervent prayer that causes your heart to glow with doctrinal
+  radiance, filling the area with bright light. Effects on creatures based on alignment
+  remain identical to the base protocol.
+
+
+  Heightened (+2) The additional spirit damage increases by 1d6.'
+tradition: fanatic_doctrine
+level: 4
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: minutes:1
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You speak a fervent prayer for the heavens to assist you and your
+      righteous allies. Your heart begins to glow with a radiance that fills the area
+      with bright light. The spell has the following effects

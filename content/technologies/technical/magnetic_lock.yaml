@@ -1,0 +1,21 @@
+id: magnetic_lock
+name: Magnetic Lock
+description: You deploy a magnetic locking mechanism on the target object. The object
+  gains a +4 status bonus to its DC against attempts to open it for the duration.
+tradition: technical
+level: 2
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+save_type: hustle
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: One object held by a creature becomes fused to that creature's hand
+      and can't be put down. To @UUID[Compendium.pf2e.actionspf2e.Item.Disarm] or
+      @UUID[Compendium.pf2e.actionspf2e.Item.Steal] the item,

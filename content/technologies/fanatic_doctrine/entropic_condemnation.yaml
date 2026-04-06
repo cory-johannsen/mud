@@ -1,0 +1,23 @@
+id: entropic_condemnation
+name: Entropic Condemnation
+description: Extending a finger, you fire a beam of doctrinal entropy that weakens
+  the life force of any creature it touches. Each living creature in the line must
+  attempt a Toughness save. All mechanical effects (damage, conditions) remain identical
+  to the base protocol.
+tradition: fanatic_doctrine
+level: 4
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: instant
+save_type: toughness
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: Extending a finger, you fire a beam of void energy that weakens the
+      life force of any creature it touches. Each living creature in the line must
+      attempt a Toughness save.Critical Success The creature

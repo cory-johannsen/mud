@@ -1,0 +1,17 @@
+id: telekinetic_load_platform
+name: Telekinetic Load Platform
+description: Activate a magnetically levitated cargo platform that follows and carries gear autonomously.
+tradition: technical
+level: 1
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: A small platform of magical force materializes adjacent to you to carry cargo. It is @UUID[Compendium.pf2e.conditionitems.Item.Invisible]
+      or has a ghostly appearance, is 2 feet in diameter, and follow

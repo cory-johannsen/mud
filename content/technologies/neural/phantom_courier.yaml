@@ -1,0 +1,20 @@
+id: phantom_courier
+name: Phantom Courier
+description: You create a psychic projection shaped like a small creature that carries
+  a single object weighing up to 1 Bulk to a location you specify within 1 mile. The
+  carrier travels at a Speed of 60 feet and delivers the item, then vanishes.
+tradition: neural
+level: 2
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You create a Tiny, semi-corporeal figure with a form you choose.
+      It hovers near you for the duration. When you Cast a tech that has a range
+      of touch, you can have the carrier move within range, deliv

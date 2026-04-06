@@ -1,0 +1,42 @@
+id: razorwire_kill_zone
+name: Razorwire Kill Zone
+description: 'You deploy a rapid-fabrication system that extrudes a tangle of mono-molecular
+  razorwire. The metal must be of a type you currently have in your possession. The
+  covered area is difficult terrain. A creature that moves through the area takes
+  @Damage[5[slashing]] damage per square traversed.
+
+  If a creature takes slashing, piercing, or persistent bleed damage while inside
+  the field, you can spend a reaction to extrude additional wire, expanding the burst
+  by 5 feet. You can expand the area four times, to a maximum of a @Template[burst|distance:40].
+
+  The wire is made of the metal you chose and activates resistances, weaknesses, and
+  the like normally. The metal retracts when the spell ends.
+
+
+  Heightened (+1) The damage per square increases by 2.'
+tradition: technical
+level: 6
+usage_type: prepared
+action_cost: 3
+range: zone
+targets: zone
+duration: instant
+save_type: hustle
+save_dc: 15
+resolution: save
+effects:
+  on_success:
+  - type: damage
+    dice: '5'
+    damage_type: slashing
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: '5'
+    damage_type: slashing
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: '5'
+    damage_type: slashing
+    dc: 0

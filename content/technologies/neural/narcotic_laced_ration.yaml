@@ -1,0 +1,34 @@
+id: narcotic_laced_ration
+name: Narcotic Laced Ration
+description: 'You lace a single food item with a neurochemical compound that induces
+  deep catatonia. The first person to consume the food within the spell''s duration
+  is subject to the Curse of Slumber, using your tech DC as the saving throw DC of
+  the curse.
+
+
+  Curse of Slumber (curse, incapacitation, necromancy, sleep)
+
+  Level 11
+
+
+  Effect You fall asleep for 1 round (or permanently on a critical failure) and seem
+  to be dead; a creature must succeed at a @Check[medicine|dc:30] check to realize
+  you''re alive. Noise doesn''t awaken you, but taking damage gives you a new saving
+  throw against the curse.'
+tradition: neural
+level: 6
+usage_type: prepared
+action_cost: 2
+range: melee
+targets: single
+duration: instant
+save_type: toughness
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You imbue a single piece of fruit with a curse that leaves its victims
+      in a magical sleep. The first person to eat the fruit within the spell's duration
+      is subject to the Curse of Slumber, using your

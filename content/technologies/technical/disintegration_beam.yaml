@@ -1,0 +1,36 @@
+id: disintegration_beam
+name: Disintegration Beam
+description: 'You fire a beam of concentrated energy that disassembles matter at the
+  molecular level. You must succeed at a tech attack roll. On a hit, the target takes
+  12d10 damage (doubled on a critical hit). A creature reduced to 0 HP by this tech
+  is completely destroyed, leaving only a fine dust. An object you hit is destroyed
+  if it has a Hardness of 40 or less.
+
+
+  Heightened (+1) The damage increases by 2d10.'
+tradition: technical
+level: 6
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+save_type: toughness
+save_dc: 15
+resolution: save
+effects:
+  on_success:
+  - type: damage
+    dice: 12d6
+    damage_type: untyped
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 12d10
+    damage_type: untyped
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 24d10
+    damage_type: untyped
+    dc: 0

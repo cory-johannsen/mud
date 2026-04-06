@@ -1,0 +1,22 @@
+id: power_drain
+name: Power Drain
+description: You tap into a powered target and drain a charge. The target loses a
+  spell slot of its highest available level; you gain that spell slot as if it were
+  your own.
+tradition: technical
+level: 9
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: minutes:1
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You disrupt the connection between a divine caster or deific servitor
+      and their deity, blocking their use of divine power. If the target fails its
+      save, it is @UUID[Compendium.pf2e.conditionitems.Item

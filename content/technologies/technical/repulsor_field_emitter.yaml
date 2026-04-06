@@ -1,0 +1,33 @@
+id: repulsor_field_emitter
+name: Repulsor Field Emitter
+description: 'You activate a repulsor field that prevents creatures from approaching.
+  When casting the spell, you can make the area any radius you choose, up to 40 feet.
+  A creature must attempt a Willpower save if it''s within the area when you Use this tech
+  or as soon as it enters the area. Once a creature has attempted the save, it uses
+  the same result for that casting. Restrictions on movement apply only if the creature
+  voluntarily moves toward you.
+
+
+  Critical Success The creature''s movement is not restricted.
+
+  Success The creature treats each square in the area as difficult terrain when moving
+  closer to you.
+
+  Failure The creature can''t move closer to you within the area.'
+tradition: technical
+level: 6
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: minutes:1
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You manifest an aura that prevents creatures from approaching you.
+      When casting the spell, you can make the area any radius you choose, up to 40
+      feet. A creature must attempt a Willpower save if it's withi

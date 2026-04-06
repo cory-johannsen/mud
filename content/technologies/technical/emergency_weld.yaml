@@ -1,0 +1,25 @@
+id: emergency_weld
+name: Emergency Weld
+description: 'Trigger A shield within range would be reduced to 0 Hit Points.
+
+  Requirements The triggering shield had more than 1 Hit Point before taking damage.
+
+  You activate an emergency micro-welder that fuses the failing shield back together.
+  The shield remains at 1 Hit Point instead of being destroyed.'
+tradition: technical
+level: 5
+usage_type: prepared
+action_cost: 0
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'Trigger A shield within range would be reduced to 0 Hit Points by
+      a damaging effect
+
+      Requirements The triggering shield had more than 1 Hit Point before taking damage.You
+      hold a shield together with th'

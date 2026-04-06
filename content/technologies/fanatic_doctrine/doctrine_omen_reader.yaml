@@ -1,0 +1,20 @@
+id: doctrine_omen_reader
+name: Doctrine Omen Reader
+description: You perform a sacred rite to glimpse near-future events. Choose a goal
+  or activity within 1 week, or an event you expect. You receive a cryptic omen or
+  prophecy fragment that could help with the chosen event.
+tradition: fanatic_doctrine
+level: 4
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You peek into the future. Choose a particular goal or activity you
+      plan to engage in within 1 week, or an event you expect might happen within
+      1 week. You learn a cryptic clue or piece of advice that

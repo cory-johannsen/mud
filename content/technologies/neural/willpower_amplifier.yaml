@@ -1,0 +1,20 @@
+id: willpower_amplifier
+name: Willpower Amplifier
+description: You bolster your ally with a psychic reinforcement signal, granting them
+  additional defenses against hostile neural effects. The target gains a +2 status
+  bonus to Will saves against mental effects for the duration.
+tradition: neural
+level: 3
+usage_type: prepared
+action_cost: 1
+range: melee
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You bolster your ally with reminders of their physical prowess, granting
+      them additional defenses against harmful mental effects. The target gains a
+      +1 status bonus to saving throws against mental eff

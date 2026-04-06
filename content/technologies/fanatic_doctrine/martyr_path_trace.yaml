@@ -1,0 +1,22 @@
+id: martyr_path_trace
+name: Martyr Path Trace
+description: You receive a vision of the deceased's final journey, tracing their last
+  10 minutes of movement through doctrinal divination. This gives you a clear impression
+  of the route taken.
+tradition: fanatic_doctrine
+level: 3
+usage_type: prepared
+action_cost: 2
+range: melee
+targets: single
+duration: instant
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You get a vision of the creature when it was alive, and its last
+      10 minutes of travel. This vision gives you a clear impression of the route
+      it took and locations it visited, if any, but not any creat

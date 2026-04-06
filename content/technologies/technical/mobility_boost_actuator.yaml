@@ -1,0 +1,18 @@
+id: mobility_boost_actuator
+name: Mobility Boost Actuator
+description: Trigger leg actuator overcharge for a short burst of enhanced movement speed.
+tradition: technical
+level: 1
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'You gain a +30-foot status bonus to your Speed.
+
+      @UUID[Compendium.pf2e.spell-effects.Item.tech Effect: Fleet Step]'

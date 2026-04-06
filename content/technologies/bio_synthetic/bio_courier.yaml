@@ -1,0 +1,20 @@
+id: bio_courier
+name: Bio-Courier
+description: You gene-hack a Tiny animal to serve as a biological courier. The animal
+  travels to a location you describe, carrying a small written message. The animal
+  travels at its normal Speed and takes the most direct route it can.
+tradition: bio_synthetic
+level: 2
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You offer food, and an ordinary Tiny animal within range approaches
+      to eat it. You imprint the image, direction, and distance of an obvious place
+      or landmark well known to you within the animal. You c

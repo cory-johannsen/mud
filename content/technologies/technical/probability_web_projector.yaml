@@ -1,0 +1,24 @@
+id: probability_web_projector
+name: Probability Web Projector
+description: You deploy a device that entangles the probability matrices of all caught
+  in the blast. Each creature must attempt a Willpower save. All mechanical effects (off-guard,
+  stupefied, enfeebled, clumsy) remain identical to the base protocol.
+tradition: technical
+level: 4
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: rounds:3
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'You cause a swirl of energy to entangle the fates of all caught
+      within the blast. Each creature in the area must attempt a Willpower save.Critical
+      Success The creature is unaffected.
+
+      Success The creature''s'

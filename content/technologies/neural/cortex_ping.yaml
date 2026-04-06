@@ -1,0 +1,25 @@
+id: cortex_ping
+name: Cortex Ping
+description: 'You recreate an infamous neural hack that detects when someone broadcasts
+  your identity. During the spell''s duration, you mentally detect when a creature
+  within 1 mile says your name, though you can''t identify who spoke it. You can Dismiss
+  the spell to teleport to within 5 feet of the creature that most recently said your
+  name, as long as you''re within 1 mile.
+
+
+  Heightened (4th) The range increases to 10 miles.'
+tradition: neural
+level: 2
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You recreate the Bee-Man's infamous ability to sense when someone
+      utters their name. During the spell's duration, you mentally sense whenever
+      someone (referred to as a speaker) speaks your full name w

@@ -1,0 +1,20 @@
+id: neural_rally_beacon
+name: Neural Rally Beacon
+description: You mark a neural waypoint at the area touched. During the spell's duration,
+  you can take a single action, which has the concentrate trait, to teleport to the
+  marked location from up to 500 feet away.
+tradition: neural
+level: 3
+usage_type: prepared
+action_cost: 3
+range: melee
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You mark the area touched as a rally point. During the spell's duration,
+      you can take a single action, which has the concentrate trait, to teleport to
+      the rally point along with items you are wearing

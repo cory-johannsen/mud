@@ -1,0 +1,25 @@
+id: detection_pulse
+name: Detection Pulse
+description: You psychically illuminate a target creature, making it easier to see.
+  The target must attempt a Reflex save. On a failure, the target glows with revealing
+  light for the duration, negating its @UUID[Compendium.pf2e.conditionitems.Item.Concealed]
+  condition and making it @UUID[Compendium.pf2e.conditionitems.Item.Concealed] instead
+  of @UUID[Compendium.pf2e.conditionitems.Item.Hidden] or @UUID[Compendium.pf2e.conditionitems.Item.Undetected]
+  if it's @UUID[Compendium.pf2e.conditionitems.Item.Invisible].
+tradition: neural
+level: 2
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: instant
+save_type: hustle
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: A wave of magical light washes over the area. You choose the appearance
+      of the light, such as colorful, heatless flames or sparkling motes. A creature
+      affected by revealing light is @UUID[Compendium.p

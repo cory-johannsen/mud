@@ -1,0 +1,18 @@
+id: psi_storage_pocket
+name: Psi-Storage Pocket
+description: |-
+    You open your cloak or create a gap with your hands, drawing the target into a pocket dimension just large enough for its basic comfort. No other creature can enter this extradimensional space, and the target can bring along objects only if they were designed to be worn by a creature of its kind. The space has enough air, food, and water to sustain the target for the duration.
+    You can @UUID[Compendium.pf2e.actionspf2e.Item.Dismiss] the spell. The spell also ends if you die or enter an extradimensional space. When the spell ends, the target reappears in the nearest unoccupied space (outside of any extradimensional space you may have entered).
+tradition: neural
+level: 1
+usage_type: prepared
+action_cost: 1
+range: melee
+targets: single
+duration: instant
+resolution: none
+effects:
+    on_apply:
+        - type: utility
+          dc: 0
+          description: You open your cloak or create a gap with your hands, drawing the target into a pocket dimension just large enough for its basic comfort. No other creature can enter this extradimensional space, and th

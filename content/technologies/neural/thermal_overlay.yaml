@@ -1,0 +1,19 @@
+id: thermal_overlay
+name: Thermal Overlay
+description: The target's visual cortex is augmented to detect infrared radiation,
+  gaining infrared vision at a range of 60 feet as a precise sense for the duration.
+tradition: neural
+level: 3
+usage_type: prepared
+action_cost: 2
+range: melee
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: The target visually senses the heat energy emitted by the creatures
+      and objects around it, gaining infrared vision at a range of 60 feet as a precise
+      sense. This vision can detect any warm-blooded cre

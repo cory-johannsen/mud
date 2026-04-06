@@ -1,0 +1,41 @@
+id: doctrinal_shockwave
+name: Doctrinal Shockwave
+description: 'You unleash a powerful pulse of doctrinal force, violently hurling creatures
+  away from you. Each creature in the area takes 7d10 force damage depending on its
+  Reflex save.
+
+
+  Critical Success The creature is unaffected.
+
+  Success The creature takes half damage.
+
+  Failure The creature takes full damage and is pushed 10 feet.
+
+  Critical Failure The creature takes double damage, is pushed 20 feet, and falls
+  Prone.'
+tradition: fanatic_doctrine
+level: 5
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: instant
+save_type: hustle
+save_dc: 15
+resolution: save
+effects:
+  on_success:
+  - type: damage
+    dice: 7d6
+    damage_type: force
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 7d10
+    damage_type: force
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 14d10
+    damage_type: force
+    dc: 0

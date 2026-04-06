@@ -1,0 +1,20 @@
+id: sleep_cycle_broadcast
+name: Sleep Cycle Broadcast
+description: You transmit a pre-recorded message into the target's sleep cycle via
+  low-frequency signals. The message is one-way, up to 150 words. If the target is
+  asleep, they receive it instantly.
+tradition: technical
+level: 3
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You send a message to your target's dream. The message is one-way,
+      up to 1 minute of speech (roughly 150 words). If the target is asleep, they
+      receive the message instantly. If not, they receive it th

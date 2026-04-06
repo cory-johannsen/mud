@@ -1,0 +1,36 @@
+id: gravity_press_projector
+name: Gravity Press Projector
+description: 'Area 60-foot tall, 30-foot radius cylinderA gravity press projector
+  fires a devastating compression beam down through the area, battering creatures
+  within it to the ground. All flying creatures in the area descend to the bottom
+  of the tech''s area, taking twice as much bludgeoning damage as if they had fallen
+  the distance moved, to a maximum of 60 falling damage if they fall 60 feet. They
+  take this falling damage even if the tech''s area is entirely in the air and they
+  don''t hit the ground, as they concuss against the bottom of the tech''s area at
+  great speed. Creatures on the ground and within the tech''s area, including flying
+  creatures forced to the ground, must attempt Toughness saves.Critical Success The
+  creature is unaffected, and if it was flying, it isn''t knocked @UUID[Compendium.pf2e.conditionitems.Item.Prone]
+  even though it took falling damage.
+
+  Success The creature is knocked prone.
+
+  Failure The creature is knocked prone and Stunned 2.
+
+  Critical Failure The creature is knocked prone and stunned for 1 round.'
+tradition: technical
+level: 8
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+save_type: toughness
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: Area 60-foot tall, 30-foot radius cylinderExtraordinary telekinetic
+      pressure smashes down through the area, battering creatures within it to the
+      ground. All flying creatures in the area descend to the

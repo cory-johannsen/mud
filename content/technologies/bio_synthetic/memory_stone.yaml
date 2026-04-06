@@ -1,0 +1,24 @@
+id: memory_stone
+name: Memory Stone
+description: 'You encode memories into a crystalline bio-synthetic substrate. This
+  memory can convey up to 10 minutes of material. When you activate this tech, choose
+  a command phrase. Any creature can access the stored memories by using an action
+  to speak the command phrase while holding the substrate.
+
+
+  Heightened (6th) The memory can convey up to 1 hour of material.'
+tradition: bio_synthetic
+level: 5
+usage_type: prepared
+action_cost: 2
+range: melee
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You store memories inside a stone. This memory can convey up to 10
+      minutes of material. When you Use this tech, choose a command word. Doing
+      so creates a carved symbol on the stone that hints at the

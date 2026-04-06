@@ -1,0 +1,23 @@
+id: loyalty_override
+name: Loyalty Override
+description: You rewrite a target's fundamental allegiances. The target must attempt
+  a Willpower save. On a critical failure, its loyalty is permanently rewritten to you.
+  On a failure, it treats you as an absolute ally for 1 hour. On a success, it is
+  unaffected but knows you attempted this.
+tradition: neural
+level: 10
+usage_type: prepared
+action_cost: 3
+range: ranged
+targets: single
+duration: instant
+save_type: toughness
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You bartered for this tech in some strange market or perhaps gained
+      it while wandering the desert, hopelessly lost and surrounded by nothing but
+      the remnants of time and fallen empires. With a gestur

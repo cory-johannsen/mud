@@ -1,0 +1,20 @@
+id: long_range_optics
+name: Long-Range Optics
+description: You can perceive distant objects as if they were close. You can view
+  creatures, objects, and terrain features that are more than 30 feet away and up
+  to 30 miles away as though they were only 30 feet away.
+tradition: neural
+level: 3
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You can see distant objects as if they were closer. You can view
+      creatures, objects, and terrain features that are more than 30 feet away and
+      up to 300 feet away as though they were only 30 feet away.

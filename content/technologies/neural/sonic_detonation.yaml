@@ -1,0 +1,32 @@
+id: sonic_detonation
+name: Sonic Detonation
+description: You lob a compressed ball of psychic sound at a foe. The ball explodes
+  on impact, unleashing a powerful blast. Make a tech attack roll. If you hit, the
+  target takes 3d6 sonic damage plus 1d6 persistent sonic damage.
+tradition: neural
+level: 3
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: attack
+effects:
+  on_hit:
+  - type: damage
+    dice: 4d8
+    damage_type: bludgeoning
+    dc: 0
+  - type: damage
+    dice: 1d4
+    damage_type: sonic
+    dc: 0
+  on_crit_hit:
+  - type: damage
+    dice: 8d8
+    damage_type: bludgeoning
+    dc: 0
+  - type: damage
+    dice: 2d4
+    damage_type: sonic
+    dc: 0

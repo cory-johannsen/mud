@@ -1,0 +1,21 @@
+id: fate_decree
+name: Fate Decree
+description: You proclaim a doctrinal decree over the target's destiny, forcing an
+  unfavorable outcome into being. The target must attempt a Willpower save.
+tradition: fanatic_doctrine
+level: 3
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: rounds:1
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You behold the many timelines that weave around a creature, and in
+      so doing, you make one more likely to occur. The target must attempt a Will
+      save.Critical Success You can make neither heads nor tail

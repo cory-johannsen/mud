@@ -1,0 +1,22 @@
+id: compliance_beam
+name: Compliance Beam
+description: Fire a calibrated electromagnetic pulse that shocks the target into compliance without lethal force.
+tradition: technical
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: attack
+effects:
+  on_hit:
+  - type: damage
+    dice: 2d6
+    damage_type: bludgeoning
+    dc: 0
+  on_crit_hit:
+  - type: damage
+    dice: 4d6
+    damage_type: bludgeoning
+    dc: 0

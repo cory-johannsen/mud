@@ -1,0 +1,38 @@
+id: coveting_curse
+name: Coveting Curse
+description: 'You invoke a doctrinal curse of jealousy upon the target toward a creature
+  you specify. The target must attempt a Willpower save.
+
+
+  Critical Success The creature is unaffected.
+
+  Success The creature takes a -1 status penalty to checks involving the specified
+  creature for 1 round.
+
+  Failure The creature is compelled to outperform or undermine the specified creature
+  for 1 minute, taking a -2 status penalty to checks that don''t involve competing
+  with or sabotaging the target of its jealousy.
+
+  Critical Failure As failure, and the creature must spend at least 1 action per turn
+  targeting the creature it envies.'
+tradition: fanatic_doctrine
+level: 2
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: minutes:1
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'The target is overcome by deep jealousy and resentment that twists
+      its mind against other creatures. It must attempt a Willpower save.
+
+
+      Critical Success The target is unaffected.
+
+      Success For 1 round, the t'

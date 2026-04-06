@@ -1,0 +1,29 @@
+id: rapid_forge_module
+name: Rapid Forge Module
+description: Deploy a compact forge unit capable of working metal into basic shapes under field conditions.
+tradition: technical
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+save_type: toughness
+save_dc: 15
+resolution: save
+effects:
+  on_success:
+  - type: damage
+    dice: 3d3
+    damage_type: fire
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 3d6
+    damage_type: fire
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 6d6
+    damage_type: fire
+    dc: 0

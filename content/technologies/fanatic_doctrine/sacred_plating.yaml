@@ -1,0 +1,20 @@
+id: sacred_plating
+name: Sacred Plating
+description: You invoke sacred protocols to sheath the target in consecrated metal.
+  The target gains a +2 item bonus to AC for the duration but takes a -10-foot penalty
+  to Speed.
+tradition: fanatic_doctrine
+level: 2
+usage_type: prepared
+action_cost: 2
+range: melee
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You briefly swap the outer surface of the metal in an object with
+      a suitable amount of a common precious metal from the Plane of Metal. You can
+      instead choose an uncommon or rare metal if you have acc

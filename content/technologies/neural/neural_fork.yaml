@@ -1,0 +1,21 @@
+id: neural_fork
+name: Neural Fork
+description: You fracture your consciousness and project a second instance of yourself.
+  You create a duplicate that occupies your space. On each of your turns, you can
+  take your turn as normal or have your duplicate take the turn instead. The duplicate
+  has the same statistics as you and shares your actions, reactions, and resources.
+tradition: neural
+level: 9
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You exist in two places at once. When you Use this tech, another
+      copy of yourself appears in an adjacent square. During bilocation's duration,
+      whenever you act, you can choose which of your selves do

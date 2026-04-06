@@ -40,11 +40,11 @@ class_features:
 technology_grants:
   prepared:
     pool:
-      - id: dehydrate_bio_synthetic
+      - id: bio_desiccant_gland
         level: 1
-      - id: interposing_earth_bio_synthetic
+      - id: bio_terrain_bulwark
         level: 1
-      - id: tether_bio_synthetic
+      - id: bio_tether_organ
         level: 1
 drawbacks:
   - id: authority_hangover

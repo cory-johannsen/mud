@@ -1,0 +1,30 @@
+id: doctrines_rebuke
+name: Doctrine's Rebuke
+description: You deliver a crushing psychic rebuke in the Doctrine's name, dealing 1d6 mental damage. On a critical failure,
+  the target is Stunned 1.
+tradition: fanatic_doctrine
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+  on_success:
+  - type: damage
+    dice: 1d3
+    damage_type: mental
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 1d6
+    damage_type: mental
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 2d6
+    damage_type: mental
+    dc: 0

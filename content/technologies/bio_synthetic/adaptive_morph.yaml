@@ -1,0 +1,20 @@
+id: adaptive_morph
+name: Adaptive Morph
+description: You reshape your bio-structure to assume the form of a different humanoid.
+  You assume the form of a Medium humanoid, gaining a +4 status bonus to Deception
+  checks to Impersonate that form. You can Dismiss the spell.
+tradition: bio_synthetic
+level: 2
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You transform your appearance to that of a Small or Medium humanoid,
+      such as a dwarf, elf, goblin, halfling, human, or orc. You gain the humanoid
+      trait in addition to your other traits while in this f

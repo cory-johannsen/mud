@@ -1,0 +1,28 @@
+id: psi_chromatic_disruptor
+name: Psi-Chromatic Disruptor
+description: |-
+    You unleash a swirling multitude of colors that overwhelms creatures based on their Will saves.
+
+    Critical Success The creature is unaffected.
+    Success The creature is @UUID[Compendium.pf2e.conditionitems.Item.Dazzled] for 1 round.
+    Failure The creature is Stunned 1, @UUID[Compendium.pf2e.conditionitems.Item.Blinded] for 1 round, and dazzled for 1 minute.
+    Critical Failure The creature is stunned for 1 round and blinded for 1 minute.
+tradition: neural
+level: 1
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: instant
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+    on_apply:
+        - type: utility
+          dc: 0
+          description: |-
+            You unleash a swirling multitude of colors that overwhelms creatures based on their Will saves.
+
+            Critical Success The creature is unaffected.
+            Success The creature is @UUID[Compendium.pf2e.conditionite

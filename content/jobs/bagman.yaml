@@ -39,11 +39,11 @@ class_features:
 technology_grants:
   prepared:
     pool:
-      - id: alarm_bio_synthetic
+      - id: bio_sentinel_trigger
         level: 1
-      - id: camel_spit_bio_synthetic
+      - id: organic_repellent_gland
         level: 1
-      - id: noxious_vapors_bio_synthetic
+      - id: toxic_vapor_gland
         level: 1
 drawbacks:
   - id: dirty_hands

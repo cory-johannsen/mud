@@ -41,9 +41,9 @@ class_features:
 technology_grants:
   prepared:
     pool:
-      - { id: admonishing_ray_fanatic_doctrine, level: 1 }
-      - { id: protect_companion_fanatic_doctrine, level: 1 }
-      - { id: shielded_arm_fanatic_doctrine, level: 1 }
+      - { id: doctrine_compliance_ray, level: 1 }
+      - { id: shared_doctrine_shield, level: 1 }
+      - { id: doctrine_shield_mandate, level: 1 }
 drawbacks:
   - id: post_commitment
     type: passive

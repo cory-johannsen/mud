@@ -1,0 +1,16 @@
+id: psi_magnetic_tether
+name: Psi-Magnetic Tether
+description: You shoot out ephemeral, telekinetic strands that drag each target directly toward you, stopping in the closest unoccupied space to you in this path. This is forced movement.
+tradition: neural
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+    on_apply:
+        - type: utility
+          dc: 0
+          description: You shoot out ephemeral, telekinetic strands that drag each target directly toward you, stopping in the closest unoccupied space to you in this path. This is forced movement.

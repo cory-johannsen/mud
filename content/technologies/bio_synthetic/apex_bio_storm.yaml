@@ -1,0 +1,24 @@
+id: apex_bio_storm
+name: Apex Bio-Storm
+description: 'You summon a massive biological storm system that persists for 1 minute.
+  Each round, the storm produces a different effect in a 360-foot burst: acid rain
+  (4d6 acid damage, Toughness save), lightning (10d6 electricity, Reflex save), spore
+  clouds (sickened 2, Toughness save), or hail (8d6 bludgeoning, Reflex save). You
+  choose the effect each round.'
+tradition: bio_synthetic
+level: 9
+usage_type: prepared
+action_cost: 3
+range: zone
+targets: zone
+duration: minutes:1
+save_type: toughness
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: A massive storm cloud forms in the air in a 360-foot burst. Beneath
+      it, rain begins to fall, and gales impose a -4 circumstance penalty to physical
+      ranged attacks and weapon ranged attacks, and the ai

@@ -1,0 +1,28 @@
+id: doctrine_compliance_ray
+name: Doctrine Compliance Ray
+description: |-
+    A ray of energy bludgeons your target into submission without causing lasting harm. When you cast this tech, you choose whether the ray feels like a strong punch or slap. Make a tech attack roll. The ray deals 2d6 bludgeoning damage.
+
+    Critical Success The target takes double damage.
+    Success The target takes full damage.
+
+    Heightened (+1) The damage increases by 2d6.
+tradition: fanatic_doctrine
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: attack
+effects:
+    on_hit:
+        - type: damage
+          dice: 2d6
+          damage_type: bludgeoning
+          dc: 0
+    on_crit_hit:
+        - type: damage
+          dice: 4d6
+          damage_type: bludgeoning
+          dc: 0

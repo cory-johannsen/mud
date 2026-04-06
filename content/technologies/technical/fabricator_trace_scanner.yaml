@@ -1,0 +1,21 @@
+id: fabricator_trace_scanner
+name: Fabricator Trace Scanner
+description: You analyze the remains or energy residue of a destroyed construct to
+  locate its creator. If within range, you sense the direction. If within 100 feet,
+  you sense their presence. EM shielding and running water block the scan. Fails if
+  no specific creator exists or they're on a different plane.
+tradition: technical
+level: 4
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You examine the remains or spiritual residue of a destroyed undead
+      creature to locate that undead's creator, perhaps a necromancer or vampire.
+      If the creator is within range, you can sense the directi

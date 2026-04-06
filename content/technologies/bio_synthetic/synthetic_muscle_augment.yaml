@@ -1,0 +1,18 @@
+id: synthetic_muscle_augment
+name: Synthetic Muscle Augment
+description: |-
+    You reinforce the target's musculoskeletal system to bear more weight. The target can carry 3 more Bulk than normal before becoming @UUID[Compendium.pf2e.conditionitems.Item.Encumbered] and up to a maximum of 6 more Bulk.
+    @UUID[Compendium.pf2e.spell-effects.Item.tech Effect: Ant Haul]
+tradition: bio_synthetic
+level: 1
+usage_type: prepared
+action_cost: 2
+range: melee
+targets: single
+duration: instant
+resolution: none
+effects:
+    on_apply:
+        - type: utility
+          dc: 0
+          description: You reinforce the target's musculoskeletal system to bear more weight. The target can carry 3 more Bulk than normal before becoming @UUID[Compendium.pf2e.conditionitems.Item.Encumbered] and up to a ma

@@ -41,9 +41,9 @@ class_features:
 technology_grants:
   prepared:
     pool:
-      - { id: bane_fanatic_doctrine, level: 1 }
-      - { id: admonishing_ray_fanatic_doctrine, level: 1 }
-      - { id: runic_weapon_fanatic_doctrine, level: 1 }
+      - { id: doctrine_bane_circuit, level: 1 }
+      - { id: doctrine_compliance_ray, level: 1 }
+      - { id: doctrine_weapon_blessing, level: 1 }
 drawbacks:
   - id: imposter_syndrome
     type: passive

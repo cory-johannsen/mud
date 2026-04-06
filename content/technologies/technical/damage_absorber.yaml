@@ -1,0 +1,22 @@
+id: damage_absorber
+name: Damage Absorber
+description: 'Trigger A spell or tech effect deals damage.
+
+  You activate a damage absorption field that partially converts the triggering effect''s
+  energy into harmless emissions. Attempt to counteract the target effect. If successful,
+  any creatures that would be damaged take only half damage.'
+tradition: technical
+level: 5
+usage_type: prepared
+action_cost: 0
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: Trigger A spell or magical effect deals damage.Exchanging material
+      energy with that of the Shadow Plane, you transform the triggering spell into
+      a partially illusory version of itself. Attempt to coun

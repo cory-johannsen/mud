@@ -1,0 +1,20 @@
+id: tracking_chip
+name: Tracking Chip
+description: You implant a tracking chip on the target. For the duration, you can
+  sense the target's general direction and distance, and you gain a +2 status bonus
+  to Track the target.
+tradition: technical
+level: 2
+usage_type: prepared
+action_cost: 3
+range: melee
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: By pressing your hand to a wall or other solid immobile surface,
+      you cause the crossed-swords symbol of the Firebrands—or a different symbol
+      of your choosing—to appear on the targeted surface. Thi

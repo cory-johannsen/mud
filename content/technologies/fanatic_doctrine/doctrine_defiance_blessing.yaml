@@ -1,0 +1,23 @@
+id: doctrine_defiance_blessing
+name: Doctrine Defiance Blessing
+description: 'Channeling the doctrine''s power, you grant the target the means to
+  deny danger and avoid harm. Choose one saving throw: Fortitude, Reflex, or Will.
+  The target gets a +4 status bonus to that saving throw for 1 round.
+
+
+  Heightened (7th) You can target up to 6 creatures, and the bonus lasts for 1 minute.'
+tradition: fanatic_doctrine
+level: 5
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: rounds:1
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'Channeling forth the power to persevere in the face of adversity,
+      you grant the target the means to deny danger and avoid dire harm. Choose one
+      saving throw: Fortitude, Reflex, or Will. The target get'

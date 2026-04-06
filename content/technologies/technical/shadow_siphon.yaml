@@ -1,0 +1,30 @@
+id: shadow_siphon
+name: Shadow Siphon
+description: 'You deploy a shadow-extraction device that tears at the target''s vitality.
+  The target takes 4d4 void damage and must attempt a Toughness save.
+
+
+  Critical Success The target is unaffected.
+
+  Success The target takes half damage.
+
+  Failure The target takes full damage and is @UUID[Compendium.pf2e.conditionitems.Item.Enfeebled]
+  1 for 1 round.
+
+  Critical Failure The target takes double damage and is @UUID[Compendium.pf2e.conditionitems.Item.Enfeebled]
+  2 for 1 minute.'
+tradition: technical
+level: 2
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: rounds:3
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You prepare to steal spells from your foes, ripping them from the
+      foe's shadow to stow them in an ephemeral pocket in the Shadow Plane. You gain
+      a temporary spell slot, which you can fill only by stea

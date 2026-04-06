@@ -1,0 +1,17 @@
+id: biological_compass_calibration
+name: Biological Compass Calibration
+description: You activate your internal biological compass, immediately orienting to your precise position and direction.
+tradition: bio_synthetic
+level: 1
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: In your mind's eye, you magically reorient yourself. You immediately know which direction is north (if it
+      exists at your current location), and you can choose a location you were at within the last 24

@@ -1,0 +1,21 @@
+id: kinetic_exosuit
+name: Kinetic Exosuit
+description: You telekinetically assemble nearby debris and psychic force into makeshift
+  armor around the target. The target gains a +4 item bonus to AC for the duration,
+  but takes a -10-foot penalty to Speed. The armor has no check penalty, Dex cap,
+  or Strength requirement.
+tradition: neural
+level: 2
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: Upon casting this tech, the armor you're wearing is whisked away
+      into an extradimensional space that's linked to you. If the armor is magical
+      and invested by you, it remains invested while in this sp

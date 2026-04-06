@@ -1,0 +1,17 @@
+id: rapid_material_former
+name: Rapid Material Former
+description: Use a focused micro-printer to shape clay or soft materials into useful forms instantly.
+tradition: technical
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You pull earthen material out of the environment, then shape it into one or more earthenware objects that,
+      in combination, can be up to light Bulk. Alternatively, you can cast this tech on objects pr

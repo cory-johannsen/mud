@@ -40,9 +40,9 @@ class_features:
 technology_grants:
   prepared:
     pool:
-      - { id: elysian_whimsy_technical, level: 1 }
-      - { id: noxious_vapors_technical, level: 1 }
-      - { id: goblin_pox_technical, level: 1 }
+      - { id: behavioral_randomizer, level: 1 }
+      - { id: toxic_gas_dispersal_canister, level: 1 }
+      - { id: synthetic_pathogen_dispersal, level: 1 }
 drawbacks:
   - id: chemical_sensitivity
     type: passive

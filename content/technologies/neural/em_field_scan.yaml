@@ -1,0 +1,17 @@
+id: em_field_scan
+name: EM Field Scan
+description: You pulse an electromagnetic sensor sweep through the area, detecting active energy signatures and powered systems.
+tradition: neural
+level: 1
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You send out a pulse that registers the presence of magic. You receive no information beyond the presence
+      or absence of magic. You can choose to ignore magic you're fully aware of, such as the magic i

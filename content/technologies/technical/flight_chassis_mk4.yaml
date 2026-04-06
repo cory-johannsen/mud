@@ -1,0 +1,32 @@
+id: flight_chassis_mk4
+name: Flight Chassis Mk4
+description: 'You deploy an advanced hardlight exoskeleton that reconfigures into
+  a Medium flight-capable combat frame. When you activate this device, choose a configuration.
+  While in this form, you gain the construct trait. You can Dismiss the spell.
+
+  All statistics and form options (Bat, Bird, Pterosaur, Wasp configurations) remain
+  identical to the base protocol.
+
+
+  Heightened (5th) Your form is Large, fly Speed gains +10-foot status bonus. Must
+  have space to expand or the spell is lost. 10 temporary HP, attack modifier +18,
+  damage bonus +8, Acrobatics +20.
+
+  Heightened (6th) Your form is Huge, fly Speed gains +15-foot, attacks have 10-foot
+  reach. Must have space. AC = 21 + your level, 15 temporary HP, attack modifier +21,
+  damage bonus +4 and double damage dice, Acrobatics +23.'
+tradition: technical
+level: 4
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You harness your mastery of primal forces to reshape your body into
+      a Medium flying animal battle form. When you Use this tech, choose a listed
+      battle form. You can decide the specific type of anima

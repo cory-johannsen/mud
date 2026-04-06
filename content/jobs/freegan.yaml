@@ -41,9 +41,9 @@ technology_grants:
     pool:
       - id: foraging_friends
         level: 1
-      - id: flourishing_flora_bio_synthetic
+      - id: rapid_organic_growth
         level: 1
-      - id: cleanse_cuisine_bio_synthetic
+      - id: bio_purification_enzyme
         level: 1
 drawbacks:
   - id: dumpster_dependency

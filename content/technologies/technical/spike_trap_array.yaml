@@ -1,0 +1,31 @@
+id: spike_trap_array
+name: Spike Trap Array
+description: Mechanized spike arrays deploy from the floor and ceiling, dealing 6d6
+  piercing damage to creatures in the area with a basic Reflex save. Dense arrays
+  make the area difficult terrain.
+tradition: technical
+level: 3
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: minutes:1
+save_type: hustle
+save_dc: 15
+resolution: save
+effects:
+  on_success:
+  - type: damage
+    dice: 6d3
+    damage_type: piercing
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 6d6
+    damage_type: piercing
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 12d6
+    damage_type: piercing
+    dc: 0

@@ -1,0 +1,21 @@
+id: sensor_spoof
+name: Sensor Spoof
+description: You hack the local sensor grid, creating a false data feed that fools
+  any remote observation of the area. Any scrying or surveillance protocol detects
+  whatever you wish within the area, rather than what is actually present. You can
+  Sustain the tech each round to update the spoofed feed.
+tradition: technical
+level: 5
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You create a false image that fools any attempts to scry on an area.
+      Any scrying spell sees, hears, smells, and otherwise detects whatever you wish
+      within the area, rather than what is actually in the

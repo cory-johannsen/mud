@@ -1,0 +1,17 @@
+id: signal_tone_generator
+name: Signal Tone Generator
+description: Produce a precise signal tone used for communication or system activation.
+tradition: technical
+level: 1
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You enchant a blade of grass that you can easily hold in your mouth without inhibiting your speech or other
+      actions. As a reaction, you can reduce the spell's remaining duration by 1 hour to Point Out

@@ -43,6 +43,6 @@ class_features:
 technology_grants:
   prepared:
     pool:
-      - { id: celestial_accord_fanatic_doctrine, level: 1 }
-      - { id: torturous_trauma_fanatic_doctrine, level: 1 }
-      - { id: cycle_of_retribution_fanatic_doctrine, level: 1 }
+      - { id: sacred_accord_mandate, level: 1 }
+      - { id: doctrines_punishment, level: 1 }
+      - { id: doctrine_retribution_cycle, level: 1 }

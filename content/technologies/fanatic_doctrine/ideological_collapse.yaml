@@ -1,0 +1,31 @@
+id: ideological_collapse
+name: Ideological Collapse
+description: You assault the target's core beliefs with a devastating counter-doctrine,
+  dealing 6d6 mental damage, or 6d8 mental damage if the target can channel doctrine
+  themselves. The target must attempt a Willpower save.
+tradition: fanatic_doctrine
+level: 3
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+  on_success:
+  - type: damage
+    dice: 6d3
+    damage_type: mental
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 6d6
+    damage_type: mental
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 12d6
+    damage_type: mental
+    dc: 0

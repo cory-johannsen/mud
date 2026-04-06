@@ -1,0 +1,24 @@
+id: petrification_mine
+name: Petrification Mine
+description: You deploy a device that causes rapid mineral encrustation on a target
+  while deploying caltrops and hazardous terrain around them. Every adjacent square
+  becomes difficult terrain for 1 minute. The target attempts a Toughness save. All
+  mechanical effects (clumsy, immobilized, restrained, escape DC) remain identical
+  to the base protocol.
+tradition: technical
+level: 4
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+save_type: toughness
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: Many stories tell of a clearing deep in the Mwangi jungle, surrounded
+      by ancient cypress trees. At the center stands an ancient baobab tree growing
+      around a large sphere of black basalt. Legends say t

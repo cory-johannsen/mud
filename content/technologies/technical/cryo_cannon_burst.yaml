@@ -1,0 +1,40 @@
+id: cryo_cannon_burst
+name: Cryo Cannon Burst
+description: 'A blast of cryogenic compound extends from your weapon system. If you
+  use 2 actions, it has a 60-foot cone area; with 3 actions, a range of 500 feet and
+  a 30-foot burst area. Each creature takes 10d6 cold damage with a Reflex save.
+
+
+  Critical Success Unaffected.
+
+  Success Half damage.
+
+  Failure Full damage and Slowed 1 for 1 round.
+
+  Critical Failure Double damage and Slowed 2 for 1 round.'
+tradition: technical
+level: 5
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: instant
+save_type: hustle
+save_dc: 15
+resolution: save
+effects:
+  on_success:
+  - type: damage
+    dice: 10d3
+    damage_type: cold
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 10d6
+    damage_type: cold
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 20d6
+    damage_type: cold
+    dc: 0

@@ -1,0 +1,17 @@
+id: biohazard_transfer_agent
+name: Biohazard Transfer Agent
+description: Apply a compound that transfers a debilitating condition from one subject to another.
+tradition: technical
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: damage
+    dice: 1d8+4
+    damage_type: untyped
+    dc: 0

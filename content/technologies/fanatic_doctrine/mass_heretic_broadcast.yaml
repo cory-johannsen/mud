@@ -1,0 +1,31 @@
+id: mass_heretic_broadcast
+name: Mass Heretic Broadcast
+description: 'A 60-foot emanation of psychic terror targets heretics. All creatures
+  must attempt a Willpower save. On a failure: 10d10 mental damage and frightened 3. On
+  a critical failure: double damage and frightened 4 and fleeing.'
+tradition: fanatic_doctrine
+level: 9
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: instant
+save_type: toughness
+save_dc: 15
+resolution: save
+effects:
+  on_success:
+  - type: damage
+    dice: 8d6
+    damage_type: void
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 8d10
+    damage_type: void
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 16d10
+    damage_type: void
+    dc: 0

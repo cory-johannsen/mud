@@ -1,0 +1,25 @@
+id: synaptic_confusion_burst
+name: Synaptic Confusion Burst
+description: |-
+    You sow seeds of confusion in your target's mind, causing its actions and thoughts to become clumsy.Critical Success The target is unaffected.
+    Success The target is Clumsy 1 and Stupefied 1.
+    Failure The target is Clumsy 2 and Stupefied 2.
+    Critical Failure The target is Clumsy 3, Stupefied 3, and @UUID[Compendium.pf2e.conditionitems.Item.Confused].
+tradition: neural
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: rounds:1
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+    on_apply:
+        - type: utility
+          dc: 0
+          description: |-
+            You sow seeds of confusion in your target's mind, causing its actions and thoughts to become clumsy.Critical Success The target is unaffected.
+            Success The target is Clumsy 1 and Stupefied 1.
+            Failure T

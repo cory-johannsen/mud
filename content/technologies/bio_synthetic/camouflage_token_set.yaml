@@ -1,0 +1,29 @@
+id: camouflage_token_set
+name: Camouflage Token Set
+description: 'You bio-synthesize four camouflage tokens, each storing a single disguise
+  profile. These tokens have negligible Bulk and remain active for the duration. As
+  an Interact action, you can activate or deactivate a token. When active, the token
+  projects a bio-luminescent disguise including altered scent patterns. The disguise
+  hides your identity but doesn''t impersonate a specific individual.
+
+  When you first activate a token, you determine its appearance. Selecting a token''s
+  appearance counts as setting up a disguise for Impersonate; attempt the Deception
+  check at mythic proficiency.
+
+  You can only use one token at a time. Deactivating reverts you to your true appearance.
+  Tokens given to others cease functioning.'
+tradition: bio_synthetic
+level: 4
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You conjure four magic feathers, each with the potential to hold
+      a single illusory guise. These feathers have negligible Bulk and remain potent
+      for the duration. As an Interact action, you can place o

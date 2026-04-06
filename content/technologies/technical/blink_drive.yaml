@@ -1,0 +1,20 @@
+id: blink_drive
+name: Blink Drive
+description: You activate a micro-temporal displacement drive, appearing across the
+  battlefield in an instant. You gain 2 actions, each must be used to Leap or Stride.
+  You don't trigger reactions during this movement.
+tradition: technical
+level: 3
+usage_type: prepared
+action_cost: 1
+range: self
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You leap forward a few seconds in time, appearing across the battlefield
+      in the blink of an eye. You gain 2 actions, each of which must be used to Leap,
+      Stand, Step, or Stride. If you have an appropri

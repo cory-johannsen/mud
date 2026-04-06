@@ -40,9 +40,9 @@ class_features:
 technology_grants:
   prepared:
     pool:
-      - { id: summon_animal_technical, level: 1 }
-      - { id: flourishing_flora_technical, level: 1 }
-      - { id: weave_wood_technical, level: 1 }
+      - { id: trained_animal_deployment, level: 1 }
+      - { id: rapid_growth_accelerant, level: 1 }
+      - { id: polymer_shaper_tool, level: 1 }
 drawbacks:
   - id: open_channel
     type: passive

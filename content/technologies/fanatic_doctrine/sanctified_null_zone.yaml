@@ -1,0 +1,21 @@
+id: sanctified_null_zone
+name: Sanctified Null Zone
+description: You invoke a stationary sphere of doctrinal protection that attempts
+  to counteract any hostile effect from outside the globe whose area or targets enter
+  into it, as if it were a Dispel effect 1 rank lower. All mechanical effects remain
+  identical to the base protocol.
+tradition: fanatic_doctrine
+level: 4
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You create an immobile globe around yourself that attempts to counteract
+      any spell from outside the globe whose area or targets enter into the globe,
+      as if the globe were a @UUID[Compendium.pf2e.spell

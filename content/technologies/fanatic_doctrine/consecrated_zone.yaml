@@ -1,0 +1,20 @@
+id: consecrated_zone
+name: Consecrated Zone
+description: You saturate the area with doctrinal chemicals, warding it against designated
+  enemies. Choose a category of foe. All creatures in the area gain a +1 status bonus
+  to AC, attack rolls, damage rolls, and saving throws against the chosen category.
+tradition: fanatic_doctrine
+level: 3
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You sanctify the area, sprinkling it with certain oils and warding
+      it against your foes. Choose aberrations, celestials, dragons, fiends, monitors,
+      or undead. All creatures in the area gain a +1 statu

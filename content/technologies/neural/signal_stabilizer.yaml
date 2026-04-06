@@ -1,0 +1,20 @@
+id: signal_stabilizer
+name: Signal Stabilizer
+description: You infuse the area with a steady neural carrier wave that helps nearby
+  operatives resist interference. The DC of any flat check to activate tech while
+  in this area is reduced by 2 for the duration.
+tradition: neural
+level: 3
+usage_type: prepared
+action_cost: 1
+range: zone
+targets: zone
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You infuse the air around you with a sustained hum that allows creatures
+      within it to resist distractions. The DC of any flat check to Cast a tech while
+      stupefied for creatures within the area is 2 l

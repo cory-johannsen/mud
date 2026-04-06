@@ -39,9 +39,9 @@ class_features:
 technology_grants:
   prepared:
     pool:
-      - { id: seashell_of_stolen_sound_technical, level: 1 }
-      - { id: ventriloquism_technical, level: 1 }
-      - { id: share_lore_technical, level: 1 }
+      - { id: sound_capture_device, level: 1 }
+      - { id: voice_projection_speaker, level: 1 }
+      - { id: data_package_transfer, level: 1 }
 drawbacks:
   - id: source_exposure
     type: passive

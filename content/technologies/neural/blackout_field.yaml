@@ -1,0 +1,29 @@
+id: blackout_field
+name: Blackout Field
+description: 'You create a zone of neural interference that prevents light from penetrating
+  or emanating within the area. Light does not enter the area and any non-magical
+  light sources, such as a torch or lantern, do not emanate any light while inside
+  the area, even if their light radius would extend beyond the darkness. This also
+  suppresses magical light of your darkness spell''s rank or lower. Light can''t pass
+  through, so creatures in the area can''t see outside. From outside, it appears as
+  a globe of pure darkness.
+
+
+  Heightened (4th) Even creatures with darkvision (but not greater darkvision) can
+  barely see through the darkness. They treat targets seen through the darkness as
+  @UUID[Compendium.pf2e.conditionitems.Item.Concealed].'
+tradition: neural
+level: 2
+usage_type: prepared
+action_cost: 3
+range: zone
+targets: zone
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You create a shroud of darkness that prevents light from penetrating
+      or emanating within the area. Light does not enter the area and any non-magical
+      light sources, such as a torch or lantern, do not e

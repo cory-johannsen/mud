@@ -1,0 +1,26 @@
+id: calcium_pillars
+name: Calcium Pillars
+description: 'You raise one or more pillars of hardite bio-calcium from the ground.
+  The total height of the pillars is 30 feet, which must be used in 10-foot increments.
+  Each pillar is a 5-foot square, and the top of the pillar is flat. A pillar can
+  be destroyed (AC 10, Hardness 8, 30 HP).
+
+
+  Heightened (+1) The total height increases by 10 feet.'
+tradition: bio_synthetic
+level: 5
+usage_type: prepared
+action_cost: 3
+range: ranged
+targets: single
+duration: minutes:1
+save_type: hustle
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You raise one or more pillars of solid sand from the earth. The total
+      height of the pillars is 30 feet, which must be used in 10-foot increments (for
+      example, you could create three 10-foot-tall pilla

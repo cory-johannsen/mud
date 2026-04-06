@@ -1,0 +1,23 @@
+id: dark_web_broadcast
+name: Dark Web Broadcast
+description: You broadcast your presence across forbidden neural frequencies, invoking
+  protocols that predate modern network security. This is not a compulsion, but rather
+  an open channel invitation. The invitation resonates through the target's subconscious,
+  and it must attempt a Willpower save to resist the urge to respond.
+tradition: neural
+level: 3
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: instant
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You announce yourself in the name of certain grim pacts that predate
+      mortal life. This is not a compulsion, but rather an invitation of sorts. The
+      invitation is understood by creatures in the area wit

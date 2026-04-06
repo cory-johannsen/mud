@@ -1,0 +1,23 @@
+id: mass_neural_dominance
+name: Mass Neural Dominance
+description: You broadcast a crushing neural suppression wave. All creatures in a
+  30-foot emanation must attempt a Willpower save. On a failure, they are awestruck and
+  controlled, compelled to treat you as an authority figure and follow reasonable
+  commands. They are also slowed 1 on a critical failure.
+tradition: neural
+level: 9
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: instant
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You surround yourself with supernatural splendor, appearing to be
+      a god or similarly majestic being, with an appearance, regalia, and iconography
+      of your choice. Targets must attempt a Willpower save. Rega

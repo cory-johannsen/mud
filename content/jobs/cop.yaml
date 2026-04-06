@@ -41,11 +41,11 @@ class_features:
 technology_grants:
   prepared:
     pool:
-      - id: caustic_blast_bio_synthetic
+      - id: acid_cluster_spray
         level: 1
-      - id: chilling_spray_bio_synthetic
+      - id: cryo_gland_spray
         level: 1
-      - id: tether_bio_synthetic
+      - id: bio_tether_organ
         level: 1
 drawbacks:
   - id: blue_wall

@@ -1,0 +1,39 @@
+id: soul_ripper
+name: Soul Ripper
+description: 'You project a psychokinetic lance that tears at the target''s life essence.
+  The target takes 5d6 void damage, depending on its basic Toughness save, and is
+  Drained 1 if it fails its save. The tech''s effect is based on how many actions
+  you spend when activating it.
+
+  1 (somatic) The tech targets one creature within 30 feet.
+
+  2 (somatic, verbal) The tech targets one creature within 60 feet, and the target
+  takes 2 persistent void damage on a failure.
+
+  3 (material, somatic, verbal) The tech targets all creatures in a 30-foot cone.'
+tradition: neural
+level: 5
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+save_type: toughness
+save_dc: 15
+resolution: save
+effects:
+  on_success:
+  - type: damage
+    dice: 5d3
+    damage_type: void
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 5d6
+    damage_type: void
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 10d6
+    damage_type: void
+    dc: 0

@@ -39,8 +39,8 @@ class_features:
 technology_grants:
   prepared:
     pool:
-      - { id: figment_neural, level: 1 }
-      - { id: item_facade_neural, level: 1 }
+      - { id: sensory_projection, level: 1 }
+      - { id: psi_object_hologram, level: 1 }
       - { id: phantom_pain, level: 1 }
 drawbacks:
   - id: smoke_and_mirrors

@@ -42,9 +42,9 @@ technology_grants:
     pool:
       - id: vanishing_tracks
         level: 1
-      - id: breadcrumbs_bio_synthetic
+      - id: bio_scent_trail_marker
         level: 1
-      - id: alarm_bio_synthetic
+      - id: bio_sentinel_trigger
         level: 1
 drawbacks:
   - id: fixation_spiral

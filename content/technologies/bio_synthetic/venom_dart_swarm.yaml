@@ -1,0 +1,55 @@
+id: venom_dart_swarm
+name: Venom Dart Swarm
+description: 'You deploy a swarm of bio-synthetic stinger drones that stab creatures
+  in the area, possibly envenoming them. Creatures take @Damage[1d6[piercing]] damage.
+  Each creature that takes piercing damage must attempt a Toughness save.
+
+
+  Critical Success The target is unaffected.
+
+  Success The target takes @Damage[2d6[poison]] damage.
+
+  Failure The target is afflicted with Swarming Wasp Venom at stage 1.
+
+  Critical Failure The target is afflicted at stage 2.
+
+
+  Swarming Wasp Venom (poison)
+
+  Saving Throw @Check[fortitude|dc:24|traits:poison]
+
+  Maximum Duration 6 rounds
+
+  Stage 1 @Damage[1d6[poison]|traits:poison] (1 round)
+
+  Stage 2 @Damage[2d6[poison]|traits:poison] and Clumsy 1 (1 round)
+
+  Stage 3 2d6 poison, @Damage[1d6[persistent,bleed]], and clumsy 1 (1 round)
+
+  Stage 4 2d6 poison, @Damage[2d6[persistent,bleed]], and clumsy 1 (1 round)'
+tradition: bio_synthetic
+level: 4
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+save_type: toughness
+save_dc: 15
+resolution: save
+effects:
+  on_success:
+  - type: damage
+    dice: 1d3
+    damage_type: piercing
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 1d6
+    damage_type: piercing
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 2d6
+    damage_type: piercing
+    dc: 0

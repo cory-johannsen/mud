@@ -1,0 +1,32 @@
+id: psi_chorus_resonance
+name: Psi-Chorus Resonance
+description: |-
+    You unleash a dangerous consonance of reverberating sound, focusing on a single target or spreading out to damage many foes. The number of actions you spend Casting this tech determines its targets, range, area, and other parameters.1 The spell deals 1d4 sonic damage to a single enemy, with a basic Toughness save.
+    2 (manipulate) The spell deals 2d4 sonic damage to all creatures in a @Template[burst|distance:10], with a basic Toughness save.
+    3 (manipulate) The spell deals 2d4 sonic damage to all creatures in a @Template[emanation|distance:30], with a basic Toughness save.Heightened (+1) The damage increases by 1d4 for the 1-action version, or 2d4 for the other versions.
+tradition: neural
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+save_type: toughness
+save_dc: 15
+resolution: save
+effects:
+    on_success:
+        - type: damage
+          dice: "2"
+          damage_type: sonic
+          dc: 0
+    on_failure:
+        - type: damage
+          dice: 2d4
+          damage_type: sonic
+          dc: 0
+    on_crit_failure:
+        - type: damage
+          dice: 4d4
+          damage_type: sonic
+          dc: 0

@@ -1,0 +1,23 @@
+id: pressurized_expulsion
+name: Pressurized Expulsion
+description: 'You expel a blast of superheated bio-gas from your lungs. You deal 4d6
+  fire damage in a @Template[cone|distance:30]. Each creature in the area must attempt
+  a basic Reflex save.
+
+
+  Heightened (+1) The damage increases by 2d6.'
+tradition: bio_synthetic
+level: 2
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You create a churning eddy of warm air that makes it difficult to
+      fly within the area. This area is difficult terrain for flying creatures. Each
+      time a flying creature enters the area or ends its turn

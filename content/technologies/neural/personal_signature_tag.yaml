@@ -1,0 +1,18 @@
+id: personal_signature_tag
+name: Personal Signature Tag
+description: You invisibly tag an object or location with your unique psionic identifier — detectable only to those who know
+  what to scan for.
+tradition: neural
+level: 1
+usage_type: prepared
+action_cost: 2
+range: melee
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You harmlessly place your unique magical sigil, which is about 1 square inch in size, on the targeted creature
+      or object. The mark can be visible or invisible, and you can change it from one state to

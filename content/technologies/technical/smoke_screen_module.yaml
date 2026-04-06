@@ -1,0 +1,24 @@
+id: smoke_screen_module
+name: Smoke Screen Module
+description: 'Trigger You or an ally in range is targeted by a ranged attack.
+
+
+  Your armor deploys a cloud of obscuring smoke around the target. The triggering
+  attack takes a -2 circumstance penalty.'
+tradition: technical
+level: 3
+usage_type: prepared
+action_cost: 0
+range: ranged
+targets: single
+duration: rounds:1
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'Trigger You or an ally in range is targeted by a ranged attack.
+
+
+      A cloud of mist enshrouds the target, appearing much like the deflecting clouds
+      created by cloud dragons. The target is treated as @UUI'

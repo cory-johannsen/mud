@@ -1,0 +1,23 @@
+id: phase_oscillator
+name: Phase Oscillator
+description: 'You activate a device that rapidly shifts you between dimensional frequencies.
+  You gain resistance 5 to all damage except force. At the end of each turn, you automatically
+  teleport 10 feet in a random direction. You can Sustain to teleport.
+
+
+  Heightened (+2) Resistance increases by 3.'
+tradition: technical
+level: 4
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You flicker quickly between your current plane and another. You gain
+      resistance 5 to all damage, except force. At the end of each of your turns,
+      you automatically teleport 10 feet in a random directio

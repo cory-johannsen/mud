@@ -1,0 +1,23 @@
+id: recursive_logic_trap
+name: Recursive Logic Trap
+description: You trap a processor or mind in an inescapable recursive logic maze.
+  The target must attempt a Willpower save. On a failure, it cannot take actions requiring
+  concentration, looping endlessly through the maze. It attempts a Willpower save at the
+  end of each turn to escape.
+tradition: technical
+level: 9
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: instant
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You connect the entire area with an invisible maze of astral energy
+      that interferes with dimensional and mental magic. Choose a point in the area
+      that you can see when you cast this tech. Objects oth

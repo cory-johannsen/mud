@@ -1,0 +1,23 @@
+id: summon_dissident
+name: Summon Dissident
+description: 'You conjure a chaotic entity bound by anti-doctrinal protocols to fight
+  on your behalf. You summon a common chaotic creature that has the celestial, monitor,
+  or fiend trait and whose level is 5 or lower.
+
+
+  Heightened As listed in the summon trait.'
+tradition: fanatic_doctrine
+level: 5
+usage_type: prepared
+action_cost: 3
+range: ranged
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You conjure a chaotic celestial, monitor, or fiend to fight on your
+      behalf. You summon a common chaotic creature that has the celestial, monitor,
+      or fiend trait and whose level is 5 or lower. You can'

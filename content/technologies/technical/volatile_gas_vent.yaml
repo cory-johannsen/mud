@@ -1,0 +1,24 @@
+id: volatile_gas_vent
+name: Volatile Gas Vent
+description: 'You vent a cloud of volatile industrial gases into the area. The gases
+  are invisible, requiring a successful Perception check against your tech DC to
+  detect visually. Each creature that enters the cloud or starts its turn there takes
+  2d6 poison damage with a basic Toughness save.
+
+
+  If any flame or fire effect contacts the cloud, it ignites, dealing 10d6 fire damage
+  (basic Reflex). The cloud then disperses.'
+tradition: technical
+level: 5
+usage_type: prepared
+action_cost: 3
+range: zone
+targets: zone
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: damage
+    dice: 2d6
+    damage_type: poison
+    dc: 0

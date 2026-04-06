@@ -1,0 +1,18 @@
+id: organic_memory_scan
+name: Organic Memory Scan
+description: You extract chemical memory from plant or soil material, reading recent environmental history encoded in organic
+  matter.
+tradition: bio_synthetic
+level: 1
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You gain general insights into the immediate vicinity by sending your sense through the root systems of trees
+      and bushes. If there are any unnoticed Medium or larger creatures in the area, you learn o

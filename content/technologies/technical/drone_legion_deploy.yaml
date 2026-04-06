@@ -1,0 +1,30 @@
+id: drone_legion_deploy
+name: Drone Legion Deploy
+description: You deploy a coordinated legion of attack drones. The legion uses the
+  statistics of a draconic legion and follows your commands for 1 minute.
+tradition: technical
+level: 9
+usage_type: prepared
+action_cost: 3
+range: ranged
+targets: single
+duration: instant
+save_type: hustle
+save_dc: 15
+resolution: save
+effects:
+  on_success:
+  - type: damage
+    dice: 10d4
+    damage_type: cold
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 10d8
+    damage_type: cold
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 20d8
+    damage_type: cold
+    dc: 0

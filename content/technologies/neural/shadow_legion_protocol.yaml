@@ -1,0 +1,43 @@
+id: shadow_legion_protocol
+name: Shadow Legion Protocol
+description: You manifest a full legion of shadow constructs from psychic material.
+  The legion uses shadow army statistics and follows your commands for 1 minute. The
+  legion can divide into separate units on your command.
+tradition: neural
+level: 10
+usage_type: prepared
+action_cost: 3
+range: zone
+targets: zone
+duration: minutes:1
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+  on_success:
+  - type: damage
+    dice: 3d6
+    damage_type: mental
+    dc: 0
+  - type: damage
+    dice: 3d6
+    damage_type: bludgeoning
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 3d10
+    damage_type: mental
+    dc: 0
+  - type: damage
+    dice: 3d10
+    damage_type: bludgeoning
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 6d10
+    damage_type: mental
+    dc: 0
+  - type: damage
+    dice: 6d10
+    damage_type: bludgeoning
+    dc: 0

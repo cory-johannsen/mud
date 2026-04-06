@@ -1,0 +1,19 @@
+id: doctrines_shield_of_faith
+name: Doctrine's Shield of Faith
+description: You manifest a doctrinal energy shield that can intercept incoming damage. Triggers as a reaction to block blows.
+tradition: fanatic_doctrine
+level: 1
+usage_type: prepared
+action_cost: 1
+range: self
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'You raise a magical shield of force. This counts as using the Raise a Shield action, giving you a +1 circumstance
+      bonus to AC until the start of your next turn, but it doesn''t require a hand to use.
+
+      W'

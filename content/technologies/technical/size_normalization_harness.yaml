@@ -1,0 +1,21 @@
+id: size_normalization_harness
+name: Size Normalization Harness
+description: Deploy a gravity-adjustment harness that equalizes physical reach and momentum regardless of size.
+tradition: technical
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'You level the field between yourself and another creature, hampering its movements if it''s quicker than
+      you. The target attempts a Willpower save.Critical Success The target is unaffected.
+
+      Success The targ'

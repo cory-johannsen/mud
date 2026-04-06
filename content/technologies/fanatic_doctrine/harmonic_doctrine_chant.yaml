@@ -1,0 +1,46 @@
+id: harmonic_doctrine_chant
+name: Harmonic Doctrine Chant
+description: 'Your voice intones the perfect frequency of doctrinal authority. When
+  activating the tech, you can make the area any radius you choose, up to 40 feet.
+  The harmonic resonance continues as long as you Sustain the tech but can''t be heard
+  at all outside of the area. A creature must attempt a Willpower save if it''s within
+  the area when you activate the tech or as soon as it enters the area while the tech
+  is in effect. Once a creature has attempted the save, it uses the same result for
+  that activation.Critical Success The creature is unaffected.
+
+  Success The creature takes @Damage[5d10[persistent,sonic]] damage at the end of
+  their turn as long as they remain within the chant''s area of effect.
+
+  Failure As success, but if the creature leaves the area, or if you move far enough
+  from the creature that they''re no longer in the area, the creature hears a shattering
+  sound and takes 5d10 sonic damage and is Stunned 1. The creature is then @UUID[Compendium.pf2e.conditionitems.Item.Deafened]
+  for the rest of the tech''s duration.
+
+  Critical Failure As failure, but the creature takes double the sonic damage and
+  is Stunned 3.Heightened (+1) The damage on a failed save increases by 1d10.'
+tradition: fanatic_doctrine
+level: 7
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: minutes:1
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+  on_success:
+  - type: damage
+    dice: 5d6
+    damage_type: sonic
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 5d10
+    damage_type: sonic
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 10d10
+    damage_type: sonic
+    dc: 0

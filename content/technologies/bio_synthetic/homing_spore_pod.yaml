@@ -1,0 +1,32 @@
+id: homing_spore_pod
+name: Homing Spore Pod
+description: 'You launch a guided bio-synthetic spore pod at a foe that curves around
+  obstacles to strike from an unexpected direction. Make a tech attack roll against
+  the target''s AC. This attack ignores the target''s Concealed condition and ignores
+  all cover except greater cover.
+
+
+  On a hit, the pod deals 7d6 bludgeoning damage. On a critical hit, the target is
+  also Stunned 1.
+
+
+  Heightened (+1) The damage increases by 2d6.'
+tradition: bio_synthetic
+level: 5
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: attack
+effects:
+  on_hit:
+  - type: damage
+    dice: 7d10
+    damage_type: bludgeoning
+    dc: 0
+  on_crit_hit:
+  - type: damage
+    dice: 14d10
+    damage_type: bludgeoning
+    dc: 0

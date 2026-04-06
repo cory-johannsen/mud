@@ -1,0 +1,22 @@
+id: covenant_mark
+name: Covenant Mark
+description: You mark the target with a doctrinal blood covenant. For the duration,
+  you can sense the target's direction and approximate distance. The mark can be removed
+  by dispel magic or similar effects.
+tradition: fanatic_doctrine
+level: 2
+usage_type: prepared
+action_cost: 2
+range: melee
+targets: single
+duration: minutes:1
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You place a drop of your blood on a weapon and charge it with magic
+      so that you transfer a small amount of your life essence with your attack. The
+      next creature you successfully Strike with the weapon

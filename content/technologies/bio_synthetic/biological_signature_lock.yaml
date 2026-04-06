@@ -1,0 +1,18 @@
+id: biological_signature_lock
+name: Biological Signature Lock
+description: You identify a target's unique biological signature, establishing a chemical resonance that makes your compounds
+  more effective against them.
+tradition: bio_synthetic
+level: 1
+usage_type: prepared
+action_cost: 1
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You speak the true name of a creature to more surely affect it with your magic. Until the end of the current
+      turn, the target is @UUID[Compendium.pf2e.conditionitems.Item.Off-Guard] against your spell

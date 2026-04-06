@@ -1,0 +1,20 @@
+id: turbine_shield
+name: Turbine Shield
+description: You activate a turbine array around the target that generates fierce
+  winds. The shield grants +1 circumstance bonus to AC against ranged attacks and
+  pushes adjacent creatures 5 feet on their turn.
+tradition: technical
+level: 3
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You shroud one creature in a cloak of fierce, howling winds, shielding
+      it from attacks and making it difficult to approach. The twisting shield of
+      wind creates difficult terrain in a @Template[burst|d

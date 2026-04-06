@@ -1,0 +1,26 @@
+id: bio_lift_wings
+name: Bio-Lift Wings
+description: 'The target sprouts temporary bio-synthetic flight membranes, gaining
+  a fly Speed equal to its Speed or 20 feet, whichever is greater.
+
+
+  Heightened (7th) The duration increases to 1 hour.'
+tradition: bio_synthetic
+level: 4
+usage_type: prepared
+action_cost: 2
+range: melee
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'The target can soar through the air, gaining a fly Speed equal to
+      its Speed or 20 feet, whichever is greater.
+
+      @UUID[Compendium.pf2e.spell-effects.Item.tech Effect: Fly]
+
+
+      Heightened (7th) The duration'

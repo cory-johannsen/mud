@@ -1,0 +1,35 @@
+id: parasitic_filament_array
+name: Parasitic Filament Array
+description: 'Barbed metallic filaments erupt from your device in a tangled cascade,
+  puncturing creatures in the line and siphoning energy. You deal 8d6 piercing damage
+  (basic Reflex save). You gain 1d4 temporary Hit Points per living creature in the
+  line. Temporary Hit Points last 1 minute.
+
+
+  Heightened (+1) Damage increases by 2d6.'
+tradition: technical
+level: 4
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: instant
+save_type: hustle
+save_dc: 15
+resolution: save
+effects:
+  on_success:
+  - type: damage
+    dice: 8d3
+    damage_type: piercing
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 8d6
+    damage_type: piercing
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 16d6
+    damage_type: piercing
+    dc: 0

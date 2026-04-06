@@ -1,0 +1,43 @@
+id: shadow_predators
+name: Shadow Predators
+description: You grow bio-synthetic predators from ambient shadows. The shades attack
+  creatures you designate, making Strikes using your spell attack modifier and dealing
+  2d6 slashing damage on a hit. You can command them when you Sustain the spell.
+tradition: bio_synthetic
+level: 2
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: instant
+save_type: toughness
+save_dc: 15
+resolution: save
+effects:
+  on_success:
+  - type: damage
+    dice: '2'
+    damage_type: slashing
+    dc: 0
+  - type: damage
+    dice: '2'
+    damage_type: void
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 2d4
+    damage_type: slashing
+    dc: 0
+  - type: damage
+    dice: 2d4
+    damage_type: void
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 4d4
+    damage_type: slashing
+    dc: 0
+  - type: damage
+    dice: 4d4
+    damage_type: void
+    dc: 0

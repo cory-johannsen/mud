@@ -1,0 +1,26 @@
+id: sentinel_eye
+name: Sentinel Eye
+description: 'You deploy an Invisible floating sensor consecrated by doctrine, 1 inch
+  in diameter, at a location you can see within 500 feet. It sees in all directions
+  with your normal visual senses and continuously transmits what it sees to you.
+
+  The first time you Sustain the tech each round, you can move the sensor up to 30
+  feet.
+
+
+  Heightened (5th) The sensor also has hearing.'
+tradition: fanatic_doctrine
+level: 5
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You create an @UUID[Compendium.pf2e.conditionitems.Item.Invisible],
+      floating eye, 1 inch in diameter, at a location you can see within 500 feet.
+      It sees in all directions with your normal visual sense

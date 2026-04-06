@@ -1,0 +1,22 @@
+id: repellent_spray_launcher
+name: Repellent Spray Launcher
+description: Project a sticky, foul compound that degrades target morale and sensor clarity.
+tradition: technical
+level: 1
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: minutes:1
+resolution: attack
+effects:
+  on_hit:
+  - type: damage
+    dice: 1d6
+    damage_type: acid
+    dc: 0
+  on_crit_hit:
+  - type: damage
+    dice: 2d6
+    damage_type: acid
+    dc: 0

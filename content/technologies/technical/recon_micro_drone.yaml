@@ -1,0 +1,26 @@
+id: recon_micro_drone
+name: Recon Micro-Drone
+description: 'You deploy an Invisible micro-drone, 1 inch in diameter, at a location
+  you can see within 500 feet. It sees in all directions with your normal visual senses
+  and continuously transmits to you.
+
+  The first time you Sustain each round, you can move the drone up to 30 feet. The
+  drone can''t go through solid objects.
+
+
+  Heightened (5th) The drone also has audio sensors.'
+tradition: technical
+level: 5
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You create an @UUID[Compendium.pf2e.conditionitems.Item.Invisible],
+      floating eye, 1 inch in diameter, at a location you can see within 500 feet.
+      It sees in all directions with your normal visual sense

@@ -1,0 +1,23 @@
+id: delayed_transmission
+name: Delayed Transmission
+description: 'You embed an encrypted message into the target''s communication implant
+  that surfaces under specific conditions. You speak a message of 25 words or fewer
+  and designate a trigger. When the trigger occurs, the target receives the message.
+
+
+  Heightened (3rd) The message can be up to 50 words.'
+tradition: technical
+level: 2
+usage_type: prepared
+action_cost: 2
+range: melee
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You specify a trigger and a message up to 25 words long. When the
+      specified trigger occurs within 30 feet of the target, illusory text of your
+      message circles the target accompanied by a disembodied v

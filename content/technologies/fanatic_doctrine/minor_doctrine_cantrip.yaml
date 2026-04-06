@@ -1,0 +1,18 @@
+id: minor_doctrine_cantrip
+name: Minor Doctrine Cantrip
+description: You perform minor doctrinal manipulations — small cleanings, warmings, or cosmetic adjustments blessed by the
+  Doctrine.
+tradition: fanatic_doctrine
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: The simplest magic does your bidding. You can perform simple magical effects for as long as you Sustain the
+      spell. Each time you Sustain the spell, you can choose one of four options.Cook Cool, warm,

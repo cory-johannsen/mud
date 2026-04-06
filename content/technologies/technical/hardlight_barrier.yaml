@@ -1,0 +1,23 @@
+id: hardlight_barrier
+name: Hardlight Barrier
+description: You project a translucent wall of hardlight energy. Either a 5-foot-thick
+  line up to 60 feet long or a 10-foot-radius ring, both 20 feet high. The wall is
+  difficult terrain.
+tradition: technical
+level: 3
+usage_type: prepared
+action_cost: 3
+range: ranged
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: damage
+    dice: 1d8
+    damage_type: vitality
+    dc: 0
+  - type: damage
+    dice: 1d8
+    damage_type: spirit
+    dc: 0

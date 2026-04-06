@@ -1,0 +1,22 @@
+id: momentum_amplifier
+name: Momentum Amplifier
+description: The target is energized by cascading combat success. It gains Quickened
+  for 1 round. If the target or an ally within 20 feet critically succeeds on an attack
+  against a significant foe, the critical striker becomes quickened if not already,
+  and duration extends by a round. Extra action can be used to Strike, Step, or Stride.
+  If no critical success occurs in a full round, the streak breaks.
+tradition: technical
+level: 4
+usage_type: prepared
+action_cost: 1
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: The target is energized by its good fortune as it spreads to others-as
+      long as they keep winning. It gains the @UUID[Compendium.pf2e.conditionitems.Item.Quickened]
+      condition for 1 round. If the target

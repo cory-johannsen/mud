@@ -1,0 +1,21 @@
+id: sonic_stun_pulse
+name: Sonic Stun Pulse
+description: You emit a calibrated sonic pulse that overwhelms nearby targets. Those
+  affected must attempt a Willpower save or be Stunned 1.
+tradition: technical
+level: 3
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: Your flamboyant flourish invokes such powerful feelings in your audience
+      that you incite cheers and applause. Targets of this tech must be able to see,
+      hear, or otherwise understand you. The targets

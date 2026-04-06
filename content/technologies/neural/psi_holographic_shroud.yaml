@@ -1,0 +1,21 @@
+id: psi_holographic_shroud
+name: Psi-Holographic Shroud
+description: You wrap the target in psychic projections that make it appear to be
+  in a slightly different position. The target gains a +1 status bonus to AC and can
+  attempt to Hide even without cover or concealment, using your tech DC as its Stealth
+  DC.
+tradition: neural
+level: 2
+usage_type: prepared
+action_cost: 2
+range: melee
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You shroud the target in subtle illusions that make it difficult
+      to detect. The target gains a +1 status bonus to Stealth checks to @UUID[Compendium.pf2e.actionspf2e.Item.Hide]
+      or @UUID[Compendium.pf2

@@ -1,0 +1,20 @@
+id: phase_shift_weapon
+name: Phase Shift Weapon
+description: The target weapon becomes translucent and phase-shifted, allowing it
+  to strike both material and incorporeal targets. It gains the effects of the ghost
+  touch property rune for the duration.
+tradition: neural
+level: 3
+usage_type: prepared
+action_cost: 2
+range: melee
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: The target weapon becomes translucent and ghostly, and it can affect
+      material and incorporeal creatures and objects. It gains the effects of the
+      @UUID[Compendium.pf2e.equipment-srd.Item.Ghost Touch] p

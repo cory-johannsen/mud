@@ -1,0 +1,24 @@
+id: orbital_blades
+name: Orbital Blades
+description: 'You deploy two precision-guided blades that orbit your body on magnetic
+  rails. When you Cast or Sustain the tech, you can make a ranged spell attack with
+  one of the blades against a target within 60 feet, dealing 2d6 slashing damage on
+  a hit. Each blade can be used once per round.
+
+
+  Heightened (+2) The damage increases by 1d6.'
+tradition: technical
+level: 2
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: The folklore and tales surrounding the legendary hero Kgalaserke
+      are so widespread and well known that a hundred lifetimes would not be enough
+      to have accomplished everything she is reputed to have do

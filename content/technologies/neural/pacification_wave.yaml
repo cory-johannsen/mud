@@ -1,0 +1,37 @@
+id: pacification_wave
+name: Pacification Wave
+description: 'You broadcast a calming neural signal that suppresses hostile impulses.
+  Each creature in the area must attempt a Willpower save.
+
+
+  Critical Success The creature is unaffected.
+
+  Success Calming urges linger in the creature''s mind. It can''t use hostile actions
+  for 1 round, though this ends if the creature is attacked.
+
+  Failure The creature can''t use hostile actions for 1 minute, though this ends if
+  the creature is attacked.
+
+  Critical Failure The creature can''t use hostile actions for 1 minute, and this
+  doesn''t end if the creature is attacked.'
+tradition: neural
+level: 2
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: minutes:1
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'You forcibly calm creatures in the area, soothing them into a nonviolent
+      state; each creature must attempt a Willpower save.
+
+
+      Critical Success The creature is unaffected.
+
+      Success Calming urges impose a -1'

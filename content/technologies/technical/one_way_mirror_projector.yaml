@@ -1,0 +1,25 @@
+id: one_way_mirror_projector
+name: One-Way Mirror Projector
+description: 'You deploy a device that projects a transparent one-way optical barrier.
+  Creatures on one side (your choice) are invisible to those on the other. Create
+  a wall up to 60 feet long and 10 feet high, or a 10-foot-radius ring. The wall is
+  intangible. If an invisible creature takes a hostile action, the spell ends after
+  that action.
+
+
+  Heightened (7th) Hostile actions don''t end the spell.'
+tradition: technical
+level: 4
+usage_type: prepared
+action_cost: 3
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You create a transparent invisible wall that makes any creatures
+      on one side of the wall invisible to those on the other side. You choose which
+      side of the wall provides invisibility to the creatures

@@ -1,0 +1,35 @@
+id: anti_theft_system
+name: Anti-Theft System
+description: 'You install an electronic security system in the target item. When a
+  creature attempts to take the target into its possession, it takes 8d8 mental damage
+  and is doomed, depending on the result of its Willpower save. The system then deactivates.
+  You can authorize up to 10 creatures when you install this tech.
+
+
+  Heightened (+2) The damage increases by 2d8.'
+tradition: technical
+level: 5
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: instant
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+  on_success:
+  - type: damage
+    dice: 8d4
+    damage_type: mental
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 8d8
+    damage_type: mental
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 16d8
+    damage_type: mental
+    dc: 0

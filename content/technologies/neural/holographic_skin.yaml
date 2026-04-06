@@ -1,0 +1,22 @@
+id: holographic_skin
+name: Holographic Skin
+description: You coat a creature's body in a layer of shimmering holographic particles.
+  The target gains a +2 status bonus on Deception checks to Feint and a +1 circumstance
+  bonus to AC against attacks from creatures that are Dazzled.
+tradition: neural
+level: 3
+usage_type: prepared
+action_cost: 2
+range: melee
+targets: single
+duration: instant
+save_type: toughness
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You coat a creature's body in a layer of brilliantly sparkling glitter.
+      The target gains a +2 status bonus on Deception checks to @UUID[Compendium.pf2e.actionspf2e.Item.Create
+      a Diversion] and to @UUI

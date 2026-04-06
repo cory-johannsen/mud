@@ -39,9 +39,9 @@ class_features:
 technology_grants:
   prepared:
     pool:
-      - { id: fold_metal, level: 1 }
-      - { id: temporary_tool, level: 1 }
-      - { id: endure_technical, level: 1 }
+      - { id: precision_metal_former, level: 1 }
+      - { id: rapid_fabrication_print, level: 1 }
+      - { id: metabolic_stabilizer_injection, level: 1 }
 drawbacks:
   - id: toolbox_dependent
     type: passive

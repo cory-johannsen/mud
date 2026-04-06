@@ -40,11 +40,11 @@ class_features:
 technology_grants:
   prepared:
     pool:
-      - id: weaken_earth_bio_synthetic
+      - id: bio_seismic_dissolve
         level: 1
-      - id: wooden_fists_bio_synthetic
+      - id: bio_chitin_gauntlets
         level: 1
-      - id: shockwave_bio_synthetic
+      - id: seismic_pulse_organ
         level: 1
 drawbacks:
   - id: worn_down

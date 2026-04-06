@@ -1,0 +1,22 @@
+id: telekinetic_launch
+name: Telekinetic Launch
+description: You seize a loose object telekinetically and launch it as a high-velocity projectile at a target.
+tradition: neural
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: attack
+effects:
+  on_hit:
+  - type: damage
+    dice: 2d6
+    damage_type: untyped
+    dc: 0
+  on_crit_hit:
+  - type: damage
+    dice: 4d6
+    damage_type: untyped
+    dc: 0

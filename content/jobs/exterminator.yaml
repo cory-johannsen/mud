@@ -39,11 +39,11 @@ class_features:
 technology_grants:
   prepared:
     pool:
-      - id: noxious_vapors_bio_synthetic
+      - id: toxic_vapor_gland
         level: 1
-      - id: goblin_pox_bio_synthetic
+      - id: viral_pathogen_gland
         level: 1
-      - id: puff_of_poison_bio_synthetic
+      - id: poison_spore_exhale
         level: 1
 drawbacks:
   - id: contaminated

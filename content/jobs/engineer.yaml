@@ -41,9 +41,9 @@ technology_grants:
     slots_by_level:
       1: 1
     pool:
-      - { id: forge_technical, level: 1 }
-      - { id: conductive_weapon_technical, level: 1 }
-      - { id: animate_rope_technical, level: 1 }
+      - { id: rapid_forge_module, level: 1 }
+      - { id: electroconductive_coating, level: 1 }
+      - { id: servo_cable_actuator, level: 1 }
 drawbacks:
   - id: theoretical_bias
     type: passive

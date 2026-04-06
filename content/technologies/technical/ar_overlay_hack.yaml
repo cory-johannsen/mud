@@ -1,0 +1,26 @@
+id: ar_overlay_hack
+name: AR Overlay Hack
+description: 'The target''s augmented reality systems are hijacked, causing them to
+  consistently perceive false data -- seeing something that isn''t there, missing
+  something that is, or perceiving one thing as another. The target doesn''t believe
+  the false data but can''t override it.
+
+
+  Heightened (6th) You can target up to 10 creatures.'
+tradition: technical
+level: 5
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: The target consistently detects one thing as another, can't detect
+      something that's there, or detects something that's not there, though it doesn't
+      alter their beliefs. You choose which of these effec

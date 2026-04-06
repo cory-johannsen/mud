@@ -1,0 +1,39 @@
+id: feedback_virus
+name: Feedback Virus
+description: 'You implant a psychic virus that causes any active neural enhancements
+  to hemorrhage energy. The target must attempt a Willpower save.
+
+
+  Critical Success The target is unaffected.
+
+  Success Whenever the target becomes affected by a spell with a duration, the target
+  takes @Damage[2d12[persistent,force]] damage. Each time it takes persistent force
+  damage from the virus, it reduces the remaining duration of spells affecting it
+  by 1 round. Only a successful @Check[arcana] check against your tech DC can help
+  the target recover from the persistent damage; the curse and the persistent damage
+  end after 1 minute.
+
+  Failure As success, but the curse and persistent damage do not end on their own.
+
+  Critical Failure As failure, but the persistent force damage is @Damage[4d12[persistent,force]].'
+tradition: neural
+level: 6
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'You cause any spells cast on the target to spill out their energy
+      in harmful surges. The target must attempt a Willpower save.
+
+
+      Critical Success The target is unaffected.
+
+      Success Whenever the target become'

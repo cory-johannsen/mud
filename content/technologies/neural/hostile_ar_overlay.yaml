@@ -1,0 +1,38 @@
+id: hostile_ar_overlay
+name: Hostile AR Overlay
+description: An augmented reality overlay of horrific threats fills the area. The
+  threats look like small swarming hazards with a specific appearance of your choice,
+  such as razor drones or animated sawblades. The overlay deals 8d8 mental damage
+  with a basic Willpower save to each creature that's inside the area when it's created,
+  enters the area, or starts its turn inside the area. A creature that critically
+  succeeds at its Willpower save can immediately attempt to disbelieve the illusion. A
+  creature that tries to Interact with the threats or observes one with a @UUID[Compendium.pf2e.actionspf2e.Item.Seek]
+  action can attempt to disbelieve the illusion. Creatures that disbelieve the illusion
+  take no damage from it thereafter.Heightened (+1) The mental damage increases by
+  1d8
+tradition: neural
+level: 7
+usage_type: prepared
+action_cost: 3
+range: zone
+targets: zone
+duration: minutes:1
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+  on_success:
+  - type: damage
+    dice: 8d4
+    damage_type: mental
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 8d8
+    damage_type: mental
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 16d8
+    damage_type: mental
+    dc: 0

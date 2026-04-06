@@ -1,0 +1,22 @@
+id: trace_the_heretic
+name: Trace the Heretic
+description: You perform a doctrinal rite over the remains of a destroyed undead to
+  divine the location of its creator. If the creator is within range, you sense the
+  direction. If within 100 feet, you sense their presence and the protocol ends. Shielded
+  locations and running water block the trace. The protocol fails if the target has
+  no specific creator or they're on a different plane.
+tradition: fanatic_doctrine
+level: 4
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You examine the remains or spiritual residue of a destroyed undead
+      creature to locate that undead's creator, perhaps a necromancer or vampire.
+      If the creator is within range, you can sense the directi

@@ -1,0 +1,17 @@
+id: object_transfer_launcher
+name: Object Transfer Launcher
+description: Fire a compact delivery capsule to transfer an object to a target at range.
+tradition: technical
+level: 1
+usage_type: prepared
+action_cost: 1
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You teleport one object of light or negligible Bulk held in your hand to the target. The object appears instantly
+      in the target's hand if they have a free hand, or at their feet if they don't. The tar

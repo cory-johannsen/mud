@@ -1,0 +1,20 @@
+id: toxin_filter_module
+name: Toxin Filter Module
+description: You install a temporary toxin filtration module in the target's digestive
+  system. The target gains a +2 status bonus to Toughness saves against ingested poisons
+  and can eat spoiled or rotten food without ill effect for the duration.
+tradition: technical
+level: 2
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: Your mouth, esophagus, and stomach become incredibly elastic and
+      tougher than metal. For the duration of the spell, you can reach down your throat
+      to store or retrieve a single object of light or negl

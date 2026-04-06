@@ -1,0 +1,22 @@
+id: psychic_inventory
+name: Psychic Inventory
+description: 'You telekinetically reorganize the target''s carried items, condensing
+  them into an extradimensional pocket. The target''s bulk from carried items is reduced
+  by 2 for the duration, to a minimum of 0.
+
+
+  Heightened (+1) The bulk reduction increases by 1.'
+tradition: neural
+level: 2
+usage_type: prepared
+action_cost: 2
+range: melee
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You render every item inside the container you touch @UUID[Compendium.pf2e.conditionitems.Item.Invisible],
+      although the container itself remains visible. The items within are @UUID[Compendium.pf2e.con

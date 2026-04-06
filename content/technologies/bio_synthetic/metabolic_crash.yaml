@@ -1,0 +1,25 @@
+id: metabolic_crash
+name: Metabolic Crash
+description: You accelerate the target's metabolism, burning through its energy reserves
+  in seconds. The creature must attempt a Toughness save or become Fatigued and Clumsy
+  1 for the duration.
+tradition: bio_synthetic
+level: 3
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: minutes:1
+save_type: toughness
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'You fast-forward time for a single creature, burdening it with the
+      aches and pain of an entire day and making it temporarily tired and weak. The
+      creature must attempt a Toughness save.
+
+
+      Critical Succe'

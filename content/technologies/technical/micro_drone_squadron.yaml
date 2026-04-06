@@ -1,0 +1,20 @@
+id: micro_drone_squadron
+name: Micro-Drone Squadron
+description: You deploy a squadron of micro-drones to harass opponents. The squadron
+  occupies the space of a Large creature. When deployed, choose a loadout. All mechanical
+  effects (damage, saves, conditions) remain identical to the base protocol.
+tradition: technical
+level: 4
+usage_type: prepared
+action_cost: 3
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: Sometimes the most common irritations can band together and become
+      threats to your enemies. You reach out to the pests and nuisances around you,
+      forming a small squadron of them to harass and occupy y

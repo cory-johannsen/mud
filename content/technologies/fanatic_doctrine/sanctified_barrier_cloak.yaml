@@ -1,0 +1,25 @@
+id: sanctified_barrier_cloak
+name: Sanctified Barrier Cloak
+description: 'You wrap yourself in doctrinal protective energy, gaining resistance
+  5 to spirit damage and a +1 status bonus to saving throws against effects with the
+  unholy trait. Creatures that hit you with melee attacks take @Damage[2d6[spirit]]
+  damage.
+
+
+  Heightened (8th) The resistance increases to 10, and the spirit damage increases
+  to @Damage[3d6[spirit]].'
+tradition: fanatic_doctrine
+level: 6
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You surround yourself in a mantle of heavenly power, invoking the
+      power of the layers of the celestial mountain above. Your body warps and morphs
+      into an angelic form, made of Heaven's light. Upon Cas

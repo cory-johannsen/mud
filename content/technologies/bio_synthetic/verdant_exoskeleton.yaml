@@ -1,0 +1,24 @@
+id: verdant_exoskeleton
+name: Verdant Exoskeleton
+description: 'Bio-synthetic vines and branches envelop you in an instant, growing
+  a wild bloom of organic armor. Upon activating this tech, pick two of the options
+  below. As a single action, which has the concentrate trait, you can change one of
+  your chosen abilities to a different option.
+
+
+  The specific ability options remain as listed in the base tech.'
+tradition: bio_synthetic
+level: 5
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: Vines and branches envelop you in an instant, growing a wild bloom
+      of colors that open to reveal your new form. Upon Casting this tech, pick two
+      of the options below. As a single action, which has th

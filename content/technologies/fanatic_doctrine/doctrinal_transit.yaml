@@ -1,0 +1,21 @@
+id: doctrinal_transit
+name: Doctrinal Transit
+description: You call upon doctrinal energies to teleport to an unoccupied space within
+  range that you can see. Any items you're wearing and holding come with you. Your
+  familiar or animal companion, if sharing your space or adjacent, is transported
+  with you.
+tradition: fanatic_doctrine
+level: 5
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You call upon the spiritual energies surrounding you to teleport
+      you to an unoccupied space within range that you can see. Any items you're wearing
+      and holding come with you. Your familiar or animal c

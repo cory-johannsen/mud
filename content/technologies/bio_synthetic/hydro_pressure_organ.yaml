@@ -1,0 +1,28 @@
+id: hydro_pressure_organ
+name: Hydro-Pressure Organ
+description: |-
+    You call forth a powerful blast of pressurized water that bludgeons the target and knocks it back. Make a ranged tech attack roll.
+
+    Critical Success The target takes 6d6 bludgeoning damage and is knocked back 10 feet.
+    Success The target takes 3d6 bludgeoning damage and is knocked back 5 feet.
+
+    Heightened (+1) The bludgeoning damage increases by 2d6.
+tradition: bio_synthetic
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: attack
+effects:
+    on_hit:
+        - type: damage
+          dice: 3d6
+          damage_type: bludgeoning
+          dc: 0
+    on_crit_hit:
+        - type: damage
+          dice: 6d6
+          damage_type: bludgeoning
+          dc: 0

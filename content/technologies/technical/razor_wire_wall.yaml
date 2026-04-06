@@ -1,0 +1,19 @@
+id: razor_wire_wall
+name: Razor Wire Wall
+description: You deploy a 5-foot-thick wall of electrified razor wire up to 60 feet
+  long and 10 feet high. A creature forced through or attempting to cross takes 3d4
+  piercing damage and 3d4 slashing damage.
+tradition: technical
+level: 3
+usage_type: prepared
+action_cost: 3
+range: ranged
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: damage
+    dice: 3d4
+    damage_type: piercing
+    dc: 0

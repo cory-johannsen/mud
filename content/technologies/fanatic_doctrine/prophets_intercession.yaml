@@ -1,0 +1,22 @@
+id: prophets_intercession
+name: Prophet's Intercession
+description: 'Trigger You or a creature within range attempts a saving throw against
+  an obvious threat.
+
+  You prophesy the result of the threat, granting doctrinal fortune. All mechanical
+  effects remain identical to the base protocol.'
+tradition: fanatic_doctrine
+level: 4
+usage_type: prepared
+action_cost: 0
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: Trigger You or a creature within range attempts a saving throw against
+      an obvious threat.You prophesize the result of the triggering saving throw as
+      either a success (including a critical success) or

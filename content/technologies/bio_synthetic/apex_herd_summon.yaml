@@ -1,0 +1,23 @@
+id: apex_herd_summon
+name: Apex Herd Summon
+description: You summon a stampeding herd of apex biological organisms. The herd occupies
+  a 30-foot burst and tramples through it dealing 8d10+20 bludgeoning damage to all
+  creatures (Reflex for half). Creatures that fail are knocked prone and take 4d10
+  persistent bludgeoning damage. The herd persists for 1 minute, trampling each round.
+tradition: bio_synthetic
+level: 10
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: minutes:1
+save_type: hustle
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: Summoning the power of the natural world, you transform the targets
+      into a herd of mammoths, and they each assume a Huge battle form. Each target
+      must have enough space to expand into or the spell fai

@@ -1,0 +1,19 @@
+id: hidden_compartment
+name: Hidden Compartment
+description: You install micro-dimensional storage compartments in your clothing.
+  Each can hold up to 1 Bulk and items can be retrieved as a free action.
+tradition: technical
+level: 3
+usage_type: prepared
+action_cost: 3
+range: self
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You create an extradimensional space within each of your sleeves.
+      If you're not wearing clothing with sleeves, the spell also produces a simple
+      shirt with long sleeves for you for the duration. Each o

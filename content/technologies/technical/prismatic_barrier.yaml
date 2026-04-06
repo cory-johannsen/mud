@@ -1,0 +1,38 @@
+id: prismatic_barrier
+name: Prismatic Barrier
+description: 'You project a hardlight barrier in a single vibrant frequency. The wall
+  is straight and vertical, stretching 60 feet long and 30 feet high. If the wall
+  would pass through a creature, the tech fails. The wall emits bright light for 20
+  feet and dim light for the next 20 feet.
+
+  Roll [[/r 1d4]] to determine the barrier''s frequency. Each frequency has a particular
+  effect on items, effects, or creatures that pass through.
+
+
+  Red Destroys ranged ammunition; deals 20 fire damage (basic Reflex).
+
+  Orange Destroys thrown weapons; deals 25 acid damage (basic Reflex).
+
+  Yellow Stops energy effects; deals 30 electricity damage (basic Reflex).
+
+  Green Stops toxins, gases, and breath weapons; deals 10 poison damage and Enfeebled
+  1 for 1 minute (basic Fortitude).
+
+
+  Heightened (7th) Duration increases to 1 hour. Roll [[/r 1d8]] for additional frequencies.
+  Existing walls deal an extra 10 damage.'
+tradition: technical
+level: 5
+usage_type: prepared
+action_cost: 3
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You create an opaque wall of light in a single vibrant color. The
+      wall is straight and vertical, stretching 60 feet long and 30 feet high. If
+      the wall would pass through a creature, the spell is lost.

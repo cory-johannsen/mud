@@ -1,0 +1,28 @@
+id: data_recovery_protocol
+name: Data Recovery Protocol
+description: 'You run deep forensic recovery on corrupted or redacted data. You learn
+  one piece of information that was removed from the target text after its creation.
+  You can instead learn one piece of information from a text that had been destroyed,
+  but you must have a fragment of the storage medium.
+
+
+  Heightened (6th) The protocol reconstructs all missing information regarding a specific
+  topic of your choice.
+
+  Heightened (9th) The protocol also reveals information the author self-censored
+  and didn''t commit to storage.'
+tradition: neural
+level: 4
+usage_type: prepared
+action_cost: 2
+range: melee
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: Members of the Lacunafex and other allies use this tech to restore
+      material that Thrune agents have redacted from historical or otherwise valuable
+      texts. You learn one piece of information that was r

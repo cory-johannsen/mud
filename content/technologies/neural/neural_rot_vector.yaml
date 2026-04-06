@@ -1,0 +1,36 @@
+id: neural_rot_vector
+name: Neural Rot Vector
+description: 'Your touch infects the target with a neuro-degenerative virus that erodes
+  their cognitive function and siphons neural data to a remote server. The effect
+  is based on the target''s Toughness save.
+
+
+  Critical Success The target is unaffected.
+
+  Success The target takes 2 spirit damage per spell rank, and takes a -2 status penalty
+  to Toughness saves for 1 round.
+
+  Failure The target is afflicted with neural rot (a disease). Stage 1 Drained 1 (1
+  day); Stage 2 Drained increases by 1 (1 day).
+
+  Critical Failure The target is afflicted with neural rot at stage 2.'
+tradition: neural
+level: 5
+usage_type: prepared
+action_cost: 2
+range: melee
+targets: single
+duration: instant
+save_type: toughness
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'Your touch afflicts the target with Abyssal plague, which siphons
+      fragments of their soul away to empower the Abyss. The effect is based on the
+      target''s Toughness save.
+
+
+      Critical Success The target is'

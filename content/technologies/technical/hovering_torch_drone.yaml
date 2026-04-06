@@ -1,0 +1,31 @@
+id: hovering_torch_drone
+name: Hovering Torch Drone
+description: You deploy a hovering thermal drone that sheds light. When you Sustain
+  the spell, you can move the drone up to 30 feet. If you move it into a creature's
+  space, that creature takes 1d6 fire damage with a basic Reflex save.
+tradition: technical
+level: 2
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: minutes:1
+save_type: hustle
+save_dc: 15
+resolution: save
+effects:
+  on_success:
+  - type: damage
+    dice: 3d3
+    damage_type: fire
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 3d6
+    damage_type: fire
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 6d6
+    damage_type: fire
+    dc: 0

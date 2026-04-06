@@ -1,0 +1,30 @@
+id: flechette_burst
+name: Flechette Burst
+description: You deploy a flechette charge that shreds targets in the area. Creatures
+  take 4d6 slashing damage and must attempt a Reflex save.
+tradition: technical
+level: 3
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: instant
+save_type: hustle
+save_dc: 15
+resolution: save
+effects:
+  on_success:
+  - type: damage
+    dice: 4d3
+    damage_type: slashing
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 4d6
+    damage_type: slashing
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 8d6
+    damage_type: slashing
+    dc: 0

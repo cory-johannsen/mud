@@ -1,0 +1,21 @@
+id: psychic_refuge
+name: Psychic Refuge
+description: You project a hardlight shelter 20 feet on each side and 10 feet high,
+  constructed from solidified psychic energy. The structure has the structure trait.
+  Creatures inside gain a +1 circumstance bonus to saving throws and can rest comfortably
+  regardless of external conditions.
+tradition: neural
+level: 3
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You shape a cabin 20 feet on each side and 10 feet high. This cabin
+      has the structure trait and the same restrictions as magic items that create
+      structures. The walls of the hut are simple and wooden,

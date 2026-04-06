@@ -1,0 +1,18 @@
+id: combat_data_feed
+name: Combat Data Feed
+description: You tap a real-time data feed about the target's tactical tendencies, gaining insight that helps you predict
+  and counter their moves.
+tradition: neural
+level: 1
+usage_type: prepared
+action_cost: 1
+range: self
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You pull a large handful of guts from your midsection. Removing these guts doesn't harm you. You can use
+      the guts as 50 feet of rope to help you @UUID[Compendium.pf2e.actionspf2e.Item.Climb], and they

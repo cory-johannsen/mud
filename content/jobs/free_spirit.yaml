@@ -40,11 +40,11 @@ class_features:
 technology_grants:
   prepared:
     pool:
-      - id: buoyant_bubbles_bio_synthetic
+      - id: bio_buoyancy_membrane
         level: 1
-      - id: gentle_landing_bio_synthetic
+      - id: bio_impact_absorber
         level: 1
-      - id: tailwind_bio_synthetic
+      - id: bio_slipstream_organ
         level: 1
 drawbacks:
   - id: uncommitted

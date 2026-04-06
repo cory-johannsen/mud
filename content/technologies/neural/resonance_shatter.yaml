@@ -1,0 +1,23 @@
+id: resonance_shatter
+name: Resonance Shatter
+description: 'You psychically vibrate the target object at its resonant frequency.
+  The target takes 5d10 sonic damage. If the target is attended by a creature, that
+  creature can attempt a basic Toughness save; on a success the object takes half
+  damage.
+
+
+  Heightened (+1) The damage increases by 2d10.'
+tradition: neural
+level: 2
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: damage
+    dice: 2d10
+    damage_type: sonic
+    dc: 0

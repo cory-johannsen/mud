@@ -1,0 +1,20 @@
+id: eidolon_vestments
+name: Eidolon Vestments
+description: You invoke sacred rites to reshape your appearance to resemble your eidolon.
+  You gain a +4 status bonus to Deception checks to Impersonate your eidolon for the
+  duration.
+tradition: fanatic_doctrine
+level: 2
+usage_type: prepared
+action_cost: 2
+range: melee
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You transform your eidolon into your identical twin. Assuming you
+      are a humanoid, the eidolon gains the humanoid trait in addition to its other
+      traits while it's in this form, as well as any other tra

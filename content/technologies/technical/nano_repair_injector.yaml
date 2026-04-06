@@ -1,0 +1,17 @@
+id: nano_repair_injector
+name: Nano-Repair Injector
+description: Apply a nano-repair compound that rapidly closes wounds and restores structural integrity.
+tradition: technical
+level: 1
+usage_type: prepared
+action_cost: 2
+range: melee
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You repair the target item. You restore 5 Hit Points per spell rank to the target, potentially removing the
+      @UUID[Compendium.pf2e.conditionitems.Item.Broken] condition if this repairs it past the item

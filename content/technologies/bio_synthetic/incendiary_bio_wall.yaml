@@ -1,0 +1,20 @@
+id: incendiary_bio_wall
+name: Incendiary Bio-Wall
+description: You raise a blazing wall of bio-synthesized combustion compounds that
+  burns creatures passing through it. You create either a 5-foot-thick wall of flame
+  in a straight line or a ring of fire, as described by the base protocol. All mechanical
+  effects remain identical.
+tradition: bio_synthetic
+level: 4
+usage_type: prepared
+action_cost: 3
+range: ranged
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: damage
+    dice: 4d6
+    damage_type: fire
+    dc: 0

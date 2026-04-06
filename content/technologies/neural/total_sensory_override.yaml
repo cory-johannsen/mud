@@ -1,0 +1,33 @@
+id: total_sensory_override
+name: Total Sensory Override
+description: You flood a target's sensory cortex with fabricated input, creating total
+  hallucinatory immersion. The target must attempt a Willpower save. On a failure, it is
+  surrounded by terrifying hallucinations and becomes frightened 4, or frightened
+  6 on a critical failure. At the end of each turn, the target attempts a Willpower save
+  to reduce the frightened value by 1.
+tradition: neural
+level: 9
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+  on_success:
+  - type: damage
+    dice: 16d3
+    damage_type: mental
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 16d6
+    damage_type: mental
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 32d6
+    damage_type: mental
+    dc: 0

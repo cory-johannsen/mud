@@ -1,0 +1,22 @@
+id: doom_consecration
+name: Doom Consecration
+description: You consecrate a weapon as the instrument of an enemy's destruction,
+  implanting doctrinal terror in the target's subconscious. All mechanical effects
+  (damage, conditions, saves) remain identical to the base protocol.
+tradition: fanatic_doctrine
+level: 4
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: minutes:1
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You solemnly declare that the target weapon will bring death to a
+      foe, implanting an irrational fear of the weapon into the target enemy's mind.
+      This link echoes at the forefront of the enemy's mind,

@@ -1,0 +1,39 @@
+id: doctrinal_force_wall
+name: Doctrinal Force Wall
+description: 'Blades of doctrinal force form a churning barrier wall. The wall is
+  a straight line 20 feet high, 120 feet long, and 2 inches thick, and it provides
+  cover. The wall deals 7d8 force damage to each creature that''s in the wall''s space
+  when it is created, that attempts to pass through the wall, or that ends its turn
+  inside the wall. A basic Reflex save reduces the damage. A creature that succeeds
+  at this save when the wall is created is pushed to the nearest space on the side
+  of its choice. Creatures trying to move through the wall fail to do so if they critically
+  fail the save, ending their movement adjacent to the wall.
+
+
+  Heightened (+1) The damage increases by 1d8.'
+tradition: fanatic_doctrine
+level: 6
+usage_type: prepared
+action_cost: 3
+range: ranged
+targets: single
+duration: minutes:1
+save_type: hustle
+save_dc: 15
+resolution: save
+effects:
+  on_success:
+  - type: damage
+    dice: 7d4
+    damage_type: force
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 7d8
+    damage_type: force
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 14d8
+    damage_type: force
+    dc: 0

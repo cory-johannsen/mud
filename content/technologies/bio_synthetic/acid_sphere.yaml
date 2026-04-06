@@ -1,0 +1,35 @@
+id: acid_sphere
+name: Acid Sphere
+description: 'A sphere of corrosive bio-fluid 10 feet in diameter coalesces in an
+  unoccupied space in range. When you activate this tech and each time you Sustain
+  it, you can roll the sphere, moving it up to 10 feet along the ground.
+
+  The sphere can engulf Large or smaller creatures it moves through. Any Large or
+  smaller creature whose space the orb tries to move through can attempt a Reflex
+  save.
+
+
+  Success The creature avoids the sphere.
+
+  Failure The creature is engulfed. It moves along with the sphere and takes 2d6 acid
+  damage per round.
+
+  Critical Failure As failure, but the creature can''t escape easily.'
+tradition: bio_synthetic
+level: 3
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: minutes:1
+save_type: hustle
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'A sphere of water 10 feet in diameter forms in an unoccupied space
+      in range, either on the ground or on the surface of a liquid.
+
+      When you Use this tech and each time you Sustain it, you can roll the'

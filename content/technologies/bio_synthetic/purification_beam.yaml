@@ -1,0 +1,24 @@
+id: purification_beam
+name: Purification Beam
+description: You emit a concentrated beam of bio-luminescent radiation. Make a ranged
+  spell attack. The beam deals 5d6 fire damage. If the target has the unholy trait,
+  you deal 5d6 good damage instead.
+tradition: bio_synthetic
+level: 3
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: attack
+effects:
+  on_hit:
+  - type: damage
+    dice: 5d6
+    damage_type: fire
+    dc: 0
+  on_crit_hit:
+  - type: damage
+    dice: 10d6
+    damage_type: fire
+    dc: 0

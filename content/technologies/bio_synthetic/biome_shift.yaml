@@ -1,0 +1,23 @@
+id: biome_shift
+name: Biome Shift
+description: 'You suffuse the area with bio-synthetic elemental energy. Choose acid,
+  cold, electricity, or fire. Creatures that enter or start their turn in the area
+  take 2d6 damage of the chosen type with a basic Reflex save.
+
+
+  Heightened (+1) The damage increases by 1d6.'
+tradition: bio_synthetic
+level: 2
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'Select an elemental trait: air, earth, fire, metal, water, or wood.
+      Elemental zone gains the trait you chose. You imbue the area with the raw energy
+      of that element, creating a zone that emits and amp'

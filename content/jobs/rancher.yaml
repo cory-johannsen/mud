@@ -40,7 +40,7 @@ class_features:
 technology_grants:
   prepared:
     pool:
-      - id: tame_bio_synthetic
+      - id: biochemical_calming_agent
         level: 1
       - id: animal_allies
         level: 1

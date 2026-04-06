@@ -1,0 +1,20 @@
+id: doctrine_polyglot_protocol
+name: Doctrine Polyglot Protocol
+description: You invoke sacred protocols that enable the target to understand and
+  speak one language you know for the duration. The target can both comprehend and
+  produce the language.
+tradition: fanatic_doctrine
+level: 2
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: The target can understand the meaning of a single language it is
+      hearing or reading when you cast the spell. This doesn't let it understand codes,
+      language couched in metaphor, and the like (subject t

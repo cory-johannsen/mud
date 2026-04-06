@@ -1,0 +1,17 @@
+id: cosmetic_compound_application
+name: Cosmetic Compound Application
+description: You apply a fast-acting cosmetic compound to alter a minor physical detail of the target's appearance.
+tradition: bio_synthetic
+level: 1
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: Using simple magical gestures, you alter a minor detail of your appearance (add or remove highlights to your
+      hair color, apply or remove cosmetics, add polish or accessories to your nails, etc.) or cr

@@ -1,0 +1,25 @@
+id: psi_water_projector
+name: Psi-Water Projector
+description: |-
+    You evoke a mass of water into the air around your outstretched fist. For the remainder of your turn, you can blast targets within 30 feet with this water by spending a single action which has the attack and concentrate traits. When you do so, attempt a ranged tech attack roll. If you hit, you inflict 2d8 bludgeoning damage. On a critical hit, the blast knocks the target @UUID[Compendium.pf2e.conditionitems.Item.Prone].
+
+    Heightened (+1) The damage increases by 1d8.
+tradition: neural
+level: 1
+usage_type: prepared
+action_cost: 1
+range: self
+targets: single
+duration: instant
+resolution: attack
+effects:
+    on_hit:
+        - type: damage
+          dice: 2d8
+          damage_type: bludgeoning
+          dc: 0
+    on_crit_hit:
+        - type: damage
+          dice: 4d8
+          damage_type: bludgeoning
+          dc: 0

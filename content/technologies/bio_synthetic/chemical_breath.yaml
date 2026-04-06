@@ -1,0 +1,29 @@
+id: chemical_breath
+name: Chemical Breath
+description: 'You open a bio-synthetic chemical reservoir, then exhale a powerful
+  chemical explosion. Roll 1d6 to determine the element. If you used 3 actions to
+  activate this tech, you can choose the element instead. This tech gains the trait
+  matching the element.
+
+  Each creature in the area takes damage based on the element with a basic Reflex
+  save.
+
+
+  Heightened (+1) The damage increases by 2d6.'
+tradition: bio_synthetic
+level: 5
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: instant
+save_type: hustle
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You open a miniature portal to an elemental plane within your mouth,
+      then exhale a powerful explosion of the plane's element. Roll 1d6 to determine
+      the element. If you used 3 actions to Cast this Spel

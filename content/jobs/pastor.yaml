@@ -43,6 +43,6 @@ class_features:
 technology_grants:
   prepared:
     pool:
-      - { id: concordant_choir_fanatic_doctrine, level: 1 }
-      - { id: bullhorn_fanatic_doctrine, level: 1 }
-      - { id: beseech_the_sphinx_fanatic_doctrine, level: 1 }
+      - { id: doctrine_choir_broadcast, level: 1 }
+      - { id: doctrine_proclamation_amplifier, level: 1 }
+      - { id: doctrine_oracle_invocation, level: 1 }

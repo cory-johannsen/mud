@@ -42,9 +42,9 @@ class_features:
 technology_grants:
   prepared:
     pool:
-      - { id: sure_strike_technical, level: 1 }
-      - { id: runic_body_technical, level: 1 }
-      - { id: echoing_weapon_technical, level: 1 }
+      - { id: targeting_precision_lock, level: 1 }
+      - { id: combat_augmentation_layer, level: 1 }
+      - { id: kinetic_echo_amplifier, level: 1 }
 drawbacks:
   - id: narrow_expertise
     type: passive

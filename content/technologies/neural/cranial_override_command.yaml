@@ -1,0 +1,25 @@
+id: cranial_override_command
+name: Cranial Override Command
+description: |-
+    You shout a command that's hard to ignore. You can command the target to approach you, run away (as if it had the @UUID[Compendium.pf2e.conditionitems.Item.Fleeing] condition), release what it's holding, drop @UUID[Compendium.pf2e.conditionitems.Item.Prone], or stand in place. It can't @UUID[Compendium.pf2e.actionspf2e.Item.Delay] or take any reactions until it has obeyed your command. The effects depend on the target's Willpower save.
+
+    Success The creature is unaffected.
+    Failure For the first action on its next turn, the creature must use a single action to do as you command.
+    Critical Failure The target must use all its actions on its next turn to obey your command.
+
+    Heightened (5th) You can target up to 10 creatures.
+tradition: neural
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+    on_apply:
+        - type: utility
+          dc: 0
+          description: You shout a command that's hard to ignore. You can command the target to approach you, run away (as if it had the @UUID[Compendium.pf2e.conditionitems.Item.Fleeing] condition), release what it's holdi

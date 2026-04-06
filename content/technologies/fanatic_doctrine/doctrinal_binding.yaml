@@ -1,0 +1,31 @@
+id: doctrinal_binding
+name: Doctrinal Binding
+description: 'You stitch the target to its current plane through sacred rites. While
+  affected, the spell attempts to counteract any teleportation or planar transport.
+  Duration determined by the target''s Willpower save.
+
+
+  Critical Success The target is unaffected.
+
+  Success Duration is 1 minute.
+
+  Failure Duration is 10 minutes.
+
+  Critical Failure Duration is 1 hour.'
+tradition: fanatic_doctrine
+level: 4
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You stitch the target to its current plane. While the target is affected
+      by planar tether, the spell attempts to counteract any teleportation effect
+      that would move the target, or any effect that woul

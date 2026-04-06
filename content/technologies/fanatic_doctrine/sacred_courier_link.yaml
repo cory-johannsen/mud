@@ -1,0 +1,21 @@
+id: sacred_courier_link
+name: Sacred Courier Link
+description: You create a doctrinal link between two containers. If both are closed
+  for 10 consecutive minutes, their contents (up to 3 Bulk of nonliving, non-magical
+  material each) transport to the other's location. All mechanical effects and restrictions
+  remain identical to the base protocol.
+tradition: fanatic_doctrine
+level: 4
+usage_type: prepared
+action_cost: 2
+range: melee
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You create an interdimensional link between two containers, both
+      of which must be capable of being closed in such a way that their contents aren't
+      visible. If both containers are left closed for 10 co

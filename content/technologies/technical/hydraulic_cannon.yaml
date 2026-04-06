@@ -1,0 +1,39 @@
+id: hydraulic_cannon
+name: Hydraulic Cannon
+description: 'You fire a pressurized water cannon in a wide arc. Each creature in
+  a @Template[cone|distance:30] must attempt a Toughness save.
+
+
+  Critical Success The creature is unaffected.
+
+  Success The creature is pushed 5 feet.
+
+  Failure The creature is pushed 10 feet and falls @UUID[Compendium.pf2e.conditionitems.Item.Prone].
+
+  Critical Failure The creature is pushed 20 feet and falls @UUID[Compendium.pf2e.conditionitems.Item.Prone].'
+tradition: technical
+level: 2
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: instant
+save_type: toughness
+save_dc: 15
+resolution: save
+effects:
+  on_success:
+  - type: damage
+    dice: 3d3
+    damage_type: bludgeoning
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 3d6
+    damage_type: bludgeoning
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 6d6
+    damage_type: bludgeoning
+    dc: 0

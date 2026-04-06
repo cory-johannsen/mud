@@ -1,0 +1,22 @@
+id: kaiju_deploy
+name: Kaiju Deploy
+description: You deploy a full kaiju-class biological construct. It appears within
+  120 feet and follows your commands for 1 minute. Its arrival causes 6d10 bludgeoning
+  damage to all creatures within 30 feet of its landing point (Reflex for half).
+tradition: bio_synthetic
+level: 10
+usage_type: prepared
+action_cost: 3
+range: ranged
+targets: single
+duration: instant
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You briefly conjure a kaiju, a massive, rampaging monster with a
+      unique name and legendary reputation. It rises from its secluded lair to annihilate
+      your foes. The summoned kaiju occupies the space of

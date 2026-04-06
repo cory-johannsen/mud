@@ -1,0 +1,19 @@
+id: judgment_weapon_protocol
+name: Judgment Weapon Protocol
+description: You manifest a weapon of pure doctrinal judgment. A spectral weapon appears
+  and attacks any target you designate as a heretic once per round, dealing 8d10+10
+  force damage on a hit. It has a +30 attack bonus. It lasts for 1 minute.
+tradition: fanatic_doctrine
+level: 9
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: damage
+    dice: 4d10
+    damage_type: untyped
+    dc: 0

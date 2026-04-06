@@ -1,0 +1,30 @@
+id: smart_mine
+name: Smart Mine
+description: 'Area 5-foot square
+
+  You program a concealed smart mine with an embedded tech payload. While activating
+  this tech, you also activate a tech of a lower rank to store in the mine. The stored
+  tech must take 2 actions or fewer to activate, have a hostile effect, and target
+  one creature or have an area. Any creature that enters the mined square triggers
+  the stored tech.
+
+
+  Heightened (+1) The maximum rank of the stored tech increases by 1.'
+tradition: technical
+level: 5
+usage_type: prepared
+action_cost: 3
+range: ranged
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'Area 5-foot square
+
+
+      You temporarily bind a hostile spell into a symbol. While Casting this tech,
+      you also Cast a tech of a lower spell rank to store in the glyph. The stored
+      spell must take 2 action'

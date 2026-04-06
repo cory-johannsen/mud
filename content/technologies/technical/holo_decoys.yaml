@@ -1,0 +1,21 @@
+id: holo_decoys
+name: Holo-Decoys
+description: You deploy three holographic decoys of yourself. Each time a creature
+  targets you with an attack, one of the decoys is hit instead and destroyed. When
+  all decoys are destroyed, the spell ends. A creature can attempt a Perception check
+  against your tech DC to discern the real you.
+tradition: technical
+level: 2
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: Three illusory images of you swirl about your space, potentially
+      causing those who attack you to hit one of the images instead of you. Any attack
+      that would hit you has a random chance of hitting one

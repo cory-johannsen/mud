@@ -1,0 +1,19 @@
+id: ascension_path
+name: Ascension Path
+description: The devoted can walk upon the air itself, carried by the strength of
+  their conviction. The target can walk on air as if it were solid ground. It can
+  ascend and descend in this way at a maximum of a 45-degree angle.
+tradition: fanatic_doctrine
+level: 4
+usage_type: prepared
+action_cost: 2
+range: melee
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: The target can walk on air as if it were solid ground. It can ascend
+      and descend in this way at a maximum of a 45-degree angle.

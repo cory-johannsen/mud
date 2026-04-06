@@ -39,9 +39,9 @@ class_features:
 technology_grants:
   spontaneous:
     pool:
-      - { id: glamorize_neural, level: 1 }
-      - { id: fashionista_neural, level: 1 }
-      - { id: read_the_air_neural, level: 1 }
+      - { id: minor_cosmetic_overlay, level: 1 }
+      - { id: neural_wardrobe_link, level: 1 }
+      - { id: social_dynamics_scan, level: 1 }
 drawbacks:
   - id: sycophant_residue
     type: passive

@@ -1,0 +1,18 @@
+id: doctrines_aura_reading
+name: Doctrine's Aura Reading
+description: You scan an object or creature with the Doctrine's discerning eye, identifying its ideological alignment and
+  power level.
+tradition: fanatic_doctrine
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You focus on the target object, opening your mind to perceive magical auras. When the casting is complete,
+      you know whether that item is magical. You or anyone you advise about the aura gains a +2 cir

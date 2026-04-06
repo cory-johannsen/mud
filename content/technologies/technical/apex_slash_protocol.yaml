@@ -1,0 +1,30 @@
+id: apex_slash_protocol
+name: Apex Slash Protocol
+description: A 30-foot cone of precision cutting force deals 10d12 slashing damage
+  (Reflex for half). On a failure, targets also take 4d12 persistent bleed damage.
+tradition: technical
+level: 9
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: instant
+save_type: toughness
+save_dc: 15
+resolution: save
+effects:
+  on_success:
+  - type: damage
+    dice: 9d3
+    damage_type: void
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 9d6
+    damage_type: void
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 18d6
+    damage_type: void
+    dc: 0

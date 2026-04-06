@@ -1,0 +1,27 @@
+id: temporal_rollback_device
+name: Temporal Rollback Device
+description: You activate a temporal rollback device to create a checkpoint. You can
+  activate this only on your turn. Keep careful track of everything that happens this
+  turn after you set the checkpoint. At the end of your turn, you can choose to rewind
+  time back to just after you set the checkpoint, removing all effects of your turn
+  since then. Malware, traps, and other harmful effects that happen during your turn
+  might prevent you from returning to the checkpoint if they're powerful enough. If
+  you were affected by any harmful effects during your turn after setting the checkpoint,
+  the device attempts a counteract check against each such effect. If it fails at
+  any of these checks, you can't return. After returning to the checkpoint, the tech
+  ends.
+tradition: technical
+level: 7
+usage_type: prepared
+action_cost: 1
+range: self
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You create a beacon in time to return to it if things go wrong. You
+      can cast time beacon only on your turn. Keep careful track of everything that
+      happens this turn after you cast time beacon. At the e

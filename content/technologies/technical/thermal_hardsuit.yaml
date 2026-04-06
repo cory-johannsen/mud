@@ -1,0 +1,24 @@
+id: thermal_hardsuit
+name: Thermal Hardsuit
+description: 'You activate a thermal hardsuit that encases your body in superheated
+  armor plating. The air around you shimmers with heat. Upon activating this tech,
+  pick two options. As a single action with the concentrate trait, you can swap one
+  ability.
+
+
+  The specific ability options remain as listed in the base tech.'
+tradition: technical
+level: 5
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You surround yourself in a mantle of blazing fire magic, and your
+      skin and anything you're wearing morphs into burning hot lava. The air around
+      you swelters with heat, and tiny sparks of flame dance b

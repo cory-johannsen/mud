@@ -1,0 +1,40 @@
+id: hemovore_cloud
+name: Hemovore Cloud
+description: 'You unleash a cloud of nanoscale blood-harvesting drones that drain
+  vitality from the living. Each living creature in the area when you Use this tech,
+  aside from you, takes 6d6 void damage with a basic Toughness save. Creatures in
+  the area are Concealed, and all creatures outside the cloud become concealed to
+  creatures within it.
+
+  The first time each round you Sustain this tech, living creatures in the area take
+  an additional @Damage[(@item.rank -2)d6[void]] damage with another basic Fortitude
+  save. You also gain temporary Hit Points equal to half the damage a single creature
+  took when you Sustained the spell this turn; calculate using the creature that took
+  the most damage. You lose any remaining temporary Hit Points after 1 minute.Heightened
+  (+1) The initial damage increases by 2d6 and the secondary damage increases by 1d6.'
+tradition: neural
+level: 4
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: minutes:1
+save_type: toughness
+save_dc: 15
+resolution: save
+effects:
+  on_success:
+  - type: damage
+    dice: 6d3
+    damage_type: void
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 6d6
+    damage_type: void
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 12d6
+    damage_type: void
+    dc: 0

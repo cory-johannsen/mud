@@ -1,0 +1,22 @@
+id: bio_dissolution
+name: Bio-Dissolution
+description: 'You release enzymes that dissolve constructed objects. The target object
+  takes 5d6 damage, ignoring hardness up to 5.
+
+
+  Heightened (+1) The damage increases by 2d6.'
+tradition: bio_synthetic
+level: 2
+usage_type: prepared
+action_cost: 2
+range: melee
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You touch an object, and it immediately disassembles itself into
+      its component pieces. The spell fails if the target lacks component pieces (such
+      as a statue carved from one block of stone), and using

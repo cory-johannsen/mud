@@ -1,0 +1,20 @@
+id: drone_hijack
+name: Drone Hijack
+description: The target becomes a remote sensor relay, allowing you to perceive through
+  its sensory inputs. If you activate another sensory tech while this is active, this
+  connection is severed.
+tradition: neural
+level: 3
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: The target becomes a scrying sensor, allowing you to see through
+      its eyes, smell what it smells, and similarly use its other senses. If you Cast
+      a tech with the revelation trait that affects your sen

@@ -1,0 +1,17 @@
+id: doctrines_luminous_path
+name: Doctrine's Luminous Path
+description: Your footsteps leave a glowing trail of doctrinal light, visible as a guide to others who follow the same path.
+tradition: fanatic_doctrine
+level: 1
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: Your movements leave a vague glowing path behind you, like a misty echo of your presence. While your form
+      is not discernible, your size is. This path hangs in space and is not anchored to any surface,
