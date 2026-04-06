@@ -835,7 +835,7 @@ features:
 
   - slug: technology-id-refactor
     name: Technology ID Refactor — Gunchete Names
-    status: planned
+    status: done
     priority: 488
     category: technology
     file: docs/features/technology-id-refactor.md
