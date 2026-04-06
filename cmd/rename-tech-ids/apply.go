@@ -206,8 +206,8 @@ func RunApply(mapFile, techDir, jobDir, archetypeDir, goSourceDir, migrationsDir
 	}
 
 	// Step 4: Emit DB migration.
-	upFile := filepath.Join(migrationsDir, "058_rename_tech_ids.up.sql")
-	downFile := filepath.Join(migrationsDir, "058_rename_tech_ids.down.sql")
+	upFile := filepath.Join(migrationsDir, "059_rename_tech_ids.up.sql")
+	downFile := filepath.Join(migrationsDir, "059_rename_tech_ids.down.sql")
 	if err := emitMigration(rm.Renames, upFile, downFile); err != nil {
 		return fmt.Errorf("emitting migration: %w", err)
 	}

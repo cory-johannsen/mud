@@ -13,5 +13,5 @@ See `docs/superpowers/specs/2026-04-03-technology-id-refactor-design.md` for the
   - Rewrites `id:` fields in all tech YAMLs
   - Updates all tech ID references in job/archetype YAMLs
   - Updates hardcoded tech ID string literals in Go source files
-  - Emits `migrations/058_rename_tech_ids.up.sql` and `.down.sql`
+  - Emits `migrations/059_rename_tech_ids.up.sql` and `.down.sql`
   - Runs validation pass via `Registry.Load()` — exits non-zero on any error

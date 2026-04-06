@@ -4,7 +4,7 @@
 
 **Goal:** Build a two-phase CLI tool (`cmd/rename-tech-ids`) that generates a rename map from all technology YAML files (deriving IDs from Gunchete names), then applies the map to rename YAML files, update references, and emit a DB migration.
 
-**Architecture:** Phase 1 (`--generate`) scans `content/technologies/` and writes `tools/rename_map.yaml` with derived IDs, PF2E flags, and collision markers. After human review of the map, Phase 2 (`--apply`) renames files, rewrites `id:` fields, updates job/archetype YAML refs, updates Go string literals in `static_localizer.go` and test files, and emits `migrations/058_rename_tech_ids.{up,down}.sql`. A validation pass at the end loads the full tech Registry and asserts zero errors.
+**Architecture:** Phase 1 (`--generate`) scans `content/technologies/` and writes `tools/rename_map.yaml` with derived IDs, PF2E flags, and collision markers. After human review of the map, Phase 2 (`--apply`) renames files, rewrites `id:` fields, updates job/archetype YAML refs, updates Go string literals in `static_localizer.go` and test files, and emits `migrations/059_rename_tech_ids.{up,down}.sql`. A validation pass at the end loads the full tech Registry and asserts zero errors.
 
 **Tech Stack:** Go 1.26, `gopkg.in/yaml.v3`, `pgregory.net/rapid` (property tests), `github.com/stretchr/testify`
 
@@ -1081,8 +1081,8 @@ Append to `cmd/rename-tech-ids/apply_test.go`:
 ```go
 func TestEmitMigration_UpAndDown(t *testing.T) {
 	dir := t.TempDir()
-	upFile := filepath.Join(dir, "058_rename_tech_ids.up.sql")
-	downFile := filepath.Join(dir, "058_rename_tech_ids.down.sql")
+	upFile := filepath.Join(dir, "059_rename_tech_ids.up.sql")
+	downFile := filepath.Join(dir, "059_rename_tech_ids.down.sql")
 
 	renames := []RenameEntry{
 		{OldID: "acid_arrow_technical", NewID: "corrosive_projectile", Skip: false},
@@ -1183,7 +1183,7 @@ Expected: all PASS
 
 ```bash
 git add cmd/rename-tech-ids/apply.go cmd/rename-tech-ids/apply_test.go
-git commit -m "feat(rename-tech-ids): emitMigration writes 058_rename_tech_ids up/down SQL"
+git commit -m "feat(rename-tech-ids): emitMigration writes 059_rename_tech_ids up/down SQL"
 ```
 
 ---
@@ -1269,9 +1269,9 @@ func TestRunApply_RenamesFilesAndUpdatesRefs(t *testing.T) {
 	assert.NotContains(t, string(locData), "`acid_arrow_technical`")
 
 	// Migration files emitted
-	_, err = os.Stat(filepath.Join(migrationsDir, "058_rename_tech_ids.up.sql"))
+	_, err = os.Stat(filepath.Join(migrationsDir, "059_rename_tech_ids.up.sql"))
 	assert.NoError(t, err)
-	_, err = os.Stat(filepath.Join(migrationsDir, "058_rename_tech_ids.down.sql"))
+	_, err = os.Stat(filepath.Join(migrationsDir, "059_rename_tech_ids.down.sql"))
 	assert.NoError(t, err)
 }
 
@@ -1385,8 +1385,8 @@ func RunApply(mapFile, techDir, jobDir, archetypeDir, goSourceDir, migrationsDir
 	}
 
 	// Step 4: Emit DB migration.
-	upFile := filepath.Join(migrationsDir, "058_rename_tech_ids.up.sql")
-	downFile := filepath.Join(migrationsDir, "058_rename_tech_ids.down.sql")
+	upFile := filepath.Join(migrationsDir, "059_rename_tech_ids.up.sql")
+	downFile := filepath.Join(migrationsDir, "059_rename_tech_ids.down.sql")
 	if err := emitMigration(rm.Renames, upFile, downFile); err != nil {
 		return fmt.Errorf("emitting migration: %w", err)
 	}
@@ -1549,7 +1549,7 @@ func run(args []string) error {
 		return err
 	}
 	fmt.Println("Apply complete. Run the DB migration:")
-	fmt.Printf("  %s/058_rename_tech_ids.up.sql\n", *migrationsDir)
+	fmt.Printf("  %s/059_rename_tech_ids.up.sql\n", *migrationsDir)
 	return nil
 }
 ```
@@ -1648,7 +1648,7 @@ go run ./cmd/rename-tech-ids --apply
 Expected:
 ```
 Apply complete. Run the DB migration:
-  migrations/058_rename_tech_ids.up.sql
+  migrations/059_rename_tech_ids.up.sql
 ```
 
 - [ ] **Step 2: Verify tech Registry loads cleanly**
@@ -1672,8 +1672,8 @@ Expected: all PASS
 ```bash
 git add content/technologies/ content/jobs/ content/archetypes/ \
         internal/importer/static_localizer.go \
-        migrations/058_rename_tech_ids.up.sql \
-        migrations/058_rename_tech_ids.down.sql \
+        migrations/059_rename_tech_ids.up.sql \
+        migrations/059_rename_tech_ids.down.sql \
         tools/rename_map.yaml
 git commit -m "feat(technology): rename all tech IDs to snake_case Gunchete names
 

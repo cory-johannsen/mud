@@ -51,6 +51,6 @@ func run(args []string) error {
 		return err
 	}
 	fmt.Println("Apply complete. Run the DB migration:")
-	fmt.Printf("  %s/058_rename_tech_ids.up.sql\n", *migrationsDir)
+	fmt.Printf("  %s/059_rename_tech_ids.up.sql\n", *migrationsDir)
 	return nil
 }

@@ -215,9 +215,9 @@ func TestRunApply_RenamesFilesAndUpdatesRefs(t *testing.T) {
 	assert.NotContains(t, string(locData), "`acid_arrow_technical`")
 
 	// Migration files emitted
-	_, err = os.Stat(filepath.Join(migrationsDir, "058_rename_tech_ids.up.sql"))
+	_, err = os.Stat(filepath.Join(migrationsDir, "059_rename_tech_ids.up.sql"))
 	assert.NoError(t, err)
-	_, err = os.Stat(filepath.Join(migrationsDir, "058_rename_tech_ids.down.sql"))
+	_, err = os.Stat(filepath.Join(migrationsDir, "059_rename_tech_ids.down.sql"))
 	assert.NoError(t, err)
 }
 
@@ -264,8 +264,8 @@ func TestRunApply_Idempotent(t *testing.T) {
 
 func TestEmitMigration_UpAndDown(t *testing.T) {
 	dir := t.TempDir()
-	upFile := filepath.Join(dir, "058_rename_tech_ids.up.sql")
-	downFile := filepath.Join(dir, "058_rename_tech_ids.down.sql")
+	upFile := filepath.Join(dir, "059_rename_tech_ids.up.sql")
+	downFile := filepath.Join(dir, "059_rename_tech_ids.down.sql")
 
 	renames := []RenameEntry{
 		{OldID: "acid_arrow_technical", NewID: "corrosive_projectile", Skip: false},
