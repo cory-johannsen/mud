@@ -1,5 +1,5 @@
 id: summon_animal_bio_synthetic
-name: Summon Animal
+name: Bio-Animal Call
 description: You summon a creature that has the animal trait and whose level is –1 to fight for you.Heightened As listed in the summon trait.
 tradition: bio_synthetic
 level: 1

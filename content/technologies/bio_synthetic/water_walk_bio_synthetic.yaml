@@ -1,5 +1,5 @@
 id: water_walk_bio_synthetic
-name: Surface Tension Pads
+name: Water-Walk Pads
 description: You mutate the targets' feet to redistribute weight across liquid surfaces.
   The targets can walk on water as if it were solid ground for the duration.
 tradition: bio_synthetic

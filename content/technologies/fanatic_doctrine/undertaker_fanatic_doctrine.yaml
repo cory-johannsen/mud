@@ -1,5 +1,5 @@
 id: undertaker_fanatic_doctrine
-name: Martyrdom Protocol
+name: Doctrine Undertaker Protocol
 description: You implant a martyrdom command that triggers on the target's death.
   When the target would die within 1 minute, it survives at 1 HP, takes one action
   of your choice, then dies.

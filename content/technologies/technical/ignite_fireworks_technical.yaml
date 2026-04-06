@@ -1,5 +1,5 @@
 id: ignite_fireworks_technical
-name: Flare Launcher
+name: Fireworks Launch Module
 description: 'You fire pyrotechnic flares that explode in a brilliant display. Each
   creature in a @Template[burst|distance:10] takes 1d8 fire damage and 1d8 sonic damage
   with a basic Reflex save. On a failure, a creature is also @UUID[Compendium.pf2e.conditionitems.Item.Dazzled]

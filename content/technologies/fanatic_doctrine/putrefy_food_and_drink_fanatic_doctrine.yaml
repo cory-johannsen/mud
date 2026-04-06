@@ -1,5 +1,5 @@
 id: putrefy_food_and_drink_fanatic_doctrine
-name: Putrefy Food and Drink
+name: Doctrine Contamination Rite
 description: |-
     You cause otherwise edible food to rot and spoil instantly, and water and other liquids to become brackish and undrinkable. @UUID[Compendium.pf2e.equipment-srd.Item.Holy Water], @UUID[Compendium.pf2e.equipment-srd.Item.Unholy Water], and similar food and drink of significance are spoiled by this tech, unless they are associated with a deity of decay or putrefaction, but it has no effect on creatures of any type, potions, or alchemical elixirs. One cubic foot of liquid is roughly 8 gallons.
 

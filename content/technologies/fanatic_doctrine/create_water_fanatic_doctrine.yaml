@@ -1,5 +1,5 @@
 id: create_water_fanatic_doctrine
-name: Create Water
+name: Sacred Water Doctrine
 description: As you cup your hands, water begins to flow forth from them. You create 2 gallons of water. If no one drinks it, it evaporates after 1 day.
 tradition: fanatic_doctrine
 level: 1

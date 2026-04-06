@@ -1,5 +1,5 @@
 id: phantasmal_minion_neural
-name: Phantasmal Minion
+name: Psi-Phantom Construct
 description: You summon a @UUID[Compendium.pf2e.pathfinder-bestiary.Actor.Phantasmal Minion]. The minion is roughly the shape of a humanoid. You can choose to have it be @UUID[Compendium.pf2e.conditionitems.Item.Invisible] or have an ephemeral appearance, but it's obviously a magical effect, not a real creature.
 tradition: neural
 level: 1

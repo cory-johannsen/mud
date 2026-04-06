@@ -1,5 +1,5 @@
 id: illusory_object_neural
-name: Illusory Object
+name: Psi-Hard-Light Construct
 description: |-
     You create an illusory visual image of a stationary object. The entire image must fit within the spell's area. The object appears to animate naturally, but it doesn't make sounds or generate smells. For example, water would appear to pour down an illusory waterfall, but it would be silent.
     Any creature that touches the image or uses the @UUID[Compendium.pf2e.actionspf2e.Item.Seek] action to examine it can attempt to disbelieve your illusion.

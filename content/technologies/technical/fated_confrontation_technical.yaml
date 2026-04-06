@@ -1,5 +1,5 @@
 id: fated_confrontation_technical
-name: Apex Fate Lock
+name: Fate Lock Module
 description: You lock two targets in a destined combat protocol. Both must attempt
   Will saves. On a failure, each can only target the other for 1 minute. Damage to
   one is reflected to the other at half value.

@@ -1,5 +1,5 @@
 id: shrink_item
-name: Compression Module
+name: Item Shrink Module
 description: You compress the target item to coin-size with negligible Bulk. You can
   Dismiss the spell. The item returns to normal size if tossed onto a solid surface
   from at least 10 feet or when the duration expires.

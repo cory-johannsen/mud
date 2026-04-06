@@ -1,5 +1,5 @@
 id: sleep_neural
-name: Sleep
+name: Neural Sleep Induction
 description: |-
     Each creature in the area becomes drowsy, possibly nodding off. A creature that falls @UUID[Compendium.pf2e.conditionitems.Item.Unconscious] from this tech doesn't fall @UUID[Compendium.pf2e.conditionitems.Item.Prone] or release what it's holding. This spell doesn't prevent creatures from waking up due to a successful Perception check, limiting its utility in combat.Critical Success The creature is unaffected.
     Success The creature takes a –1 status penalty to Perception checks for 1 round.

@@ -1,5 +1,5 @@
 id: disruptive_transfer_technical
-name: Phase Jump
+name: Disruptive Phase Jump
 description: Using spatial displacement calculations, you teleport to an empty square
   you can see within range. Creatures adjacent to your departure point take 2d6 force
   damage.

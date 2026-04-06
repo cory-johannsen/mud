@@ -1,5 +1,5 @@
 id: horizon_thunder_sphere_bio_synthetic
-name: Horizon Thunder Sphere
+name: Bio-Electric Ball Organ
 description: |-
     You gather magical energy into your palm, forming a concentrated ball of electricity that crackles and rumbles like impossibly distant thunder. Make a ranged tech attack roll against your target's AC. On a success, you deal 3d6 electricity damage. On a critical success, the target takes double damage and is @UUID[Compendium.pf2e.conditionitems.Item.Dazzled] for 1 round. The number of actions you spend when Casting this tech determines the range and other parameters.
     2 This spell has a range of 30 feet.

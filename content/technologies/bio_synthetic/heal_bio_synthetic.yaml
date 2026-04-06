@@ -1,5 +1,5 @@
 id: heal_bio_synthetic
-name: Heal
+name: Bio-Regeneration Surge
 description: |-
     You channel vital energy to heal the living or damage the undead. If the target is a willing living creature, you restore 1d8 Hit Points. If the target is undead, you deal that amount of vitality damage to it, and it gets a basic Toughness save.
 

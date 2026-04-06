@@ -1,5 +1,5 @@
 id: stabilize_bio_synthetic
-name: Stabilize
+name: Bio-Stabilization Organ
 description: Life energy shuts death's door. The target loses the @UUID[Compendium.pf2e.conditionitems.Item.Dying] condition, though it remains @UUID[Compendium.pf2e.conditionitems.Item.Unconscious] at 0 Hit Points.
 tradition: bio_synthetic
 level: 1

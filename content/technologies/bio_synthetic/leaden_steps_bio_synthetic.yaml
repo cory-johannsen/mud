@@ -1,5 +1,5 @@
 id: leaden_steps_bio_synthetic
-name: Leaden Steps
+name: Bio-Magnetic Anchor
 description: |-
     You partially transform a foe's feet into unwieldy slabs of metal, slowing their steps. The target attempts a Fortitude saving throw.Critical Success The target is unaffected.
     Success The target is @UUID[Compendium.pf2e.conditionitems.Item.Encumbered] and has weakness 2 to electricity until the end of your next turn. The spell can't be sustained.

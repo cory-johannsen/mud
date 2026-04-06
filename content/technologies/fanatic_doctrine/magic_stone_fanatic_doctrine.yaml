@@ -1,5 +1,5 @@
 id: magic_stone_fanatic_doctrine
-name: Magic Stone
+name: Doctrine Charged Round
 description: |-
     You pour vitality energy into ordinary stones, granting them temporary magical properties. You can target 1 non-magical stone or sling bullet for every action you use Casting this tech. The stones must be unattended or carried by you or a willing ally. The stones become +1 striking disrupting @UUID[Compendium.pf2e.equipment-srd.Item.Sling Bullets]. Each stone can be used only once, after which it crumbles to dust.
     @UUID[Compendium.pf2e.spell-effects.Item.tech Effect: Magic Stone]

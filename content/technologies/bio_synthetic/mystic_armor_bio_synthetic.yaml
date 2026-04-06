@@ -1,5 +1,5 @@
 id: mystic_armor_bio_synthetic
-name: Mystic Armor
+name: Bio-Hardening Membrane
 description: |-
     You ward yourself with shimmering magical energy, gaining a +1 item bonus to AC and a maximum Dexterity modifier of +5. While wearing mystic armor, you use your unarmored proficiency to calculate your AC.
     @UUID[Compendium.pf2e.spell-effects.Item.tech Effect: Mystic Armor]

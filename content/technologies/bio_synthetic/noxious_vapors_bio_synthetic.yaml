@@ -1,5 +1,5 @@
 id: noxious_vapors_bio_synthetic
-name: Noxious Vapors
+name: Toxic Vapor Gland
 description: You emit a cloud of toxic smoke that temporarily obscures you from sight. Each creature except you in the area when you Use this tech takes 1d6 poison damage (basic Toughness save). A creature that critically fails the saving throw also becomes Sickened 1. All creatures in the area become @UUID[Compendium.pf2e.conditionitems.Item.Concealed], and all creatures outside the smoke become concealed to creatures within it. This smoke can be dispersed by a strong wind.Heightened (+1) The damage increases by 1d6
 tradition: bio_synthetic
 level: 1

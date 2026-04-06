@@ -1,5 +1,5 @@
 id: fleet_step_bio_synthetic
-name: Fleet Step
+name: Bio-Velocity Augment
 description: |-
     You gain a +30-foot status bonus to your Speed.
     @UUID[Compendium.pf2e.spell-effects.Item.tech Effect: Fleet Step]

@@ -1,5 +1,5 @@
 id: synchronize_steps_neural
-name: Synchronize Steps
+name: Neural Movement Sync
 description: |-
     You link the minds of two targets, enabling them to move in tandem. When one of the targets Steps, the other target can use a reaction to Step. When one of the targets Strides, the other target can use a reaction to Stride.
 

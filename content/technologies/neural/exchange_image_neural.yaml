@@ -1,5 +1,5 @@
 id: exchange_image_neural
-name: Exchange Image
+name: Neural Appearance Swap
 description: |-
     To mislead pursuers, the Lacunafex developed the means to swap visages. You trade appearances with the target, with the effects depending on the result of the target's Will saving throw. Willing and @UUID[Compendium.pf2e.conditionitems.Item.Unconscious] targets automatically critically fail this saving throw.
 

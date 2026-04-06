@@ -1,5 +1,5 @@
 id: equal_footing_bio_synthetic
-name: Equal Footing
+name: Bio-Size Normalization
 description: |-
     You level the field between yourself and another creature, hampering its movements if it's quicker than you. The target attempts a Willpower save.Critical Success The target is unaffected.
     Success The target is Clumsy 1 and takes a –10-foot status penalty to all its Speeds until the end of your next turn.

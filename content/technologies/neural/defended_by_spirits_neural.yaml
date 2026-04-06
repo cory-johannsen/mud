@@ -1,5 +1,5 @@
 id: defended_by_spirits_neural
-name: Defended by Spirits
+name: Neural Specter Guard
 description: You entreat a spirit or the spiritual energies in your location to surround and protect an ally from an certain foe. Each time the enemy attacks and damages the ally, the enemy takes 1d6 spirit damage. The enemy is aware of these spirits and has a general sense that attacking the ally will draw the spirits' ire.Heightened (+2) The damage increases by 1d6.
 tradition: neural
 level: 1

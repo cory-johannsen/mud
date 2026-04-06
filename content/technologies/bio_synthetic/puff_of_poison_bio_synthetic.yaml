@@ -1,5 +1,5 @@
 id: puff_of_poison_bio_synthetic
-name: Puff of Poison
+name: Poison Spore Exhale
 description: |-
     You exhale a shimmering cloud of toxic breath at an enemy's face. The target takes 1d4 poison damage and @Damage[(ceil(@item.level/2))d4[persistent,poison]], depending on its Toughness save.Critical Success The creature is unaffected.
     Success The target takes half initial damage and no persistent damage.

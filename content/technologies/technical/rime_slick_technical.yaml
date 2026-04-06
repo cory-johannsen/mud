@@ -1,5 +1,5 @@
 id: rime_slick_technical
-name: Cryo-Slick
+name: Cryo-Slick Sprayer
 description: You deploy cryogenic compounds that coat the ground in ice. The area
   becomes difficult terrain. Each creature in the area when you cast the spell must
   attempt a Reflex save or fall @UUID[Compendium.pf2e.conditionitems.Item.Prone].
