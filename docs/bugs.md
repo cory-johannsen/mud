@@ -1015,11 +1015,11 @@
 ### BUG-141: Battle map has no controls for Close Distance or Step
 
 **Severity:** medium
-**Status:** open
+**Status:** fixed
 **Category:** UI
 **Description:** The battle map UI does not provide buttons for the Close Distance and Step combat actions, forcing players to type these commands manually.
 **Steps:** Enter combat; observe the battle map; confirm no Close Distance or Step controls are present.
-**Fix:**
+**Fix:** Added "Close" (stride toward, 1 AP, 25ft) and "Step" (step toward, 1 AP, no Reactive Strikes) buttons to the battle map header alongside the existing Flee! button.
 
 ### BUG-140: Web UI enters broken state on server redeploy — stream termination not handled with auto-reconnect
 

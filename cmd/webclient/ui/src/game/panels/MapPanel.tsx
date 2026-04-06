@@ -240,13 +240,29 @@ export function MapPanel() {
       <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
         <div className="map-header">
           <h3>Battle Map</h3>
-          <button
-            className="map-refresh-btn"
-            style={{ background: '#2a1a1a', borderColor: '#7a2a2a', color: '#f66' }}
-            onClick={() => sendCommand('flee')}
-          >
-            Flee!
-          </button>
+          <div style={{ display: 'flex', gap: '0.3rem', flexWrap: 'wrap' }}>
+            <button
+              className="map-refresh-btn"
+              title="Stride toward nearest enemy (25 ft, 1 AP)"
+              onClick={() => sendCommand('stride')}
+            >
+              Close
+            </button>
+            <button
+              className="map-refresh-btn"
+              title="Step 5 ft toward nearest enemy — no Reactive Strikes (1 AP)"
+              onClick={() => sendCommand('step')}
+            >
+              Step
+            </button>
+            <button
+              className="map-refresh-btn"
+              style={{ background: '#2a1a1a', borderColor: '#7a2a2a', color: '#f66' }}
+              onClick={() => sendCommand('flee')}
+            >
+              Flee!
+            </button>
+          </div>
         </div>
         <div style={{ overflow: 'auto', padding: '0.5rem' }}>
           {renderBattleGrid(state.combatPositions, state.characterInfo?.name ?? '')}
