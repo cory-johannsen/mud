@@ -107,10 +107,10 @@ func TestHandleStride_NotInCombat(t *testing.T) {
 }
 
 // TestHandleStride_TowardDecreasesDist verifies that striding "toward" moves the player
-// one grid cell closer to the NPC (Chebyshev distance decreases by 5ft).
+// their full speed (25 ft = 5 cells) toward the NPC.
 //
 // Precondition: player at GridX=0, GridY=0; NPC at GridX=5, GridY=9 (default spawn); direction=="toward".
-// Postcondition: player.GridX==1 and player.GridY==1; Chebyshev distance decreases from 45ft to 40ft.
+// Postcondition: player.GridX==5 and player.GridY==5 (5 diagonal steps of delta(1,1)).
 func TestHandleStride_TowardDecreasesDist(t *testing.T) {
 	svc, sessMgr, npcMgr, combatHandler := newStrideSvcWithCombat(t)
 
@@ -145,16 +145,16 @@ func TestHandleStride_TowardDecreasesDist(t *testing.T) {
 	require.NotNil(t, msgEvt, "expected a message event")
 	assert.Contains(t, msgEvt.Content, "toward")
 
-	// towardDelta(0,0,5,9) = (1,1): player should be at (1,1).
-	assert.Equal(t, 1, playerCbt.GridX, "player.GridX should be 1 after striding toward")
-	assert.Equal(t, 1, playerCbt.GridY, "player.GridY should be 1 after striding toward")
+	// towardDelta(0,0,5,9) = (1,1); 5 steps (25 ft) → player at (5,5).
+	assert.Equal(t, 5, playerCbt.GridX, "player.GridX should be 5 after striding toward (25 ft)")
+	assert.Equal(t, 5, playerCbt.GridY, "player.GridY should be 5 after striding toward (25 ft)")
 }
 
 // TestHandleStride_TowardFromAnyPosition_DecreasesDist verifies that stride "toward"
-// decreases Chebyshev distance regardless of the player's starting position.
+// moves the player their full speed toward the NPC regardless of starting position.
 //
 // Precondition: player at GridX=5, GridY=5; NPC at GridX=0, GridY=0; direction=="toward".
-// Postcondition: player.GridX==4 and player.GridY==4; distance decreases from 25ft to 20ft.
+// Postcondition: player.GridX==0 and player.GridY==0 (5 diagonal steps of delta(-1,-1)).
 func TestHandleStride_TowardFromAnyPosition_DecreasesDist(t *testing.T) {
 	svc, sessMgr, npcMgr, combatHandler := newStrideSvcWithCombat(t)
 
@@ -198,9 +198,9 @@ func TestHandleStride_TowardFromAnyPosition_DecreasesDist(t *testing.T) {
 	require.NotNil(t, msgEvt, "expected a message event")
 	assert.Contains(t, msgEvt.Content, "toward")
 
-	// towardDelta(5,5,0,0) = (-1,-1): player should be at (4,4).
-	assert.Equal(t, 4, playerCbt.GridX, "player.GridX should be 4 after striding toward enemy from 5")
-	assert.Equal(t, 4, playerCbt.GridY, "player.GridY should be 4 after striding toward enemy from 5")
+	// towardDelta(5,5,0,0) = (-1,-1); 5 steps (25 ft) → player at (0,0).
+	assert.Equal(t, 0, playerCbt.GridX, "player.GridX should be 0 after striding toward enemy (25 ft)")
+	assert.Equal(t, 0, playerCbt.GridY, "player.GridY should be 0 after striding toward enemy (25 ft)")
 }
 
 // TestHandleStride_AwayAtBoundary_GridClampApplied verifies that stride "away" at the
@@ -249,7 +249,7 @@ func TestHandleStride_AwayAtBoundary_GridClampApplied(t *testing.T) {
 // TestHandleStride_DefaultDirectionIsToward verifies that an empty direction defaults to toward.
 //
 // Precondition: player at GridX=0, GridY=0; NPC at GridX=5, GridY=9; direction=="".
-// Postcondition: player.GridX==1 and player.GridY==1 (same as explicit "toward").
+// Postcondition: player.GridX==5 and player.GridY==5 (same as explicit "toward", 25 ft).
 func TestHandleStride_DefaultDirectionIsToward(t *testing.T) {
 	svc, sessMgr, npcMgr, combatHandler := newStrideSvcWithCombat(t)
 
@@ -283,9 +283,9 @@ func TestHandleStride_DefaultDirectionIsToward(t *testing.T) {
 	msgEvt := event.GetMessage()
 	require.NotNil(t, msgEvt, "expected a message event")
 
-	// towardDelta(0,0,5,9) = (1,1): same as explicit "toward".
-	assert.Equal(t, 1, playerCbt.GridX, "empty direction should default to toward, GridX becomes 1")
-	assert.Equal(t, 1, playerCbt.GridY, "empty direction should default to toward, GridY becomes 1")
+	// towardDelta(0,0,5,9) = (1,1); 5 steps (25 ft) → same as explicit "toward".
+	assert.Equal(t, 5, playerCbt.GridX, "empty direction should default to toward, GridX becomes 5")
+	assert.Equal(t, 5, playerCbt.GridY, "empty direction should default to toward, GridY becomes 5")
 }
 
 // newStrideSvcWithCombatAndRegistry builds a GameServiceServer and associated helpers with

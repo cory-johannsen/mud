@@ -9206,12 +9206,14 @@ func (s *GameServiceServer) handleShove(uid string, req *gamev1.ShoveRequest) (*
 	return messageEvent(detail + fmt.Sprintf(" — success! %s is pushed back 5 ft.", inst.Name())), nil
 }
 
-// handleStride moves the player one grid cell in the requested direction.
+// handleStride moves the player their full speed in the requested direction.
 // Combat only; costs 1 AP. Defaults to "toward" the nearest enemy when no direction is given.
+// The player moves (effectiveSpeed / 5) grid cells, one cell at a time; Reactive Strikes fire
+// for each cell that exits a threatened square.
 //
 // Precondition: uid must be in active combat.
-// Postcondition: Player combatant's GridX/GridY updated; CheckReactiveStrikes fires when leaving
-// an adjacent NPC; message event returned.
+// Postcondition: Player combatant's GridX/GridY updated; CheckReactiveStrikes fires per threatened-square
+// exit; message event returned.
 func (s *GameServiceServer) handleStride(uid string, req *gamev1.StrideRequest) (*gamev1.ServerEvent, error) {
 	sess, ok := s.sessions.GetPlayer(uid)
 	if !ok {
@@ -9234,8 +9236,6 @@ func (s *GameServiceServer) handleStride(uid string, req *gamev1.StrideRequest) 
 	if combatant == nil {
 		return errorEvent("You are not a combatant in this fight."), nil
 	}
-
-	oldX, oldY := combatant.GridX, combatant.GridY
 
 	dir := req.GetDirection()
 	if dir == "" {
@@ -9268,32 +9268,57 @@ func (s *GameServiceServer) handleStride(uid string, req *gamev1.StrideRequest) 
 	if height == 0 {
 		height = 10
 	}
+
+	// Compute effective speed: 25 ft base minus armor speed penalty (min 5 ft).
+	speedFt := s.playerEffectiveSpeedFt(sess)
+	steps := speedFt / 5
+	if steps < 1 {
+		steps = 1
+	}
+
+	// Direction delta is fixed for the whole stride (re-evaluated against initial position only).
 	dx, dy := combat.CompassDelta(dir, combatant, opponent)
-	newX := combatant.GridX + dx
-	newY := combatant.GridY + dy
-	if newX < 0 {
-		newX = 0
-	} else if newX >= width {
-		newX = width - 1
-	}
-	if newY < 0 {
-		newY = 0
-	} else if newY >= height {
-		newY = height - 1
-	}
-	combatant.GridX = newX
-	combatant.GridY = newY
 
-	s.clearPlayerCover(uid, sess)
-
-	msg := fmt.Sprintf("You stride %s.", dir)
 	rsUpdater := func(id string, hp int) {
 		if target, ok := s.sessions.GetPlayer(id); ok {
 			target.CurrentHP = hp
 		}
 	}
-	rsEvents := combat.CheckReactiveStrikes(cbt, uid, oldX, oldY, globalRandSrc{}, rsUpdater)
-	for _, ev := range rsEvents {
+
+	var allRSEvents []combat.RoundEvent
+	// Move one cell at a time so Reactive Strikes fire at each threatened-square exit.
+	for step := 0; step < steps; step++ {
+		oldX, oldY := combatant.GridX, combatant.GridY
+		newX := oldX + dx
+		newY := oldY + dy
+		if newX < 0 {
+			newX = 0
+		} else if newX >= width {
+			newX = width - 1
+		}
+		if newY < 0 {
+			newY = 0
+		} else if newY >= height {
+			newY = height - 1
+		}
+		// If clamped to same cell, no more movement possible in this direction.
+		if newX == oldX && newY == oldY {
+			break
+		}
+		combatant.GridX = newX
+		combatant.GridY = newY
+		rsEvents := combat.CheckReactiveStrikes(cbt, uid, oldX, oldY, globalRandSrc{}, rsUpdater)
+		allRSEvents = append(allRSEvents, rsEvents...)
+		// Stop striding if the player was killed by a Reactive Strike.
+		if combatant.IsDead() {
+			break
+		}
+	}
+
+	s.clearPlayerCover(uid, sess)
+
+	msg := fmt.Sprintf("You stride %s (%d ft).", dir, speedFt)
+	for _, ev := range allRSEvents {
 		msg += "\n" + ev.Narrative
 	}
 	if room, ok := s.world.GetRoom(sess.RoomID); ok {
@@ -9302,6 +9327,29 @@ func (s *GameServiceServer) handleStride(uid string, req *gamev1.StrideRequest) 
 	s.combatH.FireCombatantMoved(sess.RoomID, uid)
 	s.combatH.BroadcastAllPositions(sess.RoomID)
 	return messageEvent(msg), nil
+}
+
+// playerEffectiveSpeedFt returns the player's effective movement speed in feet.
+// Base speed is 25 ft (PF2e default); armor speed penalty is subtracted.
+// Result is clamped to a minimum of 5 ft.
+//
+// Precondition: sess must be non-nil.
+// Postcondition: Returns a positive multiple of 5, at least 5.
+func (s *GameServiceServer) playerEffectiveSpeedFt(sess *session.PlayerSession) int {
+	const baseSpeedFt = 25
+	speedPenalty := 0
+	if sess.Equipment != nil && s.invRegistry != nil {
+		dexMod := 0
+		def := sess.Equipment.ComputedDefensesWithProficienciesAndSetBonuses(
+			s.invRegistry, dexMod, sess.Proficiencies, sess.Level, sess.SetBonusSummary,
+		)
+		speedPenalty = def.SpeedPenalty
+	}
+	result := baseSpeedFt - speedPenalty
+	if result < 5 {
+		result = 5
+	}
+	return result
 }
 
 // handleStep moves the player one grid cell in the requested direction without triggering Reactive Strikes.
