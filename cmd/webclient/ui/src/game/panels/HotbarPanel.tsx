@@ -14,6 +14,41 @@ const COMBAT_TARGET_CMDS = new Set([
   'burst', 'bf',
 ])
 
+// Human-readable labels for built-in action commands
+export const ACTION_NAMES: Record<string, string> = {
+  stride: 'Stride',
+  close: 'Close',
+  move: 'Move',
+  approach: 'Approach',
+  step: 'Step',
+  attack: 'Attack',
+  att: 'Attack',
+  kill: 'Attack',
+  strike: 'Strike',
+  st: 'Strike',
+  burst: 'Burst',
+  bf: 'Burst',
+  auto: 'Auto',
+  af: 'Auto',
+  reload: 'Reload',
+  rl: 'Reload',
+  flee: 'Flee',
+  run: 'Flee',
+  pass: 'Pass',
+  look: 'Look',
+  l: 'Look',
+  north: 'North',
+  south: 'South',
+  east: 'East',
+  west: 'West',
+  up: 'Up',
+  down: 'Down',
+  n: 'North',
+  s: 'South',
+  e: 'East',
+  w: 'West',
+}
+
 export function slotActivationCommand(slot: HotbarSlot): string {
   if (!slot.ref) return ''
   switch (slot.kind) {
@@ -29,7 +64,17 @@ export function slotActivationCommand(slot: HotbarSlot): string {
 }
 
 export function slotDisplayLabel(slot: HotbarSlot): string {
-  return slot.displayName ?? slot.display_name ?? slot.ref ?? ''
+  // Use || instead of ?? to fall through empty proto string defaults
+  const typed = slot.displayName || slot.display_name
+  if (typed) return typed
+  const ref = slot.ref || ''
+  if (!ref) return ''
+  // For command slots, check if ref matches a known built-in action
+  if (!slot.kind || slot.kind === 'command') {
+    const verb = ref.split(/\s+/)[0].toLowerCase()
+    if (ACTION_NAMES[verb]) return ACTION_NAMES[verb]
+  }
+  return ref
 }
 
 export function slotTooltip(slot: HotbarSlot): string {

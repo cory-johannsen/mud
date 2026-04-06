@@ -1,8 +1,9 @@
+import { useState } from 'react'
 import type { CSSProperties } from 'react'
 
 interface HelpSection {
   title: string
-  commands: Array<{ cmd: string; aliases?: string; desc: string }>
+  commands: Array<{ cmd: string; aliases?: string; desc: string; hotbarCmd?: string }>
 }
 
 const HELP_SECTIONS: HelpSection[] = [
@@ -30,15 +31,16 @@ const HELP_SECTIONS: HelpSection[] = [
   {
     title: 'Combat',
     commands: [
-      { cmd: 'attack <target>', aliases: 'att kill', desc: 'Attack a target (starts combat)' },
-      { cmd: 'strike <target>', aliases: 'st', desc: 'Full attack routine (2 AP, two hits)' },
-      { cmd: 'burst <target>', aliases: 'bf', desc: 'Burst fire (2 AP, 2 attacks)' },
-      { cmd: 'auto', aliases: 'af', desc: 'Automatic fire at all enemies (3 AP)' },
+      { cmd: 'attack <target>', aliases: 'att kill', desc: 'Attack a target (starts combat)', hotbarCmd: 'attack' },
+      { cmd: 'strike <target>', aliases: 'st', desc: 'Full attack routine (2 AP, two hits)', hotbarCmd: 'strike' },
+      { cmd: 'burst <target>', aliases: 'bf', desc: 'Burst fire (2 AP, 2 attacks)', hotbarCmd: 'burst' },
+      { cmd: 'auto', aliases: 'af', desc: 'Automatic fire at all enemies (3 AP)', hotbarCmd: 'auto' },
       { cmd: 'throw <item>', aliases: 'gr', desc: 'Throw an explosive' },
-      { cmd: 'stride', aliases: 'str close move approach', desc: 'Close 25ft toward enemy (1 AP)' },
-      { cmd: 'reload', aliases: 'rl', desc: 'Reload equipped weapon (1 AP)' },
-      { cmd: 'pass', aliases: 'p', desc: 'Forfeit remaining action points' },
-      { cmd: 'flee', aliases: 'run', desc: 'Attempt to flee combat' },
+      { cmd: 'stride', aliases: 'str close move approach', desc: 'Close 25ft toward enemy (1 AP)', hotbarCmd: 'stride' },
+      { cmd: 'step', desc: 'Step 5ft — no Reactive Strikes (1 AP)', hotbarCmd: 'step' },
+      { cmd: 'reload', aliases: 'rl', desc: 'Reload equipped weapon (1 AP)', hotbarCmd: 'reload' },
+      { cmd: 'pass', aliases: 'p', desc: 'Forfeit remaining action points', hotbarCmd: 'pass' },
+      { cmd: 'flee', aliases: 'run', desc: 'Attempt to flee combat', hotbarCmd: 'flee' },
       { cmd: 'status', aliases: 'cond', desc: 'Show your active conditions' },
       { cmd: 'equip <weapon> [slot]', aliases: 'eq', desc: 'Equip a weapon' },
       { cmd: 'loadout [1|2]', aliases: 'lo prep kit', desc: 'Display or swap weapon presets' },
@@ -84,18 +86,49 @@ const HELP_SECTIONS: HelpSection[] = [
   },
 ]
 
+const SLOT_KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0']
+
 interface HelpModalProps {
   onClose: () => void
+  onAssignHotbar?: (slot: number, text: string) => void
 }
 
-export function HelpModal({ onClose }: HelpModalProps) {
+export function HelpModal({ onClose, onAssignHotbar }: HelpModalProps) {
+  const [pickingCmd, setPickingCmd] = useState<string | null>(null)
+
+  function handleAssign(slot: number) {
+    if (!pickingCmd || !onAssignHotbar) return
+    onAssignHotbar(slot, pickingCmd)
+    setPickingCmd(null)
+  }
+
   return (
-    <div style={styles.overlay} onClick={onClose}>
+    <div style={styles.overlay} onClick={() => { setPickingCmd(null); onClose() }}>
       <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
         <div style={styles.header}>
           <h2 style={styles.title}>Command Reference</h2>
           <button style={styles.closeBtn} onClick={onClose}>✕</button>
         </div>
+        {pickingCmd && (
+          <div style={styles.slotPicker} onClick={() => setPickingCmd(null)}>
+            <span style={{ color: '#7af', fontSize: '0.75rem', fontFamily: 'monospace' }}>
+              Assign <strong style={{ color: '#e0c060' }}>{pickingCmd}</strong> to slot:
+            </span>
+            <div style={{ display: 'flex', gap: '0.3rem', flexWrap: 'wrap' }}>
+              {SLOT_KEYS.map((key, i) => (
+                <button
+                  key={key}
+                  style={styles.slotBtn}
+                  onClick={(e) => { e.stopPropagation(); handleAssign(i + 1) }}
+                  type="button"
+                >
+                  {key}
+                </button>
+              ))}
+              <button style={styles.cancelSlotBtn} onClick={() => setPickingCmd(null)} type="button">✕</button>
+            </div>
+          </div>
+        )}
         <div style={styles.body}>
           {HELP_SECTIONS.map((section) => (
             <div key={section.title} style={styles.section}>
@@ -109,6 +142,18 @@ export function HelpModal({ onClose }: HelpModalProps) {
                         ? <td style={styles.aliasCell}>[{c.aliases}]</td>
                         : <td style={styles.aliasCell} />}
                       <td style={styles.descCell}>{c.desc}</td>
+                      <td style={styles.hotbarCell}>
+                        {c.hotbarCmd && onAssignHotbar && (
+                          <button
+                            style={{ ...styles.addBtn, ...(pickingCmd === c.hotbarCmd ? styles.addBtnActive : {}) }}
+                            onClick={() => setPickingCmd(pickingCmd === c.hotbarCmd ? null : c.hotbarCmd!)}
+                            title={`Add ${c.hotbarCmd} to hotbar`}
+                            type="button"
+                          >
+                            +bar
+                          </button>
+                        )}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -207,9 +252,60 @@ const styles: Record<string, CSSProperties> = {
     wordBreak: 'break-word' as const,
   },
   descCell: {
-    width: '50%',
+    width: '46%',
     color: '#aaa',
     paddingBottom: '0.2rem',
     verticalAlign: 'top',
+  },
+  hotbarCell: {
+    width: '4%',
+    paddingBottom: '0.2rem',
+    verticalAlign: 'top',
+    textAlign: 'right' as const,
+  },
+  addBtn: {
+    padding: '0.05rem 0.3rem',
+    background: '#1a1a2a',
+    border: '1px solid #3a3a5a',
+    color: '#556',
+    borderRadius: '3px',
+    cursor: 'pointer',
+    fontFamily: 'monospace',
+    fontSize: '0.65rem',
+    whiteSpace: 'nowrap' as const,
+  },
+  addBtnActive: {
+    background: '#1a2a3a',
+    border: '1px solid #3a6a9a',
+    color: '#7af',
+  },
+  slotPicker: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.75rem',
+    padding: '0.5rem 1.25rem',
+    borderBottom: '1px solid #2a2a2a',
+    background: '#111',
+    flexWrap: 'wrap' as const,
+  },
+  slotBtn: {
+    padding: '0.15rem 0.45rem',
+    background: '#1a2a1a',
+    border: '1px solid #4a6a2a',
+    color: '#8d4',
+    borderRadius: '3px',
+    cursor: 'pointer',
+    fontFamily: 'monospace',
+    fontSize: '0.8rem',
+  },
+  cancelSlotBtn: {
+    padding: '0.15rem 0.45rem',
+    background: '#2a1a1a',
+    border: '1px solid #5a2a2a',
+    color: '#c66',
+    borderRadius: '3px',
+    cursor: 'pointer',
+    fontFamily: 'monospace',
+    fontSize: '0.8rem',
   },
 }

@@ -1078,11 +1078,11 @@
 ### BUG-133: Hotbar does not support Actions; built-in actions assigned to hotbar display as `-`
 
 **Severity:** medium
-**Status:** open
+**Status:** fixed
 **Category:** UI
 **Description:** The hotbar has no first-class support for built-in Actions (`stride`, `close`, `attack`, etc.); slots assigned to these actions render as `-` instead of a label. Additionally, the Help screen should provide a way for the player to add any Action directly to a hotbar slot.
 **Steps:** Assign `stride`, `close`, or `attack` to a hotbar slot; observe the slot displays `-` instead of the action name. Open the Help screen; observe no option to add actions to the hotbar.
-**Fix:**
+**Fix:** Added `ACTION_NAMES` map for human-readable action labels; fixed `slotDisplayLabel` to use `||` (not `??`) to handle empty proto strings and resolve action names. Added `+bar` buttons in Help modal for assignable combat actions — clicking one shows slot picker 1–10 and assigns the action directly.
 
 ### BUG-132: Adrenaline Surge requires Enraged condition but no mechanism exists to trigger Enraged
 

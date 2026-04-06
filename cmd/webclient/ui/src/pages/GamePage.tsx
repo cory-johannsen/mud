@@ -39,7 +39,7 @@ function formatTimeOfDay(tod: TimeOfDayEvent): string {
 
 // Inner component that has access to GameContext.
 function GameLayout() {
-  const { state } = useGame()
+  const { state, sendMessage } = useGame()
   const activeWeather = state.activeWeather
   const [openDrawer, setOpenDrawer] = useState<DrawerType | null>(null)
   const [activeMobilePanel, setActiveMobilePanel] = useState<MobilePanel>('room')
@@ -135,7 +135,15 @@ function GameLayout() {
       {/* Input */}
       <div className="panel-input"><InputPanel /></div>
 
-      {showHelp && <HelpModal onClose={() => setShowHelp(false)} />}
+      {showHelp && (
+        <HelpModal
+          onClose={() => setShowHelp(false)}
+          onAssignHotbar={(slot, text) => {
+            sendMessage('HotbarRequest', { action: 'set', slot, text })
+            setShowHelp(false)
+          }}
+        />
+      )}
       {state.shopView && <NpcModal />}
       <NpcInteractModal />
       {state.choicePrompt && <FeatureChoiceModal onClose={() => { /* modal self-closes on selection */ }} />}
