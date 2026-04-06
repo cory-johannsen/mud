@@ -1,8 +1,14 @@
 package main
 
 import (
+	"fmt"
+	"os"
+	"path/filepath"
 	"regexp"
+	"sort"
 	"strings"
+
+	"gopkg.in/yaml.v3"
 )
 
 var (
@@ -63,4 +69,88 @@ func IsPF2EFlagged(name, oldID string) bool {
 		}
 	}
 	return false
+}
+
+// RenameEntry is one row in the rename map.
+type RenameEntry struct {
+	OldID     string `yaml:"old_id"`
+	NewID     string `yaml:"new_id"`
+	Name      string `yaml:"name"`
+	File      string `yaml:"file"`
+	Skip      bool   `yaml:"skip"`
+	PF2EFlag  bool   `yaml:"pf2e_flag"`
+	Collision bool   `yaml:"collision"`
+}
+
+// RenameMap is the top-level structure of tools/rename_map.yaml.
+type RenameMap struct {
+	Renames []RenameEntry `yaml:"renames"`
+}
+
+// techFileHeader holds just the id and name fields from a tech YAML file.
+type techFileHeader struct {
+	ID   string `yaml:"id"`
+	Name string `yaml:"name"`
+}
+
+// BuildRenameMap scans all .yaml files under techDir, derives new IDs,
+// detects collisions and PF2E flags, and returns the complete RenameMap
+// sorted by old_id.
+//
+// Precondition: techDir is a valid, existing directory.
+// Postcondition: all collision entries have Collision=true; all no-op entries have Skip=true.
+func BuildRenameMap(techDir string) (*RenameMap, error) {
+	var entries []RenameEntry
+
+	err := filepath.WalkDir(techDir, func(path string, d os.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d.IsDir() || !strings.HasSuffix(d.Name(), ".yaml") {
+			return nil
+		}
+		data, err := os.ReadFile(path)
+		if err != nil {
+			return fmt.Errorf("reading %q: %w", path, err)
+		}
+		var h techFileHeader
+		if err := yaml.Unmarshal(data, &h); err != nil {
+			return fmt.Errorf("parsing %q: %w", path, err)
+		}
+		if h.ID == "" || h.Name == "" {
+			return fmt.Errorf("missing id or name in %q", path)
+		}
+		newID := ToSnakeCase(h.Name)
+		entries = append(entries, RenameEntry{
+			OldID:    h.ID,
+			NewID:    newID,
+			Name:     h.Name,
+			File:     path,
+			Skip:     h.ID == newID,
+			PF2EFlag: IsPF2EFlagged(h.Name, h.ID),
+		})
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	// Count occurrences of each new_id among non-skip entries to detect collisions.
+	newIDCount := make(map[string]int)
+	for _, e := range entries {
+		if !e.Skip {
+			newIDCount[e.NewID]++
+		}
+	}
+	for i := range entries {
+		if !entries[i].Skip && newIDCount[entries[i].NewID] > 1 {
+			entries[i].Collision = true
+		}
+	}
+
+	sort.Slice(entries, func(i, j int) bool {
+		return entries[i].OldID < entries[j].OldID
+	})
+
+	return &RenameMap{Renames: entries}, nil
 }

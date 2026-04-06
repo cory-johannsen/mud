@@ -1,9 +1,13 @@
 package main
 
 import (
+	"fmt"
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"pgregory.net/rapid"
 )
 
@@ -113,4 +117,78 @@ func TestIsPF2EFlagged(t *testing.T) {
 			assert.Equal(t, tc.wantFl, IsPF2EFlagged(tc.name, tc.oldID))
 		})
 	}
+}
+
+// writeTechYAML writes a minimal tech YAML file to dir/subdir/filename.
+func writeTechYAML(t *testing.T, dir, subdir, filename, id, name string) {
+	t.Helper()
+	sub := filepath.Join(dir, subdir)
+	require.NoError(t, os.MkdirAll(sub, 0755))
+	content := fmt.Sprintf("id: %s\nname: %s\ntradition: technical\nlevel: 1\nusage_type: prepared\n", id, name)
+	require.NoError(t, os.WriteFile(filepath.Join(sub, filename), []byte(content), 0644))
+}
+
+func TestBuildRenameMap_Basic(t *testing.T) {
+	dir := t.TempDir()
+	writeTechYAML(t, dir, "technical", "acid_arrow_technical.yaml", "acid_arrow_technical", "Corrosive Projectile")
+	writeTechYAML(t, dir, "neural", "daze_neural.yaml", "daze_neural", "Cranial Shock")
+	writeTechYAML(t, dir, "innate", "chrome_reflex.yaml", "chrome_reflex", "Chrome Reflex")
+
+	rm, err := BuildRenameMap(dir)
+	require.NoError(t, err)
+	require.Len(t, rm.Renames, 3)
+
+	byOld := make(map[string]RenameEntry)
+	for _, e := range rm.Renames {
+		byOld[e.OldID] = e
+	}
+
+	e := byOld["acid_arrow_technical"]
+	assert.Equal(t, "corrosive_projectile", e.NewID)
+	assert.False(t, e.Skip)
+	assert.False(t, e.PF2EFlag)
+	assert.False(t, e.Collision)
+
+	e = byOld["daze_neural"]
+	assert.Equal(t, "cranial_shock", e.NewID)
+	assert.False(t, e.Skip)
+
+	e = byOld["chrome_reflex"]
+	assert.Equal(t, "chrome_reflex", e.NewID)
+	assert.True(t, e.Skip, "already-correct IDs must be marked skip")
+}
+
+func TestBuildRenameMap_CollisionDetected(t *testing.T) {
+	dir := t.TempDir()
+	writeTechYAML(t, dir, "technical", "acid_arrow_technical.yaml", "acid_arrow_technical", "Shock Wave")
+	writeTechYAML(t, dir, "neural", "daze_neural.yaml", "daze_neural", "Shock Wave")
+
+	rm, err := BuildRenameMap(dir)
+	require.NoError(t, err)
+
+	for _, e := range rm.Renames {
+		assert.True(t, e.Collision, "both entries deriving same new_id must be flagged collision: old=%s", e.OldID)
+	}
+}
+
+func TestBuildRenameMap_PF2EFlagSet(t *testing.T) {
+	dir := t.TempDir()
+	// Name never localized — derives same ID as old (minus suffix)
+	writeTechYAML(t, dir, "technical", "acid_arrow_technical.yaml", "acid_arrow_technical", "Acid Arrow")
+
+	rm, err := BuildRenameMap(dir)
+	require.NoError(t, err)
+	require.Len(t, rm.Renames, 1)
+	assert.True(t, rm.Renames[0].PF2EFlag)
+}
+
+func TestBuildRenameMap_SortedByOldID(t *testing.T) {
+	dir := t.TempDir()
+	writeTechYAML(t, dir, "technical", "z_tech.yaml", "z_tech", "Zap")
+	writeTechYAML(t, dir, "technical", "a_tech.yaml", "a_tech", "Alpha Strike")
+
+	rm, err := BuildRenameMap(dir)
+	require.NoError(t, err)
+	require.Len(t, rm.Renames, 2)
+	assert.True(t, rm.Renames[0].OldID < rm.Renames[1].OldID, "entries must be sorted by old_id")
 }
