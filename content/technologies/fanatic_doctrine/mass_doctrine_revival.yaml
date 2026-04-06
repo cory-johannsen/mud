@@ -1,0 +1,19 @@
+id: mass_doctrine_revival
+name: Mass Doctrine Revival
+description: You broadcast a revival signal to all dead allies within 60 feet who
+  died within the last minute. Each is restored to 1 HP and loses the dying condition.
+  This can revive up to 10 creatures.
+tradition: fanatic_doctrine
+level: 10
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: damage
+    dice: 10d8+40
+    damage_type: untyped
+    dc: 0

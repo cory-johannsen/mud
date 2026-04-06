@@ -1,0 +1,31 @@
+id: judgment_claws
+name: Judgment Claws
+description: You invoke doctrinal punishment, causing spectral crushing arms to sprout
+  from a nearby surface and crush a creature, dealing 8d6 force damage and attempting
+  to restrain. All mechanical effects remain identical to the base protocol.
+tradition: fanatic_doctrine
+level: 4
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+save_type: hustle
+save_dc: 15
+resolution: save
+effects:
+  on_success:
+  - type: damage
+    dice: 8d3
+    damage_type: force
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 8d6
+    damage_type: force
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 16d6
+    damage_type: force
+    dc: 0

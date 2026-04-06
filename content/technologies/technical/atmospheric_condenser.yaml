@@ -1,0 +1,17 @@
+id: atmospheric_condenser
+name: Atmospheric Condenser
+description: Run a portable condenser unit to extract moisture from ambient air, producing clean water.
+tradition: technical
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: As you cup your hands, water begins to flow forth from them. You create 2 gallons of water. If no one drinks
+      it, it evaporates after 1 day.

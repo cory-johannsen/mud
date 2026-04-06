@@ -1,0 +1,39 @@
+id: mirror_hex_protocol
+name: Mirror Hex Protocol
+description: 'You generate a holographic decoy that curses attackers with bad luck.
+  When you cast this tech, you seem to split in two. As you do, you can Step to any
+  adjacent square. In either your initial square, or another square adjacent to it,
+  an exact illusory duplicate appears. You decide a simple course of action for the
+  duplicate. A creature can distinguish between you and the duplicate only by Seeking
+  and succeeding at a Perception check against the spell''s DC.
+
+  If a creature attacks the duplicate, the illusion shatters into data fragments,
+  inflicting a probability curse on the attacker. The attacker must attempt a Will
+  save; this is a curse and misfortune effect. When the duplicate shatters, the spell
+  ends.
+
+
+  Success The creature is unaffected.
+
+  Failure Within the next hour, the creature must roll its next two attack rolls twice
+  and take the lower result.
+
+  Critical Failure Within the next hour, the creature must roll its next four attack
+  rolls twice and take the lower result.'
+tradition: neural
+level: 4
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: minutes:1
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You split into your real self and a mirrored version of yourself
+      that curses would-be attackers with misfortune on their next attacks. When you
+      cast this tech, you seem to split in two. As you do, yo

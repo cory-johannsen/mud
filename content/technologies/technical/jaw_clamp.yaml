@@ -1,0 +1,32 @@
+id: jaw_clamp
+name: Jaw Clamp
+description: 'A precision-engineered force clamp locks the target''s mouth shut. The
+  target can attempt a Toughness save to resist.
+
+
+  Critical Success The target is unaffected.
+
+  Success The target takes a -1 status penalty to attack rolls with its jaws or fangs
+  until the start of your next turn.
+
+  Failure The target can''t make Strikes with its jaws or fangs for 1 round.
+
+  Critical Failure The target can''t make Strikes with its jaws or fangs for 1 minute
+  and can''t speak or use verbal components.'
+tradition: technical
+level: 2
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+save_type: toughness
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: A shimmering muzzle of pure magical force clamps the target's mouth
+      shut. The target can attempt a Toughness save to resist the muzzle. For targets
+      with more than one mouth, the caster must target a s

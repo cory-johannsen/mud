@@ -1,0 +1,20 @@
+id: sacramental_provisions
+name: Sacramental Provisions
+description: You consecrate non-magical objects with devotional energy, transforming
+  them into edible sustenance. You can transform up to 5 Bulk of objects into bland
+  but nourishing food sufficient to feed 5 Medium creatures for a day.
+tradition: fanatic_doctrine
+level: 2
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You transform one object into an edible substance that any living
+      creature can chew, swallow, and safely digest. This allfood always has a bland
+      taste and slightly gooey consistency, regardless of its

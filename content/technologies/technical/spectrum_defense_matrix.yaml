@@ -1,0 +1,21 @@
+id: spectrum_defense_matrix
+name: Spectrum Defense Matrix
+description: 'A seven-layer defense matrix surrounds you. Any creature that strikes
+  you or targets you with a spell must attempt a Fortitude or Willpower save or suffer
+  a random spectrum effect: paralysis, confusion, petrification, blindness, or annihilation.'
+tradition: technical
+level: 9
+usage_type: prepared
+action_cost: 1
+range: self
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'Shield-sized shards of multicolored light manifest in the air around
+      you, each rotating quickly to intercept attacks.
+
+      Melee attacks against you impact a randomly colored shard, subjecting the attacker'

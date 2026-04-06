@@ -40,9 +40,9 @@ class_features:
 technology_grants:
   prepared:
     pool:
-      - { id: sure_strike_neural, level: 1 }
-      - { id: runic_weapon_neural, level: 1 }
-      - { id: needle_darts_neural, level: 1 }
+      - { id: neural_precision_strike, level: 1 }
+      - { id: psi_weapon_augment, level: 1 }
+      - { id: needle_volley, level: 1 }
 drawbacks:
   - id: tacticool_tell
     type: passive

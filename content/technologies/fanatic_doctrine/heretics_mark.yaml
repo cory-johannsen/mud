@@ -1,0 +1,32 @@
+id: heretics_mark
+name: Heretic's Mark
+description: 'You brand the target with a mark of doctrinal condemnation. The target
+  must attempt a Willpower save.
+
+
+  Critical Success The creature is unaffected.
+
+  Success The creature takes 2d6 fire damage.
+
+  Failure The creature takes 4d6 fire damage and is marked. While marked, it takes
+  a -1 status penalty to Deception and Diplomacy checks.
+
+  Critical Failure The creature takes 4d6 fire damage and is marked for 1 month. While
+  marked, it takes a -2 status penalty to Deception and Diplomacy checks.'
+tradition: fanatic_doctrine
+level: 2
+usage_type: prepared
+action_cost: 2
+range: melee
+targets: single
+duration: instant
+save_type: toughness
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You brand the target with an ethereal copy of your deity's religious
+      symbol. This brand can't be hidden, but it is visible only to followers of your
+      faith, who see it as clearly as a lit torch. Follow

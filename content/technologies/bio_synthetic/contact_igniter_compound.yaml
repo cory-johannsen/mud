@@ -1,0 +1,22 @@
+id: contact_igniter_compound
+name: Contact Igniter Compound
+description: You apply a contact-ignition compound that sets the target alight, dealing fire damage on touch.
+tradition: bio_synthetic
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: attack
+effects:
+  on_hit:
+  - type: damage
+    dice: 2d4
+    damage_type: fire
+    dc: 0
+  on_crit_hit:
+  - type: damage
+    dice: 4d4
+    damage_type: fire
+    dc: 0

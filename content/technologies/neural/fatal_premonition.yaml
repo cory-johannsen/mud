@@ -1,0 +1,31 @@
+id: fatal_premonition
+name: Fatal Premonition
+description: You sift through probability matrices, seize upon one potential moment
+  in which the target meets a particularly gruesome end, and psychically project that
+  moment into the target's consciousness. The target must attempt a Willpower save.
+tradition: neural
+level: 3
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: rounds:3
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+  on_success:
+  - type: damage
+    dice: 6d3
+    damage_type: mental
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 6d6
+    damage_type: mental
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 12d6
+    damage_type: mental
+    dc: 0

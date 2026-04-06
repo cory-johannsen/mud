@@ -1,0 +1,32 @@
+id: necrotic_slick
+name: Necrotic Slick
+description: 'You psychically contaminate the area with rotting neural projections.
+  Creatures in the area when you cast the spell and creatures that enter the area
+  must attempt Toughness saves.
+
+
+  Critical Success The creature is unaffected.
+
+  Success The creature is @UUID[Compendium.pf2e.conditionitems.Item.Sickened] 1.
+
+  Failure The creature is @UUID[Compendium.pf2e.conditionitems.Item.Sickened] 2.
+
+  Critical Failure The creature is @UUID[Compendium.pf2e.conditionitems.Item.Sickened]
+  2 and @UUID[Compendium.pf2e.conditionitems.Item.Slowed] 1 for 1 round.'
+tradition: neural
+level: 2
+usage_type: prepared
+action_cost: 3
+range: zone
+targets: zone
+duration: minutes:1
+save_type: hustle
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: The ground opens into a seemingly endless mass of corpse limbs, grasping
+      at all creatures within the area to drag them down. Creatures in the area when
+      the spell is cast or beginning their turn in the

@@ -1,0 +1,20 @@
+id: necroplasm_barricade
+name: Necroplasm Barricade
+description: You project a wall of semi-solidified psychic necroplasm riddled with
+  grasping phantom limbs. The bulwark is 10 feet high and 20 feet long. Any creature
+  that crosses through it takes 2d10 slashing damage and must succeed at a Reflex
+  save or become Immobilized for 1 round.
+tradition: neural
+level: 3
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: damage
+    dice: 3d10
+    damage_type: bludgeoning
+    dc: 0

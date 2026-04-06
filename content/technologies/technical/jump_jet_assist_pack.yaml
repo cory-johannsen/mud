@@ -1,0 +1,17 @@
+id: jump_jet_assist_pack
+name: Jump Jet Assist Pack
+description: Trigger a brief jump-jet burst for dramatically enhanced vertical or horizontal leap.
+tradition: technical
+level: 1
+usage_type: prepared
+action_cost: 1
+range: self
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: Your legs surge with strength, ready to leap high and far. You jump 30 feet in any direction without touching
+      the ground. You must land on a space of solid ground within 30 feet of you, or else you fa

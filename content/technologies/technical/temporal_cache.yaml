@@ -1,0 +1,20 @@
+id: temporal_cache
+name: Temporal Cache
+description: You shunt the target item into a temporal buffer. The item disappears
+  and reappears when the spell ends in the hands of whoever was holding it, or on
+  the ground where it was stored.
+tradition: technical
+level: 3
+usage_type: prepared
+action_cost: 2
+range: melee
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You fling the target item forward in time and link it to the future
+      of the creature holding it. The item disappears. When the spell ends, the item
+      reappears with the creature that was holding it when

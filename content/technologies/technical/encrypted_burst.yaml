@@ -1,0 +1,18 @@
+id: encrypted_burst
+name: Encrypted Burst
+description: You send the creature an encrypted message of 25 words or fewer, and
+  it can respond immediately with its own message of 25 words or fewer.
+tradition: technical
+level: 5
+usage_type: prepared
+action_cost: 3
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You send the creature a mental message of 25 words or fewer, and
+      it can respond immediately with its own message of 25 words or fewer.

@@ -1,0 +1,22 @@
+id: noxious_spore_cloud
+name: Noxious Spore Cloud
+description: You release a cloud of putrid bio-reactive spores in the area. The cloud
+  functions as fog except it sickens creatures that end their turn inside it on a
+  failed Toughness save.
+tradition: bio_synthetic
+level: 3
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: minutes:1
+save_type: toughness
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You create a cloud of putrid mist in the area. The cloud functions
+      as @UUID[Compendium.pf2e.spells-srd.Item.Mist] except it sickens creatures that
+      end their turns within the cloud. (The @UUID[Compendi

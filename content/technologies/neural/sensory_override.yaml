@@ -1,0 +1,28 @@
+id: sensory_override
+name: Sensory Override
+description: 'The target''s sensory inputs are hijacked, causing them to consistently
+  perceive one thing as another, miss something that''s there, or perceive something
+  that isn''t. You choose which of these effects applies and determine the specifics
+  of the override. For example, you could make the target see a door where there''s
+  a solid wall, or make them unable to see a weapon held against them. The target
+  doesn''t believe the false perception; they simply can''t help perceiving it.
+
+
+  Heightened (6th) You can target up to 10 creatures.'
+tradition: neural
+level: 5
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: The target consistently detects one thing as another, can't detect
+      something that's there, or detects something that's not there, though it doesn't
+      alter their beliefs. You choose which of these effec

@@ -1,0 +1,24 @@
+id: bio_calcium_wall
+name: Bio-Calcium Wall
+description: 'You grow a wall of hardened bio-calcium compound. You create a 1-inch-thick
+  wall up to 120 feet long and 20 feet high. You can shape the wall''s path, placing
+  each 5 feet of the wall on the border between squares. The wall doesn''t need to
+  stand vertically, so you can use it to form a bridge or set of stairs.
+
+
+  Heightened (+2) The Hit Points of each section increase by 15.'
+tradition: bio_synthetic
+level: 5
+usage_type: prepared
+action_cost: 3
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You shape a wall of solid stone. You create a 1-inch-thick wall of
+      stone up to 120 feet long, and 20 feet high. You can shape the wall's path,
+      placing each 5 feet of the wall on the border between squ

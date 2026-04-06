@@ -1,0 +1,24 @@
+id: spatial_warp_device
+name: Spatial Warp Device
+description: 'You activate a device that instantly teleports you and worn/held items
+  to an unoccupied space within range you can see. If another creature would be brought
+  along, the device fails.
+
+
+  Heightened (5th) Range 1 mile. Don''t need line of sight if you''ve been there before.
+  Temporarily immune for 1 hour.'
+tradition: technical
+level: 4
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You instantly transport yourself and any items you're wearing and
+      holding from your current space to an unoccupied space within range you can
+      see. If this would bring another creature with you—even

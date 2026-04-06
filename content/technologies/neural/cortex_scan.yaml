@@ -1,0 +1,25 @@
+id: cortex_scan
+name: Cortex Scan
+description: With a focused neural probe, you attempt to read the target's surface
+  thoughts. It must attempt a Willpower save. The target then becomes temporarily immune
+  to your cortex scans for 1 hour.
+tradition: neural
+level: 3
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'With a cursory mental touch, you attempt to read the target''s mind.
+      It must attempt a Willpower save. The target then becomes temporarily immune to your
+      mind reading for 1 hour.
+
+
+      Critical Success The targe'

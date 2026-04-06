@@ -1,0 +1,21 @@
+id: reactive_thornwall
+name: Reactive Thornwall
+description: You grow a wall of thorny bio-synthetic vines that lash out at aggressors.
+  When a creature within 30 feet deals damage to you, the vines make a Strike against
+  that creature using your spell attack modifier, dealing 2d8 piercing damage on a
+  hit.
+tradition: bio_synthetic
+level: 2
+usage_type: prepared
+action_cost: 3
+range: ranged
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: A Medium tree sprouts in an unoccupied square within range, its branches
+      capable of striking out at your foes. This animated tree uses your spell attack
+      modifier for its attack rolls and your tech DC

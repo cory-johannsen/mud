@@ -1,0 +1,22 @@
+id: void_sermon
+name: Void Sermon
+description: You whisper entropic doctrinal secrets that carry to your foes' ears.
+  The words weaken their life force. Each target must attempt a Toughness save. All
+  mechanical effects (damage, conditions) remain identical to the base protocol.
+tradition: fanatic_doctrine
+level: 4
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: instant
+save_type: toughness
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You whisper baleful secrets that transcend language and carry magically
+      to the ears of your foes. The words take physical form, weakening the life force
+      of the targets, each of which must attempt a Fo

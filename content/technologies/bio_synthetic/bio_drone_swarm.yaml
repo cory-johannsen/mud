@@ -1,0 +1,22 @@
+id: bio_drone_swarm
+name: Bio-Drone Swarm
+description: You deploy a squadron of bio-engineered pest organisms to harass and
+  overwhelm opponents. The squadron occupies the space of a Large creature and can
+  share space with other creatures. When you activate this protocol, choose a swarm
+  type. All mechanical effects (damage, saves, conditions) remain identical to the
+  base protocol.
+tradition: bio_synthetic
+level: 4
+usage_type: prepared
+action_cost: 3
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: Sometimes the most common irritations can band together and become
+      threats to your enemies. You reach out to the pests and nuisances around you,
+      forming a small squadron of them to harass and occupy y

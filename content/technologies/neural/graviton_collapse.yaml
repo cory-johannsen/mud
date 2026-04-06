@@ -1,0 +1,22 @@
+id: graviton_collapse
+name: Graviton Collapse
+description: You create a sphere of altered gravity using psychokinetic force. All
+  creatures and unsecured objects in the area move towards the center, depending on
+  their Reflex saving throw results.
+tradition: neural
+level: 3
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: instant
+save_type: hustle
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You create a sphere of altered gravity. All creatures and unsecured
+      objects in the area move towards the center, depending on their Reflex saving
+      throws. This follows the rules for forced movement. If

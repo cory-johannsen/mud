@@ -1,0 +1,31 @@
+id: geological_transmutation
+name: Geological Transmutation
+description: 'Area 2 adjacent 10-foot cubes
+
+  You trigger a bio-synthetic reaction that restructures earthen material, turning
+  rock into mud or mud into rock. Choose one option when you activate the tech.
+
+
+  Rock to Mud You transform non-magical, unworked, and unattended stone in the area
+  into an equal volume of mud.
+
+  Mud to Rock You transform non-magical mud orite earth in the area into solid stone.'
+tradition: bio_synthetic
+level: 5
+usage_type: prepared
+action_cost: 3
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'Area 2 adjacent 10-foot cubes
+
+      You warp the structure of earthen material, turning rock into mud or mud into
+      rock. Choose one of these two options when you Use this tech.
+
+
+      Rock to Mud You transform no'

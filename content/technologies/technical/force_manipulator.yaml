@@ -1,0 +1,21 @@
+id: force_manipulator
+name: Force Manipulator
+description: You deploy a force manipulation field to grab, push, or trip a creature
+  within range. Attempt an Athletics check against the target's Fortitude DC. You
+  can perform a Disarm, Grapple, Shove, or Trip against the target using your spellcasting
+  modifier instead of Athletics.
+tradition: technical
+level: 2
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: attack
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: With a rush of telekinetic power, you move a foe or something they
+      carry. You can attempt to @UUID[Compendium.pf2e.actionspf2e.Item.Disarm], @UUID[Compendium.pf2e.actionspf2e.Item.Shove],
+      @UUID[Compen

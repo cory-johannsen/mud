@@ -1,0 +1,23 @@
+id: pocket_dimension_hatch
+name: Pocket Dimension Hatch
+description: 'You deploy a device that opens a portal into an extradimensional space
+  on an unbroken surface. Any creature can Interact to enter. The space beyond is
+  20 feet in each dimension, empty with grid lines.
+
+  If the access point is disrupted or over-capacity is attempted, the space collapses,
+  ejecting one creature per round until empty.'
+tradition: technical
+level: 4
+usage_type: prepared
+action_cost: 2
+range: melee
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You draw a chalk doorway on an unbroken surface, which opens into
+      an extradimensional space. Any creature treating the drawing as an actual door
+      can Interact to touch the doorknob and pass through. Th

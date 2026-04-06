@@ -1,0 +1,22 @@
+id: data_wipe
+name: Data Wipe
+description: You hack into a creature's neural implants and delete specific knowledge.
+  Choose a word when you activate this tech. On a failed save, the target loses all
+  knowledge of the chosen word for the duration.
+tradition: technical
+level: 3
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: instant
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You reach into a creature's mind and extract its knowledge of a word.
+      Choose a word to excise when you Use this tech. The word must be a mundane
+      word, not a proper noun, and not a word of power such

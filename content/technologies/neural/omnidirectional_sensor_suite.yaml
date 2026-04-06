@@ -1,0 +1,21 @@
+id: omnidirectional_sensor_suite
+name: Omnidirectional Sensor Suite
+description: Neural optic implants activate across the touched creature's body, allowing
+  it to perceive in all directions at once. The subject can't be flanked for the spell's
+  duration. In addition, when the subject succeeds when Seeking, it critically succeeds
+  instead.
+tradition: neural
+level: 4
+usage_type: prepared
+action_cost: 2
+range: melee
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: Eyes form across the touched creature's body, allowing it to see
+      in all directions at once. The subject can't be flanked for the spell's duration.
+      In addition, when the subject succeeds when Seeking,

@@ -1,0 +1,91 @@
+id: heretic_horde_summon
+name: Heretic Horde Summon
+description: Reaching out to the disgraced and excommunicated, you call upon them
+  for assistance. They emerge from the shadows of condemned sectors, and stand to
+  face your enemies, fanatical and ready for bloodshed. The horde occupies the space
+  of a Huge creature. When you activate this tech, choose one of the heretic squadrons
+  below to summon.Asuras Speed 40 feetArrive Dance of Duality A legion of adhukaits
+  arrive on the field, dancing and scurrying in and among your enemy's front line.
+  All enemies in a @Template[emanation|distance:10] take @Damage[10d6[slashing]|options:area-damage]
+  damage (@Check[reflex|basic|options:area-effect] save) as the adhukaits slash at
+  them with their kukris.Depart Split Remembrance As the adhukaits begin to retreat,
+  they argue about who did the most damage and decide to see which half is stronger.
+  All enemies in a @Template[emanation|distance:20] take @Damage[6d6[bludgeoning]|options:area-damage]
+  damage (@Check[fortitude|basic|options:area-effect,inflicts:clumsy] save) as they're
+  violently yanked by adhukaits. On a failure, a creature is Clumsy 1 for 1 minute
+  (Clumsy 2 on a critical failure).Daemons Speed 25 feet, fly 40 feetArrive (disease)
+  Winds of Pestilence Leukodaemons fly into position, their wings beating with the
+  dust of a thousand diseases of a thousand years. Enemies in a @Template[cone|distance:60]
+  take @Damage[8d8[piercing]|traits:disease|options:area-damage] damage (@Check[fortitude|basic|options:area-effect,inflicts:sickened|traits:disease]
+  save). On a failure, a creature is also Sickened 1 (Sickened 2 on a critical failure).Depart
+  (disease) Remember Me The leukodaemons claw at your enemies with their infected
+  nails. All enemies in a @Template[emanation|distance:10] take @Damage[6d6[slashing]|traits:disease|options:area-damage]
+  damage (@Check[reflex|basic|options:area-effect,inflicts:drained|traits:disease]
+  save). On a failure, a creature is also Drained 1 (Drained 2 on a critical failure).Demons
+  Speed 25 feetArrive (fire) Fuming Entrance A legion of brimoraks arrive in clouds
+  of thick black smoke. The army's space and every square in a @Template[emanation|distance:20]
+  is choked with burning ash and smog, making all creatures outside the smoke @UUID[Compendium.pf2e.conditionitems.Item.Concealed]
+  to creatures within it and all creatures within the smoke concealed to creatures
+  outside the smoke and other creatures within it. This smoke lasts for 1 minute,
+  and a creature who enters or begins its turn within the smoke must attempt a @Check[fortitude|options:area-effect,inflicts:sickened|traits:fire]
+  save or take @Damage[2d6[persistent, fire]|options:area-damage] damage and become
+  sickened 1 (@Damage[3d6[persistent,fire]] damage and sickened 2 on a critical failure).Depart
+  (fire) Swords of Flame The arson demons swing their flaming swords through your
+  enemies' ranks. All enemies in a @Template[emanation|distance:10] take @Damage[(4d8)[slashing],(3d6)[fire]|options:area-damage]
+  (@Check[reflex|basic|options:area-effect|traits:fire] save). On a critical failure,
+  a creature also takes @Damage[2d8[persistent,fire]|options:area-damage] damage.Devils
+  Speed 25 feetArrive (spirit) Diabolic Infantry A legion of vordines swarm the battlefield.
+  All enemies in a @Template[emanation|distance:20] take @Damage[4d10[piercing],2d6[spirit]|options:area-damage]
+  damage (@Check[reflex|basic|options:area-effect|traits:spirit] save) as the vordines
+  impale them with their tridents.Depart (nonlethal) Whipped and Tripped The devils'
+  whips lengthen impossibly to flense flesh from soul. Enemies in two non-intersecting
+  40-foot lines take @Damage[6d8[bludgeoning]|traits:nonlethal|options:area-damage]
+  damage (@Check[reflex|basic|options:area-effect,inflicts:prone,inflicts:immobilized|traits:spirit]
+  save). On a failure, a creature is also knocked @UUID[Compendium.pf2e.conditionitems.Item.Prone].
+  On a critical failure, it's also knocked prone and @UUID[Compendium.pf2e.conditionitems.Item.Immobilized]
+  for 1 round.Divs Speed 35 feetArrive (mental) Deceptive Delight A battalion of sepids
+  arrives to torment your enemies. Enemies in a @Template[cone|distance:60] take @Damage[6d6[mental]|options:area-damage]
+  damage (@Check[will|basic|options:area-effect,inflicts:confused|traits:mental] save).
+  On a failure, a creature is @UUID[Compendium.pf2e.conditionitems.Item.Confused]
+  for 1 round.Depart (spirit) Battle Debris The sepids slam their falchions into the
+  remnants of the chaos of battle, shattering bones, which explode out in a @Template[emanation|distance:30].
+  All non-fiends in the area take @Damage[8d6[slashing],3d6[spirit]|options:area-damage]
+  damage from debris (@Check[reflex|basic|options:area-effect|traits:spirit] save).Qlippoths
+  Speed 40 feet, climb 40 feet, fly 40 feetArrive (visual) Terrifying Scuttle A horde
+  of gongorinans opens their maws to reveal the horror inside. All enemies in a @Template[cone|distance:60]
+  must succeed at a @Check[will|options:area-effect,inflicts:sickened,inflicts:blinded|traits:visual]
+  save or be sickened 2 (sickened 2 and @UUID[Compendium.pf2e.conditionitems.Item.Blinded]
+  for 1 round on a critical failure).Depart Pincer Assault The gongorinans lash out
+  at everyone. All enemies in a @Template[emanation|distance:20] take @Damage[6d12[slashing]|options:area-damage]
+  damage (@Check[reflex|basic|options:area-effect] save).Velstracs Speed 25 feetArrive
+  Chains of Pain A legion of sacristans emerges from the shadows, their barbed chains
+  wrapping around enemy limbs to prevent all escape. Enemies in a @Template[emanation|distance:20]
+  must attempt a @Check[reflex|options:area-effect] save. On a failure, they take
+  a –10-foot circumstance penalty to their Speeds and @Damage[2d6[bleed]|options:area-damage]
+  damage. On a critical failure they take a –20-foot circumstance penalty to their
+  Speeds and @Damage[4d6[bleed]] damage. This penalty to Speeds lasts until they recover
+  from their persistent bleed damageDepart Pleasant Screams The sacristans rip their
+  chains from their victims, screaming in unison with their pain. Any enemies who
+  failed the initial Reflex save during the sacristans' arrival take @Damage[4d8[piercing]]
+  damage (@Check[fortitude|basic]). In addition, everyone in a @Template[cone|distance:60]
+  must attempt a @Check[will|options:area-effect,inflicts:frightened,inflicts:deafened|traits:auditory,emotion,fear,mental]
+  save. On a failure, they're Frightened 2 and @UUID[Compendium.pf2e.conditionitems.Item.Deafened]
+  for 1 minute (Frightened 3 and deafened for 1 minute on a critical failure); this
+  effect has the auditory, emotion, fear, and mental traits.
+tradition: fanatic_doctrine
+level: 8
+usage_type: prepared
+action_cost: 3
+range: ranged
+targets: single
+duration: instant
+save_type: hustle
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: Reaching out to the legions of the wicked, you call upon them for
+      assistance. They emerge, bubbling up from the ground, and stand to face your
+      enemies, malevolent and ready for bloodshed. The unholy a

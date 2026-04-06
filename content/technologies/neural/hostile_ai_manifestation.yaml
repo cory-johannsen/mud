@@ -1,0 +1,30 @@
+id: hostile_ai_manifestation
+name: Hostile AI Manifestation
+description: You summon a rogue AI construct, anchoring it to the area to terrorize
+  and harm opponents. Because the AI is a digital projection, it can't be attacked
+  or hurt; it remains Invisible unless otherwise stated. When you Use this tech,
+  and the first time you Sustain it on subsequent rounds, the AI creates your choice
+  of one of the following effects.Entropic Assault (negative) The AI focuses on one
+  creature in the area and surges through that creature's space, dealing @Damage[(4
+  + floor((@item.rank - 4)/2))d10[void]] damage (basic Toughness save).Terror Protocol
+  (emotion, fear, mental) The AI manifests as a horrifying digital specter. Creatures
+  in the area must attempt a Willpower save, becoming Frightened 2 on a failure.Telekinetic
+  Barrage (force) The AI hurls debris and hard-light objects around the area. All
+  creatures take @Damage[(4 + floor((@item.rank - 4)/2))d8[force]] damage (basic Reflex
+  save).Heightened (+2) The entropic assault damage increases by 1d10, and the telekinetic
+  barrage damage increases by 1d8.
+tradition: neural
+level: 4
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You create an echo of a powerful poltergeist, temporarily anchoring
+      it to the area to terrorize and harm any opponents foolish enough to remain
+      in the area. Because the poltergeist is a manifestation

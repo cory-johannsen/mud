@@ -1,0 +1,38 @@
+id: terror_frequency
+name: Terror Frequency
+description: 'You bombard the target with a subsonic frequency calibrated to trigger
+  their deepest fears. The target takes 4d6 mental damage with a Will saving throw.Critical
+  Success The target is unaffected.
+
+  Success The target takes half damage and becomes Frightened 1.
+
+  Failure The target takes full damage and becomes Frightened 2.
+
+  Critical Failure The target takes double damage and becomes Frightened 3.Heightened
+  (+1) Increase the damage by 2d6.'
+tradition: technical
+level: 3
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+  on_success:
+  - type: damage
+    dice: 4d3
+    damage_type: mental
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 4d6
+    damage_type: mental
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 8d6
+    damage_type: mental
+    dc: 0

@@ -1,0 +1,20 @@
+id: bio_monitor_graft
+name: Bio-Monitor Graft
+description: You implant a bio-sensor in the target that monitors its vital signs.
+  You can sense when the target takes damage, provided you're within 1 mile. If the
+  target drops to half HP, you are alerted immediately.
+tradition: bio_synthetic
+level: 3
+usage_type: prepared
+action_cost: 2
+range: melee
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: When you cast this tech, you place a failsafe deep within the life
+      force of the target. You can sense when the target takes damage, provided you're
+      within 1 mile of one another. A creature can be par

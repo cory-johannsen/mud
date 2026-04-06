@@ -1,0 +1,32 @@
+id: collective_absorption
+name: Collective Absorption
+description: You create a psychic gestalt entity that feeds on the minds of those
+  it destroys. The gestalt appears in an unoccupied space within 30 feet. Each creature
+  it destroys causes it to grow more powerful, increasing its attack bonus and damage
+  by 2 and gaining 20 temporary HP. It follows your instructions and lasts for 1 minute.
+tradition: neural
+level: 9
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: minutes:1
+save_type: toughness
+save_dc: 15
+resolution: save
+effects:
+  on_success:
+  - type: damage
+    dice: 14d3
+    damage_type: void
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 14d6
+    damage_type: void
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 28d6
+    damage_type: void
+    dc: 0

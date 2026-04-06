@@ -1,0 +1,19 @@
+id: phantom_squad
+name: Phantom Squad
+description: You project six psychic constructs into physical form. When you activate
+  this tech, you decide their appearance and whether they're Small or Medium. They
+  occupy space and can flank, but each is destroyed by any amount of damage.
+tradition: neural
+level: 3
+usage_type: prepared
+action_cost: 3
+range: zone
+targets: zone
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: damage
+    dice: 1d4
+    damage_type: untyped
+    dc: 0

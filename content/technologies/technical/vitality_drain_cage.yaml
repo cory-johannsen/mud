@@ -1,0 +1,45 @@
+id: vitality_drain_cage
+name: Vitality Drain Cage
+description: You deploy a hard-light restraint cage that materializes around the target
+  and siphons its vitality for your gain. Deals 4d4 piercing and 4d4 void damage,
+  target attempts Toughness save. You gain temporary HP equal to void damage taken.
+  All mechanical effects (immobilized, escape) remain identical.Heightened (+1) Piercing
+  and void damage +1d4 each.
+tradition: technical
+level: 4
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+save_type: toughness
+save_dc: 15
+resolution: save
+effects:
+  on_success:
+  - type: damage
+    dice: '4'
+    damage_type: piercing
+    dc: 0
+  - type: damage
+    dice: '4'
+    damage_type: void
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 4d4
+    damage_type: piercing
+    dc: 0
+  - type: damage
+    dice: 4d4
+    damage_type: void
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 8d4
+    damage_type: piercing
+    dc: 0
+  - type: damage
+    dice: 8d4
+    damage_type: void
+    dc: 0

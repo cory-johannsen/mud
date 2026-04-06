@@ -1,0 +1,22 @@
+id: sinkhole_gland
+name: Sinkhole Gland
+description: You secrete a chemical compound that liquefies the ground into a conical
+  pit trap of loose substrate. The area becomes difficult terrain for the duration.
+  A creature that enters the area must attempt a Reflex save or fall to the bottom.
+tradition: bio_synthetic
+level: 3
+usage_type: prepared
+action_cost: 3
+range: zone
+targets: zone
+duration: minutes:1
+save_type: hustle
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You transmute the ground into a conical pit trap of loose sand that
+      becomes difficult terrain for the duration. A creature or unsecured object that
+      enters the sand or starts its turn in the sand is mo

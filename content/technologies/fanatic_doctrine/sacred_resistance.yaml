@@ -1,0 +1,25 @@
+id: sacred_resistance
+name: Sacred Resistance
+description: 'You invoke doctrinal protection against a type of energy. Choose acid,
+  cold, electricity, fire, or sonic. The target gains resistance 5 to that energy
+  type for the duration.
+
+
+  Heightened (4th) The resistance increases to 10.
+
+  Heightened (7th) The resistance increases to 15.'
+tradition: fanatic_doctrine
+level: 2
+usage_type: prepared
+action_cost: 2
+range: melee
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: A shield of elemental energy protects a creature against one type
+      of energy damage. Choose acid, cold, electricity, fire, or sonic damage. The
+      target and its gear gain resistance 5 against the damage

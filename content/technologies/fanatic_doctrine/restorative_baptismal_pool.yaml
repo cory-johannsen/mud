@@ -1,0 +1,23 @@
+id: restorative_baptismal_pool
+name: Restorative Baptismal Pool
+description: 'Steam rises as a consecrated pool forms in the ground, filling with
+  warm mineral water. Any creature that spends the full hour soaking regains 10d8
+  Hit Points and loses the fatigued condition. The pool is 20 feet on each side, 5
+  feet deep, holds 16 Medium or smaller creatures. This pool has the structure trait.
+
+
+  Heightened (+1) The healing increases by 2d8.'
+tradition: fanatic_doctrine
+level: 4
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: damage
+    dice: 10d8
+    damage_type: vitality
+    dc: 0

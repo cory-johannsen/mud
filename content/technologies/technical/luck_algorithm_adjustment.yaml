@@ -1,0 +1,17 @@
+id: luck_algorithm_adjustment
+name: Luck Algorithm Adjustment
+description: Run a probability-tweak subroutine that biases one upcoming random outcome in your favor.
+tradition: technical
+level: 1
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You bestow yourself supernaturally good luck at cards, dice, and other games of chance. You gain a +1 status
+      bonus to Games Lore checks to gamble, and if you roll a critical failure on such a check, y

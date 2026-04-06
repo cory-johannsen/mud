@@ -1,0 +1,23 @@
+id: sensor_blackout
+name: Sensor Blackout
+description: You hack a single sensor device, preventing it from being used for surveillance
+  or remote observation. If you target a non-augmented device used for scrying, the
+  device can't be used for that purpose. If you target an augmented device that can
+  cast scrying protocols, the device is suppressed. Even devices you've blinded can't
+  be used to target the area with remote observation protocols. This tech doesn't
+  prevent creatures from simply looking at the object with their own eyes.
+tradition: neural
+level: 5
+usage_type: prepared
+action_cost: 2
+range: melee
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You enchant a single object, preventing it from being used for magical
+      observation. If you cast this tech on a non-magical item used to cast scrying
+      spells, such as a spell component pouch or a spell

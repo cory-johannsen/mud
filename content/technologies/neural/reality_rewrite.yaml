@@ -1,0 +1,23 @@
+id: reality_rewrite
+name: Reality Rewrite
+description: You rewrite local reality according to your specifications. You can produce
+  any effect of 9th rank or lower, or produce a unique effect subject to GM approval.
+  The effect is permanent unless you specify otherwise. You can alter reality once;
+  this exhausts the protocol.
+tradition: neural
+level: 10
+usage_type: prepared
+action_cost: 3
+range: self
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'You use your occult lore and the power of your mind to manipulate
+      the spiritual multiverse, resulting in any of the following effects:
+
+
+      Duplicate any occult spell of 9th rank or lower to which you hav'

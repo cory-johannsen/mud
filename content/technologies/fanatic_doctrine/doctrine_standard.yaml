@@ -1,0 +1,21 @@
+id: doctrine_standard
+name: Doctrine Standard
+description: You project a massive holographic banner representing your doctrine.
+  This banner is 30 feet tall, 30 feet wide, and hovers 20 feet above the target.
+  Allies within 30 feet gain a +1 status bonus to attack rolls, saving throws, and
+  skill checks. Enemies within 30 feet take a -1 status penalty to Will saves.
+tradition: fanatic_doctrine
+level: 5
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You create an illusory banner representing a revolution, social movement,
+      or organization such as the Firebrands. This banner is 30 feet tall, 30 feet
+      wide, and hovers 20 feet in the air above the tar

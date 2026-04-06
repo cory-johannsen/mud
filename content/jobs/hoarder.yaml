@@ -39,9 +39,9 @@ class_features:
 technology_grants:
   prepared:
     pool:
-      - { id: carryall_technical, level: 1 }
-      - { id: pet_cache_technical, level: 1 }
-      - { id: ant_haul_technical, level: 1 }
+      - { id: telekinetic_load_platform, level: 1 }
+      - { id: subspace_storage_unit, level: 1 }
+      - { id: load_bearing_exo_frame, level: 1 }
 drawbacks:
   - id: encumbrance_compulsion
     type: passive

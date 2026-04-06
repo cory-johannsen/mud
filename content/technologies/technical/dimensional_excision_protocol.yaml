@@ -1,0 +1,42 @@
+id: dimensional_excision_protocol
+name: Dimensional Excision Protocol
+description: You excise a target from local spacetime. The target must attempt a Will
+  save. On a failure, it is removed from play until the start of your next turn.
+tradition: technical
+level: 9
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+  on_success:
+  - type: damage
+    dice: 14d6
+    damage_type: untyped
+    dc: 0
+  - type: damage
+    dice: 2d6
+    damage_type: bleed
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 14d10
+    damage_type: untyped
+    dc: 0
+  - type: damage
+    dice: 2d10
+    damage_type: bleed
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 28d10
+    damage_type: untyped
+    dc: 0
+  - type: damage
+    dice: 4d10
+    damage_type: bleed
+    dc: 0

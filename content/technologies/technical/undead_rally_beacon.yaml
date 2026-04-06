@@ -1,0 +1,22 @@
+id: undead_rally_beacon
+name: Undead Rally Beacon
+description: You activate a beacon that broadcasts enhancement signals to undead and
+  terror frequencies to the living. All mechanical effects (quickened undead, frightened
+  living) remain identical to the base protocol.
+tradition: technical
+level: 4
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: instant
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You chant a marching song of Yled to empower the undead and terrify
+      the living. Undead creatures within the area gain the @UUID[Compendium.pf2e.conditionitems.Item.Quickened]
+      condition for 1 minute, w

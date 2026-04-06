@@ -1,0 +1,42 @@
+id: bio_extraction_pulse
+name: Bio-Extraction Pulse
+description: 'With a chemical command signal, you rupture capillaries throughout the
+  target''s face, causing streams of blood to erupt from every opening. You deal 8d4
+  void damage to the target.
+
+  If the target takes damage, you can absorb the extracted biomatter. If you''re a
+  living creature and don''t have void healing, you''re Sickened 2. If you''re undead
+  (or living but have void healing), you can choose to gain temporary Hit Points equal
+  to half of the void damage (after applying resistance) and become Quickened for
+  1 round, or forgo the temporary Hit Points and become quickened for 1 minute. You
+  can use this extra action only to Step, Stride, or Strike. You lose remaining temporary
+  Hit Points after 1 minute.
+
+
+  Heightened (+1) The damage increases by 2d4.'
+tradition: bio_synthetic
+level: 4
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+save_type: toughness
+save_dc: 15
+resolution: save
+effects:
+  on_success:
+  - type: damage
+    dice: '8'
+    damage_type: void
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 8d4
+    damage_type: void
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 16d4
+    damage_type: void
+    dc: 0

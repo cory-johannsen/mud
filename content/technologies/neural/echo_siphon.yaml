@@ -1,0 +1,31 @@
+id: echo_siphon
+name: Echo Siphon
+description: 'You psychically steal the last words spoken by the target. You hear
+  the last sentence the target spoke and the target must attempt a Willpower save.
+
+
+  Critical Success The target is unaffected and knows you tried to read its mind.
+
+  Success You hear the last sentence the target spoke.
+
+  Failure As success, and the target forgets it spoke those words.
+
+  Critical Failure As failure, and you can choose to implant different words as the
+  target''s memory of what it said.'
+tradition: neural
+level: 2
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You call forth an echo of the gossiping parrot from the tale of the
+      Witch and the Weaver to whisper the secrets of a creature you can see within
+      range. The garrulous parrot is known to chatter on for

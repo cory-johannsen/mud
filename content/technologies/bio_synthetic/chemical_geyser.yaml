@@ -1,0 +1,49 @@
+id: chemical_geyser
+name: Chemical Geyser
+description: 'Area 10-foot radius, 50-foot-tall cylinder
+
+  A powerful geyser of superheated chemical compound blasts up from the ground. The
+  bottom of this tech''s area must be on solid ground. Each creature in the area takes
+  3d6 bludgeoning damage and 4d6 fire damage, with a Reflex save. A creature that
+  fails is also pushed to the top of the geyser.
+
+
+  Heightened (+2) The fire damage increases by 2d6.'
+tradition: bio_synthetic
+level: 5
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: rounds:1
+save_type: hustle
+save_dc: 15
+resolution: save
+effects:
+  on_success:
+  - type: damage
+    dice: 3d3
+    damage_type: bludgeoning
+    dc: 0
+  - type: damage
+    dice: 4d3
+    damage_type: fire
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 3d6
+    damage_type: bludgeoning
+    dc: 0
+  - type: damage
+    dice: 4d6
+    damage_type: fire
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 6d6
+    damage_type: bludgeoning
+    dc: 0
+  - type: damage
+    dice: 8d6
+    damage_type: fire
+    dc: 0

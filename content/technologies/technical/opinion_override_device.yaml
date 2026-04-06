@@ -1,0 +1,25 @@
+id: opinion_override_device
+name: Opinion Override Device
+description: 'You deploy a device that ensures the target can only express favorable
+  opinions about a chosen subject. All mechanical effects (saves, durations) remain
+  identical to the base protocol.
+
+
+  Heightened (8th) Range increases to 60 feet, up to 10 targets.'
+tradition: technical
+level: 4
+usage_type: prepared
+action_cost: 2
+range: melee
+targets: single
+duration: instant
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You enchant a creature to ensure they have only good things to say
+      about your show. Identify a single creature, location, or performance, such
+      as "Dame Ellendia," "Savories Meats," or "the Theater of

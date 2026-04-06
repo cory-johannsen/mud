@@ -1,0 +1,40 @@
+id: nutrient_blocker
+name: Nutrient Blocker
+description: 'You deploy a device that blocks the target''s nutrient absorption pathways.
+  The target must attempt a Toughness save.
+
+
+  Critical Success The creature is unaffected.
+
+  Success The creature requires twice as much food as normal for 1 day.
+
+  Failure The creature gains no nourishment from eating for 1 week and must attempt
+  Toughness saves against starvation.
+
+  Critical Failure As failure, but the duration is 1 month.'
+tradition: technical
+level: 2
+usage_type: prepared
+action_cost: 3
+range: ranged
+targets: single
+duration: instant
+save_type: toughness
+save_dc: 15
+resolution: save
+effects:
+  on_success:
+  - type: damage
+    dice: '1'
+    damage_type: untyped
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 1d4
+    damage_type: untyped
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 2d4
+    damage_type: untyped
+    dc: 0

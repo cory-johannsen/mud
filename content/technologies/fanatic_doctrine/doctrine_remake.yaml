@@ -1,0 +1,21 @@
+id: doctrine_remake
+name: Doctrine Remake
+description: 'You invoke doctrinal power to remake reality. Choose one: restore a
+  destroyed or dead creature within 1 minute to full health, reverse a curse or permanent
+  condition, rewrite a creature''s memories of the last 24 hours, or produce any other
+  divine alteration subject to GM approval.'
+tradition: fanatic_doctrine
+level: 10
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You fully re-create an object from nothing, even if the object was
+      destroyed. To do so, you must be able to picture the object in your mind. Additionally,
+      the material component must be a remnant of t

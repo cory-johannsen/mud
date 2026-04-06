@@ -1,0 +1,28 @@
+id: temporal_bog
+name: Temporal Bog
+description: 'You corrupt the local timestream, thickening and slowing it until everything
+  moves at a crawl. Any creature that begins its turn in the area must attempt a Will
+  save.
+
+  Success The creature is unaffected.
+
+  Failure The creature is Slowed 1 for 1 round.
+
+  Critical Failure The creature is Slowed 2 for 1 round.'
+tradition: neural
+level: 5
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: minutes:1
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You examine the time stream in a particular area, then proceed to
+      stick a few metaphorical pins into it, thickening and slowing down the flow
+      of time until it rumbles along like a river of molasses. A

@@ -1,0 +1,23 @@
+id: microdrone_swarm
+name: Microdrone Swarm
+description: You deploy a squadron of hostile microdrones to harass and overwhelm
+  your opponents. The drone squadron occupies the space of a Large creature and can
+  occupy the same space as other creatures. When you Use this tech, choose one of
+  the drone loadouts below to deploy. All mechanical effects (damage dice, save types,
+  conditions, DCs) remain identical to the base protocol. Choose a loadout to determine
+  arrival and departure effects.
+tradition: neural
+level: 4
+usage_type: prepared
+action_cost: 3
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: Sometimes the most common irritations can band together and become
+      threats to your enemies. You reach out to the pests and nuisances around you,
+      forming a small squadron of them to harass and occupy y

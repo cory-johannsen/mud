@@ -1,0 +1,23 @@
+id: adrenal_surge
+name: Adrenal Surge
+description: You flood the target's system with synthetic adrenaline, dramatically
+  accelerating its reactions. It gains the Quickened condition and can use the extra
+  action each round to Strike, Stride, or Step.
+tradition: bio_synthetic
+level: 3
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'Magic empowers the target to act faster. It gains the @UUID[Compendium.pf2e.conditionitems.Item.Quickened]
+      condition and can use the extra action each round only for Strike and Stride
+      actions.
+
+
+      Height'

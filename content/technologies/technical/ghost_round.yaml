@@ -1,0 +1,31 @@
+id: ghost_round
+name: Ghost Round
+description: Trigger An ally within 20 feet makes a ranged attack roll. You deploy
+  a holographic duplicate of the attack. The target is Flat-Footed against the triggering
+  attack.
+tradition: technical
+level: 3
+usage_type: prepared
+action_cost: 0
+range: self
+targets: single
+duration: instant
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+  on_success:
+  - type: damage
+    dice: 3d4
+    damage_type: mental
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 3d8
+    damage_type: mental
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 6d8
+    damage_type: mental
+    dc: 0

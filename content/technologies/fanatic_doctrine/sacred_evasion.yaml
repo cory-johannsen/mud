@@ -1,0 +1,23 @@
+id: sacred_evasion
+name: Sacred Evasion
+description: 'You invoke a doctrinal movement protocol that guides the target in evasive
+  patterns. The target gains a +1 status bonus to AC and Reflex saves and a +5-foot
+  status bonus to Speed for the duration.
+
+
+  @UUID[Compendium.pf2e.spell-effects.Item.tech Effect: Coiling Dance]'
+tradition: fanatic_doctrine
+level: 2
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You perform a dance that seeks to pass on the knowledge and wisdom
+      of a naga. Your allies in the area are filled with sacred energy, making their
+      spells and attacks holy. Creatures or effects that wou

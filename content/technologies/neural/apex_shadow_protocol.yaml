@@ -1,0 +1,23 @@
+id: apex_shadow_protocol
+name: Apex Shadow Protocol
+description: You manifest a living shadow construct of supreme potency. It appears
+  in an unoccupied space within 60 feet and follows your commands. It uses the statistics
+  of an unspeakable shadow. It acts on your initiative. When destroyed or when the
+  duration expires, it dissipates.
+tradition: neural
+level: 9
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You alter a creature's shadow, transforming it into a terrifying
+      monster out to devour the creature. The creature must attempt a Willpower save. A
+      creature that has the frightened condition from unspeakabl

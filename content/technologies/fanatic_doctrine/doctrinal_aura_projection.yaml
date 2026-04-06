@@ -1,0 +1,40 @@
+id: doctrinal_aura_projection
+name: Doctrinal Aura Projection
+description: 'Doctrinal power wards the targets, granting each a +1 status bonus to
+  AC and saves while in the area.
+
+  Choose an alignment your deity has (chaotic, evil, good, or lawful). You can''t
+  activate this tech if you don''t have a deity or your deity is true neutral. This
+  tech gains the trait of the alignment you chose. The bonuses granted by the tech
+  increase to +2 against attacks by-and effects created by-creatures with an alignment
+  opposite to the tech (lawful if you chose chaotic, evil if you chose good). These
+  bonuses increase to +4 against effects created by such creatures that attempt to
+  impose the @UUID[Compendium.pf2e.conditionitems.Item.Controlled] condition on a
+  target of your doctrinal aura, as well as against attacks made by creatures summoned
+  by anything opposite in alignment to your doctrinal aura.
+
+  When a creature of opposite alignment hits a target with a melee attack, the creature
+  must succeed at a Willpower save or be @UUID[Compendium.pf2e.conditionitems.Item.Blinded]
+  for 1 minute. It''s then temporarily immune for 1 minute.
+
+  The first time you Sustain the tech each round, the doctrinal aura''s radius grows
+  10 feet.'
+tradition: fanatic_doctrine
+level: 8
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: minutes:1
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'Divine power wards the targets, granting each a +1 status bonus
+      to AC and saves while in the area.
+
+      Choose an alignment your deity has (chaotic, evil, good, or lawful). You can''t
+      cast this tech if you'

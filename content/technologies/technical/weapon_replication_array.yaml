@@ -1,0 +1,24 @@
+id: weapon_replication_array
+name: Weapon Replication Array
+description: 'Area 30-foot cone or 10-foot emanation
+
+  You swing a weapon you''re holding, and the device replicates it into a storm of
+  duplicate projectiles that tear through the area. All mechanical effects remain
+  identical to the base protocol.'
+tradition: technical
+level: 4
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: instant
+save_type: hustle
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: Area 30-foot cone or 10-foot emanationYou swing a weapon you're holding,
+      and the weapon magically multiplies into duplicates that swipe at all creatures
+      in either a cone or an emanation. This flurry d

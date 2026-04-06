@@ -1,0 +1,17 @@
+id: smart_wardrobe_interface
+name: Smart Wardrobe Interface
+description: Access a wireless clothing control system that adjusts outfit appearance on demand.
+tradition: technical
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: The target's clothes are transformed into ostentatious attire that epitomizes high-end local fashion. No
+      details of the target's appearance transform other than their clothes, so their weapons or armo

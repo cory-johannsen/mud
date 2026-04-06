@@ -14,45 +14,45 @@ technology_grants:
     slots_by_level:
       1: 2
     pool:
-    - id: force_barrage_technical
+    - id: multi_round_kinetic_volley
       level: 1
-    - id: scorching_blast_technical
+    - id: thermal_plasma_fist
       level: 1
-    - id: shocking_grasp_technical
+    - id: high_voltage_contact_discharge
       level: 1
-    - id: thunderstrike_technical
+    - id: emp_thunder_discharge
       level: 1
-    - id: snowball_technical
+    - id: cryo_gel_projectile
       level: 1
-    - id: sleep_technical
+    - id: soporific_aerosol_grenade
       level: 1
-    - id: grease_technical
+    - id: lubricant_spray_system
       level: 1
-    - id: leaden_steps_technical
+    - id: magnetic_anchor_system
       level: 1
-    - id: enfeeble_technical
+    - id: muscle_inhibitor_field
       level: 1
-    - id: gravitational_pull_technical
+    - id: grav_spike_projector
       level: 1
-    - id: mystic_armor_technical
+    - id: force_field_emitter
       level: 1
-    - id: runic_weapon_technical
+    - id: weapon_enhancement_module
       level: 1
-    - id: shielded_arm_technical
+    - id: forearm_shield_extrusion
       level: 1
-    - id: mending_technical
+    - id: nano_repair_injector
       level: 1
-    - id: anticipate_peril_technical
+    - id: threat_prediction_algorithm
       level: 1
-    - id: illusory_disguise_technical
+    - id: full_body_holographic_overlay
       level: 1
-    - id: invisible_item_technical
+    - id: optical_cloaking_wrap
       level: 1
-    - id: lock_technical
+    - id: electronic_deadbolt_override
       level: 1
-    - id: alarm_technical
+    - id: perimeter_sensor_grid
       level: 1
-    - id: pocket_library_technical
+    - id: portable_data_archive
       level: 1
 level_up_grants:
   2:
@@ -64,269 +64,269 @@ level_up_grants:
       slots_by_level:
         2: 2
       pool:
-      - id: acid_arrow_technical
+      - id: corrosive_projectile
         level: 2
-      - id: acid_grip_technical
+      - id: acid_clamp
         level: 2
-      - id: allfood_technical
+      - id: matter_converter
         level: 2
-      - id: animated_assault_technical
+      - id: drone_swarm_strike
         level: 2
-      - id: ash_cloud_technical
+      - id: smoke_screen
         level: 2
-      - id: banishing_touch_technical
+      - id: repulsor_gauntlet
         level: 2
-      - id: beemans_summons_technical
+      - id: name_trigger_beacon
         level: 2
-      - id: befitting_attire_technical
+      - id: holo_wardrobe
         level: 2
-      - id: binding_muzzle_technical
+      - id: jaw_clamp
         level: 2
-      - id: blast_of_the_bellows_technical
+      - id: thermal_vent
         level: 2
-      - id: blazing_armory_technical
+      - id: plasma_arsenal
         level: 2
-      - id: blazing_bolt_technical
+      - id: plasma_bolt
         level: 2
-      - id: blood_duplicate_technical
+      - id: bio_print_clone
         level: 2
-      - id: blood_vendetta_technical
+      - id: retribution_circuit
         level: 2
-      - id: blur_technical
+      - id: refraction_field
         level: 2
-      - id: bone_spray_technical
+      - id: flechette_cannon
         level: 2
-      - id: boneshaker_technical
+      - id: skeletal_overrider
         level: 2
-      - id: brine_dragon_bile_technical
+      - id: acid_spray_nozzle
         level: 2
-      - id: burrow_ward_technical
+      - id: seismic_lock
         level: 2
-      - id: buzzing_servants_technical
+      - id: utility_drones
         level: 2
-      - id: carrion_mire_technical
+      - id: toxic_waste_zone
         level: 2
-      - id: cauterize_wounds_technical
+      - id: laser_cauterizer
         level: 2
-      - id: charitable_urge_technical
+      - id: generosity_hack
         level: 2
-      - id: clad_in_metal_technical
+      - id: reactive_metal_plating
         level: 2
-      - id: cleanse_air_technical
+      - id: air_purifier
         level: 2
-      - id: confetti_cloud_technical
+      - id: chaff_dispersal
         level: 2
-      - id: create_food_technical
+      - id: ration_fabricator
         level: 2
-      - id: dancing_shield_technical
+      - id: auto_shield
         level: 2
-      - id: darkness_technical
+      - id: blackout_generator
         level: 2
-      - id: darkvision_technical
+      - id: nvg_implant
         level: 2
-      - id: deafness_technical
+      - id: acoustic_jammer
         level: 2
-      - id: dismantle_technical
+      - id: deconstructor
         level: 2
-      - id: dispel_magic_technical
+      - id: counter_tech
         level: 2
-      - id: elemental_zone_technical
+      - id: hazard_zone
         level: 2
-      - id: embed_message_technical
+      - id: delayed_transmission
         level: 2
-      - id: empathic_link_technical
+      - id: biometric_link
         level: 2
-      - id: empty_pack_technical
+      - id: compression_module
         level: 2
-      - id: enlarge_technical
+      - id: size_amplifier
         level: 2
-      - id: entangling_flora_technical
+      - id: cable_snare
         level: 2
-      - id: environmental_endurance_technical
+      - id: climate_regulator
         level: 2
-      - id: everlight_technical
+      - id: perpetual_lamp
         level: 2
-      - id: expeditious_excavation_technical
+      - id: rapid_drill
         level: 2
-      - id: exploding_earth_technical
+      - id: ground_charge
         level: 2
-      - id: extract_poison_technical
+      - id: toxin_extractor
         level: 2
-      - id: false_vitality_technical
+      - id: stim_injector
         level: 2
-      - id: falsify_heat_technical
+      - id: thermal_masker
         level: 2
-      - id: farflung_fetch_technical
+      - id: tractor_beam
         level: 2
-      - id: fear_the_sun_technical
+      - id: photon_allergy
         level: 2
-      - id: feast_of_ashes_technical
+      - id: nutrient_blocker
         level: 2
-      - id: final_sacrifice_technical
+      - id: overload_detonation
         level: 2
-      - id: fireproof_technical
+      - id: heat_shield
         level: 2
-      - id: flame_wisp_technical
+      - id: pilot_light_drone
         level: 2
-      - id: floating_flame_technical
+      - id: hovering_torch_drone
         level: 2
-      - id: gecko_grip_technical
+      - id: mag_lock_gloves
         level: 2
-      - id: ghostly_carrier_technical
+      - id: courier_drone
         level: 2
-      - id: heat_metal_technical
+      - id: induction_heater
         level: 2
-      - id: helpful_reload_technical
+      - id: auto_reload
         level: 2
-      - id: helpful_wood_spirits_technical
+      - id: repair_nanobots
         level: 2
-      - id: hidebound_technical
+      - id: ballistic_weave
         level: 2
-      - id: horrifying_blood_loss_technical
+      - id: hemorrhage_amplifier
         level: 2
-      - id: humanoid_form_technical
+      - id: holo_disguise
         level: 2
-      - id: ignite_fireworks_technical
+      - id: fireworks_launch_module
         level: 2
-      - id: illusory_creature_technical
+      - id: holo_construct
         level: 2
-      - id: illusory_shroud_technical
+      - id: displacement_field
         level: 2
-      - id: impeccable_flow_technical
+      - id: gyroscopic_stabilizer
         level: 2
-      - id: instant_armor_technical
+      - id: emergency_exosuit
         level: 2
-      - id: invisibility_technical
+      - id: optical_camouflage
         level: 2
-      - id: iron_gut_technical
+      - id: toxin_filter_module
         level: 2
-      - id: kgalaserkes_axes_technical
+      - id: orbital_blades
         level: 2
-      - id: knock_technical
+      - id: lock_breaker
         level: 2
-      - id: laughing_fit_technical
+      - id: euphoria_injector
         level: 2
-      - id: lock_item_technical
+      - id: magnetic_lock
         level: 2
-      - id: loose_times_arrow_technical
+      - id: temporal_shift
         level: 2
-      - id: lucky_number_technical
+      - id: probability_engine
         level: 2
-      - id: magnetic_attraction_technical
+      - id: mag_pull
         level: 2
-      - id: magnetic_repulsion_technical
+      - id: mag_push
         level: 2
-      - id: mark_of_blood_technical
+      - id: blood_tracer
         level: 2
-      - id: marvelous_mount_technical
+      - id: hover_bike
         level: 2
-      - id: mental_map_technical
+      - id: sonar_mapper
         level: 2
-      - id: mind_games_technical
+      - id: mind_games_protocol
         level: 2
-      - id: mirror_image_technical
+      - id: holo_decoys
         level: 2
-      - id: mist_technical
+      - id: fog_emitter
         level: 2
-      - id: noise_blast_technical
+      - id: noise_blast_cannon
         level: 2
-      - id: oaken_resilience_technical
+      - id: armor_hardener
         level: 2
-      - id: osseous_cage_technical
+      - id: containment_cage
         level: 2
-      - id: pave_ground_technical
+      - id: terrain_leveler
         level: 2
-      - id: peaceful_rest_technical
+      - id: cryo_preservation
         level: 2
-      - id: penumbral_disguise_technical
+      - id: shadow_projector
         level: 2
-      - id: persistent_servant_technical
+      - id: attendant_drone
         level: 2
-      - id: phantasmal_treasure_technical
+      - id: holographic_bait
         level: 2
-      - id: phantom_crowd_technical
+      - id: holographic_crowd_generator
         level: 2
-      - id: propulsive_breeze_technical
+      - id: thrust_assist
         level: 2
-      - id: pyrefowl_rebuke_technical
+      - id: thermal_countermeasure
         level: 2
-      - id: radiant_field_technical
+      - id: flashbang_zone
         level: 2
-      - id: resist_energy_technical
+      - id: energy_dampener
         level: 2
-      - id: revealing_light_technical
+      - id: target_painter
         level: 2
-      - id: rime_slick_technical
+      - id: cryo_slick_sprayer
         level: 2
-      - id: rubble_step_technical
+      - id: debris_field
         level: 2
-      - id: sea_surge_technical
+      - id: hydraulic_cannon
         level: 2
-      - id: see_the_unseen_technical
+      - id: spectrum_analyzer
         level: 2
-      - id: shadow_zombie_technical
+      - id: shadow_drone
         level: 2
-      - id: shape_wood_technical
+      - id: material_shaper
         level: 2
-      - id: shrink_technical
+      - id: miniaturizer
         level: 2
-      - id: slough_skin_technical
+      - id: ablative_shedding
         level: 2
-      - id: splinter_volley_technical
+      - id: needle_storm
         level: 2
-      - id: spys_mark_technical
+      - id: tracking_chip
         level: 2
-      - id: steel_fortifications_technical
+      - id: structural_reinforcement
         level: 2
-      - id: sticky_fire_technical
+      - id: thermite_glob
         level: 2
-      - id: stupefy_technical
+      - id: neural_jammer
         level: 2
-      - id: sudden_bolt_technical
+      - id: arc_discharge
         level: 2
-      - id: summon_elemental_technical
+      - id: summon_construct
         level: 2
-      - id: summoners_precaution_technical
+      - id: eidolon_backup
         level: 2
-      - id: summoners_visage_technical
+      - id: eidolon_hologram
         level: 2
-      - id: swallow_light_technical
+      - id: light_absorber
         level: 2
-      - id: telekinetic_maneuver_technical
+      - id: force_manipulator
         level: 2
-      - id: the_queens_rainbow_technical
+      - id: prismatic_burst
         level: 2
-      - id: thermal_remedy_technical
+      - id: medkit_application
         level: 2
-      - id: timely_tutor_technical
+      - id: skill_module
         level: 2
-      - id: translate_technical
+      - id: universal_translator_module
         level: 2
-      - id: tremorsense_technical
+      - id: seismic_sensor
         level: 2
-      - id: umbral_extraction_technical
+      - id: shadow_siphon
         level: 2
-      - id: umbral_mindtheft_technical
+      - id: data_exfiltrator
         level: 2
-      - id: veil_of_spirits_technical
+      - id: defense_grid
         level: 2
-      - id: vicious_jealousy_technical
+      - id: envy_implant
         level: 2
-      - id: voice_on_the_breeze_technical
+      - id: remote_speaker
         level: 2
-      - id: vomit_swarm_technical
+      - id: drone_burst
         level: 2
-      - id: warping_pull
+      - id: gravity_well
         level: 2
-      - id: warriors_regret_technical
+      - id: pacification_signal
         level: 2
-      - id: water_breathing_technical
+      - id: rebreather_module
         level: 2
-      - id: water_walk_technical
+      - id: surface_walker
         level: 2
-      - id: waterproof_technical
+      - id: sealant_spray
         level: 2
-      - id: web_technical
+      - id: fiber_trap
         level: 2
   4:
     prepared:
@@ -337,229 +337,229 @@ level_up_grants:
       slots_by_level:
         3: 2
       pool:
-      - id: agonizing_despair_technical
+      - id: terror_frequency
         level: 3
-      - id: aqueous_orb_technical
+      - id: containment_sphere
         level: 3
-      - id: bind_undead_technical
+      - id: override_automaton
         level: 3
-      - id: blastback_technical
+      - id: impact_negation_burst
         level: 3
-      - id: blazing_dive_technical
+      - id: jet_dive
         level: 3
-      - id: blindness_technical
+      - id: optic_scrambler
         level: 3
-      - id: blister_bomb_technical
+      - id: corrosive_grenade
         level: 3
-      - id: bone_flense_technical
+      - id: resonance_blade
         level: 3
-      - id: bonewall_bulwark_technical
+      - id: scrap_barricade
         level: 3
-      - id: bottomless_stomach_technical
+      - id: cargo_pocket_module
         level: 3
-      - id: bracing_tendrils_technical
+      - id: mag_lock_anchors
         level: 3
-      - id: casters_imposition_technical
+      - id: tech_jammer
         level: 3
-      - id: cave_fangs_technical
+      - id: spike_trap_array
         level: 3
-      - id: clairaudience_technical
+      - id: remote_mic_drone
         level: 3
-      - id: cloud_dragons_cloak_technical
+      - id: smoke_screen_module
         level: 3
-      - id: conjured_conveyance_technical
+      - id: fabricated_transport
         level: 3
-      - id: coral_scourge_technical
+      - id: corrosion_coating
         level: 3
-      - id: cozy_cabin_technical
+      - id: prefab_shelter
         level: 3
-      - id: crashing_wave_technical
+      - id: concussion_wave
         level: 3
-      - id: croak_voice_technical
+      - id: voice_modulator_hack
         level: 3
-      - id: cup_of_dust_technical
+      - id: moisture_extractor
         level: 3
-      - id: curse_of_lost_time_technical
+      - id: temporal_decay_module
         level: 3
-      - id: days_weight_technical
+      - id: exhaustion_field
         level: 3
-      - id: deep_sight_technical
+      - id: night_vision_module
         level: 3
-      - id: disruptive_transfer_technical
+      - id: disruptive_phase_jump
         level: 3
-      - id: distracting_chatter_technical
+      - id: comm_flood
         level: 3
-      - id: dive_and_breach_technical
+      - id: tunneling_charge
         level: 3
-      - id: dividing_trench_technical
+      - id: trench_cutter
         level: 3
-      - id: dream_message_technical
+      - id: sleep_cycle_broadcast
         level: 3
-      - id: eagles_cry_technical
+      - id: eagle_cry_sonic_cannon
         level: 3
-      - id: earthbind_technical
+      - id: gravity_tether
         level: 3
-      - id: echo_jump_technical
+      - id: flashpoint_teleport
         level: 3
-      - id: elemental_absorption_technical
+      - id: energy_sink_module
         level: 3
-      - id: elemental_annihilation_wave_technical
+      - id: annihilation_projector
         level: 3
-      - id: enthrall_technical
+      - id: hypnotic_broadcast
         level: 3
-      - id: excise_lexicon_technical
+      - id: data_wipe
         level: 3
-      - id: familiars_face_technical
+      - id: drone_relay
         level: 3
-      - id: feet_to_fins_technical
+      - id: aquatic_conversion_kit
         level: 3
-      - id: fireball_technical
+      - id: plasma_grenade
         level: 3
-      - id: firework_blast
+      - id: flashbang_salvo
         level: 3
-      - id: gasping_marsh_technical
+      - id: nerve_gas_dispenser
         level: 3
-      - id: ghostly_weapon_technical
+      - id: phase_modulator
         level: 3
-      - id: glass_sand_technical
+      - id: flechette_burst
         level: 3
-      - id: gravity_well_technical
+      - id: graviton_projector
         level: 3
-      - id: haste_technical
+      - id: overclock_module
         level: 3
-      - id: heatvision_technical
+      - id: ir_overlay_module
         level: 3
-      - id: horde_of_underlings_technical
+      - id: drone_swarm
         level: 3
-      - id: hypnotize_technical
+      - id: dazzle_projector
         level: 3
-      - id: ibexs_harvest_technical
+      - id: field_repair_kit
         level: 3
-      - id: impending_doom_technical
+      - id: impending_doom_module
         level: 3
-      - id: insect_form_technical
+      - id: micro_mech_form
         level: 3
-      - id: instant_parade_technical
+      - id: hologram_crowd
         level: 3
-      - id: lashing_rope_technical
+      - id: cable_whip_array
         level: 3
-      - id: levitate_technical
+      - id: anti_grav_module
         level: 3
-      - id: lightning_bolt_technical
+      - id: rail_lance
         level: 3
-      - id: locate_technical
+      - id: tracking_beacon
         level: 3
-      - id: lotus_walk_technical
+      - id: hydrophobic_boots
         level: 3
-      - id: magical_fetters_technical
+      - id: mag_lock_restraints
         level: 3
-      - id: magnetic_acceleration_technical
+      - id: railgun_shot
         level: 3
-      - id: mind_of_menace_technical
+      - id: counter_intrusion_rig
         level: 3
-      - id: mind_reading_technical
+      - id: neural_scanner
         level: 3
-      - id: nothing_up_my_sleeve_technical
+      - id: hidden_compartment
         level: 3
-      - id: noxious_metals
+      - id: toxic_precipitate
         level: 3
-      - id: one_with_stone_technical
+      - id: concrete_merge
         level: 3
-      - id: oneiric_mire_technical
+      - id: holographic_quicksand
         level: 3
-      - id: ooze_form_technical
+      - id: nanite_swarm_form
         level: 3
-      - id: organsight_technical
+      - id: x_ray_scanner
         level: 3
-      - id: overwhelming_memory_technical
+      - id: data_overload
         level: 3
-      - id: paralyze_technical
+      - id: paralysis_stasis_field
         level: 3
-      - id: perceive_the_threads_of_fate_technical
+      - id: predictive_analytics
         level: 3
-      - id: percussive_impact_technical
+      - id: sonic_shell
         level: 3
-      - id: perseiss_precautions_technical
+      - id: early_warning_system
         level: 3
-      - id: phantom_prison_technical
+      - id: holographic_cell
         level: 3
-      - id: pillar_of_water_technical
+      - id: coolant_column
         level: 3
-      - id: pyrotechnics_technical
+      - id: incendiary_override
         level: 3
-      - id: radiant_globe_technical
+      - id: point_defense_dome
         level: 3
-      - id: rally_point_technical
+      - id: rally_point_transponder
         level: 3
-      - id: roaring_applause_technical
+      - id: sonic_stun_pulse
         level: 3
-      - id: rouse_skeletons_technical
+      - id: scrap_automaton_swarm
         level: 3
-      - id: safe_passage_technical
+      - id: hazard_neutralizer
         level: 3
-      - id: sand_form_technical
+      - id: particulate_mode
         level: 3
-      - id: scrying_ripples_technical
+      - id: network_ping
         level: 3
-      - id: sea_of_thought_technical
+      - id: static_floor
         level: 3
-      - id: secret_page_technical
+      - id: data_encryption
         level: 3
-      - id: shadow_projectile_technical
+      - id: ghost_round
         level: 3
-      - id: shared_invisibility_technical
+      - id: group_stealth_field
         level: 3
-      - id: shift_blame_technical
+      - id: alibi_fabricator
         level: 3
-      - id: shifting_sand_technical
+      - id: seismic_destabilizer
         level: 3
-      - id: shrink_item
+      - id: item_shrink_module
         level: 3
-      - id: slow_technical
+      - id: system_lag_inducer
         level: 3
-      - id: sparkleskin_technical
+      - id: reflective_coating
         level: 3
-      - id: stinking_cloud_technical
+      - id: tear_gas_canister
         level: 3
-      - id: tempest_cloak_technical
+      - id: turbine_shield
         level: 3
-      - id: temporal_twin_technical
+      - id: chrono_duplicate
         level: 3
-      - id: thief_of_fortune_technical
+      - id: buff_hijack
         level: 3
-      - id: time_jump_technical
+      - id: blink_drive
         level: 3
-      - id: time_pocket_technical
+      - id: temporal_cache
         level: 3
-      - id: trade_items_technical
+      - id: teleport_swap_module
         level: 3
-      - id: transcribe_conflict_technical
+      - id: combat_recorder
         level: 3
-      - id: travel_by_turtle_technical
+      - id: submersible_drone
         level: 3
-      - id: unseasonable_squall_technical
+      - id: pressure_wave_emitter
         level: 3
-      - id: vampiric_feast_technical
+      - id: energy_siphon
         level: 3
-      - id: veil_of_privacy_technical
+      - id: ecm_suite
         level: 3
-      - id: wall_of_radiance_technical
+      - id: laser_grid
         level: 3
-      - id: wall_of_shadow_technical
+      - id: blackout_barrier
         level: 3
-      - id: wall_of_thorns_technical
+      - id: razor_wire_wall
         level: 3
-      - id: wall_of_virtue_technical
+      - id: hardlight_barrier
         level: 3
-      - id: wall_of_water_technical
+      - id: coolant_curtain
         level: 3
-      - id: wall_of_wind_technical
+      - id: turbine_wall
         level: 3
-      - id: warding_aggression_technical
+      - id: threat_lock_module
         level: 3
-      - id: web_of_eyes_technical
+      - id: surveillance_mesh
         level: 3
-      - id: wooden_double_technical
+      - id: decoy_hologram
         level: 3
   6:
     prepared:
@@ -570,211 +570,211 @@ level_up_grants:
       slots_by_level:
         4: 2
       pool:
-      - id: aerial_form_technical
+      - id: flight_chassis_mk4
         level: 4
-      - id: airlift_technical
+      - id: pneumatic_mass_lifter
         level: 4
-      - id: aromatic_lure_technical
+      - id: scent_decoy_projector
         level: 4
-      - id: bestial_curse_technical
+      - id: devolution_emitter
         level: 4
-      - id: bridge_of_vines_technical
+      - id: hardlight_bridge_mk4
         level: 4
-      - id: call_the_blood_technical
+      - id: hemodynamic_disruptor
         level: 4
-      - id: channel_arrogance_technical
+      - id: ego_amplification_device
         level: 4
-      - id: chromatic_armor_technical
+      - id: spectrum_shield_generator
         level: 4
-      - id: chromatic_ray_technical
+      - id: variable_frequency_cannon
         level: 4
-      - id: cinder_swarm_technical
+      - id: thermal_micro_drone_cloud
         level: 4
-      - id: clairvoyance_technical
+      - id: remote_sensor_relay
         level: 4
-      - id: cloud_current_technical
+      - id: jetstream_generator
         level: 4
-      - id: clownish_curse_technical
+      - id: malfunction_protocol
         level: 4
-      - id: compel_true_name_technical
+      - id: identity_override_transmitter
         level: 4
-      - id: confusion_technical
+      - id: logic_bomb_module
         level: 4
-      - id: containment_technical
+      - id: containment_grid_mk4
         level: 4
-      - id: coral_eruption_technical
+      - id: spike_mine_deployment
         level: 4
-      - id: countless_eyes_technical
+      - id: panoramic_sensor_suite
         level: 4
-      - id: creation_technical
+      - id: rapid_fabrication_unit
         level: 4
-      - id: daydreamers_curse_technical
+      - id: focus_disruption_emitter
         level: 4
-      - id: deathless_march_technical
+      - id: undead_rally_beacon
         level: 4
-      - id: detect_creator_technical
+      - id: fabricator_trace_scanner
         level: 4
-      - id: detect_scrying_technical
+      - id: anti_surveillance_scanner
         level: 4
-      - id: discern_lies_technical
+      - id: polygraph_module
         level: 4
-      - id: dispelling_globe_technical
+      - id: countermeasure_sphere
         level: 4
-      - id: draw_the_lightning_technical
+      - id: lightning_channeler
         level: 4
-      - id: dull_ambition_technical
+      - id: motivation_suppressor
         level: 4
-      - id: elemental_sense_technical
+      - id: environmental_sensor_module
         level: 4
-      - id: enervation_technical
+      - id: entropy_beam_projector
         level: 4
-      - id: enhance_senses_technical
+      - id: sensor_amplification_array
         level: 4
-      - id: entangle_fate_technical
+      - id: probability_web_projector
         level: 4
-      - id: false_nature_technical
+      - id: object_disguise_projector
         level: 4
-      - id: favorable_review_technical
+      - id: opinion_override_device
         level: 4
-      - id: filter_air_technical
+      - id: atmospheric_filtration_unit
         level: 4
-      - id: fire_shield_technical
+      - id: thermal_shield_generator
         level: 4
-      - id: flicker_technical
+      - id: phase_oscillator
         level: 4
-      - id: fly_technical
+      - id: thruster_pack_mk4
         level: 4
-      - id: forgotten_lines_technical
+      - id: forensic_data_recovery
         level: 4
-      - id: glass_form_technical
+      - id: crystalline_plating
         level: 4
-      - id: grasp_of_the_deep_technical
+      - id: pressure_crush_device
         level: 4
-      - id: grasping_earth_technical
+      - id: seismic_restraint_array
         level: 4
-      - id: ice_storm_technical
+      - id: cryogenic_storm_generator
         level: 4
-      - id: infiltrators_tunnel_technical
+      - id: spatial_bypass_unit
         level: 4
-      - id: invisibility_curtain_technical
+      - id: one_way_mirror_projector
         level: 4
-      - id: it_is_written_technical
+      - id: probability_lock_device
         level: 4
-      - id: lifedraining_roots_technical
+      - id: parasitic_filament_array
         level: 4
-      - id: liminal_doorway_technical
+      - id: pocket_dimension_hatch
         level: 4
-      - id: magic_mailbox_technical
+      - id: quantum_courier_container
         level: 4
-      - id: mantiss_grasp_technical
+      - id: hydraulic_crush_arm
         level: 4
-      - id: mercurial_stride_technical
+      - id: liquid_metal_rush
         level: 4
-      - id: mirage_technical
+      - id: terrain_hologram_unit
         level: 4
-      - id: mirrors_misfortune_technical
+      - id: decoy_hex_projector
         level: 4
-      - id: misty_memory_technical
+      - id: hydro_forensic_scanner
         level: 4
-      - id: morass_of_ages_technical
+      - id: temporal_drag_projector
         level: 4
-      - id: mountain_resilience_technical
+      - id: ablative_armor_protocol
         level: 4
-      - id: mutilate_technical
+      - id: sympathetic_damage_relay
         level: 4
-      - id: necrotic_radiation_technical
+      - id: entropic_emitter
         level: 4
-      - id: nightmare_technical
+      - id: sleep_cycle_jammer
         level: 4
-      - id: ocular_overload_technical
+      - id: flash_overload_device
         level: 4
-      - id: outcasts_curse_technical
+      - id: social_interference_emitter
         level: 4
-      - id: peaceful_bubble_technical
+      - id: isolation_dome_generator
         level: 4
-      - id: pest_swarm_technical
+      - id: micro_drone_squadron
         level: 4
-      - id: phantasmal_killer_technical
+      - id: terror_projection_mk4
         level: 4
-      - id: planar_tether_technical
+      - id: dimensional_anchor_device
         level: 4
-      - id: procyal_philosophy_technical
+      - id: tactical_guidance_drone
         level: 4
-      - id: prophets_luck_technical
+      - id: probability_override_module
         level: 4
-      - id: ranages_circle_technical
+      - id: petrification_mine
         level: 4
-      - id: ravenous_portal_technical
+      - id: mimic_mine
         level: 4
-      - id: rebounding_barrier_technical
+      - id: kinetic_deflector_mk4
         level: 4
-      - id: reflective_scales_technical
+      - id: energy_capacitor_plating
         level: 4
-      - id: replicate_technical
+      - id: holographic_double
         level: 4
-      - id: rigid_form_technical
+      - id: morph_lock_module
         level: 4
-      - id: rope_trick_technical
+      - id: concealed_access_hatch
         level: 4
-      - id: rust_cloud_technical
+      - id: corrosive_particle_cloud
         level: 4
-      - id: sages_curse_technical
+      - id: data_noise_emitter
         level: 4
-      - id: sanguine_mist_technical
+      - id: hemovore_drone_cloud
         level: 4
-      - id: seal_fate_technical
+      - id: terminal_lock_device
         level: 4
-      - id: shape_stone_technical
+      - id: mineral_shaping_tool
         level: 4
-      - id: sliding_blocks_technical
+      - id: levitation_block_array
         level: 4
-      - id: soft_landing_technical
+      - id: inertial_dampening_field
         level: 4
-      - id: solid_fog_technical
+      - id: dense_smoke_generator
         level: 4
-      - id: spell_immunity_technical
+      - id: countermeasure_firewall
         level: 4
-      - id: steal_voice_technical
+      - id: vocal_suppressor
         level: 4
-      - id: stifling_stillness_technical
+      - id: atmospheric_stagnation_field
         level: 4
-      - id: stonesense_technical
+      - id: seismic_sensor_array
         level: 4
-      - id: suggestion_technical
+      - id: subliminal_command_unit
         level: 4
-      - id: swarming_wasp_stings_technical
+      - id: venom_dart_turret
         level: 4
-      - id: telepathy_technical
+      - id: secure_comm_array
         level: 4
-      - id: translocate_technical
+      - id: spatial_warp_device
         level: 4
-      - id: tricksters_feathers_technical
+      - id: disguise_module_set
         level: 4
-      - id: umbral_graft_technical
+      - id: effect_siphon_device
         level: 4
-      - id: unfettered_movement_technical
+      - id: movement_override_module
         level: 4
-      - id: vampiric_maiden_technical
+      - id: vitality_drain_cage
         level: 4
-      - id: vapor_form_technical
+      - id: dispersal_field
         level: 4
-      - id: variable_gravity_technical
+      - id: gravity_modulation_device
         level: 4
-      - id: vision_of_beauty_technical
+      - id: allure_hologram
         level: 4
-      - id: vision_of_death_technical
+      - id: mortality_simulator
         level: 4
-      - id: wall_of_fire_technical
+      - id: plasma_barrier_mk4
         level: 4
-      - id: wall_of_mirrors_technical
+      - id: reflective_barrier_array
         level: 4
-      - id: weapon_storm_technical
+      - id: weapon_replication_array
         level: 4
-      - id: winning_streak_technical
+      - id: momentum_amplifier
         level: 4
-      - id: ymeris_mark_technical
+      - id: thermal_brand_projector
         level: 4
-      - id: zephyr_slip_technical
+      - id: emergency_evasion_jet
         level: 4
   8:
     prepared:
@@ -785,179 +785,179 @@ level_up_grants:
       slots_by_level:
         5: 2
       pool:
-      - id: acid_storm_technical
+      - id: corrosive_spray_grid
         level: 5
-      - id: ancestral_winds_technical
+      - id: em_ghost_wind
         level: 5
-      - id: bandits_doom_technical
+      - id: anti_theft_system
         level: 5
-      - id: banishment_technical
+      - id: system_purge
         level: 5
-      - id: belittling_boast_technical
+      - id: superiority_broadcast
         level: 5
-      - id: black_tentacles_technical
+      - id: cable_snare_array
         level: 5
-      - id: blazing_fissure_technical
+      - id: thermite_fissure
         level: 5
-      - id: blind_eye_technical
+      - id: surveillance_jammer
         level: 5
-      - id: blinding_bottle_technical
+      - id: flash_canister
         level: 5
-      - id: blinding_foam_technical
+      - id: optic_solvent_spray
         level: 5
-      - id: blink_charge_technical
+      - id: warp_strike
         level: 5
-      - id: blister_technical
+      - id: thermal_blisters
         level: 5
-      - id: blood_feast_technical
+      - id: system_drain
         level: 5
-      - id: boomerang_shot_technical
+      - id: guided_munition
         level: 5
-      - id: chromatic_wall_technical
+      - id: prismatic_barrier
         level: 5
-      - id: cloak_of_colors_technical
+      - id: chromatic_cloak_module
         level: 5
-      - id: cone_of_cold_technical
+      - id: cryo_cannon
         level: 5
-      - id: control_water_technical
+      - id: hydraulic_override
         level: 5
-      - id: corrosive_muck_technical
+      - id: acid_pool_deployer
         level: 5
-      - id: desperate_repair_technical
+      - id: emergency_weld
         level: 5
-      - id: diadem_of_divine_radiance_technical
+      - id: targeting_laser_crown
         level: 5
-      - id: domoras_defense_technical
+      - id: multi_shield_array
         level: 5
-      - id: drop_dead_technical
+      - id: decoy_protocol
         level: 5
-      - id: elemental_breath_technical
+      - id: elemental_projector
         level: 5
-      - id: elemental_form_technical
+      - id: elemental_frame
         level: 5
-      - id: engrave_memory_technical
+      - id: data_crystal
         level: 5
-      - id: entwined_roots_technical
+      - id: reactive_root_plating
         level: 5
-      - id: etheric_shards_technical
+      - id: force_mine_array
         level: 5
-      - id: false_vision_technical
+      - id: sensor_spoof
         level: 5
-      - id: fires_pathway_technical
+      - id: thermal_warp_gate
         level: 5
-      - id: flame_dancer_technical
+      - id: thermal_augment_rig
         level: 5
-      - id: flames_of_ego_technical
+      - id: ego_overload
         level: 5
-      - id: flammable_fumes_technical
+      - id: volatile_gas_vent
         level: 5
-      - id: flowing_strike_technical
+      - id: hydraulic_rush
         level: 5
-      - id: forceful_hand_technical
+      - id: shield_drone
         level: 5
-      - id: freezing_rain_technical
+      - id: cryo_dispersal
         level: 5
-      - id: geyser_technical
+      - id: pressure_vent
         level: 5
-      - id: glimmer_of_charm_technical
+      - id: charm_emitter
         level: 5
-      - id: grisly_growths_technical
+      - id: nano_growth_overload
         level: 5
-      - id: hallucination_technical
+      - id: ar_overlay_hack
         level: 5
-      - id: howling_blizzard_technical
+      - id: cryo_cannon_burst
         level: 5
-      - id: illusory_scene_technical
+      - id: holographic_stage
         level: 5
-      - id: imaginary_lockbox_technical
+      - id: phase_cache
         level: 5
-      - id: impaling_spike_technical
+      - id: spike_launcher
         level: 5
-      - id: incendiary_fog_technical
+      - id: combustible_dust_cloud
         level: 5
-      - id: infectious_comedy_technical
+      - id: viral_meme_weapon
         level: 5
-      - id: instant_minefield_technical
+      - id: smart_mine_deploy
         level: 5
-      - id: invoke_spirits_technical
+      - id: em_phantom_array
         level: 5
-      - id: kings_castle_technical
+      - id: transposition_matrix
         level: 5
-      - id: lashuntas_life_bubble_technical
+      - id: sealed_atmo_shell
         level: 5
-      - id: magic_passage_technical
+      - id: tunnel_borer
         level: 5
-      - id: mantle_of_the_frozen_heart_technical
+      - id: cryo_hardsuit
         level: 5
-      - id: mantle_of_the_magma_heart_technical
+      - id: thermal_hardsuit
         level: 5
-      - id: mantle_of_the_melting_heart_technical
+      - id: alloy_hardsuit
         level: 5
-      - id: mantle_of_the_unwavering_heart_technical
+      - id: composite_hardsuit
         level: 5
-      - id: mariners_curse_technical
+      - id: gyro_scrambler
         level: 5
-      - id: mind_probe_technical
+      - id: neural_extraction
         level: 5
-      - id: mirror_malefactors_technical
+      - id: decoy_projector_ring
         level: 5
-      - id: pillars_of_sand_technical
+      - id: fabrication_pillars
         level: 5
-      - id: pressure_zone_technical
+      - id: pressure_drop_field
         level: 5
-      - id: quicken_time_technical
+      - id: overclock_zone
         level: 5
-      - id: return_beacon_technical
+      - id: return_beacon_transponder
         level: 5
-      - id: rewinding_step_technical
+      - id: chrono_anchor
         level: 5
-      - id: ritual_obstruction_technical
+      - id: signal_jammer_grid
         level: 5
-      - id: sawtooth_terrain_technical
+      - id: razor_wire_grid
         level: 5
-      - id: scouring_pulse_technical
+      - id: em_purge_beam
         level: 5
-      - id: scouting_eye_technical
+      - id: recon_micro_drone
         level: 5
-      - id: secret_chest_technical
+      - id: phase_vault
         level: 5
-      - id: sending_technical
+      - id: encrypted_burst
         level: 5
-      - id: shadow_siphon_technical
+      - id: damage_absorber
         level: 5
-      - id: shock_and_awe_technical
+      - id: sensory_barrage
         level: 5
-      - id: slither_technical
+      - id: cable_serpents
         level: 5
-      - id: stagnate_time_technical
+      - id: temporal_dampener
         level: 5
-      - id: subconscious_suggestion_technical
+      - id: subliminal_suggestion_module
         level: 5
-      - id: summon_dragon_technical
+      - id: drake_nano_constructor
         level: 5
-      - id: telekinetic_haul_technical
+      - id: gravity_tractor
         level: 5
-      - id: telepathic_bond_technical
+      - id: encrypted_group_link
         level: 5
-      - id: temporary_glyph_technical
+      - id: smart_mine
         level: 5
-      - id: toxic_cloud_technical
+      - id: chemical_agent_cloud
         level: 5
-      - id: transmute_rock_and_mud_technical
+      - id: material_transmuter
         level: 5
-      - id: truespeech_technical
+      - id: truespeech_translator
         level: 5
-      - id: umbral_journey_technical
+      - id: shadow_transit_module
         level: 5
-      - id: wall_of_ice_technical
+      - id: cryo_barrier
         level: 5
-      - id: wall_of_stone_technical
+      - id: ferrocrete_wall
         level: 5
-      - id: wave_of_despair_technical
+      - id: morale_suppressor
         level: 5
-      - id: wisdom_of_the_winds_technical
+      - id: sensor_network_query
         level: 5
-      - id: wyvern_sting_technical
+      - id: venom_injector
         level: 5
   10:
     prepared:
@@ -968,119 +968,119 @@ level_up_grants:
       slots_by_level:
         6: 2
       pool:
-      - id: arrow_salvo_technical
+      - id: railgun_volley
         level: 6
-      - id: aura_of_the_unremarkable_technical
+      - id: stealth_field_generator
         level: 6
-      - id: awaken_entropy_technical
+      - id: entropy_accelerator
         level: 6
-      - id: boots_on_the_ground_technical
+      - id: holographic_army_unit
         level: 6
-      - id: bound_in_death_technical
+      - id: damage_redirect_tether
         level: 6
-      - id: cast_into_time_technical
+      - id: temporal_displacement_beam
         level: 6
-      - id: catch_your_name_technical
+      - id: identity_alert_system
         level: 6
-      - id: chain_lightning_technical
+      - id: arc_lightning_cascade
         level: 6
-      - id: chromatic_image_technical
+      - id: prismatic_decoy_array
         level: 6
-      - id: collective_transposition_technical
+      - id: mass_translocator_beam
         level: 6
-      - id: crimson_breath_technical
+      - id: chemical_weapon_spray
         level: 6
-      - id: cursed_metamorphosis_technical
+      - id: forced_reconfiguration
         level: 6
-      - id: daemon_form_technical
+      - id: void_engine_frame
         level: 6
-      - id: demon_form_technical
+      - id: corruption_engine_frame
         level: 6
-      - id: devil_form_technical
+      - id: enforcement_engine_frame
         level: 6
-      - id: disintegrate
+      - id: disintegration_beam
         level: 6
-      - id: dominate_technical
+      - id: neural_override_device
         level: 6
-      - id: dragon_form_technical
+      - id: heavy_assault_frame
         level: 6
-      - id: earth_and_sky_technical
+      - id: launch_platform_eruption
         level: 6
-      - id: elemental_confluence_technical
+      - id: multi_element_reactor
         level: 6
-      - id: explosive_barrage_technical
+      - id: cluster_munition_strike
         level: 6
-      - id: field_of_razors_technical
+      - id: razorwire_kill_zone
         level: 6
-      - id: flame_vortex_technical
+      - id: plasma_cyclone
         level: 6
-      - id: frost_pillar_technical
+      - id: cryo_lock_column
         level: 6
-      - id: frozen_fog_technical
+      - id: cryogenic_fog_projector
         level: 6
-      - id: halcyon_infusion_technical
+      - id: tech_skill_upload
         level: 6
-      - id: lignify_technical
+      - id: polymer_encasement
         level: 6
-      - id: mislead_technical
+      - id: cloak_and_decoy_system
         level: 6
-      - id: missed_cue_technical
+      - id: system_lockout_panic
         level: 6
-      - id: necrotize_technical
+      - id: molecular_decay_beam
         level: 6
-      - id: never_mind_technical
+      - id: memory_wipe_device
         level: 6
-      - id: personal_ocean_technical
+      - id: hydrostatic_shield_bubble
         level: 6
-      - id: petrify_technical
+      - id: rapid_calcification_beam
         level: 6
-      - id: phantasmal_calamity_technical
+      - id: mass_hallucination_bomb
         level: 6
-      - id: phantom_orchestra_technical
+      - id: sonic_emitter_array
         level: 6
-      - id: poltergeists_fury_technical
+      - id: magnetic_debris_storm
         level: 6
-      - id: purple_worm_sting_technical
+      - id: neurotoxin_dart_injector
         level: 6
-      - id: ravenous_darkness_technical
+      - id: void_field_projector
         level: 6
-      - id: repulsion_technical
+      - id: repulsor_field_emitter
         level: 6
-      - id: scrying_technical
+      - id: remote_surveillance_drone
         level: 6
-      - id: seize_identity_technical
+      - id: biometric_spoof_device
         level: 6
-      - id: siege_weapons_blessing_technical
+      - id: targeting_computer_uplink
         level: 6
-      - id: skeleton_army_technical
+      - id: combat_drone_swarm
         level: 6
-      - id: spellwrack_technical
+      - id: tech_disruption_virus
         level: 6
-      - id: tangling_creepers_technical
+      - id: auto_grapple_wire_field
         level: 6
-      - id: teleport_technical
+      - id: quantum_displacement_drive
         level: 6
-      - id: temporal_ward_technical
+      - id: chrono_lock_security
         level: 6
-      - id: truesight_technical
+      - id: full_spectrum_scanner
         level: 6
-      - id: unexpected_transposition_technical
+      - id: emergency_swap_relay
         level: 6
-      - id: utter_destruction_technical
+      - id: resonance_shatter_cannon
         level: 6
-      - id: vampiric_exsanguination_technical
+      - id: mass_energy_drain_device
         level: 6
-      - id: vibrant_pattern_technical
+      - id: strobe_disorientation_grid
         level: 6
-      - id: vitrifying_blast_technical
+      - id: glass_frag_launcher
         level: 6
-      - id: wall_of_force_technical
+      - id: hardlight_barrier_wall
         level: 6
-      - id: wall_of_metal_technical
+      - id: fabricated_metal_wall
         level: 6
-      - id: word_of_revision_technical
+      - id: emergency_reboot_protocol
         level: 6
-      - id: zero_gravity_technical
+      - id: gravity_suppressor_field
         level: 6
   12:
     prepared:
@@ -1091,97 +1091,97 @@ level_up_grants:
       slots_by_level:
         7: 2
       pool:
-      - id: beheading_buzz_saw
+      - id: plasma_disc_launcher
         level: 7
-      - id: blightburn_blast_technical
+      - id: nuclear_waste_projector
         level: 7
-      - id: chrysopoetic_curse_technical
+      - id: alloy_transmutation_hex
         level: 7
-      - id: contingency
+      - id: conditional_subroutine
         level: 7
-      - id: control_sand_technical
+      - id: ferrofluid_manipulation
         level: 7
-      - id: corrosive_body_technical
+      - id: acid_exoskeleton_mode
         level: 7
-      - id: dancing_fountain_technical
+      - id: hydraulic_turret_array
         level: 7
-      - id: devouring_void_technical
+      - id: micro_singularity_array
         level: 7
-      - id: duplicate_foe_technical
+      - id: hard_light_combat_clone
         level: 7
-      - id: eclipse_burst_technical
+      - id: emp_darkness_burst
         level: 7
-      - id: energy_aegis_technical
+      - id: omni_frequency_dampener
         level: 7
-      - id: entrancing_eyes
+      - id: hypno_optic_projector
         level: 7
-      - id: fiery_body_technical
+      - id: plasma_core_ignition
         level: 7
-      - id: final_fate_of_the_locust_host_technical
+      - id: drone_swarm_apocalypse
         level: 7
-      - id: frigid_flurry_technical
+      - id: cryo_shrapnel_cannon
         level: 7
-      - id: heaving_earth_technical
+      - id: seismic_charge_detonation
         level: 7
-      - id: hungry_depths_technical
+      - id: gravity_well_projector
         level: 7
-      - id: indolent_haze_technical
+      - id: soporific_gas_emitter
         level: 7
-      - id: inexhaustible_cynicism_technical
+      - id: total_distrust_protocol
         level: 7
-      - id: interplanar_teleport_technical
+      - id: dimensional_gate_projector
         level: 7
-      - id: leng_sting_technical
+      - id: aberrant_toxin_injector
         level: 7
-      - id: lifewood_cage_technical
+      - id: hard_light_containment_cage
         level: 7
-      - id: loves_sacrifice_technical
+      - id: override_loyalty_circuit
         level: 7
-      - id: mask_of_terror_technical
+      - id: holographic_terror_mask
         level: 7
-      - id: maze_of_locked_doors_technical
+      - id: recursive_security_maze
         level: 7
-      - id: momentary_recovery_technical
+      - id: emergency_blink_module
         level: 7
-      - id: planar_palace_technical
+      - id: pocket_dimension_bunker
         level: 7
-      - id: planar_seal_technical
+      - id: dimensional_lock_emitter
         level: 7
-      - id: pollen_pods_technical
+      - id: chemical_mine_array
         level: 7
-      - id: power_word_blind
+      - id: override_code_blind
         level: 7
-      - id: prismatic_armor_technical
+      - id: chromatic_plating_system
         level: 7
-      - id: prismatic_spray_technical
+      - id: spectrum_cannon
         level: 7
-      - id: project_image_technical
+      - id: remote_drone_proxy
         level: 7
-      - id: recall_legacy_technical
+      - id: heritage_data_retrieval
         level: 7
-      - id: restore_ground_technical
+      - id: structural_demolition_wave
         level: 7
-      - id: return_to_essence_technical
+      - id: security_bypass_siphon
         level: 7
-      - id: reverse_gravity_technical
+      - id: gravity_reversal_projector
         level: 7
-      - id: shadow_raid_technical
+      - id: stealth_drone_swarm
         level: 7
-      - id: spell_riposte_technical
+      - id: tech_riposte_module
         level: 7
-      - id: spell_turning
+      - id: reflection_matrix
         level: 7
-      - id: telekinetic_bombardment_technical
+      - id: railgun_debris_barrage
         level: 7
-      - id: tempest_of_shades_technical
+      - id: phantom_signal_typhoon
         level: 7
-      - id: time_beacon_technical
+      - id: temporal_rollback_device
         level: 7
-      - id: true_target_technical
+      - id: target_acquisition_suite
         level: 7
-      - id: vacuum_technical
+      - id: atmospheric_purge_system
         level: 7
-      - id: warp_mind_technical
+      - id: cognitive_disruptor_beam
         level: 7
   14:
     prepared:
@@ -1192,73 +1192,73 @@ level_up_grants:
       slots_by_level:
         8: 2
       pool:
-      - id: all_is_one_one_is_all_technical
+      - id: matter_transference_array
         level: 8
-      - id: antimagic_field_technical
+      - id: emp_suppression_dome
         level: 8
-      - id: arctic_rift_technical
+      - id: cryo_fissure_projector
         level: 8
-      - id: boil_blood_technical
+      - id: microwave_blood_heater
         level: 8
-      - id: burning_blossoms_technical
+      - id: plasma_antenna_tower
         level: 8
-      - id: clockwork_devotion
+      - id: combat_drone_battalion
         level: 8
-      - id: confusing_colors_technical
+      - id: prismatic_interference_cloud
         level: 8
-      - id: deluge_technical
+      - id: hydraulic_collapse_bomb
         level: 8
-      - id: desiccate_technical
+      - id: molecular_dehydrator_beam
         level: 8
-      - id: disappearance_technical
+      - id: full_spectrum_cloaking
         level: 8
-      - id: dream_council_technical
+      - id: shared_vr_conference
         level: 8
-      - id: earthquake_technical
+      - id: seismic_resonance_bomb
         level: 8
-      - id: falling_sky_technical
+      - id: gravity_press_projector
         level: 8
-      - id: ferrous_form_technical
+      - id: alloy_exoskeleton_mode
         level: 8
-      - id: hidden_mind_technical
+      - id: neural_firewall_suite
         level: 8
-      - id: mimic_spell_technical
+      - id: tech_reverse_engineer
         level: 8
-      - id: monstrosity_form_technical
+      - id: kaiju_mech_frame
         level: 8
-      - id: part_the_mists_to_paradise_technical
+      - id: pocket_dimension_resort
         level: 8
-      - id: pinpoint_technical
+      - id: global_tracking_satellite
         level: 8
-      - id: polar_ray_technical
+      - id: absolute_zero_cannon
         level: 8
-      - id: power_word_stun
+      - id: override_code_stun
         level: 8
-      - id: prismatic_wall_technical
+      - id: spectrum_defense_grid
         level: 8
-      - id: prying_survey_technical
+      - id: surveillance_drone_array
         level: 8
-      - id: quandary_technical
+      - id: puzzle_room_trap_module
         level: 8
-      - id: rainbow_fumarole_technical
+      - id: prismatic_vent_array
         level: 8
-      - id: sudden_transposition_technical
+      - id: emergency_teleport_scrambler
         level: 8
-      - id: summon_archmage
+      - id: summon_legacy_ai
         level: 8
-      - id: summon_elemental_herald_technical
+      - id: elemental_disaster_engine
         level: 8
-      - id: summon_irii_technical
+      - id: temporal_construct_beacon
         level: 8
-      - id: take_your_places_technical
+      - id: tactical_warp_scrambler
         level: 8
-      - id: uncontrollable_dance_technical
+      - id: motor_override_loop
         level: 8
-      - id: undermine_reality_technical
+      - id: phase_destabilizer_beam
         level: 8
-      - id: unrelenting_observation_technical
+      - id: panopticon_surveillance_grid
         level: 8
-      - id: whirlpool_technical
+      - id: hydro_vortex_generator
         level: 8
   16:
     prepared:
@@ -1269,63 +1269,63 @@ level_up_grants:
       slots_by_level:
         9: 2
       pool:
-      - id: astral_labyrinth_technical
+      - id: recursive_logic_trap
         level: 9
-      - id: beseech_arcanotheign_technical
+      - id: apex_system_query
         level: 9
-      - id: bilocation_technical
+      - id: system_fork
         level: 9
-      - id: call_fluxwraith_technical
+      - id: construct_summon_protocol
         level: 9
-      - id: detonate_magic_technical
+      - id: system_cascade_detonation
         level: 9
-      - id: dimensional_excision_technical
+      - id: dimensional_excision_protocol
         level: 9
-      - id: disjunction_technical
+      - id: system_severance
         level: 9
-      - id: divinity_leech_technical
+      - id: power_drain
         level: 9
-      - id: falling_stars_technical
+      - id: orbital_kinetic_barrage
         level: 9
-      - id: foresight_technical
+      - id: tactical_precognition_feed
         level: 9
-      - id: forest_of_gates_technical
+      - id: warp_gate_network
         level: 9
-      - id: implosion_technical
+      - id: gravity_implosion
         level: 9
-      - id: linnorm_sting_technical
+      - id: apex_toxin_injector
         level: 9
-      - id: magnetic_dominion_technical
+      - id: apex_magnetic_dominion
         level: 9
-      - id: massacre_technical
+      - id: apex_slash_protocol
         level: 9
-      - id: metamorphosis_technical
+      - id: apex_system_reconfig
         level: 9
-      - id: phantasmagoria_technical
+      - id: full_sensory_fabrication
         level: 9
-      - id: power_word_kill
+      - id: kill_code
         level: 9
-      - id: prismatic_shield_technical
+      - id: spectrum_defense_matrix
         level: 9
-      - id: prismatic_sphere_technical
+      - id: full_spectrum_sphere
         level: 9
-      - id: proliferating_eyes_technical
+      - id: recon_sensor_network
         level: 9
-      - id: resplendent_mansion_technical
+      - id: secure_facility_protocol
         level: 9
-      - id: summon_ancient_fleshforged_technical
+      - id: war_construct_summon
         level: 9
-      - id: summon_draconic_legion
+      - id: drone_legion_deploy
         level: 9
-      - id: telepathic_demand_technical
+      - id: remote_command_broadcast
         level: 9
-      - id: trim_the_blight_technical
+      - id: system_purge_protocol
         level: 9
-      - id: unspeakable_shadow_technical
+      - id: shadow_apex_construct
         level: 9
-      - id: upheaval_technical
+      - id: tectonic_surge
         level: 9
-      - id: weird_technical
+      - id: mass_nightmare_uplink
         level: 9
   18:
     prepared:
@@ -1336,31 +1336,31 @@ level_up_grants:
       slots_by_level:
         10: 2
       pool:
-      - id: cataclysm_technical
+      - id: technical_cataclysm
         level: 10
-      - id: conquering_soldiers_technical
+      - id: combat_drone_army
         level: 10
-      - id: dragon_turret_technical
+      - id: apex_automated_turret
         level: 10
-      - id: fated_confrontation_technical
+      - id: fate_lock_module
         level: 10
-      - id: freeze_time_technical
+      - id: apex_time_stop
         level: 10
-      - id: gate_technical
+      - id: dimensional_gate
         level: 10
-      - id: indestructibility_technical
+      - id: system_invulnerability
         level: 10
-      - id: jassims_allegiance_technical
+      - id: allegiance_rewrite
         level: 10
-      - id: manifestation_technical
+      - id: apex_system_manifestation
         level: 10
-      - id: nullify_technical
+      - id: system_null_protocol
         level: 10
-      - id: remake_technical
+      - id: system_remake_protocol
         level: 10
-      - id: shadow_army_technical
+      - id: apex_shadow_construct_legion
         level: 10
-      - id: summon_oliphaunt_of_jandelay_technical
+      - id: apex_war_construct_deploy
         level: 10
   20:
     prepared:

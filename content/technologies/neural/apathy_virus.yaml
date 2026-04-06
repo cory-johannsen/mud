@@ -1,0 +1,25 @@
+id: apathy_virus
+name: Apathy Virus
+description: With a targeted neural pulse, you inject feelings of hopelessness and
+  despair into the target's mind. The creature must attempt a Willpower save or become
+  overcome with ennui that spreads to nearby allies.
+tradition: neural
+level: 3
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: minutes:1
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'With a wave of your hand and a short invocation, you cause feelings
+      of ennui and impending doom to well up in the mind of the targeted creature,
+      who must attempt a Willpower save.
+
+
+      Critical Success The tar'

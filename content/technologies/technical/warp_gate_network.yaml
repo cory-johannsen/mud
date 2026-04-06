@@ -1,0 +1,20 @@
+id: warp_gate_network
+name: Warp Gate Network
+description: You deploy a network of short-range warp gates in a 30-foot burst. Creatures
+  can enter any gate and exit from any other gate in the network. Gates last 1 hour
+  and can be destroyed by dealing 20 force damage to a gate structure.
+tradition: technical
+level: 9
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You transport yourself and your allies to a peaceful extraplanar
+      realm of towering trees, each of which holds a misty gateway to another location.
+      When you Use this tech, you choose a specific desti

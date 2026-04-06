@@ -1,0 +1,17 @@
+id: doctrines_luck_cleansing
+name: Doctrine's Luck Cleansing
+description: You invoke the Doctrine's authority to wash away bad luck from a target, allowing them to reroll a recent failure.
+tradition: fanatic_doctrine
+level: 1
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: Some practitioners argue this tech literally washes your fortunes of all influences, malign or benign, while
+      others claim it simply cleanses your mind of obsessions about luck and destiny. You adjust

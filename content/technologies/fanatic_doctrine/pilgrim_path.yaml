@@ -1,0 +1,21 @@
+id: pilgrim_path
+name: Pilgrim Path
+description: 'Area 10-foot-wide, 10-foot-tall, 60-foot-long section of terrain
+
+  You lay down a trail of consecrated compounds that neutralize hazards. Anyone passing
+  through ignores difficult terrain and hazardous terrain penalties.'
+tradition: fanatic_doctrine
+level: 3
+usage_type: prepared
+action_cost: 3
+range: melee
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: Area 10-foot-wide, 10-foot-tall, 60-foot-long section of terrainYou
+      make passage through the area safe for a brief amount of time. Anyone passing
+      through the area gains the following benefits against

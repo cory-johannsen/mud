@@ -3160,9 +3160,9 @@ renames:
       new_id: ideological_collapse
       name: Ideological Collapse
       file: content/technologies/fanatic_doctrine/crisis_of_faith.yaml
-      skip: false
+      skip: true
       pf2e_flag: false
-      collision: false
+      collision: true
     - old_id: croak_voice_bio_synthetic
       new_id: laryngeal_bloat
       name: Laryngeal Bloat
@@ -14227,9 +14227,9 @@ renames:
       new_id: combat_drone_deploy
       name: Combat Drone Deploy
       file: content/technologies/technical/summon_construct.yaml
-      skip: false
+      skip: true
       pf2e_flag: false
-      collision: false
+      collision: true
     - old_id: summon_deific_herald
       new_id: summon_doctrinal_avatar
       name: Summon Doctrinal Avatar
@@ -15466,9 +15466,9 @@ renames:
       new_id: seismic_sense
       name: Seismic Sense
       file: content/technologies/neural/tremorsense_neural.yaml
-      skip: false
+      skip: true
       pf2e_flag: false
-      collision: false
+      collision: true
     - old_id: tremorsense_technical
       new_id: seismic_sensor
       name: Seismic Sensor

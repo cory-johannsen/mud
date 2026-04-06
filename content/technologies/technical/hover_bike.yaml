@@ -1,0 +1,20 @@
+id: hover_bike
+name: Hover Bike
+description: You fabricate a temporary hover vehicle. The mount has AC 16, 20 HP,
+  and a Speed of 40 feet. It can carry one rider and shuts down if reduced to 0 HP.
+  You can Dismiss the spell.
+tradition: technical
+level: 2
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You conjure a Large fantastical creature to serve as a mount for
+      the target. The mount is the target's minion, has a Speed of 40 feet, and can
+      bear the target with any carried possessions. It can't ca

@@ -1,0 +1,33 @@
+id: containment_cage
+name: Containment Cage
+description: 'You deploy a rapid-assembly containment cage around the target. The
+  target must attempt a Reflex save.
+
+
+  Critical Success The creature is unaffected.
+
+  Success The creature takes 2d6 piercing damage.
+
+  Failure The creature takes 4d6 piercing damage and is @UUID[Compendium.pf2e.conditionitems.Item.Immobilized]
+  for 1 round.
+
+  Critical Failure The creature takes 4d6 piercing damage and is @UUID[Compendium.pf2e.conditionitems.Item.Immobilized]
+  for 1 minute. It can attempt to @UUID[Compendium.pf2e.actionspf2e.Item.Escape] against
+  your tech DC.'
+tradition: technical
+level: 2
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: minutes:1
+save_type: hustle
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You conjure a prison made of bone. Creatures in the space where you
+      create the cage can attempt a Reflex save; if they fail or don't attempt the
+      save, they're trapped within it. The spell automaticall

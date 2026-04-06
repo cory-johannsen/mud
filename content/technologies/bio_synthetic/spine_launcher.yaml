@@ -1,0 +1,22 @@
+id: spine_launcher
+name: Spine Launcher
+description: You extrude and launch three bio-synthetic spine projectiles simultaneously at targets in range.
+tradition: bio_synthetic
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: attack
+effects:
+  on_hit:
+  - type: damage
+    dice: 3d4
+    damage_type: piercing
+    dc: 0
+  on_crit_hit:
+  - type: damage
+    dice: 6d4
+    damage_type: piercing
+    dc: 0

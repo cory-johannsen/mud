@@ -1,0 +1,38 @@
+id: cacophony_loop
+name: Cacophony Loop
+description: 'You summon an @UUID[Compendium.pf2e.conditionitems.Item.Invisible],
+  persistent audio virus that infects the target''s neural feed, playing distracting
+  noise loops that hinder its actions. The noise is as disruptive to the action as
+  possible (for example, loud static bursts as the target tries to @UUID[Compendium.pf2e.actionspf2e.Item.Sneak]
+  or children''s jingles when the target tries to negotiate seriously). The audio
+  virus can''t be reasoned with or destroyed.
+
+
+  Critical Success The target is unaffected.
+
+  Success Until the start of your next turn, the target must roll twice and use the
+  worse result when it attempts a Diplomacy, Intimidation, Performance, or Stealth
+  check. When the target rolls a critical success on any skill check, it gets a success
+  instead. When the target rolls a failure on any skill check, it gets a critical
+  failure instead.
+
+  Failure As success, but the duration is 1 hour.
+
+  Critical Failure As success, but the duration is unlimited.'
+tradition: neural
+level: 7
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You summon an @UUID[Compendium.pf2e.conditionitems.Item.Invisible],
+      insubstantial group of extraplanar musicians who follow the target and play
+      distracting music to hinder its actions. The music the m

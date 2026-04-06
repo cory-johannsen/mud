@@ -40,11 +40,11 @@ class_features:
 technology_grants:
   prepared:
     pool:
-      - id: airburst_bio_synthetic
+      - id: bio_concussive_burst
         level: 1
-      - id: gale_blast_bio_synthetic
+      - id: compressed_air_exhale
         level: 1
-      - id: personal_rain_cloud_bio_synthetic
+      - id: atmospheric_moisture_organ
         level: 1
 drawbacks:
   - id: grounded

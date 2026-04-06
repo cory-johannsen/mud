@@ -1,0 +1,24 @@
+id: martyrdom_shield
+name: Martyrdom Shield
+description: 'You invoke a doctrinal ward of sacrificial protection, gaining resistance
+  10 to fire. If fire damage would reduce you to 0 Hit Points, the ward absorbs excess
+  damage and triggers a healing burst. You regain Hit Points equal to 4d8 + the absorbed
+  damage; this is a healing vitality effect. The ward then ends, and you can''t use
+  it again for 24 hours.
+
+
+  Heightened (+1) The healing increases by 1d8.'
+tradition: fanatic_doctrine
+level: 4
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: damage
+    dice: 4d8
+    damage_type: untyped
+    dc: 0

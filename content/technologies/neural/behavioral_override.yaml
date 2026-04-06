@@ -1,0 +1,19 @@
+id: behavioral_override
+name: Behavioral Override
+description: You broadcast a calming behavioral override signal to a wild creature, suppressing its aggression.
+tradition: neural
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: minutes:1
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: As you make comforting sounds and gestures, you approach the target in a friendly manner combining caution
+      and confidence. You improve the target's attitude to you by one step (unfriendly to neutral,

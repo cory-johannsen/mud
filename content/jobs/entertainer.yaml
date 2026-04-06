@@ -40,9 +40,9 @@ class_features:
 technology_grants:
   spontaneous:
     pool:
-      - { id: musical_accompaniment_neural, level: 1 }
-      - { id: figment_neural, level: 1 }
-      - { id: overselling_flourish_neural, level: 1 }
+      - { id: sonic_rhythm_interface, level: 1 }
+      - { id: sensory_projection, level: 1 }
+      - { id: psi_dramatic_overclock, level: 1 }
 drawbacks:
   - id: spotlight_addiction
     type: passive

@@ -1,0 +1,41 @@
+id: positive_spin_implant
+name: Positive Spin Implant
+description: 'You implant a neural filter ensuring the target can only express favorable
+  opinions about a chosen subject. Identify a single creature, location, or performance.
+  The target must attempt a Willpower save. You can Dismiss the spell.
+
+
+  Critical Success The target is unaffected and knows you tried to manipulate it.
+
+  Success The target is unaffected but thinks your protocol was something harmless
+  instead of a manipulation, unless it identifies the effect.
+
+  Failure The target cannot speak unfavorably about the subject for 1 week. This doesn''t
+  change the target''s opinion about the subject, but the target''s attempts to speak
+  ill of the subject always twist into compliments and praise instead. The target
+  likely becomes aware of this effect quickly and can avoid speaking about the subject
+  entirely if they choose.
+
+  Critical Failure As failure, except the duration is permanent and the target genuinely
+  holds a favorable opinion about the subject, with their attitude toward the creature
+  (or creatures associated with the subject) becoming two degrees better.
+
+
+  Heightened (8th) The range increases to 60 feet and you can target up to 10 creatures.'
+tradition: neural
+level: 4
+usage_type: prepared
+action_cost: 2
+range: melee
+targets: single
+duration: instant
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You enchant a creature to ensure they have only good things to say
+      about your show. Identify a single creature, location, or performance, such
+      as "Dame Ellendia," "Savories Meats," or "the Theater of

@@ -45,6 +45,6 @@ class_features:
 technology_grants:
   prepared:
     pool:
-      - { id: admonishing_ray_fanatic_doctrine, level: 1 }
-      - { id: curse_of_recoil_fanatic_doctrine, level: 1 }
-      - { id: draw_moisture_fanatic_doctrine, level: 1 }
+      - { id: doctrine_compliance_ray, level: 1 }
+      - { id: doctrine_recoil_curse, level: 1 }
+      - { id: doctrines_desiccation, level: 1 }

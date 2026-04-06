@@ -1,0 +1,21 @@
+id: full_spectrum_containment
+name: Full Spectrum Containment
+description: You erect a 10-foot-radius sphere of cycling defense protocols around
+  a point within range. The sphere blocks passage and applies spectrum effects to
+  any creature that passes through or touches it. Creatures inside are protected from
+  external attacks. The sphere persists for 1 minute.
+tradition: neural
+level: 9
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You create a seven-layered sphere to protect an area. This multicolored
+      sphere functions like a @UUID[Compendium.pf2e.spells-srd.Item.Prismatic Wall]
+      but is shaped in a 10-foot burst centered on a cor

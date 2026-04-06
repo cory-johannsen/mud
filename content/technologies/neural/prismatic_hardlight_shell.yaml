@@ -1,0 +1,53 @@
+id: prismatic_hardlight_shell
+name: Prismatic Hardlight Shell
+description: 'You encase the target in reactive hardlight armor that shifts through
+  defensive wavelengths. The armor sheds bright light for 20 feet (and dim light for
+  the next 20 feet). Whenever a creature attacks the target and is adjacent to it,
+  the attacker must attempt a Willpower save at the end of its action. On a failure, it
+  becomes Dazzled until the end of its next turn. Regardless of the result of the
+  save, the attacker is temporarily immune until the end of its next turn. The dazzling
+  effect has the light and visual traits.
+
+  When you cast the spell, roll [[/r 2d8]]{1d8 twice} on the table below to see the
+  armor''s wavelength configuration (rerolling any duplicates). Each color grants
+  resistance 5 to the indicated damage type. If you spend three actions to Cast the
+  tech, roll [[/r 3d8]]{three} times instead.
+
+
+  Red fire
+
+  Orange acid
+
+  Yellow electricity
+
+  Green poison
+
+  Blue sonic
+
+  Indigo mental
+
+  Violet force
+
+  Matching Color The armor shifts to match the type of damage the target took most
+  recently in the past minute. If it didn''t take any of those seven types of damage
+  or the armor is already that color, roll again, rerolling results of 8.
+
+
+  Heightened (+3) The resistance is increased by 5.'
+tradition: neural
+level: 4
+usage_type: prepared
+action_cost: 2
+range: melee
+targets: single
+duration: minutes:1
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You wrap the target in armor made of sheets of colored light. The
+      armor sheds bright light for 20 feet (and dim light for the next 20 feet). Whenever
+      a creature attacks the target and is adjacent to i

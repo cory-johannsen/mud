@@ -1,0 +1,21 @@
+id: displacement_field
+name: Displacement Field
+description: You wrap the target in a holographic displacement field that makes it
+  appear slightly offset from its true position. The target gains a +1 status bonus
+  to AC and can attempt to Hide even without cover or concealment, using your spell
+  DC as its Stealth DC.
+tradition: technical
+level: 2
+usage_type: prepared
+action_cost: 2
+range: melee
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You shroud the target in subtle illusions that make it difficult
+      to detect. The target gains a +1 status bonus to Stealth checks to @UUID[Compendium.pf2e.actionspf2e.Item.Hide]
+      or @UUID[Compendium.pf2

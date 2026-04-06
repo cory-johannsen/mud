@@ -1,0 +1,21 @@
+id: mycelial_transit
+name: Mycelial Transit
+description: You step into a living organic structure large enough for you to fit
+  inside and instantly teleport to any similar organic structure within 5 miles. Once
+  you enter the first structure, you instantly know the rough locations of other sufficiently
+  large structures within range and can exit from any of them.
+tradition: bio_synthetic
+level: 5
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You step into a living tree with a trunk big enough for you to fit
+      inside it and instantly teleport to any tree within 5 miles that also has a
+      sufficiently large trunk. Once you enter the first tree,

@@ -1,0 +1,28 @@
+id: neural_compliance_induction
+name: Neural Compliance Induction
+description: |-
+    To the target, your words are honey and your visage seems bathed in a dreamy haze. It must attempt a Willpower save, with a +4 circumstance bonus if you or your allies recently threatened it or used hostile actions against it.
+    You can Dismiss the spell. If you use hostile actions against the target, the spell ends. When the spell ends, the target doesn't necessarily realize it was charmed unless its friendship with you or the actions you convinced it to take clash with its expectations, meaning you could potentially convince the target to continue being your friend via mundane means.
+
+    Critical Success The target is unaffected and aware you tried to charm it.
+    Success The target is unaffected but thinks your spell was something harmless instead of charm, unless it identifies the spell.
+    Failure The target's attitude becomes @UUID[Compendium.pf2e.conditionitems.Item.Friendly] toward you. If it was Friendly, it becomes @UUID[Compendium.pf2e.conditionitems.Item.Helpful]. It can't use hostile actions against you.
+    Critical Failure The target's attitude becomes Helpful toward you, and it can't use hostile actions against you.
+
+    Heightened (4th) The duration lasts until the next time you make your daily preparations.
+    Heightened (8th) The duration lasts until the next time you make your daily preparations, and you can target up to 10 creatures.
+tradition: neural
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+    on_apply:
+        - type: utility
+          dc: 0
+          description: To the target, your words are honey and your visage seems bathed in a dreamy haze. It must attempt a Willpower save, with a +4 circumstance bonus if you or your allies recently threatened it or used hostil

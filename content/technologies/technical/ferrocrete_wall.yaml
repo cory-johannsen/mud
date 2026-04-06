@@ -1,0 +1,23 @@
+id: ferrocrete_wall
+name: Ferrocrete Wall
+description: 'You fabricate a wall of rapid-set ferrocrete. You create a 1-inch-thick
+  wall up to 120 feet long and 20 feet high. You can shape the wall''s path. The wall
+  doesn''t need to stand vertically, so you can form bridges or stairs.
+
+
+  Heightened (+2) HP per section increases by 15.'
+tradition: technical
+level: 5
+usage_type: prepared
+action_cost: 3
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You shape a wall of solid stone. You create a 1-inch-thick wall of
+      stone up to 120 feet long, and 20 feet high. You can shape the wall's path,
+      placing each 5 feet of the wall on the border between squ

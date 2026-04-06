@@ -1,0 +1,20 @@
+id: righteous_counter
+name: Righteous Counter
+description: You channel a doctrinal ward through your attack and plant it on a foe.
+  This ward increases your defenses against that foe as long as you continue to engage
+  it.
+tradition: fanatic_doctrine
+level: 3
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You channel a magical ward through your attack and attempt to plant
+      it on a foe. This ward increases your defenses against that foe, as long as
+      you keep attacking that foe to maintain it. Make a melee

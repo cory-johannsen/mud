@@ -1,0 +1,23 @@
+id: vigil_sight
+name: Vigil Sight
+description: Your eyes take on a dark, fanatical gleam as your doctrine grants you
+  sight in darkness. You gain darkvision. If you already have darkvision, you gain
+  greater darkvision for the duration.
+tradition: fanatic_doctrine
+level: 3
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'Your eyes darken until they become entirely pitch black. You grant
+      yourself the ability to see in the darkness. You gain darkvision. If you already
+      have darkvision, you gain greater darkvision.
+
+
+      Heigh'

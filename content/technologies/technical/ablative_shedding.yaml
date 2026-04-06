@@ -1,0 +1,23 @@
+id: ablative_shedding
+name: Ablative Shedding
+description: 'You trigger the target''s ablative outer layer to shed, removing harmful
+  effects. You remove one persistent damage condition affecting you and gain 5 temporary
+  HP.
+
+
+  Heightened (+1) The temporary HP increase by 5.'
+tradition: technical
+level: 2
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You continually and harmlessly slough off the top layer of your skin
+      while new skin regenerates immediately, quickly moving damaging substances away
+      from your body. The flat check to remove persistent

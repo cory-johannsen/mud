@@ -1,0 +1,17 @@
+id: blade_array_projector
+name: Blade Array Projector
+description: Deploy a rotating array of hard-light blades that punish movement through the area.
+tradition: technical
+level: 1
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You create numerous phantom copies of your weapon arm, hiding your true movements and rendering your attacks
+      unpredictable. You gain a +2 status bonus to Deception checks. If you're untrained in Decep

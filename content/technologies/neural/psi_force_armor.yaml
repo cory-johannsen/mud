@@ -1,0 +1,23 @@
+id: psi_force_armor
+name: Psi-Force Armor
+description: |-
+    You ward yourself with shimmering magical energy, gaining a +1 item bonus to AC and a maximum Dexterity modifier of +5. While wearing mystic armor, you use your unarmored proficiency to calculate your AC.
+    @UUID[Compendium.pf2e.spell-effects.Item.tech Effect: Mystic Armor]
+
+    Heightened (4th) You gain a +1 item bonus to saving throws.
+    Heightened (6th) The item bonus to AC increases to +2, and you gain a +1 item bonus to saving throws.
+    Heightened (8th) The item bonus to AC increases to +2, and you gain a +2 item bonus to saving throws.
+    Heightened (10th) The item bonus to AC increases to +3, and you gain a +3 item bonus to saving throws.
+tradition: neural
+level: 1
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: instant
+resolution: none
+effects:
+    on_apply:
+        - type: utility
+          dc: 0
+          description: You ward yourself with shimmering magical energy, gaining a +1 item bonus to AC and a maximum Dexterity modifier of +5. While wearing mystic armor, you use your unarmored proficiency to calculate your

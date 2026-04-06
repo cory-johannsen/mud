@@ -1,0 +1,20 @@
+id: fauna_interface
+name: Fauna Interface
+description: You establish a bio-synthetic communication link with animals. You can
+  ask questions of and receive answers from animals for the duration. The animals'
+  responses are limited by their intelligence and perceptions.
+tradition: bio_synthetic
+level: 2
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You can ask questions of, receive answers from, and use the Diplomacy
+      skill with animals. The spell doesn't make them more friendly than normal. Cunning
+      animals are likely to be terse and evasive, whi

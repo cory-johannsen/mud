@@ -1,0 +1,19 @@
+id: hologram_crowd
+name: Hologram Crowd
+description: A holographic crowd of dozens appears around you, following your movement.
+  The crowd provides cover and makes it difficult for enemies to identify you specifically.
+tradition: technical
+level: 3
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: An illusory parade with dozens of participants and performers appears
+      around you, following you as you move. The parade is lively and noisy, providing
+      enough cover and distraction to hide among the cr

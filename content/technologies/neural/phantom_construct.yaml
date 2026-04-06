@@ -1,0 +1,25 @@
+id: phantom_construct
+name: Phantom Construct
+description: 'You create a psychic projection that appears to be a creature. The illusion
+  appears in an unoccupied space within range and can move up to 25 feet when you
+  Sustain the spell. If a creature Seeks or interacts with it, it can attempt a Perception
+  check against your tech DC to disbelieve.
+
+
+  The illusion can make illusory melee Strikes, dealing 1d4+4 mental damage on a hit
+  and 1d4+1 on a failure.'
+tradition: neural
+level: 2
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You create an illusory image of a Large or smaller creature. It generates
+      the appropriate sounds, smells, and feels believable to the touch. If you and
+      the image are ever farther than 500 feet apart,

@@ -1,0 +1,48 @@
+id: cluster_munition_strike
+name: Cluster Munition Strike
+description: Area (continued) 20-foot burst plus additional @Template[burst|distance:5]{5-foot
+  bursts}You launch a high-explosive warhead followed by a salvo of cluster munitions.
+  You create a 20-foot burst and [[/r 1d4#Additional 5-foot bursts]] additional 5-foot
+  bursts each within the range and within 20 feet of another burst. None of the bursts
+  can intersect. Each creature caught in at least one of these bursts takes 6d8 fire
+  damage and 6d4 sonic damage (basic Toughness save). On a failed save, a creature
+  is also @UUID[Compendium.pf2e.conditionitems.Item.Deafened] for 1 minute.Heightened
+  (+1) The fire damage increases by 1d8 and the sonic damage increases by 1d4.
+tradition: technical
+level: 6
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: instant
+save_type: toughness
+save_dc: 15
+resolution: save
+effects:
+  on_success:
+  - type: damage
+    dice: 6d4
+    damage_type: fire
+    dc: 0
+  - type: damage
+    dice: '6'
+    damage_type: sonic
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 6d8
+    damage_type: fire
+    dc: 0
+  - type: damage
+    dice: 6d4
+    damage_type: sonic
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 12d8
+    damage_type: fire
+    dc: 0
+  - type: damage
+    dice: 12d4
+    damage_type: sonic
+    dc: 0

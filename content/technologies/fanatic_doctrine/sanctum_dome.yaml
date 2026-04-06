@@ -1,0 +1,22 @@
+id: sanctum_dome
+name: Sanctum Dome
+description: You create a dome of radiant doctrinal energy that intercepts projectiles.
+  Ammunition from physical ranged attacks passing through the dome is destroyed. Creatures
+  inside gain a +1 circumstance bonus to AC against ranged attacks.
+tradition: fanatic_doctrine
+level: 3
+usage_type: prepared
+action_cost: 3
+range: zone
+targets: zone
+duration: minutes:1
+save_type: toughness
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You create a dome of brilliant light that destroys projectiles attempting
+      to pass through it. Ammunition from physical ranged attacks—such as arrows,
+      bolts, sling bullets, and other objects of simil

@@ -1,0 +1,37 @@
+id: memory_wipe_device
+name: Memory Wipe Device
+description: 'You activate a device that drastically reduces the target''s cognitive
+  function. The target must attempt a Willpower save. The effects of this curse can be
+  removed only through effects that target curses.
+
+
+  Critical Success The target is unaffected.
+
+  Success The target is Stupefied 2 for 1 round.
+
+  Failure The target is Stupefied 4 with an unlimited duration.
+
+  Critical Failure The target''s intellect is permanently reduced below that of an
+  animal, and it treats its Charisma, Intelligence, and Wisdom modifiers as –5. It
+  loses all class abilities that require mental faculties, including all spellcasting.
+  If the target is a PC, they become an NPC under the GM''s control.'
+tradition: technical
+level: 6
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'You drastically reduce the target''s mental faculties. The target
+      must attempt a Willpower save. The effects of this curse can be removed only through
+      effects that target curses.
+
+
+      Critical Success The targe'

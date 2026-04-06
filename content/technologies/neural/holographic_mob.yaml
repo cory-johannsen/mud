@@ -1,0 +1,21 @@
+id: holographic_mob
+name: Holographic Mob
+description: You create an illusion of a crowd of people in the area. The illusory
+  figures move, talk, and generally act like a normal crowd. Creatures can attempt
+  a Perception check against your tech DC to disbelieve. The crowd is difficult terrain
+  for creatures that believe it's real.
+tradition: neural
+level: 2
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: A tightly packed crowd of humanoids appropriate to the area appear,
+      facing you and agreeing loudly with anything you say. A creature that touches
+      a member of the crowd or makes a Seek action to examin

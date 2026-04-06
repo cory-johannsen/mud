@@ -1,0 +1,38 @@
+id: hemophobic_pulse
+name: Hemophobic Pulse
+description: 'You psychically amplify the target''s awareness of its own bleeding.
+  The target must attempt a Willpower save.
+
+
+  Critical Success The creature is unaffected.
+
+  Success The creature is @UUID[Compendium.pf2e.conditionitems.Item.Frightened] 1.
+
+  Failure The creature is @UUID[Compendium.pf2e.conditionitems.Item.Frightened] 2
+  and takes @Damage[1d6[persistent,bleed]] damage.
+
+  Critical Failure The creature is @UUID[Compendium.pf2e.conditionitems.Item.Frightened]
+  3 and takes @Damage[2d6[persistent,bleed]] damage.'
+tradition: neural
+level: 2
+usage_type: prepared
+action_cost: 1
+range: ranged
+targets: single
+duration: instant
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'You curse the target, filling it with terror at the loss of its
+      blood. The target must attempt a Willpower save.
+
+
+      Critical Success The target is unaffected.
+
+      Success The target is Frightened 1.
+
+      Failure The'

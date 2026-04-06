@@ -1,0 +1,21 @@
+id: graviton_projector
+name: Graviton Projector
+description: You deploy a gravity manipulation device. All creatures and objects in
+  the area are pulled toward the center based on their Reflex saves.
+tradition: technical
+level: 3
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: instant
+save_type: hustle
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You create a sphere of altered gravity. All creatures and unsecured
+      objects in the area move towards the center, depending on their Reflex saving
+      throws. This follows the rules for forced movement. If

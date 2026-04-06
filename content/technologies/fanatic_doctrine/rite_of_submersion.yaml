@@ -1,0 +1,22 @@
+id: rite_of_submersion
+name: Rite of Submersion
+description: You invoke a sacred blessing that allows the targets to breathe underwater.
+  The targets retain the ability to breathe air.
+tradition: fanatic_doctrine
+level: 2
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'The targets can breathe underwater.
+
+
+      Heightened (3rd) The duration increases to 8 hours.
+
+      Heightened (4th) The duration increases to until your next daily preparations.'

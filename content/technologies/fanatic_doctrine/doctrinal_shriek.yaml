@@ -1,0 +1,34 @@
+id: doctrinal_shriek
+name: Doctrinal Shriek
+description: 'You emit an unsettling, doctrine-infused war cry that scrambles nearby
+  creatures'' willpower. Each creature in the area that can hear must attempt a Will
+  save.
+
+
+  Critical Success The target is unaffected and immune to this tech for 1 minute.
+
+  Success The target is Stunned 1.
+
+  Failure The target is Confused for 1 round.
+
+  Critical Failure The target is Confused for 1 minute.'
+tradition: fanatic_doctrine
+level: 5
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: minutes:1
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'You give an unsettling, warbling cry that causes nearby creatures
+      to lash out without control. Each creature in the area that can hear must attempt
+      a Willpower save.
+
+
+      Critical Success The target is unaffec'

@@ -43,9 +43,9 @@ class_features:
 technology_grants:
   prepared:
     pool:
-      - id: camel_spit_bio_synthetic
+      - id: organic_repellent_gland
         level: 1
-      - id: chilling_spray_bio_synthetic
+      - id: cryo_gland_spray
         level: 1
-      - id: airburst_bio_synthetic
+      - id: bio_concussive_burst
         level: 1

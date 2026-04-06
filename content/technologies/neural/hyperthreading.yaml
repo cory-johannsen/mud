@@ -1,0 +1,20 @@
+id: hyperthreading
+name: Hyperthreading
+description: You massively parallelize your cognitive processes. You can instantly
+  use up to 6 Recall Knowledge actions as part of activating this tech. You gain a
+  +2 status bonus on these checks.
+tradition: neural
+level: 3
+usage_type: prepared
+action_cost: 1
+range: self
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You rapidly catalog and collate information relevant to your current
+      situation. You can instantly use up to 6 Recall Knowledge actions as part of
+      Casting this tech. For these actions, you can't use a

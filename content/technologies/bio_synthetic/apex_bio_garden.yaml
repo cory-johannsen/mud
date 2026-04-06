@@ -1,0 +1,23 @@
+id: apex_bio_garden
+name: Apex Bio-Garden
+description: 'You seed a 120-foot burst with apex bio-growth. The growth becomes impassable
+  difficult terrain for non-plant creatures. Each round, plants in the area make a
+  +30 attack vs all non-plant creatures for 4d10+15 bludgeoning damage. Duration:
+  1 minute.'
+tradition: bio_synthetic
+level: 10
+usage_type: prepared
+action_cost: 3
+range: ranged
+targets: single
+duration: instant
+save_type: hustle
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You cast your magic into the earth, calling out to a powerful green
+      man, a verdant lesser deity of nature, to come to your aid. They occupy the
+      space of a Medium creature, have a Speed of 40 feet, and

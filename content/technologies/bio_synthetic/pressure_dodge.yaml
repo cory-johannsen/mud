@@ -1,0 +1,27 @@
+id: pressure_dodge
+name: Pressure Dodge
+description: 'Trigger A creature enters a space within 5 feet of you.
+
+
+  A bio-generated pressure wave sweeps you up instantly and moves you to safety. All
+  mechanical effects remain identical to the base protocol.'
+tradition: bio_synthetic
+level: 4
+usage_type: prepared
+action_cost: 0
+range: self
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'Trigger A creature enters a space within 5 feet of you.
+
+
+      An arresting breeze sweeps you up in an instant and moves you to safety. You
+      Fly 15 feet directly away from the triggering creature.
+
+
+      Heightene'

@@ -1,0 +1,45 @@
+id: frequency_modulation_field
+name: Frequency Modulation Field
+description: 'With a quick series of neural adjustments, subsonic frequencies fill
+  the area. While the frequencies can be detected as if they were broadcast normally
+  at a distance, creatures in the tech''s area become affected in more significant
+  ways. When you activate this tech, select a key signature (to affect enemies) and
+  a time signature (to affect allies) from the options below; all creatures within
+  the area are affected as indicated. You can change the key signature or time signature
+  as part of the action you take when you Sustain the tech.
+
+  Flat (key signature) Whenever an enemy critically fails at a Strike, saving throw,
+  or skill check, they fall @UUID[Compendium.pf2e.conditionitems.Item.Prone] in addition
+  to other effects from the critical failure.
+
+  Natural (key signature) Enemies take a –2 status penalty to attack rolls.
+
+  Sharp (key signature) Whenever an enemy takes piercing or slashing damage, they
+  also take 2d6 persistent bleed damage.
+
+  Double (time signature) You and your allies become @UUID[Compendium.pf2e.conditionitems.Item.Quickened]
+  and can use the extra action each round only for @UUID[Compendium.pf2e.actionspf2e.Item.Leap],
+  Stand, Step, or Stride actions.
+
+  Quadruple (time signature) You and your allies gain a +2 status bonus to attack
+  rolls.
+
+  Triple (time signature) You and your allies gain a +2 status bonus to Armor Class
+  and Reflex saving throws.
+
+  @UUID[Compendium.pf2e.spell-effects.Item.tech Effect: Musical Shift]'
+tradition: neural
+level: 8
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: With a quick series of wrist flicks, music fills the air. While the
+      music can be heard as if it were performed normally at a distance, creatures
+      in the spell's area become affected in more significant

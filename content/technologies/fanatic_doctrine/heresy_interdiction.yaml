@@ -1,0 +1,22 @@
+id: heresy_interdiction
+name: Heresy Interdiction
+description: A doctrinal interference signal prevents the target from participating
+  in cooperative tech activation. On a failed save, the target is cut off from group
+  rituals and shared channeling for the duration.
+tradition: fanatic_doctrine
+level: 3
+usage_type: prepared
+action_cost: 3
+range: self
+targets: single
+duration: minutes:1
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: A magical interference prevents the target from contributing to any
+      form of cooperative spellcasting. On a failed save, the target can't participate
+      in any ritual unless they can cast the ritual alone

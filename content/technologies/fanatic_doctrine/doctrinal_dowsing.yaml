@@ -1,0 +1,20 @@
+id: doctrinal_dowsing
+name: Doctrinal Dowsing
+description: Through ritualistic focus, you learn the direction to the target object
+  or nearest object of a specified type. You must have a clear mental image or have
+  seen the target before.
+tradition: fanatic_doctrine
+level: 3
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You learn the direction to the target (if you picked a specific object,
+      such as "my mother's sword") or the nearest target (if you picked a type of
+      object, such as "swords"). If the target is a specif

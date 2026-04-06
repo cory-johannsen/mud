@@ -1,0 +1,21 @@
+id: bio_remake_protocol
+name: Bio Remake Protocol
+description: 'You reconstruct biology at a fundamental level. Choose one: restore
+  a destroyed or dead creature within 1 minute to full health, reverse a biological
+  mutation permanently, grow a new biological system in a creature, or produce any
+  other biological alteration subject to GM approval.'
+tradition: bio_synthetic
+level: 10
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You fully re-create an object from nothing, even if the object was
+      destroyed. To do so, you must be able to picture the object in your mind. Additionally,
+      the material component must be a remnant of t

@@ -1,0 +1,20 @@
+id: ration_fabricator
+name: Ration Fabricator
+description: You operate a molecular fabricator to produce food. You manufacture enough
+  food to feed 10 Medium creatures for a day. The food is bland but nutritious and
+  lasts 24 hours before losing cohesion.
+tradition: technical
+level: 2
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You create enough food to feed six Medium creatures for a day. This
+      food is bland and unappealing, but it is nourishing. After 1 day, if no one
+      has eaten the food, it decays and becomes inedible. Most

@@ -1,0 +1,20 @@
+id: death_data_scan
+name: Death Data Scan
+description: You psychically scan a corpse to extract residual neural impressions.
+  You learn the creature's cause of death, approximate time of death, and can see
+  a brief psychic playback of its final moments from its perspective.
+tradition: neural
+level: 2
+usage_type: prepared
+action_cost: 2
+range: melee
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You project a fragment of your senses into the corpse. While within
+      500 feet of the corpse (even if it's outside your line of sight or line of effect),
+      you can see from where the target corpse had eye

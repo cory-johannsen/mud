@@ -1,0 +1,22 @@
+id: emotion_injection
+name: Emotion Injection
+description: You psychically inject an emotion into the target's mind. The target
+  must attempt a Willpower save. On a failure, the target feels the emotion strongly for
+  1 minute, which can affect its behavior at the GM's discretion.
+tradition: neural
+level: 2
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You expand the target's ability to understand social cues that are
+      normally beyond its comprehension. Any creature to which the target isn't unfriendly
+      or hostile can use Diplomacy to @UUID[Compendium

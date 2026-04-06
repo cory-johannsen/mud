@@ -1,0 +1,31 @@
+id: apex_bio_turret
+name: Apex Bio-Turret
+description: You grow an apex organic turret. The turret has AC 40, 200 HP, and attacks
+  one target per round with a +35 attack dealing 6d12+20 acid or fire damage (alternating).
+  It follows your targeting commands for 1 minute.
+tradition: bio_synthetic
+level: 10
+usage_type: prepared
+action_cost: 3
+range: ranged
+targets: single
+duration: instant
+save_type: hustle
+save_dc: 15
+resolution: save
+effects:
+  on_success:
+  - type: damage
+    dice: 13d4
+    damage_type: untyped
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 13d8
+    damage_type: untyped
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 26d8
+    damage_type: untyped
+    dc: 0

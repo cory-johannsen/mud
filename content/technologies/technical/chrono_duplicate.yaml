@@ -1,0 +1,20 @@
+id: chrono_duplicate
+name: Chrono-Duplicate
+description: 'You pull a momentary copy of your ally from a fraction of a second ago.
+  The duplicate appears within 30 feet and can take one action before vanishing: Strike,
+  Stride, Step, or use a skill.'
+tradition: technical
+level: 3
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You pull a fleeting duplicate of your ally from the recent past.
+      The duplicate appears in an unoccupied space of your choice within 30 feet of
+      you and repeats a basic single action the target took sin

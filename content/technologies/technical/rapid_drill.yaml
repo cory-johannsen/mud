@@ -1,0 +1,22 @@
+id: rapid_drill
+name: Rapid Drill
+description: You deploy a rapid drilling mechanism that excavates earth. You move
+  up to 20 cubic feet of dirt, sand, or loose rock. This can create a hole, trench,
+  or other excavation.
+tradition: technical
+level: 2
+usage_type: prepared
+action_cost: 2
+range: melee
+targets: single
+duration: instant
+save_type: hustle
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: Area (continued) cube of dirt 5 feet across or smallerYou remove
+      loose dirt, dust, gravel, sand, and the like (though not solid stone) up to
+      the size of a 5-foot cube. Any Medium or smaller creature s

@@ -1,0 +1,33 @@
+id: withering_decree
+name: Withering Decree
+description: 'You invoke a doctrinal decree of decay. Each creature in the area takes
+  3d10 void damage with a basic Toughness save.
+
+
+  Heightened (+1) The damage increases by 1d10.'
+tradition: fanatic_doctrine
+level: 2
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: instant
+save_type: toughness
+save_dc: 15
+resolution: save
+effects:
+  on_success:
+  - type: damage
+    dice: 2d6
+    damage_type: void
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 2d10
+    damage_type: void
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 4d10
+    damage_type: void
+    dc: 0

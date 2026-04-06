@@ -1,0 +1,27 @@
+id: remote_drone_proxy
+name: Remote Drone Proxy
+description: 'You deploy a holographic drone that projects your image. You must stay
+  within range of the drone, and if at any point you can''t see it, the tech ends.
+  Whenever you activate a tech other than one whose area is an emanation, you can
+  cause the effect to originate from either yourself or the drone. Because the drone
+  is a projection, it can''t benefit from tech, though visual manifestations appear.
+  The drone has the same AC and saves as you. If it is hit by an attack or fails a
+  save, the tech ends.
+
+
+  Heightened (+2) The maximum duration you can Sustain the tech increases to 10 minutes.'
+tradition: technical
+level: 7
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You project an illusory image of yourself. You must stay within range
+      of the image, and if at any point you can't see the image, the spell ends. Whenever
+      you Cast a tech other than one whose area is

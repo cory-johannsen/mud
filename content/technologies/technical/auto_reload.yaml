@@ -1,0 +1,21 @@
+id: auto_reload
+name: Auto-Reload
+description: You deploy an automated reloading mechanism on the target's ranged weapon.
+  The weapon is reloaded as if the target had used the Interact action to reload it.
+tradition: technical
+level: 2
+usage_type: prepared
+action_cost: 0
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'Trigger One of your allies makes a ranged Strike with a weapon with
+      a reload of 1 or less
+
+      Requirements Your ally has more ammunition for their ranged weapon available.With
+      a quick gesture, you reload'

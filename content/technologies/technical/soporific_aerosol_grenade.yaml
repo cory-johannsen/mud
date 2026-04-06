@@ -1,0 +1,19 @@
+id: soporific_aerosol_grenade
+name: Soporific Aerosol Grenade
+description: Detonate a grenade releasing a fast-acting soporific aerosol that induces unconsciousness.
+tradition: technical
+level: 1
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: instant
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: Each creature in the area becomes drowsy, possibly nodding off. A creature that falls @UUID[Compendium.pf2e.conditionitems.Item.Unconscious]
+      from this tech doesn't fall @UUID[Compendium.pf2e.conditio

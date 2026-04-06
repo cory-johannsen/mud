@@ -1,0 +1,35 @@
+id: forced_reconfiguration
+name: Forced Reconfiguration
+description: 'You activate a device that forcibly reconfigures the target creature
+  into a harmless form, with effects based on its Toughness save.Critical Success
+  The target is unaffected.
+
+  Success The target''s body gains minor features of the harmless form. Its systems
+  churn as they partially reconfigure, causing it to be Sickened 1. When it recovers
+  from the sickened condition, its features revert to normal.
+
+  Failure The target transforms for 1 minute but keeps its mind. If it spends all
+  its actions on its turn concentrating on its original form, it can attempt a @Check[will]
+  save to end the effect immediately.
+
+  Critical Failure The target is transformed into the chosen harmless form, body and
+  mind, for an unlimited duration.'
+tradition: technical
+level: 6
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+save_type: toughness
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'You transform the target creature into a harmless animal appropriate
+      to the area, with effects based on its Toughness save.Critical Success The target
+      is unaffected.
+
+      Success The target''s body gains mi'

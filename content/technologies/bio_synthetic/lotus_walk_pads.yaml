@@ -1,0 +1,20 @@
+id: lotus_walk_pads
+name: Lotus-Walk Pads
+description: Bio-adhesive pads grow on your feet, allowing you to walk on the surface
+  of water and other liquids. You can submerge yourself voluntarily and resurface
+  as part of your movement.
+tradition: bio_synthetic
+level: 3
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: Lotuses, water lilies, and other watery plants bloom at your feet,
+      allowing you to walk on the surface of water and other liquids. You can go underwater
+      if you wish, but in that case, you must Swim no

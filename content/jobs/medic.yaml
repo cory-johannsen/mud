@@ -41,9 +41,9 @@ technology_grants:
     slots_by_level:
       1: 1
     pool:
-      - { id: rousing_splash_fanatic_doctrine, level: 1 }
-      - { id: stabilize_fanatic_doctrine, level: 1 }
-      - { id: necromancers_generosity_fanatic_doctrine, level: 1 }
+      - { id: revival_blessing, level: 1 }
+      - { id: emergency_doctrine_stabilization, level: 1 }
+      - { id: doctrine_contagion_transfer, level: 1 }
 drawbacks:
   - id: caretaker_fatigue
     type: passive

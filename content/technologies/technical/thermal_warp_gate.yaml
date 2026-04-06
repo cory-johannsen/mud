@@ -1,0 +1,21 @@
+id: thermal_warp_gate
+name: Thermal Warp Gate
+description: You step into a heat source large enough to fit inside and instantly
+  teleport to any other sufficient heat source within 5 miles. Once you enter the
+  first source, you instantly know the rough locations of other sufficiently large
+  heat sources within range.
+tradition: technical
+level: 5
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You step into a blazing fire that's big enough for you to fit inside
+      and instantly teleport to any other fire within 5 miles that also has a sufficiently
+      large size. Once you enter the first fire, you

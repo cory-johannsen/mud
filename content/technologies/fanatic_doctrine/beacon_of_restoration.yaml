@@ -1,0 +1,20 @@
+id: beacon_of_restoration
+name: Beacon of Restoration
+description: Restorative doctrinal energy radiates outward from you, allowing allies
+  to receive healing. Once per round, either you or an ally within range can recover
+  Hit Points as described by the base protocol.
+tradition: fanatic_doctrine
+level: 4
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: Vitality radiates outward from you, allowing others to supplicate
+      and receive healing. Once per round, either you or an ally can use an Interact
+      action to supplicate and lay hands upon you to regain H

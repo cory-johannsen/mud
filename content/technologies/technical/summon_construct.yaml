@@ -1,8 +1,15 @@
 id: summon_construct
-name: Combat Drone Deploy
-description: Release a pre-loaded combat drone from a transport capsule for autonomous combat support.
+name: Summon Construct
+description: 'You fabricate an elemental construct from raw materials. The creature
+  fights for you and acts on your turn. It uses the statistics of a 2nd-level or lower
+  elemental creature.
+
+
+  Heightened (3rd) The maximum level of the summoned creature is 3.
+
+  Heightened (4th) The maximum level is 5.'
 tradition: technical
-level: 1
+level: 2
 usage_type: prepared
 action_cost: 3
 range: ranged
@@ -13,7 +20,8 @@ effects:
   on_apply:
   - type: utility
     dc: 0
-    description: 'You summon a creature that has the construct trait and whose level is –1 to fight for you.
+    description: 'You summon a creature that has the elemental trait and whose level
+      is 1 or lower to fight for you.
 
 
       Heightened As listed in the summon trait.'

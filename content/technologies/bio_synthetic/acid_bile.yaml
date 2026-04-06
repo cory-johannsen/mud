@@ -1,0 +1,27 @@
+id: acid_bile
+name: Acid Bile
+description: 'You regurgitate a stream of bio-synthesized corrosive bile. Make a spell
+  attack. On a hit, you deal 3d6 acid damage. On a critical hit, the target is also
+  @UUID[Compendium.pf2e.conditionitems.Item.Sickened] 1.
+
+
+  Heightened (+1) The damage increases by 1d6.'
+tradition: bio_synthetic
+level: 2
+usage_type: prepared
+action_cost: 0
+range: ranged
+targets: single
+duration: instant
+resolution: attack
+effects:
+  on_hit:
+  - type: damage
+    dice: 2d6
+    damage_type: acid
+    dc: 0
+  on_crit_hit:
+  - type: damage
+    dice: 4d6
+    damage_type: acid
+    dc: 0

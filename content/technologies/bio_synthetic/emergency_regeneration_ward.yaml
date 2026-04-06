@@ -1,0 +1,25 @@
+id: emergency_regeneration_ward
+name: Emergency Regeneration Ward
+description: 'You activate a bio-synthetic regeneration implant, gaining resistance
+  10 to fire. If you take fire damage that would reduce you to 0 Hit Points, the ward
+  absorbs any damage beyond the amount that would bring you to 1 Hit Point, then triggers
+  an emergency healing burst. You regain Hit Points equal to 4d8 + the absorbed damage;
+  this is a healing vitality effect. The ward then deactivates, and you can''t use
+  it again for 24 hours.
+
+
+  Heightened (+1) The healing increases by 1d8.'
+tradition: bio_synthetic
+level: 4
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: damage
+    dice: 4d8
+    damage_type: untyped
+    dc: 0

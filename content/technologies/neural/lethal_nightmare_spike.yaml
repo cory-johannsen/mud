@@ -1,0 +1,35 @@
+id: lethal_nightmare_spike
+name: Lethal Nightmare Spike
+description: 'You inject a personalized terror construct directly into the target''s
+  visual cortex. Only the target can perceive the killer, though you can see the vague
+  outline as it races forth. The effect is based on the outcome of the target''s Will
+  save.Critical Success The target is unaffected.
+
+  Success The target takes @Damage[4d6[mental]] damage and is Frightened 1.
+
+  Failure The target takes @Damage[(max(8,@item.rank*2))d6[mental]] damage and is
+  Frightened 2.
+
+  Critical Failure The target is so terrified it might flatline. It must attempt a
+  Toughness save; if the target fails, it dies. On a successful Toughness save, the
+  target takes @Damage[(max(12,@item.rank*3))d6[mental]] damage, is Fleeing until
+  the end of its next turn, and is Frightened 4. This effect has the incapacitation
+  trait.Heightened (+1) The damage increases by 2d6 on a failure and by 3d6 on a critical
+  failure.'
+tradition: neural
+level: 4
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You create a phantasmal image of the most fearsome creature imaginable
+      to the target. Only the spell's target can see the killer, though you can see
+      the vague shape of the illusion as it races forth t

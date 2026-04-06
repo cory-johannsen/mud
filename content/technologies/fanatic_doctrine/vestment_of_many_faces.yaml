@@ -1,0 +1,27 @@
+id: vestment_of_many_faces
+name: Vestment of Many Faces
+description: 'You invoke four doctrinal disguise tokens, each storing a single identity.
+  As an Interact action, you can don or remove a token. When worn, the token projects
+  a complete disguise including altered voice and scent. The disguise hides your identity
+  but doesn''t impersonate a specific individual.
+
+  First activation determines the appearance. Attempt the Deception check at mythic
+  proficiency.
+
+  One token at a time. Removing reverts to true appearance. Tokens given to others
+  cease functioning.'
+tradition: fanatic_doctrine
+level: 4
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You conjure four magic feathers, each with the potential to hold
+      a single illusory guise. These feathers have negligible Bulk and remain potent
+      for the duration. As an Interact action, you can place o

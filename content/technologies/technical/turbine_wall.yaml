@@ -1,0 +1,22 @@
+id: turbine_wall
+name: Turbine Wall
+description: You deploy a row of high-powered turbines generating a barrier of wind
+  5 feet thick, 60 feet long, and 30 feet high. The wind hinders ranged attacks and
+  movement through the wall.
+tradition: technical
+level: 3
+usage_type: prepared
+action_cost: 3
+range: ranged
+targets: single
+duration: minutes:1
+save_type: toughness
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You create a barrier of gusting winds that hinders anything moving
+      through it. The wall of swirling winds is 5 feet thick, 60 feet long, and 30
+      feet high. The wall stands vertically, but you can shape

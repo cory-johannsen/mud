@@ -1,0 +1,20 @@
+id: transport_organism
+name: Transport Organism
+description: You grow a large aquatic bio-construct that serves as transportation.
+  It must be deployed into a large body of water. It has a swim Speed of 40 feet and
+  can carry up to 4 Medium creatures.
+tradition: bio_synthetic
+level: 3
+usage_type: prepared
+action_cost: 3
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You conjure an intelligent sea turtle, who agrees to carry you upon
+      its shell on a water journey. This turtle must be conjured into a large body
+      of water within range, such as a lake or broad river. T

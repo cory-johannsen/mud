@@ -1,0 +1,22 @@
+id: pressure_wave_emitter
+name: Pressure Wave Emitter
+description: You fire a directional pressure wave from your armor. The blast extinguishes
+  small fires, disperses gases, and pushes creatures. Each creature must attempt a
+  Reflex save or be pushed 10 feet.
+tradition: technical
+level: 3
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: instant
+save_type: toughness
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You issue a blast of sudden wind that ripples outward from the center
+      of the burst. The wind extinguishes small non-magical fires, disperses fog and
+      mist, scatters objects of light Bulk or less, and p

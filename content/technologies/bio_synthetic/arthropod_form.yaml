@@ -1,0 +1,20 @@
+id: arthropod_form
+name: Arthropod Form
+description: You trigger a controlled mutagenic shift, transforming into a Medium
+  arthropod battle form. Choose a listed form when you activate this tech. You gain
+  the listed abilities.
+tradition: bio_synthetic
+level: 3
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You envision a simple bug and transform into a Medium animal battle
+      form. When you Use this tech, choose a listed battle form. You can decide
+      the specific type of animal (such as a ladybug or scarab

@@ -1,0 +1,22 @@
+id: doctrine_army_deploy
+name: Doctrine Army Deploy
+description: 'You summon an army of doctrinal soldiers. The army occupies a 60-foot
+  burst and makes attacks against all enemy creatures within it each round (+30 attack,
+  6d8+15 slashing). Allies in the area gain +2 to all checks. Duration: 1 minute.'
+tradition: fanatic_doctrine
+level: 10
+usage_type: prepared
+action_cost: 3
+range: ranged
+targets: single
+duration: instant
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You tap into the glories of the armies of old, bringing forth their
+      might to your battlefield and making their strength and power your own. This
+      army manifests as glimmering forms of a conquering mili

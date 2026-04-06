@@ -1,0 +1,20 @@
+id: organic_transport_pod
+name: Organic Transport Pod
+description: You grow a living vehicle from bio-engineered plant matter. The conveyance
+  appears in an unoccupied area and can carry up to 4 Medium creatures. It has a Speed
+  of 40 feet and AC 15.
+tradition: bio_synthetic
+level: 3
+usage_type: prepared
+action_cost: 3
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You conjure an intricate vehicle, carved entirely from wood, to serve
+      as a method of conveyance. The vehicle appears in an unoccupied area of your
+      choice within range. The vehicle can be piloted using

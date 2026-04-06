@@ -1,0 +1,36 @@
+id: puzzle_room_trap_module
+name: Puzzle Room Trap Module
+description: 'You deploy a dimensional trap module that transports the target into
+  an extraplanar puzzle room of fiendish engineering, locking them inside. Once each
+  turn as a single action, the target can attempt an Occultism check, Perception check,
+  or Thievery check against your tech DC to solve the puzzle. Teleportation effects
+  can''t carry the target outside the puzzle room unless they can also traverse the
+  planes, such as @UUID[Compendium.pf2e.spells-srd.Item.Interplanar Teleport]. When
+  the tech ends, the target returns to the space it occupied when it was banished,
+  or to the nearest space if the original is now filled.
+
+
+  Critical Success The target solves the puzzle and escapes.
+
+  Success The target is on the right path to the solution. If it was already on the
+  right path, it solves the puzzle and escapes.
+
+  Failure The target makes no progress toward a solution.
+
+  Critical Failure The target makes no progress and, if it was on the right path,
+  it no longer is.'
+tradition: technical
+level: 8
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You transport the target into an extraplanar puzzle room of mysterious
+      origin, locking them there. Once each turn as a single action, the target can
+      attempt an Occultism check, Perception check, or Th

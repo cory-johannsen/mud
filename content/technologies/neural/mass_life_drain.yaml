@@ -1,0 +1,38 @@
+id: mass_life_drain
+name: Mass Life Drain
+description: 'You psychically draw the vitality from living creatures through neural
+  parasitism. You deal 12d6 void damage to living creatures in the area with a basic
+  Toughness save.
+
+  You gain temporary Hit Points equal to half the damage a single creature takes from
+  this tech; calculate these temporary Hit Points using the creature that took the
+  most damage. You lose any remaining temporary Hit Points after 1 minute.
+
+
+  Heightened (+1) The damage increases by 2d6.'
+tradition: neural
+level: 6
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: instant
+save_type: toughness
+save_dc: 15
+resolution: save
+effects:
+  on_success:
+  - type: damage
+    dice: 12d3
+    damage_type: void
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 12d6
+    damage_type: void
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 24d6
+    damage_type: void
+    dc: 0

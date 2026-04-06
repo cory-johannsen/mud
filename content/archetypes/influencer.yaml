@@ -16,47 +16,47 @@ technology_grants:
     uses_by_level:
       1: 2
     pool:
-    - id: fear_neural
+    - id: cranial_fear_injection
       level: 1
-    - id: daze_neural
+    - id: cranial_shock
       level: 1
-    - id: haunting_hymn_neural
+    - id: subliminal_screech
       level: 1
-    - id: grim_tendrils_neural
+    - id: psi_void_tendrils
       level: 1
-    - id: telekinetic_projectile_neural
+    - id: telekinetic_launch
       level: 1
-    - id: sleep_neural
+    - id: neural_sleep_induction
       level: 1
-    - id: charm_neural
+    - id: neural_compliance_induction
       level: 1
-    - id: command_neural
+    - id: cranial_override_command
       level: 1
-    - id: enfeeble_neural
+    - id: synaptic_muscle_inhibitor
       level: 1
-    - id: lose_the_path_neural
+    - id: neural_disorientation_pulse
       level: 1
-    - id: void_warp_neural
+    - id: void_phase_shift
       level: 1
-    - id: illusory_disguise_neural
+    - id: neural_holographic_shell
       level: 1
-    - id: illusory_object_neural
+    - id: psi_hard_light_construct
       level: 1
-    - id: ghost_sound_neural
+    - id: audio_ghost
       level: 1
-    - id: penumbral_shroud_neural
+    - id: neural_darkfield_veil
       level: 1
     - id: soothe
       level: 1
-    - id: sanctuary_neural
+    - id: neural_sanctuary_bubble
       level: 1
-    - id: shield_neural
+    - id: neural_barrier
       level: 1
-    - id: mindlink_neural
+    - id: cranial_direct_link
       level: 1
-    - id: detect_magic_neural
+    - id: em_field_scan
       level: 1
-    - id: read_aura_neural
+    - id: signature_reading
       level: 1
 level_up_grants:
   2:
@@ -70,219 +70,219 @@ level_up_grants:
       uses_by_level:
         2: 2
       pool:
-      - id: albatross_curse_neural
+      - id: hex_tracker
         level: 2
-      - id: animated_assault_neural
+      - id: poltergeist_protocol
         level: 2
-      - id: animus_mine
+      - id: psychic_tripwire
         level: 2
-      - id: augury_neural
+      - id: probability_scan
         level: 2
-      - id: banishing_touch_neural
+      - id: neural_ejection
         level: 2
-      - id: beemans_summons_neural
+      - id: cortex_ping
         level: 2
-      - id: befitting_attire_neural
+      - id: holographic_wardrobe
         level: 2
-      - id: binding_muzzle_neural
+      - id: synaptic_muzzle
         level: 2
-      - id: blistering_invective
+      - id: verbal_assault
         level: 2
-      - id: blood_duplicate_neural
+      - id: blood_clone
         level: 2
-      - id: blood_vendetta_neural
+      - id: neural_vendetta
         level: 2
-      - id: blur_neural
+      - id: signal_scramble
         level: 2
-      - id: calm_neural
+      - id: pacification_wave
         level: 2
-      - id: carrion_mire_neural
+      - id: necrotic_slick
         level: 2
-      - id: charitable_urge_neural
+      - id: compelled_generosity
         level: 2
-      - id: cleanse_affliction_neural
+      - id: neural_purge
         level: 2
-      - id: clear_mind_neural
+      - id: firewall_protocol
         level: 2
-      - id: coiling_dance_neural
+      - id: serpentine_protocol
         level: 2
-      - id: confetti_cloud_neural
+      - id: glitter_burst
         level: 2
-      - id: cutting_insult
+      - id: psychic_laceration
         level: 2
-      - id: dancing_shield_neural
+      - id: kinetic_barrier
         level: 2
-      - id: darkness_neural
+      - id: blackout_field
         level: 2
-      - id: darkvision_neural
+      - id: lowlight_implant
         level: 2
-      - id: deafness_neural
+      - id: audio_blackout
         level: 2
-      - id: death_knell_neural
+      - id: neural_terminus
         level: 2
-      - id: dispel_magic_neural
+      - id: neural_nullifier
         level: 2
-      - id: embed_message_neural
+      - id: neural_message_embed
         level: 2
-      - id: empathic_link_neural
+      - id: neural_tether
         level: 2
-      - id: empty_pack_neural
+      - id: psychic_inventory
         level: 2
-      - id: everlight_neural
+      - id: neural_beacon
         level: 2
-      - id: faerie_fire_neural
+      - id: target_lock_pulse
         level: 2
-      - id: false_vitality_neural
+      - id: phantom_vigor
         level: 2
-      - id: farflung_fetch_neural
+      - id: telekinetic_retrieval
         level: 2
-      - id: fear_the_sun_neural
+      - id: photophobic_override
         level: 2
-      - id: feast_of_ashes_neural
+      - id: appetite_suppressor
         level: 2
-      - id: final_sacrifice_neural
+      - id: neural_detonation
         level: 2
-      - id: gentle_breeze_neural
+      - id: calming_signal
         level: 2
-      - id: ghostly_carrier_neural
+      - id: phantom_courier
         level: 2
-      - id: ghoulish_cravings_neural
+      - id: hunger_override
         level: 2
-      - id: grave_impressions_neural
+      - id: death_data_scan
         level: 2
-      - id: helpful_reload_neural
+      - id: telekinetic_reload
         level: 2
-      - id: horrifying_blood_loss_neural
+      - id: hemophobic_pulse
         level: 2
-      - id: humanoid_form_neural
+      - id: neural_skinsuit
         level: 2
-      - id: illusory_creature_neural
+      - id: phantom_construct
         level: 2
-      - id: illusory_shroud_neural
+      - id: psi_holographic_shroud
         level: 2
-      - id: imp_sting_neural
+      - id: venomed_psyche
         level: 2
-      - id: impart_empathy_neural
+      - id: emotion_injection
         level: 2
-      - id: inner_radiance_torrent_neural
+      - id: psychic_cascade
         level: 2
-      - id: instant_armor_neural
+      - id: kinetic_exosuit
         level: 2
-      - id: invisibility_neural
+      - id: cloaking_signal
         level: 2
-      - id: kgalaserkes_axes_neural
+      - id: phantom_blades
         level: 2
-      - id: knock_neural
+      - id: override_lock
         level: 2
-      - id: laughing_fit_neural
+      - id: manic_override
         level: 2
-      - id: loose_times_arrow_neural
+      - id: temporal_glitch
         level: 2
-      - id: lucky_number_neural
+      - id: probability_hack
         level: 2
-      - id: mark_of_blood_neural
+      - id: blood_tracker
         level: 2
-      - id: marvelous_mount_neural
+      - id: psychic_steed
         level: 2
-      - id: mental_map_neural
+      - id: neural_cartography
         level: 2
-      - id: mimic_undead_neural
+      - id: deadzone_aura
         level: 2
-      - id: mind_games_neural
+      - id: cortex_scramble
         level: 2
-      - id: mirror_image_neural
+      - id: holographic_doubles
         level: 2
-      - id: noise_blast_neural
+      - id: sonic_overload
         level: 2
-      - id: osseous_cage_neural
+      - id: bone_prison
         level: 2
-      - id: pack_attack_neural
+      - id: swarm_tactics
         level: 2
-      - id: paranoia
+      - id: paranoia_protocol
         level: 2
-      - id: peaceful_rest_neural
+      - id: neural_stasis_field
         level: 2
-      - id: penumbral_disguise_neural
+      - id: shadow_mask
         level: 2
-      - id: persistent_servant_neural
+      - id: drone_attendant
         level: 2
-      - id: phantasmal_treasure_neural
+      - id: phantom_jackpot
         level: 2
-      - id: phantom_crowd_neural
+      - id: holographic_mob
         level: 2
-      - id: radiant_field_neural
+      - id: strobing_field
         level: 2
-      - id: reapers_lantern_neural
+      - id: death_signal
         level: 2
-      - id: resist_energy_neural
+      - id: psychic_dampener
         level: 2
-      - id: restoration_neural
+      - id: neural_restoration
         level: 2
-      - id: revealing_light_neural
+      - id: detection_pulse
         level: 2
-      - id: see_the_unseen_neural
+      - id: spectral_scanner
         level: 2
-      - id: shadow_zombie_neural
+      - id: shade_puppet
         level: 2
-      - id: shatter_neural
+      - id: resonance_shatter
         level: 2
-      - id: silence_neural
+      - id: dead_channel
         level: 2
-      - id: sonata_span
+      - id: harmonic_bridge
         level: 2
-      - id: sound_body_neural
+      - id: system_restore
         level: 2
-      - id: spirit_sense_neural
+      - id: aura_scanner
         level: 2
-      - id: spiritual_armament_neural
+      - id: psychic_blade
         level: 2
-      - id: spiritual_weapon_neural
+      - id: ghost_striker
         level: 2
-      - id: spys_mark_neural
+      - id: neural_tag
         level: 2
-      - id: status_neural
+      - id: vitals_monitor
         level: 2
-      - id: stupefy_neural
+      - id: cognitive_drain
         level: 2
-      - id: summoners_precaution_neural
+      - id: eidolon_safeguard
         level: 2
-      - id: summoners_visage_neural
+      - id: eidolon_mask
         level: 2
-      - id: sure_footing_neural
+      - id: stability_protocol
         level: 2
-      - id: swallow_light_neural
+      - id: light_drain
         level: 2
-      - id: teeth_to_terror
+      - id: fang_protocol
         level: 2
-      - id: telekinetic_maneuver_neural
+      - id: force_grapple
         level: 2
-      - id: the_parrots_whisper_neural
+      - id: echo_siphon
         level: 2
-      - id: the_queens_rainbow_neural
+      - id: prismatic_feedback
         level: 2
-      - id: thundering_dominance_neural
+      - id: alpha_override
         level: 2
-      - id: timely_tutor_neural
+      - id: skillsoft_upload
         level: 2
-      - id: translate_neural
+      - id: neural_translator
         level: 2
-      - id: tremorsense_neural
+      - id: seismic_sense
         level: 2
-      - id: umbral_extraction_neural
+      - id: shadow_drain
         level: 2
-      - id: umbral_mindtheft_neural
+      - id: memory_siphon
         level: 2
-      - id: veil_of_spirits_neural
+      - id: ghost_screen
         level: 2
-      - id: vicious_jealousy_neural
+      - id: envy_virus
         level: 2
-      - id: voice_on_the_breeze_neural
+      - id: remote_whisper
         level: 2
-      - id: vomit_swarm_neural
+      - id: swarm_projection
         level: 2
-      - id: warriors_regret_neural
+      - id: combat_remorse
         level: 2
-      - id: worms_repast_neural
+      - id: neural_parasites
         level: 2
   4:
     spontaneous:
@@ -295,189 +295,189 @@ level_up_grants:
       uses_by_level:
         3: 2
       pool:
-      - id: agonizing_despair_neural
+      - id: dread_cascade
         level: 3
-      - id: annunciation_of_the_outer_gate_neural
+      - id: dark_web_broadcast
         level: 3
-      - id: behold_the_weave_neural
+      - id: timeline_splice
         level: 3
-      - id: bind_undead_neural
+      - id: override_reanimant
         level: 3
-      - id: blindness_neural
+      - id: optic_burnout
         level: 3
-      - id: bonewall_bulwark_neural
+      - id: necroplasm_barricade
         level: 3
-      - id: bottomless_stomach_neural
+      - id: pocket_dimension_maw
         level: 3
-      - id: bracing_tendrils_neural
+      - id: psychic_anchor
         level: 3
-      - id: burglars_blind
+      - id: stealth_cloak_protocol
         level: 3
-      - id: casters_imposition_neural
+      - id: sync_jammer
         level: 3
-      - id: circle_of_protection_neural
+      - id: neural_protection_circle
         level: 3
-      - id: claim_curse_neural
+      - id: curse_transfer_protocol
         level: 3
-      - id: clairaudience_neural
+      - id: remote_audio_tap
         level: 3
-      - id: cozy_cabin_neural
+      - id: psychic_refuge
         level: 3
-      - id: cup_of_dust_neural
+      - id: dehydration_loop
         level: 3
-      - id: curse_of_lost_time_neural
+      - id: entropy_upload
         level: 3
-      - id: cyclone_rondo_neural
+      - id: vortex_feedback
         level: 3
-      - id: days_weight_neural
+      - id: fatigue_injection
         level: 3
-      - id: deep_sight_neural
+      - id: low_light_implant
         level: 3
-      - id: disruptive_transfer_neural
+      - id: glitch_teleport
         level: 3
-      - id: distracting_chatter_neural
+      - id: white_noise_assault
         level: 3
-      - id: dream_message_neural
+      - id: rem_transmission
         level: 3
-      - id: echo_jump_neural
+      - id: phase_detonation
         level: 3
-      - id: enthrall_neural
+      - id: mass_mesmerize
         level: 3
-      - id: excise_lexicon_neural
+      - id: memory_excision
         level: 3
-      - id: familiars_face_neural
+      - id: drone_hijack
         level: 3
-      - id: far_sight_neural
+      - id: long_range_optics
         level: 3
-      - id: fates_travels_neural
+      - id: death_route_trace
         level: 3
-      - id: focusing_hum_neural
+      - id: signal_stabilizer
         level: 3
-      - id: ghostly_weapon_neural
+      - id: phase_shift_weapon
         level: 3
-      - id: gravity_well_neural
+      - id: graviton_collapse
         level: 3
-      - id: haste_neural
+      - id: neural_overclock
         level: 3
-      - id: heatvision_neural
+      - id: thermal_overlay
         level: 3
-      - id: heroism_neural
+      - id: combat_stim_protocol
         level: 3
-      - id: horde_of_underlings_neural
+      - id: phantom_squad
         level: 3
-      - id: hypercognition
+      - id: hyperthreading
         level: 3
-      - id: hypnotize_neural
+      - id: dazzle_matrix
         level: 3
-      - id: impending_doom_neural
+      - id: fatal_premonition
         level: 3
-      - id: infectious_ennui_neural
+      - id: apathy_virus
         level: 3
-      - id: instant_parade_neural
+      - id: psi_crowd_projection
         level: 3
-      - id: lashing_rope_neural
+      - id: psionic_tendrils
         level: 3
-      - id: levitate_neural
+      - id: psychokinetic_lift
         level: 3
-      - id: life_pact_neural
+      - id: neural_life_link
         level: 3
-      - id: locate_neural
+      - id: neural_ping
         level: 3
-      - id: magical_fetters_neural
+      - id: psionic_shackles
         level: 3
-      - id: martyrs_intervention_neural
+      - id: neural_intercept
         level: 3
-      - id: mind_of_menace_neural
+      - id: psychic_firewall
         level: 3
-      - id: mind_reading_neural
+      - id: cortex_scan
         level: 3
-      - id: moths_supper_neural
+      - id: nanite_swarm_feast
         level: 3
-      - id: nothing_up_my_sleeve_neural
+      - id: sleeve_cache
         level: 3
-      - id: oneiric_mire_neural
+      - id: hallucination_field
         level: 3
-      - id: ooze_form_neural
+      - id: nanite_dissolution
         level: 3
-      - id: organsight_neural
+      - id: biometric_scan
         level: 3
-      - id: overwhelming_memory_neural
+      - id: memory_flood
         level: 3
-      - id: painted_scout_neural
+      - id: wall_scanner
         level: 3
-      - id: paralyze_neural
+      - id: motor_lock
         level: 3
-      - id: perceive_the_threads_of_fate_neural
+      - id: probability_matrix_scan
         level: 3
-      - id: percussive_impact_neural
+      - id: sonic_detonation
         level: 3
-      - id: perseiss_precautions_neural
+      - id: predictive_defense
         level: 3
-      - id: phantom_prison_neural
+      - id: virtual_cage
         level: 3
-      - id: pyrotechnics_neural
+      - id: flash_override
         level: 3
-      - id: rally_point_neural
+      - id: neural_rally_beacon
         level: 3
-      - id: ring_of_truth_neural
+      - id: veritas_field
         level: 3
-      - id: roaring_applause_neural
+      - id: psychic_ovation
         level: 3
-      - id: rouse_skeletons_neural
+      - id: reanimant_swarm
         level: 3
-      - id: scrying_ripples_neural
+      - id: signal_propagation
         level: 3
-      - id: sculpt_sound
+      - id: audio_fabrication
         level: 3
-      - id: sea_of_thought_neural
+      - id: cognitive_mire
         level: 3
-      - id: secret_page_neural
+      - id: data_mask
         level: 3
-      - id: shadow_projectile_neural
+      - id: phantom_shot
         level: 3
-      - id: shadow_spy_neural
+      - id: psi_shadow_spy
         level: 3
-      - id: shared_invisibility_neural
+      - id: group_cloak_field
         level: 3
-      - id: shift_blame_neural
+      - id: memory_edit
         level: 3
-      - id: slow_neural
+      - id: lag_spike
         level: 3
-      - id: sparkleskin_neural
+      - id: holographic_skin
         level: 3
-      - id: speak_with_plants_neural
+      - id: bionet_interface
         level: 3
-      - id: strength_of_mind_neural
+      - id: willpower_amplifier
         level: 3
-      - id: sudden_recollection
+      - id: delayed_memory_bomb
         level: 3
-      - id: temporal_twin_neural
+      - id: chrono_echo
         level: 3
-      - id: the_four_hunters_neural
+      - id: quad_pursuit_protocol
         level: 3
-      - id: threefold_aspect_neural
+      - id: persona_shift
         level: 3
-      - id: time_jump_neural
+      - id: blink_step
         level: 3
-      - id: time_pocket_neural
+      - id: temporal_stash
         level: 3
-      - id: trade_items_neural
+      - id: psychic_swap
         level: 3
-      - id: transcribe_conflict_neural
+      - id: combat_log_extract
         level: 3
-      - id: vampiric_feast_neural
+      - id: neural_drain
         level: 3
-      - id: veil_of_privacy_neural
+      - id: counter_surveillance
         level: 3
-      - id: wall_of_shadow_neural
+      - id: darkfield_barrier
         level: 3
-      - id: wanderers_guide_neural
+      - id: gps_override
         level: 3
-      - id: web_of_eyes_neural
+      - id: sensor_net
         level: 3
-      - id: whirling_scarves_neural
+      - id: force_veil
         level: 3
-      - id: wooden_double_neural
+      - id: holographic_decoy
         level: 3
   6:
     spontaneous:
@@ -490,195 +490,195 @@ level_up_grants:
       uses_by_level:
         4: 2
       pool:
-      - id: aromatic_lure_neural
+      - id: pheromone_beacon
         level: 4
-      - id: bestial_curse_neural
+      - id: feral_regression
         level: 4
-      - id: bloodspray_curse_neural
+      - id: hemorrhagic_protocol
         level: 4
-      - id: bursting_bloom_neural
+      - id: cranial_parasite_bloom
         level: 4
-      - id: call_the_blood_neural
+      - id: hemorrhage_siphon
         level: 4
-      - id: channel_arrogance_neural
+      - id: ego_spike
         level: 4
-      - id: chroma_leach
+      - id: spectrum_drain
         level: 4
-      - id: chromatic_armor_neural
+      - id: prismatic_hardlight_shell
         level: 4
-      - id: chromatic_ray_neural
+      - id: prismatic_lance
         level: 4
-      - id: clairvoyance_neural
+      - id: remote_optic_drone
         level: 4
-      - id: clownish_curse_neural
+      - id: malware_fumble_loop
         level: 4
-      - id: compel_true_name_neural
+      - id: root_access_override
         level: 4
-      - id: confusion_neural
+      - id: cognitive_scrambler
         level: 4
-      - id: containment_neural
+      - id: psionic_containment_field
         level: 4
-      - id: countless_eyes_neural
+      - id: omnidirectional_sensor_suite
         level: 4
-      - id: dawnflowers_light_neural
+      - id: truth_spectrum_beacon
         level: 4
-      - id: daydreamers_curse_neural
+      - id: focus_dissolution_virus
         level: 4
-      - id: deathless_march_neural
+      - id: undead_override_signal
         level: 4
-      - id: detect_creator_neural
+      - id: trace_fabricator
         level: 4
-      - id: detect_scrying_neural
+      - id: counter_surveillance_sweep
         level: 4
-      - id: dirge_of_remembrance_neural
+      - id: spectral_resonance_pulse
         level: 4
-      - id: discern_lies_neural
+      - id: deception_filter
         level: 4
-      - id: dispelling_globe_neural
+      - id: null_field_generator
         level: 4
-      - id: dull_ambition_neural
+      - id: drive_suppressor
         level: 4
-      - id: enervation_neural
+      - id: vitality_drain_beam
         level: 4
-      - id: enhance_senses_neural
+      - id: sensory_overclock
         level: 4
-      - id: entangle_fate_neural
+      - id: probability_tangle
         level: 4
-      - id: fallen_soldiers_lament_neural
+      - id: ghost_signal_projection
         level: 4
-      - id: false_nature_neural
+      - id: object_spoof_protocol
         level: 4
-      - id: favorable_review_neural
+      - id: positive_spin_implant
         level: 4
-      - id: fey_form_neural
+      - id: chimera_frame
         level: 4
-      - id: flicker_neural
+      - id: phase_jitter
         level: 4
-      - id: fly_neural
+      - id: grav_lift_module
         level: 4
-      - id: forgotten_lines_neural
+      - id: data_recovery_protocol
         level: 4
-      - id: ghostly_tragedy_neural
+      - id: crime_scene_replay
         level: 4
-      - id: girzanjes_march_neural
+      - id: war_hymn_broadcast
         level: 4
-      - id: honeyed_words
+      - id: silver_tongue_hack
         level: 4
-      - id: implement_of_destruction_neural
+      - id: death_mark_protocol
         level: 4
-      - id: infectious_melody
+      - id: earworm_virus
         level: 4
-      - id: infiltrators_tunnel_neural
+      - id: breach_portal
         level: 4
-      - id: internal_insurrection_neural
+      - id: autoimmune_cascade
         level: 4
-      - id: invisibility_curtain_neural
+      - id: optical_masking_wall
         level: 4
-      - id: it_is_written_neural
+      - id: destiny_compiler
         level: 4
-      - id: lifes_flowing_river
+      - id: vitality_current
         level: 4
-      - id: liminal_doorway_neural
+      - id: pocket_dimension_access
         level: 4
-      - id: luring_wail_neural
+      - id: siren_frequency
         level: 4
-      - id: magic_mailbox_neural
+      - id: quantum_dead_drop
         level: 4
-      - id: mercurial_stride_neural
+      - id: quicksilver_rush
         level: 4
-      - id: mirage_neural
+      - id: holographic_terrain
         level: 4
-      - id: mirrors_misfortune_neural
+      - id: mirror_hex_protocol
         level: 4
-      - id: morass_of_ages_neural
+      - id: temporal_drag_field
         level: 4
-      - id: mutilate_neural
+      - id: sympathetic_laceration
         level: 4
-      - id: necrotic_radiation_neural
+      - id: entropic_irradiation
         level: 4
-      - id: nightmare_neural
+      - id: sleep_cycle_attack
         level: 4
-      - id: ocular_overload_neural
+      - id: visual_cortex_overload
         level: 4
-      - id: outcasts_curse_neural
+      - id: social_pariah_virus
         level: 4
-      - id: painful_vibrations_neural
+      - id: subsonic_shatter_pulse
         level: 4
-      - id: peaceful_bubble_neural
+      - id: isolation_dome
         level: 4
-      - id: pernicious_poltergeist_neural
+      - id: hostile_ai_manifestation
         level: 4
-      - id: pest_swarm_neural
+      - id: microdrone_swarm
         level: 4
-      - id: phantasmal_killer_neural
+      - id: lethal_nightmare_spike
         level: 4
-      - id: phantasmal_protagonist_neural
+      - id: hard_light_operative
         level: 4
-      - id: planar_tether_neural
+      - id: dimensional_anchor
         level: 4
-      - id: procyal_philosophy_neural
+      - id: tactical_ai_advisor
         level: 4
-      - id: ravenous_portal_neural
+      - id: booby_trapped_access_point
         level: 4
-      - id: read_omens_neural
+      - id: probability_forecast
         level: 4
-      - id: rebounding_barrier_neural
+      - id: kinetic_deflector
         level: 4
-      - id: reflected_beauty_neural
+      - id: neural_glamour_mirror
         level: 4
-      - id: replicate_neural
+      - id: digital_doppelganger
         level: 4
-      - id: rewrite_memory
+      - id: memory_editor
         level: 4
-      - id: rope_trick_neural
+      - id: concealed_access_point
         level: 4
-      - id: sages_curse_neural
+      - id: analysis_paralysis_virus
         level: 4
-      - id: sanguine_mist_neural
+      - id: hemovore_cloud
         level: 4
-      - id: seal_fate_neural
+      - id: neural_fate_seal
         level: 4
-      - id: soft_landing_neural
+      - id: inertial_dampener
         level: 4
-      - id: spell_immunity_neural
+      - id: protocol_firewall
         level: 4
-      - id: spiritual_anamnesis_neural
+      - id: past_life_data_flood
         level: 4
-      - id: spiritual_attunement_neural
+      - id: planar_frequency_lock
         level: 4
-      - id: steal_voice_neural
+      - id: vocal_cord_lockout
         level: 4
-      - id: suggestion_neural
+      - id: subliminal_directive
         level: 4
-      - id: talking_corpse_neural
+      - id: dead_mans_data
         level: 4
-      - id: telepathy_neural
+      - id: neural_link_array
         level: 4
-      - id: tomorrows_dawn_neural
+      - id: radiant_purge_aura
         level: 4
-      - id: tortoise_and_the_hare_neural
+      - id: velocity_siphon
         level: 4
-      - id: translocate_neural
+      - id: spatial_jump
         level: 4
-      - id: tricksters_feathers_neural
+      - id: identity_token_set
         level: 4
-      - id: umbral_graft_neural
+      - id: shadow_protocol_theft
         level: 4
-      - id: vampiric_maiden_neural
+      - id: iron_maiden_protocol
         level: 4
-      - id: vapor_form_neural
+      - id: gaseous_dispersal
         level: 4
-      - id: variable_gravity_neural
+      - id: gravity_modulator
         level: 4
-      - id: vision_of_beauty_neural
+      - id: phantom_lure_construct
         level: 4
-      - id: vision_of_death_neural
+      - id: flatline_vision
         level: 4
-      - id: wall_of_mirrors_neural
+      - id: reflective_hardlight_wall
         level: 4
-      - id: whispers_of_the_void_neural
+      - id: void_frequency_whisper
         level: 4
-      - id: winning_streak_neural
+      - id: hot_streak_cascade
         level: 4
   8:
     spontaneous:
@@ -691,151 +691,151 @@ level_up_grants:
       uses_by_level:
         5: 2
       pool:
-      - id: aberrant_form
+      - id: aberrant_protocol
         level: 5
-      - id: abyssal_plague_neural
+      - id: neural_rot_vector
         level: 5
-      - id: ancestral_winds_neural
+      - id: ghost_signal_storm
         level: 5
-      - id: bandits_doom_neural
+      - id: theft_deterrent_loop
         level: 5
-      - id: banishment_neural
+      - id: forced_disconnect
         level: 5
-      - id: belittling_boast_neural
+      - id: dominance_broadcast
         level: 5
-      - id: black_tentacles_neural
+      - id: neural_tendrils
         level: 5
-      - id: blind_eye_neural
+      - id: sensor_blackout
         level: 5
-      - id: blinding_bottle_neural
+      - id: flashbang_grenade
         level: 5
-      - id: blinding_foam_neural
+      - id: caustic_optic_spray
         level: 5
-      - id: blink_charge_neural
+      - id: phase_rush
         level: 5
-      - id: blister_neural
+      - id: neural_blisters
         level: 5
-      - id: blood_feast_neural
+      - id: psychic_drain
         level: 5
-      - id: bloodfeasting_breath_neural
+      - id: neural_siphon_burst
         level: 5
-      - id: chromatic_wall_neural
+      - id: spectrum_barrier
         level: 5
-      - id: cloak_of_colors_neural
+      - id: prismatic_shroud
         level: 5
-      - id: death_ward_neural
+      - id: void_shielding
         level: 5
-      - id: diadem_of_divine_radiance_neural
+      - id: radiant_targeting_crown
         level: 5
-      - id: dreaming_potential
+      - id: sleep_learning
         level: 5
-      - id: drop_dead_neural
+      - id: feigned_flatline
         level: 5
-      - id: ectoplasmic_expulsion
+      - id: psychic_purge
         level: 5
-      - id: etheric_shards_neural
+      - id: force_caltrops
         level: 5
-      - id: false_vision_neural
+      - id: spoofed_feed
         level: 5
-      - id: flame_dancer_neural
+      - id: thermal_combat_rig
         level: 5
-      - id: flames_of_ego_neural
+      - id: narcissistic_feedback
         level: 5
-      - id: forceful_hand_neural
+      - id: kinetic_shield_drone
         level: 5
-      - id: glimmer_of_charm_neural
+      - id: ambient_allure_field
         level: 5
-      - id: hallucination_neural
+      - id: sensory_override
         level: 5
-      - id: illusory_scene_neural
+      - id: holographic_scene
         level: 5
-      - id: imaginary_lockbox_neural
+      - id: neural_cache
         level: 5
-      - id: inevitable_disaster_neural
+      - id: doom_cascade
         level: 5
-      - id: infectious_comedy_neural
+      - id: viral_laughware
         level: 5
-      - id: instant_minefield_neural
+      - id: psychic_minefield
         level: 5
-      - id: invoke_spirits_neural
+      - id: ghost_signal_assault
         level: 5
-      - id: kings_castle_neural
+      - id: position_swap
         level: 5
-      - id: mariners_curse_neural
+      - id: system_corruption
         level: 5
-      - id: mind_probe_neural
+      - id: deep_neural_scan
         level: 5
-      - id: mirecloak_neural
+      - id: shadow_protocol
         level: 5
-      - id: mirror_malefactors_neural
+      - id: doppelganger_loop
         level: 5
-      - id: portrait_of_the_artist
+      - id: identity_overlay
         level: 5
-      - id: quicken_time_neural
+      - id: overclock_field
         level: 5
-      - id: rallying_banner_neural
+      - id: propaganda_beacon
         level: 5
-      - id: ravening_maw_neural
+      - id: hunger_protocol
         level: 5
-      - id: repelling_pulse_neural
+      - id: kinetic_shockwave
         level: 5
-      - id: return_beacon_neural
+      - id: neural_return_beacon
         level: 5
-      - id: rewinding_step_neural
+      - id: temporal_anchor
         level: 5
-      - id: rip_the_spirit_neural
+      - id: soul_ripper
         level: 5
-      - id: ritual_obstruction_neural
+      - id: protocol_jammer
         level: 5
-      - id: scouring_pulse_neural
+      - id: purification_blast
         level: 5
-      - id: scouting_eye_neural
+      - id: psi_scouting_drone
         level: 5
-      - id: secret_chest_neural
+      - id: dimensional_stash
         level: 5
-      - id: sending_neural
+      - id: direct_message
         level: 5
-      - id: shadow_blast_neural
+      - id: dark_matter_blast
         level: 5
-      - id: shadow_siphon_neural
+      - id: damage_dampener
         level: 5
-      - id: shock_and_awe_neural
+      - id: sensory_overload
         level: 5
-      - id: slither_neural
+      - id: shadow_serpents
         level: 5
-      - id: speak_with_stones_neural
+      - id: structure_interface
         level: 5
-      - id: spiritual_torrent_neural
+      - id: psychic_torrent
         level: 5
-      - id: stagnate_time_neural
+      - id: temporal_bog
         level: 5
-      - id: strange_geometry
+      - id: warped_topology
         level: 5
-      - id: subconscious_suggestion_neural
+      - id: deep_implant
         level: 5
-      - id: summon_dragon_neural
+      - id: psi_drake_construct
         level: 5
-      - id: summon_entity
+      - id: summon_aberration
         level: 5
       - id: synaptic_pulse
         level: 5
-      - id: synesthesia
+      - id: sensory_scramble
         level: 5
-      - id: telekinetic_haul_neural
+      - id: psi_gravity_tractor
         level: 5
-      - id: telepathic_bond_neural
+      - id: secure_mesh_link
         level: 5
-      - id: temporary_glyph_neural
+      - id: proximity_mine
         level: 5
-      - id: truespeech_neural
+      - id: universal_codec
         level: 5
-      - id: umbral_journey_neural
+      - id: neural_shadow_transit
         level: 5
-      - id: wall_of_flesh_neural
+      - id: biomass_barrier
         level: 5
-      - id: wave_of_despair_neural
+      - id: despair_wave
         level: 5
-      - id: wisdom_of_the_winds_neural
+      - id: network_query
         level: 5
   10:
     spontaneous:
@@ -848,93 +848,93 @@ level_up_grants:
       uses_by_level:
         6: 2
       pool:
-      - id: aura_of_the_unremarkable_neural
+      - id: cognitive_blind_spot
         level: 6
-      - id: awaken_entropy_neural
+      - id: entropic_decay_field
         level: 6
-      - id: blanket_of_stars_neural
+      - id: neural_star_field_shroud
         level: 6
-      - id: blinding_fury_neural
+      - id: retinal_burn_reflex
         level: 6
-      - id: boots_on_the_ground_neural
+      - id: ghost_army_protocol
         level: 6
-      - id: bound_in_death_neural
+      - id: parasitic_link
         level: 6
-      - id: cast_into_time_neural
+      - id: temporal_dislocation_pulse
         level: 6
-      - id: catch_your_name_neural
+      - id: identity_trace_protocol
         level: 6
-      - id: chromatic_image_neural
+      - id: prismatic_echo_array
         level: 6
-      - id: collective_transposition_neural
+      - id: mass_neural_displacement
         level: 6
-      - id: cursed_metamorphosis_neural
+      - id: forced_devolution
         level: 6
-      - id: dominate_neural
+      - id: total_mind_override
         level: 6
-      - id: dragon_form_neural
+      - id: apex_predator_frame
         level: 6
-      - id: fateful_condemnation_neural
+      - id: karmic_data_cascade
         level: 6
-      - id: hags_fruit_neural
+      - id: narcotic_laced_ration
         level: 6
-      - id: heinous_future_neural
+      - id: premonition_of_ruin
         level: 6
-      - id: lure_dream
+      - id: subconscious_lure
         level: 6
-      - id: mislead_neural
+      - id: neural_double_protocol
         level: 6
-      - id: missed_cue_neural
+      - id: critical_failure_loop
         level: 6
-      - id: never_mind_neural
+      - id: cognitive_wipe
         level: 6
-      - id: phantasmal_calamity_neural
+      - id: mass_psychic_catastrophe
         level: 6
-      - id: phantom_orchestra_neural
+      - id: psychoacoustic_barrage
         level: 6
-      - id: poltergeists_fury_neural
+      - id: telekinetic_storm
         level: 6
-      - id: ravenous_darkness_neural
+      - id: predatory_void_field
         level: 6
-      - id: repulsion_neural
+      - id: psi_repulsion_zone
         level: 6
-      - id: scintillating_safeguard_neural
+      - id: refraction_shield_array
         level: 6
-      - id: scrying_neural
+      - id: remote_surveillance_hack
         level: 6
-      - id: seize_identity_neural
+      - id: identity_theft_protocol
         level: 6
-      - id: siege_weapons_blessing_neural
+      - id: targeting_override_hack
         level: 6
-      - id: skeleton_army_neural
+      - id: necro_drone_swarm
         level: 6
-      - id: spellwrack_neural
+      - id: feedback_virus
         level: 6
-      - id: spirit_blast_neural
+      - id: psychic_detonation
         level: 6
-      - id: suspended_retribution_neural
+      - id: doom_protocol
         level: 6
-      - id: teleport_neural
+      - id: neural_phase_jump
         level: 6
-      - id: temporal_ward_neural
+      - id: chrono_lock_trap
         level: 6
-      - id: truesight_neural
+      - id: penetrating_scan
         level: 6
-      - id: unexpected_transposition_neural
+      - id: involuntary_swap
         level: 6
-      - id: utter_destruction_neural
+      - id: annihilation_shriek
         level: 6
-      - id: vampiric_exsanguination_neural
+      - id: mass_life_drain
         level: 6
-      - id: vibrant_pattern_neural
+      - id: hypnotic_frequency_grid
         level: 6
-      - id: wall_of_force_neural
+      - id: psionic_barrier_wall
         level: 6
-      - id: word_of_revision_neural
+      - id: neural_save_state
         level: 6
-      - id: zealous_conviction_neural
+      - id: fanatical_override
         level: 6
-      - id: zero_gravity_neural
+      - id: gravity_null_zone
         level: 6
   12:
     spontaneous:
@@ -947,77 +947,77 @@ level_up_grants:
       uses_by_level:
         7: 2
       pool:
-      - id: attacked_from_within_neural
+      - id: psychic_trauma_spike
         level: 7
-      - id: blightburn_blast_neural
+      - id: radiation_pulse_beam
         level: 7
-      - id: curse_of_the_spirit_orchestra
+      - id: cacophony_loop
         level: 7
-      - id: devouring_void_neural
+      - id: entropy_maw_field
         level: 7
-      - id: duplicate_foe_neural
+      - id: holographic_doppelganger
         level: 7
-      - id: energy_aegis_neural
+      - id: omni_resistance_shield
         level: 7
-      - id: ethereal_jaunt_neural
+      - id: phase_shift_protocol
         level: 7
-      - id: final_fate_of_the_locust_host_neural
+      - id: swarm_intelligence_upload
         level: 7
-      - id: indolent_haze_neural
+      - id: neural_sedation_cloud
         level: 7
-      - id: inexhaustible_cynicism_neural
+      - id: paranoia_virus
         level: 7
-      - id: interplanar_teleport_neural
+      - id: cross_frequency_jump
         level: 7
-      - id: leng_sting_neural
+      - id: nightmare_venom_strike
         level: 7
-      - id: mask_of_terror_neural
+      - id: dread_projection_field
         level: 7
-      - id: maze_of_locked_doors_neural
+      - id: recursive_firewall_trap
         level: 7
-      - id: momentary_recovery_neural
+      - id: micro_blink_escape
         level: 7
-      - id: orb_of_twisting_fate
+      - id: probability_scrambler
         level: 7
-      - id: planar_palace_neural
+      - id: pocket_dimension_suite
         level: 7
-      - id: planar_seal_neural
+      - id: dimensional_lockdown_field
         level: 7
-      - id: possession
+      - id: full_neural_hijack
         level: 7
-      - id: prismatic_armor_neural
+      - id: chromatic_barrier_plating
         level: 7
-      - id: prismatic_spray_neural
+      - id: chromatic_pulse_array
         level: 7
-      - id: project_image_neural
+      - id: remote_holographic_proxy
         level: 7
-      - id: recall_legacy_neural
+      - id: ancestral_data_recovery
         level: 7
-      - id: retrocognition
+      - id: temporal_echo_scanner
         level: 7
-      - id: return_to_essence_neural
+      - id: energy_siphon_hack
         level: 7
-      - id: reverse_gravity_neural
+      - id: gravity_inversion_pulse
         level: 7
-      - id: shadow_raid_neural
+      - id: dark_data_swarm
         level: 7
-      - id: shock_to_the_system_neural
+      - id: defibrillator_surge_protocol
         level: 7
-      - id: spell_riposte_neural
+      - id: counter_hack_redirect
         level: 7
-      - id: telekinetic_bombardment_neural
+      - id: psychokinetic_barrage
         level: 7
-      - id: tempest_of_shades_neural
+      - id: ghost_signal_vortex
         level: 7
-      - id: time_beacon_neural
+      - id: temporal_save_point
         level: 7
-      - id: true_target_neural
+      - id: predictive_lock_on
         level: 7
-      - id: vibrant_vibrato_neural
+      - id: resonance_shatter_field
         level: 7
-      - id: visions_of_danger
+      - id: hostile_ar_overlay
         level: 7
-      - id: warp_mind_neural
+      - id: neural_scramble_pulse
         level: 7
   14:
     spontaneous:
@@ -1030,57 +1030,57 @@ level_up_grants:
       uses_by_level:
         8: 2
       pool:
-      - id: antimagic_field_neural
+      - id: tech_suppression_field
         level: 8
-      - id: canticle_of_everlasting_grief_neural
+      - id: recursive_despair_loop
         level: 8
-      - id: confusing_colors_neural
+      - id: holographic_chaos_cloud
         level: 8
-      - id: devour_life_neural
+      - id: neural_essence_drain
         level: 8
-      - id: disappearance_neural
+      - id: total_sensory_erasure
         level: 8
-      - id: dream_council_neural
+      - id: shared_dreamspace_link
         level: 8
-      - id: falling_sky_neural
+      - id: gravity_crush_pulse
         level: 8
-      - id: hidden_mind_neural
+      - id: deep_neural_encryption
         level: 8
-      - id: holy_host_neural
+      - id: psionic_legion_summon
         level: 8
-      - id: hypnopompic_terrors
+      - id: waking_nightmare_hack
         level: 8
-      - id: mimic_spell_neural
+      - id: tech_duplication_hack
         level: 8
-      - id: musical_shift_neural
+      - id: frequency_modulation_field
         level: 8
-      - id: part_the_mists_to_paradise_neural
+      - id: vr_sanctuary_protocol
         level: 8
-      - id: pinpoint_neural
+      - id: omniscient_trace_protocol
         level: 8
-      - id: prismatic_wall_neural
+      - id: chromatic_barrier_matrix
         level: 8
-      - id: prying_survey_neural
+      - id: omnidirectional_spy_drones
         level: 8
-      - id: quandary_neural
+      - id: psychic_labyrinth_trap
         level: 8
-      - id: spirit_song_neural
+      - id: resonance_shockwave_hymn
         level: 8
-      - id: spiritual_epidemic_neural
+      - id: viral_cognition_plague
         level: 8
-      - id: sudden_transposition_neural
+      - id: forced_teleport_scramble
         level: 8
-      - id: summon_irii_neural
+      - id: temporal_entity_beacon
         level: 8
-      - id: take_your_places_neural
+      - id: tactical_repositioning_pulse
         level: 8
-      - id: uncontrollable_dance_neural
+      - id: motor_cortex_hijack
         level: 8
-      - id: undermine_reality_neural
+      - id: existential_destabilizer
         level: 8
-      - id: unholy_army_neural
+      - id: dark_psionic_horde
         level: 8
-      - id: unrelenting_observation_neural
+      - id: persistent_tracking_network
         level: 8
   16:
     spontaneous:
@@ -1093,49 +1093,49 @@ level_up_grants:
       uses_by_level:
         9: 2
       pool:
-      - id: astral_labyrinth_neural
+      - id: maze_protocol
         level: 9
-      - id: beseech_arcanotheign_neural
+      - id: neural_splice_request
         level: 9
-      - id: bilocation_neural
+      - id: neural_fork
         level: 9
-      - id: call_fluxwraith_neural
+      - id: wraith_summon_protocol
         level: 9
-      - id: dimensional_excision_neural
+      - id: reality_excision
         level: 9
-      - id: divinity_leech_neural
+      - id: power_tap
         level: 9
-      - id: foresight_neural
+      - id: precognition_feed
         level: 9
-      - id: overwhelming_presence_neural
+      - id: mass_neural_dominance
         level: 9
-      - id: phantasmagoria_neural
+      - id: total_sensory_override
         level: 9
-      - id: prismatic_shield_neural
+      - id: spectrum_defense_array
         level: 9
-      - id: prismatic_sphere_neural
+      - id: full_spectrum_containment
         level: 9
-      - id: proliferating_eyes_neural
+      - id: sensor_network_bloom
         level: 9
-      - id: resplendent_mansion_neural
+      - id: neural_sanctum
         level: 9
-      - id: seize_soul_neural
+      - id: soul_seizure_protocol
         level: 9
-      - id: summon_ancient_fleshforged_neural
+      - id: ancient_construct_summon
         level: 9
-      - id: telepathic_demand_neural
+      - id: neural_command_broadcast
         level: 9
-      - id: undertaker_neural
+      - id: death_protocol
         level: 9
-      - id: unfathomable_song
+      - id: cognitohazard_broadcast
         level: 9
-      - id: unspeakable_shadow_neural
+      - id: apex_shadow_protocol
         level: 9
-      - id: voracious_gestalt_neural
+      - id: collective_absorption
         level: 9
-      - id: wails_of_the_damned_neural
+      - id: mass_terror_broadcast
         level: 9
-      - id: weird_neural
+      - id: mass_nightmare_protocol
         level: 9
   18:
     spontaneous:
@@ -1148,31 +1148,31 @@ level_up_grants:
       uses_by_level:
         10: 2
       pool:
-      - id: alter_reality
+      - id: reality_rewrite
         level: 10
-      - id: dragon_turret_neural
+      - id: apex_neural_turret
         level: 10
-      - id: fabricated_truth
+      - id: reality_fabrication_protocol
         level: 10
-      - id: fated_confrontation_neural
+      - id: psi_fate_lock
         level: 10
-      - id: freeze_time_neural
+      - id: time_stop_protocol
         level: 10
-      - id: gate_neural
+      - id: reality_gate
         level: 10
-      - id: indestructibility_neural
+      - id: invulnerability_protocol
         level: 10
-      - id: jassims_allegiance_neural
+      - id: loyalty_override
         level: 10
-      - id: manifestation_neural
+      - id: apex_psychic_manifestation
         level: 10
-      - id: nullify_neural
+      - id: null_protocol
         level: 10
-      - id: remake_neural
+      - id: memory_remake
         level: 10
-      - id: shadow_army_neural
+      - id: shadow_legion_protocol
         level: 10
-      - id: summon_oliphaunt_of_jandelay_neural
+      - id: apex_behemoth_summon
         level: 10
   20:
     spontaneous:

@@ -1,0 +1,22 @@
+id: null_protocol
+name: Null Protocol
+description: You attempt to nullify any spell or effect as a reaction. You must succeed
+  at a counteract check (your spell rank + relevant modifier vs the effect's DC).
+  On a success, the effect is negated entirely. You can spend additional spell slots
+  to boost your counteract level by +1 per slot expended.
+tradition: neural
+level: 10
+usage_type: prepared
+action_cost: 0
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'Trigger A foe within range casts a 9th-rank or lower spell.
+
+      You instantly destroy the incoming spell, though at the cost of sending magical
+      feedback through your body. You automatically counteract the'

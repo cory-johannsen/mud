@@ -1,0 +1,35 @@
+id: decoy_projector_ring
+name: Decoy Projector Ring
+description: 'You surround a Large or smaller creature in a ring of holographic decoy
+  projectors that follows it. The projectors create convincing copies, confusing attackers.
+  Any attacker that can see the projectors must succeed at a Willpower save or treat the
+  target as Concealed.
+
+
+  Heightened (6th) The projectors also retaliate, dealing 2d6 mental damage to attackers.'
+tradition: technical
+level: 5
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: minutes:1
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+  on_success:
+  - type: damage
+    dice: 7d4
+    damage_type: mental
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 7d8
+    damage_type: mental
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 14d8
+    damage_type: mental
+    dc: 0

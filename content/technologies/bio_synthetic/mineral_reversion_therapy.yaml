@@ -1,0 +1,21 @@
+id: mineral_reversion_therapy
+name: Mineral Reversion Therapy
+description: Manipulating fundamental biological processes, you convert mineralized
+  tissue back into living flesh and blood. You restore a @UUID[Compendium.pf2e.conditionitems.Item.Petrified]
+  creature to its normal state or transform a stone object into a mass of inert flesh
+  (without stone's Hardness) in roughly the same shape.
+tradition: bio_synthetic
+level: 6
+usage_type: prepared
+action_cost: 2
+range: melee
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: Manipulating the fundamental particles of matter, you convert stone
+      into flesh and blood. You restore a @UUID[Compendium.pf2e.conditionitems.Item.Petrified]
+      creature to its normal state or transform a

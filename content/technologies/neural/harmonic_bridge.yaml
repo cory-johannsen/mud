@@ -1,0 +1,20 @@
+id: harmonic_bridge
+name: Harmonic Bridge
+description: You project a bridge of solidified psychic resonance. The bridge is 10
+  feet wide and can span up to 60 feet across a gap. It can support any weight and
+  lasts for the duration. You can Dismiss the spell.
+tradition: neural
+level: 2
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: By playing a brief tune on an instrument or in song, you cause the
+      notes of the melody to physically manifest into a shimmering, translucent path.
+      This path doesn't need to be over solid ground and ca

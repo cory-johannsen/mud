@@ -1,0 +1,22 @@
+id: doctrine_undertaker_protocol
+name: Doctrine Undertaker Protocol
+description: You implant a martyrdom command that triggers on the target's death.
+  When the target would die within 1 minute, it survives at 1 HP, takes one action
+  of your choice, then dies.
+tradition: fanatic_doctrine
+level: 9
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+save_type: toughness
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You point your finger toward the target and whisper an epitaph that
+      promises to grace their gravestone in the near future. This spell works best
+      when both you and the target are in contact with solid

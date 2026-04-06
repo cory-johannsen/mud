@@ -1,0 +1,24 @@
+id: holographic_stage
+name: Holographic Stage
+description: 'You project an elaborate holographic scene that includes up to 10 discrete
+  entities or objects. These elements generate appropriate sounds and smells, and
+  they feel right to the touch. Elements are incapable of speech. This tech is undetectable
+  by normal observation.
+
+
+  Heightened (6th) Holographic entities can speak.'
+tradition: technical
+level: 5
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You craft an imaginary scene that includes up to 10 discrete creatures
+      or objects of various sizes, all of which must be within the spell's area. These
+      elements generate appropriate sounds and smells,

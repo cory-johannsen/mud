@@ -1,0 +1,56 @@
+id: hydro_vortex_generator
+name: Hydro-Vortex Generator
+description: 'Area 25-foot radius, 20-foot tall cylinder
+
+
+  With a twist of the controls, you activate a hydro-vortex generator that creates
+  a massive swirling vortex of pressurized water. All squares in the vortex are difficult
+  terrain. The constant churning of the fierce waves means that creatures are constantly
+  tossed between areas of air and water, allowing both air- and water-breathing creatures
+  to breathe within the vortex. Any creature with a swim Speed can Swim instead of
+  Stride to move within the vortex; the DC to Swim within it is equal to your tech
+  DC.
+
+  All creatures in the area take 6d10 bludgeoning damage as the waves crash into them.
+  On subsequent rounds, the first time you Sustain the tech each round, the waves
+  crash again with the same effect.
+
+
+  Critical Success The creature is unaffected.
+
+  Success The creature takes half damage.
+
+  Failure The creature takes full damage and is drawn 10 feet toward the center of
+  the vortex.
+
+  Critical Failure The creature takes double damage and is drawn to the center of
+  the vortex.
+
+
+  Heightened (+1) The bludgeoning damage increases by 1d10.'
+tradition: technical
+level: 8
+usage_type: prepared
+action_cost: 3
+range: ranged
+targets: single
+duration: minutes:1
+save_type: hustle
+save_dc: 15
+resolution: save
+effects:
+  on_success:
+  - type: damage
+    dice: 6d6
+    damage_type: bludgeoning
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 6d10
+    damage_type: bludgeoning
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 12d10
+    damage_type: bludgeoning
+    dc: 0

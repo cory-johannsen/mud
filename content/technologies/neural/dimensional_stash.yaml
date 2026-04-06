@@ -1,0 +1,25 @@
+id: dimensional_stash
+name: Dimensional Stash
+description: 'You phase-shift a container and its contents into a pocket dimension,
+  where you can retrieve it later. The container''s physical properties are irrelevant
+  to this tech, but the container can''t contain any creatures. When you wish to retrieve
+  the container, you spend a single action to recall it from the pocket dimension.
+
+
+  If the tech ends or is counteracted while the container is stored, the container
+  reappears in the nearest unoccupied space.'
+tradition: neural
+level: 5
+usage_type: prepared
+action_cost: 2
+range: melee
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You banish a container and its contents to the Ethereal Plane, where
+      you can retrieve it from later. The container's physical properties-the material
+      from which it is made, any locks, or other feature

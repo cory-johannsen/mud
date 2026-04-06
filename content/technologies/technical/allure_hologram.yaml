@@ -1,0 +1,26 @@
+id: allure_hologram
+name: Allure Hologram
+description: 'You deploy a device that projects a personalized holographic image of
+  the most compelling figure imaginable to the target. Only the target perceives it.
+  The effect depends on the target''s Willpower save. All mechanical effects (stupefied,
+  fascinated, movement) remain identical to the base protocol.
+
+
+  Heightened (+2) Target an additional creature.'
+tradition: technical
+level: 4
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You create a phantasmal image of the most beautiful creature imaginable
+      to the target at a location somewhere within the spell's range. Only the spell's
+      target can see the beauty, though you can see t

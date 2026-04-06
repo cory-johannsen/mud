@@ -1,0 +1,22 @@
+id: doctrine_pain_harvest
+name: Doctrine Pain Harvest
+description: |-
+    Trigger You critically fail a saving throw against a foe's effect.You distract your enemy with their feeling of smug pleasure when you fail catastrophically. They must attempt a Willpower save.Critical Success The creature is unaffected.
+    Success The creature is distracted by its amusement and takes a -1 status penalty on Perception checks and Will saves for 1 round. @UUID[Compendium.pf2e.spell-effects.Item.tech Effect: Schadenfreude (Success)]
+    Failure The creature is overcome by its amusement and is Stupefied 1 for 1 round.
+    Critical Failure The creature is lost in its amusement and is Stupefied 2 for 1 round and Stunned 1.
+tradition: fanatic_doctrine
+level: 1
+usage_type: prepared
+action_cost: 0
+range: ranged
+targets: single
+duration: instant
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+    on_apply:
+        - type: utility
+          dc: 0
+          description: Trigger You critically fail a saving throw against a foe's effect.You distract your enemy with their feeling of smug pleasure when you fail catastrophically. They must attempt a Willpower save.Critical Suc

@@ -1,0 +1,41 @@
+id: rapid_calcification_beam
+name: Rapid Calcification Beam
+description: 'You fire a beam that induces rapid mineral calcification throughout
+  the target''s body. The target must attempt a Toughness save.
+
+
+  Critical Success The target is unaffected.
+
+  Success The target is Slowed 1 for 1 round as mineral deposits begin to form.
+
+  Failure The target is slowed 1 and must attempt a Toughness save at the end of each
+  of its turns; this ongoing save has the incapacitation trait. On a failed save,
+  the slowed condition increases by 1 (or 2 on a critical failure). A successful save
+  reduces the slowed condition by 1. When a creature becomes fully unable to act due
+  to the slowed condition, the spell then ends in a flash of gray light, leaving the
+  target @UUID[Compendium.pf2e.conditionitems.Item.Petrified] permanently. The spell
+  also ends if the slowed condition is removed, which causes the mineral deposits
+  to break off harmlessly.
+
+  Critical Failure As failure, but the target is initially Slowed 2.'
+tradition: technical
+level: 6
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+save_type: toughness
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'The target''s body slowly turns into a stone statue. The target
+      must attempt a Toughness save.
+
+
+      Critical Success The target is unaffected.
+
+      Success The target is Slowed 1 for 1 round as stone begins to'

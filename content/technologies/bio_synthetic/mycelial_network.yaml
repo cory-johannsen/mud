@@ -1,0 +1,21 @@
+id: mycelial_network
+name: Mycelial Network
+description: You grow a network of bio-synthetic fungal threads through the ground.
+  For the duration, you can sense any creature touching the ground within 30 feet,
+  gaining tremorsense. You can also communicate telepathically with willing creatures
+  standing on the network.
+tradition: bio_synthetic
+level: 2
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: Thin hyphae grow from your feet and plunge into the earth, creating
+      a symbiotic fungal network that attaches to plants within 30 feet and connects
+      you to their root systems. You gain an imprecise trem

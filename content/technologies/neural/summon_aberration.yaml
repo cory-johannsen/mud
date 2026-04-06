@@ -1,0 +1,24 @@
+id: summon_aberration
+name: Summon Aberration
+description: 'You summon a creature that has the aberration trait and whose level
+  is 5 or lower to fight for you.
+
+
+  Heightened As listed in the summon trait.'
+tradition: neural
+level: 5
+usage_type: prepared
+action_cost: 3
+range: ranged
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'You summon a creature that has the aberration trait and whose level
+      is 5 or lower to fight for you.
+
+
+      Heightened As listed in the summon trait.'

@@ -1,0 +1,24 @@
+id: phase_vault
+name: Phase Vault
+description: 'You shift a container and its contents into a pocket dimension for later
+  retrieval. The container''s physical properties are irrelevant, but it can''t contain
+  creatures. Spend a single action to recall it.
+
+
+  If the tech ends while the container is stored, it reappears in the nearest unoccupied
+  space.'
+tradition: technical
+level: 5
+usage_type: prepared
+action_cost: 2
+range: melee
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You banish a container and its contents to the Ethereal Plane, where
+      you can retrieve it from later. The container's physical properties-the material
+      from which it is made, any locks, or other feature

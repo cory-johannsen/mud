@@ -1,0 +1,36 @@
+id: spike_mine_deployment
+name: Spike Mine Deployment
+description: 'Area two 10-foot bursts that don''t overlap
+
+  Razor-sharp metallic spike clusters erupt from deployed charges, transforming the
+  area into a hazardous kill zone. You can deploy a third cluster if all three centers
+  are underwater. Creatures take 6d6 piercing damage (basic Reflex save). Critical
+  failures also take @Damage[1d6[bleed]]. Area becomes difficult and hazardous terrain.
+  Movement through costs @Damage[(floor(@item.rank/2)+1)[piercing]] per square.Heightened
+  (+2) Initial damage increases by 3d6, hazardous damage by 1.'
+tradition: technical
+level: 4
+usage_type: prepared
+action_cost: 3
+range: zone
+targets: zone
+duration: minutes:1
+save_type: hustle
+save_dc: 15
+resolution: save
+effects:
+  on_success:
+  - type: damage
+    dice: 6d3
+    damage_type: piercing
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 6d6
+    damage_type: piercing
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 12d6
+    damage_type: piercing
+    dc: 0

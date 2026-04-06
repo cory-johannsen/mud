@@ -1,0 +1,20 @@
+id: seismic_sense_implant
+name: Seismic Sense Implant
+description: You gain tremorsense as an imprecise sense to a range of 100 feet, but
+  you can only sense vibrations through natural stone (not masonry, adobe, or manufactured
+  structures).
+tradition: bio_synthetic
+level: 4
+usage_type: prepared
+action_cost: 3
+range: self
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You gain tremorsense as an imprecise sense to a range of 100 feet,
+      but you can only sense vibrations through natural stone (not masonry, adobe,
+      or any other manufactured edifice).

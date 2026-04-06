@@ -1,0 +1,19 @@
+id: ocular_parasite_net
+name: Ocular Parasite Net
+description: You implant an invisible bio-sensor parasite on each target. Each parasite
+  relays visual data to you, allowing you to see what each target sees.
+tradition: bio_synthetic
+level: 3
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You place an @UUID[Compendium.pf2e.conditionitems.Item.Invisible]
+      scrying sensor on each target just above their eyes. Each sensor looks where
+      that target looks, and all the targets can link their vis

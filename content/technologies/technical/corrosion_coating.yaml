@@ -1,0 +1,22 @@
+id: corrosion_coating
+name: Corrosion Coating
+description: You deploy a corrosive nanite solution that colonizes the target's equipment
+  joints. The target takes 2d6 persistent piercing damage and a -10-foot status penalty
+  to Speed on a failed Toughness save.
+tradition: technical
+level: 3
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: minutes:1
+save_type: hustle
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: Barnacles, coral, and other rough aquatic creatures grow on the target's
+      body, getting in between their joints and stiffening their movement. This impedes
+      the target's movement depending on the result

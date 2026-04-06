@@ -1,0 +1,21 @@
+id: system_remake_protocol
+name: System Remake Protocol
+description: 'You perform a fundamental system rebuild. Choose one: restore a destroyed
+  or dead creature within 1 minute to full health, permanently destroy a 10th-level
+  item or structure, undo a single death within the last minute, or produce any other
+  technical alteration subject to GM approval.'
+tradition: technical
+level: 10
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You fully re-create an object from nothing, even if the object was
+      destroyed. To do so, you must be able to picture the object in your mind. Additionally,
+      the material component must be a remnant of t

@@ -1,0 +1,24 @@
+id: elemental_frame
+name: Elemental Frame
+description: 'You activate an elemental conversion frame, transforming into a Medium
+  elemental battle form. Choose a listed element. While in this form, you gain the
+  corresponding trait and the elemental trait. You have hands and can take manipulate
+  actions. You can Dismiss the tech.
+
+
+  Heightened (6th) Your battle form is Large.'
+tradition: technical
+level: 5
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You call upon the power of the planes to transform into a Medium
+      elemental battle form. When you Use this tech, choose a listed element. While
+      in this form, you gain the corresponding trait and the

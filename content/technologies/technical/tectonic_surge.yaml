@@ -1,0 +1,23 @@
+id: tectonic_surge
+name: Tectonic Surge
+description: You trigger a massive structural upheaval. All creatures in a 60-foot
+  burst take 10d10 bludgeoning damage and are knocked prone (Reflex for half, negates
+  prone). Structures take 200 damage. Area becomes difficult terrain permanently.
+tradition: technical
+level: 9
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+save_type: hustle
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'The ground in the area shudders and crumbles as huge pillars of
+      stone erupt into the air, rending the terrain around them.
+
+      The GM might add additional effects in certain areas. Cliffs might collapse,'

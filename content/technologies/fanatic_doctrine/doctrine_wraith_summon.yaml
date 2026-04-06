@@ -1,0 +1,22 @@
+id: doctrine_wraith_summon
+name: Doctrine Wraith Summon
+description: You summon a wraith constructed from pure doctrinal devotion. It appears
+  within 30 feet and follows your instructions for the duration, using standard fluxwraith
+  statistics.
+tradition: fanatic_doctrine
+level: 9
+usage_type: prepared
+action_cost: 3
+range: ranged
+targets: single
+duration: instant
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You break a mirror and cast the shards into the air. Between their
+      thousand fractured reflections, the fluxwraith appears—a thing of broken glass,
+      broken time and broken lives. This undead creature

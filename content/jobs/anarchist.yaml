@@ -39,9 +39,9 @@ class_features:
 technology_grants:
   spontaneous:
     pool:
-      - { id: concordant_choir_neural, level: 1 }
-      - { id: draw_ire_neural, level: 1 }
-      - { id: infectious_enthusiasm_neural, level: 1 }
+      - { id: psi_chorus_resonance, level: 1 }
+      - { id: neural_aggro_beacon, level: 1 }
+      - { id: morale_contagion, level: 1 }
 drawbacks:
   - id: cop_magnet
     type: passive

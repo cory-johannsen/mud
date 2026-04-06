@@ -1,0 +1,31 @@
+id: doctrinal_wrath
+name: Doctrinal Wrath
+description: You channel the fury of your ideology against enemies. You deal 4d10
+  spirit damage to enemies in the area, depending on their saves. All mechanical effects
+  remain identical to the base protocol.
+tradition: fanatic_doctrine
+level: 4
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: instant
+save_type: toughness
+save_dc: 15
+resolution: save
+effects:
+  on_success:
+  - type: damage
+    dice: 4d6
+    damage_type: spirit
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 4d10
+    damage_type: spirit
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 8d10
+    damage_type: spirit
+    dc: 0

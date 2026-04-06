@@ -44,9 +44,9 @@ class_features:
 technology_grants:
   prepared:
     pool:
-      - id: acidic_burst_bio_synthetic
+      - id: caustic_secretion_burst
         level: 1
-      - id: caustic_blast_bio_synthetic
+      - id: acid_cluster_spray
         level: 1
-      - id: puff_of_poison_bio_synthetic
+      - id: poison_spore_exhale
         level: 1

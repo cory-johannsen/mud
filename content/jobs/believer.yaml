@@ -44,5 +44,5 @@ technology_grants:
   prepared:
     pool:
       - { id: battle_fervor, level: 1 }
-      - { id: bane_fanatic_doctrine, level: 1 }
-      - { id: admonishing_ray_fanatic_doctrine, level: 1 }
+      - { id: doctrine_bane_circuit, level: 1 }
+      - { id: doctrine_compliance_ray, level: 1 }

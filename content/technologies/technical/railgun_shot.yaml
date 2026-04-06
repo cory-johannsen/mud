@@ -1,0 +1,32 @@
+id: railgun_shot
+name: Railgun Shot
+description: You magnetically accelerate a small metal projectile to extreme velocity.
+  Make a ranged tech attack roll; the projectile deals 3d12 piercing damage on a
+  hit.
+tradition: technical
+level: 3
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: attack
+effects:
+  on_hit:
+  - type: damage
+    dice: 3d6
+    damage_type: bludgeoning
+    dc: 0
+  - type: damage
+    dice: 3d6
+    damage_type: piercing
+    dc: 0
+  on_crit_hit:
+  - type: damage
+    dice: 6d6
+    damage_type: bludgeoning
+    dc: 0
+  - type: damage
+    dice: 6d6
+    damage_type: piercing
+    dc: 0

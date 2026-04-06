@@ -1,0 +1,24 @@
+id: disguise_module_set
+name: Disguise Module Set
+description: 'You deploy four holographic disguise modules, each storing a single
+  identity profile. As an Interact action, activate or deactivate a module. When active,
+  it projects a complete holographic disguise including altered voice and scent. Hides
+  identity but doesn''t impersonate specific individuals.
+
+  First activation sets the appearance. Deception check at mythic proficiency. One
+  module at a time. Deactivating reverts. Modules given to others cease functioning.'
+tradition: technical
+level: 4
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You conjure four magic feathers, each with the potential to hold
+      a single illusory guise. These feathers have negligible Bulk and remain potent
+      for the duration. As an Interact action, you can place o

@@ -1,0 +1,20 @@
+id: root_trench
+name: Root Trench
+description: You command subterranean root systems to tear open a trench across soft
+  ground. The trench is 5 feet wide, 10 feet deep, and up to 60 feet long. Creatures
+  that fall in take falling damage.
+tradition: bio_synthetic
+level: 3
+usage_type: prepared
+action_cost: 3
+range: ranged
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You dig an earthen trench across the surrounding terrain, which must
+      be soil, clay, sand, or other soft earth, but not flooring or stone. The trench
+      is 5 feet wide, 5 feet deep, and up to 15 feet long

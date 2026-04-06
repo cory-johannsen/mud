@@ -1,0 +1,28 @@
+id: hardlight_bridge_mk4
+name: Hardlight Bridge Mk4
+description: 'A hardlight projector beneath your feet extends a solid energy bridge
+  in a straight line up to 60 feet, forming a 10-foot-wide walkway. The bridge has
+  AC equal to your tech DC, Hardness 10, and 20 Hit Points. Immune to critical hits
+  and precision damage.
+
+  You and allies use it normally. Other creatures that attempt to cross face defensive
+  countermeasures. They must attempt a Reflex save. All mechanical effects (trip,
+  grab) remain identical to the base protocol.Heightened (+1) Hit Points increase
+  by 10.'
+tradition: technical
+level: 4
+usage_type: prepared
+action_cost: 3
+range: ranged
+targets: single
+duration: instant
+save_type: hustle
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: Vines sprout beneath your feet and extend away from you in a straight
+      line up to 60 feet, forming a 10-foot-wide bridge that can cross over difficult
+      terrain and low obstacles, as well as reach higher

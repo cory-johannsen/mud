@@ -1,0 +1,22 @@
+id: confession_zone
+name: Confession Zone
+description: You designate an area saturated with doctrinal truth-enforcement. Creatures
+  in the area take a -2 status penalty to Deception checks. Each time a creature lies,
+  all other creatures present are alerted.
+tradition: fanatic_doctrine
+level: 3
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: instant
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You designate an area in which lies are revealed. Creatures in the
+      area also take a –2 status penalty to Deception checks. Each time a creature
+      in the area speaks a true statement, the soft ring of

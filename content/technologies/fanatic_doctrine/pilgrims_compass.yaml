@@ -1,0 +1,20 @@
+id: pilgrims_compass
+name: Pilgrim's Compass
+description: You invoke a doctrinal guide light attuned to a specific location. For
+  the duration, you always know the direction and approximate distance to the chosen
+  location.
+tradition: fanatic_doctrine
+level: 2
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You call on the constellations of the night sky to guide a creature
+      to the location where you Use this tech. Each time the target views the stars,
+      it receives a mental nudge toward your chosen locati

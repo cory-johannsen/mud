@@ -1,0 +1,26 @@
+id: feigned_flatline
+name: Feigned Flatline
+description: 'Trigger A creature within range is hit by an attack from an enemy.
+
+
+  The target''s biometrics simulate death while they actually turn Invisible. An illusory
+  corpse remains where they fell, complete with a believable fatal wound. This illusion
+  looks and feels real to the touch. If the target acts hostile toward anyone while
+  invisible, the illusion disappears and the invisibility ends.'
+tradition: neural
+level: 5
+usage_type: prepared
+action_cost: 0
+range: ranged
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'Trigger A creature within range is hit by an attack from an enemy.
+
+
+      The target appears to fall down dead, though it actually turns @UUID[Compendium.pf2e.conditionitems.Item.Invisible].
+      Its illusory co'

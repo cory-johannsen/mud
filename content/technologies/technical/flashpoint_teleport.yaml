@@ -1,0 +1,31 @@
+id: flashpoint_teleport
+name: Flashpoint Teleport
+description: You teleport to an unoccupied space within range, leaving a detonation
+  charge at your departure point. Each creature within a 10-foot burst takes 3d6 force
+  damage with a basic Reflex save.
+tradition: technical
+level: 3
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: instant
+save_type: hustle
+save_dc: 15
+resolution: save
+effects:
+  on_success:
+  - type: damage
+    dice: 4d4
+    damage_type: force
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 4d8
+    damage_type: force
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 8d8
+    damage_type: force
+    dc: 0

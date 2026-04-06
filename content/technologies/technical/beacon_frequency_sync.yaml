@@ -1,0 +1,17 @@
+id: beacon_frequency_sync
+name: Beacon Frequency Sync
+description: Sync tactical beacons across multiple units to a shared communication frequency.
+tradition: technical
+level: 1
+usage_type: prepared
+action_cost: 2
+range: melee
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You harmlessly place your unique magic sigil, which is about 1 square inch in size, on your targets. When
+      you Use this tech, you set the duration by choosing a time at which point the sigil flashes d

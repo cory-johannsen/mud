@@ -1,0 +1,22 @@
+id: neural_restoration
+name: Neural Restoration
+description: You restore the target's neural pathways, removing debilitating conditions.
+  Reduce the target's @UUID[Compendium.pf2e.conditionitems.Item.Clumsy], @UUID[Compendium.pf2e.conditionitems.Item.Enfeebled],
+  or @UUID[Compendium.pf2e.conditionitems.Item.Stupefied] condition value by 2. You
+  can instead remove the target's @UUID[Compendium.pf2e.conditionitems.Item.Drained]
+  condition (reducing it by 1).
+tradition: neural
+level: 2
+usage_type: prepared
+action_cost: 2
+range: melee
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: Restorative magic counters the effects of toxins or conditions that
+      prevent a creature from functioning at its best. When you cast restoration,
+      choose to either reduce a condition or lessen the effect

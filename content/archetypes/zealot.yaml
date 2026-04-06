@@ -15,45 +15,45 @@ technology_grants:
     slots_by_level:
       1: 2
     pool:
-    - id: divine_lance
+    - id: doctrines_judgment_bolt
       level: 1
     - id: harm
       level: 1
-    - id: haunting_hymn_fanatic_doctrine
+    - id: zealous_war_hymn
       level: 1
-    - id: ancient_dust_fanatic_doctrine
+    - id: doctrines_reckoning
       level: 1
-    - id: vitality_lash_fanatic_doctrine
+    - id: doctrines_vitality_lash
       level: 1
-    - id: command_fanatic_doctrine
+    - id: doctrine_command_mandate
       level: 1
-    - id: fear_fanatic_doctrine
+    - id: doctrine_fear_mandate
       level: 1
-    - id: daze_fanatic_doctrine
+    - id: doctrines_rebuke
       level: 1
     - id: malediction
       level: 1
-    - id: enfeeble_fanatic_doctrine
+    - id: doctrine_weakening_curse
       level: 1
-    - id: heal_fanatic_doctrine
+    - id: doctrine_healing_circuit
       level: 1
-    - id: bless_fanatic_doctrine
+    - id: doctrine_combat_blessing
       level: 1
     - id: benediction
       level: 1
-    - id: spirit_link_fanatic_doctrine
+    - id: doctrine_spirit_bond
       level: 1
     - id: infuse_vitality
       level: 1
-    - id: detect_alignment_fanatic_doctrine
+    - id: doctrine_alignment_scan
       level: 1
-    - id: detect_magic_fanatic_doctrine
+    - id: forbidden_power_scan
       level: 1
-    - id: light_fanatic_doctrine
+    - id: doctrines_light
       level: 1
-    - id: guidance_fanatic_doctrine
+    - id: doctrines_guidance
       level: 1
-    - id: sanctuary_fanatic_doctrine
+    - id: doctrine_sanctuary_field
       level: 1
 level_up_grants:
   2:
@@ -65,171 +65,171 @@ level_up_grants:
       slots_by_level:
         2: 2
       pool:
-      - id: advanced_scurvy_fanatic_doctrine
+      - id: wasting_judgment
         level: 2
-      - id: allfood_fanatic_doctrine
+      - id: sacramental_provisions
         level: 2
-      - id: augury_fanatic_doctrine
+      - id: doctrine_augury_circuit
         level: 2
-      - id: banishing_touch_fanatic_doctrine
+      - id: heretics_exile
         level: 2
-      - id: blast_of_the_bellows_fanatic_doctrine
+      - id: zealots_breath
         level: 2
-      - id: blazing_armory_fanatic_doctrine
+      - id: consecrated_arsenal
         level: 2
-      - id: blazing_blade_fanatic_doctrine
+      - id: purifying_edge
         level: 2
-      - id: blood_vendetta_fanatic_doctrine
+      - id: martyrs_retribution
         level: 2
-      - id: bone_spray_fanatic_doctrine
+      - id: relic_shrapnel
         level: 2
-      - id: boneshaker_fanatic_doctrine
+      - id: skeletal_penance
         level: 2
-      - id: bralani_referendum_fanatic_doctrine
+      - id: devotional_blast
         level: 2
-      - id: brand_the_impenitent
+      - id: heretics_mark
         level: 2
-      - id: buzzing_servants_fanatic_doctrine
+      - id: acolyte_drones
         level: 2
-      - id: calm_fanatic_doctrine
+      - id: serenity_rite
         level: 2
-      - id: carrion_mire_fanatic_doctrine
+      - id: profane_corruption
         level: 2
-      - id: cauterize_wounds_fanatic_doctrine
+      - id: sacred_seal
         level: 2
-      - id: charitable_urge_fanatic_doctrine
+      - id: compelled_tithe
         level: 2
-      - id: clad_in_metal_fanatic_doctrine
+      - id: sacred_plating
         level: 2
-      - id: claws_of_the_otter_fanatic_doctrine
+      - id: blessed_talons
         level: 2
-      - id: clawsong_fanatic_doctrine
+      - id: devotional_strike
         level: 2
-      - id: cleanse_affliction_fanatic_doctrine
+      - id: purification_rite
         level: 2
-      - id: cleanse_air_fanatic_doctrine
+      - id: sacred_fumigation
         level: 2
-      - id: clear_mind_fanatic_doctrine
+      - id: doctrine_shield
         level: 2
-      - id: coiling_dance_fanatic_doctrine
+      - id: sacred_evasion
         level: 2
-      - id: create_food_fanatic_doctrine
+      - id: sacramental_feast
         level: 2
-      - id: dancing_shield_fanatic_doctrine
+      - id: sentinels_guard
         level: 2
-      - id: darkness_fanatic_doctrine
+      - id: shadow_doctrine
         level: 2
-      - id: darkvision_fanatic_doctrine
+      - id: sacred_night_sight
         level: 2
-      - id: deafness_fanatic_doctrine
+      - id: silence_of_heresy
         level: 2
-      - id: death_knell_fanatic_doctrine
+      - id: doctrine_death_knell
         level: 2
-      - id: dispel_magic_fanatic_doctrine
+      - id: doctrinal_nullifier
         level: 2
-      - id: enhance_victuals_fanatic_doctrine
+      - id: blessed_provisions
         level: 2
-      - id: environmental_endurance_fanatic_doctrine
+      - id: sacred_endurance
         level: 2
-      - id: everlight_fanatic_doctrine
+      - id: eternal_vigil
         level: 2
-      - id: faerie_fire_fanatic_doctrine
+      - id: judgment_glow
         level: 2
-      - id: farflung_fetch_fanatic_doctrine
+      - id: devotional_summons
         level: 2
-      - id: fear_the_sun_fanatic_doctrine
+      - id: light_aversion_rite
         level: 2
-      - id: final_sacrifice_fanatic_doctrine
+      - id: martyrs_immolation
         level: 2
-      - id: fireproof_fanatic_doctrine
+      - id: sacred_flame_ward
         level: 2
-      - id: gentle_breeze_fanatic_doctrine
+      - id: soothing_litany
         level: 2
-      - id: ghoulish_cravings_fanatic_doctrine
+      - id: hunger_curse
         level: 2
-      - id: grave_impressions_fanatic_doctrine
+      - id: last_rites_reading
         level: 2
-      - id: guiding_star_fanatic_doctrine
+      - id: pilgrims_compass
         level: 2
-      - id: helpful_reload_fanatic_doctrine
+      - id: devotional_reload
         level: 2
-      - id: horrifying_blood_loss_fanatic_doctrine
+      - id: stigmata_curse
         level: 2
-      - id: imp_sting_fanatic_doctrine
+      - id: heretics_bane
         level: 2
-      - id: impeccable_flow_fanatic_doctrine
+      - id: sacred_flow
         level: 2
-      - id: inner_radiance_torrent_fanatic_doctrine
+      - id: devotional_cascade
         level: 2
-      - id: instant_armor_fanatic_doctrine
+      - id: reliquary_armor
         level: 2
-      - id: lucky_number_fanatic_doctrine
+      - id: blessed_number
         level: 2
-      - id: manifestation_of_spirits_fanatic_doctrine
+      - id: ancestral_martyrs
         level: 2
-      - id: mark_of_blood_fanatic_doctrine
+      - id: covenant_mark
         level: 2
-      - id: marvelous_mount_fanatic_doctrine
+      - id: sacred_steed
         level: 2
-      - id: mimic_undead_fanatic_doctrine
+      - id: death_shroud_rite
         level: 2
-      - id: noise_blast_fanatic_doctrine
+      - id: doctrinal_thunder
         level: 2
-      - id: peaceful_rest_fanatic_doctrine
+      - id: sanctified_repose
         level: 2
-      - id: radiant_field_fanatic_doctrine
+      - id: sacred_radiance
         level: 2
-      - id: reapers_lantern_fanatic_doctrine
+      - id: deaths_beacon
         level: 2
-      - id: resist_energy_fanatic_doctrine
+      - id: sacred_resistance
         level: 2
-      - id: restoration_fanatic_doctrine
+      - id: penitent_restoration
         level: 2
-      - id: revealing_light_fanatic_doctrine
+      - id: judgment_lamp
         level: 2
-      - id: see_the_unseen_fanatic_doctrine
+      - id: heresy_sight
         level: 2
-      - id: shadow_zombie_fanatic_doctrine
+      - id: shade_thrall
         level: 2
-      - id: share_life
+      - id: covenant_bond
         level: 2
-      - id: silence_fanatic_doctrine
+      - id: vow_of_silence
         level: 2
-      - id: sound_body_fanatic_doctrine
+      - id: sacred_mending
         level: 2
-      - id: spirit_sense_fanatic_doctrine
+      - id: spirit_sight
         level: 2
-      - id: spiritual_armament_fanatic_doctrine
+      - id: devotional_blade
         level: 2
-      - id: spiritual_weapon_fanatic_doctrine
+      - id: sacred_striker
         level: 2
-      - id: status_fanatic_doctrine
+      - id: covenant_monitor
         level: 2
-      - id: sudden_blight_fanatic_doctrine
+      - id: withering_decree
         level: 2
-      - id: summoners_precaution_fanatic_doctrine
+      - id: eidolon_sanctuary
         level: 2
-      - id: summoners_visage_fanatic_doctrine
+      - id: eidolon_vestments
         level: 2
-      - id: sure_footing_fanatic_doctrine
+      - id: pilgrims_step
         level: 2
-      - id: swallow_light_fanatic_doctrine
+      - id: eclipse_rite
         level: 2
-      - id: the_parrots_whisper_fanatic_doctrine
+      - id: confession_extractor
         level: 2
-      - id: thermal_remedy_fanatic_doctrine
+      - id: sacred_cautery
         level: 2
-      - id: translate_fanatic_doctrine
+      - id: doctrine_polyglot_protocol
         level: 2
-      - id: veil_of_spirits_fanatic_doctrine
+      - id: martyrs_veil
         level: 2
-      - id: vicious_jealousy_fanatic_doctrine
+      - id: coveting_curse
         level: 2
-      - id: warriors_regret_fanatic_doctrine
+      - id: penitents_remorse
         level: 2
-      - id: water_breathing_fanatic_doctrine
+      - id: rite_of_submersion
         level: 2
-      - id: water_walk_fanatic_doctrine
+      - id: sacred_passage
         level: 2
   4:
     prepared:
@@ -240,115 +240,115 @@ level_up_grants:
       slots_by_level:
         3: 2
       pool:
-      - id: agonizing_despair_fanatic_doctrine
+      - id: despair_doctrine
         level: 3
-      - id: annunciation_of_the_outer_gate_fanatic_doctrine
+      - id: forbidden_frequency
         level: 3
-      - id: anointed_ground
+      - id: consecrated_zone
         level: 3
-      - id: behold_the_weave_fanatic_doctrine
+      - id: fate_decree
         level: 3
-      - id: bind_undead_fanatic_doctrine
+      - id: doctrinal_servitude
         level: 3
-      - id: blindness_fanatic_doctrine
+      - id: blinding_judgment
         level: 3
-      - id: bone_flense_fanatic_doctrine
+      - id: reliquary_blade
         level: 3
-      - id: casters_imposition_fanatic_doctrine
+      - id: heresy_interdiction
         level: 3
-      - id: chilling_darkness
+      - id: void_condemnation
         level: 3
-      - id: circle_of_protection_fanatic_doctrine
+      - id: doctrinal_ward
         level: 3
-      - id: claim_curse_fanatic_doctrine
+      - id: martyrdom_transfer
         level: 3
-      - id: consecrate_flesh
+      - id: sanctified_vessel
         level: 3
-      - id: crisis_of_faith
+      - id: ideological_collapse
         level: 3
-      - id: deep_sight_fanatic_doctrine
+      - id: vigil_sight
         level: 3
-      - id: dream_message_fanatic_doctrine
+      - id: indoctrination_dream
         level: 3
-      - id: familiars_face_fanatic_doctrine
+      - id: acolyte_relay
         level: 3
-      - id: fates_travels_fanatic_doctrine
+      - id: martyr_path_trace
         level: 3
-      - id: focusing_hum_fanatic_doctrine
+      - id: liturgical_drone
         level: 3
-      - id: heatvision_fanatic_doctrine
+      - id: zealot_sight
         level: 3
-      - id: heroism_fanatic_doctrine
+      - id: zealot_fervor
         level: 3
-      - id: holy_light_fanatic_doctrine
+      - id: purging_beam
         level: 3
-      - id: horde_of_underlings_fanatic_doctrine
+      - id: zealot_conscripts
         level: 3
-      - id: impending_doom_fanatic_doctrine
+      - id: doomsday_prophecy
         level: 3
-      - id: infectious_ennui_fanatic_doctrine
+      - id: nihilist_contagion
         level: 3
-      - id: life_connection_fanatic_doctrine
+      - id: faithful_bond
         level: 3
-      - id: life_pact_fanatic_doctrine
+      - id: covenant_of_blood
         level: 3
-      - id: locate_fanatic_doctrine
+      - id: doctrinal_dowsing
         level: 3
-      - id: lotus_walk_fanatic_doctrine
+      - id: walk_of_faith
         level: 3
-      - id: martyrs_intervention_fanatic_doctrine
+      - id: sacrificial_intercept
         level: 3
-      - id: mind_of_menace_fanatic_doctrine
+      - id: zealot_counterstrike
         level: 3
-      - id: moonlight_ray_fanatic_doctrine
+      - id: doctrine_moonlight_ray
         level: 3
-      - id: organsight_fanatic_doctrine
+      - id: anatomical_revelation
         level: 3
-      - id: perceive_the_threads_of_fate_fanatic_doctrine
+      - id: divine_thread_reading
         level: 3
-      - id: percussive_impact_fanatic_doctrine
+      - id: thunder_judgment
         level: 3
-      - id: positive_attunement_fanatic_doctrine
+      - id: vital_blessing
         level: 3
-      - id: radiant_globe_fanatic_doctrine
+      - id: sanctum_dome
         level: 3
-      - id: ring_of_truth_fanatic_doctrine
+      - id: confession_zone
         level: 3
-      - id: roaring_applause_fanatic_doctrine
+      - id: fervent_acclamation
         level: 3
-      - id: rouse_skeletons_fanatic_doctrine
+      - id: exhumed_servants
         level: 3
-      - id: safe_passage_fanatic_doctrine
+      - id: pilgrim_path
         level: 3
-      - id: scrying_ripples_fanatic_doctrine
+      - id: doctrine_scry_ripple
         level: 3
-      - id: show_the_way_fanatic_doctrine
+      - id: pilgrim_guide
         level: 3
-      - id: sign_of_conviction
+      - id: banner_of_zeal
         level: 3
-      - id: soothing_blossoms_fanatic_doctrine
+      - id: healing_incense
         level: 3
-      - id: sparkleskin_fanatic_doctrine
+      - id: hallowed_sheen
         level: 3
-      - id: speak_with_plants_fanatic_doctrine
+      - id: sacred_grove_link
         level: 3
-      - id: strength_of_mind_fanatic_doctrine
+      - id: doctrine_mind_fortitude
         level: 3
-      - id: thief_of_fortune_fanatic_doctrine
+      - id: fortune_seizure
         level: 3
-      - id: trade_items_fanatic_doctrine
+      - id: doctrinal_exchange
         level: 3
-      - id: vampiric_feast_fanatic_doctrine
+      - id: soul_tithe
         level: 3
-      - id: wall_of_virtue_fanatic_doctrine
+      - id: doctrinal_barrier
         level: 3
-      - id: wanderers_guide_fanatic_doctrine
+      - id: pilgrim_navigation
         level: 3
-      - id: warding_aggression_fanatic_doctrine
+      - id: righteous_counter
         level: 3
-      - id: web_of_eyes_fanatic_doctrine
+      - id: watchful_faithful
         level: 3
-      - id: whirling_scarves_fanatic_doctrine
+      - id: devotional_shroud
         level: 3
   6:
     prepared:
@@ -359,123 +359,123 @@ level_up_grants:
       slots_by_level:
         4: 2
       pool:
-      - id: air_walk_fanatic_doctrine
+      - id: ascension_path
         level: 4
-      - id: anathematic_reprisal
+      - id: doctrinal_punishment
         level: 4
-      - id: bloodspray_curse_fanatic_doctrine
+      - id: hemorrhagic_condemnation
         level: 4
-      - id: cloak_of_light_fanatic_doctrine
+      - id: zealots_radiance
         level: 4
-      - id: compel_true_name_fanatic_doctrine
+      - id: sacred_name_binding
         level: 4
-      - id: dawnflowers_light_fanatic_doctrine
+      - id: illumination_of_truth
         level: 4
-      - id: detect_creator_fanatic_doctrine
+      - id: trace_the_heretic
         level: 4
-      - id: dirge_of_remembrance_fanatic_doctrine
+      - id: requiem_frequency
         level: 4
-      - id: discern_lies_fanatic_doctrine
+      - id: confessors_insight
         level: 4
-      - id: dispelling_globe_fanatic_doctrine
+      - id: sanctified_null_zone
         level: 4
-      - id: divine_wrath
+      - id: doctrinal_wrath
         level: 4
-      - id: dull_ambition_fanatic_doctrine
+      - id: zeal_dampener
         level: 4
-      - id: enervation_fanatic_doctrine
+      - id: entropic_condemnation
         level: 4
-      - id: enhance_senses_fanatic_doctrine
+      - id: heightened_awareness_rite
         level: 4
-      - id: fallen_soldiers_lament_fanatic_doctrine
+      - id: martyrs_specter
         level: 4
-      - id: filter_air_fanatic_doctrine
+      - id: sacred_breath
         level: 4
-      - id: fly_fanatic_doctrine
+      - id: wings_of_conviction
         level: 4
-      - id: forgotten_lines_fanatic_doctrine
+      - id: sacred_text_recovery
         level: 4
-      - id: ghostly_tragedy_fanatic_doctrine
+      - id: reenactment_rite
         level: 4
-      - id: girzanjes_march_fanatic_doctrine
+      - id: mass_crusade_protocol_hymn
         level: 4
-      - id: holy_cascade
+      - id: sacred_purge_burst
         level: 4
-      - id: implement_of_destruction_fanatic_doctrine
+      - id: doom_consecration
         level: 4
-      - id: internal_insurrection_fanatic_doctrine
+      - id: doctrinal_dissolution
         level: 4
-      - id: it_is_written_fanatic_doctrine
+      - id: prophetic_certainty
         level: 4
-      - id: lifes_fresh_bloom_fanatic_doctrine
+      - id: sanctified_ground
         level: 4
-      - id: magic_mailbox_fanatic_doctrine
+      - id: sacred_courier_link
         level: 4
-      - id: mantiss_grasp_fanatic_doctrine
+      - id: judgment_claws
         level: 4
-      - id: misty_memory_fanatic_doctrine
+      - id: witness_rite
         level: 4
-      - id: movanic_glimmer_fanatic_doctrine
+      - id: blessed_awareness
         level: 4
-      - id: necrotic_radiation_fanatic_doctrine
+      - id: profane_irradiation
         level: 4
-      - id: outcasts_curse_fanatic_doctrine
+      - id: excommunication_brand
         level: 4
-      - id: painful_vibrations_fanatic_doctrine
+      - id: resonance_of_judgment
         level: 4
-      - id: pernicious_poltergeist_fanatic_doctrine
+      - id: wrathful_spirit_manifestation
         level: 4
-      - id: phantasmal_protagonist_fanatic_doctrine
+      - id: sacred_icon_projection
         level: 4
-      - id: phoenix_ward_fanatic_doctrine
+      - id: martyrdom_shield
         level: 4
-      - id: planar_tether_fanatic_doctrine
+      - id: doctrinal_binding
         level: 4
-      - id: procyal_philosophy_fanatic_doctrine
+      - id: sacred_advisor
         level: 4
-      - id: prophets_luck_fanatic_doctrine
+      - id: prophets_intercession
         level: 4
-      - id: radiant_beam_fanatic_doctrine
+      - id: doctrine_radiant_beam
         level: 4
-      - id: radiant_heart_of_devotion_fanatic_doctrine
+      - id: heart_of_the_zealot
         level: 4
-      - id: read_omens_fanatic_doctrine
+      - id: doctrine_omen_reader
         level: 4
-      - id: reflected_beauty_fanatic_doctrine
+      - id: mirror_of_devotion
         level: 4
-      - id: sacred_nimbus_fanatic_doctrine
+      - id: sacred_rain_protocol
         level: 4
-      - id: sanguine_mist_fanatic_doctrine
+      - id: blood_tithe_cloud
         level: 4
-      - id: seal_fate_fanatic_doctrine
+      - id: doctrinal_death_sentence
         level: 4
-      - id: soothing_spring_fanatic_doctrine
+      - id: restorative_baptismal_pool
         level: 4
-      - id: spell_immunity_fanatic_doctrine
+      - id: sacred_countermeasure
         level: 4
-      - id: spiritual_anamnesis_fanatic_doctrine
+      - id: past_life_revelation
         level: 4
-      - id: spiritual_attunement_fanatic_doctrine
+      - id: doctrinal_alignment
         level: 4
-      - id: spiritual_renewal
+      - id: doctrinal_renewal
         level: 4
-      - id: steal_voice_fanatic_doctrine
+      - id: silencing_edict
         level: 4
-      - id: stonesense_fanatic_doctrine
+      - id: earth_communion
         level: 4
-      - id: talking_corpse_fanatic_doctrine
+      - id: rite_of_interrogation
         level: 4
-      - id: tricksters_feathers_fanatic_doctrine
+      - id: vestment_of_many_faces
         level: 4
-      - id: unfettered_movement_fanatic_doctrine
+      - id: doctrinal_liberation
         level: 4
-      - id: vampiric_maiden_fanatic_doctrine
+      - id: iron_penance
         level: 4
-      - id: vital_beacon_fanatic_doctrine
+      - id: beacon_of_restoration
         level: 4
-      - id: whispers_of_the_void_fanatic_doctrine
+      - id: void_sermon
         level: 4
-      - id: ymeris_mark_fanatic_doctrine
+      - id: brand_of_immolation
         level: 4
   8:
     prepared:
@@ -486,109 +486,109 @@ level_up_grants:
       slots_by_level:
         5: 2
       pool:
-      - id: abyssal_plague_fanatic_doctrine
+      - id: corruption_vector
         level: 5
-      - id: ancestral_winds_fanatic_doctrine
+      - id: martyrs_wind
         level: 5
-      - id: bandits_doom_fanatic_doctrine
+      - id: sacred_ward_trap
         level: 5
-      - id: banishment_fanatic_doctrine
+      - id: doctrinal_exile
         level: 5
-      - id: belittling_boast_fanatic_doctrine
+      - id: zealot_proclamation
         level: 5
-      - id: blackfingers_blades_fanatic_doctrine
+      - id: consecrated_venom
         level: 5
-      - id: blessing_of_defiance_fanatic_doctrine
+      - id: doctrine_defiance_blessing
         level: 5
-      - id: blink_charge_fanatic_doctrine
+      - id: zealot_rush
         level: 5
-      - id: blood_feast_fanatic_doctrine
+      - id: sanguine_rite
         level: 5
-      - id: bloodfeasting_breath_fanatic_doctrine
+      - id: doctrine_siphon
         level: 5
-      - id: breath_of_life
+      - id: emergency_revival
         level: 5
-      - id: confusing_cry_fanatic_doctrine
+      - id: doctrinal_shriek
         level: 5
-      - id: death_ward_fanatic_doctrine
+      - id: sacred_shield
         level: 5
-      - id: diadem_of_divine_radiance_fanatic_doctrine
+      - id: halo_of_judgment
         level: 5
-      - id: divine_dragons_watch
+      - id: guardian_protocol
         level: 5
-      - id: divine_immolation
+      - id: sacred_immolation
         level: 5
-      - id: domoras_defense_fanatic_doctrine
+      - id: triple_aegis
         level: 5
-      - id: drop_dead_fanatic_doctrine
+      - id: doctrinal_feint
         level: 5
-      - id: flame_strike
+      - id: orbital_doctrine_strike
         level: 5
-      - id: healing_well_fanatic_doctrine
+      - id: doctrine_regen_pool
         level: 5
-      - id: inevitable_disaster_fanatic_doctrine
+      - id: fated_ruin
         level: 5
-      - id: invoke_spirits_fanatic_doctrine
+      - id: invoke_martyrs
         level: 5
-      - id: kings_castle_fanatic_doctrine
+      - id: sacred_transposition
         level: 5
-      - id: lashuntas_life_bubble_fanatic_doctrine
+      - id: sacred_atmosphere
         level: 5
-      - id: mirecloak_fanatic_doctrine
+      - id: shroud_of_doctrine
         level: 5
-      - id: mirror_malefactors_fanatic_doctrine
+      - id: judgment_mirrors
         level: 5
-      - id: rallying_banner_fanatic_doctrine
+      - id: doctrine_standard
         level: 5
-      - id: ravening_maw_fanatic_doctrine
+      - id: sacred_hunger
         level: 5
-      - id: repelling_pulse_fanatic_doctrine
+      - id: doctrinal_shockwave
         level: 5
-      - id: rewinding_step_fanatic_doctrine
+      - id: doctrinal_anchor
         level: 5
-      - id: rip_the_spirit_fanatic_doctrine
+      - id: soul_extraction
         level: 5
-      - id: ritual_obstruction_fanatic_doctrine
+      - id: doctrinal_lockdown
         level: 5
-      - id: sawtooth_terrain_fanatic_doctrine
+      - id: consecrated_blades
         level: 5
-      - id: scouring_pulse_fanatic_doctrine
+      - id: purification_wave
         level: 5
-      - id: scouting_eye_fanatic_doctrine
+      - id: sentinel_eye
         level: 5
-      - id: sending_fanatic_doctrine
+      - id: doctrinal_message
         level: 5
-      - id: shadow_blast_fanatic_doctrine
+      - id: umbral_judgment
         level: 5
-      - id: speak_with_stones_fanatic_doctrine
+      - id: consecrated_interface
         level: 5
-      - id: spiritual_guardian
+      - id: doctrinal_guardian
         level: 5
-      - id: spiritual_torrent_fanatic_doctrine
+      - id: doctrinal_torrent
         level: 5
-      - id: spiritual_transport
+      - id: doctrinal_transit
         level: 5
-      - id: summon_anarch
+      - id: summon_dissident
         level: 5
-      - id: summon_axiom
+      - id: summon_enforcer
         level: 5
-      - id: summon_celestial
+      - id: summon_herald
         level: 5
-      - id: summon_dragon_fanatic_doctrine
+      - id: doctrine_drake_summons
         level: 5
-      - id: summon_fiend
+      - id: summon_wraith
         level: 5
-      - id: summon_healing_servitor_fanatic_doctrine
+      - id: deploy_sacred_medic
         level: 5
-      - id: summon_monitor
+      - id: summon_auditor
         level: 5
-      - id: temporary_glyph_fanatic_doctrine
+      - id: sacred_mine
         level: 5
-      - id: truespeech_fanatic_doctrine
+      - id: doctrinal_tongue
         level: 5
-      - id: wall_of_flesh_fanatic_doctrine
+      - id: consecrated_barrier
         level: 5
-      - id: wisdom_of_the_winds_fanatic_doctrine
+      - id: doctrinal_guidance
         level: 5
   10:
     prepared:
@@ -599,77 +599,77 @@ level_up_grants:
       slots_by_level:
         6: 2
       pool:
-      - id: awaken_entropy_fanatic_doctrine
+      - id: doctrine_of_decay
         level: 6
-      - id: blade_barrier
+      - id: doctrinal_force_wall
         level: 6
-      - id: blessed_boundary
+      - id: sacred_barrier_sphere
         level: 6
-      - id: blinding_fury_fanatic_doctrine
+      - id: righteous_blind_wrath
         level: 6
-      - id: bound_in_death_fanatic_doctrine
+      - id: martyrdom_tether
         level: 6
-      - id: bounty_of_the_sky_fanatic_doctrine
+      - id: airdrop_of_grace
         level: 6
-      - id: catch_your_name_fanatic_doctrine
+      - id: sacred_name_ward
         level: 6
-      - id: crimson_breath_fanatic_doctrine
+      - id: blood_doctrine_exhalation
         level: 6
-      - id: daemon_form_fanatic_doctrine
+      - id: profane_engine_form
         level: 6
-      - id: demon_form_fanatic_doctrine
+      - id: heretic_engine_form
         level: 6
-      - id: devil_form_fanatic_doctrine
+      - id: inquisitor_engine_form
         level: 6
-      - id: dominate_fanatic_doctrine
+      - id: absolute_doctrine_command
         level: 6
-      - id: dragon_form_fanatic_doctrine
+      - id: sacred_beast_form
         level: 6
-      - id: fateful_condemnation_fanatic_doctrine
+      - id: doctrinal_condemnation
         level: 6
-      - id: field_of_life_fanatic_doctrine
+      - id: sacred_restoration_zone
         level: 6
-      - id: gray_shadow
+      - id: shadow_operative
         level: 6
-      - id: heinous_future_fanatic_doctrine
+      - id: prophecy_of_damnation
         level: 6
-      - id: mantle_of_heavens_slopes
+      - id: sanctified_barrier_cloak
         level: 6
-      - id: necrotize_fanatic_doctrine
+      - id: flesh_rot_doctrine
         level: 6
-      - id: pain_of_ages
+      - id: eternal_suffering_protocol
         level: 6
-      - id: raise_dead
+      - id: resurrection_protocol
         level: 6
-      - id: ravenous_darkness_fanatic_doctrine
+      - id: devouring_judgment_field
         level: 6
-      - id: repulsion_fanatic_doctrine
+      - id: doctrinal_repulsion_field
         level: 6
-      - id: sacred_form
+      - id: exalted_doctrine_form
         level: 6
-      - id: scintillating_safeguard_fanatic_doctrine
+      - id: doctrinal_safeguard_burst
         level: 6
-      - id: siege_weapons_blessing_fanatic_doctrine
+      - id: siege_anointing_protocol
         level: 6
-      - id: skeleton_army_fanatic_doctrine
+      - id: undead_zealot_legion
         level: 6
-      - id: spellwrack_fanatic_doctrine
+      - id: heresy_feedback_curse
         level: 6
-      - id: spirit_blast_fanatic_doctrine
+      - id: doctrinal_spirit_blast
         level: 6
-      - id: stone_to_flesh_fanatic_doctrine
+      - id: sacred_restoration_rite
         level: 6
-      - id: suspended_retribution_fanatic_doctrine
+      - id: suspended_judgment
         level: 6
-      - id: tanglecurse_fanatic_doctrine
+      - id: doctrinal_fungal_blight
         level: 6
-      - id: temporal_ward_fanatic_doctrine
+      - id: sacred_chrono_seal
         level: 6
-      - id: truesight_fanatic_doctrine
+      - id: doctrine_of_true_sight
         level: 6
-      - id: vampiric_exsanguination_fanatic_doctrine
+      - id: mass_vitality_siphon
         level: 6
-      - id: zealous_conviction_fanatic_doctrine
+      - id: doctrinal_fervor
         level: 6
   12:
     prepared:
@@ -680,57 +680,57 @@ level_up_grants:
       slots_by_level:
         7: 2
       pool:
-      - id: angel_form
+      - id: ascended_zealot_form
         level: 7
-      - id: attacked_from_within_fanatic_doctrine
+      - id: doctrinal_shame_lance
         level: 7
-      - id: chrysopoetic_curse_fanatic_doctrine
+      - id: midas_condemnation
         level: 7
-      - id: cosmic_form_fanatic_doctrine
+      - id: celestial_avatar_form
         level: 7
-      - id: deitys_strike
+      - id: doctrinal_smite
         level: 7
-      - id: devouring_void_fanatic_doctrine
+      - id: void_of_unbelief
         level: 7
-      - id: divine_decree
+      - id: doctrinal_decree
         level: 7
-      - id: divine_vessel
+      - id: vessel_of_doctrine
         level: 7
-      - id: eclipse_burst_fanatic_doctrine
+      - id: shadow_doctrine_burst
         level: 7
-      - id: energy_aegis_fanatic_doctrine
+      - id: doctrinal_energy_ward
         level: 7
-      - id: ethereal_jaunt_fanatic_doctrine
+      - id: transcendent_phase_walk
         level: 7
-      - id: execute_fanatic_doctrine
+      - id: doctrine_execute_order
         level: 7
-      - id: final_fate_of_the_locust_host_fanatic_doctrine
+      - id: doctrinal_plague_host
         level: 7
-      - id: inexhaustible_cynicism_fanatic_doctrine
+      - id: ideological_collapse
         level: 7
-      - id: interplanar_teleport_fanatic_doctrine
+      - id: doctrinal_plane_crossing
         level: 7
-      - id: loves_sacrifice_fanatic_doctrine
+      - id: doctrine_love_sacrifice
         level: 7
-      - id: moonburst_fanatic_doctrine
+      - id: sanctified_uv_blast
         level: 7
-      - id: planar_seal_fanatic_doctrine
+      - id: doctrinal_warding_seal
         level: 7
-      - id: ray_of_corruption_fanatic_doctrine
+      - id: condemnation_beam
         level: 7
-      - id: regenerate_fanatic_doctrine
+      - id: doctrinal_restoration
         level: 7
-      - id: return_to_essence_fanatic_doctrine
+      - id: doctrinal_energy_reclaim
         level: 7
-      - id: shock_to_the_system_fanatic_doctrine
+      - id: doctrinal_revivification
         level: 7
-      - id: spell_riposte_fanatic_doctrine
+      - id: doctrinal_counter_strike
         level: 7
-      - id: sunburst_fanatic_doctrine
+      - id: purifying_solar_judgment
         level: 7
-      - id: tempest_of_shades_fanatic_doctrine
+      - id: wraith_storm_of_judgment
         level: 7
-      - id: vibrant_vibrato_fanatic_doctrine
+      - id: harmonic_doctrine_chant
         level: 7
   14:
     prepared:
@@ -741,37 +741,37 @@ level_up_grants:
       slots_by_level:
         8: 2
       pool:
-      - id: antimagic_field_fanatic_doctrine
+      - id: doctrinal_null_zone
         level: 8
-      - id: canticle_of_everlasting_grief_fanatic_doctrine
+      - id: hymn_of_eternal_sorrow
         level: 8
-      - id: devour_life_fanatic_doctrine
+      - id: doctrinal_soul_harvest
         level: 8
-      - id: divine_armageddon
+      - id: doctrinal_annihilation
         level: 8
-      - id: divine_aura
+      - id: doctrinal_aura_projection
         level: 8
-      - id: divine_inspiration
+      - id: doctrinal_revelation
         level: 8
-      - id: holy_host_fanatic_doctrine
+      - id: zealot_legion_summon
         level: 8
-      - id: moment_of_renewal_fanatic_doctrine
+      - id: doctrinal_restoration_rite
         level: 8
-      - id: musical_shift_fanatic_doctrine
+      - id: doctrinal_frequency_chant
         level: 8
-      - id: part_the_mists_to_paradise_fanatic_doctrine
+      - id: doctrinal_sanctum_retreat
         level: 8
-      - id: pinpoint_fanatic_doctrine
+      - id: doctrinal_omniscience
         level: 8
-      - id: spirit_song_fanatic_doctrine
+      - id: doctrinal_resonance_hymn
         level: 8
-      - id: spiritual_epidemic_fanatic_doctrine
+      - id: doctrinal_doubt_plague
         level: 8
-      - id: summon_deific_herald
+      - id: summon_doctrinal_avatar
         level: 8
-      - id: summon_elemental_herald_fanatic_doctrine
+      - id: elemental_judgment_beacon
         level: 8
-      - id: unholy_army_fanatic_doctrine
+      - id: heretic_horde_summon
         level: 8
   16:
     prepared:
@@ -782,35 +782,35 @@ level_up_grants:
       slots_by_level:
         9: 2
       pool:
-      - id: astral_labyrinth_fanatic_doctrine
+      - id: doctrine_maze
         level: 9
-      - id: beseech_arcanotheign_fanatic_doctrine
+      - id: supreme_doctrine_request
         level: 9
-      - id: call_fluxwraith_fanatic_doctrine
+      - id: doctrine_wraith_summon
         level: 9
-      - id: crusade
+      - id: mass_crusade_protocol
         level: 9
-      - id: dimensional_excision_fanatic_doctrine
+      - id: doctrinal_excision
         level: 9
-      - id: foresight_fanatic_doctrine
+      - id: doctrine_precognition
         level: 9
-      - id: massacre_fanatic_doctrine
+      - id: holy_massacre_protocol
         level: 9
-      - id: overwhelming_presence_fanatic_doctrine
+      - id: mass_doctrinal_dominance
         level: 9
-      - id: proliferating_eyes_fanatic_doctrine
+      - id: doctrine_sensor_network
         level: 9
-      - id: seize_soul_fanatic_doctrine
+      - id: soul_harvest_protocol
         level: 9
-      - id: telepathic_demand_fanatic_doctrine
+      - id: doctrinal_command_broadcast
         level: 9
-      - id: undertaker_fanatic_doctrine
+      - id: doctrine_undertaker_protocol
         level: 9
-      - id: voracious_gestalt_fanatic_doctrine
+      - id: doctrine_gestalt
         level: 9
-      - id: wails_of_the_damned_fanatic_doctrine
+      - id: mass_heretic_broadcast
         level: 9
-      - id: weapon_of_judgment
+      - id: judgment_weapon_protocol
         level: 9
   18:
     prepared:
@@ -821,29 +821,29 @@ level_up_grants:
       slots_by_level:
         10: 2
       pool:
-      - id: avatar
+      - id: avatar_protocol
         level: 10
-      - id: conquering_soldiers_fanatic_doctrine
+      - id: doctrine_army_deploy
         level: 10
-      - id: dragon_turret_fanatic_doctrine
+      - id: doctrine_turret
         level: 10
-      - id: fated_confrontation_fanatic_doctrine
+      - id: sacred_fate_lock
         level: 10
-      - id: garden_of_the_green_mans_growth_fanatic_doctrine
+      - id: sacred_growth_protocol
         level: 10
-      - id: gate_fanatic_doctrine
+      - id: doctrine_gate
         level: 10
-      - id: indestructibility_fanatic_doctrine
+      - id: sacred_invulnerability
         level: 10
-      - id: manifestation_fanatic_doctrine
+      - id: doctrine_manifestation
         level: 10
-      - id: miracle
+      - id: miracle_protocol
         level: 10
-      - id: nullify_fanatic_doctrine
+      - id: doctrine_null_protocol
         level: 10
-      - id: remake_fanatic_doctrine
+      - id: doctrine_remake
         level: 10
-      - id: revival_fanatic_doctrine
+      - id: mass_doctrine_revival
         level: 10
   20:
     prepared:

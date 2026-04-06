@@ -1,0 +1,22 @@
+id: ghost_screen
+name: Ghost Screen
+description: You surround yourself with psychic projections of spirits. Any creature
+  that ends its turn adjacent to you takes 1d6 void damage and 1d6 mental damage.
+  The spirits also grant you concealment against ranged attacks.
+tradition: neural
+level: 2
+usage_type: prepared
+action_cost: 3
+range: zone
+targets: zone
+duration: minutes:1
+save_type: hustle
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You draw on the essence of spiritual energy surrounding you to manifest
+      a misty veil. When a creature that isn't immune to spirit damage begins its
+      turn within the area, it must attempt a Reflex save.

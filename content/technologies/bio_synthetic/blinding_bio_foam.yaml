@@ -1,0 +1,37 @@
+id: blinding_bio_foam
+name: Blinding Bio-Foam
+description: 'You spray a caustic bio-synthetic foam into the target''s eyes, which
+  clings to their face. Make a tech attack roll. If you hit, you deal 5d10 acid damage
+  and 1d6 persistent acid damage, and the target is Blinded for the duration. The
+  foam can be removed with 3 Interact actions.
+
+
+  Heightened (+1) The initial damage increases by 2d10, and the persistent damage
+  increases by 1d6.'
+tradition: bio_synthetic
+level: 5
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: minutes:1
+resolution: attack
+effects:
+  on_hit:
+  - type: damage
+    dice: 5d10
+    damage_type: acid
+    dc: 0
+  - type: damage
+    dice: 1d6
+    damage_type: acid
+    dc: 0
+  on_crit_hit:
+  - type: damage
+    dice: 10d10
+    damage_type: acid
+    dc: 0
+  - type: damage
+    dice: 2d6
+    damage_type: acid
+    dc: 0

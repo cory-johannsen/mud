@@ -1,0 +1,34 @@
+id: system_drain
+name: System Drain
+description: 'Your device deploys a blood-extraction module that feasts upon the target''s
+  circulatory system, dealing 12d6 piercing damage, depending on your spell attack
+  roll. You gain temporary Hit Points for 1 minute equal to half the piercing damage
+  the target took.
+
+
+  Critical Success You deal double damage.
+
+  Success You deal full damage.
+
+  Failure You deal half damage.
+
+  Critical Failure The target is unaffected.'
+tradition: technical
+level: 5
+usage_type: prepared
+action_cost: 2
+range: melee
+targets: single
+duration: instant
+resolution: attack
+effects:
+  on_hit:
+  - type: damage
+    dice: 12d6
+    damage_type: piercing
+    dc: 0
+  on_crit_hit:
+  - type: damage
+    dice: 24d6
+    damage_type: piercing
+    dc: 0

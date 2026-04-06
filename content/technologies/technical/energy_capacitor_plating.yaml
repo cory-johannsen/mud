@@ -1,0 +1,24 @@
+id: energy_capacitor_plating
+name: Energy Capacitor Plating
+description: You deploy reactive plating that absorbs energy and releases it in a
+  final burst. Choose acid, cold, fire, electricity, or poison damage. Gain resistance
+  5 against that type. Track prevented damage. As a 2-action activity, explode the
+  plating in a 20-foot emanation dealing 1d6 damage per 10 prevented, max 10d6 (basic
+  Reflex save). tech ends.Heightened (+2) Resistance +5, max explosion +5d6.
+tradition: technical
+level: 4
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: minutes:1
+save_type: hustle
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You grow a set of colored, glowing scales or scaled armor that stores
+      energy before releasing it in a final burst. When you cast this tech, choose
+      acid, cold, fire, electricity, or poison damage. You

@@ -1,0 +1,20 @@
+id: remote_speaker
+name: Remote Speaker
+description: You deploy a remote audio projector to a distant location within 1 mile.
+  Your voice emanates from the device, and you can hear any responses spoken near
+  it. The effect is audible in a 10-foot radius.
+tradition: technical
+level: 2
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You whisper a secret message or sound into the wind, which carries
+      it to a designated spot. The message travels to a specific @Template[burst|distance:10]
+      within range that's familiar to you, provided

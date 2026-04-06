@@ -39,9 +39,9 @@ class_features:
 technology_grants:
   spontaneous:
     pool:
-      - { id: exchange_image_neural, level: 1 }
-      - { id: glamorize_neural, level: 1 }
-      - { id: fashionista_neural, level: 1 }
+      - { id: neural_appearance_swap, level: 1 }
+      - { id: minor_cosmetic_overlay, level: 1 }
+      - { id: neural_wardrobe_link, level: 1 }
 drawbacks:
   - id: transactional_trust
     type: passive

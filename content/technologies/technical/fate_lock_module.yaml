@@ -1,0 +1,20 @@
+id: fate_lock_module
+name: Fate Lock Module
+description: You lock two targets in a destined combat protocol. Both must attempt
+  Will saves. On a failure, each can only target the other for 1 minute. Damage to
+  one is reflected to the other at half value.
+tradition: technical
+level: 10
+usage_type: prepared
+action_cost: 3
+range: ranged
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'You weave the threads of fate to lead two foes into a climactic
+      battle. The targets of this tech are the fated opponents: one of the targets
+      of this tech must be you or a willing ally, and the other'

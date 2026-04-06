@@ -1,0 +1,25 @@
+id: nihilist_contagion
+name: Nihilist Contagion
+description: With a doctrinal invocation, you inject feelings of hopelessness into
+  the target's psyche. The creature must attempt a Willpower save or become overcome with
+  nihilistic despair that spreads to nearby allies.
+tradition: fanatic_doctrine
+level: 3
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: minutes:1
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'With a wave of your hand and a short invocation, you cause feelings
+      of ennui and impending doom to well up in the mind of the targeted creature,
+      who must attempt a Willpower save.
+
+
+      Critical Success The tar'

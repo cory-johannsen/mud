@@ -1,0 +1,22 @@
+id: penetrating_scan
+name: Penetrating Scan
+description: You perceive things within 60 feet as they actually are, filtering out
+  all deception. The GM rolls a secret counteract check against any illusion, morph
+  or polymorph effect in the area, but only for the purpose of determining whether
+  you see through it (for instance, if the check succeeds against a polymorph spell,
+  you can see the creature's true form, but you don't end the polymorph spell).
+tradition: neural
+level: 6
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You see things within 60 feet as they actually are. The GM rolls
+      a secret counteract check against any illusion, morph or polymorph effect in
+      the area, but only for the purpose of determining whether

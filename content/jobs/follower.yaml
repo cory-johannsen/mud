@@ -43,6 +43,6 @@ class_features:
 technology_grants:
   prepared:
     pool:
-      - { id: bane_fanatic_doctrine, level: 1 }
-      - { id: alarm_fanatic_doctrine, level: 1 }
-      - { id: air_bubble_fanatic_doctrine, level: 1 }
+      - { id: doctrine_bane_circuit, level: 1 }
+      - { id: doctrine_vigilance_ward, level: 1 }
+      - { id: sacred_breath_doctrine, level: 1 }

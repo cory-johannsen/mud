@@ -1,0 +1,20 @@
+id: countermeasure_sphere
+name: Countermeasure Sphere
+description: You deploy an immobile interference sphere that attempts to counteract
+  hostile effects from outside the globe that enter it, functioning as a Dispel effect
+  1 rank lower. All mechanical effects remain identical to the base protocol.
+tradition: technical
+level: 4
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You create an immobile globe around yourself that attempts to counteract
+      any spell from outside the globe whose area or targets enter into the globe,
+      as if the globe were a @UUID[Compendium.pf2e.spell

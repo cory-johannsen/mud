@@ -1,0 +1,32 @@
+id: cryo_slick_sprayer
+name: Cryo-Slick Sprayer
+description: You deploy cryogenic compounds that coat the ground in ice. The area
+  becomes difficult terrain. Each creature in the area when you cast the spell must
+  attempt a Reflex save or fall @UUID[Compendium.pf2e.conditionitems.Item.Prone].
+  The ice has AC 10 and 15 HP and is destroyed by any fire damage.
+tradition: technical
+level: 2
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: minutes:1
+save_type: hustle
+save_dc: 15
+resolution: save
+effects:
+  on_success:
+  - type: damage
+    dice: '2'
+    damage_type: cold
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 2d4
+    damage_type: cold
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 4d4
+    damage_type: cold
+    dc: 0

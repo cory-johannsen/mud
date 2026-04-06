@@ -1,0 +1,28 @@
+id: heritage_data_retrieval
+name: Heritage Data Retrieval
+description: 'You establish a data link with the target, focusing on archived knowledge
+  important to their culture, family (by birth or choice), or home settlement. Both
+  you and the target must be aware this knowledge exists, even if you don''t know
+  the exact details.
+
+  As your tech connects them to this heritage, the target gains a non-lineage ancestry
+  feat from their ancestry. The feat must be of a level no higher than twice the tech''s
+  rank and the target must meet any prerequisites for the feat.
+
+  The target is then immune to any further activations of heritage data retrieval
+  until their next daily preparations.'
+tradition: technical
+level: 7
+usage_type: prepared
+action_cost: 3
+range: melee
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You establish a mental link with the target, focusing on a piece
+      of knowledge important to their culture, family (by birth or choice), or home
+      settlement. Both you and the target must be aware this kn

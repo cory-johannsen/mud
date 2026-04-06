@@ -1,0 +1,25 @@
+id: venom_coating
+name: Venom Coating
+description: 'You synthesize a potent neurotoxin and coat allied weapons with it.
+  The target weapons are coated with Giant Scorpion Venom with a DC equal to your
+  tech DC. The effects remain on a weapon for 1 minute or until the weapon scores
+  a hit, whichever comes first.
+
+
+  Heightened (+2) You can coat two additional weapons.'
+tradition: bio_synthetic
+level: 5
+usage_type: prepared
+action_cost: 2
+range: melee
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'You pray for swift and painful death to your enemies and find your
+      and your allies'' weapons blessed to deliver just that.
+
+      The target weapons are coated with @UUID[Compendium.pf2e.equipment-srd.Item.Gi'

@@ -1,0 +1,23 @@
+id: tapetum_graft
+name: Tapetum Graft
+description: Your pupils dilate and a reflective layer grows behind your retinas.
+  You gain darkvision. If you already have darkvision, you gain greater darkvision
+  for the duration.
+tradition: bio_synthetic
+level: 3
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'Your eyes darken until they become entirely pitch black. You grant
+      yourself the ability to see in the darkness. You gain darkvision. If you already
+      have darkvision, you gain greater darkvision.
+
+
+      Heigh'

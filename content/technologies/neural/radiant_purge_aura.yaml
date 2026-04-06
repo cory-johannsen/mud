@@ -1,0 +1,36 @@
+id: radiant_purge_aura
+name: Radiant Purge Aura
+description: 'Restorative energy radiates from your body, filling the area with bright
+  light in a 20-foot radius (and dim light for the next 20 feet). You gain mental
+  resistance 5. Any corrupted or undead creature that begins its turn adjacent to
+  you must attempt a Willpower save.
+
+  Critical Success The creature is unaffected and immune to this effect for the remainder
+  of the duration.
+
+  Success The creature is Sickened 1 until the end of its turn.
+
+  Failure The creature is sickened 1 and becomes Slowed 1 until the end of its next
+  turn.
+
+  Critical Failure As failure, but Sickened 2 and the creature remains slowed 1 for
+  the rest of the spell''s duration.Heightened (6th) You gain mental resistance 10.
+
+  Heightened (8th) You gain mental resistance 15.'
+tradition: neural
+level: 4
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: minutes:1
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: The golden light of a new dawn and the promise of life beyond death
+      radiates from your body. You radiate bright light in a 20-foot radius (and dim
+      light for the next 20 feet) and gain mental resistanc

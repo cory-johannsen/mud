@@ -39,8 +39,8 @@ class_features:
 technology_grants:
   prepared:
     pool:
-      - { id: runic_weapon_fanatic_doctrine, level: 1 }
-      - { id: runic_body_fanatic_doctrine, level: 1 }
+      - { id: doctrine_weapon_blessing, level: 1 }
+      - { id: doctrine_body_augmentation, level: 1 }
       - { id: battle_fervor, level: 1 }
 drawbacks:
   - id: contractor_stigma

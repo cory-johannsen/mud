@@ -1,0 +1,21 @@
+id: quantum_courier_container
+name: Quantum Courier Container
+description: You deploy devices that create a quantum-entangled link between two containers.
+  If both are closed for 10 minutes, contents (up to 3 Bulk of nonliving, non-magical
+  material each) swap locations. All mechanical effects and restrictions remain identical
+  to the base protocol.
+tradition: technical
+level: 4
+usage_type: prepared
+action_cost: 2
+range: melee
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You create an interdimensional link between two containers, both
+      of which must be capable of being closed in such a way that their contents aren't
+      visible. If both containers are left closed for 10 co

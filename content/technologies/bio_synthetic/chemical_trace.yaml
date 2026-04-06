@@ -1,0 +1,20 @@
+id: chemical_trace
+name: Chemical Trace
+description: You touch a liquid surface, and bio-sensors propagate outward through
+  the fluid. You automatically know the location of any creatures within 30 feet of
+  the liquid and can observe them.
+tradition: bio_synthetic
+level: 3
+usage_type: prepared
+action_cost: 2
+range: melee
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You touch the water's surface, and as the ripples spread out, so
+      do your senses. When you Use this tech, you automatically know the location
+      of any unoccupied, flowing water with a surface area of a

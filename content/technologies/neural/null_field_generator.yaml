@@ -1,0 +1,30 @@
+id: null_field_generator
+name: Null-Field Generator
+description: 'You project an immobile interference sphere around yourself that attempts
+  to counteract any hostile protocol from outside the globe whose area or targets
+  enter into the globe, as if the globe were a Dispel effect 1 rank lower than its
+  actual rank.
+
+  If the counteract attempt succeeds, it prevents only the portion of the effect that
+  would have entered the globe (so if the effect also has targets outside the globe,
+  or part of its area is beyond the globe, those targets or that area is affected
+  normally).
+
+  You must form the sphere in an unbroken open space, so its edges don''t pass through
+  any creatures or objects, or the effect is lost (though creatures can enter the
+  globe after it is activated).'
+tradition: neural
+level: 4
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You create an immobile globe around yourself that attempts to counteract
+      any spell from outside the globe whose area or targets enter into the globe,
+      as if the globe were a @UUID[Compendium.pf2e.spell

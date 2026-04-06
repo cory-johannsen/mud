@@ -1,0 +1,26 @@
+id: elemental_infusion
+name: Elemental Infusion
+description: 'An elemental compound floods the target''s biology, granting enhanced
+  capabilities based on the chosen element. Choose an element when you activate the
+  protocol. Effects and statistics remain identical to the base protocol for each
+  element (air, earth, fire, metal, water, wood).
+
+
+  Heightened (8th) You can target up to 5 willing creatures.'
+tradition: bio_synthetic
+level: 4
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: minutes:1
+save_type: hustle
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: An elemental force fills your target, granting the target the swiftness
+      of air, the ruggedness of earth, the sting of fire, or the flexibility of water,
+      depending on which element you choose. Choose a

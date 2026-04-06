@@ -1,0 +1,20 @@
+id: dimensional_gate
+name: Dimensional Gate
+description: You open a gate to another dimension. The gate is 10 feet in diameter
+  and persists for 1 minute. You can also summon a creature from the target dimension
+  (DC 40 check to compel it).
+tradition: technical
+level: 10
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You tear open a rift to another plane, creating a portal that creatures
+      can travel through in either direction. This portal is vertical and circular,
+      with a radius of 40 feet. The portal appears at a

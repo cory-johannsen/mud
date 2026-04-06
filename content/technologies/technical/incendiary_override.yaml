@@ -1,0 +1,21 @@
+id: incendiary_override
+name: Incendiary Override
+description: You overload an existing light or heat source, converting it into either
+  a blinding flash or a thick smoke cloud. Choose the effect when you activate.
+tradition: technical
+level: 3
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: minutes:1
+save_type: toughness
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You turn a fire into either a burst of blinding fireworks or a thick
+      cloud of choking smoke, chosen when you Use this tech. The spell targets one
+      fire source, which is immediately extinguished if it

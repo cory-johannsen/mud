@@ -1,0 +1,29 @@
+id: memory_siphon
+name: Memory Siphon
+description: 'You psychically steal a memory from the target''s mind. The target must
+  attempt a Willpower save.
+
+
+  Critical Success The target is unaffected.
+
+  Success You glimpse a surface thought from the target.
+
+  Failure You steal a specific memory from the target. The target forgets the memory
+  for 1 hour.
+
+  Critical Failure As failure, but the target forgets the memory permanently unless
+  restored by restoration or similar effects.'
+tradition: neural
+level: 2
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: rounds:3
+resolution: none
+effects:
+  on_apply:
+  - type: damage
+    dice: 2d6
+    damage_type: mental
+    dc: 0

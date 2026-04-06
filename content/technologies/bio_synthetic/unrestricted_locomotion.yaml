@@ -1,0 +1,20 @@
+id: unrestricted_locomotion
+name: Unrestricted Locomotion
+description: You bio-chemically repel effects that would hinder movement. While under
+  this tech's effect, the target ignores effects that would slow or restrict its
+  movement.
+tradition: bio_synthetic
+level: 4
+usage_type: prepared
+action_cost: 2
+range: melee
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You repel effects that would hinder a creature or slow its movement.
+      While under this tech's effect, the target ignores effects that would give
+      them a circumstance penalty to Speed. When they attempt

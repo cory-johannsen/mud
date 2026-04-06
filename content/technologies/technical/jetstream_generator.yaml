@@ -1,0 +1,24 @@
+id: jetstream_generator
+name: Jetstream Generator
+description: 'Air compression machinery creates a massive cloud corridor with a powerful
+  internal current. The cloud is up to 30 feet wide, 30 feet tall, and 10 miles long
+  at least 100 feet above ground. Travel Speed in the chosen direction is doubled.
+  You can Dismiss.Heightened (6th) Duration 8 hours, cloud up to 50 feet wide and
+  100 miles long.
+
+  Heightened (8th) As 6th, travel speed quadrupled.'
+tradition: technical
+level: 4
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: Air and water vapor combine into a great cloud that funnels a powerful
+      current within it. The eddies make the cloud appear from a distance to be a
+      group of cloud dragons tumbling through the sky. The

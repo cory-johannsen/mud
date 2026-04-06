@@ -40,11 +40,11 @@ class_features:
 technology_grants:
   prepared:
     pool:
-      - id: deep_breath_bio_synthetic
+      - id: extended_oxygen_reserve
         level: 1
-      - id: buoyant_bubbles_bio_synthetic
+      - id: bio_buoyancy_membrane
         level: 1
-      - id: tailwind_bio_synthetic
+      - id: bio_slipstream_organ
         level: 1
 drawbacks:
   - id: nowhere_to_run

@@ -43,6 +43,6 @@ class_features:
 technology_grants:
   prepared:
     pool:
-      - { id: tame_neural, level: 1 }
+      - { id: behavioral_override, level: 1 }
       - { id: phantom_pain, level: 1 }
-      - { id: agitate_neural, level: 1 }
+      - { id: neural_agitation_pulse, level: 1 }

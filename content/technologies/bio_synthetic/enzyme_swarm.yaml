@@ -1,0 +1,19 @@
+id: enzyme_swarm
+name: Enzyme Swarm
+description: You exhale a cloud of digestive enzymes carried by micro-organisms. They
+  descend on nearby targets, dissolving organic material on contact. Creatures in
+  a 30-foot cone take 4d6 acid damage with a basic Reflex save.
+tradition: bio_synthetic
+level: 3
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: damage
+    dice: 2d4
+    damage_type: untyped
+    dc: 0

@@ -1,0 +1,23 @@
+id: muscle_inhibitor_field
+name: Muscle Inhibitor Field
+description: Generate a localized field that disrupts motor control signals, reducing target physical output.
+tradition: technical
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+save_type: toughness
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: |-
+      Toughness save results:
+      Critical Success: The target is unaffected.
+      Success: The target is Enfeebled 1 until the start of your next turn.
+      Failure: The target is Enfeebled 2 until the end of your next turn.
+      Critical Failure: The target is Enfeebled 3 for 1 minute.

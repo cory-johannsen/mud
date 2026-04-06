@@ -1,0 +1,22 @@
+id: identity_override_transmitter
+name: Identity Override Transmitter
+description: You deploy a device that hacks the target using their registered identity
+  code, compelling obedience. All mechanical effects (saves, immunity, duration) remain
+  identical to the base protocol.
+tradition: technical
+level: 4
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You instruct the target to do something, compelling obedience by
+      calling it by its true name. Your instructions can't be self-destructive. Though
+      this tech has the linguistic trait, this applies only

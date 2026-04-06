@@ -1,0 +1,32 @@
+id: neural_terminus
+name: Neural Terminus
+description: 'You snuff out the consciousness of a creature on the brink of death
+  via psychic override. The target must attempt a Willpower save. If this kills it, you
+  gain 10 temporary HP and a +1 status bonus to attack and damage rolls for 10 minutes.
+
+
+  Critical Success The target is unaffected.
+
+  Success The target takes 2d6 mental damage.
+
+  Failure The target takes 4d6 mental damage. If this reduces the creature to 0 HP,
+  it dies.
+
+  Critical Failure The target dies.'
+tradition: neural
+level: 2
+usage_type: prepared
+action_cost: 2
+range: melee
+targets: single
+duration: instant
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You snuff the life out of a creature on the brink of death. The target
+      must attempt a Willpower save. If this kills it, you gain 10 temporary HP and a +1
+      status bonus to attack and damage rolls for 10 minu
