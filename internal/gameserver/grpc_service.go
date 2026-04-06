@@ -851,10 +851,34 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 	// AddPlayer always initialises Status=1 (idle); if an active combat in this room
 	// already has the player as a combatant, reset Status to statusInCombat so that
 	// combat commands (stride, pass, etc.) work immediately after reconnect.
+	// REQ-BUG-143: Also push a RoundStartEvent directly to the reconnecting player so
+	// the web client immediately restores its combat UI without a visible interruption.
 	if s.combatH != nil {
 		if cbt, inCombat := s.combatH.GetCombatForRoom(sess.RoomID); inCombat {
 			if cbt.GetCombatant(uid) != nil {
 				sess.Status = statusInCombat
+				// Build and push a RoundStartEvent to restore the client's combat state.
+				turnOrder := make([]string, 0, len(cbt.Combatants))
+				for _, c := range cbt.Combatants {
+					turnOrder = append(turnOrder, c.Name)
+				}
+				positions := make([]*gamev1.CombatantPosition, 0, len(cbt.Combatants))
+				for _, c := range cbt.Combatants {
+					positions = append(positions, &gamev1.CombatantPosition{
+						Name: c.Name, X: int32(c.GridX), Y: int32(c.GridY),
+					})
+				}
+				_ = stream.Send(&gamev1.ServerEvent{
+					Payload: &gamev1.ServerEvent_RoundStart{
+						RoundStart: &gamev1.RoundStartEvent{
+							Round:            int32(cbt.Round),
+							ActionsPerTurn:   3,
+							DurationMs:       int32(s.combatH.roundDuration.Milliseconds()),
+							TurnOrder:        turnOrder,
+							InitialPositions: positions,
+						},
+					},
+				})
 			}
 		}
 	}

@@ -1203,11 +1203,11 @@
 ### BUG-143: Server reconnects produce noisy console messages and temporarily interrupt combat
 
 **Severity:** medium
-**Status:** open
+**Status:** fixed
 **Category:** UI
 **Description:** Each server reconnect appends a "— Reconnected to server —" message to the console feed and temporarily interrupts combat, leaving the player confused about their combat state. Reconnect notifications should be suppressed and combat state should be seamlessly restored on reconnect.
 **Steps:** Allow the web client to reconnect during combat (e.g. after a brief disconnect); observe "— Reconnected to server —" entries in the console feed and a temporary loss of combat UI state.
-**Fix:**
+**Fix:** Removed the `APPEND_FEED` reconnect notification from `GameContext.tsx`. Added server-side `RoundStartEvent` push to the reconnecting player's stream in `grpc_service.go` when they rejoin mid-combat, so the client immediately restores its combat UI.
 
 ### BUG-142: Player attacks with fists despite having a melee weapon equipped
 
