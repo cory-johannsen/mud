@@ -120,7 +120,6 @@
   awareness: 12
   disposition: neutral
   personality: cowardly
-  respawn_delay: "15m"
   abilities:
     brutality: 10
     grit: 12
@@ -153,7 +152,6 @@
   awareness: 8
   disposition: neutral
   personality: neutral
-  respawn_delay: "15m"
   abilities:
     brutality: 8
     grit: 10
@@ -184,7 +182,7 @@
 
 - id: vantucky_black_market_merchant
   name: "Pawn Shop Dealer"
-  npc_type: merchant
+  npc_type: black_market_merchant
   npc_role: merchant
   type: human
   description: "Operates from the back of the neutral pawn shop. The front inventory is legal; the back inventory is priced higher."
@@ -194,7 +192,6 @@
   awareness: 10
   disposition: neutral
   personality: neutral
-  respawn_delay: "15m"
   abilities:
     brutality: 9
     grit: 11

@@ -178,7 +178,8 @@ func TestProperty_AllNonCombatTemplatesHaveNeutralDisposition(t *testing.T) {
 func TestOptionalNPCTypesOnlyInAuthorizedZones(t *testing.T) {
 	guardZones := map[string]bool{"aloha": true, "battleground": true, "beaverton": true, "downtown": true, "hillsboro": true, "pdx_international": true, "se_industrial": true, "the_couve": true}
 	hirelingZones := map[string]bool{"beaverton": true, "hillsboro": true, "lake_oswego": true, "ross_island": true, "rustbucket_ridge": true, "se_industrial": true, "vantucky": true}
-	fixerZones := map[string]bool{"aloha": true, "downtown": true, "felony_flats": true, "the_couve": true}
+	fixerZones := map[string]bool{"aloha": true, "battleground": true, "beaverton": true, "downtown": true, "felony_flats": true, "hillsboro": true, "lake_oswego": true, "ne_portland": true, "pdx_international": true, "ross_island": true, "rustbucket_ridge": true, "sauvie_island": true, "se_industrial": true, "the_couve": true, "troutdale": true, "vantucky": true}
+	brothelKeeperZones := map[string]bool{"aloha": true, "battleground": true, "beaverton": true, "downtown": true, "felony_flats": true, "hillsboro": true, "lake_oswego": true, "ne_portland": true, "pdx_international": true, "ross_island": true, "rustbucket_ridge": true, "sauvie_island": true, "se_industrial": true, "the_couve": true, "troutdale": true, "vantucky": true}
 
 	zones := []string{
 		"aloha", "beaverton", "battleground", "downtown", "felony_flats",
@@ -204,6 +205,8 @@ func TestOptionalNPCTypesOnlyInAuthorizedZones(t *testing.T) {
 				require.True(t, hirelingZones[zoneID], "hireling %q in unauthorized zone %q (REQ-NCNAZ-5)", tmpl.ID, zoneID)
 			case "fixer":
 				require.True(t, fixerZones[zoneID], "fixer %q in unauthorized zone %q (REQ-NCNAZ-5)", tmpl.ID, zoneID)
+			case "brothel_keeper":
+				require.True(t, brothelKeeperZones[zoneID], "brothel_keeper %q in unauthorized zone %q (REQ-NCNAZ-5)", tmpl.ID, zoneID)
 			}
 		}
 	}

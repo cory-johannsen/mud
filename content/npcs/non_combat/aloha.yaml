@@ -139,7 +139,6 @@
   awareness: 8
   disposition: neutral
   personality: neutral
-  respawn_delay: "15m"
   abilities:
     brutality: 8
     grit: 10
@@ -170,7 +169,7 @@
 
 - id: aloha_black_market_merchant
   name: "Strip Mall Dealer"
-  npc_type: merchant
+  npc_type: black_market_merchant
   npc_role: merchant
   type: human
   description: "Operates from a shuttered nail salon. The shelves are full, the prices are wrong, and the inventory has no provenance."
@@ -180,7 +179,6 @@
   awareness: 10
   disposition: neutral
   personality: neutral
-  respawn_delay: "15m"
   abilities:
     brutality: 9
     grit: 11

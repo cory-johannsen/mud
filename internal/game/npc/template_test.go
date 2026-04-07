@@ -628,7 +628,7 @@ fixer:
 // does not break any existing NPC YAML file. Reads all *.yaml in content/npcs/.
 func TestProperty_AllExistingNPCTemplatesStillLoad(t *testing.T) {
 	validTypes := map[string]bool{
-		"combat": true, "merchant": true, "guard": true, "healer": true,
+		"combat": true, "merchant": true, "black_market_merchant": true, "guard": true, "healer": true,
 		"quest_giver": true, "hireling": true, "banker": true,
 		"job_trainer": true, "crafter": true, "fixer": true,
 		"chip_doc": true, "motel_keeper": true, "brothel_keeper": true,

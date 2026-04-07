@@ -944,7 +944,7 @@ func TestLoadZone_ClownCamp_HasFiveRooms(t *testing.T) {
 	require.NoError(t, err)
 	zone, err := LoadZoneFromBytes(data)
 	require.NoError(t, err)
-	assert.Len(t, zone.Rooms, 5, "Clown Camp must have exactly 5 rooms")
+	assert.Len(t, zone.Rooms, 6, "Clown Camp must have exactly 6 rooms")
 	assert.Equal(t, "clown_camp", zone.ID)
 }
 
@@ -966,7 +966,7 @@ func TestLoadZone_SteamPDX_HasSevenRooms(t *testing.T) {
 	require.NoError(t, err)
 	zone, err := LoadZoneFromBytes(data)
 	require.NoError(t, err)
-	assert.Len(t, zone.Rooms, 7, "SteamPDX must have exactly 7 rooms")
+	assert.Len(t, zone.Rooms, 8, "SteamPDX must have exactly 8 rooms")
 	assert.Equal(t, "steampdx", zone.ID)
 }
 
@@ -975,7 +975,7 @@ func TestLoadZone_TheVelvetRope_HasTerrainLubeEffect(t *testing.T) {
 	require.NoError(t, err)
 	zone, err := LoadZoneFromBytes(data)
 	require.NoError(t, err)
-	assert.Len(t, zone.Rooms, 7, "The Velvet Rope must have exactly 7 rooms")
+	assert.Len(t, zone.Rooms, 8, "The Velvet Rope must have exactly 8 rooms")
 	assert.Equal(t, "the_velvet_rope", zone.ID)
 	tracks := make([]string, 0, len(zone.ZoneEffects))
 	for _, e := range zone.ZoneEffects {
@@ -991,7 +991,7 @@ func TestLoadZone_ClubPrivata_HasSixteenRooms(t *testing.T) {
 	require.NoError(t, err)
 	zone, err := LoadZoneFromBytes(data)
 	require.NoError(t, err)
-	assert.Len(t, zone.Rooms, 16, "Club Privata must have exactly 16 rooms")
+	assert.Len(t, zone.Rooms, 17, "Club Privata must have exactly 17 rooms")
 	assert.Equal(t, "club_privata", zone.ID)
 }
 

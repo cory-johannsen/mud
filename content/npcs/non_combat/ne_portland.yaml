@@ -104,7 +104,6 @@
   awareness: 12
   disposition: neutral
   personality: cowardly
-  respawn_delay: "15m"
   abilities:
     brutality: 10
     grit: 12
@@ -137,7 +136,6 @@
   awareness: 8
   disposition: neutral
   personality: neutral
-  respawn_delay: "15m"
   abilities:
     brutality: 8
     grit: 10
@@ -168,7 +166,7 @@
 
 - id: ne_portland_black_market_merchant
   name: "Garage Sale Dealer"
-  npc_type: merchant
+  npc_type: black_market_merchant
   npc_role: merchant
   type: human
   description: "Sells from the back of the neutral garage. Has a folksy explanation for every item's questionable origin."
@@ -178,7 +176,6 @@
   awareness: 10
   disposition: neutral
   personality: neutral
-  respawn_delay: "15m"
   abilities:
     brutality: 9
     grit: 11

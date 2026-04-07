@@ -120,7 +120,6 @@
   awareness: 12
   disposition: neutral
   personality: cowardly
-  respawn_delay: "15m"
   abilities:
     brutality: 10
     grit: 12
@@ -153,7 +152,6 @@
   awareness: 8
   disposition: neutral
   personality: neutral
-  respawn_delay: "15m"
   abilities:
     brutality: 8
     grit: 10
@@ -184,7 +182,7 @@
 
 - id: ross_island_black_market_merchant
   name: "Drift Trader"
-  npc_type: merchant
+  npc_type: black_market_merchant
   npc_role: merchant
   type: human
   description: "Sells goods that came downriver and didn't come with paperwork. The barge is always loaded; the manifest is always blank."
@@ -194,7 +192,6 @@
   awareness: 10
   disposition: neutral
   personality: neutral
-  respawn_delay: "15m"
   abilities:
     brutality: 9
     grit: 11

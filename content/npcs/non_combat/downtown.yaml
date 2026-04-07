@@ -139,7 +139,6 @@
   awareness: 8
   disposition: neutral
   personality: neutral
-  respawn_delay: "15m"
   abilities:
     brutality: 8
     grit: 10
@@ -170,7 +169,7 @@
 
 - id: downtown_black_market_merchant
   name: "Underground Trader"
-  npc_type: merchant
+  npc_type: black_market_merchant
   npc_role: merchant
   type: human
   description: "Works the Underground's shadow economy. Goods move without invoices and prices adjust based on how much you need it."
@@ -180,7 +179,6 @@
   awareness: 10
   disposition: neutral
   personality: neutral
-  respawn_delay: "15m"
   abilities:
     brutality: 9
     grit: 11

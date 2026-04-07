@@ -124,7 +124,6 @@
   awareness: 8
   disposition: neutral
   personality: neutral
-  respawn_delay: "15m"
   abilities:
     brutality: 8
     grit: 10
@@ -155,7 +154,7 @@
 
 - id: felony_flats_black_market_merchant
   name: "Jade District Fence"
-  npc_type: merchant
+  npc_type: black_market_merchant
   npc_role: merchant
   type: human
   description: "Sells what fell off trucks, out of pockets, and through broken windows. Specializes in items that have recently changed ownership."
@@ -165,7 +164,6 @@
   awareness: 10
   disposition: neutral
   personality: neutral
-  respawn_delay: "15m"
   abilities:
     brutality: 9
     grit: 11

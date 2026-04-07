@@ -10,7 +10,6 @@
   awareness: 12
   disposition: neutral
   personality: cowardly
-  respawn_delay: "15m"
   abilities:
     brutality: 10
     grit: 12
@@ -43,7 +42,6 @@
   awareness: 8
   disposition: neutral
   personality: neutral
-  respawn_delay: "15m"
   abilities:
     brutality: 8
     grit: 10
@@ -74,7 +72,7 @@
 
 - id: the_velvet_rope_black_market_merchant
   name: "Club Supply Broker"
-  npc_type: merchant
+  npc_type: black_market_merchant
   npc_role: merchant
   type: human
   description: "Handles the club's less-visible supply chain from behind the velvet curtain. Anything the buffet doesn't offer, this person does."
@@ -84,7 +82,6 @@
   awareness: 10
   disposition: neutral
   personality: neutral
-  respawn_delay: "15m"
   abilities:
     brutality: 9
     grit: 11

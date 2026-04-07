@@ -119,7 +119,6 @@
   awareness: 12
   disposition: neutral
   personality: cowardly
-  respawn_delay: "15m"
   abilities:
     brutality: 10
     grit: 12
@@ -152,7 +151,6 @@
   awareness: 8
   disposition: neutral
   personality: neutral
-  respawn_delay: "15m"
   abilities:
     brutality: 8
     grit: 10
@@ -183,7 +181,7 @@
 
 - id: battleground_black_market_merchant
   name: "Arms Surplus Dealer"
-  npc_type: merchant
+  npc_type: black_market_merchant
   npc_role: merchant
   type: human
   description: "Sells military surplus that somehow ended up outside the collective's inventory. Does not explain how. Will not elaborate."
@@ -193,7 +191,6 @@
   awareness: 10
   disposition: neutral
   personality: neutral
-  respawn_delay: "15m"
   abilities:
     brutality: 9
     grit: 11

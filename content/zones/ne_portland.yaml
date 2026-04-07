@@ -874,8 +874,8 @@ zone:
     title: The Velvet Spoke
     danger_level: safe
     description: Adjacent to the neutral bunker, through a door painted with an ironic mural of a bicycle wheel. The Velvet Spoke operates with Northeast Portland's characteristic self-awareness — locally owned, community-priced, and entirely earnest about what it offers. Drinks available. Conversation optional.
-    map_x: 0
-    map_y: 100
+    map_x: 6
+    map_y: -6
     exits:
     - direction: west
       target: ne_neutral_bunker

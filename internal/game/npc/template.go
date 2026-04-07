@@ -288,7 +288,7 @@ func (t *Template) Validate() error {
 
 	// Validate NPCType value and corresponding config struct (REQ-NPC-2).
 	validTypes := map[string]bool{
-		"combat": true, "merchant": true, "guard": true, "healer": true,
+		"combat": true, "merchant": true, "black_market_merchant": true, "guard": true, "healer": true,
 		"quest_giver": true, "hireling": true, "banker": true,
 		"job_trainer": true, "crafter": true, "fixer": true,
 		"chip_doc": true, "motel_keeper": true, "brothel_keeper": true,
@@ -300,9 +300,9 @@ func (t *Template) Validate() error {
 	switch t.NPCType {
 	case "combat":
 		// no config struct required
-	case "merchant":
+	case "merchant", "black_market_merchant":
 		if t.Merchant == nil {
-			return fmt.Errorf("npc template %q: npc_type 'merchant' requires a merchant: config block", t.ID)
+			return fmt.Errorf("npc template %q: npc_type %q requires a merchant: config block", t.ID, t.NPCType)
 		}
 		if err := t.Merchant.ReplenishRate.Validate(); err != nil {
 			return fmt.Errorf("npc template %q: %w", t.ID, err)
