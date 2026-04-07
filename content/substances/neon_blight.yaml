@@ -1,0 +1,17 @@
+id: neon_blight
+name: Neon Blight
+category: disease
+onset_delay: "0s"
+duration: "8h"
+effects:
+  - attribute: savvy
+    modifier: -1
+  - attribute: grit
+    modifier: -1
+remove_on_expire: []
+addictive: false
+addiction_chance: 0.0
+overdose_threshold: 1
+overdose_condition: ""
+withdrawal_conditions: []
+recovery_duration: "0s"

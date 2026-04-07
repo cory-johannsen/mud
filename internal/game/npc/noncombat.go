@@ -10,7 +10,7 @@ import (
 
 // MerchantConfig holds the static configuration for a merchant NPC.
 type MerchantConfig struct {
-	MerchantType  string                `yaml:"merchant_type"` // weapons|armor|rings_neck|consumables|maps|technology|drugs
+	MerchantType  string                `yaml:"merchant_type"` // weapons|armor|rings_neck|consumables|maps|technology|drugs|black_market
 	Inventory     []MerchantItem        `yaml:"inventory"`
 	SellMargin    float64               `yaml:"sell_margin"`
 	BuyMargin     float64               `yaml:"buy_margin"`

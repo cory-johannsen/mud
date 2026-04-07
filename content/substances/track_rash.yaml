@@ -1,0 +1,16 @@
+id: track_rash
+name: Track Rash
+category: disease
+onset_delay: "0s"
+duration: "4h"
+effects:
+  - apply_condition: nausea
+    stacks: 1
+remove_on_expire:
+  - nausea
+addictive: false
+addiction_chance: 0.0
+overdose_threshold: 1
+overdose_condition: ""
+withdrawal_conditions: []
+recovery_duration: "0s"

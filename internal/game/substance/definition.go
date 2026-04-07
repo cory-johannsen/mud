@@ -17,7 +17,7 @@ import (
 // ValidCategories is the set of accepted substance category values.
 var ValidCategories = map[string]bool{
 	"drug": true, "alcohol": true, "medicine": true, "poison": true, "toxin": true,
-	"stimulant": true,
+	"stimulant": true, "disease": true,
 }
 
 // SubstanceEffect describes one effect applied at onset.
