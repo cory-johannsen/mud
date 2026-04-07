@@ -82,6 +82,14 @@
 **Steps:** Equip any armor item and run `eq`; observe armor slot values show raw IDs.
 **Fix:** Added `hydrateEquipmentNames(eq *inventory.Equipment, reg *inventory.Registry)` in `internal/gameserver/grpc_service.go`. After `LoadEquipment` succeeds at login, this function iterates `eq.Armor` and `eq.Accessories`, looks up each `ItemDefID` via `reg.Item()`, and sets `item.Name` to `ItemDef.Name` when found. Items whose IDs are not registered remain unchanged. (Initial implementation incorrectly used `reg.Armor()` with an item ID — armor is registered under its `ArmorDef.ID`, not the item ID; the correct lookup is via `reg.Item()`.)
 
+### BUG-150: Technology panel does not refresh after motel or brothel rest
+**Severity:** medium
+**Status:** fixed
+**Category:** UI
+**Description:** After a player rests at a motel or brothel, HP and tech pools are restored by `applyLongRestEffects`, but the Technology panel in the web UI does not refresh because neither rest handler calls `pushCharacterSheet` afterward.
+**Steps:** Rest at a motel or brothel; observe HP and tech pools are restored; open the Technology tab in the web UI; confirm the panel does not display the updated state.
+**Fix:** Updated `handleMotelRest` in `internal/gameserver/grpc_service.go` to capture the error from `applyLongRestEffects` and call `s.pushCharacterSheet(sess)` before returning. Updated `handleBrothelRest` to call `s.pushCharacterSheet(sess)` before the final return. Both handlers now send a `CharacterSheetView` event to the player's entity channel, causing the web UI Technology panel to refresh. Added two property-based tests (using `pgregory.net/rapid`) to verify that `CharacterSheetView` is always pushed after rest, regardless of job/slot configuration or currency amount.
+
 ## Combat
 
 ### BUG-32: Post-combat movement blocked; reconnect shows "already logged in"
@@ -1225,3 +1233,30 @@
 **Description:** The `ws.onmessage` handler in `connect` (useCallback with deps `[navigate]`) captures `state` at creation time. When a `CombatEvent` arrives with `ce.target == player name`, the `state.characterInfo?.name` check always fails because `state` is the initial null value, so `UPDATE_PLAYER_HP` is never dispatched.
 **Steps:** Enter combat; take damage from an NPC attack targeting your character; observe that HP in the UI does not update from combat events (only from explicit CharacterSheet refreshes).
 **Fix:** Moved the player-name comparison into the UPDATE_COMBATANT_HP reducer case where state is always current. The reducer now also updates characterInfo HP when the combatant name matches the player's name, eliminating the stale closure entirely.
+
+### BUG-148: Stride direction not passed to game server — only stride toward supported
+
+**Severity:** high
+**Status:** fixed
+**Category:** Combat
+**Description:** The Stride action in combat only allows the player to move toward an enemy, not away, preventing tactical repositioning. The websocket dispatcher in `cmd/webclient/handlers/websocket_dispatch.go` correctly handles `StepRequest` with a `direction` field ("toward" or "away"), but the `StrideRequest` handler ignores the `rawArgs` and never sets the `Direction` field, so strides always default to toward-movement.
+**Steps:** Enter combat; type `stride away`; observe the command is accepted but the player strides toward the enemy instead of away.
+**Fix:** Updated `HandlerStride` case in `cmd/webclient/handlers/websocket_dispatch.go` to read `rawArgs` and set `Direction: "away"` when `rawArgs == "away"`, defaulting to `"toward"` otherwise. Mirrors the existing pattern in `HandlerStep` case. Added four unit tests in `cmd/webclient/handlers/websocket_dispatch_test.go`: `stride` (no args) → Direction "toward", `stride away` → Direction "away", `stride toward` → Direction "toward", `stride <other>` → Direction "toward".
+
+### BUG-149: Overpower applies no visible combat effect and shows no feedback
+
+**Severity:** high
+**Status:** fixed
+**Category:** Combat
+**Description:** Using Overpower (or any feat/class-feature with a condition_id) shows the flavor text (e.g. "You put everything into it.") but gives no indication of what condition was applied. Players had no idea that e.g. `brutal_surge_active` had been applied to them.
+**Steps:** Enter combat; use Overpower; observe console shows "You put everything into it." with no condition name appended.
+**Fix:** In `internal/gameserver/grpc_service.go`, after applying the condition for both the feat-activation path (~line 7815) and the class-feature-activation path (~line 7867), a second registry lookup appends `(ConditionName)` to the `UseResponse.Message`. When the condition is not found in the registry the message falls back to `ActivateText` only. Added four tests in `grpc_service_bug149_test.go` including a property-based test using `pgregory.net/rapid`.
+
+### BUG-151: Web client does not receive weather events — WeatherEvent silently dropped by websocket dispatcher
+
+**Severity:** medium
+**Status:** fixed
+**Category:** UI
+**Description:** The backend sends `WeatherEvent` messages via ServerEvent.Weather field, and the frontend GameContext.tsx already handles `"WeatherEvent"` messages to update `state.activeWeather`. However, `serverEventInner` in `cmd/webclient/handlers/websocket.go` was missing the case for `*gamev1.ServerEvent_Weather`, causing weather events to be silently dropped without reaching the browser.
+**Steps:** Observe weather changes occur on the server but no visual weather indicator updates in the web UI; weather conditions exist in the game state but are never displayed to the player.
+**Fix:** Added `case *gamev1.ServerEvent_Weather: return p.Weather, "WeatherEvent"` to the `serverEventInner` switch statement in `cmd/webclient/handlers/websocket.go` (before the `default:` case). Added unit test `TestServerEventInner_Weather_BasicMessage` in `cmd/webclient/handlers/websocket_dispatch_test.go` to verify the case is wired correctly.

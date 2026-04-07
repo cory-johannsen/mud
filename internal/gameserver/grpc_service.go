@@ -3735,7 +3735,11 @@ func (s *GameServiceServer) handleMotelRest(uid string, sess *session.PlayerSess
 	if err := sendMsg(fmt.Sprintf("You pay %d credits and settle in for the night.", cost)); err != nil {
 		return err
 	}
-	return s.applyLongRestEffects(uid, sess, stream.Context(), sendMsg, stream)
+	if err := s.applyLongRestEffects(uid, sess, stream.Context(), sendMsg, stream); err != nil {
+		return err
+	}
+	s.pushCharacterSheet(sess)
+	return nil
 }
 
 // applyLongRestEffects applies the full long-rest restoration (HP, tech pools, durability)
@@ -3859,6 +3863,7 @@ func (s *GameServiceServer) handleBrothelRest(uid string, sess *session.PlayerSe
 		}
 	}
 
+	s.pushCharacterSheet(sess)
 	return nil
 }
 
@@ -7811,6 +7816,11 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string, targetX, 
 				if f.PreparedUses > 0 {
 					msg = fmt.Sprintf("%s (%d uses remaining.)", f.ActivateText, sess.ActiveFeatUses[f.ID])
 				}
+				if condID != "" && s.condRegistry != nil {
+					if def, ok := s.condRegistry.Get(condID); ok {
+						msg = fmt.Sprintf("%s (%s)", msg, def.Name)
+					}
+				}
 				return &gamev1.ServerEvent{
 					Payload: &gamev1.ServerEvent_UseResponse{
 						UseResponse: &gamev1.UseResponse{Message: msg},
@@ -7859,9 +7869,15 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string, targetX, 
 						)
 					}
 				}
+				cfMsg := cf.ActivateText
+				if condID != "" && s.condRegistry != nil {
+					if def, ok := s.condRegistry.Get(condID); ok {
+						cfMsg = fmt.Sprintf("%s (%s)", cfMsg, def.Name)
+					}
+				}
 				return &gamev1.ServerEvent{
 					Payload: &gamev1.ServerEvent_UseResponse{
-						UseResponse: &gamev1.UseResponse{Message: cf.ActivateText},
+						UseResponse: &gamev1.UseResponse{Message: cfMsg},
 					},
 				}, nil
 			}

@@ -114,7 +114,8 @@ func TestBrutalSurge_AppliesConditionToCombatSet(t *testing.T) {
 
 	useResp := resp.GetUseResponse()
 	require.NotNil(t, useResp, "expected UseResponse")
-	assert.Equal(t, cf.ActivateText, useResp.Message)
+	assert.Contains(t, useResp.Message, cf.ActivateText, "message must contain ActivateText")
+	assert.Contains(t, useResp.Message, "Brutal Surge Active", "message must contain condition name (REQ-BUG149-3)")
 
 	// Postcondition: condition must be in the COMBAT set, not session-level.
 	assert.True(t, cbt.Conditions[uid].Has(condID),
@@ -181,7 +182,8 @@ func TestBrutalSurge_OutOfCombat_FallsBackToSessionConditions(t *testing.T) {
 
 	useResp := resp.GetUseResponse()
 	require.NotNil(t, useResp)
-	assert.Equal(t, cf.ActivateText, useResp.Message)
+	assert.Contains(t, useResp.Message, cf.ActivateText, "message must contain ActivateText")
+	assert.Contains(t, useResp.Message, "Brutal Surge Active", "message must contain condition name (REQ-BUG149-3)")
 
 	assert.True(t, sess.Conditions.Has(condID),
 		"brutal_surge_active should be in session conditions when used outside combat")

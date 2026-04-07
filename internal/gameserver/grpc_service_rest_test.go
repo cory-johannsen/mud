@@ -12,6 +12,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap/zaptest"
 	"google.golang.org/grpc/metadata"
+	"google.golang.org/protobuf/proto"
 	"pgregory.net/rapid"
 
 	"github.com/cory-johannsen/mud/internal/game/character"
@@ -1104,4 +1105,195 @@ func TestHandleRest_MotelRest_SendsInteractiveChoicePrompt(t *testing.T) {
 	}
 	assert.True(t, foundPrompt,
 		"handleRest motel path must send a sentinel-encoded choice prompt; got %d sent events", len(stream.sent))
+}
+
+// TestHandleMotelRest_PushesCharacterSheet verifies that after a successful motel rest,
+// a CharacterSheetView event is sent to the entity channel (BUG-150 fix).
+//
+// Precondition: Player is idle with sufficient credits in a room with a motel NPC.
+// Postcondition: A ServerEvent with CharacterSheetView payload is sent to the entity channel.
+func TestHandleMotelRest_PushesCharacterSheet(t *testing.T) {
+	sessMgr := session.NewManager()
+	svc := testMinimalService(t, sessMgr)
+
+	uid := "player-motel-sheet"
+	_, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID:      uid,
+		Username: uid,
+		CharName: uid,
+		RoomID:   "room_a",
+		Role:     "player",
+		Level:    1,
+	})
+	require.NoError(t, err)
+
+	sess, ok := sessMgr.GetPlayer(uid)
+	require.True(t, ok)
+	sess.Status = int32(gamev1.CombatStatus_COMBAT_STATUS_IDLE)
+	sess.Class = "test_job"
+	sess.PreparedTechs = map[int][]*session.PreparedSlot{
+		1: {{TechID: "old_tech"}},
+	}
+	sess.CurrentHP = 1
+	sess.MaxHP = 100
+	sess.Currency = 500
+	// Set up entity to receive push events
+	sess.Entity = session.NewBridgeEntity(uid, 8)
+
+	job := &ruleset.Job{
+		ID:   "test_job",
+		Name: "Test Job",
+		TechnologyGrants: &ruleset.TechnologyGrants{
+			Prepared: &ruleset.PreparedGrants{
+				SlotsByLevel: map[int]int{1: 1},
+				Pool: []ruleset.PreparedEntry{
+					{ID: "new_tech", Level: 1},
+				},
+			},
+		},
+	}
+	jobReg := ruleset.NewJobRegistry()
+	jobReg.Register(job)
+	svc.SetJobRegistry(jobReg)
+
+	prepRepo := &fakePreparedRepoRest{}
+	svc.SetPreparedTechRepo(prepRepo)
+
+	// Create a motel NPC
+	motelNPC := &npc.Instance{
+		ID:       "motel_npc_test",
+		TemplateID: "motel_keeper_test",
+		RoomID:   "room_a",
+		RestCost: 100,
+	}
+
+	stream := &fakeSessionStream{}
+	sendMsg := func(text string) error {
+		return stream.Send(&gamev1.ServerEvent{
+			RequestId: "req-motel-sheet",
+			Payload: &gamev1.ServerEvent_Message{
+				Message: &gamev1.MessageEvent{Content: text},
+			},
+		})
+	}
+	require.NoError(t, svc.handleMotelRest(uid, sess, motelNPC, sendMsg, "req-motel-sheet", stream))
+
+	// Check if CharacterSheetView was pushed to the entity channel
+	// Try to read all available events
+	var foundCharSheet bool
+	for {
+		select {
+		case data := <-sess.Entity.Events():
+			var evt gamev1.ServerEvent
+			if err := proto.Unmarshal(data, &evt); err == nil && evt.GetCharacterSheet() != nil {
+				foundCharSheet = true
+				break
+			}
+		default:
+			// No more events available
+			goto done
+		}
+	}
+done:
+	assert.True(t, foundCharSheet, "CharacterSheetView must be sent to entity channel after motel rest (BUG-150)")
+}
+
+// TestPropertyHandleMotelRest_AlwaysPushesCharacterSheet is a property-based test
+// verifying that CharacterSheetView is sent after any valid motel rest, regardless
+// of job/slot configuration (property, BUG-150).
+func TestPropertyHandleMotelRest_AlwaysPushesCharacterSheet(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		numSlots := rapid.IntRange(0, 3).Draw(rt, "numSlots")
+		sessMgr := session.NewManager()
+		svc := testMinimalService(t, sessMgr)
+
+		uid := fmt.Sprintf("player-motel-prop-%d", rapid.IntRange(0, 9999).Draw(rt, "uid"))
+		_, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+			UID:      uid,
+			Username: uid,
+			CharName: uid,
+			RoomID:   "room_a",
+			Role:     "player",
+		})
+		if err != nil {
+			rt.Skip()
+		}
+
+		sess, ok := sessMgr.GetPlayer(uid)
+		if !ok {
+			rt.Skip()
+		}
+		sess.Status = int32(gamev1.CombatStatus_COMBAT_STATUS_IDLE)
+		sess.Class = "test_job"
+		sess.CurrentHP = 1
+		sess.MaxHP = 100
+		sess.Currency = 500
+		sess.Entity = session.NewBridgeEntity(uid, 8)
+		initial := make([]*session.PreparedSlot, numSlots)
+		for i := range initial {
+			initial[i] = &session.PreparedSlot{TechID: fmt.Sprintf("tech_%d", i)}
+		}
+		sess.PreparedTechs = map[int][]*session.PreparedSlot{1: initial}
+
+		job := &ruleset.Job{
+			ID:   "test_job",
+			Name: "Test Job",
+			TechnologyGrants: &ruleset.TechnologyGrants{
+				Prepared: &ruleset.PreparedGrants{
+					SlotsByLevel: map[int]int{1: numSlots},
+					Pool: []ruleset.PreparedEntry{
+						{ID: "new_tech", Level: 1},
+					},
+				},
+			},
+		}
+		jobReg := ruleset.NewJobRegistry()
+		jobReg.Register(job)
+		svc.SetJobRegistry(jobReg)
+
+		prepRepo := &fakePreparedRepoRest{
+			slots: map[int][]*session.PreparedSlot{1: initial},
+		}
+		svc.SetPreparedTechRepo(prepRepo)
+
+		motelNPC := &npc.Instance{
+			ID:       "motel_npc_prop_test",
+			TemplateID: "motel_keeper_prop_test",
+			RoomID:   "room_a",
+			RestCost: 100,
+		}
+
+		stream := &fakeSessionStream{}
+		sendMsg := func(text string) error {
+			return stream.Send(&gamev1.ServerEvent{
+				RequestId: "req",
+				Payload: &gamev1.ServerEvent_Message{
+					Message: &gamev1.MessageEvent{Content: text},
+				},
+			})
+		}
+		if err := svc.handleMotelRest(uid, sess, motelNPC, sendMsg, "req", stream); err != nil {
+			rt.Skip()
+		}
+
+		// Verify CharacterSheetView was pushed to the entity channel
+		foundCharSheet := false
+		for {
+			select {
+			case data := <-sess.Entity.Events():
+				var evt gamev1.ServerEvent
+				if err := proto.Unmarshal(data, &evt); err == nil && evt.GetCharacterSheet() != nil {
+					foundCharSheet = true
+					break
+				}
+			default:
+				// No more events available
+				goto done
+			}
+		}
+	done:
+		if !foundCharSheet {
+			rt.Fatalf("CharacterSheetView not sent after motel rest")
+		}
+	})
 }

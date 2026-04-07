@@ -250,10 +250,24 @@ export function MapPanel() {
             </button>
             <button
               className="map-refresh-btn"
+              title="Stride away from nearest enemy (25 ft, 1 AP)"
+              onClick={() => sendCommand('stride away')}
+            >
+              Stride Away
+            </button>
+            <button
+              className="map-refresh-btn"
               title="Step 5 ft toward nearest enemy — no Reactive Strikes (1 AP)"
               onClick={() => sendCommand('step')}
             >
               Step
+            </button>
+            <button
+              className="map-refresh-btn"
+              title="Step 5 ft away from nearest enemy — no Reactive Strikes (1 AP)"
+              onClick={() => sendCommand('step away')}
+            >
+              Step Away
             </button>
             <button
               className="map-refresh-btn"
