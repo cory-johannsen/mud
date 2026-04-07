@@ -323,44 +323,63 @@ html, body, #root { margin: 0; padding: 0; height: 100%; overflow: hidden; }
 /* ─── Resize handles ─────────────────────────────────────────────────────── */
 
 .resize-handle {
-  background: transparent;
+  /* Always-visible dark separator line */
+  background: #2a2a2a;
   flex-shrink: 0;
+  flex-grow: 0;
   outline: none;
-  transition: background 0.15s;
+  transition: background 0.12s;
   position: relative;
-  z-index: 1;
+  z-index: 2;
 }
 
 /* Vertical divider between Room | Map | Character */
 .resize-handle-h {
-  width: 4px;
+  width: 6px;
+  min-width: 6px;
   cursor: col-resize;
 }
 
 /* Horizontal divider between upper panels and feed */
 .resize-handle-v {
-  height: 4px;
+  height: 6px;
+  min-height: 6px;
   cursor: row-resize;
 }
 
-.resize-handle:hover,
-.resize-handle[data-resize-handle-active] {
-  background: #333;
-}
-
-/* Bright accent while dragging */
-.resize-handle[data-resize-handle-active="pointer"],
-.resize-handle[data-resize-handle-active="keyboard"] {
+/* Highlight on hover */
+.resize-handle:hover {
   background: #e0c060;
 }
 
-/* Focus ring for keyboard navigation */
-.resize-handle:focus-visible::after {
+/* Active while dragging */
+.resize-handle:active {
+  background: #e0c060;
+}
+
+/* Wider invisible hit area via pseudo-element so small handles are easier to grab */
+.resize-handle-h::after {
   content: '';
   position: absolute;
-  inset: 0;
+  top: 0;
+  bottom: 0;
+  left: -4px;
+  right: -4px;
+}
+
+.resize-handle-v::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -4px;
+  bottom: -4px;
+}
+
+/* Focus ring for keyboard navigation */
+.resize-handle:focus-visible {
   outline: 2px solid #e0c060;
-  outline-offset: -2px;
+  outline-offset: 1px;
 }
 
 /* Mobile tab bar: hidden on desktop and tablet */
