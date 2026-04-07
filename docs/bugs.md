@@ -82,6 +82,14 @@
 **Steps:** Equip any armor item and run `eq`; observe armor slot values show raw IDs.
 **Fix:** Added `hydrateEquipmentNames(eq *inventory.Equipment, reg *inventory.Registry)` in `internal/gameserver/grpc_service.go`. After `LoadEquipment` succeeds at login, this function iterates `eq.Armor` and `eq.Accessories`, looks up each `ItemDefID` via `reg.Item()`, and sets `item.Name` to `ItemDef.Name` when found. Items whose IDs are not registered remain unchanged. (Initial implementation incorrectly used `reg.Armor()` with an item ID — armor is registered under its `ArmorDef.ID`, not the item ID; the correct lookup is via `reg.Item()`.)
 
+### BUG-150: Technology panel does not refresh after motel or brothel rest
+**Severity:** medium
+**Status:** fixed
+**Category:** UI
+**Description:** After a player rests at a motel or brothel, HP and tech pools are restored by `applyLongRestEffects`, but the Technology panel in the web UI does not refresh because neither rest handler calls `pushCharacterSheet` afterward.
+**Steps:** Rest at a motel or brothel; observe HP and tech pools are restored; open the Technology tab in the web UI; confirm the panel does not display the updated state.
+**Fix:** Updated `handleMotelRest` in `internal/gameserver/grpc_service.go` to capture the error from `applyLongRestEffects` and call `s.pushCharacterSheet(sess)` before returning. Updated `handleBrothelRest` to call `s.pushCharacterSheet(sess)` before the final return. Both handlers now send a `CharacterSheetView` event to the player's entity channel, causing the web UI Technology panel to refresh. Added two property-based tests (using `pgregory.net/rapid`) to verify that `CharacterSheetView` is always pushed after rest, regardless of job/slot configuration or currency amount.
+
 ## Combat
 
 ### BUG-32: Post-combat movement blocked; reconnect shows "already logged in"

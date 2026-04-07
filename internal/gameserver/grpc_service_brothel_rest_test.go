@@ -10,6 +10,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"google.golang.org/protobuf/proto"
 	"pgregory.net/rapid"
 
 	"github.com/cory-johannsen/mud/internal/game/character"
@@ -480,6 +481,114 @@ func TestProperty_BrothelRest_CurrencyNeverNegative(t *testing.T) {
 
 		if sess.Currency < 0 {
 			rt.Fatalf("currency went negative: got %d", sess.Currency)
+		}
+	})
+}
+
+// TestBrothelRest_PushesCharacterSheet verifies that after a successful brothel rest,
+// a CharacterSheetView event is sent to the entity channel (BUG-150 fix).
+//
+// Precondition: Player is idle with sufficient credits in a room with a brothel NPC.
+// Postcondition: A ServerEvent with CharacterSheetView payload is sent to the entity channel.
+func TestBrothelRest_PushesCharacterSheet(t *testing.T) {
+	svc, sessMgr, npcMgr := newBrothelSvcWithSafeRoom(t)
+	sess := addBrothelPlayer(t, sessMgr, "br-sheet", "room_brothel", 100, 20)
+	sess.CurrentHP = 5
+	sess.Entity = session.NewBridgeEntity("br-sheet", 8)
+
+	svc.condRegistry = loadTestCondRegistry(t)
+	sess.Conditions = condition.NewActiveSet()
+
+	charSaver := &fakeCharSaver{}
+	svc.SetCharSaver(charSaver)
+
+	cfg := defaultBrothelCfg()
+	spawnBrothelNPC(t, npcMgr, "room_brothel", cfg)
+
+	stream := &fakeSessionStream{}
+	require.NoError(t, svc.handleRest("br-sheet", "req", stream))
+
+	// Check if CharacterSheetView was pushed to the entity channel
+	var foundCharSheet bool
+	for {
+		select {
+		case data := <-sess.Entity.Events():
+			var evt gamev1.ServerEvent
+			if err := proto.Unmarshal(data, &evt); err == nil && evt.GetCharacterSheet() != nil {
+				foundCharSheet = true
+				break
+			}
+		default:
+			// No more events available
+			goto done
+		}
+	}
+done:
+	assert.True(t, foundCharSheet, "CharacterSheetView must be sent to entity channel after brothel rest (BUG-150)")
+}
+
+// TestPropertyBrothelRest_AlwaysPushesCharacterSheet is a property-based test
+// verifying that CharacterSheetView is sent after any valid brothel rest, regardless
+// of currency amount or side effects (disease/robbery) (property, BUG-150).
+func TestPropertyBrothelRest_AlwaysPushesCharacterSheet(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		svc, sessMgr, npcMgr := newBrothelSvcWithSafeRoom(t)
+
+		uid := fmt.Sprintf("br-sheet-prop-%d", rapid.IntRange(0, 9999).Draw(rt, "uid"))
+		minCurrency := rapid.IntRange(50, 500).Draw(rt, "currency")
+		maxHP := rapid.IntRange(10, 100).Draw(rt, "maxHP")
+
+		sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+			UID:         uid,
+			Username:    uid,
+			CharName:    uid,
+			CharacterID: 1,
+			RoomID:      "room_brothel",
+			CurrentHP:   1,
+			MaxHP:       maxHP,
+			Abilities:   character.AbilityScores{},
+			Role:        "player",
+		})
+		if err != nil {
+			rt.Skip()
+		}
+
+		sess.Status = int32(gamev1.CombatStatus_COMBAT_STATUS_IDLE)
+		sess.Currency = minCurrency
+		sess.Entity = session.NewBridgeEntity(uid, 8)
+
+		svc.condRegistry = loadTestCondRegistry(t)
+		sess.Conditions = condition.NewActiveSet()
+
+		charSaver := &fakeCharSaver{}
+		svc.SetCharSaver(charSaver)
+
+		cfg := defaultBrothelCfg()
+		spawnBrothelNPC(t, npcMgr, "room_brothel", cfg)
+
+		stream := &fakeSessionStream{}
+		if err := svc.handleRest(uid, "req", stream); err != nil {
+			rt.Skip()
+		}
+
+		// Verify CharacterSheetView was pushed to the entity channel
+		foundCharSheet := false
+		for {
+			select {
+			case data := <-sess.Entity.Events():
+				var evt gamev1.ServerEvent
+				if err := proto.Unmarshal(data, &evt); err == nil && evt.GetCharacterSheet() != nil {
+					foundCharSheet = true
+					break
+				}
+			default:
+				// No more events available
+				goto done
+			}
+		}
+	done:
+		if !foundCharSheet {
+			rt.Fatalf("CharacterSheetView not sent after brothel rest")
 		}
 	})
 }
