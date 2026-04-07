@@ -290,10 +290,77 @@ html, body, #root { margin: 0; padding: 0; height: 100%; overflow: hidden; }
 .stats-save-row { display: flex; gap: 1rem; font-size: 0.82rem; margin-bottom: 0.25rem; color: #ccc; }
 .stats-save-row strong { color: #fff; }
 
-/* panel-content: transparent wrapper on desktop/tablet so children
-   participate directly in the CSS Grid; becomes a real block on mobile. */
+/* panel-content: transparent wrapper on tablet so children participate
+   directly in the CSS Grid; becomes a real block on mobile. */
 .panel-content {
   display: contents;
+}
+
+/* ─── Desktop resizable layout ──────────────────────────────────────────── */
+
+/* Switch to flex-column so PanelGroups fill the space between
+   the fixed toolbar and the fixed hotbar/input rows. */
+.game-layout--desktop {
+  display: flex;
+  flex-direction: column;
+}
+
+/* The vertical PanelGroup fills all remaining space */
+.game-layout--desktop .game-panels-vertical {
+  flex: 1;
+  min-height: 0;
+}
+
+/* Panels must fill their Panel container (library sets size via flex-basis) */
+.game-layout--desktop .panel-room,
+.game-layout--desktop .panel-map,
+.game-layout--desktop .panel-character,
+.game-layout--desktop .panel-feed {
+  height: 100%;
+  min-height: unset;
+}
+
+/* ─── Resize handles ─────────────────────────────────────────────────────── */
+
+.resize-handle {
+  background: transparent;
+  flex-shrink: 0;
+  outline: none;
+  transition: background 0.15s;
+  position: relative;
+  z-index: 1;
+}
+
+/* Vertical divider between Room | Map | Character */
+.resize-handle-h {
+  width: 4px;
+  cursor: col-resize;
+}
+
+/* Horizontal divider between upper panels and feed */
+.resize-handle-v {
+  height: 4px;
+  cursor: row-resize;
+}
+
+.resize-handle:hover,
+.resize-handle[data-resize-handle-active] {
+  background: #333;
+}
+
+/* Bright accent while dragging */
+.resize-handle[data-resize-handle-active="pointer"],
+.resize-handle[data-resize-handle-active="keyboard"] {
+  background: #e0c060;
+}
+
+/* Focus ring for keyboard navigation */
+.resize-handle:focus-visible::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  outline: 2px solid #e0c060;
+  outline-offset: -2px;
 }
 
 /* Mobile tab bar: hidden on desktop and tablet */
