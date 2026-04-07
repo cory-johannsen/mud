@@ -1226,6 +1226,15 @@
 **Steps:** Enter combat; take damage from an NPC attack targeting your character; observe that HP in the UI does not update from combat events (only from explicit CharacterSheet refreshes).
 **Fix:** Moved the player-name comparison into the UPDATE_COMBATANT_HP reducer case where state is always current. The reducer now also updates characterInfo HP when the combatant name matches the player's name, eliminating the stale closure entirely.
 
+### BUG-148: Stride direction not passed to game server — only stride toward supported
+
+**Severity:** high
+**Status:** fixed
+**Category:** Combat
+**Description:** The Stride action in combat only allows the player to move toward an enemy, not away, preventing tactical repositioning. The websocket dispatcher in `cmd/webclient/handlers/websocket_dispatch.go` correctly handles `StepRequest` with a `direction` field ("toward" or "away"), but the `StrideRequest` handler ignores the `rawArgs` and never sets the `Direction` field, so strides always default to toward-movement.
+**Steps:** Enter combat; type `stride away`; observe the command is accepted but the player strides toward the enemy instead of away.
+**Fix:** Updated `HandlerStride` case in `cmd/webclient/handlers/websocket_dispatch.go` to read `rawArgs` and set `Direction: "away"` when `rawArgs == "away"`, defaulting to `"toward"` otherwise. Mirrors the existing pattern in `HandlerStep` case. Added four unit tests in `cmd/webclient/handlers/websocket_dispatch_test.go`: `stride` (no args) → Direction "toward", `stride away` → Direction "away", `stride toward` → Direction "toward", `stride <other>` → Direction "toward".
+
 ### BUG-151: Web client does not receive weather events — WeatherEvent silently dropped by websocket dispatcher
 
 **Severity:** medium

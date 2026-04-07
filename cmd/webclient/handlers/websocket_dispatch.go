@@ -231,8 +231,12 @@ func buildMessageFromCommand(bctx *webBridgeContext) (*gamev1.ClientMessage, err
 		return &gamev1.ClientMessage{RequestId: reqID,
 			Payload: &gamev1.ClientMessage_Sneak{Sneak: &gamev1.SneakRequest{}}}, nil
 	case command.HandlerStride:
+		strideDir := "toward"
+		if rawArgs == "away" {
+			strideDir = "away"
+		}
 		return &gamev1.ClientMessage{RequestId: reqID,
-			Payload: &gamev1.ClientMessage_Stride{Stride: &gamev1.StrideRequest{}}}, nil
+			Payload: &gamev1.ClientMessage_Stride{Stride: &gamev1.StrideRequest{Direction: strideDir}}}, nil
 	case command.HandlerStep:
 		stepDir := "toward"
 		if rawArgs == "away" {
