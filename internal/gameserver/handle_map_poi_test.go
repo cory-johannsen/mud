@@ -18,6 +18,8 @@ func TestNpcRoleToPOIIDIntegration(t *testing.T) {
 		{"healer", "healer"},
 		{"job_trainer", "trainer"},
 		{"guard", "guard"},
+		{"motel_keeper", "motel"},
+		{"brothel_keeper", "brothel"},
 		{"quest_giver", "quest_giver"},
 		{"", ""},
 	}

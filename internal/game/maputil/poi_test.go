@@ -46,6 +46,8 @@ func TestNpcRoleToPOIID_KnownRoles(t *testing.T) {
 		{"healer", "healer"},
 		{"job_trainer", "trainer"},
 		{"guard", "guard"},
+		{"motel_keeper", "motel"},
+		{"brothel_keeper", "brothel"},
 		{"quest_giver", "quest_giver"},
 		{"banker", "npc"},
 		{"chip_doc", "npc"},
@@ -62,7 +64,7 @@ func TestNpcRoleToPOIID_EmptyAlwaysEmpty(t *testing.T) {
 	rapid.Check(t, func(rt *rapid.T) {
 		// Any non-empty string that is not a known role maps to "npc".
 		role := rapid.StringOf(rapid.RuneFrom([]rune("abcdefghijklmnopqrstuvwxyz_"))).Filter(func(s string) bool {
-			return s != "" && s != "merchant" && s != "healer" && s != "job_trainer" && s != "guard" && s != "quest_giver"
+			return s != "" && s != "merchant" && s != "healer" && s != "job_trainer" && s != "guard" && s != "quest_giver" && s != "motel_keeper" && s != "brothel_keeper"
 		}).Draw(rt, "role")
 		got := maputil.NpcRoleToPOIID(role)
 		if got != "npc" {
@@ -72,9 +74,9 @@ func TestNpcRoleToPOIID_EmptyAlwaysEmpty(t *testing.T) {
 }
 
 func TestSortPOIs_KnownOrder(t *testing.T) {
-	input := []string{"equipment", "guard", "merchant", "npc", "healer", "trainer", "quest_giver"}
+	input := []string{"equipment", "guard", "merchant", "npc", "healer", "trainer", "brothel", "quest_giver", "motel"}
 	got := maputil.SortPOIs(input)
-	want := []string{"merchant", "healer", "trainer", "guard", "quest_giver", "npc", "equipment"}
+	want := []string{"merchant", "healer", "trainer", "guard", "motel", "brothel", "quest_giver", "npc", "equipment"}
 	for i, v := range want {
 		if got[i] != v {
 			t.Errorf("SortPOIs position %d: got %q, want %q (full: %v)", i, got[i], v, got)
@@ -98,7 +100,7 @@ func TestSortPOIs_UnknownIDsLast(t *testing.T) {
 
 func TestSortPOIs_DoesNotMutateInput(t *testing.T) {
 	rapid.Check(t, func(rt *rapid.T) {
-		knownIDs := []string{"merchant", "healer", "trainer", "guard", "quest_giver", "npc", "equipment"}
+		knownIDs := []string{"merchant", "healer", "trainer", "guard", "motel", "brothel", "quest_giver", "npc", "equipment"}
 		n := rapid.IntRange(0, 6).Draw(rt, "n")
 		input := rapid.SliceOf(rapid.SampledFrom(knownIDs)).Draw(rt, "pois")
 		_ = n
