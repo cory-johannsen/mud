@@ -94,6 +94,32 @@ func TestDispatchWSMessage_CommandText_Stride_OtherArg(t *testing.T) {
 	assert.Equal(t, "toward", stride.Direction)
 }
 
+// Uses rapid property-based testing (SWENG-5a).
+func TestProperty_StrideDirection_NonAwayDefaultsToToward(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		arg := rapid.StringOf(rapid.RuneFrom([]rune("abcdefghijklmnopqrstuvwxyz_0123456789 "))).
+			Filter(func(s string) bool { return s != "away" }).
+			Draw(rt, "non_away_arg")
+		text := "stride"
+		if arg != "" {
+			text = "stride " + arg
+		}
+		env := handlers.WSMessageForTest("CommandText", map[string]string{"text": text})
+		registry := command.DefaultRegistry()
+		msg, err := handlers.DispatchWSMessageForTest(env, "prop-stride", registry)
+		if err != nil {
+			rt.Fatalf("DispatchWSMessageForTest returned error: %v", err)
+		}
+		stride := msg.GetStride()
+		if stride == nil {
+			rt.Fatalf("expected StrideRequest, got nil")
+		}
+		if stride.Direction != "toward" {
+			rt.Fatalf("expected Direction=toward for arg %q, got %q", arg, stride.Direction)
+		}
+	})
+}
+
 // ── serverEventInner: UseResponse ────────────────────────────────────────────
 
 func TestServerEventInner_UseResponse_Message(t *testing.T) {
