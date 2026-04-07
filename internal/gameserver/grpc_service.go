@@ -3691,6 +3691,14 @@ func (s *GameServiceServer) handleRest(uid string, requestID string, stream game
 				}
 			}
 		}
+		// REQ-BR-4: safe room + brothel NPC → brothel rest.
+		if s.npcMgr != nil {
+			for _, npcInst := range s.npcMgr.InstancesInRoom(sess.RoomID) {
+				if npcInst.NPCType == "brothel_keeper" {
+					return s.handleBrothelRest(uid, sess, npcInst, sendMsg, requestID, stream)
+				}
+			}
+		}
 		// REQ-REST-4: safe room but no motel NPC.
 		return sendMsg("There is no motel here to rest at.")
 	case danger.Sketchy, danger.Dangerous, danger.AllOutWar:
@@ -3727,6 +3735,15 @@ func (s *GameServiceServer) handleMotelRest(uid string, sess *session.PlayerSess
 	if err := sendMsg(fmt.Sprintf("You pay %d credits and settle in for the night.", cost)); err != nil {
 		return err
 	}
+	return s.applyLongRestEffects(uid, sess, stream.Context(), sendMsg, stream)
+}
+
+// applyLongRestEffects applies the full long-rest restoration (HP, tech pools, durability)
+// via applyFullLongRestCtx, building the tech-choice prompt from the given stream.
+//
+// Precondition: uid must be a valid player UID; sess, stream must not be nil.
+// Postcondition: HP + tech pools fully restored; tech-choice prompt sent if needed.
+func (s *GameServiceServer) applyLongRestEffects(uid string, sess *session.PlayerSession, ctx context.Context, sendMsg func(string) error, stream gamev1.GameService_SessionServer) error {
 	headless := sess.Headless
 	promptFn := func(options []string) (string, error) {
 		choices := &ruleset.FeatureChoices{
@@ -3737,6 +3754,112 @@ func (s *GameServiceServer) handleMotelRest(uid string, sess *session.PlayerSess
 		return s.promptFeatureChoice(stream, "tech_choice", choices, headless)
 	}
 	return s.applyFullLongRestCtx(uid, sess, ctx, sendMsg, promptFn)
+}
+
+// handleBrothelRest performs an instant full rest at a brothel NPC (REQ-BR-6 through REQ-BR-13).
+//
+// Precondition: brothelNPC.Brothel != nil and room is safe; stream is non-nil.
+// Postcondition: player HP + tech pools fully restored; RestCost deducted from Currency;
+// flair_bonus_1 condition applied; disease and robbery rolled independently after rest.
+func (s *GameServiceServer) handleBrothelRest(uid string, sess *session.PlayerSession, brothelNPC *npc.Instance, sendMsg func(string) error, requestID string, stream gamev1.GameService_SessionServer) error {
+	brothelConfig := brothelNPC.Brothel
+	ctx := stream.Context()
+
+	// REQ-BR-6: insufficient credits → block rest.
+	if sess.Currency < brothelConfig.RestCost {
+		return sendMsg(fmt.Sprintf("A night here costs %d credits. You only have %d.", brothelConfig.RestCost, sess.Currency))
+	}
+
+	// REQ-BR-7: deduct credits, save, confirm, apply full rest.
+	sess.Currency -= brothelConfig.RestCost
+	if s.charSaver != nil {
+		if err := s.charSaver.SaveCurrency(ctx, sess.CharacterID, sess.Currency); err != nil {
+			s.logger.Warn("handleBrothelRest: failed to save currency", zap.Error(err))
+		}
+	}
+	if err := sendMsg(fmt.Sprintf("You pay %d credits and settle in for the night.", brothelConfig.RestCost)); err != nil {
+		return err
+	}
+	if err := s.applyLongRestEffects(uid, sess, ctx, sendMsg, stream); err != nil {
+		return err
+	}
+
+	// REQ-BR-8: apply flair_bonus_1 timed condition.
+	if s.condRegistry != nil && sess.Conditions != nil {
+		if def, ok := s.condRegistry.Get("flair_bonus_1"); ok {
+			dur, parseErr := time.ParseDuration(brothelConfig.FlairBonusDur)
+			if parseErr == nil {
+				expiresAt := time.Now().Add(dur)
+				if applyErr := sess.Conditions.ApplyTaggedWithExpiry(uid, def, 1, "brothel_rest", expiresAt); applyErr != nil {
+					s.logger.Warn("handleBrothelRest: failed to apply flair_bonus_1", zap.Error(applyErr))
+				} else {
+					_ = sendMsg("You feel unusually confident. (+1 Flair)")
+				}
+			}
+		}
+	}
+
+	// REQ-BR-9: independent disease roll. Rest completes before this (REQ-BR-12).
+	if rand.Float64() < brothelConfig.DiseaseChance && len(brothelConfig.DiseasePool) > 0 {
+		diseaseID := brothelConfig.DiseasePool[rand.Intn(len(brothelConfig.DiseasePool))]
+		diseaseName := diseaseID
+		if err := s.ApplySubstanceByID(uid, diseaseID); err != nil {
+			s.logger.Warn("handleBrothelRest: ApplySubstanceByID failed", zap.String("substance", diseaseID), zap.Error(err))
+		} else {
+			_ = sendMsg("You've contracted " + diseaseName + ".")
+		}
+	}
+
+	// REQ-BR-10: independent robbery roll (REQ-BR-11). Rest already completed above.
+	if rand.Float64() < brothelConfig.RobberyChance {
+		robbed := false
+		// Steal crypto.
+		if sess.Currency > 0 {
+			stolenCrypto := sess.Currency * 5 / 100
+			if stolenCrypto < 1 {
+				stolenCrypto = 1
+			}
+			sess.Currency -= stolenCrypto
+			if s.charSaver != nil {
+				if err := s.charSaver.SaveCurrency(ctx, sess.CharacterID, sess.Currency); err != nil {
+					s.logger.Warn("handleBrothelRest: failed to save currency after robbery", zap.Error(err))
+				}
+			}
+			robbed = true
+		}
+		// Steal items.
+		if sess.Backpack != nil {
+			items := sess.Backpack.Items()
+			numToSteal := len(items) * 5 / 100
+			if numToSteal > 0 {
+				// Pick random indices without replacement using Fisher-Yates partial shuffle.
+				indices := make([]int, len(items))
+				for i := range indices {
+					indices[i] = i
+				}
+				for i := 0; i < numToSteal; i++ {
+					j := i + rand.Intn(len(indices)-i)
+					indices[i], indices[j] = indices[j], indices[i]
+				}
+				for i := 0; i < numToSteal; i++ {
+					item := items[indices[i]]
+					_ = sess.Backpack.Remove(item.InstanceID, item.Quantity)
+				}
+				if s.charSaver != nil {
+					invItems := backpackToInventoryItems(sess.Backpack)
+					if err := s.charSaver.SaveInventory(ctx, sess.CharacterID, invItems); err != nil {
+						s.logger.Warn("handleBrothelRest: failed to save inventory after robbery", zap.Error(err))
+					}
+				}
+				robbed = true
+			}
+		}
+		if robbed {
+			_ = sendMsg("You wake to find someone has gone through your belongings.")
+		}
+	}
+
+	return nil
 }
 
 // startCamping validates gear requirements and starts a camping rest session (REQ-REST-3/10-14/17).
