@@ -123,7 +123,8 @@ func TestTamper_AppliesConditionToFoeInCombat(t *testing.T) {
 
 	useResp := resp.GetUseResponse()
 	require.NotNil(t, useResp, "expected UseResponse")
-	assert.Equal(t, feat.ActivateText, useResp.Message)
+	assert.Contains(t, useResp.Message, feat.ActivateText, "message must contain ActivateText")
+	assert.Contains(t, useResp.Message, "Tampered", "message must include condition name (REQ-BUG149-1)")
 
 	// Postcondition: debuff must be on the FOE, not the player.
 	assert.True(t, cbt.Conditions[npcCombatantID].Has(condID),

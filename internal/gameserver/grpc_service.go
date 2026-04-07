@@ -7816,6 +7816,11 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string, targetX, 
 				if f.PreparedUses > 0 {
 					msg = fmt.Sprintf("%s (%d uses remaining.)", f.ActivateText, sess.ActiveFeatUses[f.ID])
 				}
+				if condID != "" && s.condRegistry != nil {
+					if def, ok := s.condRegistry.Get(condID); ok {
+						msg = fmt.Sprintf("%s (%s)", msg, def.Name)
+					}
+				}
 				return &gamev1.ServerEvent{
 					Payload: &gamev1.ServerEvent_UseResponse{
 						UseResponse: &gamev1.UseResponse{Message: msg},
@@ -7864,9 +7869,15 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string, targetX, 
 						)
 					}
 				}
+				cfMsg := cf.ActivateText
+				if condID != "" && s.condRegistry != nil {
+					if def, ok := s.condRegistry.Get(condID); ok {
+						cfMsg = fmt.Sprintf("%s (%s)", cfMsg, def.Name)
+					}
+				}
 				return &gamev1.ServerEvent{
 					Payload: &gamev1.ServerEvent_UseResponse{
-						UseResponse: &gamev1.UseResponse{Message: cf.ActivateText},
+						UseResponse: &gamev1.UseResponse{Message: cfMsg},
 					},
 				}, nil
 			}

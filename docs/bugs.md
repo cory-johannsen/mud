@@ -1243,6 +1243,15 @@
 **Steps:** Enter combat; type `stride away`; observe the command is accepted but the player strides toward the enemy instead of away.
 **Fix:** Updated `HandlerStride` case in `cmd/webclient/handlers/websocket_dispatch.go` to read `rawArgs` and set `Direction: "away"` when `rawArgs == "away"`, defaulting to `"toward"` otherwise. Mirrors the existing pattern in `HandlerStep` case. Added four unit tests in `cmd/webclient/handlers/websocket_dispatch_test.go`: `stride` (no args) → Direction "toward", `stride away` → Direction "away", `stride toward` → Direction "toward", `stride <other>` → Direction "toward".
 
+### BUG-149: Overpower applies no visible combat effect and shows no feedback
+
+**Severity:** high
+**Status:** fixed
+**Category:** Combat
+**Description:** Using Overpower (or any feat/class-feature with a condition_id) shows the flavor text (e.g. "You put everything into it.") but gives no indication of what condition was applied. Players had no idea that e.g. `brutal_surge_active` had been applied to them.
+**Steps:** Enter combat; use Overpower; observe console shows "You put everything into it." with no condition name appended.
+**Fix:** In `internal/gameserver/grpc_service.go`, after applying the condition for both the feat-activation path (~line 7815) and the class-feature-activation path (~line 7867), a second registry lookup appends `(ConditionName)` to the `UseResponse.Message`. When the condition is not found in the registry the message falls back to `ActivateText` only. Added four tests in `grpc_service_bug149_test.go` including a property-based test using `pgregory.net/rapid`.
+
 ### BUG-151: Web client does not receive weather events — WeatherEvent silently dropped by websocket dispatcher
 
 **Severity:** medium
