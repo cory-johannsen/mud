@@ -319,6 +319,74 @@ func TestBrothelRest_RobberyChance1_RemovesBackpackItem(t *testing.T) {
 	assert.Less(t, itemsAfter, itemsBefore, "robbery must remove at least one item from backpack")
 }
 
+// TestBrothelRest_RobberyChance1_StackableItemsLoseOneUnit verifies that stackable items
+// lose exactly 1 unit (not the entire stack) during robbery. This is a regression test for
+// the bug where Remove(item.InstanceID, item.Quantity) removed the whole stack.
+//
+// Precondition: backpack has a stackable item with Quantity=2.
+// Postcondition: after robbery, that item still exists with Quantity=1.
+func TestBrothelRest_RobberyChance1_StackableItemsLoseOneUnit(t *testing.T) {
+	svc, sessMgr, npcMgr := newBrothelSvcWithSafeRoom(t)
+	sess := addBrothelPlayer(t, sessMgr, "br-stackable-robbed", "room_brothel", 200, 20)
+	sess.CurrentHP = 5
+
+	svc.condRegistry = loadTestCondRegistry(t)
+	sess.Conditions = condition.NewActiveSet()
+
+	charSaver := &fakeCharSaver{}
+	svc.SetCharSaver(charSaver)
+
+	// Create an inventory with 10 junk items (non-stackable) + 1 stackable item with qty 2.
+	invReg := inventory.NewRegistry()
+	for i := 0; i < 10; i++ {
+		def := &inventory.ItemDef{
+			ID:       fmt.Sprintf("junk_%02d", i),
+			Name:     fmt.Sprintf("Junk %d", i),
+			Kind:     inventory.KindJunk,
+			Weight:   0.1,
+			MaxStack: 1,
+		}
+		require.NoError(t, invReg.RegisterItem(def))
+		_, addErr := sess.Backpack.Add(def.ID, 1, invReg)
+		require.NoError(t, addErr)
+	}
+
+	// Add one stackable item with qty 2
+	stackDef := &inventory.ItemDef{
+		ID:       "potion_health",
+		Name:     "Health Potion",
+		Kind:     inventory.KindConsumable,
+		Weight:   0.1,
+		MaxStack: 10,
+	}
+	require.NoError(t, invReg.RegisterItem(stackDef))
+	stackItem, addErr := sess.Backpack.Add("potion_health", 2, invReg)
+	require.NoError(t, addErr)
+	stackID := stackItem.InstanceID
+
+	svc.invRegistry = invReg
+
+	// Configure brothel to guarantee robbery.
+	cfg := defaultBrothelCfg()
+	cfg.RobberyChance = 1.0
+	spawnBrothelNPC(t, npcMgr, "room_brothel", cfg)
+
+	stream := &fakeSessionStream{}
+	require.NoError(t, svc.handleRest("br-stackable-robbed", "req", stream))
+
+	// Check that the stackable item still exists with qty 1 (not removed entirely).
+	items := sess.Backpack.Items()
+	var foundItem *inventory.ItemInstance
+	for i, item := range items {
+		if item.InstanceID == stackID {
+			foundItem = &items[i]
+			break
+		}
+	}
+	assert.NotNil(t, foundItem, "stackable item must still exist in backpack after robbery")
+	assert.Equal(t, 1, foundItem.Quantity, "stackable item must lose exactly 1 unit (not entire stack)")
+}
+
 // TestBrothelRest_ZeroChances_NoSideEffects verifies REQ-BR-T6:
 // disease_chance == 0.0, robbery_chance == 0.0 → no disease, no robbery, only rest cost deducted.
 //

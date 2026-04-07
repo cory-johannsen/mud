@@ -3843,7 +3843,7 @@ func (s *GameServiceServer) handleBrothelRest(uid string, sess *session.PlayerSe
 				}
 				for i := 0; i < numToSteal; i++ {
 					item := items[indices[i]]
-					_ = sess.Backpack.Remove(item.InstanceID, item.Quantity)
+					_ = sess.Backpack.Remove(item.InstanceID, 1)
 				}
 				if s.charSaver != nil {
 					invItems := backpackToInventoryItems(sess.Backpack)
