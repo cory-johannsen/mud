@@ -1273,8 +1273,8 @@
 ### BUG-153: Web UI panels do not auto-size on load — player must manually resize every session
 
 **Severity:** high
-**Status:** open
+**Status:** fixed
 **Category:** UI
 **Description:** When the web UI loads, panels retain static default sizes rather than auto-sizing to fit their content. The Room and Map panels in particular need to expand to show their full content, while the Character Sheet and Console should shrink to yield space. Players are forced to manually resize the layout on every session.
 **Steps:** Load the web UI; observe the Room panel clips its content and the Map panel does not expand to show the full map; observe the Character Sheet and Console consume excess space that the Room/Map panels need.
-**Fix:**
+**Fix:** Used `useDefaultLayout` from `react-resizable-panels` v4 for both the vertical (top/feed) and horizontal (room/map/character) PanelGroups in `GamePage.tsx`. Panel sizes are persisted to localStorage under keys `game-vertical` and `game-horizontal`. Added `id` props to all four panels so the layout map keys are stable. On first load, panels fall back to their existing `defaultSize` values; on subsequent loads, the saved layout is restored automatically.

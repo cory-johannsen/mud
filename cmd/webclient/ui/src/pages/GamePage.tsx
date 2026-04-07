@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Navigate } from 'react-router-dom'
-import { Panel, Group as PanelGroup, Separator as PanelResizeHandle } from 'react-resizable-panels'
+import { Panel, Group as PanelGroup, Separator as PanelResizeHandle, useDefaultLayout } from 'react-resizable-panels'
 import { useAuth } from '../auth/AuthContext'
 import { GameProvider, useGame } from '../game/GameContext'
 import type { TimeOfDayEvent } from '../proto'
@@ -55,6 +55,14 @@ function GameLayout() {
   const { state, sendMessage } = useGame()
   const activeWeather = state.activeWeather
   const [openDrawer, setOpenDrawer] = useState<DrawerType | null>(null)
+  const { defaultLayout: verticalLayout, onLayoutChanged: onVerticalLayoutChanged } = useDefaultLayout({
+    id: 'game-vertical',
+    storage: localStorage,
+  })
+  const { defaultLayout: horizontalLayout, onLayoutChanged: onHorizontalLayoutChanged } = useDefaultLayout({
+    id: 'game-horizontal',
+    storage: localStorage,
+  })
   const [activeMobilePanel, setActiveMobilePanel] = useState<MobilePanel>('room')
   const [showHelp, setShowHelp] = useState(false)
   const isDesktop = useIsDesktop()
@@ -132,27 +140,31 @@ function GameLayout() {
         <PanelGroup
           orientation="vertical"
           className="game-panels-vertical"
+          defaultLayout={verticalLayout}
+          onLayoutChanged={onVerticalLayoutChanged}
         >
-          <Panel defaultSize={35} minSize={15}>
+          <Panel id="top" defaultSize={35} minSize={15}>
             <PanelGroup
               orientation="horizontal"
               className="game-panels-horizontal"
+              defaultLayout={horizontalLayout}
+              onLayoutChanged={onHorizontalLayoutChanged}
             >
-              <Panel defaultSize={25} minSize={10}>
+              <Panel id="room" defaultSize={25} minSize={10}>
                 <div className="panel-room"><RoomPanel /></div>
               </Panel>
               <PanelResizeHandle className="resize-handle resize-handle-h" />
-              <Panel defaultSize={40} minSize={15}>
+              <Panel id="map" defaultSize={40} minSize={15}>
                 <div className="panel-map"><MapPanel /></div>
               </Panel>
               <PanelResizeHandle className="resize-handle resize-handle-h" />
-              <Panel defaultSize={35} minSize={10}>
+              <Panel id="character" defaultSize={35} minSize={10}>
                 <div className="panel-character"><CharacterPanel /></div>
               </Panel>
             </PanelGroup>
           </Panel>
           <PanelResizeHandle className="resize-handle resize-handle-v" />
-          <Panel defaultSize={65} minSize={15}>
+          <Panel id="feed" defaultSize={65} minSize={15}>
             <div className="panel-feed">
               <FeedPanel />
               <DrawerContainer openDrawer={openDrawer} onClose={() => setOpenDrawer(null)} />
