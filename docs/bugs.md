@@ -1260,3 +1260,21 @@
 **Description:** The backend sends `WeatherEvent` messages via ServerEvent.Weather field, and the frontend GameContext.tsx already handles `"WeatherEvent"` messages to update `state.activeWeather`. However, `serverEventInner` in `cmd/webclient/handlers/websocket.go` was missing the case for `*gamev1.ServerEvent_Weather`, causing weather events to be silently dropped without reaching the browser.
 **Steps:** Observe weather changes occur on the server but no visual weather indicator updates in the web UI; weather conditions exist in the game state but are never displayed to the player.
 **Fix:** Added `case *gamev1.ServerEvent_Weather: return p.Weather, "WeatherEvent"` to the `serverEventInner` switch statement in `cmd/webclient/handlers/websocket.go` (before the `default:` case). Added unit test `TestServerEventInner_Weather_BasicMessage` in `cmd/webclient/handlers/websocket_dispatch_test.go` to verify the case is wired correctly.
+
+### BUG-152: Character selector XP shown as text instead of a progress bar
+
+**Severity:** low
+**Status:** open
+**Category:** UI
+**Description:** In the web UI character selector, XP is displayed as raw text rather than a progress bar like HP, leaving the player with no visual indication of progress toward the next level.
+**Steps:** Open the web UI character selector; observe XP is shown as a number/text field rather than a filled progress bar matching the HP bar style.
+**Fix:**
+
+### BUG-153: Web UI panels do not auto-size on load — player must manually resize every session
+
+**Severity:** high
+**Status:** fixed
+**Category:** UI
+**Description:** When the web UI loads, panels retain static default sizes rather than auto-sizing to fit their content. The Room and Map panels in particular need to expand to show their full content, while the Character Sheet and Console should shrink to yield space. Players are forced to manually resize the layout on every session.
+**Steps:** Load the web UI; observe the Room panel clips its content and the Map panel does not expand to show the full map; observe the Character Sheet and Console consume excess space that the Room/Map panels need.
+**Fix:** Used `useDefaultLayout` from `react-resizable-panels` v4 for both the vertical (top/feed) and horizontal (room/map/character) PanelGroups in `GamePage.tsx`. Panel sizes are persisted to localStorage under keys `game-vertical` and `game-horizontal`. Added `id` props to all four panels so the layout map keys are stable. On first load, panels fall back to their existing `defaultSize` values; on subsequent loads, the saved layout is restored automatically.
