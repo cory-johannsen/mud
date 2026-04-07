@@ -1225,3 +1225,12 @@
 **Description:** The `ws.onmessage` handler in `connect` (useCallback with deps `[navigate]`) captures `state` at creation time. When a `CombatEvent` arrives with `ce.target == player name`, the `state.characterInfo?.name` check always fails because `state` is the initial null value, so `UPDATE_PLAYER_HP` is never dispatched.
 **Steps:** Enter combat; take damage from an NPC attack targeting your character; observe that HP in the UI does not update from combat events (only from explicit CharacterSheet refreshes).
 **Fix:** Moved the player-name comparison into the UPDATE_COMBATANT_HP reducer case where state is always current. The reducer now also updates characterInfo HP when the combatant name matches the player's name, eliminating the stale closure entirely.
+
+### BUG-151: Web client does not receive weather events — WeatherEvent silently dropped by websocket dispatcher
+
+**Severity:** medium
+**Status:** fixed
+**Category:** UI
+**Description:** The backend sends `WeatherEvent` messages via ServerEvent.Weather field, and the frontend GameContext.tsx already handles `"WeatherEvent"` messages to update `state.activeWeather`. However, `serverEventInner` in `cmd/webclient/handlers/websocket.go` was missing the case for `*gamev1.ServerEvent_Weather`, causing weather events to be silently dropped without reaching the browser.
+**Steps:** Observe weather changes occur on the server but no visual weather indicator updates in the web UI; weather conditions exist in the game state but are never displayed to the player.
+**Fix:** Added `case *gamev1.ServerEvent_Weather: return p.Weather, "WeatherEvent"` to the `serverEventInner` switch statement in `cmd/webclient/handlers/websocket.go` (before the `default:` case). Added unit test `TestServerEventInner_Weather_BasicMessage` in `cmd/webclient/handlers/websocket_dispatch_test.go` to verify the case is wired correctly.

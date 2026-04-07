@@ -49,6 +49,50 @@ func TestDispatchWSMessage_UnknownType_ReturnsError(t *testing.T) {
 	assert.Error(t, err)
 }
 
+func TestDispatchWSMessage_CommandText_Stride_NoArgs(t *testing.T) {
+	env := handlers.WSMessageForTest("CommandText", map[string]string{"text": "stride"})
+	registry := command.DefaultRegistry()
+	msg, err := handlers.DispatchWSMessageForTest(env, "req-5", registry)
+	require.NoError(t, err)
+	require.NotNil(t, msg)
+	stride := msg.GetStride()
+	require.NotNil(t, stride)
+	assert.Equal(t, "toward", stride.Direction)
+}
+
+func TestDispatchWSMessage_CommandText_Stride_Away(t *testing.T) {
+	env := handlers.WSMessageForTest("CommandText", map[string]string{"text": "stride away"})
+	registry := command.DefaultRegistry()
+	msg, err := handlers.DispatchWSMessageForTest(env, "req-6", registry)
+	require.NoError(t, err)
+	require.NotNil(t, msg)
+	stride := msg.GetStride()
+	require.NotNil(t, stride)
+	assert.Equal(t, "away", stride.Direction)
+}
+
+func TestDispatchWSMessage_CommandText_Stride_Toward(t *testing.T) {
+	env := handlers.WSMessageForTest("CommandText", map[string]string{"text": "stride toward"})
+	registry := command.DefaultRegistry()
+	msg, err := handlers.DispatchWSMessageForTest(env, "req-7", registry)
+	require.NoError(t, err)
+	require.NotNil(t, msg)
+	stride := msg.GetStride()
+	require.NotNil(t, stride)
+	assert.Equal(t, "toward", stride.Direction)
+}
+
+func TestDispatchWSMessage_CommandText_Stride_OtherArg(t *testing.T) {
+	env := handlers.WSMessageForTest("CommandText", map[string]string{"text": "stride forward"})
+	registry := command.DefaultRegistry()
+	msg, err := handlers.DispatchWSMessageForTest(env, "req-8", registry)
+	require.NoError(t, err)
+	require.NotNil(t, msg)
+	stride := msg.GetStride()
+	require.NotNil(t, stride)
+	assert.Equal(t, "toward", stride.Direction)
+}
+
 // ── serverEventInner: UseResponse ────────────────────────────────────────────
 
 func TestServerEventInner_UseResponse_Message(t *testing.T) {
@@ -78,4 +122,21 @@ func TestServerEventInner_UseResponse_Choices(t *testing.T) {
 	inner, name := handlers.ServerEventInnerForTest(event)
 	require.NotNil(t, inner, "UseResponse with choices must not be dropped")
 	assert.Equal(t, "UseResponse", name)
+}
+
+// ── serverEventInner: Weather ────────────────────────────────────────────
+
+func TestServerEventInner_Weather_BasicMessage(t *testing.T) {
+	event := &gamev1.ServerEvent{
+		Payload: &gamev1.ServerEvent_Weather{
+			Weather: &gamev1.WeatherEvent{WeatherName: "acid_rain", Active: true},
+		},
+	}
+	inner, name := handlers.ServerEventInnerForTest(event)
+	require.NotNil(t, inner, "WeatherEvent must not be dropped")
+	assert.Equal(t, "WeatherEvent", name)
+	we, ok := inner.(*gamev1.WeatherEvent)
+	require.True(t, ok, "inner must be *gamev1.WeatherEvent")
+	assert.Equal(t, "acid_rain", we.GetWeatherName())
+	assert.True(t, we.GetActive())
 }
