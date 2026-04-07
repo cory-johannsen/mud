@@ -362,6 +362,41 @@ type MotelConfig struct {
 	RestCost int `yaml:"rest_cost"`
 }
 
+// ---- BrothelKeeper ----
+
+// BrothelConfig holds configuration for a brothel_keeper NPC (REQ-BR-2).
+type BrothelConfig struct {
+	RestCost      int      `yaml:"rest_cost"`
+	DiseaseChance float64  `yaml:"disease_chance"`
+	RobberyChance float64  `yaml:"robbery_chance"`
+	DiseasePool   []string `yaml:"disease_pool"`
+	FlairBonusDur string   `yaml:"flair_bonus_duration"`
+}
+
+// Validate checks REQ-BR-3: rest_cost > 0, disease_chance and robbery_chance in [0,1],
+// disease_pool non-empty, flair_bonus_duration parseable as a Go duration.
+//
+// Precondition: cfg must not be nil.
+// Postcondition: Returns nil iff all constraints are satisfied.
+func (cfg *BrothelConfig) Validate() error {
+	if cfg.RestCost <= 0 {
+		return fmt.Errorf("brothel: rest_cost must be > 0, got %d", cfg.RestCost)
+	}
+	if cfg.DiseaseChance < 0.0 || cfg.DiseaseChance > 1.0 {
+		return fmt.Errorf("brothel: disease_chance must be in [0.0, 1.0], got %f", cfg.DiseaseChance)
+	}
+	if cfg.RobberyChance < 0.0 || cfg.RobberyChance > 1.0 {
+		return fmt.Errorf("brothel: robbery_chance must be in [0.0, 1.0], got %f", cfg.RobberyChance)
+	}
+	if len(cfg.DiseasePool) == 0 {
+		return fmt.Errorf("brothel: disease_pool must not be empty")
+	}
+	if _, err := time.ParseDuration(cfg.FlairBonusDur); err != nil {
+		return fmt.Errorf("brothel: flair_bonus_duration %q is not a valid duration: %w", cfg.FlairBonusDur, err)
+	}
+	return nil
+}
+
 // ---- Fixer ----
 
 // FixerConfig holds the static configuration for a fixer NPC.
