@@ -47,10 +47,9 @@ zone:
         target: storybook_lane
       - direction: southeast
         target: the_caravan
+      - direction: down
+        target: wooklyn_brothel
     spawns:
-      - template: wook_fixer
-        count: 1
-        respawn_after: 15m
       - template: wooklyn_motel_keeper
         count: 1
         respawn_after: 0s
@@ -790,3 +789,23 @@ zone:
       - template: wook_enforcer
         count: 3
         respawn_after: 10m
+
+  - id: wooklyn_brothel
+    title: The Mossy Hollow
+    danger_level: safe
+    description: Beneath the Tofteville Market, reached through a ladder hatch between the roots of an enormous oak. The Mossy Hollow is exactly what it sounds like — a subterranean chamber lined with living moss, salvaged fairy-tale furniture, and soft bioluminescent lanterns. Services are offered with genuine warmth and a sliding scale.
+    map_x: 0
+    map_y: 100
+    exits:
+      - direction: up
+        target: tofteville_market
+    spawns:
+      - template: wooklyn_brothel_keeper
+        count: 1
+        respawn_after: 0s
+      - template: wooklyn_black_market_merchant
+        count: 1
+        respawn_after: 0s
+      - template: wooklyn_fixer
+        count: 1
+        respawn_after: 0s

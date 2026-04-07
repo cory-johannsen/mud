@@ -601,9 +601,6 @@ zone:
     - template: the_couve_guard
       count: 1
       respawn_after: 0s
-    - template: the_couve_fixer
-      count: 1
-      respawn_after: 0s
     - template: the_couve_motel_keeper
       count: 1
       respawn_after: 0s
@@ -629,6 +626,8 @@ zone:
       target: couve_esther_short_park
     - direction: east
       target: couve_neutral_back_room
+    - direction: north
+      target: the_couve_brothel
     map_x: 2
     map_y: -5
     properties:
@@ -875,3 +874,23 @@ zone:
     properties:
       lighting: dim
       atmosphere: quiet
+
+  - id: the_couve_brothel
+    title: The Crossroads Lodge
+    danger_level: safe
+    description: Above the neutral diner, accessed through a side staircase with a hand-lettered sign reading ROOMS. The stairwell smells of coffee and something else. Inside, the noise from the diner below is a gentle murmur. Three rooms, one rate, cash only. Roz claims not to know about it. No one believes her.
+    map_x: 0
+    map_y: 100
+    exits:
+    - direction: south
+      target: couve_neutral_diner
+    spawns:
+    - template: the_couve_brothel_keeper
+      count: 1
+      respawn_after: 0s
+    - template: the_couve_black_market_merchant
+      count: 1
+      respawn_after: 0s
+    - template: the_couve_fixer
+      count: 1
+      respawn_after: 0s

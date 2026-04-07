@@ -624,6 +624,8 @@ zone:
       target: sauvie_neutral_barn
     - direction: down
       target: sauvie_neutral_cellar
+    - direction: west
+      target: sauvie_island_brothel
     map_x: -2
     map_y: 2
     properties:
@@ -831,3 +833,23 @@ zone:
     properties:
       lighting: overcast
       atmosphere: overgrown
+
+  - id: sauvie_island_brothel
+    title: The Farmhouse Hideaway
+    danger_level: safe
+    description: A converted summer kitchen annexed to the neutral farmhouse's west wall. The original hearth still works. Rough-hewn shelves hold mason jars of unknown contents. The Farmhouse Hideaway maintains the island's pastoral aesthetic while conducting entirely non-agricultural business. Beds are actual beds. Rates are actual rates.
+    map_x: 0
+    map_y: 100
+    exits:
+    - direction: east
+      target: sauvie_neutral_farmhouse
+    spawns:
+    - template: sauvie_island_brothel_keeper
+      count: 1
+      respawn_after: 0s
+    - template: sauvie_island_black_market_merchant
+      count: 1
+      respawn_after: 0s
+    - template: sauvie_island_fixer
+      count: 1
+      respawn_after: 0s

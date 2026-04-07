@@ -737,6 +737,8 @@ zone:
     exits:
     - direction: north
       target: sei_neutral_office
+    - direction: east
+      target: se_industrial_brothel
     map_x: 2
     map_y: 6
     spawns:
@@ -922,3 +924,23 @@ zone:
     properties:
       lighting: dim
       atmosphere: fetid
+
+  - id: se_industrial_brothel
+    title: The Loading Dock
+    danger_level: safe
+    description: A repurposed freight office behind the neutral break room. Corrugated steel walls, a padlock on the door, and a hand-drawn sign that reads DOCK 7 — APPOINTMENTS ONLY. Inside, industrial mats and salvaged curtains divide the space. No windows. The noise from the loading dock outside is muffled but never fully gone.
+    map_x: 0
+    map_y: 100
+    exits:
+    - direction: west
+      target: sei_neutral_break_room
+    spawns:
+    - template: se_industrial_brothel_keeper
+      count: 1
+      respawn_after: 0s
+    - template: se_industrial_black_market_merchant
+      count: 1
+      respawn_after: 0s
+    - template: se_industrial_fixer
+      count: 1
+      respawn_after: 0s

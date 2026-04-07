@@ -1,23 +1,9 @@
-- id: wooklyn_motel_keeper
-  name: "Camp Steward"
-  npc_type: motel_keeper
-  type: human
-  description: "Keeps the caravan bunk tent. Communal sleeping, communal rules. No violence, no exceptions, no refunds."
-  level: 2
-  max_hp: 20
-  ac: 10
-  awareness: 3
-  disposition: neutral
-  personality: neutral
-  motel:
-    rest_cost: 45
-
-- id: wooklyn_fixer
-  name: "The Root"
+- id: club_privata_fixer
+  name: "The VIP Coordinator"
   npc_type: fixer
   npc_role: fixer
   type: human
-  description: "Deep in the park's network, the Root is the one you find when other solutions have composted. Patient, thorough, never hurried."
+  description: "Manages the club's less-advertised services from the VIP suite. Every membership has a price; every problem has a tier."
   level: 5
   max_hp: 30
   ac: 12
@@ -45,12 +31,12 @@
       min: 10
       max: 50
 
-- id: wooklyn_brothel_keeper
-  name: "Mossy Hollow Host"
+- id: club_privata_brothel_keeper
+  name: "Members Suite Host"
   npc_type: brothel_keeper
   npc_role: brothel_keeper
   type: human
-  description: "Runs the Mossy Hollow from a converted fairy-tale cottage deep in the park. No judgment, no clocks, no synthetic materials."
+  description: "Manages the Members Suite with the detached professionalism of someone who has seen everything and prices none of it cheaply."
   level: 3
   max_hp: 20
   ac: 10
@@ -66,7 +52,7 @@
     savvy: 13
     flair: 14
   brothel:
-    rest_cost: 25
+    rest_cost: 10
     disease_chance: 0.15
     robbery_chance: 0.20
     disease_pool:
@@ -86,12 +72,12 @@
       min: 0
       max: 0
 
-- id: wooklyn_black_market_merchant
-  name: "Barter Trader"
+- id: club_privata_black_market_merchant
+  name: "Club Supply Dealer"
   npc_type: merchant
   npc_role: merchant
   type: human
-  description: "Operates from a market stall that is definitely just selling herbs and hand-crafted goods. The back of the stall tells a different story."
+  description: "Handles the club's unofficial supply chain from the coat check. Everything from enhancement compounds to weapons, members only pricing."
   level: 4
   max_hp: 22
   ac: 11

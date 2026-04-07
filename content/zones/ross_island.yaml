@@ -702,6 +702,8 @@ zone:
       target: ri_neutral_shack
     - direction: east
       target: ri_neutral_cache
+    - direction: south
+      target: ross_island_brothel
     map_x: 4
     map_y: 0
     properties:
@@ -950,3 +952,23 @@ zone:
     properties:
       lighting: exposed
       atmosphere: wind
+
+  - id: ross_island_brothel
+    title: The River Rat Den
+    danger_level: safe
+    description: Beneath the neutral dock, in a boathouse that technically belongs to nobody and practically belongs to everyone with the right price. The River Rat Den sits half above water on old pilings, smelling of the Willamette and tallow candles. The river noise is constant. The staff say it's peaceful.
+    map_x: 0
+    map_y: 100
+    exits:
+    - direction: north
+      target: ri_neutral_dock
+    spawns:
+    - template: ross_island_brothel_keeper
+      count: 1
+      respawn_after: 0s
+    - template: ross_island_black_market_merchant
+      count: 1
+      respawn_after: 0s
+    - template: ross_island_fixer
+      count: 1
+      respawn_after: 0s

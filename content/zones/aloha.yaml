@@ -113,6 +113,8 @@ zone:
       target: aloha_185th_crossing
     - direction: south
       target: aloha_park
+    - direction: west
+      target: aloha_brothel
     map_x: -4
     map_y: 2
     spawns:
@@ -132,9 +134,6 @@ zone:
       count: 1
       respawn_after: 0s
     - template: aloha_guard
-      count: 1
-      respawn_after: 0s
-    - template: aloha_fixer
       count: 1
       respawn_after: 0s
     - template: aloha_motel_keeper
@@ -716,3 +715,23 @@ zone:
     properties:
       lighting: dappled
       atmosphere: peaceful
+
+  - id: aloha_brothel
+    title: Discount Motel Room 7
+    danger_level: safe
+    description: The back corner of a strip mall that never quite became anything else. A hand-stenciled "7" marks the door. Inside, fluorescent tubes flicker over linoleum floors, a folding table, and two locked back rooms. The smell of pine cleaner barely covers what came before it. Services are transactional and the rate card is taped to the door.
+    map_x: 0
+    map_y: 100
+    exits:
+    - direction: east
+      target: aloha_the_bazaar
+    spawns:
+    - template: aloha_brothel_keeper
+      count: 1
+      respawn_after: 0s
+    - template: aloha_black_market_merchant
+      count: 1
+      respawn_after: 0s
+    - template: aloha_fixer
+      count: 1
+      respawn_after: 0s

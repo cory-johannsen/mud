@@ -739,6 +739,8 @@ zone:
       target: pdx_neutral_terminal
     - direction: east
       target: pdx_neutral_gate
+    - direction: west
+      target: pdx_international_brothel
     map_x: 4
     map_y: -12
     properties:
@@ -847,3 +849,23 @@ zone:
     properties:
       lighting: exposed
       atmosphere: wind
+
+  - id: pdx_international_brothel
+    title: Terminal Comfort
+    danger_level: safe
+    description: A former airline club lounge off the neutral terminal corridor, its frosted glass doors still etched with the old carrier's logo. Inside, reclined seats have been converted into curtained berths. The bar cart still operates. Terminal Comfort offers the airport traveler experience with none of the amenities and all of the human contact.
+    map_x: 0
+    map_y: 100
+    exits:
+    - direction: east
+      target: pdx_neutral_lounge
+    spawns:
+    - template: pdx_international_brothel_keeper
+      count: 1
+      respawn_after: 0s
+    - template: pdx_international_black_market_merchant
+      count: 1
+      respawn_after: 0s
+    - template: pdx_international_fixer
+      count: 1
+      respawn_after: 0s

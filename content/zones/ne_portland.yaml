@@ -719,6 +719,8 @@ zone:
     exits:
     - direction: south
       target: ne_neutral_garage
+    - direction: east
+      target: ne_portland_brothel
     map_x: 4
     map_y: -6
     spawns:
@@ -867,3 +869,23 @@ zone:
     properties:
       lighting: dim
       atmosphere: quiet
+
+  - id: ne_portland_brothel
+    title: The Velvet Spoke
+    danger_level: safe
+    description: Adjacent to the neutral bunker, through a door painted with an ironic mural of a bicycle wheel. The Velvet Spoke operates with Northeast Portland's characteristic self-awareness — locally owned, community-priced, and entirely earnest about what it offers. Drinks available. Conversation optional.
+    map_x: 0
+    map_y: 100
+    exits:
+    - direction: west
+      target: ne_neutral_bunker
+    spawns:
+    - template: ne_portland_brothel_keeper
+      count: 1
+      respawn_after: 0s
+    - template: ne_portland_black_market_merchant
+      count: 1
+      respawn_after: 0s
+    - template: ne_portland_fixer
+      count: 1
+      respawn_after: 0s

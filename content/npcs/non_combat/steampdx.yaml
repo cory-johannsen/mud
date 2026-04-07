@@ -1,23 +1,9 @@
-- id: wooklyn_motel_keeper
-  name: "Camp Steward"
-  npc_type: motel_keeper
-  type: human
-  description: "Keeps the caravan bunk tent. Communal sleeping, communal rules. No violence, no exceptions, no refunds."
-  level: 2
-  max_hp: 20
-  ac: 10
-  awareness: 3
-  disposition: neutral
-  personality: neutral
-  motel:
-    rest_cost: 45
-
-- id: wooklyn_fixer
-  name: "The Root"
+- id: steampdx_fixer
+  name: "The Locker Room Attendant"
   npc_type: fixer
   npc_role: fixer
   type: human
-  description: "Deep in the park's network, the Root is the one you find when other solutions have composted. Patient, thorough, never hurried."
+  description: "Maintains the lockers and maintains a parallel operation for clients who need things cleaned up. Has the keys to everything."
   level: 5
   max_hp: 30
   ac: 12
@@ -45,12 +31,12 @@
       min: 10
       max: 50
 
-- id: wooklyn_brothel_keeper
-  name: "Mossy Hollow Host"
+- id: steampdx_brothel_keeper
+  name: "Brass Bed Host"
   npc_type: brothel_keeper
   npc_role: brothel_keeper
   type: human
-  description: "Runs the Mossy Hollow from a converted fairy-tale cottage deep in the park. No judgment, no clocks, no synthetic materials."
+  description: "Manages the Brass Bed Chamber from the parking lot's converted attendant booth. Steampunk aesthetic, pragmatic operations."
   level: 3
   max_hp: 20
   ac: 10
@@ -66,7 +52,7 @@
     savvy: 13
     flair: 14
   brothel:
-    rest_cost: 25
+    rest_cost: 10
     disease_chance: 0.15
     robbery_chance: 0.20
     disease_pool:
@@ -86,12 +72,12 @@
       min: 0
       max: 0
 
-- id: wooklyn_black_market_merchant
-  name: "Barter Trader"
+- id: steampdx_black_market_merchant
+  name: "Bathhouse Supply Dealer"
   npc_type: merchant
   npc_role: merchant
   type: human
-  description: "Operates from a market stall that is definitely just selling herbs and hand-crafted goods. The back of the stall tells a different story."
+  description: "Provides supplies that the bathhouse officially does not stock and the health department officially does not know about."
   level: 4
   max_hp: 22
   ac: 11

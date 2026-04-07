@@ -32,6 +32,8 @@ zone:
     exits:
     - direction: east
       target: tvr_play_rooms
+    - direction: west
+      target: the_velvet_rope_brothel
     map_x: 0
     map_y: 0
     spawns:
@@ -145,3 +147,23 @@ zone:
       count: 1
       respawn_after: 30m
     boss_room: true
+
+  - id: the_velvet_rope_brothel
+    title: The VIP Lounge
+    danger_level: safe
+    description: A quiet anteroom off the buffet, separated from the main club by a heavy velvet curtain and a sign reading VIP ONLY. The VIP Lounge is the velvet rope's velvet rope — quieter, better lit, more expensive, and administered with the kind of studied discretion that the main club only pretends to offer. Membership implied.
+    map_x: 0
+    map_y: 100
+    exits:
+    - direction: east
+      target: tvr_the_buffet
+    spawns:
+    - template: the_velvet_rope_brothel_keeper
+      count: 1
+      respawn_after: 0s
+    - template: the_velvet_rope_black_market_merchant
+      count: 1
+      respawn_after: 0s
+    - template: the_velvet_rope_fixer
+      count: 1
+      respawn_after: 0s

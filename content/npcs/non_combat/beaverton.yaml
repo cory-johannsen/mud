@@ -122,3 +122,112 @@
   personality: neutral
   motel:
     rest_cost: 75
+
+- id: beaverton_fixer
+  name: "The Consultant"
+  npc_type: fixer
+  npc_role: fixer
+  type: human
+  description: "Former tech sector middle manager who pivoted to problem resolution. Has a laminated rate card and a very firm handshake."
+  level: 5
+  max_hp: 30
+  ac: 12
+  awareness: 12
+  disposition: neutral
+  personality: cowardly
+  respawn_delay: "15m"
+  abilities:
+    brutality: 10
+    grit: 12
+    quickness: 13
+    reasoning: 12
+    savvy: 15
+    flair: 11
+  fixer:
+    npc_variance: 1.15
+    max_wanted_level: 4
+    base_costs:
+      1: 150
+      2: 350
+      3: 700
+      4: 1500
+  loot:
+    currency:
+      min: 10
+      max: 50
+
+- id: beaverton_brothel_keeper
+  name: "Silicon Comfort Host"
+  npc_type: brothel_keeper
+  npc_role: brothel_keeper
+  type: human
+  description: "Manages the Silicon Comfort from a former hotel meeting room. Efficient, clean, professionally indifferent."
+  level: 3
+  max_hp: 20
+  ac: 10
+  awareness: 8
+  disposition: neutral
+  personality: neutral
+  respawn_delay: "15m"
+  abilities:
+    brutality: 8
+    grit: 10
+    quickness: 11
+    reasoning: 10
+    savvy: 13
+    flair: 14
+  brothel:
+    rest_cost: 45
+    disease_chance: 0.15
+    robbery_chance: 0.20
+    disease_pool:
+      - street_fever
+      - crotch_rot
+      - swamp_itch
+      - track_rash
+      - gutter_flu
+      - rust_pox
+      - neon_blight
+      - wet_lung
+      - chrome_mange
+      - black_tongue
+    flair_bonus_duration: "24h"
+  loot:
+    currency:
+      min: 0
+      max: 0
+
+- id: beaverton_black_market_merchant
+  name: "Tech Surplus Trader"
+  npc_type: merchant
+  npc_role: merchant
+  type: human
+  description: "Deals in components and devices that fell outside the grid's asset tracking. Everything has a serial number filed off."
+  level: 4
+  max_hp: 22
+  ac: 11
+  awareness: 10
+  disposition: neutral
+  personality: neutral
+  respawn_delay: "15m"
+  abilities:
+    brutality: 9
+    grit: 11
+    quickness: 12
+    reasoning: 12
+    savvy: 14
+    flair: 11
+  merchant:
+    merchant_type: black_market
+    sell_margin: 1.5
+    buy_margin: 0.6
+    budget: 500
+    replenish_rate:
+      min_hours: 6
+      max_hours: 12
+      stock_refill: 0
+      budget_refill: 100
+  loot:
+    currency:
+      min: 10
+      max: 50

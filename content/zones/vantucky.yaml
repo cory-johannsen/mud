@@ -984,6 +984,8 @@ zone:
       target: vantucky_neutral_pawn
     - direction: east
       target: vantucky_neutral_vault
+    - direction: north
+      target: vantucky_brothel
     map_x: -2
     map_y: -4
     properties:
@@ -1233,3 +1235,23 @@ zone:
       cover_tier: standard
       cover_destructible: true
       cover_hp: 3
+
+  - id: vantucky_brothel
+    title: The Happy Trails Hideaway
+    danger_level: safe
+    description: Upstairs from the neutral pawn shop's back room, past a door with a horseshoe nailed to it. The Happy Trails Hideaway runs on trailer park logic — it is what it is, no pretense, no menu. Rates posted on a hand-written card. Cash preferred. Tabs run only for regulars.
+    map_x: 0
+    map_y: 100
+    exits:
+    - direction: south
+      target: vantucky_neutral_back
+    spawns:
+    - template: vantucky_brothel_keeper
+      count: 1
+      respawn_after: 0s
+    - template: vantucky_black_market_merchant
+      count: 1
+      respawn_after: 0s
+    - template: vantucky_fixer
+      count: 1
+      respawn_after: 0s
