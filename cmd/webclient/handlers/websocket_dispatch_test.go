@@ -5,6 +5,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"pgregory.net/rapid"
 
 	"github.com/cory-johannsen/mud/cmd/webclient/handlers"
 	"github.com/cory-johannsen/mud/internal/game/command"
@@ -139,4 +140,34 @@ func TestServerEventInner_Weather_BasicMessage(t *testing.T) {
 	require.True(t, ok, "inner must be *gamev1.WeatherEvent")
 	assert.Equal(t, "acid_rain", we.GetWeatherName())
 	assert.True(t, we.GetActive())
+}
+
+// Uses rapid property-based testing (SWENG-5a).
+func TestProperty_ServerEventInner_Weather_AlwaysReturnsWeatherEvent(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		name := rapid.StringOf(rapid.Rune()).Draw(rt, "weather_name")
+		active := rapid.Bool().Draw(rt, "active")
+		event := &gamev1.ServerEvent{
+			Payload: &gamev1.ServerEvent_Weather{
+				Weather: &gamev1.WeatherEvent{WeatherName: name, Active: active},
+			},
+		}
+		inner, msgName := handlers.ServerEventInnerForTest(event)
+		if inner == nil {
+			rt.Fatalf("serverEventInner returned nil for Weather payload")
+		}
+		if msgName != "WeatherEvent" {
+			rt.Fatalf("expected msgName=WeatherEvent, got %q", msgName)
+		}
+		we, ok := inner.(*gamev1.WeatherEvent)
+		if !ok {
+			rt.Fatalf("expected *gamev1.WeatherEvent, got %T", inner)
+		}
+		if we.WeatherName != name {
+			rt.Fatalf("WeatherName mismatch: got %q, want %q", we.WeatherName, name)
+		}
+		if we.Active != active {
+			rt.Fatalf("Active mismatch: got %v, want %v", we.Active, active)
+		}
+	})
 }
