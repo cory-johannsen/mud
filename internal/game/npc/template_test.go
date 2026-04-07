@@ -3,6 +3,7 @@ package npc_test
 import (
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/cory-johannsen/mud/internal/game/npc"
 	"github.com/cory-johannsen/mud/internal/game/ruleset"
@@ -1185,15 +1186,35 @@ func TestProperty_BrothelConfig_InvalidRobberyChanceFails(t *testing.T) {
 	})
 }
 
-// TestProperty_BrothelConfig_EmptyDiseasePoolFails verifies REQ-BR-T1 for empty disease_pool.
+// TestBrothelConfig_EmptyDiseasePoolFails verifies REQ-BR-T1 for empty disease_pool.
 //
-// Precondition: disease_pool is nil or empty.
+// Precondition: disease_pool is empty.
+// Postcondition: Validate() returns a non-nil error.
+func TestBrothelConfig_EmptyDiseasePoolFails(t *testing.T) {
+	cfg := validBrothelConfig()
+	cfg.DiseasePool = []string{}
+	assert.Error(t, cfg.Validate())
+}
+
+// TestProperty_BrothelConfig_InvalidDurationFails verifies REQ-BR-T1 for invalid flair_bonus_duration strings.
+//
+// Precondition: flair_bonus_duration is a non-empty string that time.ParseDuration cannot parse.
 // Postcondition: Validate() always returns a non-nil error.
-func TestProperty_BrothelConfig_EmptyDiseasePoolFails(t *testing.T) {
+func TestProperty_BrothelConfig_InvalidDurationFails(t *testing.T) {
 	rapid.Check(t, func(rt *rapid.T) {
+		s := rapid.StringOf(rapid.RuneFrom([]rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_!@#$%"))).
+			Filter(func(s string) bool {
+				if s == "" {
+					return false
+				}
+				_, err := time.ParseDuration(s)
+				return err != nil
+			}).Draw(rt, "invalid_duration")
 		cfg := validBrothelConfig()
-		cfg.DiseasePool = []string{}
-		assert.Error(rt, cfg.Validate())
+		cfg.FlairBonusDur = s
+		if err := cfg.Validate(); err == nil {
+			rt.Errorf("Validate() returned nil for invalid duration %q, want error", s)
+		}
 	})
 }
 
