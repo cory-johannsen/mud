@@ -3,6 +3,7 @@ package npc_test
 import (
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/cory-johannsen/mud/internal/game/npc"
 	"github.com/cory-johannsen/mud/internal/game/ruleset"
@@ -627,10 +628,10 @@ fixer:
 // does not break any existing NPC YAML file. Reads all *.yaml in content/npcs/.
 func TestProperty_AllExistingNPCTemplatesStillLoad(t *testing.T) {
 	validTypes := map[string]bool{
-		"combat": true, "merchant": true, "guard": true, "healer": true,
+		"combat": true, "merchant": true, "black_market_merchant": true, "guard": true, "healer": true,
 		"quest_giver": true, "hireling": true, "banker": true,
 		"job_trainer": true, "crafter": true, "fixer": true,
-		"chip_doc": true, "motel_keeper": true,
+		"chip_doc": true, "motel_keeper": true, "brothel_keeper": true,
 	}
 	templates, err := npc.LoadTemplates("../../../content/npcs")
 	require.NoError(t, err, "all existing NPC templates must still load after Validate() changes")
@@ -988,4 +989,305 @@ motel:
 	assert.Equal(t, "motel_keeper", tmpl.NPCType)
 	require.NotNil(t, tmpl.Motel)
 	assert.Equal(t, 50, tmpl.Motel.RestCost)
+}
+
+// ---- BrothelConfig tests (REQ-BR-1, REQ-BR-2, REQ-BR-3, REQ-BR-T1) ----
+
+// validBrothelConfig returns a BrothelConfig that satisfies all constraints (REQ-BR-3).
+func validBrothelConfig() *npc.BrothelConfig {
+	return &npc.BrothelConfig{
+		RestCost:      50,
+		DiseaseChance: 0.1,
+		RobberyChance: 0.05,
+		DiseasePool:   []string{"syphilis"},
+		FlairBonusDur: "24h",
+	}
+}
+
+// TestBrothelConfig_Validate_ValidConfig verifies that a fully valid BrothelConfig passes.
+//
+// Precondition: config has rest_cost>0, chances in [0,1], non-empty disease_pool,
+// valid duration string.
+// Postcondition: Validate() returns nil.
+func TestBrothelConfig_Validate_ValidConfig(t *testing.T) {
+	cfg := validBrothelConfig()
+	assert.NoError(t, cfg.Validate())
+}
+
+// TestBrothelConfig_Validate_ZeroRestCostErrors verifies REQ-BR-3: rest_cost <= 0 rejected.
+//
+// Precondition: rest_cost == 0.
+// Postcondition: Validate() returns a non-nil error.
+func TestBrothelConfig_Validate_ZeroRestCostErrors(t *testing.T) {
+	cfg := validBrothelConfig()
+	cfg.RestCost = 0
+	err := cfg.Validate()
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "rest_cost")
+}
+
+// TestBrothelConfig_Validate_NegativeRestCostErrors verifies REQ-BR-3: rest_cost <= 0 rejected.
+//
+// Precondition: rest_cost == -1.
+// Postcondition: Validate() returns a non-nil error.
+func TestBrothelConfig_Validate_NegativeRestCostErrors(t *testing.T) {
+	cfg := validBrothelConfig()
+	cfg.RestCost = -1
+	err := cfg.Validate()
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "rest_cost")
+}
+
+// TestBrothelConfig_Validate_DiseaseChanceOutOfRangeErrors verifies REQ-BR-3.
+//
+// Precondition: disease_chance is -0.01 or 1.01.
+// Postcondition: Validate() returns a non-nil error referencing disease_chance.
+func TestBrothelConfig_Validate_DiseaseChanceOutOfRangeErrors(t *testing.T) {
+	for _, bad := range []float64{-0.01, 1.01, -100.0, 5.0} {
+		cfg := validBrothelConfig()
+		cfg.DiseaseChance = bad
+		err := cfg.Validate()
+		assert.Error(t, err, "expected error for disease_chance %f", bad)
+		assert.Contains(t, err.Error(), "disease_chance")
+	}
+}
+
+// TestBrothelConfig_Validate_RobberyChanceOutOfRangeErrors verifies REQ-BR-3.
+//
+// Precondition: robbery_chance is -0.01 or 1.01.
+// Postcondition: Validate() returns a non-nil error referencing robbery_chance.
+func TestBrothelConfig_Validate_RobberyChanceOutOfRangeErrors(t *testing.T) {
+	for _, bad := range []float64{-0.01, 1.01, -100.0, 5.0} {
+		cfg := validBrothelConfig()
+		cfg.RobberyChance = bad
+		err := cfg.Validate()
+		assert.Error(t, err, "expected error for robbery_chance %f", bad)
+		assert.Contains(t, err.Error(), "robbery_chance")
+	}
+}
+
+// TestBrothelConfig_Validate_EmptyDiseasePoolErrors verifies REQ-BR-3.
+//
+// Precondition: disease_pool is empty.
+// Postcondition: Validate() returns a non-nil error referencing disease_pool.
+func TestBrothelConfig_Validate_EmptyDiseasePoolErrors(t *testing.T) {
+	cfg := validBrothelConfig()
+	cfg.DiseasePool = []string{}
+	err := cfg.Validate()
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "disease_pool")
+}
+
+// TestBrothelConfig_Validate_InvalidDurationErrors verifies REQ-BR-3.
+//
+// Precondition: flair_bonus_duration is "banana" (not a valid Go duration).
+// Postcondition: Validate() returns a non-nil error.
+func TestBrothelConfig_Validate_InvalidDurationErrors(t *testing.T) {
+	for _, bad := range []string{"banana", "forever", "1day", "5 minutes", "abc"} {
+		cfg := validBrothelConfig()
+		cfg.FlairBonusDur = bad
+		err := cfg.Validate()
+		assert.Error(t, err, "expected error for flair_bonus_duration %q", bad)
+		assert.Contains(t, err.Error(), "flair_bonus_duration")
+	}
+}
+
+// TestBrothelConfig_Validate_ValidDurations verifies that standard Go duration strings pass.
+//
+// Precondition: flair_bonus_duration is "24h", "30m", "1h30m".
+// Postcondition: Validate() returns nil.
+func TestBrothelConfig_Validate_ValidDurations(t *testing.T) {
+	for _, dur := range []string{"24h", "30m", "1h30m", "45s", "2h"} {
+		cfg := validBrothelConfig()
+		cfg.FlairBonusDur = dur
+		assert.NoError(t, cfg.Validate(), "expected no error for duration %q", dur)
+	}
+}
+
+// TestProperty_BrothelConfig_ValidConfigPasses verifies that any generated valid config passes (REQ-BR-T1).
+//
+// Precondition: all fields satisfy constraints.
+// Postcondition: Validate() returns nil.
+func TestProperty_BrothelConfig_ValidConfigPasses(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		restCost := rapid.IntRange(1, 10000).Draw(rt, "rest_cost")
+		diseaseChance := rapid.Float64Range(0.0, 1.0).Draw(rt, "disease_chance")
+		robberyChance := rapid.Float64Range(0.0, 1.0).Draw(rt, "robbery_chance")
+		diseaseCount := rapid.IntRange(1, 5).Draw(rt, "disease_count")
+		diseases := make([]string, diseaseCount)
+		for i := range diseases {
+			diseases[i] = fmt.Sprintf("disease_%d", i)
+		}
+		value := rapid.IntRange(1, 3600).Draw(rt, "dur_value")
+		unit := rapid.SampledFrom([]string{"s", "m", "h"}).Draw(rt, "dur_unit")
+		dur := fmt.Sprintf("%d%s", value, unit)
+
+		cfg := &npc.BrothelConfig{
+			RestCost:      restCost,
+			DiseaseChance: diseaseChance,
+			RobberyChance: robberyChance,
+			DiseasePool:   diseases,
+			FlairBonusDur: dur,
+		}
+		assert.NoError(rt, cfg.Validate())
+	})
+}
+
+// TestProperty_BrothelConfig_InvalidRestCostFails verifies REQ-BR-T1 for rest_cost <= 0.
+//
+// Precondition: rest_cost is in [-1000, 0].
+// Postcondition: Validate() always returns a non-nil error.
+func TestProperty_BrothelConfig_InvalidRestCostFails(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		restCost := rapid.IntRange(-1000, 0).Draw(rt, "rest_cost")
+		cfg := validBrothelConfig()
+		cfg.RestCost = restCost
+		assert.Error(rt, cfg.Validate())
+	})
+}
+
+// TestProperty_BrothelConfig_InvalidDiseaseChanceFails verifies REQ-BR-T1 for disease_chance out of [0,1].
+//
+// Precondition: disease_chance < 0 or > 1.
+// Postcondition: Validate() always returns a non-nil error.
+func TestProperty_BrothelConfig_InvalidDiseaseChanceFails(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		sign := rapid.SampledFrom([]float64{-1.0, 1.0}).Draw(rt, "sign")
+		offset := rapid.Float64Range(0.001, 100.0).Draw(rt, "offset")
+		var chance float64
+		if sign < 0 {
+			chance = -offset
+		} else {
+			chance = 1.0 + offset
+		}
+		cfg := validBrothelConfig()
+		cfg.DiseaseChance = chance
+		assert.Error(rt, cfg.Validate())
+	})
+}
+
+// TestProperty_BrothelConfig_InvalidRobberyChanceFails verifies REQ-BR-T1 for robbery_chance out of [0,1].
+//
+// Precondition: robbery_chance < 0 or > 1.
+// Postcondition: Validate() always returns a non-nil error.
+func TestProperty_BrothelConfig_InvalidRobberyChanceFails(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		sign := rapid.SampledFrom([]float64{-1.0, 1.0}).Draw(rt, "sign")
+		offset := rapid.Float64Range(0.001, 100.0).Draw(rt, "offset")
+		var chance float64
+		if sign < 0 {
+			chance = -offset
+		} else {
+			chance = 1.0 + offset
+		}
+		cfg := validBrothelConfig()
+		cfg.RobberyChance = chance
+		assert.Error(rt, cfg.Validate())
+	})
+}
+
+// TestBrothelConfig_EmptyDiseasePoolFails verifies REQ-BR-T1 for empty disease_pool.
+//
+// Precondition: disease_pool is empty.
+// Postcondition: Validate() returns a non-nil error.
+func TestBrothelConfig_EmptyDiseasePoolFails(t *testing.T) {
+	cfg := validBrothelConfig()
+	cfg.DiseasePool = []string{}
+	assert.Error(t, cfg.Validate())
+}
+
+// TestProperty_BrothelConfig_InvalidDurationFails verifies REQ-BR-T1 for invalid flair_bonus_duration strings.
+//
+// Precondition: flair_bonus_duration is a non-empty string that time.ParseDuration cannot parse.
+// Postcondition: Validate() always returns a non-nil error.
+func TestProperty_BrothelConfig_InvalidDurationFails(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		s := rapid.StringOf(rapid.RuneFrom([]rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_!@#$%"))).
+			Filter(func(s string) bool {
+				if s == "" {
+					return false
+				}
+				_, err := time.ParseDuration(s)
+				return err != nil
+			}).Draw(rt, "invalid_duration")
+		cfg := validBrothelConfig()
+		cfg.FlairBonusDur = s
+		if err := cfg.Validate(); err == nil {
+			rt.Errorf("Validate() returned nil for invalid duration %q, want error", s)
+		}
+	})
+}
+
+// TestTemplate_BrothelKeeperRequiresBrothelConfig verifies REQ-BR-1:
+// brothel_keeper without a brothel: block is a fatal load error.
+//
+// Precondition: npc_type is "brothel_keeper", no brothel: config block present.
+// Postcondition: LoadTemplateFromBytes returns a non-nil error.
+func TestTemplate_BrothelKeeperRequiresBrothelConfig(t *testing.T) {
+	data := []byte(`id: test_brothel
+name: Test Brothel Keeper
+level: 2
+max_hp: 20
+ac: 10
+npc_type: brothel_keeper
+`)
+	_, err := npc.LoadTemplateFromBytes(data)
+	assert.Error(t, err, "brothel_keeper without brothel config must error")
+	assert.Contains(t, err.Error(), "requires a brothel: config block")
+}
+
+// TestTemplate_BrothelKeeperWithValidConfigLoads verifies REQ-BR-1 and REQ-BR-2:
+// a well-formed brothel_keeper template loads without error.
+//
+// Precondition: all BrothelConfig fields satisfy REQ-BR-3.
+// Postcondition: LoadTemplateFromBytes returns a non-nil *Template with Brothel set.
+func TestTemplate_BrothelKeeperWithValidConfigLoads(t *testing.T) {
+	data := []byte(`id: test_brothel
+name: Test Brothel Keeper
+level: 2
+max_hp: 20
+ac: 10
+npc_type: brothel_keeper
+brothel:
+  rest_cost: 75
+  disease_chance: 0.1
+  robbery_chance: 0.05
+  disease_pool:
+    - syphilis
+    - gonorrhea
+  flair_bonus_duration: 24h
+`)
+	tmpl, err := npc.LoadTemplateFromBytes(data)
+	require.NoError(t, err)
+	assert.Equal(t, "brothel_keeper", tmpl.NPCType)
+	require.NotNil(t, tmpl.Brothel)
+	assert.Equal(t, 75, tmpl.Brothel.RestCost)
+	assert.Equal(t, 0.1, tmpl.Brothel.DiseaseChance)
+	assert.Equal(t, 0.05, tmpl.Brothel.RobberyChance)
+	assert.Equal(t, []string{"syphilis", "gonorrhea"}, tmpl.Brothel.DiseasePool)
+	assert.Equal(t, "24h", tmpl.Brothel.FlairBonusDur)
+}
+
+// TestTemplate_BrothelKeeperInvalidRestCostErrors verifies REQ-BR-3 via template load.
+//
+// Precondition: brothel.rest_cost is 0.
+// Postcondition: LoadTemplateFromBytes returns a non-nil error.
+func TestTemplate_BrothelKeeperInvalidRestCostErrors(t *testing.T) {
+	data := []byte(`id: test_brothel
+name: Test Brothel Keeper
+level: 2
+max_hp: 20
+ac: 10
+npc_type: brothel_keeper
+brothel:
+  rest_cost: 0
+  disease_chance: 0.1
+  robbery_chance: 0.05
+  disease_pool:
+    - syphilis
+  flair_bonus_duration: 24h
+`)
+	_, err := npc.LoadTemplateFromBytes(data)
+	assert.Error(t, err, "brothel_keeper with rest_cost=0 must error")
+	assert.Contains(t, err.Error(), "rest_cost")
 }

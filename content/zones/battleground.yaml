@@ -904,6 +904,8 @@ zone:
     exits:
     - direction: north
       target: battle_infirmary
+    - direction: south
+      target: battleground_brothel
     map_x: -2
     map_y: 0
     spawns:
@@ -913,3 +915,23 @@ zone:
     properties:
       lighting: overcast
       atmosphere: cautious
+
+  - id: battleground_brothel
+    title: The Foxhole
+    danger_level: safe
+    description: A converted storage bunker behind the neutral commons, accessed through a reinforced steel door marked with a red X. Inside, army-surplus cots, a coal burner, and no unnecessary conversation. The Foxhole runs on military schedule. Services rendered, morale maintained, no unit affiliation required.
+    map_x: 0
+    map_y: 100
+    exits:
+    - direction: north
+      target: battle_neutral_commons
+    spawns:
+    - template: battleground_brothel_keeper
+      count: 1
+      respawn_after: 0s
+    - template: battleground_black_market_merchant
+      count: 1
+      respawn_after: 0s
+    - template: battleground_fixer
+      count: 1
+      respawn_after: 0s

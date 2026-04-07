@@ -752,6 +752,8 @@ zone:
       target: hills_waystation_yard
     - direction: east
       target: hills_waystation_shelter
+    - direction: down
+      target: hillsboro_brothel
     map_x: 2
     map_y: -3
     spawns:
@@ -817,3 +819,23 @@ zone:
     properties:
       lighting: overcast
       atmosphere: trade
+
+  - id: hillsboro_brothel
+    title: The Grain Silo Inn
+    danger_level: safe
+    description: Below the waystation, accessed through a trapdoor behind the old service counter. The Grain Silo Inn occupies a converted underground cistern — concrete walls, lantern light, folding screens for privacy. Agricultural aesthetics with urban rates. No questions about farm affiliation.
+    map_x: 0
+    map_y: 100
+    exits:
+    - direction: up
+      target: hills_waystation
+    spawns:
+    - template: hillsboro_brothel_keeper
+      count: 1
+      respawn_after: 0s
+    - template: hillsboro_black_market_merchant
+      count: 1
+      respawn_after: 0s
+    - template: hillsboro_fixer
+      count: 1
+      respawn_after: 0s

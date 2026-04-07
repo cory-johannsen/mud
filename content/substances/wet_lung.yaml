@@ -1,0 +1,16 @@
+id: wet_lung
+name: Wet Lung
+category: disease
+onset_delay: "0s"
+duration: "2h"
+effects:
+  - apply_condition: nausea
+    stacks: 2
+remove_on_expire:
+  - nausea
+addictive: false
+addiction_chance: 0.0
+overdose_threshold: 1
+overdose_condition: ""
+withdrawal_conditions: []
+recovery_duration: "0s"

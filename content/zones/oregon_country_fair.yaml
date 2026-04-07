@@ -324,11 +324,10 @@ zone:
         target: the_big_top
       - direction: east
         target: icp_shrine
+      - direction: south
+        target: ocf_juggalo_brothel
     spawns:
       - template: juggalo_quest_giver
-        count: 1
-        respawn_after: 0s
-      - template: juggalo_fixer
         count: 1
         respawn_after: 0s
 
@@ -512,11 +511,10 @@ zone:
         target: the_trailer_cluster
       - direction: east
         target: tweaker_watchtower
+      - direction: south
+        target: ocf_tweaker_brothel
     spawns:
       - template: tweaker_quest_giver
-        count: 1
-        respawn_after: 0s
-      - template: tweaker_fixer
         count: 1
         respawn_after: 0s
 
@@ -712,11 +710,10 @@ zone:
         target: wook_river_camp
       - direction: west
         target: mushroom_grove_ocf
+      - direction: south
+        target: ocf_wook_brothel
     spawns:
       - template: wook_quest_giver
-        count: 1
-        respawn_after: 0s
-      - template: wook_fixer
         count: 1
         respawn_after: 0s
 
@@ -839,3 +836,63 @@ zone:
       - template: wook_shaman
         count: 2
         respawn_after: 10m
+
+  - id: ocf_juggalo_brothel
+    title: The Velvet Tent (Juggalo)
+    danger_level: safe
+    description: A large carnival tent behind the Gathering Ground, painted in the Dark Carnival's black and red with hand-stenciled clown faces at each corner. The Velvet Tent operates on Family loyalty — Juggalos and guests equally welcome, Faygo available, face paint optional but appreciated. Down with the clown.
+    map_x: 0
+    map_y: 100
+    exits:
+      - direction: north
+        target: the_gathering_ground
+    spawns:
+      - template: juggalo_brothel_keeper
+        count: 1
+        respawn_after: 0s
+      - template: juggalo_black_market_merchant
+        count: 1
+        respawn_after: 0s
+      - template: juggalo_fixer
+        count: 1
+        respawn_after: 0s
+
+  - id: ocf_tweaker_brothel
+    title: The Velvet Tent (Tweaker)
+    danger_level: safe
+    description: A repurposed shipping container behind the command post, interior retrofitted with bunk partitions and strip lighting. Operates with Tweaker efficiency — five-minute check-in process, standardized services, no small talk, no eye contact. The monitors on the roof are still watching. They are always watching.
+    map_x: 0
+    map_y: 101
+    exits:
+      - direction: north
+        target: tweaker_command_post
+    spawns:
+      - template: tweaker_brothel_keeper
+        count: 1
+        respawn_after: 0s
+      - template: tweaker_black_market_merchant
+        count: 1
+        respawn_after: 0s
+      - template: tweaker_fixer
+        count: 1
+        respawn_after: 0s
+
+  - id: ocf_wook_brothel
+    title: The Velvet Tent (Wook)
+    danger_level: safe
+    description: A handmade canvas structure behind the council fire, woven from salvaged festival tarps in every earthen color. The interior is hung with prayer flags and mycelium lanterns. The Velvet Tent's Wook wing operates on consent, community, and sliding scale pricing. Spore concentration is mild but present.
+    map_x: 0
+    map_y: 102
+    exits:
+      - direction: north
+        target: the_wook_council_fire
+    spawns:
+      - template: wook_ocf_brothel_keeper
+        count: 1
+        respawn_after: 0s
+      - template: wook_ocf_black_market_merchant
+        count: 1
+        respawn_after: 0s
+      - template: wook_fixer
+        count: 1
+        respawn_after: 0s

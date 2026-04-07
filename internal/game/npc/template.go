@@ -214,6 +214,7 @@ type Template struct {
 	Fixer      *FixerConfig      `yaml:"fixer,omitempty"`
 	ChipDoc    *ChipDocConfig    `yaml:"chip_doc,omitempty"`
 	Motel      *MotelConfig      `yaml:"motel,omitempty"`
+	Brothel    *BrothelConfig    `yaml:"brothel,omitempty"`
 }
 
 // Validate checks that the template satisfies basic invariants.
@@ -287,10 +288,10 @@ func (t *Template) Validate() error {
 
 	// Validate NPCType value and corresponding config struct (REQ-NPC-2).
 	validTypes := map[string]bool{
-		"combat": true, "merchant": true, "guard": true, "healer": true,
+		"combat": true, "merchant": true, "black_market_merchant": true, "guard": true, "healer": true,
 		"quest_giver": true, "hireling": true, "banker": true,
 		"job_trainer": true, "crafter": true, "fixer": true,
-		"chip_doc": true, "motel_keeper": true,
+		"chip_doc": true, "motel_keeper": true, "brothel_keeper": true,
 	}
 	if !validTypes[t.NPCType] {
 		return fmt.Errorf("npc template %q: unknown npc_type %q", t.ID, t.NPCType)
@@ -299,9 +300,9 @@ func (t *Template) Validate() error {
 	switch t.NPCType {
 	case "combat":
 		// no config struct required
-	case "merchant":
+	case "merchant", "black_market_merchant":
 		if t.Merchant == nil {
-			return fmt.Errorf("npc template %q: npc_type 'merchant' requires a merchant: config block", t.ID)
+			return fmt.Errorf("npc template %q: npc_type %q requires a merchant: config block", t.ID, t.NPCType)
 		}
 		if err := t.Merchant.ReplenishRate.Validate(); err != nil {
 			return fmt.Errorf("npc template %q: %w", t.ID, err)
@@ -350,6 +351,13 @@ func (t *Template) Validate() error {
 		}
 		if t.Motel.RestCost <= 0 {
 			return fmt.Errorf("npc template %q: npc_type 'motel_keeper' requires rest_cost > 0", t.ID)
+		}
+	case "brothel_keeper":
+		if t.Brothel == nil {
+			return fmt.Errorf("npc template %q: npc_type 'brothel_keeper' requires a brothel: config block", t.ID)
+		}
+		if err := t.Brothel.Validate(); err != nil {
+			return fmt.Errorf("npc template %q: %w", t.ID, err)
 		}
 	case "fixer":
 		if t.Fixer == nil {

@@ -22,6 +22,8 @@ zone:
     exits:
     - direction: east
       target: cp_bar_1f
+    - direction: south
+      target: club_privata_brothel
     map_x: 0
     map_y: 0
     boss_room: false
@@ -243,3 +245,23 @@ zone:
       count: 1
       respawn_after: 30m
     boss_room: true
+
+  - id: club_privata_brothel
+    title: The Members Suite
+    danger_level: safe
+    description: Below the club entrance, reached through a frosted door marked MEMBERS ONLY in embossed gold letters. The Members Suite is everything the club claims to be — plush, exclusive, expensive, and entirely insulated from the chaos above. Services are tiered. Discretion is contractual.
+    map_x: 0
+    map_y: 100
+    exits:
+    - direction: north
+      target: cp_entry
+    spawns:
+    - template: club_privata_brothel_keeper
+      count: 1
+      respawn_after: 0s
+    - template: club_privata_black_market_merchant
+      count: 1
+      respawn_after: 0s
+    - template: club_privata_fixer
+      count: 1
+      respawn_after: 0s

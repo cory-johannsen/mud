@@ -180,6 +180,9 @@ type Instance struct {
 	// RestCost is the credit cost charged to a player for a motel rest at this NPC.
 	// 0 means this NPC is not a motel NPC and does not offer rest (REQ-REST-8).
 	RestCost int
+	// Brothel holds the brothel-keeper configuration copied from the template at spawn.
+	// Nil for all non-brothel_keeper NPC types.
+	Brothel *BrothelConfig
 	// Taunts is a list of combat taunts copied from the template at spawn.
 	// On each combat turn there is a 25% chance one is broadcast to the room.
 	Taunts []string
@@ -351,6 +354,9 @@ func NewInstanceWithResolver(id string, tmpl *Template, roomID string, armorACBo
 	}
 	if tmpl.Motel != nil {
 		inst.RestCost = tmpl.Motel.RestCost
+	}
+	if tmpl.Brothel != nil {
+		inst.Brothel = tmpl.Brothel
 	}
 	return inst
 }

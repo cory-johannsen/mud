@@ -703,6 +703,8 @@ zone:
       target: trout_neutral_motel
     - direction: east
       target: trout_neutral_storage
+    - direction: west
+      target: troutdale_brothel
     map_x: 2
     map_y: -4
     spawns:
@@ -845,3 +847,23 @@ zone:
     properties:
       lighting: overcast
       atmosphere: desolate
+
+  - id: troutdale_brothel
+    title: The River's Edge Tavern
+    danger_level: safe
+    description: The highway motel's western wing, kept in better condition than the rest. A hand-painted sign reads RIVER'S EDGE with a fish below it. Inside, the carpeting is old but clean, the beds are actual beds, and the proprietor maintains a small bar. Small-town hospitality, small-town discretion.
+    map_x: 0
+    map_y: 100
+    exits:
+    - direction: east
+      target: trout_neutral_lobby
+    spawns:
+    - template: troutdale_brothel_keeper
+      count: 1
+      respawn_after: 0s
+    - template: troutdale_black_market_merchant
+      count: 1
+      respawn_after: 0s
+    - template: troutdale_fixer
+      count: 1
+      respawn_after: 0s

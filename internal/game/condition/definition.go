@@ -25,6 +25,8 @@ type ConditionDef struct {
 	DamageBonus     int      `yaml:"damage_bonus"`   // positive = bonus to damage rolls
 	ReflexBonus     int      `yaml:"reflex_bonus"`   // positive = bonus to Reflex saves
 	StealthBonus    int      `yaml:"stealth_bonus"`  // positive = bonus to Stealth checks
+	// FlairBonus is a flat bonus applied to the bearer's Flair attribute while this condition is active.
+	FlairBonus      int      `yaml:"flair_bonus,omitempty"`
 	RestrictActions []string `yaml:"restrict_actions"`
 	// APReduction is the number of AP removed from the combatant's action queue at round start.
 	APReduction int `yaml:"ap_reduction"`

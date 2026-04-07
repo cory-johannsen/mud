@@ -27,6 +27,8 @@ zone:
     exits:
     - direction: east
       target: cc_empty_theater
+    - direction: south
+      target: clown_camp_brothel
     map_x: 0
     map_y: 0
     spawns:
@@ -104,3 +106,23 @@ zone:
       count: 1
       respawn_after: 30m
     boss_room: true
+
+  - id: clown_camp_brothel
+    title: The Big Top Boudoir
+    danger_level: safe
+    description: A side door off the coat check opens into a low-ceilinged room decorated with salvaged circus posters and string lights. The Big Top Boudoir maintains a determinedly cheerful aesthetic that is somehow more unsettling than the rest of the camp. The greasepaint smell does not diminish. The rates are genuinely affordable.
+    map_x: 0
+    map_y: 100
+    exits:
+    - direction: north
+      target: cc_coat_check
+    spawns:
+    - template: clown_camp_brothel_keeper
+      count: 1
+      respawn_after: 0s
+    - template: clown_camp_black_market_merchant
+      count: 1
+      respawn_after: 0s
+    - template: clown_camp_fixer
+      count: 1
+      respawn_after: 0s

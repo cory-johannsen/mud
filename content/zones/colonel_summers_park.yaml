@@ -29,6 +29,8 @@ zone:
       target: sei_holgate_blvd
     - direction: south
       target: csp_park_gate
+    - direction: east
+      target: colonel_summers_park_brothel
     map_x: 0
     map_y: -1
     equipment:
@@ -255,3 +257,23 @@ zone:
     properties:
       lighting: dim
       atmosphere: ominous
+
+  - id: colonel_summers_park_brothel
+    title: The Bench
+    danger_level: safe
+    description: A converted park equipment shed at the entrance, just upwind of the shrimp smell. The Bench is small, clean relative to the park itself, and decorated with park-bench slats repurposed as wall paneling. The proprietor is philosophical about the location. Services rendered, park affiliation not required.
+    map_x: 0
+    map_y: 100
+    exits:
+    - direction: west
+      target: csp_main_entrance
+    spawns:
+    - template: colonel_summers_park_brothel_keeper
+      count: 1
+      respawn_after: 0s
+    - template: colonel_summers_park_black_market_merchant
+      count: 1
+      respawn_after: 0s
+    - template: colonel_summers_park_fixer
+      count: 1
+      respawn_after: 0s

@@ -290,10 +290,96 @@ html, body, #root { margin: 0; padding: 0; height: 100%; overflow: hidden; }
 .stats-save-row { display: flex; gap: 1rem; font-size: 0.82rem; margin-bottom: 0.25rem; color: #ccc; }
 .stats-save-row strong { color: #fff; }
 
-/* panel-content: transparent wrapper on desktop/tablet so children
-   participate directly in the CSS Grid; becomes a real block on mobile. */
+/* panel-content: transparent wrapper on tablet so children participate
+   directly in the CSS Grid; becomes a real block on mobile. */
 .panel-content {
   display: contents;
+}
+
+/* ─── Desktop resizable layout ──────────────────────────────────────────── */
+
+/* Switch to flex-column so PanelGroups fill the space between
+   the fixed toolbar and the fixed hotbar/input rows. */
+.game-layout--desktop {
+  display: flex;
+  flex-direction: column;
+}
+
+/* The vertical PanelGroup fills all remaining space */
+.game-layout--desktop .game-panels-vertical {
+  flex: 1;
+  min-height: 0;
+}
+
+/* Panels must fill their Panel container (library sets size via flex-basis) */
+.game-layout--desktop .panel-room,
+.game-layout--desktop .panel-map,
+.game-layout--desktop .panel-character,
+.game-layout--desktop .panel-feed {
+  height: 100%;
+  min-height: unset;
+}
+
+/* ─── Resize handles ─────────────────────────────────────────────────────── */
+
+.resize-handle {
+  /* Always-visible dark separator line */
+  background: #2a2a2a;
+  flex-shrink: 0;
+  flex-grow: 0;
+  outline: none;
+  transition: background 0.12s;
+  position: relative;
+  z-index: 2;
+}
+
+/* Vertical divider between Room | Map | Character */
+.resize-handle-h {
+  width: 6px;
+  min-width: 6px;
+  cursor: col-resize;
+}
+
+/* Horizontal divider between upper panels and feed */
+.resize-handle-v {
+  height: 6px;
+  min-height: 6px;
+  cursor: row-resize;
+}
+
+/* Highlight on hover */
+.resize-handle:hover {
+  background: #e0c060;
+}
+
+/* Active while dragging */
+.resize-handle:active {
+  background: #e0c060;
+}
+
+/* Wider invisible hit area via pseudo-element so small handles are easier to grab */
+.resize-handle-h::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -4px;
+  right: -4px;
+}
+
+.resize-handle-v::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -4px;
+  bottom: -4px;
+}
+
+/* Focus ring for keyboard navigation */
+.resize-handle:focus-visible {
+  outline: 2px solid #e0c060;
+  outline-offset: 1px;
 }
 
 /* Mobile tab bar: hidden on desktop and tablet */

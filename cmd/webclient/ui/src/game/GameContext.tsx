@@ -286,11 +286,13 @@ export function GameProvider({ children }: { children: ReactNode }) {
       dispatch({ type: 'SET_CONNECTED', connected: true })
       backoffRef.current = 1000
       if (isReconnect) {
-        // Clear stale combat state from the previous session.
+        // Clear stale combat state so the server can restore it via a fresh RoundStartEvent
+        // pushed during reconnect handling. This avoids stale combat UI when combat ended
+        // while the client was disconnected (BUG-143).
         dispatch({ type: 'SET_COMBAT_ROUND', round: null })
         dispatch({ type: 'CLEAR_COMBAT_POSITIONS' })
         dispatch({ type: 'CLEAR_COMBATANT_HP' })
-        dispatch({ type: 'APPEND_FEED', entry: makeFeedEntry('system', '— Reconnected to server —') })
+        // Reconnect notification suppressed — server restores state seamlessly (BUG-143).
       }
       while (queueRef.current.length > 0) {
         ws.send(queueRef.current.shift()!)

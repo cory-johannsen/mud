@@ -846,7 +846,7 @@ features:
 
   - slug: brothel-expansion
     name: Brothel Expansion
-    status: spec
+    status: done
     priority: 489
     category: world
     file: docs/features/brothel-expansion.md

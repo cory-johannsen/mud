@@ -1520,10 +1520,14 @@ func (h *CombatHandler) startPursuitCombatLocked(playerSess *session.PlayerSessi
 	}
 
 	h.loadoutsMu.Lock()
-	if lo, ok := h.loadouts[playerSess.UID]; ok {
+	lo, ok := h.loadouts[playerSess.UID]
+	h.loadoutsMu.Unlock()
+	if !ok && playerSess.LoadoutSet != nil {
+		lo = playerSess.LoadoutSet.ActivePreset()
+	}
+	if lo != nil {
 		playerCbt.Loadout = lo
 	}
-	h.loadoutsMu.Unlock()
 
 	// Weapon proficiency rank and damage type — same pattern as startCombatLocked.
 	weaponProfRank := "untrained"

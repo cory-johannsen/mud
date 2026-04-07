@@ -1,0 +1,221 @@
+- id: juggalo_brothel_keeper
+  name: "Dark Carnival Host"
+  npc_type: brothel_keeper
+  npc_role: brothel_keeper
+  type: human
+  description: "Runs the Velvet Tent's Juggalo wing from beside the gathering ground fire. Face paint optional. Faygo provided."
+  level: 3
+  max_hp: 20
+  ac: 10
+  awareness: 8
+  disposition: neutral
+  personality: neutral
+  abilities:
+    brutality: 8
+    grit: 10
+    quickness: 11
+    reasoning: 10
+    savvy: 13
+    flair: 14
+  brothel:
+    rest_cost: 10
+    disease_chance: 0.15
+    robbery_chance: 0.20
+    disease_pool:
+      - street_fever
+      - crotch_rot
+      - swamp_itch
+      - track_rash
+      - gutter_flu
+      - rust_pox
+      - neon_blight
+      - wet_lung
+      - chrome_mange
+      - black_tongue
+    flair_bonus_duration: "24h"
+  loot:
+    currency:
+      min: 0
+      max: 0
+
+- id: juggalo_black_market_merchant
+  name: "Faygo Fence"
+  npc_type: black_market_merchant
+  npc_role: merchant
+  type: human
+  description: "Deals in goods obtained through ICP-approved methods. What those methods are is unclear but the prices are low and the selection is eclectic."
+  level: 4
+  max_hp: 22
+  ac: 11
+  awareness: 10
+  disposition: neutral
+  personality: neutral
+  abilities:
+    brutality: 9
+    grit: 11
+    quickness: 12
+    reasoning: 12
+    savvy: 14
+    flair: 11
+  merchant:
+    merchant_type: black_market
+    sell_margin: 1.5
+    buy_margin: 0.6
+    budget: 500
+    replenish_rate:
+      min_hours: 6
+      max_hours: 12
+      stock_refill: 0
+      budget_refill: 100
+  loot:
+    currency:
+      min: 10
+      max: 50
+
+- id: tweaker_brothel_keeper
+  name: "Command Post Host"
+  npc_type: brothel_keeper
+  npc_role: brothel_keeper
+  type: human
+  description: "Runs the Velvet Tent's Tweaker wing from the command post with flat affect and zero sentimentality. Fast service, no small talk."
+  level: 3
+  max_hp: 20
+  ac: 10
+  awareness: 8
+  disposition: neutral
+  personality: neutral
+  abilities:
+    brutality: 8
+    grit: 10
+    quickness: 11
+    reasoning: 10
+    savvy: 13
+    flair: 14
+  brothel:
+    rest_cost: 10
+    disease_chance: 0.15
+    robbery_chance: 0.20
+    disease_pool:
+      - street_fever
+      - crotch_rot
+      - swamp_itch
+      - track_rash
+      - gutter_flu
+      - rust_pox
+      - neon_blight
+      - wet_lung
+      - chrome_mange
+      - black_tongue
+    flair_bonus_duration: "24h"
+  loot:
+    currency:
+      min: 0
+      max: 0
+
+- id: tweaker_black_market_merchant
+  name: "Crystal Supply Dealer"
+  npc_type: black_market_merchant
+  npc_role: merchant
+  type: human
+  description: "Moves product and miscellaneous goods from the command post with the same efficiency applied to all Tweaker operations. Eyes wide open."
+  level: 4
+  max_hp: 22
+  ac: 11
+  awareness: 10
+  disposition: neutral
+  personality: neutral
+  abilities:
+    brutality: 9
+    grit: 11
+    quickness: 12
+    reasoning: 12
+    savvy: 14
+    flair: 11
+  merchant:
+    merchant_type: black_market
+    sell_margin: 1.5
+    buy_margin: 0.6
+    budget: 500
+    replenish_rate:
+      min_hours: 6
+      max_hours: 12
+      stock_refill: 0
+      budget_refill: 100
+  loot:
+    currency:
+      min: 10
+      max: 50
+
+- id: wook_ocf_brothel_keeper
+  name: "Council Fire Host"
+  npc_type: brothel_keeper
+  npc_role: brothel_keeper
+  type: human
+  description: "Presides over the Velvet Tent's Wook wing near the council fire. Consent is sacred, spores are ambient, rates are sliding scale."
+  level: 3
+  max_hp: 20
+  ac: 10
+  awareness: 8
+  disposition: neutral
+  personality: neutral
+  abilities:
+    brutality: 8
+    grit: 10
+    quickness: 11
+    reasoning: 10
+    savvy: 13
+    flair: 14
+  brothel:
+    rest_cost: 10
+    disease_chance: 0.15
+    robbery_chance: 0.20
+    disease_pool:
+      - street_fever
+      - crotch_rot
+      - swamp_itch
+      - track_rash
+      - gutter_flu
+      - rust_pox
+      - neon_blight
+      - wet_lung
+      - chrome_mange
+      - black_tongue
+    flair_bonus_duration: "24h"
+  loot:
+    currency:
+      min: 0
+      max: 0
+
+- id: wook_ocf_black_market_merchant
+  name: "Mycelium Trader"
+  npc_type: black_market_merchant
+  npc_role: merchant
+  type: human
+  description: "Trades goods from within the Wook grove network. Specializes in items that the outside world cannot properly classify."
+  level: 4
+  max_hp: 22
+  ac: 11
+  awareness: 10
+  disposition: neutral
+  personality: neutral
+  abilities:
+    brutality: 9
+    grit: 11
+    quickness: 12
+    reasoning: 12
+    savvy: 14
+    flair: 11
+  merchant:
+    merchant_type: black_market
+    sell_margin: 1.5
+    buy_margin: 0.6
+    budget: 500
+    replenish_rate:
+      min_hours: 6
+      max_hours: 12
+      stock_refill: 0
+      budget_refill: 100
+  loot:
+    currency:
+      min: 10
+      max: 50

@@ -126,3 +126,77 @@
   personality: neutral
   motel:
     rest_cost: 45
+
+- id: the_couve_brothel_keeper
+  name: "Crossroads Lodge Host"
+  npc_type: brothel_keeper
+  npc_role: brothel_keeper
+  type: human
+  description: "Manages the Crossroads Lodge from the back room of the neutral diner. Works-class rates for working-class entertainment."
+  level: 3
+  max_hp: 20
+  ac: 10
+  awareness: 8
+  disposition: neutral
+  personality: neutral
+  abilities:
+    brutality: 8
+    grit: 10
+    quickness: 11
+    reasoning: 10
+    savvy: 13
+    flair: 14
+  brothel:
+    rest_cost: 25
+    disease_chance: 0.15
+    robbery_chance: 0.20
+    disease_pool:
+      - street_fever
+      - crotch_rot
+      - swamp_itch
+      - track_rash
+      - gutter_flu
+      - rust_pox
+      - neon_blight
+      - wet_lung
+      - chrome_mange
+      - black_tongue
+    flair_bonus_duration: "24h"
+  loot:
+    currency:
+      min: 0
+      max: 0
+
+- id: the_couve_black_market_merchant
+  name: "Bridge Trade Dealer"
+  npc_type: black_market_merchant
+  npc_role: merchant
+  type: human
+  description: "Handles goods that cross the bridge outside of official channels. The river's a natural border; the rules are more flexible."
+  level: 4
+  max_hp: 22
+  ac: 11
+  awareness: 10
+  disposition: neutral
+  personality: neutral
+  abilities:
+    brutality: 9
+    grit: 11
+    quickness: 12
+    reasoning: 12
+    savvy: 14
+    flair: 11
+  merchant:
+    merchant_type: black_market
+    sell_margin: 1.5
+    buy_margin: 0.6
+    budget: 500
+    replenish_rate:
+      min_hours: 6
+      max_hours: 12
+      stock_refill: 0
+      budget_refill: 100
+  loot:
+    currency:
+      min: 10
+      max: 50

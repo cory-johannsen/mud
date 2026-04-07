@@ -1087,11 +1087,11 @@
 ### BUG-132: Adrenaline Surge requires Enraged condition but no mechanism exists to trigger Enraged
 
 **Severity:** high
-**Status:** open
+**Status:** fixed
 **Category:** Combat
 **Description:** Adrenaline Surge has a prerequisite of the Enraged condition, but no technology, feat, or game event applies the Enraged condition, making Adrenaline Surge permanently unusable.
 **Steps:** Attempt to use Adrenaline Surge in combat; observe it is blocked due to missing Enraged condition; confirm no other ability grants Enraged.
-**Fix:**
+**Fix:** Added a "Rage" active feat (id: rage) to the Aggressor archetype that calls `handleRage`, advancing the Mental State Rage track to SeverityMod (Enraged). Added precondition check in `handleUse` blocking Adrenaline Surge when not Enraged. Added rage to roid_rager (fixed), beat_down_artist, and street_fighter (choices) jobs, and all Aggressor archetype level-up pools.
 
 ### BUG-131: Brutal Charge has no mechanical effect beyond AP cost and console text
 
@@ -1163,6 +1163,60 @@
 **Description:** Clicking a hotbar slot assigned to a feat or ability in the web client shows no visible feedback even though the feat is activated server-side.
 **Steps:** Add an active feat to a hotbar slot via the Feats drawer; click the hotbar slot; observe no message or effect in the console feed.
 **Fix:** `UseResponse` was missing from `serverEventInner` in `cmd/webclient/handlers/websocket.go`, causing the server's activation feedback to be silently dropped. Added `case *gamev1.ServerEvent_UseResponse:` returning `(p.UseResponse, "UseResponse")`. Added `case 'UseResponse':` handler in `GameContext.tsx` that appends the message to the feed (or lists available abilities when `choices` is populated).
+
+### BUG-147: Quest giver NPC type has no map POI symbol — falls through to generic NPC marker
+
+**Severity:** medium
+**Status:** fixed
+**Category:** UI
+**Description:** `NpcRoleToPOIID()` has no mapping for `"quest_giver"`, so quest giver NPCs appear as generic white `N` markers on the map instead of a distinct POI symbol. `POITypes` also has no quest giver entry, so the map legend never lists them.
+**Steps:** Place a quest giver NPC in a zone; open the map; observe the NPC shows as a generic `N` with no quest giver legend entry.
+**Fix:** Added `{ID: "quest_giver", Symbol: 'Q', Color: "\033[93m", Label: "Quest"}` to `POITypes` in `internal/game/maputil/poi.go` between `guard` and `npc`. Added `"quest_giver"` case to `NpcRoleToPOIID` returning `"quest_giver"`. Updated `poi_test.go` and `handle_map_poi_test.go` to expect `"quest_giver"` instead of `"npc"` for quest giver role.
+
+### BUG-146: Rustbucket Ridge has no quest giver NPC — no template or zone spawn defined
+
+**Severity:** high
+**Status:** fixed
+**Category:** World
+**Description:** Rustbucket Ridge has no quest giver NPC template in `content/npcs/non_combat/rustbucket_ridge.yaml` and no quest giver spawn in `content/zones/rustbucket_ridge.yaml`, leaving the zone without any quest giver presence.
+**Steps:** Enter Rustbucket Ridge; observe no quest giver NPC in any safe room; confirm map shows no quest giver marker.
+**Fix:** Added `rustbucket_ridge_quest_giver` ("Dispatch Board Operator") NPC template to `content/npcs/non_combat/rustbucket_ridge.yaml` and added a spawn for it in `rust_scrap_office` in the zone YAML.
+
+### BUG-145: Web UI Job tab does not show Feat and Technology grants
+
+**Severity:** medium
+**Status:** fixed
+**Category:** UI
+**Description:** The Job tab in the web UI does not display the Feat and Technology grants associated with the player's job, leaving the player with no visibility into what was granted and at which level.
+**Steps:** Open the web UI; navigate to the Job tab; observe no Feat or Technology grant information is shown.
+**Fix:** `JobGrantsRequest` was missing from `protoMessageByName` and `wrapProtoAsClientMessage` in `cmd/webclient/handlers/websocket_dispatch.go`. Added both entries so the WebSocket handler correctly routes `JobGrantsRequest` messages from the browser to the gRPC service.
+
+### BUG-144: Hovering a navigation direction control does not trigger look in that direction
+
+**Severity:** medium
+**Status:** fixed
+**Category:** UI
+**Description:** Hovering over a compass direction control on the navigation UI should issue a `look <direction>` command and display the result as a tooltip or console message, giving the player a preview of the adjacent room before moving.
+**Steps:** Open the web UI in a room with exits; hover over a direction button on the navigation control; observe no look output is produced.
+**Fix:** Added `onMouseEnter={() => sendCommand('look \${ex.direction}')}` to both compass grid buttons and vertical exits buttons in `RoomPanel.tsx`.
+
+### BUG-143: Server reconnects produce noisy console messages and temporarily interrupt combat
+
+**Severity:** medium
+**Status:** fixed
+**Category:** UI
+**Description:** Each server reconnect appends a "— Reconnected to server —" message to the console feed and temporarily interrupts combat, leaving the player confused about their combat state. Reconnect notifications should be suppressed and combat state should be seamlessly restored on reconnect.
+**Steps:** Allow the web client to reconnect during combat (e.g. after a brief disconnect); observe "— Reconnected to server —" entries in the console feed and a temporary loss of combat UI state.
+**Fix:** Removed the `APPEND_FEED` reconnect notification from `GameContext.tsx`. Added server-side `RoundStartEvent` push to the reconnecting player's stream in `grpc_service.go` when they rejoin mid-combat, so the client immediately restores its combat UI.
+
+### BUG-142: Player attacks with fists despite having a melee weapon equipped
+
+**Severity:** high
+**Status:** fixed
+**Category:** Combat
+**Description:** Attack narrative reports fists as the weapon even when the player has a melee weapon (e.g. Rebar Club) equipped, indicating the combat system is not resolving the equipped weapon for the attack roll.
+**Steps:** Equip a Rebar Club; enter combat; use the attack action; observe narrative reads "attacks with a fists" instead of the equipped weapon.
+**Fix:** `startPursuitCombatLocked` was missing the `sess.LoadoutSet.ActivePreset()` fallback that `buildPlayerCombatant` uses. When the player's loadout existed only in `sess.LoadoutSet` (not in `h.loadouts`), the combatant defaulted to fists. Applied the same fallback pattern to `startPursuitCombatLocked`.
 
 ### BUG-137: Stale closure in GameContext.tsx ws.onmessage prevents player HP updates from CombatEvents
 **Severity:** medium

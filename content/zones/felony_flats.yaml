@@ -853,9 +853,6 @@ zone:
     - template: motel_raider
       count: 1
       respawn_after: 5m
-    - template: felony_flats_fixer
-      count: 1
-      respawn_after: 0s
     properties:
       lighting: overcast
       atmosphere: grease
@@ -876,6 +873,8 @@ zone:
     exits:
     - direction: south
       target: flats_jade_district
+    - direction: east
+      target: felony_flats_brothel
     map_x: 2
     map_y: -6
     spawns:
@@ -940,3 +939,23 @@ zone:
     properties:
       lighting: firelight
       atmosphere: herbal
+
+  - id: felony_flats_brothel
+    title: The Broken Arrow Lounge
+    danger_level: safe
+    description: A reinforced back room above the safe house, reached through a door that has no number and is only ever mentioned by address. Scavenged velvet curtains, a locked cashbox, and a bouncer who doesn't make conversation. Cash first, questions never.
+    map_x: 0
+    map_y: 100
+    exits:
+    - direction: west
+      target: flats_safe_house
+    spawns:
+    - template: felony_flats_brothel_keeper
+      count: 1
+      respawn_after: 0s
+    - template: felony_flats_black_market_merchant
+      count: 1
+      respawn_after: 0s
+    - template: felony_flats_fixer
+      count: 1
+      respawn_after: 0s

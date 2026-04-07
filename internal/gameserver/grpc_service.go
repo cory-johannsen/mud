@@ -851,10 +851,34 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 	// AddPlayer always initialises Status=1 (idle); if an active combat in this room
 	// already has the player as a combatant, reset Status to statusInCombat so that
 	// combat commands (stride, pass, etc.) work immediately after reconnect.
+	// REQ-BUG-143: Also push a RoundStartEvent directly to the reconnecting player so
+	// the web client immediately restores its combat UI without a visible interruption.
 	if s.combatH != nil {
 		if cbt, inCombat := s.combatH.GetCombatForRoom(sess.RoomID); inCombat {
 			if cbt.GetCombatant(uid) != nil {
 				sess.Status = statusInCombat
+				// Build and push a RoundStartEvent to restore the client's combat state.
+				turnOrder := make([]string, 0, len(cbt.Combatants))
+				for _, c := range cbt.Combatants {
+					turnOrder = append(turnOrder, c.Name)
+				}
+				positions := make([]*gamev1.CombatantPosition, 0, len(cbt.Combatants))
+				for _, c := range cbt.Combatants {
+					positions = append(positions, &gamev1.CombatantPosition{
+						Name: c.Name, X: int32(c.GridX), Y: int32(c.GridY),
+					})
+				}
+				_ = stream.Send(&gamev1.ServerEvent{
+					Payload: &gamev1.ServerEvent_RoundStart{
+						RoundStart: &gamev1.RoundStartEvent{
+							Round:            int32(cbt.Round),
+							ActionsPerTurn:   3,
+							DurationMs:       int32(s.combatH.roundDuration.Milliseconds()),
+							TurnOrder:        turnOrder,
+							InitialPositions: positions,
+						},
+					},
+				})
 			}
 		}
 	}
@@ -3667,6 +3691,14 @@ func (s *GameServiceServer) handleRest(uid string, requestID string, stream game
 				}
 			}
 		}
+		// REQ-BR-4: safe room + brothel NPC → brothel rest.
+		if s.npcMgr != nil {
+			for _, npcInst := range s.npcMgr.InstancesInRoom(sess.RoomID) {
+				if npcInst.NPCType == "brothel_keeper" {
+					return s.handleBrothelRest(uid, sess, npcInst, sendMsg, requestID, stream)
+				}
+			}
+		}
 		// REQ-REST-4: safe room but no motel NPC.
 		return sendMsg("There is no motel here to rest at.")
 	case danger.Sketchy, danger.Dangerous, danger.AllOutWar:
@@ -3703,6 +3735,15 @@ func (s *GameServiceServer) handleMotelRest(uid string, sess *session.PlayerSess
 	if err := sendMsg(fmt.Sprintf("You pay %d credits and settle in for the night.", cost)); err != nil {
 		return err
 	}
+	return s.applyLongRestEffects(uid, sess, stream.Context(), sendMsg, stream)
+}
+
+// applyLongRestEffects applies the full long-rest restoration (HP, tech pools, durability)
+// via applyFullLongRestCtx, building the tech-choice prompt from the given stream.
+//
+// Precondition: uid must be a valid player UID; sess, stream must not be nil.
+// Postcondition: HP + tech pools fully restored; tech-choice prompt sent if needed.
+func (s *GameServiceServer) applyLongRestEffects(uid string, sess *session.PlayerSession, ctx context.Context, sendMsg func(string) error, stream gamev1.GameService_SessionServer) error {
 	headless := sess.Headless
 	promptFn := func(options []string) (string, error) {
 		choices := &ruleset.FeatureChoices{
@@ -3713,6 +3754,112 @@ func (s *GameServiceServer) handleMotelRest(uid string, sess *session.PlayerSess
 		return s.promptFeatureChoice(stream, "tech_choice", choices, headless)
 	}
 	return s.applyFullLongRestCtx(uid, sess, ctx, sendMsg, promptFn)
+}
+
+// handleBrothelRest performs an instant full rest at a brothel NPC (REQ-BR-6 through REQ-BR-13).
+//
+// Precondition: brothelNPC.Brothel != nil and room is safe; stream is non-nil.
+// Postcondition: player HP + tech pools fully restored; RestCost deducted from Currency;
+// flair_bonus_1 condition applied; disease and robbery rolled independently after rest.
+func (s *GameServiceServer) handleBrothelRest(uid string, sess *session.PlayerSession, brothelNPC *npc.Instance, sendMsg func(string) error, requestID string, stream gamev1.GameService_SessionServer) error {
+	brothelConfig := brothelNPC.Brothel
+	ctx := stream.Context()
+
+	// REQ-BR-6: insufficient credits → block rest.
+	if sess.Currency < brothelConfig.RestCost {
+		return sendMsg(fmt.Sprintf("A night here costs %d credits. You only have %d.", brothelConfig.RestCost, sess.Currency))
+	}
+
+	// REQ-BR-7: deduct credits, save, confirm, apply full rest.
+	sess.Currency -= brothelConfig.RestCost
+	if s.charSaver != nil {
+		if err := s.charSaver.SaveCurrency(ctx, sess.CharacterID, sess.Currency); err != nil {
+			s.logger.Warn("handleBrothelRest: failed to save currency", zap.Error(err))
+		}
+	}
+	if err := sendMsg(fmt.Sprintf("You pay %d credits and settle in for the night.", brothelConfig.RestCost)); err != nil {
+		return err
+	}
+	if err := s.applyLongRestEffects(uid, sess, ctx, sendMsg, stream); err != nil {
+		return err
+	}
+
+	// REQ-BR-8: apply flair_bonus_1 timed condition.
+	if s.condRegistry != nil && sess.Conditions != nil {
+		if def, ok := s.condRegistry.Get("flair_bonus_1"); ok {
+			dur, parseErr := time.ParseDuration(brothelConfig.FlairBonusDur)
+			if parseErr == nil {
+				expiresAt := time.Now().Add(dur)
+				if applyErr := sess.Conditions.ApplyTaggedWithExpiry(uid, def, 1, "brothel_rest", expiresAt); applyErr != nil {
+					s.logger.Warn("handleBrothelRest: failed to apply flair_bonus_1", zap.Error(applyErr))
+				} else {
+					_ = sendMsg("You feel unusually confident. (+1 Flair)")
+				}
+			}
+		}
+	}
+
+	// REQ-BR-9: independent disease roll. Rest completes before this (REQ-BR-12).
+	if rand.Float64() < brothelConfig.DiseaseChance && len(brothelConfig.DiseasePool) > 0 {
+		diseaseID := brothelConfig.DiseasePool[rand.Intn(len(brothelConfig.DiseasePool))]
+		diseaseName := diseaseID
+		if err := s.ApplySubstanceByID(uid, diseaseID); err != nil {
+			s.logger.Warn("handleBrothelRest: ApplySubstanceByID failed", zap.String("substance", diseaseID), zap.Error(err))
+		} else {
+			_ = sendMsg("You've contracted " + diseaseName + ".")
+		}
+	}
+
+	// REQ-BR-10: independent robbery roll (REQ-BR-11). Rest already completed above.
+	if rand.Float64() < brothelConfig.RobberyChance {
+		robbed := false
+		// Steal crypto.
+		if sess.Currency > 0 {
+			stolenCrypto := sess.Currency * 5 / 100
+			if stolenCrypto < 1 {
+				stolenCrypto = 1
+			}
+			sess.Currency -= stolenCrypto
+			if s.charSaver != nil {
+				if err := s.charSaver.SaveCurrency(ctx, sess.CharacterID, sess.Currency); err != nil {
+					s.logger.Warn("handleBrothelRest: failed to save currency after robbery", zap.Error(err))
+				}
+			}
+			robbed = true
+		}
+		// Steal items.
+		if sess.Backpack != nil {
+			items := sess.Backpack.Items()
+			numToSteal := len(items) * 5 / 100
+			if numToSteal > 0 {
+				// Pick random indices without replacement using Fisher-Yates partial shuffle.
+				indices := make([]int, len(items))
+				for i := range indices {
+					indices[i] = i
+				}
+				for i := 0; i < numToSteal; i++ {
+					j := i + rand.Intn(len(indices)-i)
+					indices[i], indices[j] = indices[j], indices[i]
+				}
+				for i := 0; i < numToSteal; i++ {
+					item := items[indices[i]]
+					_ = sess.Backpack.Remove(item.InstanceID, 1)
+				}
+				if s.charSaver != nil {
+					invItems := backpackToInventoryItems(sess.Backpack)
+					if err := s.charSaver.SaveInventory(ctx, sess.CharacterID, invItems); err != nil {
+						s.logger.Warn("handleBrothelRest: failed to save inventory after robbery", zap.Error(err))
+					}
+				}
+				robbed = true
+			}
+		}
+		if robbed {
+			_ = sendMsg("You wake to find someone has gone through your belongings.")
+		}
+	}
+
+	return nil
 }
 
 // startCamping validates gear requirements and starts a camping rest session (REQ-REST-3/10-14/17).
@@ -7542,6 +7689,16 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string, targetX, 
 				if f.ID == "brutal_charge" {
 					return s.handleBrutalCharge(uid, targetID)
 				}
+				if f.ID == "rage" {
+					return s.handleRage(uid)
+				}
+				// REQ-BUG-132: Adrenaline Surge requires the player to be Enraged.
+				if f.ID == "adrenaline_surge" && s.mentalStateMgr != nil {
+					sev := s.mentalStateMgr.CurrentSeverity(uid, mentalstate.TrackRage)
+					if sev < mentalstate.SeverityMod {
+						return messageEvent("You must be Enraged to use Adrenaline Surge."), nil
+					}
+				}
 				condID := f.ConditionID
 				if condID != "" && s.condRegistry != nil {
 					// REQ-AOE-2: When feat has aoe_radius > 0 and target coordinates are provided,
@@ -10083,6 +10240,46 @@ func formatResistanceMap(m map[string]int) string {
 		parts = append(parts, fmt.Sprintf("%s (%d)", k, m[k]))
 	}
 	return strings.Join(parts, ", ")
+}
+
+// handleRage processes the "rage" active feat, advancing the player's Rage mental
+// state track to SeverityMod (Enraged). In combat: costs 1 AP.
+//
+// Precondition: uid must be a valid player session; mentalStateMgr must be non-nil.
+// Postcondition: Rage track is at least SeverityMod; rage_enraged condition applied to session/combat.
+func (s *GameServiceServer) handleRage(uid string) (*gamev1.ServerEvent, error) {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return nil, fmt.Errorf("player %q not found", uid)
+	}
+	if s.mentalStateMgr == nil {
+		return errorEvent("Mental state system unavailable."), nil
+	}
+	current := s.mentalStateMgr.CurrentSeverity(uid, mentalstate.TrackRage)
+	if current >= mentalstate.SeverityMod {
+		return messageEvent("You are already enraged."), nil
+	}
+	// Spend 1 AP when in active combat.
+	if sess.Status == statusInCombat && s.combatH != nil {
+		if err := s.combatH.SpendAP(uid, 1); err != nil {
+			return errorEvent(err.Error()), nil
+		}
+	}
+	changes := s.mentalStateMgr.ApplyTrigger(uid, mentalstate.TrackRage, mentalstate.SeverityMod)
+	if sess.Status == statusInCombat && s.combatH != nil {
+		msgs := s.combatH.applyMentalStateChanges(uid, changes)
+		narrative := "Fury overtakes you. You stop holding back."
+		if len(msgs) > 0 && msgs[0] != "" {
+			narrative = msgs[0]
+		}
+		return messageEvent(narrative), nil
+	}
+	applyMentalChangesToSession(sess, uid, changes, s.condRegistry, s.logger)
+	narrative := "Fury overtakes you. You stop holding back."
+	if len(changes) > 0 && changes[0].Message != "" {
+		narrative = changes[0].Message
+	}
+	return messageEvent(narrative), nil
 }
 
 // handleCalm attempts to calm the player's worst active mental state via a Grit check.

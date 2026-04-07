@@ -370,6 +370,8 @@ zone:
     exits:
     - direction: south
       target: morrison_bridge
+    - direction: west
+      target: downtown_brothel
     map_x: 0
     map_y: -4
     spawns:
@@ -386,9 +388,6 @@ zone:
       count: 1
       respawn_after: 0s
     - template: downtown_guard
-      count: 1
-      respawn_after: 0s
-    - template: downtown_fixer
       count: 1
       respawn_after: 0s
     properties:
@@ -794,3 +793,23 @@ zone:
     properties:
       lighting: exposed
       atmosphere: open
+
+  - id: downtown_brothel
+    title: The Back Room
+    danger_level: safe
+    description: A converted service corridor off the Underground, accessed through a heavy steel door with a hand-lettered sign that reads BACK ROOM. Inside, red-tinted strip lighting, curtained alcoves, and a folding table where three people conduct three different businesses simultaneously. Noise from the parking garage is entirely muffled.
+    map_x: 0
+    map_y: 100
+    exits:
+    - direction: east
+      target: downtown_underground
+    spawns:
+    - template: downtown_brothel_keeper
+      count: 1
+      respawn_after: 0s
+    - template: downtown_black_market_merchant
+      count: 1
+      respawn_after: 0s
+    - template: downtown_fixer
+      count: 1
+      respawn_after: 0s
