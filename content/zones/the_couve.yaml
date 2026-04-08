@@ -397,8 +397,8 @@ zone:
       '
     danger_level: sketchy
     exits: []
-    map_x: 202
-    map_y: 0
+    map_x: 0
+    map_y: -1
     spawns:
     - template: couve_scavenger
       count: 1
@@ -567,8 +567,8 @@ zone:
       target: couve_waterfront
     - direction: east
       target: couve_columbia_way
-    map_x: 202
-    map_y: 2
+    map_x: 2
+    map_y: 1
     spawns:
     - template: jantzen_beach_pirate
       count: 1
@@ -810,8 +810,8 @@ zone:
       target: couve_river_access
     - direction: north
       target: couve_columbia_way
-    map_x: 204
-    map_y: 2
+    map_x: 4
+    map_y: 1
     spawns:
     - template: jantzen_beach_pirate
       count: 2
@@ -879,8 +879,8 @@ zone:
     title: The Crossroads Lodge
     danger_level: safe
     description: Above the neutral diner, accessed through a side staircase with a hand-lettered sign reading ROOMS. The stairwell smells of coffee and something else. Inside, the noise from the diner below is a gentle murmur. Three rooms, one rate, cash only. Roz claims not to know about it. No one believes her.
-    map_x: 0
-    map_y: 100
+    map_x: 2
+    map_y: -4
     exits:
     - direction: south
       target: couve_neutral_diner
