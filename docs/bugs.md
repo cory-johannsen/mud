@@ -1264,11 +1264,11 @@
 ### BUG-152: Character selector XP shown as text instead of a progress bar
 
 **Severity:** low
-**Status:** open
+**Status:** fixed
 **Category:** UI
 **Description:** In the web UI character selector, XP is displayed as raw text rather than a progress bar like HP, leaving the player with no visual indication of progress toward the next level.
 **Steps:** Open the web UI character selector; observe XP is shown as a number/text field rather than a filled progress bar matching the HP bar style.
-**Fix:**
+**Fix:** Replaced the raw XP text in `CharacterCard` (CharactersPage.tsx) with a progress bar matching the HP bar style. XP to next level is computed client-side using the formula `(level+1)² × 100` (BaseXP=100, matching the server `xp` package). Bar fills blue (`#4a7aaf`); label shows `current / next XP`.
 
 ### BUG-153: Web UI panels do not auto-size on load — player must manually resize every session
 

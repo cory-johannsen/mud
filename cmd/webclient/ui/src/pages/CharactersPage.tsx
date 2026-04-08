@@ -120,6 +120,11 @@ function CharacterCard({ char, onPlay, onDelete, onForceLogout }: {
   const hpPct = char.max_hp > 0 ? (char.current_hp / char.max_hp) * 100 : 0
   const hpColor = hpPct > 50 ? '#4caf50' : hpPct > 25 ? '#ff9800' : '#f44336'
   const isOnline = char.is_online === true
+  // XP formula: xp_to_reach_level(n) = n² × 100 (BaseXP=100, matches server xp package)
+  const xpToNext = (char.level + 1) * (char.level + 1) * 100
+  const xpPct = char.experience !== undefined && xpToNext > 0
+    ? Math.min(100, (char.experience / xpToNext) * 100)
+    : 0
 
   return (
     <div style={{ ...styles.card, ...(isOnline ? styles.cardOnline : {}) }}>
@@ -143,9 +148,14 @@ function CharacterCard({ char, onPlay, onDelete, onForceLogout }: {
         {char.current_hp} / {char.max_hp} HP
       </div>
       {char.experience !== undefined && (
-        <div style={{ ...styles.cardSub, marginTop: '0.25rem' }}>
-          XP: {char.experience.toLocaleString()}
-        </div>
+        <>
+          <div style={styles.xpBar}>
+            <div style={{ ...styles.xpFill, width: `${xpPct}%` }} />
+          </div>
+          <div style={styles.hpText}>
+            {char.experience.toLocaleString()} / {xpToNext.toLocaleString()} XP
+          </div>
+        </>
       )}
       <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.75rem' }}>
         {isOnline ? (
@@ -229,6 +239,8 @@ const styles: Record<string, React.CSSProperties> = {
   hpBar: { background: '#333', borderRadius: '4px', height: '6px', overflow: 'hidden', marginTop: '0.5rem' },
   hpFill: { height: '100%', borderRadius: '4px', transition: 'width 0.3s' },
   hpText: { fontSize: '0.75rem', color: '#aaa' },
+  xpBar: { background: '#333', borderRadius: '4px', height: '6px', overflow: 'hidden', marginTop: '0.5rem' },
+  xpFill: { height: '100%', borderRadius: '4px', transition: 'width 0.3s', background: '#4a7aaf' },
   playButton: {
     marginTop: '0.75rem',
     padding: '0.4rem',
