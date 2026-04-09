@@ -130,6 +130,34 @@ func (s *GameServiceServer) buildTrainerView(uid string, inst *npc.Instance) (*g
 	}, nil
 }
 
+// buildRestView constructs a RestView ServerEvent for a motel_keeper or brothel_keeper NPC examine.
+//
+// Precondition: uid identifies an active player session; inst is a motel_keeper or brothel_keeper NPC.
+// Postcondition: Returns a non-nil ServerEvent wrapping RestView; error is always nil.
+func (s *GameServiceServer) buildRestView(uid string, inst *npc.Instance) (*gamev1.ServerEvent, error) {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return messageEvent("player not found"), nil
+	}
+	restCost := int32(inst.RestCost)
+	if inst.Brothel != nil {
+		restCost = int32(inst.Brothel.RestCost)
+	}
+	return &gamev1.ServerEvent{
+		Payload: &gamev1.ServerEvent_RestView{
+			RestView: &gamev1.RestView{
+				NpcName:       inst.Name(),
+				Description:   inst.Description,
+				NpcType:       inst.NPCType,
+				RestCost:      restCost,
+				PlayerCurrency: int32(sess.Currency),
+				CurrentHp:     int32(sess.CurrentHP),
+				MaxHp:         int32(sess.MaxHP),
+			},
+		},
+	}, nil
+}
+
 // buildFixerView constructs a FixerView ServerEvent for a fixer NPC examine.
 //
 // Precondition: uid identifies an active player session; inst is a fixer NPC.

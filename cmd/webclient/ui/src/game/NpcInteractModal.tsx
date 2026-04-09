@@ -400,10 +400,80 @@ function GenericNpcModal({
   )
 }
 
+// ---------- Rest Modal (motel_keeper / brothel_keeper) ----------
+
+function RestModal({ view, onClose }: { view: import('../proto').RestView; onClose: () => void }) {
+  const { sendMessage } = useGame()
+  const npcName = view.npcName ?? view.npc_name ?? 'Keeper'
+  const restCost = view.restCost ?? view.rest_cost ?? 0
+  const playerCurrency = view.playerCurrency ?? view.player_currency ?? 0
+  const currentHp = view.currentHp ?? view.current_hp ?? 0
+  const maxHp = view.maxHp ?? view.max_hp ?? 0
+
+  const atFullHp = currentHp >= maxHp
+  const canAfford = playerCurrency >= restCost
+
+  function handleRest() {
+    sendMessage('RestRequest', {})
+    onClose()
+  }
+
+  return (
+    <div style={styles.overlay} onClick={onClose}>
+      <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
+        <div style={styles.header}>
+          <h3 style={styles.title}>{npcName}</h3>
+          <button style={styles.closeBtn} onClick={onClose} type="button">✕</button>
+        </div>
+        <div style={styles.body}>
+          {view.description && <p style={styles.desc}>{view.description}</p>}
+          <div style={styles.infoGrid}>
+            <div style={styles.infoRow}>
+              <span style={styles.infoLabel}>HP</span>
+              <span style={styles.infoValue}>{currentHp} / {maxHp}</span>
+            </div>
+            <div style={styles.infoRow}>
+              <span style={styles.infoLabel}>Cost</span>
+              <span style={styles.infoValue}>{restCost} Crypto</span>
+            </div>
+            <div style={styles.infoRow}>
+              <span style={styles.infoLabel}>Your Crypto</span>
+              <span style={styles.infoValue}>{playerCurrency} Crypto</span>
+            </div>
+          </div>
+          {atFullHp && (
+            <p style={{ color: '#8b8', marginTop: '0.5rem', fontSize: '0.85rem' }}>
+              You are already at full health.
+            </p>
+          )}
+          {!canAfford && (
+            <p style={{ color: '#f88', marginTop: '0.5rem', fontSize: '0.85rem' }}>
+              You cannot afford to rest here.
+            </p>
+          )}
+          <div style={{ ...styles.actions, marginTop: '0.75rem' }}>
+            <button
+              style={{ ...styles.actionBtn, ...styles.actionBtnGreen, opacity: canAfford ? 1 : 0.4 }}
+              onClick={handleRest}
+              disabled={!canAfford}
+              type="button"
+            >
+              Rest ({restCost} Crypto)
+            </button>
+            <button style={{ ...styles.actionBtn, background: '#444' }} onClick={onClose} type="button">
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ---------- Root export ----------
 
 export function NpcInteractModal() {
-  const { state, clearHealer, clearTrainer, clearFixer, clearNpcView } = useGame()
+  const { state, clearHealer, clearTrainer, clearFixer, clearRestView, clearNpcView } = useGame()
 
   if (state.healerView) {
     return <HealerModal view={state.healerView} onClose={clearHealer} />
@@ -413,6 +483,9 @@ export function NpcInteractModal() {
   }
   if (state.fixerView) {
     return <FixerModal view={state.fixerView} onClose={clearFixer} />
+  }
+  if (state.restView) {
+    return <RestModal view={state.restView} onClose={clearRestView} />
   }
   if (state.npcView) {
     if (state.npcView.npcType === 'banker') {

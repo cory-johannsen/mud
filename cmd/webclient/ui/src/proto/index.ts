@@ -355,6 +355,22 @@ export interface HealerView {
   max_hp?: number
 }
 
+export interface RestView {
+  npcName?: string
+  npc_name?: string
+  description?: string
+  npcType?: string
+  npc_type?: string
+  restCost?: number
+  rest_cost?: number
+  playerCurrency?: number
+  player_currency?: number
+  currentHp?: number
+  current_hp?: number
+  maxHp?: number
+  max_hp?: number
+}
+
 export interface JobOfferEntry {
   jobId?: string
   job_id?: string
