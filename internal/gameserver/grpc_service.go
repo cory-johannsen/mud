@@ -3126,26 +3126,6 @@ func (s *GameServiceServer) handleLook(uid string) (*gamev1.ServerEvent, error) 
 		}
 	}
 
-	if s.roomEquipMgr != nil {
-		if sess, ok := s.sessions.GetPlayer(uid); ok {
-			for _, eq := range s.roomEquipMgr.EquipmentInRoom(sess.RoomID) {
-				name := eq.ItemDefID
-				if s.invRegistry != nil {
-					if def, ok := s.invRegistry.Item(eq.ItemDefID); ok {
-						name = def.Name
-					}
-				}
-				view.Equipment = append(view.Equipment, &gamev1.RoomEquipmentItem{
-					InstanceId: eq.InstanceID,
-					Name:       name,
-					Quantity:   1,
-					Immovable:  eq.Immovable,
-					Usable:     eq.Script != "",
-				})
-			}
-		}
-	}
-
 	return &gamev1.ServerEvent{
 		Payload: &gamev1.ServerEvent_RoomView{RoomView: view},
 	}, nil
