@@ -77,9 +77,17 @@ function GameLayout() {
         <span className="toolbar-zone">
           {state.roomView?.zoneName ?? state.roomView?.zone_name ?? 'Connecting…'}
         </span>
-        {state.timeOfDay && (
-          <span className="toolbar-time">{formatTimeOfDay(state.timeOfDay)}</span>
-        )}
+        {(['inventory', 'equipment', 'skills', 'feats', 'stats', 'technology', 'job'] as DrawerType[]).map((d) => (
+          <button
+            key={d}
+            className={`toolbar-btn${openDrawer === d ? ' active' : ''}`}
+            onClick={() => toggleDrawer(d)}
+          >
+            {d.charAt(0).toUpperCase() + d.slice(1)}
+          </button>
+        ))}
+        <button className="toolbar-btn" onClick={() => setShowHelp(true)}>Help</button>
+        <LogoutDropdown />
         {activeWeather && (
           <span style={{
             background: 'rgba(0,0,0,0.7)',
@@ -92,21 +100,14 @@ function GameLayout() {
             fontWeight: 'bold',
             letterSpacing: '0.05em',
             whiteSpace: 'nowrap',
+            flexShrink: 0,
           }}>
             {'\u26C8'} {activeWeather}
           </span>
         )}
-        {(['inventory', 'equipment', 'skills', 'feats', 'stats', 'technology', 'job'] as DrawerType[]).map((d) => (
-          <button
-            key={d}
-            className={`toolbar-btn${openDrawer === d ? ' active' : ''}`}
-            onClick={() => toggleDrawer(d)}
-          >
-            {d.charAt(0).toUpperCase() + d.slice(1)}
-          </button>
-        ))}
-        <button className="toolbar-btn" onClick={() => setShowHelp(true)}>Help</button>
-        <LogoutDropdown />
+        {state.timeOfDay && (
+          <span className="toolbar-time">{formatTimeOfDay(state.timeOfDay)}</span>
+        )}
       </div>
       {state.combatRound !== null && <CombatBanner />}
     </div>
