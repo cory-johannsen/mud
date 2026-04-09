@@ -161,8 +161,6 @@ zone:
       target: lo_hoa_headquarters
     - direction: west
       target: lo_millennium_park
-    - direction: down
-      target: lake_oswego_brothel
     map_x: 0
     map_y: 4
     spawns:
@@ -182,6 +180,15 @@ zone:
       count: 1
       respawn_after: 0s
     - template: lake_oswego_motel_keeper
+      count: 1
+      respawn_after: 0s
+    - template: lake_oswego_brothel_keeper
+      count: 1
+      respawn_after: 0s
+    - template: lake_oswego_black_market_merchant
+      count: 1
+      respawn_after: 0s
+    - template: lake_oswego_fixer
       count: 1
       respawn_after: 0s
     properties:
@@ -673,22 +680,3 @@ zone:
       lighting: soft
       atmosphere: discreet
 
-  - id: lake_oswego_brothel
-    title: The Lakehouse Retreat
-    danger_level: safe
-    description: Below The Commons, in what was once a wine cellar beneath a boutique. Climate-controlled, tastefully lit, and furnished with the kind of restraint that only comes from significant money. The Lakehouse Retreat serves the enclave's upper tier and the travelers who can match the rate card. Everything is discreet. Nothing is cheap.
-    map_x: 0
-    map_y: 100
-    exits:
-    - direction: up
-      target: lo_the_commons
-    spawns:
-    - template: lake_oswego_brothel_keeper
-      count: 1
-      respawn_after: 0s
-    - template: lake_oswego_black_market_merchant
-      count: 1
-      respawn_after: 0s
-    - template: lake_oswego_fixer
-      count: 1
-      respawn_after: 0s

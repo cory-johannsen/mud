@@ -47,10 +47,17 @@ zone:
         target: storybook_lane
       - direction: southeast
         target: the_caravan
-      - direction: down
-        target: wooklyn_brothel
     spawns:
       - template: wooklyn_motel_keeper
+        count: 1
+        respawn_after: 0s
+      - template: wooklyn_brothel_keeper
+        count: 1
+        respawn_after: 0s
+      - template: wooklyn_black_market_merchant
+        count: 1
+        respawn_after: 0s
+      - template: wooklyn_fixer
         count: 1
         respawn_after: 0s
 
@@ -283,7 +290,7 @@ zone:
     exits:
       - direction: north
         target: forest_path_east
-      - direction: down
+      - direction: south
         target: the_flow_exit
     spawns:
       - template: wook
@@ -301,7 +308,7 @@ zone:
     map_x: 4
     map_y: -8
     exits:
-      - direction: up
+      - direction: north
         target: the_flow_entry
       - direction: south
         target: forest_path_south
@@ -410,7 +417,7 @@ zone:
     exits:
       - direction: east
         target: gift_shoppe_ruins
-      - direction: up
+      - direction: south
         target: ice_mountain_peak
     spawns:
       - template: wook
@@ -527,7 +534,7 @@ zone:
     map_x: -4
     map_y: -12
     exits:
-      - direction: down
+      - direction: north
         target: ice_mountain_base
       - direction: east
         target: the_fungal_cavern
@@ -790,22 +797,3 @@ zone:
         count: 3
         respawn_after: 10m
 
-  - id: wooklyn_brothel
-    title: The Mossy Hollow
-    danger_level: safe
-    description: Beneath the Tofteville Market, reached through a ladder hatch between the roots of an enormous oak. The Mossy Hollow is exactly what it sounds like — a subterranean chamber lined with living moss, salvaged fairy-tale furniture, and soft bioluminescent lanterns. Services are offered with genuine warmth and a sliding scale.
-    map_x: 0
-    map_y: 100
-    exits:
-      - direction: up
-        target: tofteville_market
-    spawns:
-      - template: wooklyn_brothel_keeper
-        count: 1
-        respawn_after: 0s
-      - template: wooklyn_black_market_merchant
-        count: 1
-        respawn_after: 0s
-      - template: wooklyn_fixer
-        count: 1
-        respawn_after: 0s

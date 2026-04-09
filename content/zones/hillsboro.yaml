@@ -131,8 +131,6 @@ zone:
       target: hills_throne_room
     - direction: south
       target: hills_the_foundry
-    - direction: down
-      target: hills_power_station
     - direction: west
       target: hills_fortress_core
     map_x: -6
@@ -140,6 +138,9 @@ zone:
     spawns:
     - template: hillsboro_knight
       count: 2
+      respawn_after: 5m
+    - template: intel_guard
+      count: 1
       respawn_after: 5m
     properties:
       lighting: fluorescent
@@ -466,32 +467,6 @@ zone:
     properties:
       lighting: overcast
       atmosphere: suburban
-  - id: hills_power_station
-    title: Power Station
-    description: 'Below the Server Keep, a basement level houses the Kingdom''s
-
-      power distribution center. Banks of salvaged batteries line the
-
-      walls, connected by a rat''s nest of cabling to the solar farm
-
-      above. The hum of electricity is constant and oppressive. A wrong
-
-      step here could be fatal. Only trusted engineers are permitted entry.
-
-      '
-    danger_level: sketchy
-    exits:
-    - direction: up
-      target: hills_server_keep
-    map_x: 202
-    map_y: 8
-    spawns:
-    - template: intel_guard
-      count: 1
-      respawn_after: 5m
-    properties:
-      lighting: emergency
-      atmosphere: electric
   - id: hills_refugee_processing
     title: Refugee Processing
     description: 'A fenced compound near the serf quarters where newcomers are
@@ -507,8 +482,8 @@ zone:
       '
     danger_level: sketchy
     exits: []
-    map_x: 202
-    map_y: 10
+    map_x: -6
+    map_y: 8
     spawns:
     - template: silicon_serf
       count: 1
@@ -752,12 +727,19 @@ zone:
       target: hills_waystation_yard
     - direction: east
       target: hills_waystation_shelter
-    - direction: down
-      target: hillsboro_brothel
     map_x: 2
     map_y: -3
     spawns:
     - template: hillsboro_motel_keeper
+      count: 1
+      respawn_after: 0s
+    - template: hillsboro_brothel_keeper
+      count: 1
+      respawn_after: 0s
+    - template: hillsboro_black_market_merchant
+      count: 1
+      respawn_after: 0s
+    - template: hillsboro_fixer
       count: 1
       respawn_after: 0s
     properties:
@@ -820,22 +802,3 @@ zone:
       lighting: overcast
       atmosphere: trade
 
-  - id: hillsboro_brothel
-    title: The Grain Silo Inn
-    danger_level: safe
-    description: Below the waystation, accessed through a trapdoor behind the old service counter. The Grain Silo Inn occupies a converted underground cistern — concrete walls, lantern light, folding screens for privacy. Agricultural aesthetics with urban rates. No questions about farm affiliation.
-    map_x: 0
-    map_y: 100
-    exits:
-    - direction: up
-      target: hills_waystation
-    spawns:
-    - template: hillsboro_brothel_keeper
-      count: 1
-      respawn_after: 0s
-    - template: hillsboro_black_market_merchant
-      count: 1
-      respawn_after: 0s
-    - template: hillsboro_fixer
-      count: 1
-      respawn_after: 0s

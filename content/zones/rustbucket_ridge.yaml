@@ -105,8 +105,6 @@ zone:
       target: junkers_dream
     - direction: west
       target: the_green_hell
-    - direction: down
-      target: rustbucket_ridge_brothel
     map_x: 0
     map_y: 2
     spawns:
@@ -1233,17 +1231,6 @@ zone:
     - template: dwayne_dawg
       count: 1
       respawn_after: 0s
-
-  - id: rustbucket_ridge_brothel
-    title: The Rusty Latch
-    danger_level: safe
-    description: A converted shipping container wedged beneath the Rusty Oasis, accessible by a ladder through a hatch in the floor. Red-tinted work lights, salvaged mattresses on welded frames, and the perpetual smell of machine oil cut with cheap perfume. The Rusty Latch does exactly what it says and nothing more.
-    map_x: 1
-    map_y: 2
-    exits:
-    - direction: up
-      target: the_rusty_oasis
-    spawns:
     - template: rustbucket_ridge_brothel_keeper
       count: 1
       respawn_after: 0s

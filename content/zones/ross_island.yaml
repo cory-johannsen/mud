@@ -323,37 +323,9 @@ zone:
     exits:
     - direction: south
       target: ross_the_hermitage
-    - direction: down
-      target: ross_cave_interior
     - direction: east
       target: ross_pit_edge
     map_x: -8
-    map_y: 0
-    spawns:
-    - template: island_hermit
-      count: 1
-      respawn_after: 5m
-    properties:
-      lighting: dark
-      atmosphere: damp
-  - id: ross_cave_interior
-    title: Cave Interior
-    description: 'The cave opens into a low chamber carved from compressed gravel
-
-      and sandstone. Water drips from the ceiling, pooling in shallow
-
-      depressions. Old mining equipment rusts in the corners — picks,
-
-      buckets, a section of rail track going nowhere. Someone has
-
-      stacked supplies against the far wall under a sheet of plastic.
-
-      '
-    danger_level: dangerous
-    exits:
-    - direction: up
-      target: ross_cave_entrance
-    map_x: 202
     map_y: 0
     spawns:
     - template: island_hermit
@@ -381,7 +353,7 @@ zone:
     exits:
     - direction: north
       target: ross_pit_edge
-    - direction: down
+    - direction: south
       target: ross_quarry_floor
     map_x: -6
     map_y: 2
@@ -412,8 +384,6 @@ zone:
       target: ross_bridge_road
     - direction: south
       target: ross_rubble_ridge
-    - direction: down
-      target: ross_gravel_pit
     - direction: west
       target: ross_cave_entrance
     - direction: north
@@ -444,17 +414,13 @@ zone:
 
       '
     exits:
-    - direction: up
-      target: ross_pit_edge
     - direction: south
-      target: ross_quarry_floor
-    - direction: east
       target: ross_crane_platform
-    - direction: west
+    - direction: east
       target: ross_lagoon
     danger_level: dangerous
-    map_x: 202
-    map_y: 2
+    map_x: -10
+    map_y: 4
     spawns:
     - template: gravel_pit_boss
       count: 1
@@ -480,12 +446,10 @@ zone:
     danger_level: dangerous
     exits:
     - direction: north
-      target: ross_gravel_pit
-    - direction: up
       target: ross_rubble_ridge
     - direction: west
       target: ross_lagoon
-    map_x: 202
+    map_x: -6
     map_y: 4
     spawns:
     - template: gravel_pit_boss
@@ -514,11 +478,11 @@ zone:
     danger_level: dangerous
     exits:
     - direction: east
-      target: ross_gravel_pit
-    - direction: south
       target: ross_quarry_floor
-    map_x: 202
-    map_y: 6
+    - direction: west
+      target: ross_gravel_pit
+    map_x: -8
+    map_y: 4
     spawns:
     - template: ross_salvager
       count: 1
@@ -543,12 +507,10 @@ zone:
       '
     danger_level: dangerous
     exits:
-    - direction: west
-      target: ross_gravel_pit
     - direction: north
-      target: ross_pit_edge
-    map_x: 202
-    map_y: 8
+      target: ross_gravel_pit
+    map_x: -10
+    map_y: 6
     spawns:
     - template: gang_enforcer
       count: 1
@@ -957,8 +919,8 @@ zone:
     title: The River Rat Den
     danger_level: safe
     description: Beneath the neutral dock, in a boathouse that technically belongs to nobody and practically belongs to everyone with the right price. The River Rat Den sits half above water on old pilings, smelling of the Willamette and tallow candles. The river noise is constant. The staff say it's peaceful.
-    map_x: 0
-    map_y: 100
+    map_x: 4
+    map_y: 2
     exits:
     - direction: north
       target: ri_neutral_dock

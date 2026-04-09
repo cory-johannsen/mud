@@ -40,7 +40,7 @@ var safeRooms = map[string]bool{
 // REQ-WK-1: Zone ID must be "wooklyn".
 // REQ-WK-2: Zone name must be "Wooklyn".
 // REQ-WK-3: Zone faction_id must be "wooks".
-// REQ-WK-4: Zone must contain exactly 35 rooms.
+// REQ-WK-4: Zone must contain exactly 34 rooms.
 func TestWooklyn_ZoneLoads(t *testing.T) {
 	zones, err := world.LoadZonesFromDir("../../../content/zones")
 	require.NoError(t, err)
@@ -56,7 +56,7 @@ func TestWooklyn_ZoneLoads(t *testing.T) {
 	assert.Equal(t, "wooklyn", wooklyn.ID)
 	assert.Equal(t, "Wooklyn", wooklyn.Name)
 	assert.Equal(t, "wooks", wooklyn.FactionID)
-	assert.Len(t, wooklyn.Rooms, 35)
+	assert.Len(t, wooklyn.Rooms, 34)
 }
 
 // TestWooklyn_AllRoomsHaveValidConnections verifies every exit in every room has a non-empty

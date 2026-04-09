@@ -91,8 +91,8 @@ zone:
       zone: troutdale
     - direction: south
       target: pdx_cargo_terminal
-    map_x: 202
-    map_y: 2
+    map_x: 10
+    map_y: 0
     spawns:
     - template: tarmac_raider
       count: 1
@@ -319,7 +319,7 @@ zone:
     exits:
     - direction: west
       target: pdx_concourse_d
-    - direction: down
+    - direction: east
       target: pdx_the_tarmac
     map_x: 2
     map_y: -4
@@ -399,7 +399,7 @@ zone:
 
       '
     exits:
-    - direction: up
+    - direction: west
       target: pdx_concourse_e
     - direction: east
       target: pdx_hangar_row
@@ -407,8 +407,8 @@ zone:
       target: pdx_runway_south
     - direction: north
       target: pdx_fuel_depot
-    map_x: 202
-    map_y: 24
+    map_x: 8
+    map_y: 4
     spawns:
     - template: tarmac_raider
       count: 2
@@ -437,10 +437,8 @@ zone:
       target: pdx_cargo_terminal
     - direction: east
       target: pdx_control_tower
-    - direction: northeast
-      target: pdx_east_runway
-    map_x: 202
-    map_y: 26
+    map_x: 10
+    map_y: 4
     spawns:
     - template: tarmac_raider
       count: 2
@@ -469,8 +467,8 @@ zone:
       target: pdx_hangar_row
     - direction: east
       target: pdx_old_control_tower
-    map_x: 202
-    map_y: 28
+    map_x: 12
+    map_y: 4
     spawns:
     - template: rogue_security
       count: 1
@@ -499,8 +497,8 @@ zone:
       target: pdx_i84_east
     - direction: east
       target: pdx_cargo_warehouse
-    map_x: 202
-    map_y: 30
+    map_x: 10
+    map_y: 2
     spawns:
     - template: cargo_cultist
       count: 3
@@ -607,8 +605,8 @@ zone:
       target: pdx_the_tarmac
     - direction: east
       target: pdx_fuel_depot
-    map_x: 202
-    map_y: 38
+    map_x: 8
+    map_y: 6
     spawns:
     - template: tarmac_raider
       count: 1
@@ -635,8 +633,8 @@ zone:
       target: pdx_the_tarmac
     - direction: west
       target: pdx_runway_south
-    map_x: 202
-    map_y: 40
+    map_x: 8
+    map_y: 2
     spawns:
     - template: tarmac_raider
       count: 1
@@ -739,7 +737,7 @@ zone:
       target: pdx_neutral_terminal
     - direction: east
       target: pdx_neutral_gate
-    - direction: west
+    - direction: north
       target: pdx_international_brothel
     map_x: 4
     map_y: -12
@@ -776,8 +774,8 @@ zone:
     exits:
     - direction: west
       target: pdx_cargo_terminal
-    map_x: 202
-    map_y: 32
+    map_x: 12
+    map_y: 2
     spawns:
     - template: airport_scavenger
       count: 2
@@ -797,8 +795,10 @@ zone:
     exits:
     - direction: west
       target: pdx_control_tower
-    map_x: 203
-    map_y: 30
+    - direction: north
+      target: pdx_east_runway
+    map_x: 14
+    map_y: 4
     spawns:
     - template: rogue_security
       count: 2
@@ -815,12 +815,12 @@ zone:
       blackberry brambles that have reclaimed the old blast zone.
       '
     exits:
-    - direction: southwest
-      target: pdx_hangar_row
+    - direction: south
+      target: pdx_old_control_tower
     - direction: north
       target: pdx_perimeter_fence
-    map_x: 202
-    map_y: 22
+    map_x: 14
+    map_y: 2
     spawns:
     - template: tarmac_raider
       count: 2
@@ -840,8 +840,8 @@ zone:
     exits:
     - direction: south
       target: pdx_east_runway
-    map_x: 202
-    map_y: 20
+    map_x: 14
+    map_y: 0
     spawns:
     - template: rogue_security
       count: 1
@@ -854,10 +854,10 @@ zone:
     title: Terminal Comfort
     danger_level: safe
     description: A former airline club lounge off the neutral terminal corridor, its frosted glass doors still etched with the old carrier's logo. Inside, reclined seats have been converted into curtained berths. The bar cart still operates. Terminal Comfort offers the airport traveler experience with none of the amenities and all of the human contact.
-    map_x: 0
-    map_y: 100
+    map_x: 4
+    map_y: -14
     exits:
-    - direction: east
+    - direction: south
       target: pdx_neutral_lounge
     spawns:
     - template: pdx_international_brothel_keeper

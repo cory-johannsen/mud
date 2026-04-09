@@ -188,8 +188,8 @@ zone:
       '
     danger_level: sketchy
     exits: []
-    map_x: 202
-    map_y: 0
+    map_x: 4
+    map_y: -8
     spawns:
     - template: sauvie_wild_dog
       count: 1
@@ -266,8 +266,8 @@ zone:
       '
     danger_level: sketchy
     exits: []
-    map_x: 202
-    map_y: 2
+    map_x: 4
+    map_y: -6
     spawns:
     - template: harvest_guard
       count: 2
@@ -622,12 +622,14 @@ zone:
       target: sauvie_farm_stand
     - direction: north
       target: sauvie_neutral_barn
-    - direction: down
-      target: sauvie_neutral_cellar
     - direction: west
       target: sauvie_island_brothel
     map_x: -2
     map_y: 2
+    spawns:
+    - template: chip_doc_sauvie_island
+      count: 1
+      respawn_after: 0s
     properties:
       lighting: warm
       atmosphere: neutral
@@ -651,30 +653,6 @@ zone:
     properties:
       lighting: lantern
       atmosphere: sheltered
-  - id: sauvie_neutral_cellar
-    title: Neutral Farmhouse Cellar
-    description: 'A cool, earthen-walled cellar beneath the farmhouse. Shelves hold
-
-      preserved food, candles, and medical supplies. A small work table
-
-      in the corner serves as a surgery of sorts — a woman with calloused
-
-      hands and a steady eye handles the island''s quieter medical needs.
-
-      '
-    danger_level: safe
-    exits:
-    - direction: up
-      target: sauvie_neutral_farmhouse
-    map_x: -2
-    map_y: 3
-    spawns:
-    - template: chip_doc_sauvie_island
-      count: 1
-      respawn_after: 0s
-    properties:
-      lighting: candlelight
-      atmosphere: hushed
   - id: sauvie_south_fields
     title: South Fields
     description: 'Fallow fields stretch along the southern edge of the island, overgrown
@@ -838,8 +816,8 @@ zone:
     title: The Farmhouse Hideaway
     danger_level: safe
     description: A converted summer kitchen annexed to the neutral farmhouse's west wall. The original hearth still works. Rough-hewn shelves hold mason jars of unknown contents. The Farmhouse Hideaway maintains the island's pastoral aesthetic while conducting entirely non-agricultural business. Beds are actual beds. Rates are actual rates.
-    map_x: 0
-    map_y: 100
+    map_x: -4
+    map_y: 2
     exits:
     - direction: east
       target: sauvie_neutral_farmhouse
