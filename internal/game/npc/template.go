@@ -190,6 +190,10 @@ type Template struct {
 	// Zero is treated as 1 at runtime.
 	AttacksPerRound int `yaml:"attacks_per_round,omitempty"`
 
+	// SpeedFt is the NPC's combat movement speed in feet per stride action.
+	// Zero means 25 ft (PF2e default) at runtime.
+	SpeedFt int `yaml:"speed_ft,omitempty"`
+
 	// AllowedDangerLevels restricts spawning to zones whose danger level matches
 	// one of the listed strings. Empty means no restriction.
 	AllowedDangerLevels []string `yaml:"allowed_danger_levels,omitempty"`

@@ -113,6 +113,10 @@ type Combatant struct {
 	// AttackMod is a temporary mid-round attack roll modifier applied by conditions (e.g. frightened).
 	// Negative values reduce the attacker's roll total.
 	AttackMod int
+	// SpeedFt is this combatant's movement speed in feet per stride action.
+	// 0 means 25 ft (PF2e default). Populated from NPC template at combat start;
+	// always 0 (= 25 ft default) for players.
+	SpeedFt int
 	// WeaponName is the display name of the NPC's equipped weapon; empty = unarmed.
 	WeaponName string
 	// Hidden is true when this combatant is concealed. Attackers must pass a DC 11 flat check.
@@ -136,6 +140,23 @@ type Combatant struct {
 	// AttackVerb is the verb used in combat attack narratives (e.g. "bites", "shoots").
 	// Empty string means the default verb ("attacks") will be used.
 	AttackVerb string
+}
+
+// SpeedSquares returns the number of grid squares this combatant may move per stride action.
+// SpeedFt == 0 is treated as the PF2e default of 25 ft = 5 squares.
+// Minimum 1 square.
+//
+// Postcondition: returns >= 1.
+func (c *Combatant) SpeedSquares() int {
+	ft := c.SpeedFt
+	if ft <= 0 {
+		ft = 25
+	}
+	sq := ft / 5
+	if sq < 1 {
+		sq = 1
+	}
+	return sq
 }
 
 // IsPlayer reports whether this combatant is a player character.

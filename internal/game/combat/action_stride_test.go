@@ -80,38 +80,37 @@ func TestStride_AwayMovesAwayOnGrid(t *testing.T) {
 	assert.GreaterOrEqual(t, distAfter, distBefore, "stride away must not reduce Chebyshev distance")
 }
 
-// TestStride_CompassDirections verifies each compass direction moves exactly 1 square.
+// TestStride_CompassDirections verifies each compass direction moves up to 5 squares
+// (default 25 ft speed = 5 squares). Starting at (5,5), each cardinal/diagonal direction
+// moves 5 cells, clamped at grid boundaries.
 func TestStride_CompassDirections(t *testing.T) {
 	tests := []struct {
-		dir     string
-		wantDX  int
-		wantDY  int
+		dir    string
+		wantX  int
+		wantY  int
 	}{
-		{"n", 0, -1},
-		{"s", 0, 1},
-		{"e", 1, 0},
-		{"w", -1, 0},
-		{"ne", 1, -1},
-		{"nw", -1, -1},
-		{"se", 1, 1},
-		{"sw", -1, 1},
+		{"n", 5, 0},
+		{"s", 5, 10},
+		{"e", 10, 5},
+		{"w", 0, 5},
+		{"ne", 10, 0},
+		{"nw", 0, 0},
+		{"se", 10, 10},
+		{"sw", 0, 10},
 	}
 	for _, tc := range tests {
 		t.Run(tc.dir, func(t *testing.T) {
 			src := fixedSrcDist{val: 1}
-			// Place player in the middle of the grid so no clamping occurs.
-			// NPC far away so it doesn't interfere with compass directions.
-			cbt, player, _ := makeStrideCombat2D(t, 5, 5, 9, 9)
-			startX := player.GridX
-			startY := player.GridY
+			// Player starts at (5,5); NPC far away so it doesn't block movement.
+			cbt, player, _ := makeStrideCombat2D(t, 5, 5, 19, 19)
 
 			_ = cbt.StartRound(3)
 			_ = cbt.QueueAction("p1", combat.QueuedAction{Type: combat.ActionStride, Direction: tc.dir})
 			_ = cbt.QueueAction("n1", combat.QueuedAction{Type: combat.ActionPass})
 			_ = combat.ResolveRound(cbt, src, func(id string, hp int) {}, nil)
 
-			assert.Equal(t, startX+tc.wantDX, player.GridX, "dir=%s: wrong GridX", tc.dir)
-			assert.Equal(t, startY+tc.wantDY, player.GridY, "dir=%s: wrong GridY", tc.dir)
+			assert.Equal(t, tc.wantX, player.GridX, "dir=%s: wrong GridX", tc.dir)
+			assert.Equal(t, tc.wantY, player.GridY, "dir=%s: wrong GridY", tc.dir)
 		})
 	}
 }

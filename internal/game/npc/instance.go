@@ -134,6 +134,9 @@ type Instance struct {
 	// AttackVerb is the verb used in combat attack narratives. Copied from template.
 	// Empty string means the default verb ("attacks") will be used.
 	AttackVerb string
+	// SpeedFt is the NPC's combat movement speed in feet. 0 = 25 ft (PF2e default).
+	// Copied from template at spawn.
+	SpeedFt int
 	// Immobile prevents this NPC from patrolling or wandering. Copied from template.
 	Immobile bool
 	// Roving state — only populated when Template.Roving != nil.
@@ -327,6 +330,7 @@ func NewInstanceWithResolver(id string, tmpl *Template, roomID string, armorACBo
 		NpcRole:          tmpl.NpcRole,
 		Personality:      tmpl.Personality,
 		AttackVerb: tmpl.AttackVerb,
+		SpeedFt:    tmpl.SpeedFt,
 		Immobile:   tmpl.Immobile,
 		// Cowering defaults to false (zero value).
 		FactionID: tmpl.FactionID,

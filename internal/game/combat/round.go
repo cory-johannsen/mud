@@ -494,44 +494,54 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 					}
 				}
 
-				dx, dy := CompassDelta(dir, actor, opponent)
+				// REQ-STRIDE-SPEED: Move up to SpeedSquares() cells per stride (default 5 = 25 ft).
+				// Each step recomputes direction for "toward"/"away" since position changes.
+				steps := actor.SpeedSquares()
+				for step := 0; step < steps; step++ {
+					// REQ-STRIDE-STOP: For "toward" strides, stop when already adjacent (≤ 5 ft).
+					if dir == "toward" && opponent != nil && CombatRange(*actor, *opponent) <= 5 {
+						break
+					}
 
-				// REQ-STRIDE-STOP: For "toward" strides, do not move if already adjacent (≤ 5 ft).
-				// Prevents moving onto the opponent's cell when at distance 1.
-				if dir == "toward" && opponent != nil && CombatRange(*actor, *opponent) <= 5 {
-					dx, dy = 0, 0
-				}
+					dx, dy := CompassDelta(dir, actor, opponent)
+					if dx == 0 && dy == 0 {
+						break
+					}
 
-				newX := actor.GridX + dx
-				newY := actor.GridY + dy
-				// Clamp to grid bounds.
-				if newX < 0 {
-					newX = 0
-				} else if newX >= width {
-					newX = width - 1
-				}
-				if newY < 0 {
-					newY = 0
-				} else if newY >= height {
-					newY = height - 1
-				}
-				// REQ-STRIDE-NOOVERLAP: Do not move onto a cell occupied by another living combatant.
-				if CellOccupied(cbt, actor.ID, newX, newY) {
-					newX = actor.GridX
-					newY = actor.GridY
-				}
-				actor.GridX = newX
-				actor.GridY = newY
+					newX := actor.GridX + dx
+					newY := actor.GridY + dy
+					// Clamp to grid bounds.
+					if newX < 0 {
+						newX = 0
+					} else if newX >= width {
+						newX = width - 1
+					}
+					if newY < 0 {
+						newY = 0
+					} else if newY >= height {
+						newY = height - 1
+					}
+					// Stop if clamping produced no movement (actor is at a grid edge in this direction).
+					if newX == actor.GridX && newY == actor.GridY {
+						break
+					}
+					// REQ-STRIDE-NOOVERLAP: Do not move onto a cell occupied by another living combatant.
+					if CellOccupied(cbt, actor.ID, newX, newY) {
+						break
+					}
+					actor.GridX = newX
+					actor.GridY = newY
 
-				// REQ-RXN19: TriggerOnEnemyMoveAdjacent fires when an NPC moves into melee range of a player.
-				if actor.Kind == KindNPC {
-					for _, c := range cbt.Combatants {
-						if c.Kind == KindPlayer && !c.IsDead() {
-							if CombatRange(*actor, *c) <= 5 {
-								fireReaction(c.ID, reaction.TriggerOnEnemyMoveAdjacent, reaction.ReactionContext{
-									TriggerUID: c.ID,
-									SourceUID:  actor.ID,
-								})
+					// REQ-RXN19: TriggerOnEnemyMoveAdjacent fires when an NPC moves into melee range of a player.
+					if actor.Kind == KindNPC {
+						for _, c := range cbt.Combatants {
+							if c.Kind == KindPlayer && !c.IsDead() {
+								if CombatRange(*actor, *c) <= 5 {
+									fireReaction(c.ID, reaction.TriggerOnEnemyMoveAdjacent, reaction.ReactionContext{
+										TriggerUID: c.ID,
+										SourceUID:  actor.ID,
+									})
+								}
 							}
 						}
 					}

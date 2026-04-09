@@ -61,9 +61,9 @@ func TestStride_Away_GridBoundClamped(t *testing.T) {
 }
 
 // TestStride_Away_BelowMaxRange_NotClamped verifies that striding away within
-// grid boundaries proceeds normally.
+// grid boundaries moves the NPC its full speed (default 25 ft = 5 squares).
 func TestStride_Away_BelowMaxRange_NotClamped(t *testing.T) {
-	// NPC at (5,5), player at (0,0) — stride "away" moves NPC to (6,6).
+	// NPC at (5,5), player at (0,0) — stride "away" moves NPC 5 squares diagonally to (10,10).
 	cbt := makeMaxRangeCombat(t, 0, 0, 5, 5)
 	_ = cbt.StartRound(3)
 	err := cbt.QueueAction("npc1", combat.QueuedAction{Type: combat.ActionStride, Direction: "away"})
@@ -74,8 +74,8 @@ func TestStride_Away_BelowMaxRange_NotClamped(t *testing.T) {
 
 	npc := cbt.GetCombatant("npc1")
 	require.NotNil(t, npc)
-	assert.Equal(t, 6, npc.GridX, "NPC should move to GridX=6 after stride away")
-	assert.Equal(t, 6, npc.GridY, "NPC should move to GridY=6 after stride away")
+	assert.Equal(t, 10, npc.GridX, "NPC should move 5 squares to GridX=10 after stride away")
+	assert.Equal(t, 10, npc.GridY, "NPC should move 5 squares to GridY=10 after stride away")
 }
 
 // TestStride_Away_MaxGridDistance_StaysInBounds verifies that an NPC at maximum

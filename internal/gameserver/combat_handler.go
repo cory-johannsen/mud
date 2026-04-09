@@ -1071,6 +1071,7 @@ func (h *CombatHandler) JoinPendingNPCCombat(inst *npc.Instance, pendingRoomID s
 		Weaknesses:  inst.Weaknesses,
 		WeaponName:  npcWeaponName,
 		AttackVerb:  inst.AttackVerb,
+		SpeedFt:     inst.SpeedFt,
 	}
 	combat.RollInitiative([]*combat.Combatant{npcCbt}, h.dice.Src())
 	// Assign NPC on right edge, stacked vertically from center.
@@ -1613,6 +1614,7 @@ func (h *CombatHandler) startPursuitCombatLocked(playerSess *session.PlayerSessi
 			Weaknesses:  inst.Weaknesses,
 			WeaponName:  npcWeaponName,
 			AttackVerb:  inst.AttackVerb,
+			SpeedFt:     inst.SpeedFt,
 			// NPC starts on the right edge, stacked vertically from center.
 			GridX: 19,
 			GridY: 10 + i,
@@ -2720,6 +2722,7 @@ func (h *CombatHandler) startCombatLocked(sess *session.PlayerSession, inst *npc
 		Weaknesses:  inst.Weaknesses,
 		WeaponName:  npcWeaponName,
 		AttackVerb:  inst.AttackVerb,
+		SpeedFt:     inst.SpeedFt,
 	}
 
 	combatants := []*combat.Combatant{playerCbt, npcCbt}
