@@ -324,3 +324,79 @@ func TestQueuedAction_AidTarget(t *testing.T) {
 		t.Errorf("expected Type=ActionAid")
 	}
 }
+
+// TestActionQueue_DeductMovementAP_Success verifies two movement actions succeed.
+func TestActionQueue_DeductMovementAP_Success(t *testing.T) {
+	q := combat.NewActionQueue("u1", 3)
+	require.NoError(t, q.DeductMovementAP(1))
+	assert.Equal(t, 2, q.RemainingPoints())
+	assert.Equal(t, 1, q.MovementAPSpent())
+
+	require.NoError(t, q.DeductMovementAP(1))
+	assert.Equal(t, 1, q.RemainingPoints())
+	assert.Equal(t, 2, q.MovementAPSpent())
+}
+
+// TestActionQueue_DeductMovementAP_BlocksThirdMovement verifies the third movement
+// action is rejected even when general AP remains (REQ-COMBAT-MVTCAP).
+func TestActionQueue_DeductMovementAP_BlocksThirdMovement(t *testing.T) {
+	q := combat.NewActionQueue("u1", 3)
+	require.NoError(t, q.DeductMovementAP(1))
+	require.NoError(t, q.DeductMovementAP(1))
+	// Third movement must be rejected.
+	err := q.DeductMovementAP(1)
+	require.Error(t, err)
+	// State must be unchanged after the failed attempt.
+	assert.Equal(t, 1, q.RemainingPoints(), "AP must not change on failed movement deduct")
+	assert.Equal(t, 2, q.MovementAPSpent(), "movementAPSpent must not change on failure")
+}
+
+// TestActionQueue_DeductMovementAP_InsufficientAP verifies that general AP is also checked.
+func TestActionQueue_DeductMovementAP_InsufficientAP(t *testing.T) {
+	q := combat.NewActionQueue("u1", 1)
+	require.NoError(t, q.DeductMovementAP(1))
+	// No general AP left; second movement attempt must fail on AP check.
+	err := q.DeductMovementAP(1)
+	require.Error(t, err)
+	assert.Equal(t, 0, q.RemainingPoints())
+	assert.Equal(t, 1, q.MovementAPSpent())
+}
+
+// TestActionQueue_DeductMovementAP_ZeroCost_ReturnsError verifies zero cost is rejected.
+func TestActionQueue_DeductMovementAP_ZeroCost_ReturnsError(t *testing.T) {
+	q := combat.NewActionQueue("u1", 3)
+	err := q.DeductMovementAP(0)
+	require.Error(t, err)
+	assert.Equal(t, 3, q.RemainingPoints())
+	assert.Equal(t, 0, q.MovementAPSpent())
+}
+
+// TestActionQueue_ClearActions_ResetsMovementAPSpent verifies ClearActions resets
+// movement AP tracking (simulates new round).
+func TestActionQueue_ClearActions_ResetsMovementAPSpent(t *testing.T) {
+	q := combat.NewActionQueue("u1", 3)
+	require.NoError(t, q.DeductMovementAP(1))
+	require.NoError(t, q.DeductMovementAP(1))
+	assert.Equal(t, 2, q.MovementAPSpent())
+
+	q.ClearActions()
+	assert.Equal(t, 0, q.MovementAPSpent(), "ClearActions must reset movement AP spent")
+	assert.Equal(t, 3, q.RemainingPoints())
+}
+
+// TestProperty_MovementAPSpent_NeverExceedsMax is a property test ensuring movement AP
+// spending never allows more than MaxMovementAP per round.
+func TestProperty_MovementAPSpent_NeverExceedsMax(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		maxAP := rapid.IntRange(2, 6).Draw(rt, "maxAP")
+		q := combat.NewActionQueue("u1", maxAP)
+		attempts := rapid.IntRange(0, 5).Draw(rt, "attempts")
+		for i := 0; i < attempts; i++ {
+			_ = q.DeductMovementAP(1)
+			assert.LessOrEqual(rt, q.MovementAPSpent(), combat.MaxMovementAP,
+				"movementAPSpent must never exceed MaxMovementAP")
+			assert.GreaterOrEqual(rt, q.RemainingPoints(), 0,
+				"remaining AP must never go negative")
+		}
+	})
+}

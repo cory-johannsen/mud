@@ -9416,7 +9416,7 @@ func (s *GameServiceServer) handleStride(uid string, req *gamev1.StrideRequest) 
 	if s.combatH == nil {
 		return errorEvent("Combat handler unavailable."), nil
 	}
-	if err := s.combatH.SpendAP(uid, 1); err != nil {
+	if err := s.combatH.SpendMovementAP(uid, 1); err != nil {
 		return errorEvent(err.Error()), nil
 	}
 	cbt, ok := s.combatH.GetCombatForRoom(sess.RoomID)
@@ -9704,7 +9704,7 @@ func (s *GameServiceServer) handleStep(uid string, req *gamev1.StepRequest) (*ga
 	if s.combatH == nil {
 		return errorEvent("Combat handler unavailable."), nil
 	}
-	if err := s.combatH.SpendAP(uid, 1); err != nil {
+	if err := s.combatH.SpendMovementAP(uid, 1); err != nil {
 		return errorEvent(err.Error()), nil
 	}
 	cbt, ok := s.combatH.GetCombatForRoom(sess.RoomID)

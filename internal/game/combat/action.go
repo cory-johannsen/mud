@@ -95,13 +95,19 @@ type QueuedAction struct {
 	AbilityCost int    // for ActionUseAbility; AP cost from ClassFeature.ActionCost
 }
 
+// MaxMovementAP is the maximum action points a combatant may spend on movement
+// (Stride or Step) in a single round per PF2e rules.
+const MaxMovementAP = 2
+
 // ActionQueue tracks a combatant's remaining action points and queued actions.
 // Invariant: remaining >= 0 at all times.
+// Invariant: movementAPSpent <= MaxMovementAP at all times.
 type ActionQueue struct {
-	UID       string
-	MaxPoints int
-	remaining int
-	actions   []QueuedAction
+	UID              string
+	MaxPoints        int
+	remaining        int
+	movementAPSpent  int
+	actions          []QueuedAction
 }
 
 // RemainingPoints returns the number of action points still available this round.
@@ -122,6 +128,30 @@ func (q *ActionQueue) DeductAP(cost int) error {
 	q.remaining -= cost
 	return nil
 }
+
+// DeductMovementAP reduces remaining action points by cost for a movement action
+// (Stride or Step), enforcing the per-round movement AP cap (MaxMovementAP).
+//
+// Precondition: cost > 0.
+// Postcondition: on success, remaining and movementAPSpent both decremented/incremented
+// by cost; on error, queue state is unchanged.
+func (q *ActionQueue) DeductMovementAP(cost int) error {
+	if cost <= 0 {
+		return fmt.Errorf("DeductMovementAP: cost must be positive, got %d", cost)
+	}
+	if q.movementAPSpent+cost > MaxMovementAP {
+		return fmt.Errorf("movement limit reached: may spend at most %d AP on movement per round (already spent %d)", MaxMovementAP, q.movementAPSpent)
+	}
+	if q.remaining < cost {
+		return fmt.Errorf("not enough AP: have %d, need %d", q.remaining, cost)
+	}
+	q.remaining -= cost
+	q.movementAPSpent += cost
+	return nil
+}
+
+// MovementAPSpent returns how many action points have been spent on movement this round.
+func (q *ActionQueue) MovementAPSpent() int { return q.movementAPSpent }
 
 // AddAP adds n action points to remaining.
 //
@@ -211,4 +241,5 @@ func (q *ActionQueue) IsSubmitted() bool {
 func (q *ActionQueue) ClearActions() {
 	q.actions = q.actions[:0]
 	q.remaining = q.MaxPoints
+	q.movementAPSpent = 0
 }

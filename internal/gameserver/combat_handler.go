@@ -827,6 +827,32 @@ func (h *CombatHandler) SpendAP(uid string, cost int) error {
 	return q.DeductAP(cost)
 }
 
+// SpendMovementAP deducts cost AP from uid's action queue for a movement action,
+// enforcing the per-round movement AP cap (combat.MaxMovementAP = 2).
+//
+// Precondition: uid non-empty; cost > 0; player in active combat with an action queue.
+// Postcondition: on success, remaining and movementAPSpent both adjusted; on error, unchanged.
+func (h *CombatHandler) SpendMovementAP(uid string, cost int) error {
+	sess, ok := h.sessions.GetPlayer(uid)
+	if !ok {
+		return fmt.Errorf("player %q not found", uid)
+	}
+
+	h.combatMu.Lock()
+	defer h.combatMu.Unlock()
+
+	cbt, ok := h.engine.GetCombat(sess.RoomID)
+	if !ok {
+		return fmt.Errorf("player %q is not in active combat", uid)
+	}
+
+	q, ok := cbt.ActionQueues[uid]
+	if !ok {
+		return fmt.Errorf("no action queue for player %q", uid)
+	}
+	return q.DeductMovementAP(cost)
+}
+
 // SpendAllAP drains all remaining AP from uid's action queue in their active combat.
 // If the player is not in combat or has no action queue, SpendAllAP is a no-op.
 //
