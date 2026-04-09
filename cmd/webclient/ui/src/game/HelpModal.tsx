@@ -114,6 +114,7 @@ export function HelpModal({ onClose }: HelpModalProps) {
             hotbarSlots={state.hotbarSlots}
             onPick={handleAssign}
             onCancel={() => setPickingCmd(null)}
+            label={`Assign "${pickingCmd}" to slot`}
           />
         )}
         <div style={styles.body}>

@@ -11,7 +11,7 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    zIndex: 300,
+    zIndex: 1100,
   },
   modal: {
     background: '#111',
@@ -69,16 +69,18 @@ export function HotbarSlotPicker({
   hotbarSlots,
   onPick,
   onCancel,
+  label = 'Add to Hotbar',
 }: {
   hotbarSlots: HotbarSlot[]
   onPick: (slot: number) => void
   onCancel: () => void
+  label?: string
 }) {
   return createPortal(
     <div style={styles.overlay} onClick={onCancel}>
       <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
         <div style={styles.header}>
-          <span style={styles.label}>Add to Hotbar</span>
+          <span style={styles.label}>{label}</span>
           <button style={styles.cancelBtn} onClick={onCancel} type="button">✕</button>
         </div>
         <div style={styles.grid}>
