@@ -1,0 +1,10 @@
+id: dog_meat
+name: Dog Meat
+description: Dried and salted dog meat. Wasteland protein. No judgment.
+kind: consumable
+weight: 0.3
+stackable: true
+max_stack: 10
+value: 5
+effect:
+  heal: "1d6"

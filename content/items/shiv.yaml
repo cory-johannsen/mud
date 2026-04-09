@@ -1,0 +1,9 @@
+id: shiv
+name: Shiv
+description: A improvised stabbing weapon fashioned from scrap metal and tape. Crude but effective at close range.
+kind: weapon
+weapon_ref: shiv
+weight: 0.3
+stackable: false
+max_stack: 1
+value: 8

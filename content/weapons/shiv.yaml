@@ -1,0 +1,11 @@
+id: shiv
+name: Shiv
+description: A improvised stabbing weapon fashioned from scrap metal and tape.
+damage_dice: 1d4
+damage_type: piercing
+range_increment: 0
+traits: [agile, finesse]
+kind: one_handed
+group: blade
+proficiency_category: simple_weapons
+rarity: street

@@ -1,0 +1,10 @@
+id: duct_tape
+name: Duct Tape
+description: The universal repair material. Holds armor together, patches wounds, and keeps the apocalypse running.
+kind: consumable
+weight: 0.2
+stackable: true
+max_stack: 10
+value: 10
+effect:
+  heal: "1"

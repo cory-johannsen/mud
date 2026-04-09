@@ -1,0 +1,10 @@
+id: packaged_food
+name: Packaged Food
+description: A vacuum-sealed ration pack of indeterminate origin. Probably edible.
+kind: consumable
+weight: 0.4
+stackable: true
+max_stack: 10
+value: 8
+effect:
+  heal: "1d4+1"

@@ -1,0 +1,9 @@
+id: hatchet
+name: Hatchet
+description: A short-handled axe, as comfortable splitting wood as skulls.
+kind: weapon
+weapon_ref: hatchet
+weight: 1.5
+stackable: false
+max_stack: 1
+value: 40

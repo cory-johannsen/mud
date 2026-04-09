@@ -1,0 +1,10 @@
+id: rad_tabs
+name: Rad Tabs
+description: Potassium iodide tablets. Prophylactic protection against radiation exposure. Take before, not after.
+kind: consumable
+weight: 0.1
+stackable: true
+max_stack: 20
+value: 20
+effect:
+  heal: "1d2"

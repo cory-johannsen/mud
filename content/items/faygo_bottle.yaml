@@ -1,0 +1,10 @@
+id: faygo_bottle
+name: Faygo Bottle
+description: A two-liter of Faygo, sacred to certain factions. Sticky, sweet, and somehow still carbonated.
+kind: consumable
+weight: 0.6
+stackable: true
+max_stack: 5
+value: 6
+effect:
+  heal: "1d6"

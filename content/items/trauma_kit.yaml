@@ -1,0 +1,10 @@
+id: trauma_kit
+name: Trauma Kit
+description: A battered field medic bag with sutures, clotting powder, and a tourniquet. Serious wounds only.
+kind: consumable
+weight: 1.0
+stackable: true
+max_stack: 3
+value: 80
+effect:
+  heal: "4d6+4"

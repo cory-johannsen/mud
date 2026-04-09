@@ -1,0 +1,10 @@
+id: icp_face_paint
+name: ICP Face Paint
+description: Black and white greasepaint applied in the sacred clown pattern. Inspires fear in some, confusion in most.
+kind: consumable
+weight: 0.1
+stackable: true
+max_stack: 10
+value: 15
+effect:
+  heal: "1"

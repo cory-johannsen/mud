@@ -1,0 +1,10 @@
+id: energy_drink
+name: Energy Drink
+description: A neon-colored stimulant beverage with enough caffeine to wake the dead. Briefly.
+kind: consumable
+weight: 0.3
+stackable: true
+max_stack: 10
+value: 12
+effect:
+  heal: "1d4"

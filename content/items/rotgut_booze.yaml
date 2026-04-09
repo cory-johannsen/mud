@@ -1,0 +1,10 @@
+id: rotgut_booze
+name: Rotgut Booze
+description: Unlabeled grain alcohol in a repurposed bottle. Strips paint, cleans wounds, and makes bad decisions easier.
+kind: consumable
+weight: 0.5
+stackable: true
+max_stack: 5
+value: 10
+effect:
+  heal: "1d4"

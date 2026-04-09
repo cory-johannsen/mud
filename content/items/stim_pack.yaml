@@ -1,0 +1,10 @@
+id: stim_pack
+name: Stim Pack
+description: A pre-loaded auto-injector of combat stimulants and coagulants. Stops bleeding and gets you back on your feet fast.
+kind: consumable
+weight: 0.2
+stackable: true
+max_stack: 10
+value: 35
+effect:
+  heal: "2d6"

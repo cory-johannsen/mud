@@ -1,0 +1,10 @@
+id: scrap_bandage
+name: Scrap Bandage
+description: Strips of salvaged cloth and tape. Barely sterile, but better than nothing.
+kind: consumable
+weight: 0.1
+stackable: true
+max_stack: 20
+value: 8
+effect:
+  heal: "1d4"

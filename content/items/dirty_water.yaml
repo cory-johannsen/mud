@@ -1,0 +1,10 @@
+id: dirty_water
+name: Dirty Water
+description: Murky water from a questionable source. Hydrating, technically.
+kind: consumable
+weight: 0.5
+stackable: true
+max_stack: 5
+value: 3
+effect:
+  heal: "1"
