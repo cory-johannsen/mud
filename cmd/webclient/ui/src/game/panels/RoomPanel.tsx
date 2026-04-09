@@ -1,4 +1,7 @@
+import { useState } from 'react'
 import { useGame } from '../GameContext'
+import { RoomTooltip } from '../RoomTooltip'
+import type { ExitInfo, MapTile } from '../../proto'
 
 function npcTypeTag(npcType: string): string {
   switch (npcType) {
@@ -18,6 +21,28 @@ function npcTypeTag(npcType: string): string {
 export function RoomPanel() {
   const { state, sendMessage, sendCommand } = useGame()
   const room = state.roomView
+  const [tooltip, setTooltip] = useState<{ tile: MapTile; pos: { x: number; y: number } } | null>(null)
+
+  function tileForExit(ex: ExitInfo): MapTile | null {
+    if (ex.targetRoomId) {
+      const found = state.mapTiles.find(t => t.roomId === ex.targetRoomId)
+      if (found) return found
+    }
+    // Room not yet on map — build a minimal tile from the exit's title
+    const title = ex.targetTitle
+    if (title) return { roomName: title }
+    return null
+  }
+
+  function handleExitEnter(ex: ExitInfo, e: React.MouseEvent) {
+    sendCommand(`look ${ex.direction}`)
+    const tile = tileForExit(ex)
+    if (tile) setTooltip({ tile, pos: { x: e.clientX, y: e.clientY + 8 } })
+  }
+
+  function handleExitLeave() {
+    setTooltip(null)
+  }
 
   if (!room) {
     return <p className="room-loading" style={{ color: '#555', fontStyle: 'italic' }}>Connecting…</p>
@@ -70,11 +95,9 @@ export function RoomPanel() {
           return null
         }
 
-        // Vertical exits: up / down (and long-form aliases)
-        const verticalKeys = ['up', 'down', 'u', 'd']
-        const verticalExits = visibleExits.filter((ex) =>
-          verticalKeys.includes(ex.direction.toLowerCase())
-        )
+        // Resolve up/down exits for the center cell
+        const upExit = exitMap.get('up') ?? exitMap.get('u') ?? null
+        const downExit = exitMap.get('down') ?? exitMap.get('d') ?? null
 
         return (
           <>
@@ -83,8 +106,35 @@ export function RoomPanel() {
               {compassGrid.map((row, ri) =>
                 row.map((key, ci) => {
                   if (key === null) {
-                    // Center cell — always empty
-                    return <div key={`${ri}-${ci}`} className="exit-cell-empty" />
+                    // Center cell — split into Up (top) and Down (bottom)
+                    return (
+                      <div key={`${ri}-${ci}`} className="exit-cell-center">
+                        {upExit ? (
+                          <button
+                            className="exit-btn exit-btn-vert"
+                            onClick={() => sendMessage('MoveRequest', { direction: upExit.direction })}
+                            onMouseEnter={(e) => handleExitEnter(upExit, e)}
+                            onMouseLeave={handleExitLeave}
+                          >
+                            {upExit.locked ? '↑*' : '↑'}
+                          </button>
+                        ) : (
+                          <div className="exit-half-empty" />
+                        )}
+                        {downExit ? (
+                          <button
+                            className="exit-btn exit-btn-vert"
+                            onClick={() => sendMessage('MoveRequest', { direction: downExit.direction })}
+                            onMouseEnter={(e) => handleExitEnter(downExit, e)}
+                            onMouseLeave={handleExitLeave}
+                          >
+                            {downExit.locked ? '↓*' : '↓'}
+                          </button>
+                        ) : (
+                          <div className="exit-half-empty" />
+                        )}
+                      </div>
+                    )
                   }
                   const ex = resolveExit(key)
                   if (!ex) {
@@ -95,7 +145,8 @@ export function RoomPanel() {
                       key={`${ri}-${ci}`}
                       className="exit-btn"
                       onClick={() => sendMessage('MoveRequest', { direction: ex.direction })}
-                      onMouseEnter={() => sendCommand(`look ${ex.direction}`)}
+                      onMouseEnter={(e) => handleExitEnter(ex, e)}
+                      onMouseLeave={handleExitLeave}
                     >
                       {ex.locked ? `${ex.direction}*` : ex.direction}
                     </button>
@@ -103,20 +154,7 @@ export function RoomPanel() {
                 })
               )}
             </div>
-            {verticalExits.length > 0 && (
-              <div className="room-exits-vertical">
-                {verticalExits.map((ex) => (
-                  <button
-                    key={ex.direction}
-                    className="exit-btn"
-                    onClick={() => sendMessage('MoveRequest', { direction: ex.direction })}
-                    onMouseEnter={() => sendCommand(`look ${ex.direction}`)}
-                  >
-                    {ex.locked ? `${ex.direction}*` : ex.direction}
-                  </button>
-                ))}
-              </div>
-            )}
+            {tooltip && <RoomTooltip tile={tooltip.tile} pos={tooltip.pos} />}
           </>
         )
       })()}
