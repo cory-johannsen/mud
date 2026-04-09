@@ -468,6 +468,18 @@ export interface CombatantPosition {
   name: string
   x: number
   y: number
+  apRemaining?: number
+  ap_remaining?: number
+  apTotal?: number
+  ap_total?: number
+}
+
+export interface APUpdateEvent {
+  name?: string
+  apRemaining?: number
+  ap_remaining?: number
+  apTotal?: number
+  ap_total?: number
 }
 
 export interface CombatEvent {
@@ -601,4 +613,5 @@ export type ServerEvent =
   | { type: 'Disconnected'; payload: Record<string, never> }
   | { type: 'WeatherEvent'; payload: WeatherEvent }
   | { type: 'JobGrantsResponse'; payload: JobGrantsResponse }
+  | { type: 'APUpdateEvent'; payload: APUpdateEvent }
   | { type: string; payload: unknown }

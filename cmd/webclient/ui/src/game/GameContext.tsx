@@ -35,6 +35,7 @@ import type {
   LoadoutView,
   HotbarSlot,
   JobGrantsResponse,
+  APUpdateEvent,
 } from '../proto'
 
 const TOKEN_KEY = 'mud_token'
@@ -68,6 +69,11 @@ export interface ChoicePrompt {
   options: string[]
 }
 
+export interface CombatantAP {
+  remaining: number
+  total: number
+}
+
 export interface GameState {
   connected: boolean
   roomView: RoomView | null
@@ -80,6 +86,7 @@ export interface GameState {
   combatRound: RoundStartEvent | null
   combatPositions: Record<string, { x: number; y: number }>
   combatantHp: Record<string, CombatantHp>
+  combatantAP: Record<string, CombatantAP>
   hotbarSlots: HotbarSlot[]
   timeOfDay: TimeOfDayEvent | null
   activeWeather: string | null
@@ -107,6 +114,8 @@ type Action =
   | { type: 'CLEAR_COMBAT_POSITIONS' }
   | { type: 'UPDATE_COMBATANT_HP'; name: string; current: number; max: number }
   | { type: 'CLEAR_COMBATANT_HP' }
+  | { type: 'UPDATE_COMBATANT_AP'; name: string; remaining: number; total: number }
+  | { type: 'CLEAR_COMBATANT_AP' }
   | { type: 'SET_HOTBAR'; slots: HotbarSlot[] }
   | { type: 'SET_TIME_OF_DAY'; tod: TimeOfDayEvent }
   | { type: 'SET_ACTIVE_WEATHER'; weather: string | null }
@@ -158,6 +167,10 @@ function reducer(state: GameState, action: Action): GameState {
     }
     case 'CLEAR_COMBATANT_HP':
       return { ...state, combatantHp: {} }
+    case 'UPDATE_COMBATANT_AP':
+      return { ...state, combatantAP: { ...state.combatantAP, [action.name]: { remaining: action.remaining, total: action.total } } }
+    case 'CLEAR_COMBATANT_AP':
+      return { ...state, combatantAP: {} }
     case 'SET_HOTBAR':
       return { ...state, hotbarSlots: action.slots }
     case 'UPDATE_PLAYER_HP':
@@ -217,6 +230,7 @@ const initialState: GameState = {
   combatRound: null,
   combatPositions: {},
   combatantHp: {},
+  combatantAP: {},
   hotbarSlots: Array(10).fill({ kind: 'command', ref: '' }) as HotbarSlot[],
   timeOfDay: null,
   activeWeather: null,
@@ -298,6 +312,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
         dispatch({ type: 'SET_COMBAT_ROUND', round: null })
         dispatch({ type: 'CLEAR_COMBAT_POSITIONS' })
         dispatch({ type: 'CLEAR_COMBATANT_HP' })
+        dispatch({ type: 'CLEAR_COMBATANT_AP' })
         // Reconnect notification suppressed — server restores state seamlessly (BUG-143).
       }
       while (queueRef.current.length > 0) {
@@ -400,6 +415,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
             dispatch({ type: 'SET_COMBAT_ROUND', round: null })
             dispatch({ type: 'CLEAR_COMBAT_POSITIONS' })
             dispatch({ type: 'CLEAR_COMBATANT_HP' })
+            dispatch({ type: 'CLEAR_COMBATANT_AP' })
           }
           // Track target HP from attack events.
           const tHp = ce.targetHp ?? ce.target_hp
@@ -417,6 +433,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
         case 'RoundStartEvent': {
           const rs = payload as RoundStartEvent
           dispatch({ type: 'SET_COMBAT_ROUND', round: rs })
+          const actionsPerTurn = rs.actionsPerTurn ?? rs.actions_per_turn ?? 3
           if (rs.initialPositions) {
             for (const pos of rs.initialPositions as CombatantPosition[]) {
               dispatch({
@@ -424,6 +441,14 @@ export function GameProvider({ children }: { children: ReactNode }) {
                 combatantName: pos.name,
                 x: pos.x ?? 0,
                 y: pos.y ?? 0,
+              })
+              const apTotal = pos.apTotal ?? pos.ap_total ?? actionsPerTurn
+              const apRemaining = pos.apRemaining ?? pos.ap_remaining ?? apTotal
+              dispatch({
+                type: 'UPDATE_COMBATANT_AP',
+                name: pos.name,
+                remaining: apRemaining,
+                total: apTotal,
               })
             }
           }
@@ -441,6 +466,15 @@ export function GameProvider({ children }: { children: ReactNode }) {
             type: 'APPEND_FEED',
             entry: makeFeedEntry('round_end', `Round ${re.round ?? '?'} ended`),
           })
+          break
+        }
+        case 'APUpdateEvent': {
+          const au = payload as APUpdateEvent
+          if (au.name) {
+            const remaining = au.apRemaining ?? au.ap_remaining ?? 0
+            const total = au.apTotal ?? au.ap_total ?? 0
+            dispatch({ type: 'UPDATE_COMBATANT_AP', name: au.name, remaining, total })
+          }
           break
         }
         case 'TimeOfDay': {

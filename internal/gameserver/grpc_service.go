@@ -568,6 +568,11 @@ func NewGameServiceServer(
 				Payload: &gamev1.ServerEvent_RoundStart{RoundStart: evt},
 			})
 		})
+		s.combatH.SetAPUpdateBroadcastFn(func(roomID string, evt *gamev1.APUpdateEvent) {
+			s.broadcastToRoom(roomID, "", &gamev1.ServerEvent{
+				Payload: &gamev1.ServerEvent_ApUpdate{ApUpdate: evt},
+			})
+		})
 		s.worldH.SetCombatHandler(s.combatH)
 		// REQ-AH-21: wire substance service for poison-on-hit.
 		s.combatH.SetSubstanceSvc(s)

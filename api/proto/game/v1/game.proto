@@ -334,6 +334,7 @@ message ServerEvent {
     FixerView            fixer_view             = 34;
     JobGrantsResponse    job_grants_response    = 35;
     RestView             rest_view              = 36;
+    APUpdateEvent        ap_update              = 37;
   }
 }
 
@@ -861,9 +862,11 @@ message InventoryView {
 
 // CombatantPosition carries a combatant's name and 2D grid coordinates.
 message CombatantPosition {
-  string name = 1;
-  int32  x    = 2;
-  int32  y    = 3;
+  string name         = 1;
+  int32  x            = 2;
+  int32  y            = 3;
+  int32  ap_remaining = 4; // current remaining action points
+  int32  ap_total     = 5; // total action points this round
 }
 
 // RoundStartEvent is broadcast to all combatants when a new round begins.
@@ -878,6 +881,14 @@ message RoundStartEvent {
 // RoundEndEvent is broadcast when a round's actions have resolved.
 message RoundEndEvent {
   int32 round = 1;
+}
+
+// APUpdateEvent is broadcast to all room combatants when a combatant's
+// action points change mid-round.
+message APUpdateEvent {
+  string name         = 1; // combatant display name
+  int32  ap_remaining = 2; // updated remaining action points
+  int32  ap_total     = 3; // total action points for this round
 }
 
 // CombatEvent delivers combat narration to all players in the room.

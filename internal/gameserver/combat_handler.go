@@ -56,7 +56,8 @@ type CombatHandler struct {
 	sessions      *session.Manager
 	dice          *dice.Roller
 	broadcastFn            func(roomID string, events []*gamev1.CombatEvent)
-	roundStartBroadcastFn  func(roomID string, evt *gamev1.RoundStartEvent) // optional; sends RoundStartEvent to all room sessions
+	roundStartBroadcastFn  func(roomID string, evt *gamev1.RoundStartEvent)  // optional; sends RoundStartEvent to all room sessions
+	apUpdateBroadcastFn    func(roomID string, evt *gamev1.APUpdateEvent)    // optional; broadcasts AP update to all room sessions
 	roundDuration time.Duration
 	condRegistry  *condition.Registry
 	worldMgr      *world.Manager
@@ -342,6 +343,28 @@ func (h *CombatHandler) SetOnCombatEnd(fn func(roomID string)) {
 // for delivering the event to all sessions in the room. If nil, no RoundStartEvent is sent.
 func (h *CombatHandler) SetRoundStartBroadcastFn(fn func(roomID string, evt *gamev1.RoundStartEvent)) {
 	h.roundStartBroadcastFn = fn
+}
+
+// SetAPUpdateBroadcastFn registers a callback that fires when a combatant's AP changes mid-round.
+// The callback receives the room ID and a populated APUpdateEvent. If nil, no APUpdateEvent is sent.
+func (h *CombatHandler) SetAPUpdateBroadcastFn(fn func(roomID string, evt *gamev1.APUpdateEvent)) {
+	h.apUpdateBroadcastFn = fn
+}
+
+// broadcastAPUpdate emits an APUpdateEvent for the given combatant to all players in their room.
+// No-op if apUpdateBroadcastFn is nil.
+//
+// Precondition: roomID and name are non-empty; remaining >= 0; total >= 0.
+// Postcondition: APUpdateEvent is delivered to all sessions in roomID via apUpdateBroadcastFn.
+func (h *CombatHandler) broadcastAPUpdate(roomID, name string, remaining, total int) {
+	if h.apUpdateBroadcastFn == nil {
+		return
+	}
+	h.apUpdateBroadcastFn(roomID, &gamev1.APUpdateEvent{
+		Name:        name,
+		ApRemaining: int32(remaining),
+		ApTotal:     int32(total),
+	})
 }
 
 // SetOnCoverHit registers a callback that fires when an attack misses due to cover.
@@ -824,7 +847,11 @@ func (h *CombatHandler) SpendAP(uid string, cost int) error {
 	if !ok {
 		return fmt.Errorf("no action queue for player %q", uid)
 	}
-	return q.DeductAP(cost)
+	if err := q.DeductAP(cost); err != nil {
+		return err
+	}
+	h.broadcastAPUpdate(sess.RoomID, sess.CharName, q.RemainingPoints(), q.MaxPoints)
+	return nil
 }
 
 // SpendMovementAP deducts cost AP from uid's action queue for a movement action,
@@ -850,7 +877,11 @@ func (h *CombatHandler) SpendMovementAP(uid string, cost int) error {
 	if !ok {
 		return fmt.Errorf("no action queue for player %q", uid)
 	}
-	return q.DeductMovementAP(cost)
+	if err := q.DeductMovementAP(cost); err != nil {
+		return err
+	}
+	h.broadcastAPUpdate(sess.RoomID, sess.CharName, q.RemainingPoints(), q.MaxPoints)
+	return nil
 }
 
 // SpendAllAP drains all remaining AP from uid's action queue in their active combat.
@@ -1699,10 +1730,20 @@ func (h *CombatHandler) startPursuitCombatLocked(playerSess *session.PlayerSessi
 		}
 		initialPositions := make([]*gamev1.CombatantPosition, 0, len(cbt.Combatants))
 		for _, c := range cbt.Combatants {
+			var apRemaining, apTotal int32
+			apTotal = 3
+			if q, qOK := cbt.ActionQueues[c.ID]; qOK {
+				apRemaining = int32(q.RemainingPoints())
+				apTotal = int32(q.MaxPoints)
+			} else {
+				apRemaining = apTotal
+			}
 			initialPositions = append(initialPositions, &gamev1.CombatantPosition{
-				Name: c.Name,
-				X:    int32(c.GridX),
-				Y:    int32(c.GridY),
+				Name:        c.Name,
+				X:           int32(c.GridX),
+				Y:           int32(c.GridY),
+				ApRemaining: apRemaining,
+				ApTotal:     apTotal,
 			})
 		}
 		h.roundStartBroadcastFn(playerSess.RoomID, &gamev1.RoundStartEvent{
@@ -2431,6 +2472,16 @@ func (h *CombatHandler) resolveAndAdvanceLocked(roomID string, cbt *combat.Comba
 
 	h.broadcastFn(roomID, events)
 
+	// Broadcast AP state for all living combatants after round resolves (NPC AP tracking).
+	for _, c := range cbt.Combatants {
+		if c.IsDead() {
+			continue
+		}
+		if q, qOK := cbt.ActionQueues[c.ID]; qOK {
+			h.broadcastAPUpdate(roomID, c.Name, q.RemainingPoints(), q.MaxPoints)
+		}
+	}
+
 	// Start the next round.
 	condEvents := cbt.StartRound(3)
 	condCombatEvents := conditionEventsToProto(condEvents, h.condRegistry)
@@ -2584,10 +2635,20 @@ func (h *CombatHandler) resolveAndAdvanceLocked(roomID string, cbt *combat.Comba
 		}
 		initialPositions := make([]*gamev1.CombatantPosition, 0, len(cbt.Combatants))
 		for _, c := range cbt.Combatants {
+			var apRemaining, apTotal int32
+			apTotal = 3
+			if q, qOK := cbt.ActionQueues[c.ID]; qOK {
+				apRemaining = int32(q.RemainingPoints())
+				apTotal = int32(q.MaxPoints)
+			} else {
+				apRemaining = apTotal
+			}
 			initialPositions = append(initialPositions, &gamev1.CombatantPosition{
-				Name: c.Name,
-				X:    int32(c.GridX),
-				Y:    int32(c.GridY),
+				Name:        c.Name,
+				X:           int32(c.GridX),
+				Y:           int32(c.GridY),
+				ApRemaining: apRemaining,
+				ApTotal:     apTotal,
 			})
 		}
 		h.roundStartBroadcastFn(roomID, &gamev1.RoundStartEvent{
@@ -2911,10 +2972,20 @@ func (h *CombatHandler) startCombatLocked(sess *session.PlayerSession, inst *npc
 	if h.roundStartBroadcastFn != nil {
 		initialPositions := make([]*gamev1.CombatantPosition, 0, len(cbt.Combatants))
 		for _, c := range cbt.Combatants {
+			var apRemaining, apTotal int32
+			apTotal = 3
+			if q, qOK := cbt.ActionQueues[c.ID]; qOK {
+				apRemaining = int32(q.RemainingPoints())
+				apTotal = int32(q.MaxPoints)
+			} else {
+				apRemaining = apTotal
+			}
 			initialPositions = append(initialPositions, &gamev1.CombatantPosition{
-				Name: c.Name,
-				X:    int32(c.GridX),
-				Y:    int32(c.GridY),
+				Name:        c.Name,
+				X:           int32(c.GridX),
+				Y:           int32(c.GridY),
+				ApRemaining: apRemaining,
+				ApTotal:     apTotal,
 			})
 		}
 		h.roundStartBroadcastFn(sess.RoomID, &gamev1.RoundStartEvent{

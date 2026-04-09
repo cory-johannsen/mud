@@ -85,6 +85,42 @@ html, body, #root { margin: 0; padding: 0; height: 100%; overflow: hidden; }
   to   { transform: translateY(0);     opacity: 1; }
 }
 
+/* Combat turn order with AP pip indicators */
+.combat-turn-order {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+.combat-combatant {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.combat-combatant-name {
+  font-size: 0.85rem;
+}
+.combat-combatant-pips {
+  display: flex;
+  gap: 2px;
+  align-items: center;
+}
+.combat-pip {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+}
+.combat-pip-full {
+  background: #ffdd00;
+  border-color: #ffaa00;
+}
+.combat-pip-empty {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
 /* Room panel */
 .room-title { margin: 0 0 0.5rem; color: #e0c060; font-size: 1rem; }
 .room-description { color: #bbb; font-size: 0.85rem; line-height: 1.4; margin: 0 0 0.5rem; }
