@@ -25,7 +25,7 @@ export const POI_TYPES: Array<{ id: string; symbol: string; color: string; label
   { id: 'guard',       symbol: 'G', color: '#cc0', label: 'Guard'       },
   { id: 'motel',       symbol: 'R', color: '#d8f', label: 'Motel'       },
   { id: 'brothel',     symbol: 'B', color: '#f64', label: 'Brothel'     },
-  { id: 'quest_giver', symbol: 'Q', color: '#fa0', label: 'Quest'       },
+  { id: 'quest_giver', symbol: '!', color: '#fa0', label: 'Quest'       },
   { id: 'npc',         symbol: 'N', color: '#aaa', label: 'NPC'         },
   { id: 'map',         symbol: 'M', color: '#0cc', label: 'Map'         },
   { id: 'cover',       symbol: 'C', color: '#cc0', label: 'Cover'       },
