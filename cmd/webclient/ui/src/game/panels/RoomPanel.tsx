@@ -176,7 +176,7 @@ export function RoomPanel() {
                 // Non-combat NPC: Name [type], clickable
                 const onClick = npcType === 'merchant'
                   ? () => sendMessage('BrowseRequest', { npc_name: npc.name })
-                  : npcType === 'motel_keeper'
+                  : npcType === 'motel_keeper' || npcType === 'brothel_keeper'
                   ? () => sendMessage('RestRequest', {})
                   : npcType === 'quest_giver'
                   ? () => sendMessage('TalkRequest', { npc_name: npc.name })
