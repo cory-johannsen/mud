@@ -1238,8 +1238,8 @@ zone:
     title: The Rusty Latch
     danger_level: safe
     description: A converted shipping container wedged beneath the Rusty Oasis, accessible by a ladder through a hatch in the floor. Red-tinted work lights, salvaged mattresses on welded frames, and the perpetual smell of machine oil cut with cheap perfume. The Rusty Latch does exactly what it says and nothing more.
-    map_x: 0
-    map_y: 100
+    map_x: 1
+    map_y: 2
     exits:
     - direction: up
       target: the_rusty_oasis
