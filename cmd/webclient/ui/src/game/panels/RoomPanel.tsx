@@ -116,7 +116,7 @@ export function RoomPanel() {
                         {upExit ? (
                           <button
                             className="exit-btn exit-btn-vert"
-                            onClick={() => sendMessage('MoveRequest', { direction: upExit.direction })}
+                            onClick={() => { handleExitLeave(); sendMessage('MoveRequest', { direction: upExit.direction }) }}
                             onMouseEnter={(e) => handleExitEnter(upExit, e)}
                             onMouseLeave={handleExitLeave}
                           >
@@ -128,7 +128,7 @@ export function RoomPanel() {
                         {downExit ? (
                           <button
                             className="exit-btn exit-btn-vert"
-                            onClick={() => sendMessage('MoveRequest', { direction: downExit.direction })}
+                            onClick={() => { handleExitLeave(); sendMessage('MoveRequest', { direction: downExit.direction }) }}
                             onMouseEnter={(e) => handleExitEnter(downExit, e)}
                             onMouseLeave={handleExitLeave}
                           >
@@ -148,7 +148,7 @@ export function RoomPanel() {
                     <button
                       key={`${ri}-${ci}`}
                       className="exit-btn"
-                      onClick={() => sendMessage('MoveRequest', { direction: ex.direction })}
+                      onClick={() => { handleExitLeave(); sendMessage('MoveRequest', { direction: ex.direction }) }}
                       onMouseEnter={(e) => handleExitEnter(ex, e)}
                       onMouseLeave={handleExitLeave}
                     >
