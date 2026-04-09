@@ -52,7 +52,7 @@ function useIsDesktop() {
 
 // Inner component that has access to GameContext.
 function GameLayout() {
-  const { state, sendMessage } = useGame()
+  const { state } = useGame()
   const activeWeather = state.activeWeather
   const [openDrawer, setOpenDrawer] = useState<DrawerType | null>(null)
   const { defaultLayout: verticalLayout, onLayoutChanged: onVerticalLayoutChanged } = useDefaultLayout({
@@ -116,13 +116,7 @@ function GameLayout() {
   const modals = (
     <>
       {showHelp && (
-        <HelpModal
-          onClose={() => setShowHelp(false)}
-          onAssignHotbar={(slot, text) => {
-            sendMessage('HotbarRequest', { action: 'set', slot, text })
-            setShowHelp(false)
-          }}
-        />
+        <HelpModal onClose={() => setShowHelp(false)} />
       )}
       {state.shopView && <NpcModal />}
       <NpcInteractModal />

@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import type { CSSProperties } from 'react'
+import { useGame } from './GameContext'
+import { HotbarSlotPicker } from './HotbarSlotPicker'
 
 interface HelpSection {
   title: string
@@ -86,19 +88,17 @@ const HELP_SECTIONS: HelpSection[] = [
   },
 ]
 
-const SLOT_KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0']
-
 interface HelpModalProps {
   onClose: () => void
-  onAssignHotbar?: (slot: number, text: string) => void
 }
 
-export function HelpModal({ onClose, onAssignHotbar }: HelpModalProps) {
+export function HelpModal({ onClose }: HelpModalProps) {
+  const { state, sendMessage } = useGame()
   const [pickingCmd, setPickingCmd] = useState<string | null>(null)
 
   function handleAssign(slot: number) {
-    if (!pickingCmd || !onAssignHotbar) return
-    onAssignHotbar(slot, pickingCmd)
+    if (!pickingCmd) return
+    sendMessage('HotbarRequest', { action: 'set', slot, text: pickingCmd })
     setPickingCmd(null)
   }
 
@@ -110,24 +110,11 @@ export function HelpModal({ onClose, onAssignHotbar }: HelpModalProps) {
           <button style={styles.closeBtn} onClick={onClose}>✕</button>
         </div>
         {pickingCmd && (
-          <div style={styles.slotPicker} onClick={() => setPickingCmd(null)}>
-            <span style={{ color: '#7af', fontSize: '0.75rem', fontFamily: 'monospace' }}>
-              Assign <strong style={{ color: '#e0c060' }}>{pickingCmd}</strong> to slot:
-            </span>
-            <div style={{ display: 'flex', gap: '0.3rem', flexWrap: 'wrap' }}>
-              {SLOT_KEYS.map((key, i) => (
-                <button
-                  key={key}
-                  style={styles.slotBtn}
-                  onClick={(e) => { e.stopPropagation(); handleAssign(i + 1) }}
-                  type="button"
-                >
-                  {key}
-                </button>
-              ))}
-              <button style={styles.cancelSlotBtn} onClick={() => setPickingCmd(null)} type="button">✕</button>
-            </div>
-          </div>
+          <HotbarSlotPicker
+            hotbarSlots={state.hotbarSlots}
+            onPick={handleAssign}
+            onCancel={() => setPickingCmd(null)}
+          />
         )}
         <div style={styles.body}>
           {HELP_SECTIONS.map((section) => (
@@ -143,7 +130,7 @@ export function HelpModal({ onClose, onAssignHotbar }: HelpModalProps) {
                         : <td style={styles.aliasCell} />}
                       <td style={styles.descCell}>{c.desc}</td>
                       <td style={styles.hotbarCell}>
-                        {c.hotbarCmd && onAssignHotbar && (
+                        {c.hotbarCmd && (
                           <button
                             style={{ ...styles.addBtn, ...(pickingCmd === c.hotbarCmd ? styles.addBtnActive : {}) }}
                             onClick={() => setPickingCmd(pickingCmd === c.hotbarCmd ? null : c.hotbarCmd!)}
@@ -278,34 +265,5 @@ const styles: Record<string, CSSProperties> = {
     background: '#1a2a3a',
     border: '1px solid #3a6a9a',
     color: '#7af',
-  },
-  slotPicker: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.75rem',
-    padding: '0.5rem 1.25rem',
-    borderBottom: '1px solid #2a2a2a',
-    background: '#111',
-    flexWrap: 'wrap' as const,
-  },
-  slotBtn: {
-    padding: '0.15rem 0.45rem',
-    background: '#1a2a1a',
-    border: '1px solid #4a6a2a',
-    color: '#8d4',
-    borderRadius: '3px',
-    cursor: 'pointer',
-    fontFamily: 'monospace',
-    fontSize: '0.8rem',
-  },
-  cancelSlotBtn: {
-    padding: '0.15rem 0.45rem',
-    background: '#2a1a1a',
-    border: '1px solid #5a2a2a',
-    color: '#c66',
-    borderRadius: '3px',
-    cursor: 'pointer',
-    fontFamily: 'monospace',
-    fontSize: '0.8rem',
   },
 }
