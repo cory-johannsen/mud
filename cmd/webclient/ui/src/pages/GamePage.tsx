@@ -81,10 +81,7 @@ function GameLayout() {
           <span className="toolbar-time">{formatTimeOfDay(state.timeOfDay)}</span>
         )}
         {activeWeather && (
-          <div style={{
-            position: 'absolute',
-            left: '50%',
-            transform: 'translateX(-50%)',
+          <span style={{
             background: 'rgba(0,0,0,0.7)',
             color: '#f0a500',
             border: '1px solid #f0a500',
@@ -95,10 +92,9 @@ function GameLayout() {
             fontWeight: 'bold',
             letterSpacing: '0.05em',
             whiteSpace: 'nowrap',
-            pointerEvents: 'none',
           }}>
             {'\u26C8'} {activeWeather}
-          </div>
+          </span>
         )}
         {(['inventory', 'equipment', 'skills', 'feats', 'stats', 'technology', 'job'] as DrawerType[]).map((d) => (
           <button
