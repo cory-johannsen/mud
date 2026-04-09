@@ -13,8 +13,12 @@ function npcTypeTag(npcType: string): string {
     case 'guard':      return '[guard]'
     case 'fixer':      return '[fixer]'
     case 'hireling':     return '[hire]'
-    case 'motel_keeper': return '[motel]'
-    default:             return ''
+    case 'motel_keeper':          return '[motel]'
+    case 'chip_doc':              return '[chip doc]'
+    case 'crafter':               return '[crafter]'
+    case 'brothel_keeper':        return '[brothel]'
+    case 'black_market_merchant': return '[black market]'
+    default:                      return ''
   }
 }
 
