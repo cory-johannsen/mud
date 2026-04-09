@@ -198,6 +198,10 @@ func npcTypeTag(npcType string) string {
 		return "[chip doc]"
 	case "crafter":
 		return "[crafter]"
+	case "brothel_keeper":
+		return "[brothel]"
+	case "black_market_merchant":
+		return "[black market]"
 	default:
 		return ""
 	}
