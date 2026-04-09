@@ -22,9 +22,17 @@ function npcTypeTag(npcType: string): string {
   }
 }
 
+// Maps full or short direction names to the short compass form accepted by StrideRequest/StepRequest.
+const SHORT_DIR: Record<string, string> = {
+  n: 'n', s: 's', e: 'e', w: 'w', ne: 'ne', nw: 'nw', se: 'se', sw: 'sw',
+  north: 'n', south: 's', east: 'e', west: 'w',
+  northeast: 'ne', northwest: 'nw', southeast: 'se', southwest: 'sw',
+}
+
 export function RoomPanel() {
   const { state, sendMessage, sendCommand } = useGame()
   const room = state.roomView
+  const inCombat = state.combatRound !== null
   const [tooltip, setTooltip] = useState<{ tile: MapTile; pos: { x: number; y: number } } | null>(null)
 
   function tileForExit(ex: ExitInfo): MapTile | null {
@@ -119,6 +127,7 @@ export function RoomPanel() {
                             onClick={() => { handleExitLeave(); sendMessage('MoveRequest', { direction: upExit.direction }) }}
                             onMouseEnter={(e) => handleExitEnter(upExit, e)}
                             onMouseLeave={handleExitLeave}
+                            disabled={inCombat}
                           >
                             {upExit.locked ? '↑*' : '↑'}
                           </button>
@@ -131,6 +140,7 @@ export function RoomPanel() {
                             onClick={() => { handleExitLeave(); sendMessage('MoveRequest', { direction: downExit.direction }) }}
                             onMouseEnter={(e) => handleExitEnter(downExit, e)}
                             onMouseLeave={handleExitLeave}
+                            disabled={inCombat}
                           >
                             {downExit.locked ? '↓*' : '↓'}
                           </button>
@@ -144,11 +154,19 @@ export function RoomPanel() {
                   if (!ex) {
                     return <div key={`${ri}-${ci}`} className="exit-cell-empty" />
                   }
+                  const shortDir = SHORT_DIR[ex.direction.toLowerCase()]
                   return (
                     <button
                       key={`${ri}-${ci}`}
                       className="exit-btn"
-                      onClick={() => { handleExitLeave(); sendMessage('MoveRequest', { direction: ex.direction }) }}
+                      onClick={() => {
+                        handleExitLeave()
+                        if (inCombat && shortDir) {
+                          sendMessage('StepRequest', { direction: shortDir })
+                        } else {
+                          sendMessage('MoveRequest', { direction: ex.direction })
+                        }
+                      }}
                       onMouseEnter={(e) => handleExitEnter(ex, e)}
                       onMouseLeave={handleExitLeave}
                     >
