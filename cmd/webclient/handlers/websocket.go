@@ -333,6 +333,14 @@ func serverEventInner(event *gamev1.ServerEvent) (proto.Message, string) {
 		return p.HealerView, "HealerView"
 	case *gamev1.ServerEvent_TrainerView:
 		return p.TrainerView, "TrainerView"
+	case *gamev1.ServerEvent_FixerView:
+		return p.FixerView, "FixerView"
+	case *gamev1.ServerEvent_LoadoutView:
+		return p.LoadoutView, "LoadoutView"
+	case *gamev1.ServerEvent_JobGrantsResponse:
+		return p.JobGrantsResponse, "JobGrantsResponse"
+	case *gamev1.ServerEvent_RestView:
+		return p.RestView, "RestView"
 	case *gamev1.ServerEvent_Weather:
 		return p.Weather, "WeatherEvent"
 	default:
