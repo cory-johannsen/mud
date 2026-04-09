@@ -3798,7 +3798,7 @@ func (s *GameServiceServer) handleBrothelRest(uid string, sess *session.PlayerSe
 
 	// REQ-BR-10: independent robbery roll (REQ-BR-11). Rest already completed above.
 	if rand.Float64() < brothelConfig.RobberyChance {
-		robbed := false
+		var robDetails []string
 		// Steal crypto.
 		if sess.Currency > 0 {
 			stolenCrypto := sess.Currency * 5 / 100
@@ -3811,7 +3811,7 @@ func (s *GameServiceServer) handleBrothelRest(uid string, sess *session.PlayerSe
 					s.logger.Warn("handleBrothelRest: failed to save currency after robbery", zap.Error(err))
 				}
 			}
-			robbed = true
+			robDetails = append(robDetails, fmt.Sprintf("%d crypto", stolenCrypto))
 		}
 		// Steal items.
 		if sess.Backpack != nil {
@@ -3830,6 +3830,13 @@ func (s *GameServiceServer) handleBrothelRest(uid string, sess *session.PlayerSe
 				for i := 0; i < numToSteal; i++ {
 					item := items[indices[i]]
 					_ = sess.Backpack.Remove(item.InstanceID, 1)
+					name := item.ItemDefID
+					if s.invRegistry != nil {
+						if def, ok := s.invRegistry.Item(item.ItemDefID); ok {
+							name = def.Name
+						}
+					}
+					robDetails = append(robDetails, name)
 				}
 				if s.charSaver != nil {
 					invItems := backpackToInventoryItems(sess.Backpack)
@@ -3837,11 +3844,11 @@ func (s *GameServiceServer) handleBrothelRest(uid string, sess *session.PlayerSe
 						s.logger.Warn("handleBrothelRest: failed to save inventory after robbery", zap.Error(err))
 					}
 				}
-				robbed = true
 			}
 		}
-		if robbed {
-			_ = sendMsg("You wake to find someone has gone through your belongings.")
+		if len(robDetails) > 0 {
+			stolen := strings.Join(robDetails, ", ")
+			_ = sendMsg(fmt.Sprintf("You wake to find someone has gone through your belongings, taking: %s.", stolen))
 		}
 	}
 

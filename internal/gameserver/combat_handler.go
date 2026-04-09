@@ -4434,10 +4434,12 @@ func (h *CombatHandler) robPlayersLocked(cbt *combat.Combat) []*gamev1.CombatEve
 			inst.Currency += stolen
 			sess.Currency -= stolen
 			robbedSessions = append(robbedSessions, sess)
+			msg := fmt.Sprintf("The %s rifles through your pockets, taking %d rounds.", inst.Name(), stolen)
 			events = append(events, &gamev1.CombatEvent{
 				Type:      gamev1.CombatEventType_COMBAT_EVENT_TYPE_ATTACK,
-				Narrative: fmt.Sprintf("The %s rifles through your pockets, taking %d rounds.", inst.Name(), stolen),
+				Narrative: msg,
 			})
+			h.pushMessageToUID(pc.ID, msg)
 		}
 	}
 
