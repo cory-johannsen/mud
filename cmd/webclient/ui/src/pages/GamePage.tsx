@@ -75,20 +75,11 @@ function GameLayout() {
   const toolbar = (
     <div className="panel-toolbar">
       <div className="toolbar">
-        {/* Left: zone + nav buttons */}
+        {/* Left: zone */}
         <div className="toolbar-left">
           <span className="toolbar-zone">
             {state.roomView?.zoneName ?? state.roomView?.zone_name ?? 'Connecting…'}
           </span>
-          {(['inventory', 'equipment', 'skills', 'feats', 'stats', 'technology', 'job'] as DrawerType[]).map((d) => (
-            <button
-              key={d}
-              className={`toolbar-btn${openDrawer === d ? ' active' : ''}`}
-              onClick={() => toggleDrawer(d)}
-            >
-              {d.charAt(0).toUpperCase() + d.slice(1)}
-            </button>
-          ))}
         </div>
 
         {/* Center: weather + clock */}
@@ -106,8 +97,17 @@ function GameLayout() {
           )}
         </div>
 
-        {/* Right: help + logout */}
+        {/* Right: nav buttons + help + logout */}
         <div className="toolbar-right">
+          {(['inventory', 'equipment', 'skills', 'feats', 'stats', 'technology', 'job'] as DrawerType[]).map((d) => (
+            <button
+              key={d}
+              className={`toolbar-btn${openDrawer === d ? ' active' : ''}`}
+              onClick={() => toggleDrawer(d)}
+            >
+              {d.charAt(0).toUpperCase() + d.slice(1)}
+            </button>
+          ))}
           <button className="toolbar-btn" onClick={() => setShowHelp(true)}>Help</button>
           <LogoutDropdown />
         </div>
