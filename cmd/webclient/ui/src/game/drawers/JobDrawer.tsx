@@ -113,9 +113,9 @@ export function JobDrawer({ onClose }: { onClose: () => void }) {
                         const isSlot = type === 'prepared_slot'
                         const isUse = type === 'spontaneous_use'
                         const baseType = isSlot ? 'prepared' : isUse ? 'spontaneous' : type
-                        const typeColor = baseType === 'hardwired' ? '#88ccff' : baseType === 'prepared' ? '#ffcc88' : '#cc88ff'
-                        const typeBg = baseType === 'hardwired' ? 'rgba(100,180,255,0.12)' : baseType === 'prepared' ? 'rgba(200,140,40,0.12)' : 'rgba(180,80,255,0.12)'
-                        const typeBorder = baseType === 'hardwired' ? 'rgba(100,180,255,0.3)' : baseType === 'prepared' ? 'rgba(200,140,40,0.3)' : 'rgba(180,80,255,0.3)'
+                        const typeColor = baseType === 'hardwired' ? '#88ccff' : baseType === 'prepared' ? '#ffcc88' : baseType === 'spontaneous' ? '#cc88ff' : '#999999'
+                        const typeBg = baseType === 'hardwired' ? 'rgba(100,180,255,0.12)' : baseType === 'prepared' ? 'rgba(200,140,40,0.12)' : baseType === 'spontaneous' ? 'rgba(180,80,255,0.12)' : 'rgba(150,150,150,0.08)'
+                        const typeBorder = baseType === 'hardwired' ? 'rgba(100,180,255,0.3)' : baseType === 'prepared' ? 'rgba(200,140,40,0.3)' : baseType === 'spontaneous' ? 'rgba(180,80,255,0.3)' : 'rgba(150,150,150,0.2)'
                         const label = isSlot ? 'slot' : isUse ? 'use' : (type || 'tech')
                         return (
                           <div key={`tech-${i}`} style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '3px', paddingLeft: '4px' }}>
