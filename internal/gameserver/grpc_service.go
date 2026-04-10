@@ -7038,16 +7038,42 @@ func (s *GameServiceServer) handleJobGrants(uid string) (*gamev1.ServerEvent, er
 		}
 		return id
 	}
-	// Collect fixed feat grants from a FeatGrants at a given level.
+	// Collect all feat grants (fixed, choice pool, and general) from a FeatGrants at a given level.
 	addFeatGrants := func(fg *ruleset.FeatGrants, level int) {
 		if fg == nil {
 			return
 		}
+		// Fixed feats always granted.
 		for _, id := range fg.Fixed {
 			featGrants = append(featGrants, &gamev1.JobFeatGrant{
 				GrantLevel: int32(level),
 				FeatId:     id,
 				FeatName:   featName(id),
+			})
+		}
+		// General feat pick — player freely selects from all general feats.
+		if fg.GeneralCount > 0 {
+			label := fmt.Sprintf("Choose %d general feat", fg.GeneralCount)
+			if fg.GeneralCount > 1 {
+				label += "s"
+			}
+			featGrants = append(featGrants, &gamev1.JobFeatGrant{
+				GrantLevel: int32(level),
+				FeatId:     "",
+				FeatName:   label,
+			})
+		}
+		// Choice pool — player picks fg.Choices.Count feats from the pool.
+		if fg.Choices != nil && fg.Choices.Count > 0 && len(fg.Choices.Pool) > 0 {
+			poolNames := make([]string, 0, len(fg.Choices.Pool))
+			for _, id := range fg.Choices.Pool {
+				poolNames = append(poolNames, featName(id))
+			}
+			label := fmt.Sprintf("Choose %d: %s", fg.Choices.Count, strings.Join(poolNames, ", "))
+			featGrants = append(featGrants, &gamev1.JobFeatGrant{
+				GrantLevel: int32(level),
+				FeatId:     "",
+				FeatName:   label,
 			})
 		}
 	}
@@ -7092,13 +7118,34 @@ func (s *GameServiceServer) handleJobGrants(uid string) (*gamev1.ServerEvent, er
 	addFeatGrants(job.FeatGrants, 1)
 	addTechGrants(job.TechnologyGrants, 1)
 
-	// Level-up feat grants (sorted by level for consistent ordering).
+	// Merge archetype level-up grants with job-specific level-up grants.
+	// Archetype grants take the base position; job-specific entries overlay or extend them.
+	var archetypeLevelUpFeatGrants map[int]*ruleset.FeatGrants
+	var archetypeLevelUpGrants map[int]*ruleset.TechnologyGrants
+	if s.archetypes != nil {
+		if arch, ok := s.archetypes[job.Archetype]; ok {
+			archetypeLevelUpFeatGrants = arch.LevelUpFeatGrants
+			archetypeLevelUpGrants = arch.LevelUpGrants
+		}
+	}
+	mergedFeatGrants := ruleset.MergeFeatLevelUpGrants(archetypeLevelUpFeatGrants, job.LevelUpFeatGrants)
+
+	// Level-up grants (sorted by level for consistent ordering).
 	for level := 2; level <= 20; level++ {
-		if fg, ok := job.LevelUpFeatGrants[level]; ok {
+		if fg, ok := mergedFeatGrants[level]; ok {
 			addFeatGrants(fg, level)
 		}
-		if tg, ok := job.LevelUpGrants[level]; ok {
-			addTechGrants(tg, level)
+		// Tech grants: merge archetype and job per-level.
+		archTG := archetypeLevelUpGrants[level]
+		jobTG := job.LevelUpGrants[level]
+		switch {
+		case archTG != nil && jobTG != nil:
+			addTechGrants(archTG, level)
+			addTechGrants(jobTG, level)
+		case archTG != nil:
+			addTechGrants(archTG, level)
+		case jobTG != nil:
+			addTechGrants(jobTG, level)
 		}
 	}
 
