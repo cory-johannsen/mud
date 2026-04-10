@@ -1463,7 +1463,7 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 	}
 
 	// Send initial HotbarUpdateEvent so the frontend can render the hotbar row (REQ-HB-12).
-	if err := stream.Send(s.hotbarUpdateEvent(sess.Hotbar)); err != nil {
+	if err := stream.Send(s.hotbarUpdateEvent(sess)); err != nil {
 		s.logger.Warn("failed to send initial hotbar update", zap.Error(err))
 	}
 
@@ -4239,6 +4239,7 @@ func (s *GameServiceServer) applyFullLongRestCtx(uid string, sess *session.Playe
 		return sendMsg("Something went wrong preparing your technologies.")
 	}
 
+	s.pushEventToUID(uid, s.hotbarUpdateEvent(sess))
 	return sendMsg(fmt.Sprintf("You finish your rest. HP restored to maximum. %s", restFlavor.RestMessage))
 }
 
@@ -7828,6 +7829,7 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string, targetX, 
 						return messageEvent(fmt.Sprintf("You have no uses of %s remaining. Rest to recover.", f.Name)), nil
 					}
 					sess.ActiveFeatUses[f.ID] = remaining - 1
+					s.pushEventToUID(uid, s.hotbarUpdateEvent(sess))
 				}
 				// Feats with special sequenced actions are handled individually before the
 				// generic condition-application path.
@@ -8048,6 +8050,7 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string, targetX, 
 						zap.Error(err))
 				}
 				sess.PreparedTechs[lvl][idx].Expended = true
+				s.pushEventToUID(uid, s.hotbarUpdateEvent(sess))
 				return s.activateTechWithEffects(sess, uid, abilityID, targetID, fmt.Sprintf("You activate %s.", abilityID), nil, targetX, targetY)
 			}
 		}
@@ -8098,6 +8101,7 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string, targetX, 
 		}
 		pool.Remaining--
 		sess.SpontaneousUsePools[foundLevel] = pool
+		s.pushEventToUID(uid, s.hotbarUpdateEvent(sess))
 		return s.activateTechWithEffects(sess, uid, abilityID, targetID, fmt.Sprintf("You activate %s. (%d uses remaining at level %d.)", abilityID, pool.Remaining, foundLevel), nil, targetX, targetY)
 	}
 	// Innate tech activation
@@ -8117,6 +8121,8 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string, targetX, 
 					return nil, fmt.Errorf("handleUse: decrement innate %s: %w", abilityID, err)
 				}
 				slot.UsesRemaining--
+				sess.InnateTechs[abilityID] = slot
+				s.pushEventToUID(uid, s.hotbarUpdateEvent(sess))
 				return s.activateTechWithEffects(sess, uid, abilityID, targetID, fmt.Sprintf("You activate %s. (%d uses remaining.)", abilityID, slot.UsesRemaining), nil, targetX, targetY)
 			}
 			return s.activateTechWithEffects(sess, uid, abilityID, targetID, fmt.Sprintf("You activate %s.", abilityID), nil, targetX, targetY)

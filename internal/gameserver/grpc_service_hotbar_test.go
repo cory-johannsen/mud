@@ -9,6 +9,7 @@ import (
 	"pgregory.net/rapid"
 
 	"github.com/cory-johannsen/mud/internal/game/inventory"
+	"github.com/cory-johannsen/mud/internal/game/ruleset"
 	"github.com/cory-johannsen/mud/internal/game/session"
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 )
@@ -311,6 +312,124 @@ func TestHandleInventory_ThrowableFlag(t *testing.T) {
 
 	require.Contains(t, itemsByID, "stimpak")
 	assert.False(t, itemsByID["stimpak"].Throwable, "stimpak must have Throwable=false")
+}
+
+// REQ-HB-UC-1: hotbarUpdateEvent populates UsesRemaining and MaxUses for a feat slot
+// when the feat has PreparedUses > 0 and session.ActiveFeatUses is set.
+func TestHotbarUpdateEvent_FeatSlot_PopulatesUseCounts(t *testing.T) {
+	t.Parallel()
+	sessMgr := session.NewManager()
+	svc := testMinimalService(t, sessMgr)
+
+	const featID = "test_feat_limited"
+	feat := &ruleset.Feat{
+		ID:                featID,
+		Name:              "Test Limited Feat",
+		Description:       "A feat with limited uses.",
+		Active:            true,
+		PreparedUses:      2,
+		RechargeCondition: "Recharges on long rest",
+	}
+	svc.featRegistry = ruleset.NewFeatRegistry([]*ruleset.Feat{feat})
+
+	uid := "feat-use-count-uid"
+	_, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID:         uid,
+		Username:    "tester",
+		CharName:    "Tester",
+		CharacterID: 10,
+		RoomID:      "room_a",
+		Role:        "player",
+	})
+	require.NoError(t, err)
+
+	sess, ok := sessMgr.GetPlayer(uid)
+	require.True(t, ok)
+	sess.Hotbar[0] = session.HotbarSlot{Kind: session.HotbarSlotKindFeat, Ref: featID}
+	sess.ActiveFeatUses = map[string]int{featID: 1}
+
+	evt := svc.hotbarUpdateEvent(sess)
+	require.NotNil(t, evt)
+	hu := evt.GetHotbarUpdate()
+	require.NotNil(t, hu)
+	require.Len(t, hu.Slots, 10)
+
+	slot0 := hu.Slots[0]
+	assert.Equal(t, int32(1), slot0.GetUsesRemaining(), "UsesRemaining must reflect session.ActiveFeatUses")
+	assert.Equal(t, int32(2), slot0.GetMaxUses(), "MaxUses must equal feat.PreparedUses")
+	assert.Equal(t, "Recharges on long rest", slot0.GetRechargeCondition())
+}
+
+// REQ-HB-UC-2: hotbarUpdateEvent reports zero MaxUses for an unlimited feat (PreparedUses==0).
+func TestHotbarUpdateEvent_UnlimitedFeat_ZeroMaxUses(t *testing.T) {
+	t.Parallel()
+	sessMgr := session.NewManager()
+	svc := testMinimalService(t, sessMgr)
+
+	const featID = "test_feat_unlimited"
+	feat := &ruleset.Feat{
+		ID:           featID,
+		Name:         "Test Unlimited Feat",
+		Description:  "A feat with no use limit.",
+		Active:       true,
+		PreparedUses: 0,
+	}
+	svc.featRegistry = ruleset.NewFeatRegistry([]*ruleset.Feat{feat})
+
+	uid := "feat-unlimited-uid"
+	_, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID:         uid,
+		Username:    "tester",
+		CharName:    "Tester",
+		CharacterID: 11,
+		RoomID:      "room_a",
+		Role:        "player",
+	})
+	require.NoError(t, err)
+
+	sess, ok := sessMgr.GetPlayer(uid)
+	require.True(t, ok)
+	sess.Hotbar[0] = session.HotbarSlot{Kind: session.HotbarSlotKindFeat, Ref: featID}
+
+	evt := svc.hotbarUpdateEvent(sess)
+	require.NotNil(t, evt)
+	hu := evt.GetHotbarUpdate()
+	require.NotNil(t, hu)
+
+	slot0 := hu.Slots[0]
+	assert.Equal(t, int32(0), slot0.GetMaxUses(), "MaxUses must be 0 for unlimited feat")
+	assert.Equal(t, int32(0), slot0.GetUsesRemaining(), "UsesRemaining must be 0 for unlimited feat")
+}
+
+// REQ-HB-UC-3: hotbarUpdateEvent reports zero use counts for a command slot.
+func TestHotbarUpdateEvent_CommandSlot_ZeroUseCounts(t *testing.T) {
+	t.Parallel()
+	sessMgr := session.NewManager()
+	svc := testMinimalService(t, sessMgr)
+
+	uid := "cmd-slot-uid"
+	_, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID:         uid,
+		Username:    "tester",
+		CharName:    "Tester",
+		CharacterID: 12,
+		RoomID:      "room_a",
+		Role:        "player",
+	})
+	require.NoError(t, err)
+
+	sess, ok := sessMgr.GetPlayer(uid)
+	require.True(t, ok)
+	sess.Hotbar[3] = session.CommandSlot("look")
+
+	evt := svc.hotbarUpdateEvent(sess)
+	require.NotNil(t, evt)
+	hu := evt.GetHotbarUpdate()
+	require.NotNil(t, hu)
+
+	slot3 := hu.Slots[3]
+	assert.Equal(t, int32(0), slot3.GetMaxUses(), "MaxUses must be 0 for command slot")
+	assert.Equal(t, int32(0), slot3.GetUsesRemaining(), "UsesRemaining must be 0 for command slot")
 }
 
 // Property: set with valid slot 1–10 and non-empty text always writes to index slot-1.

@@ -41,7 +41,7 @@ func (s *GameServiceServer) handleHotbar(uid string, req *gamev1.HotbarRequest) 
 				s.logger.Warn("SaveHotbar failed", zap.String("uid", uid), zap.Error(err))
 			}
 		}
-		return s.hotbarUpdateEvent(sess.Hotbar), nil
+		return s.hotbarUpdateEvent(sess), nil
 
 	case "clear":
 		if req.Slot < 1 || req.Slot > 10 {
@@ -54,7 +54,7 @@ func (s *GameServiceServer) handleHotbar(uid string, req *gamev1.HotbarRequest) 
 				s.logger.Warn("SaveHotbar failed", zap.String("uid", uid), zap.Error(err))
 			}
 		}
-		return s.hotbarUpdateEvent(sess.Hotbar), nil
+		return s.hotbarUpdateEvent(sess), nil
 
 	case "show":
 		for i := 0; i < 10; i++ {
@@ -88,15 +88,16 @@ func buildHotbarSlot(req *gamev1.HotbarRequest) session.HotbarSlot {
 }
 
 // hotbarUpdateEvent builds a HotbarUpdateEvent for the player's current hotbar.
-// Resolves display_name and description from registries for typed slots.
+// Resolves display_name, description, and use-count fields from registries and session state.
 //
 // Postcondition: Returns a non-nil ServerEvent with exactly 10 HotbarSlot entries.
-func (s *GameServiceServer) hotbarUpdateEvent(slots [10]session.HotbarSlot) *gamev1.ServerEvent {
+func (s *GameServiceServer) hotbarUpdateEvent(sess *session.PlayerSession) *gamev1.ServerEvent {
 	protoSlots := make([]*gamev1.HotbarSlot, 10)
-	for i, sl := range slots {
+	for i, sl := range sess.Hotbar {
 		ps := &gamev1.HotbarSlot{Kind: sl.Kind, Ref: sl.Ref}
 		if !sl.IsEmpty() {
 			ps.DisplayName, ps.Description = s.resolveHotbarSlotDisplay(sl)
+			ps.UsesRemaining, ps.MaxUses, ps.RechargeCondition = s.resolveHotbarSlotUseState(sess, sl)
 		}
 		protoSlots[i] = ps
 	}
@@ -105,6 +106,70 @@ func (s *GameServiceServer) hotbarUpdateEvent(slots [10]session.HotbarSlot) *gam
 			HotbarUpdate: &gamev1.HotbarUpdateEvent{Slots: protoSlots},
 		},
 	}
+}
+
+// resolveHotbarSlotUseState returns the uses-remaining, max-uses, and recharge condition
+// for a hotbar slot by querying session state and registries.
+//
+// Precondition: sess and slot are valid; slot.Kind is a recognized kind.
+// Postcondition: Returns (0, 0, "") for unlimited or command slots.
+func (s *GameServiceServer) resolveHotbarSlotUseState(sess *session.PlayerSession, slot session.HotbarSlot) (usesRemaining, maxUses int32, rechargeCondition string) {
+	switch slot.Kind {
+	case session.HotbarSlotKindFeat:
+		if s.featRegistry != nil {
+			if feat, ok := s.featRegistry.Feat(slot.Ref); ok {
+				if feat.PreparedUses > 0 {
+					maxUses = int32(feat.PreparedUses)
+					if sess.ActiveFeatUses != nil {
+						usesRemaining = int32(sess.ActiveFeatUses[slot.Ref])
+					}
+					rechargeCondition = feat.RechargeCondition
+				}
+			}
+		}
+	case session.HotbarSlotKindTechnology:
+		if s.techRegistry != nil {
+			if techDef, ok := s.techRegistry.Get(slot.Ref); ok {
+				rechargeCondition = techDef.RechargeCondition
+			}
+		}
+		// Innate tech: look up by tech ID.
+		if innate, ok := sess.InnateTechs[slot.Ref]; ok && innate.MaxUses > 0 {
+			maxUses = int32(innate.MaxUses)
+			usesRemaining = int32(innate.UsesRemaining)
+		} else if sess.PreparedTechs != nil {
+			// Prepared tech: count non-expended slots for this tech ID.
+			var total, remaining int32
+			for _, pslots := range sess.PreparedTechs {
+				for _, ps := range pslots {
+					if ps != nil && ps.TechID == slot.Ref {
+						total++
+						if !ps.Expended {
+							remaining++
+						}
+					}
+				}
+			}
+			if total > 0 {
+				maxUses = total
+				usesRemaining = remaining
+			} else if sess.SpontaneousUsePools != nil {
+				// Spontaneous tech: find pool level from SpontaneousTechs.
+				for lvl, techIDs := range sess.SpontaneousTechs {
+					for _, tid := range techIDs {
+						if tid == slot.Ref {
+							if pool, ok := sess.SpontaneousUsePools[lvl]; ok && pool.Max > 0 {
+								maxUses = int32(pool.Max)
+								usesRemaining = int32(pool.Remaining)
+							}
+							break
+						}
+					}
+				}
+			}
+		}
+	}
+	return
 }
 
 // resolveHotbarSlotDisplay returns the display_name and description for a slot
