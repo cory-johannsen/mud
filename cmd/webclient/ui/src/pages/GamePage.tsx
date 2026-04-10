@@ -75,44 +75,42 @@ function GameLayout() {
   const toolbar = (
     <div className="panel-toolbar">
       <div className="toolbar">
-        <span className="toolbar-zone">
-          {state.roomView?.zoneName ?? state.roomView?.zone_name ?? 'Connecting…'}
-        </span>
-        {(['inventory', 'equipment', 'skills', 'feats', 'stats', 'technology', 'job'] as DrawerType[]).map((d) => (
-          <button
-            key={d}
-            className={`toolbar-btn${openDrawer === d ? ' active' : ''}`}
-            onClick={() => toggleDrawer(d)}
-          >
-            {d.charAt(0).toUpperCase() + d.slice(1)}
-          </button>
-        ))}
-        <button className="toolbar-btn" onClick={() => setShowHelp(true)}>Help</button>
-        <LogoutDropdown />
-        {activeWeather && (
-          <span
-            style={{
-              background: 'rgba(0,0,0,0.7)',
-              color: '#f0a500',
-              border: '1px solid #f0a500',
-              borderRadius: '12px',
-              padding: '2px 12px',
-              fontSize: '0.8rem',
-              fontFamily: 'monospace',
-              fontWeight: 'bold',
-              letterSpacing: '0.05em',
-              whiteSpace: 'nowrap',
-              flexShrink: 0,
-              cursor: activeWeatherDescription ? 'help' : 'default',
-            }}
-            title={activeWeatherDescription ?? undefined}
-          >
-            {'\u26C8'} {activeWeather}
+        {/* Left: zone + nav buttons */}
+        <div className="toolbar-left">
+          <span className="toolbar-zone">
+            {state.roomView?.zoneName ?? state.roomView?.zone_name ?? 'Connecting…'}
           </span>
-        )}
-        {state.timeOfDay && (
-          <span className="toolbar-time">{formatTimeOfDay(state.timeOfDay)}</span>
-        )}
+          {(['inventory', 'equipment', 'skills', 'feats', 'stats', 'technology', 'job'] as DrawerType[]).map((d) => (
+            <button
+              key={d}
+              className={`toolbar-btn${openDrawer === d ? ' active' : ''}`}
+              onClick={() => toggleDrawer(d)}
+            >
+              {d.charAt(0).toUpperCase() + d.slice(1)}
+            </button>
+          ))}
+        </div>
+
+        {/* Center: weather + clock */}
+        <div className="toolbar-center">
+          {activeWeather && (
+            <span
+              className="toolbar-weather"
+              title={activeWeatherDescription ?? undefined}
+            >
+              {'\u26C8'} {activeWeather}
+            </span>
+          )}
+          {state.timeOfDay && (
+            <span className="toolbar-time">{formatTimeOfDay(state.timeOfDay)}</span>
+          )}
+        </div>
+
+        {/* Right: help + logout */}
+        <div className="toolbar-right">
+          <button className="toolbar-btn" onClick={() => setShowHelp(true)}>Help</button>
+          <LogoutDropdown />
+        </div>
       </div>
       {state.combatRound !== null && <CombatBanner />}
     </div>
