@@ -54,6 +54,10 @@ type ConditionDef struct {
 	PreventMovement  bool `yaml:"prevents_movement"`
 	PreventCommands  bool `yaml:"prevents_commands"`
 	PreventTargeting bool `yaml:"prevents_targeting"`
+	// ExtraWeaponDice is the number of additional weapon damage dice to roll on a hit.
+	// Each extra die uses the weapon's own die type (e.g. 1d10 weapon → extra d10 per die).
+	// Used by feats like Overpower that add bonus weapon dice rather than a flat damage bonus.
+	ExtraWeaponDice int `yaml:"extra_weapon_dice,omitempty"`
 	// IsDomination indicates this condition represents magical domination (e.g. confused).
 	// Precious material ghost_grade weapons and armor can suppress domination conditions.
 	IsDomination bool `yaml:"is_domination"`

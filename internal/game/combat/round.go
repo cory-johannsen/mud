@@ -7,6 +7,7 @@ import (
 	lua "github.com/yuin/gopher-lua"
 
 	"github.com/cory-johannsen/mud/internal/game/condition"
+	"github.com/cory-johannsen/mud/internal/game/dice"
 	"github.com/cory-johannsen/mud/internal/game/inventory"
 	"github.com/cory-johannsen/mud/internal/game/reaction"
 )
@@ -729,6 +730,24 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 				dmg := r.EffectiveDamage()
 				dmg += weaponModifierDamageBonus(actor) // REQ-EM-23
 				dmg += condition.DamageBonus(cbt.Conditions[actor.ID])
+				// Extra weapon dice from conditions (e.g. brutal_surge_active / Overpower).
+				// Only applied on a hit or crit; crits double the extra dice as well.
+				if extraDice := condition.ExtraWeaponDice(cbt.Conditions[actor.ID]); extraDice > 0 && (r.Outcome == CritSuccess || r.Outcome == Success) {
+					dieSides := 6 // unarmed fallback
+					if mainHandDef != nil && mainHandDef.DamageDice != "" {
+						if expr, parseErr := dice.Parse(mainHandDef.DamageDice); parseErr == nil {
+							dieSides = expr.Sides
+						}
+					}
+					extraDmg := 0
+					for i := 0; i < extraDice; i++ {
+						extraDmg += src.Intn(dieSides) + 1
+					}
+					if r.Outcome == CritSuccess {
+						extraDmg *= 2
+					}
+					dmg += extraDmg
+				}
 				dmg += applyPassiveFeats(cbt, actor, target, dmg, src)
 				dmg = hookDamageRoll(cbt, actor, target, dmg)
 				dmg, rwAnnotations := applyResistanceWeakness(target, r.DamageType, dmg)

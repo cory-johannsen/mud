@@ -7780,6 +7780,16 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string, targetX, 
 						// Apply condition to self (default).
 						// REQ-FEAT-COND: Apply to combat condition set when in combat so that
 						// AC/damage modifiers take effect immediately; fall back to session conditions.
+						// RequiresCombat feats may only be activated during an active encounter.
+						if f.RequiresCombat {
+							var inCombat bool
+							if s.combatH != nil {
+								inCombat = s.combatH.ActiveCombatForPlayer(uid) != nil
+							}
+							if !inCombat {
+								return messageEvent(fmt.Sprintf("You must be in combat to use %s.", f.Name)), nil
+							}
+						}
 						if def, ok := s.condRegistry.Get(condID); ok {
 							var applyErr error
 							var selfCbt *combat.Combat
@@ -7809,11 +7819,6 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string, targetX, 
 				msg := f.ActivateText
 				if f.PreparedUses > 0 {
 					msg = fmt.Sprintf("%s (%d uses remaining.)", f.ActivateText, sess.ActiveFeatUses[f.ID])
-				}
-				if condID != "" && s.condRegistry != nil {
-					if def, ok := s.condRegistry.Get(condID); ok {
-						msg = fmt.Sprintf("%s (%s)", msg, def.Name)
-					}
 				}
 				return &gamev1.ServerEvent{
 					Payload: &gamev1.ServerEvent_UseResponse{

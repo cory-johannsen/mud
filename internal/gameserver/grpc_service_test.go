@@ -1796,8 +1796,7 @@ func TestHandleUse_AppliesConditionWhenConditionIDSet(t *testing.T) {
 
 	useResp := event.GetUseResponse()
 	require.NotNil(t, useResp, "expected UseResponse")
-	assert.Contains(t, useResp.Message, "You surge with power!", "message must contain ActivateText")
-	assert.Contains(t, useResp.Message, "(Power Surge)", "message must include condition name (REQ-BUG149-1)")
+	assert.Equal(t, "You surge with power!", useResp.Message, "message must be ActivateText only; no condition name parenthetical (REQ-BUG29)")
 
 	assert.True(t, sess.Conditions.Has("surge_active"), "expected surge_active condition to be applied")
 }

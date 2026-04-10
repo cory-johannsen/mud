@@ -114,6 +114,25 @@ func DamageBonus(s *ActiveSet) int {
 	return total
 }
 
+// ExtraWeaponDice returns the total number of extra weapon damage dice granted by all active conditions.
+// Each die is of the weapon's own die type, rolled on a hit and doubled on a crit.
+//
+// Precondition: s may be nil.
+// Postcondition: Returns >= 0.
+func ExtraWeaponDice(s *ActiveSet) int {
+	if s == nil {
+		return 0
+	}
+	total := 0
+	for _, ac := range s.conditions {
+		total += ac.Def.ExtraWeaponDice * ac.Stacks
+	}
+	if total < 0 {
+		total = 0
+	}
+	return total
+}
+
 // StunnedAPReduction returns the number of AP to subtract from the action queue
 // this round due to the stunned condition. Equal to the current stunned stack count.
 //

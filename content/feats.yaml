@@ -2361,6 +2361,7 @@ feats:
     active: true
     activate_text: "You put everything into it."
     condition_id: brutal_surge_active
+    requires_combat: true
     description: "Wind up a two-handed strike dealing two extra damage dice."
 
   - id: snap_shot

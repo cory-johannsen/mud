@@ -45,6 +45,9 @@ type Feat struct {
 	// 0 means single-target (default). When > 0 and UseRequest.target_x/target_y are non-zero,
 	// the feat's condition effect is applied to every combatant within Chebyshev distance AoeRadius.
 	AoeRadius int `yaml:"aoe_radius,omitempty"`
+	// RequiresCombat, when true, means this feat may only be activated while the player is in
+	// an active combat encounter. Attempting to use it outside combat returns an error message.
+	RequiresCombat bool `yaml:"requires_combat,omitempty"`
 }
 
 // featsFile is the top-level YAML structure for content/feats.yaml.
