@@ -730,12 +730,14 @@ func TestStartCombatLocked_NilRegistry_ACIsTenPlusDex(t *testing.T) {
 func TestStartCombatLocked_WithRegistry_ACIncludesArmorBonus(t *testing.T) {
 	reg := inventory.NewRegistry()
 	armorDef := &inventory.ArmorDef{
-		ID:      "test-vest",
-		Name:    "Test Vest",
-		Slot:    inventory.SlotTorso,
-		ACBonus: 3,
-		DexCap:  10,
-		Group:   "light",
+		ID:                  "test-vest",
+		Name:                "Test Vest",
+		Slot:                inventory.SlotTorso,
+		ACBonus:             3,
+		DexCap:              10,
+		Group:               "light",
+		ProficiencyCategory: "light_armor",
+		Rarity:              "street",
 	}
 	if err := reg.RegisterArmor(armorDef); err != nil {
 		t.Fatalf("RegisterArmor: %v", err)
@@ -747,10 +749,16 @@ func TestStartCombatLocked_WithRegistry_ACIncludesArmorBonus(t *testing.T) {
 	spawnTestNPC(t, h.npcMgr, roomID)
 	sess := addTestPlayer(t, h.sessions, "player-ac-armor", roomID)
 
+	// Set proficiency so armor AC bonus is applied (untrained armor contributes 0 AC).
+	sess.Proficiencies = map[string]string{"light_armor": "untrained"}
+	// Level 1, untrained: proficiency bonus = 0. ACBonus from armor = 3. EffectiveDex = 1.
+	// Postcondition: AC = 10 + 3 + 1 = 14.
+
 	// Equip the armor directly on the session's Equipment by setting the torso slot.
 	sess.Equipment.Armor[inventory.SlotTorso] = &inventory.SlottedItem{
-		ItemDefID: "test-vest",
-		Name:      "Test Vest",
+		ItemDefID:  "test-vest",
+		Name:       "Test Vest",
+		Durability: 10,
 	}
 
 	_, err := h.Attack("player-ac-armor", "Goblin")
