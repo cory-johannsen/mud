@@ -461,6 +461,16 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 
 	var events []RoundEvent
 
+	// Snapshot start-of-round positions for simultaneous resolution.
+	// When resolving stride "toward"/"away", use the position the opponent
+	// occupied when actions were committed, not where they moved to after
+	// acting earlier in the same round. This eliminates positional foreknowledge.
+	type gridPos struct{ x, y int }
+	startPos := make(map[string]gridPos, len(cbt.Combatants))
+	for _, c := range cbt.Combatants {
+		startPos[c.ID] = gridPos{c.GridX, c.GridY}
+	}
+
 	for _, actor := range cbt.Combatants {
 		if actor.IsDead() {
 			continue
@@ -486,10 +496,18 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 				}
 
 				// Find the first living opponent (used for "toward"/"away" legacy directions).
+				// Use the start-of-round snapshot position so later-acting combatants
+				// target where opponents were when actions committed, not where they
+				// moved to after acting earlier this round (simultaneous resolution).
 				var opponent *Combatant
 				for _, c := range cbt.Combatants {
 					if c.ID != actor.ID && c.Kind != actor.Kind && !c.IsDead() {
-						opponent = c
+						snap := *c
+						if sp, ok := startPos[c.ID]; ok {
+							snap.GridX = sp.x
+							snap.GridY = sp.y
+						}
+						opponent = &snap
 						break
 					}
 				}
