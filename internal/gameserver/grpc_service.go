@@ -5977,13 +5977,18 @@ func (s *GameServiceServer) handleChar(uid string) (*gamev1.ServerEvent, error) 
 				if !ok {
 					continue
 				}
+				armorCat := ""
+				if f.ID == "armor_training" && sess.FeatureChoices != nil {
+					armorCat = armorProfCategoryLabel(sess.FeatureChoices["armor_training"]["armor_category"])
+				}
 				view.Feats = append(view.Feats, &gamev1.FeatEntry{
-					FeatId:       f.ID,
-					Name:         f.Name,
-					Active:       f.Active,
-					Description:  f.Description,
-					ActivateText: f.ActivateText,
-					IsReaction:   f.Reaction != nil,
+					FeatId:        f.ID,
+					Name:          f.Name,
+					Active:        f.Active,
+					Description:   f.Description,
+					ActivateText:  f.ActivateText,
+					IsReaction:    f.Reaction != nil,
+					ArmorCategory: armorCat,
 				})
 			}
 		}
@@ -7021,10 +7026,17 @@ func (s *GameServiceServer) handleJobGrants(uid string) (*gamev1.ServerEvent, er
 	var techGrants []*gamev1.JobTechGrant
 
 	// Helper to resolve feat name from registry.
+	// For armor_training, appends the chosen armor category so the player can see their selection.
 	featName := func(id string) string {
 		if s.featRegistry != nil {
 			if f, ok := s.featRegistry.Feat(id); ok {
-				return f.Name
+				name := f.Name
+				if id == "armor_training" && sess.FeatureChoices != nil {
+					if cat := armorProfCategoryLabel(sess.FeatureChoices["armor_training"]["armor_category"]); cat != "" {
+						name += " (" + cat + " armor)"
+					}
+				}
+				return name
 			}
 		}
 		return id
