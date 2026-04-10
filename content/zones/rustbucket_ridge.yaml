@@ -575,7 +575,7 @@ zone:
       cover_hp: 2
   - id: the_barrel_house
     title: The Barrel House
-    danger_level: sketchy
+    danger_level: dangerous
     description: Whiskey Pete runs this trailer-turned-distillery, a ramshackle operation built from salvaged barrels and
       broken-down machinery. He specializes in rotgut—cheap, harsh liquor that barely qualifies as drinkable. Pete trades
       his booze for favors, and while his drinks may be terrible, they're strong enough to keep his regulars coming back.
@@ -587,9 +587,9 @@ zone:
     map_x: -2
     map_y: 6
     spawns:
-    - template: scavenger
-      count: 1
-      respawn_after: 3m
+    - template: barrel_house_enforcer
+      count: 2
+      respawn_after: 5m
     properties:
       area: rotgut_alley
     equipment:
@@ -647,7 +647,7 @@ zone:
       cover_hp: 2
   - id: the_keg_hole
     title: The Keg Hole
-    danger_level: sketchy
+    danger_level: dangerous
     description: A run-down trailer that Big Grizz, a former bar bouncer, has converted into a low-class dive bar. It's packed
       with mismatched chairs, tables made from scrap wood, and barrels of his infamous homebrew. It's a hotspot for seedy
       negotiations and drunken brawls. Grizz doesn't ask questions as long as you pay and don't break his stuff.
@@ -657,9 +657,12 @@ zone:
     map_x: -2
     map_y: 8
     spawns:
-    - template: ganger
+    - template: barrel_house_enforcer
       count: 1
-      respawn_after: 3m
+      respawn_after: 5m
+    - template: big_grizz
+      count: 1
+      respawn_after: 15m
     properties:
       area: rotgut_alley
     equipment:

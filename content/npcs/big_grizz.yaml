@@ -1,0 +1,49 @@
+id: big_grizz
+name: Big Grizz
+description: A mountain of a man with arms like industrial pistons and a face that's absorbed more punches than most fighters throw in a lifetime. He runs The Keg Hole with iron fists and doesn't need a weapon to make his point—though he keeps a length of rebar behind the bar just in case.
+level: 4
+max_hp: 50
+ac: 15
+awareness: 7
+tier: boss
+ai_domain: territory_patrol
+respawn_delay: "15m"
+abilities:
+  brutality: 18
+  quickness: 10
+  grit: 16
+  reasoning: 9
+  savvy: 11
+  flair: 10
+loot:
+  currency:
+    min: 80
+    max: 200
+  items:
+    - item: medkit
+      chance: 0.4
+      min_qty: 1
+      max_qty: 2
+    - item: scrap_metal
+      chance: 0.6
+      min_qty: 2
+      max_qty: 5
+weapon:
+  - id: rebar_club
+    weight: 4
+  - id: steel_pipe
+    weight: 1
+armor:
+  - id: kevlar_vest
+    weight: 3
+  - id: leather_jacket
+    weight: 2
+taunts:
+  - "You've got nerve walking in here."
+  - "I've thrown out bigger than you."
+  - "This is my bar. My rules."
+  - "Last person who started trouble here woke up in the gutter three blocks away."
+  - "Grizz don't ask twice."
+  - "Bar's closed to troublemakers. You look like trouble."
+  - "I've been running this hole longer than you've been surviving out there."
+  - "A man my size doesn't need a weapon. But I've got one anyway."

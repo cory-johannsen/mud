@@ -1,0 +1,48 @@
+id: barrel_house_enforcer
+name: Barrel House Enforcer
+description: A thick-necked bruiser in a stained work apron, wielding a length of pipe. Pete pays well for loyalty—and for cracking skulls.
+level: 2
+max_hp: 18
+ac: 13
+awareness: 6
+ai_domain: territory_patrol
+respawn_delay: "5m"
+abilities:
+  brutality: 16
+  quickness: 11
+  grit: 14
+  reasoning: 8
+  savvy: 9
+  flair: 7
+loot:
+  currency:
+    min: 15
+    max: 50
+  items:
+    - item: scrap_metal
+      chance: 0.5
+      min_qty: 1
+      max_qty: 3
+    - item: medkit
+      chance: 0.15
+      min_qty: 1
+      max_qty: 1
+weapon:
+  - id: steel_pipe
+    weight: 3
+  - id: cheap_blade
+    weight: 2
+armor:
+  - id: leather_jacket
+    weight: 3
+  - id: tactical_vest
+    weight: 1
+taunts:
+  - "This place ain't for tourists."
+  - "Pete don't like visitors."
+  - "You picked the wrong distillery to wander into."
+  - "Last guy who snooped around here is still in one of those barrels."
+  - "Pete's operation runs smooth. You're a wrench in the works."
+  - "Enforcer means I enforce. Starting now."
+  - "You think the smell of rotgut is bad? Try the smell of trouble."
+  - "I don't ask questions. Pete doesn't want questions asked."
