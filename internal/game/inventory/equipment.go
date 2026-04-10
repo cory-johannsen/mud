@@ -127,6 +127,10 @@ type DefenseStats struct {
 	CheckPenalty int // sum of all slot check_penalty values (non-positive)
 	SpeedPenalty int // sum of speed_penalty values
 	StrengthReq  int // max strength_req across all equipped slots
+	// ProficiencyACBonus is the single proficiency contribution to AC (applied once per character).
+	ProficiencyACBonus int
+	// EffectiveArmorCategory is the heaviest proficient armor category worn.
+	EffectiveArmorCategory string
 	// Resistances maps damage type → effective flat reduction (highest single-source value per type).
 	Resistances map[string]int
 	// Weaknesses maps damage type → total flat addition (sum across all sources).
@@ -218,19 +222,42 @@ func armorProfBonus(level int, rank string) int {
 	return 0
 }
 
+// armorCategoryPrecedence maps armor categories to a numeric weight for heaviest-wins ordering.
+// Higher value = heavier category.
+var armorCategoryPrecedence = map[string]int{
+	"unarmored":   0,
+	"light_armor":  1,
+	"medium_armor": 2,
+	"heavy_armor":  3,
+}
+
+// heavierCategory returns whichever of a or b is the heavier armor category.
+// Unknown categories are treated as lighter than "unarmored".
+func heavierCategory(a, b string) string {
+	if armorCategoryPrecedence[a] >= armorCategoryPrecedence[b] {
+		return a
+	}
+	return b
+}
+
 // ComputedDefensesWithProficiencies aggregates defense stats, applying armor proficiency rules:
-// - For armor in a category the player is trained in: add proficiency bonus to ACBonus; skip check/speed penalties.
-// - For armor in an untrained category: apply check/speed penalties; no proficiency bonus.
+//   - For each slot proficient in its category: add the item's AC bonus to ACBonus; skip check/speed penalties.
+//   - For each slot NOT proficient: apply check/speed penalties; exclude item's AC bonus entirely.
+//   - After all slots are processed, determine the heaviest proficient category worn, compute
+//     armorProfBonus once for that category, and add it to ACBonus.
 //
 // Precondition: reg must be non-nil; profs may be nil (treated as all untrained).
-// Postcondition: ACBonus includes per-slot proficiency bonus for trained categories.
+// Postcondition: ProficiencyACBonus is added to ACBonus exactly once; EffectiveArmorCategory
+// reflects the heaviest proficient category (or "unarmored" if none).
 func (e *Equipment) ComputedDefensesWithProficiencies(reg *Registry, dexMod int, profs map[string]string, level int) DefenseStats {
 	stats := DefenseStats{
-		EffectiveDex: dexMod,
-		Resistances:  make(map[string]int),
-		Weaknesses:   make(map[string]int),
+		EffectiveDex:           dexMod,
+		EffectiveArmorCategory: "unarmored",
+		Resistances:            make(map[string]int),
+		Weaknesses:             make(map[string]int),
 	}
 	hasDexCap := false
+
 	for _, slotted := range e.Armor {
 		if slotted == nil {
 			continue
@@ -242,6 +269,8 @@ func (e *Equipment) ComputedDefensesWithProficiencies(reg *Registry, dexMod int,
 		if !ok {
 			continue
 		}
+
+		// Compute effective item AC with modifier adjustment.
 		slotAC := def.ACBonus
 		switch slotted.Modifier {
 		case "tuned":
@@ -251,18 +280,19 @@ func (e *Equipment) ComputedDefensesWithProficiencies(reg *Registry, dexMod int,
 		case "cursed":
 			slotAC -= 2
 		}
-		stats.ACBonus += slotAC
 
-		// Apply proficiency-based rules.
+		// Determine proficiency rank for this slot's category.
 		rank := ""
 		if profs != nil {
 			rank = profs[def.ProficiencyCategory]
 		}
+
 		if rank != "" {
-			// Trained: proficiency bonus, no penalties.
-			stats.ACBonus += armorProfBonus(level, rank)
+			// Proficient: include item AC and track this category for the single prof bonus.
+			stats.ACBonus += slotAC
+			stats.EffectiveArmorCategory = heavierCategory(stats.EffectiveArmorCategory, def.ProficiencyCategory)
 		} else {
-			// Untrained: apply check and speed penalties.
+			// Unproficient: exclude item AC; apply check and speed penalties.
 			stats.CheckPenalty += def.CheckPenalty
 			stats.SpeedPenalty += def.SpeedPenalty
 		}
@@ -283,6 +313,17 @@ func (e *Equipment) ComputedDefensesWithProficiencies(reg *Registry, dexMod int,
 			stats.Weaknesses[dmgType] += val
 		}
 	}
+
+	// Apply the proficiency bonus exactly once, using the heaviest proficient category.
+	if stats.EffectiveArmorCategory != "unarmored" && profs != nil {
+		effectiveRank := profs[stats.EffectiveArmorCategory]
+		if effectiveRank != "" {
+			profBonus := armorProfBonus(level, effectiveRank)
+			stats.ACBonus += profBonus
+			stats.ProficiencyACBonus = profBonus
+		}
+	}
+
 	if stats.EffectiveDex > dexMod {
 		stats.EffectiveDex = dexMod
 	}
