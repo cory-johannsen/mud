@@ -6,11 +6,14 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"google.golang.org/protobuf/proto"
 	"pgregory.net/rapid"
 
+	"github.com/cory-johannsen/mud/internal/game/condition"
 	"github.com/cory-johannsen/mud/internal/game/inventory"
 	"github.com/cory-johannsen/mud/internal/game/ruleset"
 	"github.com/cory-johannsen/mud/internal/game/session"
+	"github.com/cory-johannsen/mud/internal/game/technology"
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 )
 
@@ -430,6 +433,341 @@ func TestHotbarUpdateEvent_CommandSlot_ZeroUseCounts(t *testing.T) {
 	slot3 := hu.Slots[3]
 	assert.Equal(t, int32(0), slot3.GetMaxUses(), "MaxUses must be 0 for command slot")
 	assert.Equal(t, int32(0), slot3.GetUsesRemaining(), "UsesRemaining must be 0 for command slot")
+}
+
+// REQ-HB-UC-4: hotbarUpdateEvent populates UsesRemaining, MaxUses, and RechargeCondition
+// for an innate technology slot when the session has InnateTechs populated.
+func TestHotbarUpdateEvent_InnateTechSlot_PopulatesUseCounts(t *testing.T) {
+	t.Parallel()
+	sessMgr := session.NewManager()
+	svc := testMinimalService(t, sessMgr)
+
+	const techID = "gunchete_neural_dart"
+	reg := technology.NewRegistry()
+	reg.Register(&technology.TechnologyDef{
+		ID:                techID,
+		Name:              "Neural Dart",
+		Tradition:         technology.TraditionBioSynthetic,
+		Level:             1,
+		UsageType:         technology.UsageSpontaneous,
+		Range:             technology.RangeSelf,
+		Targets:           technology.TargetsSingle,
+		Duration:          "instant",
+		Resolution:        "none",
+		RechargeCondition: "Recharges on rest",
+	})
+	svc.SetTechRegistry(reg)
+
+	uid := "innate-tech-uid"
+	_, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID:         uid,
+		Username:    "tester",
+		CharName:    "Tester",
+		CharacterID: 20,
+		RoomID:      "room_a",
+		Role:        "player",
+	})
+	require.NoError(t, err)
+
+	sess, ok := sessMgr.GetPlayer(uid)
+	require.True(t, ok)
+	sess.Hotbar[0] = session.HotbarSlot{Kind: session.HotbarSlotKindTechnology, Ref: techID}
+	sess.InnateTechs = map[string]*session.InnateSlot{
+		techID: {MaxUses: 3, UsesRemaining: 1},
+	}
+
+	evt := svc.hotbarUpdateEvent(sess)
+	require.NotNil(t, evt)
+	hu := evt.GetHotbarUpdate()
+	require.NotNil(t, hu)
+	require.Len(t, hu.Slots, 10)
+
+	slot0 := hu.Slots[0]
+	assert.Equal(t, int32(3), slot0.GetMaxUses(), "MaxUses must equal InnateSlot.MaxUses")
+	assert.Equal(t, int32(1), slot0.GetUsesRemaining(), "UsesRemaining must equal InnateSlot.UsesRemaining")
+	assert.Equal(t, "Recharges on rest", slot0.GetRechargeCondition())
+}
+
+// REQ-HB-UC-5: hotbarUpdateEvent counts non-expended prepared slots for a prepared technology slot.
+func TestHotbarUpdateEvent_PreparedTechSlot_PopulatesUseCounts(t *testing.T) {
+	t.Parallel()
+	sessMgr := session.NewManager()
+	svc := testMinimalService(t, sessMgr)
+
+	const techID = "arc_bolt"
+	uid := "prepared-tech-uid"
+	_, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID:         uid,
+		Username:    "tester",
+		CharName:    "Tester",
+		CharacterID: 21,
+		RoomID:      "room_a",
+		Role:        "player",
+	})
+	require.NoError(t, err)
+
+	sess, ok := sessMgr.GetPlayer(uid)
+	require.True(t, ok)
+	sess.Hotbar[0] = session.HotbarSlot{Kind: session.HotbarSlotKindTechnology, Ref: techID}
+	// 3 total slots for techID: 2 not expended, 1 expended.
+	sess.InnateTechs = nil
+	sess.PreparedTechs = map[int][]*session.PreparedSlot{
+		1: {
+			{TechID: techID, Expended: false},
+			{TechID: techID, Expended: false},
+			{TechID: techID, Expended: true},
+		},
+	}
+
+	evt := svc.hotbarUpdateEvent(sess)
+	require.NotNil(t, evt)
+	hu := evt.GetHotbarUpdate()
+	require.NotNil(t, hu)
+	require.Len(t, hu.Slots, 10)
+
+	slot0 := hu.Slots[0]
+	assert.Equal(t, int32(3), slot0.GetMaxUses(), "MaxUses must equal total prepared slots")
+	assert.Equal(t, int32(2), slot0.GetUsesRemaining(), "UsesRemaining must equal non-expended prepared slots")
+}
+
+// REQ-HB-UC-6: hotbarUpdateEvent reflects the spontaneous use pool for a spontaneous technology slot.
+func TestHotbarUpdateEvent_SpontaneousTechSlot_PopulatesUseCounts(t *testing.T) {
+	t.Parallel()
+	sessMgr := session.NewManager()
+	svc := testMinimalService(t, sessMgr)
+
+	const techID = "phase_shift"
+	uid := "spontaneous-tech-uid"
+	_, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID:         uid,
+		Username:    "tester",
+		CharName:    "Tester",
+		CharacterID: 22,
+		RoomID:      "room_a",
+		Role:        "player",
+	})
+	require.NoError(t, err)
+
+	sess, ok := sessMgr.GetPlayer(uid)
+	require.True(t, ok)
+	sess.Hotbar[0] = session.HotbarSlot{Kind: session.HotbarSlotKindTechnology, Ref: techID}
+	sess.InnateTechs = nil
+	// PreparedTechs must be non-nil but empty so the code enters the else-if branch
+	// and falls through to the spontaneous pool lookup (total == 0 → spontaneous path).
+	sess.PreparedTechs = map[int][]*session.PreparedSlot{}
+	sess.SpontaneousTechs = map[int][]string{
+		1: {techID},
+	}
+	sess.SpontaneousUsePools = map[int]session.UsePool{
+		1: {Max: 4, Remaining: 2},
+	}
+
+	evt := svc.hotbarUpdateEvent(sess)
+	require.NotNil(t, evt)
+	hu := evt.GetHotbarUpdate()
+	require.NotNil(t, hu)
+	require.Len(t, hu.Slots, 10)
+
+	slot0 := hu.Slots[0]
+	assert.Equal(t, int32(4), slot0.GetMaxUses(), "MaxUses must equal pool.Max")
+	assert.Equal(t, int32(2), slot0.GetUsesRemaining(), "UsesRemaining must equal pool.Remaining")
+}
+
+// REQ-HB-UC-7 (property): command and consumable slots always report zero MaxUses and UsesRemaining.
+func TestPropertyHotbarUpdateEvent_CommandConsumable_ZeroMaxUses(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		kind := rapid.SampledFrom([]string{
+			session.HotbarSlotKindCommand,
+			session.HotbarSlotKindConsumable,
+		}).Draw(rt, "kind")
+		ref := rapid.StringOfN(rapid.RuneFrom([]rune("abcdefghijklmnopqrstuvwxyz_0123456789")), 1, 20, -1).Draw(rt, "ref")
+
+		sessMgr := session.NewManager()
+		svc := testMinimalService(t, sessMgr)
+
+		uid := "prop-cmd-cons-uid"
+		_, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+			UID:         uid,
+			Username:    "tester",
+			CharName:    "Tester",
+			CharacterID: 30,
+			RoomID:      "room_a",
+			Role:        "player",
+		})
+		require.NoError(rt, err)
+
+		sess, ok := sessMgr.GetPlayer(uid)
+		require.True(rt, ok)
+		sess.Hotbar[0] = session.HotbarSlot{Kind: kind, Ref: ref}
+
+		evt := svc.hotbarUpdateEvent(sess)
+		require.NotNil(rt, evt)
+		hu := evt.GetHotbarUpdate()
+		require.NotNil(rt, hu)
+		require.Len(rt, hu.Slots, 10)
+
+		slot0 := hu.Slots[0]
+		assert.Equal(rt, int32(0), slot0.GetMaxUses(), "MaxUses must be 0 for kind=%s", kind)
+		assert.Equal(rt, int32(0), slot0.GetUsesRemaining(), "UsesRemaining must be 0 for kind=%s", kind)
+	})
+}
+
+// REQ-HB-UC-8: after activating a feat with limited uses, handleUse pushes a
+// HotbarUpdateEvent with decremented UsesRemaining for the feat's hotbar slot.
+func TestHandleUse_FeatWithLimitedUses_PushesHotbarUpdateEvent(t *testing.T) {
+	const featID = "power_strike"
+	sessMgr := session.NewManager()
+
+	feat := &ruleset.Feat{
+		ID:           featID,
+		Name:         "Power Strike",
+		Active:       true,
+		PreparedUses: 3,
+		ActivateText: "You strike with devastating power!",
+	}
+	featsRepo := &stubFeatsRepo{
+		data: map[int64][]string{0: {featID}},
+	}
+	svc := buildFeatUseService(t, sessMgr, feat)
+	svc.characterFeatsRepo = featsRepo
+
+	uid := "handleuse-hotbar-uid"
+	sess := addPlayerForFeatTest(t, sessMgr, uid)
+	sess.Conditions = condition.NewActiveSet()
+
+	// Simulate 2 uses remaining before activation.
+	sess.ActiveFeatUses = map[string]int{featID: 2}
+	// Slot 0 assigned to this feat.
+	sess.Hotbar[0] = session.HotbarSlot{Kind: session.HotbarSlotKindFeat, Ref: featID}
+
+	// Drain any pre-existing events from the entity.
+	for {
+		select {
+		case <-sess.Entity.Events():
+		default:
+			goto drained5
+		}
+	}
+drained5:
+
+	evt, err := svc.handleUse(uid, featID, "", 0, 0)
+	require.NoError(t, err)
+	require.NotNil(t, evt)
+
+	// After activation, sess.ActiveFeatUses[featID] must be decremented.
+	assert.Equal(t, 1, sess.ActiveFeatUses[featID], "use count must decrement from 2 to 1")
+
+	// Collect pushed events from entity channel.
+	var hotbarEvt *gamev1.HotbarUpdateEvent
+	for {
+		select {
+		case data := <-sess.Entity.Events():
+			var pushed gamev1.ServerEvent
+			if unmarshalErr := proto.Unmarshal(data, &pushed); unmarshalErr == nil {
+				if hu := pushed.GetHotbarUpdate(); hu != nil {
+					hotbarEvt = hu
+				}
+			}
+		default:
+			goto collected5
+		}
+	}
+collected5:
+	require.NotNil(t, hotbarEvt, "handleUse must push a HotbarUpdateEvent after feat activation")
+	require.Len(t, hotbarEvt.Slots, 10)
+	assert.Equal(t, int32(1), hotbarEvt.Slots[0].GetUsesRemaining(),
+		"slot 0 UsesRemaining must reflect decremented count")
+}
+
+// REQ-HB-UC-9: after a full long rest, handleRest pushes a HotbarUpdateEvent
+// with UsesRemaining restored to PreparedUses for the feat's hotbar slot.
+func TestApplyFullLongRest_PushesHotbarUpdateEvent(t *testing.T) {
+	const featID = "battle_cry"
+	sessMgr := session.NewManager()
+
+	feat := &ruleset.Feat{
+		ID:                featID,
+		Name:              "Battle Cry",
+		Active:            true,
+		PreparedUses:      3,
+		RechargeCondition: "Recharges on rest",
+		ActivateText:      "You roar a battle cry!",
+	}
+	featsRepo := &stubFeatsRepo{
+		data: map[int64][]string{0: {featID}},
+	}
+	svc := buildFeatUseService(t, sessMgr, feat)
+	svc.characterFeatsRepo = featsRepo
+
+	uid := "rest-hotbar-uid"
+	sess := addPlayerForFeatTest(t, sessMgr, uid)
+	sess.Status = int32(gamev1.CombatStatus_COMBAT_STATUS_IDLE)
+	sess.CurrentHP = 1
+	sess.MaxHP = 20
+
+	// All uses exhausted before rest.
+	sess.ActiveFeatUses = map[string]int{featID: 0}
+	// Slot 0 assigned to this feat.
+	sess.Hotbar[0] = session.HotbarSlot{Kind: session.HotbarSlotKindFeat, Ref: featID}
+
+	// Provide a minimal job so applyFullLongRestCtx reaches the hotbarUpdateEvent push.
+	job := &ruleset.Job{
+		ID:   "test_rest_job",
+		Name: "Test Rest Job",
+		TechnologyGrants: &ruleset.TechnologyGrants{
+			Prepared: &ruleset.PreparedGrants{
+				SlotsByLevel: map[int]int{},
+				Pool:         []ruleset.PreparedEntry{},
+			},
+		},
+	}
+	jobReg := ruleset.NewJobRegistry()
+	jobReg.Register(job)
+	svc.SetJobRegistry(jobReg)
+	sess.Class = "test_rest_job"
+
+	prepRepo := &fakePreparedRepoRest{}
+	svc.SetPreparedTechRepo(prepRepo)
+
+	charSaver := &fakeCharSaver{}
+	svc.SetCharSaver(charSaver)
+
+	// Drain any pre-existing events from the entity.
+	for {
+		select {
+		case <-sess.Entity.Events():
+		default:
+			goto drained6
+		}
+	}
+drained6:
+
+	stream := &fakeSessionStream{}
+	require.NoError(t, svc.handleRest(uid, "req-rest-hotbar", stream))
+
+	// After rest, uses must be restored.
+	assert.Equal(t, 3, sess.ActiveFeatUses[featID], "uses must be restored to PreparedUses after rest")
+
+	// Collect pushed events from entity channel.
+	var hotbarEvt *gamev1.HotbarUpdateEvent
+	for {
+		select {
+		case data := <-sess.Entity.Events():
+			var pushed gamev1.ServerEvent
+			if unmarshalErr := proto.Unmarshal(data, &pushed); unmarshalErr == nil {
+				if hu := pushed.GetHotbarUpdate(); hu != nil {
+					hotbarEvt = hu
+				}
+			}
+		default:
+			goto collected6
+		}
+	}
+collected6:
+	require.NotNil(t, hotbarEvt, "handleRest must push a HotbarUpdateEvent after long rest")
+	require.Len(t, hotbarEvt.Slots, 10)
+	assert.Equal(t, int32(3), hotbarEvt.Slots[0].GetUsesRemaining(),
+		"slot 0 UsesRemaining must be restored to PreparedUses after rest")
 }
 
 // Property: set with valid slot 1–10 and non-empty text always writes to index slot-1.
