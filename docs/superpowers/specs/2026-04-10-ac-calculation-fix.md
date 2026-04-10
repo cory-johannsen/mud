@@ -11,55 +11,56 @@ In `internal/game/inventory/equipment.go`, `ComputedDefensesWithProficiencies()`
 
 ## Design Decision: Multi-Slot Proficiency Model
 
-The game allows equipping multiple armor pieces across 8 slots with mixed types (light/medium/heavy). Four options were considered:
+The game allows equipping multiple armor pieces across 8 slots with mixed types (light/medium/heavy). Four options were considered and Option B was selected by the user:
 
 | Option | Approach | Verdict |
 |--------|----------|---------|
-| A | Sum all item bonuses; apply proficiency once using highest equipped category | **Selected** |
-| B | Only count slots where player is proficient; apply proficiency once | Overly punishing for mixed kits |
-| C | Single torso-slot armor only (PF2e RAW) | Breaks the multi-slot equipment system |
-| D | Per-slot proficiency check + one bonus | Too complex; harsh for mixed kits |
+| A | Sum all item bonuses; apply proficiency once using highest equipped category | Rejected — too permissive |
+| B | Only count slots where player is proficient; apply proficiency once by highest proficient+equipped category | **Selected** |
+| C | Single torso-slot armor only (PF2e RAW) | Rejected — breaks multi-slot system |
+| D | Per-slot proficiency check + one bonus (effectively identical to B) | Rejected — same as B |
 
-**Selected approach: Option A**
+**Selected approach: Option B**
 
-The player's effective armor category is the **heaviest category among all equipped armor pieces**. Proficiency bonus is applied **once** based on the player's proficiency rank in that effective category. All equipped item AC bonuses are always summed regardless of proficiency. If the player is not proficient in the effective category, the proficiency contribution is untrained (0) and a check penalty applies.
-
-This matches the spirit of PF2e (one proficiency bonus, determined by armor category) while supporting the multi-slot equipment model.
+Only equipped armor pieces whose `proficiency_category` the player is proficient in contribute their `ac_bonus`. Proficiency bonus is applied **once** based on the player's highest-ranked proficiency among the categories they are both proficient in and have equipped. Unequipped or unproficient slots contribute no AC bonus.
 
 ---
 
-## REQ-1: Effective armor category
+## REQ-1: Per-slot proficiency filtering
 
-- REQ-1a: `ComputedDefenses()` MUST determine the effective armor category as the heaviest category present among all equipped, non-broken armor pieces
-- REQ-1b: Category precedence MUST be: `heavy_armor` > `medium_armor` > `light_armor` > `unarmored`
-- REQ-1c: If no armor is equipped, effective category MUST be `unarmored`
+- REQ-1a: In the `ComputedDefenses()` item loop, each slot's `ac_bonus` MUST only be added to `stats.ACBonus` if the player is proficient in that item's `proficiency_category`
+- REQ-1b: Slots where the player is NOT proficient in the item's category MUST contribute 0 to `ACBonus`
+- REQ-1c: Broken armor (durability = 0) continues to be skipped regardless of proficiency (unchanged)
 
-## REQ-2: Proficiency bonus applied once
+## REQ-2: Effective proficiency category
 
-- REQ-2a: `ComputedDefensesWithProficiencies()` MUST apply `armorProfBonus(level, rank)` exactly once to `stats.ACBonus`
-- REQ-2b: The rank used MUST be the player's proficiency rank in the effective armor category (REQ-1a)
-- REQ-2c: If the player has no entry in `Proficiencies` for the effective category, rank MUST default to `"untrained"` (contributes 0)
-- REQ-2d: The per-slot loop MUST NOT add any proficiency bonus — it MUST accumulate item AC bonuses only
+- REQ-2a: After the per-slot loop, the effective proficiency category MUST be determined as the heaviest `proficiency_category` among all slots that passed the REQ-1a check (i.e. proficient AND equipped)
+- REQ-2b: Category precedence MUST be: `heavy_armor` > `medium_armor` > `light_armor` > `unarmored`
+- REQ-2c: If no proficient slots exist, effective category MUST be `unarmored`
 
-## REQ-3: Check penalty
+## REQ-3: Proficiency bonus applied once
 
-- REQ-3a: Check penalty MUST be applied if the player is untrained in the effective armor category
-- REQ-3b: Check penalty value MUST be the sum of `CheckPenalty` fields from all equipped, non-broken pieces (unchanged from current logic)
+- REQ-3a: `ComputedDefensesWithProficiencies()` MUST apply `armorProfBonus(level, rank)` exactly once to `stats.ACBonus`
+- REQ-3b: The rank used MUST be the player's proficiency rank in the effective category (REQ-2a)
+- REQ-3c: The per-slot loop MUST NOT add any proficiency bonus — item bonuses only
 
-## REQ-4: DexCap
+## REQ-4: Check penalty
 
-- REQ-4a: DexCap calculation is unchanged — the strictest (minimum) DexCap across all equipped pieces applies
+- REQ-4a: Check penalty is summed from all equipped, non-broken pieces regardless of proficiency (unchanged)
 
-## REQ-5: CharacterSheetView breakdown
+## REQ-5: DexCap
 
-- REQ-5a: The proto `CharacterSheetView` MUST expose the effective armor category and proficiency rank so the client can display the AC breakdown (resolves issue #32)
-- REQ-5b: `view.AcBonus` MUST reflect only the corrected item bonus total (no proficiency)
-- REQ-5c: A new field `proficiency_ac_bonus int32` MUST be added to `CharacterSheetView` for the proficiency contribution
-- REQ-5d: A new field `effective_armor_category string` MUST be added to `CharacterSheetView`
+- REQ-5a: DexCap is the strictest (minimum) across all equipped, non-broken pieces (unchanged)
+
+## REQ-6: CharacterSheetView breakdown
+
+- REQ-6a: `view.AcBonus` MUST reflect the corrected item bonus total (proficient slots only, no proficiency bonus)
+- REQ-6b: A new field `proficiency_ac_bonus int32` MUST be added to `CharacterSheetView` for the single proficiency contribution
+- REQ-6c: A new field `effective_armor_category string` MUST be added to `CharacterSheetView` so the client can display the AC breakdown (supports issue #32)
 
 ## Files to Modify
 
-- `internal/game/inventory/equipment.go` — fix `ComputedDefensesWithProficiencies()` per REQ-1 and REQ-2; add effective category computation
-- `api/proto/game/v1/game.proto` — add `proficiency_ac_bonus` and `effective_armor_category` to `CharacterSheetView` (REQ-5)
+- `internal/game/inventory/equipment.go` — fix `ComputedDefensesWithProficiencies()` per REQ-1 through REQ-3
+- `api/proto/game/v1/game.proto` — add `proficiency_ac_bonus` and `effective_armor_category` to `CharacterSheetView`
 - `api/proto/game/v1/game.pb.go` — regenerate after proto change
 - `internal/gameserver/grpc_service.go` — populate new `CharacterSheetView` fields (lines ~5861-5866)
