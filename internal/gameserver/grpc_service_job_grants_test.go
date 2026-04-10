@@ -282,6 +282,84 @@ func TestHandleJobGrants_GeneralCount_IncludedAsGrant(t *testing.T) {
 	assert.True(t, hasGeneral, "response must include a general feat grant entry")
 }
 
+// TestHandleJobGrants_GeneralCount_ResolvesToPlayerFeat verifies that when a player has
+// an unattributed feat in their character sheet, the general-count slot resolves to that
+// feat rather than showing the "Choose N general feat" label.
+func TestHandleJobGrants_GeneralCount_ResolvesToPlayerFeat(t *testing.T) {
+	const uid = "jg-general-resolved"
+	const generalFeatID = "street_knowledge"
+
+	job := &ruleset.Job{
+		ID:   "fixer",
+		Name: "Fixer",
+		FeatGrants: &ruleset.FeatGrants{
+			GeneralCount: 1,
+			Fixed:        []string{"under_the_radar"},
+		},
+	}
+	feats := []*ruleset.Feat{
+		{ID: "under_the_radar", Name: "Under the Radar"},
+		{ID: generalFeatID, Name: "Street Knowledge"},
+	}
+
+	worldMgr, sessMgr := testWorldAndSession(t)
+	logger := zaptest.NewLogger(t)
+
+	jobReg := ruleset.NewJobRegistry()
+	jobReg.Register(job)
+	featReg := ruleset.NewFeatRegistry(feats)
+	// featsRepo returns both feats for characterID 0.
+	featsRepo := &stubFeatsRepo{data: map[int64][]string{
+		0: {"under_the_radar", generalFeatID},
+	}}
+
+	svc := newTestGameServiceServer(
+		worldMgr, sessMgr,
+		command.DefaultRegistry(),
+		NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil, nil, nil),
+		NewChatHandler(sessMgr),
+		logger,
+		nil, nil, nil, nil, nil, nil,
+		nil, nil, nil, nil, nil, nil,
+		nil, jobReg, nil, nil, nil, nil, nil, nil, "",
+		nil, nil, nil,
+		nil, featReg, featsRepo,
+		nil, nil, nil, nil, nil, nil, nil,
+		nil, nil,
+		nil, nil,
+		nil, nil,
+	)
+
+	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID: uid, Username: "Fixer", CharName: "Fixer",
+		RoomID: "room_a", CurrentHP: 20, MaxHP: 20, Role: "player",
+	})
+	require.NoError(t, err)
+	sess.Class = "fixer"
+
+	resp, err := svc.handleJobGrants(uid)
+	require.NoError(t, err)
+	gr := resp.GetJobGrantsResponse()
+	require.NotNil(t, gr)
+
+	// Should have: under_the_radar (fixed) + street_knowledge (resolved general) = 2.
+	require.Len(t, gr.FeatGrants, 2, "expected fixed + resolved general feat")
+
+	var foundGeneral bool
+	for _, fg := range gr.FeatGrants {
+		if fg.FeatId == generalFeatID {
+			foundGeneral = true
+			assert.Equal(t, "Street Knowledge", fg.FeatName)
+			assert.Equal(t, int32(1), fg.GrantLevel)
+		}
+	}
+	assert.True(t, foundGeneral, "general-count slot must resolve to the player's actual feat, not a label")
+	// Ensure no label entries remain.
+	for _, fg := range gr.FeatGrants {
+		assert.NotContains(t, fg.FeatName, "general feat", "label must not appear when feat is resolved")
+	}
+}
+
 // TestHandleJobGrants_NoJobReturnsMessage verifies that a player with no job class gets a message.
 func TestHandleJobGrants_NoJobReturnsMessage(t *testing.T) {
 	const uid = "jg-nojob"

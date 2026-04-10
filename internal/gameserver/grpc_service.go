@@ -7033,7 +7033,7 @@ func (s *GameServiceServer) handleJobGrants(uid string) (*gamev1.ServerEvent, er
 	// Load the player's actual feat IDs for choice resolution.
 	// Choice-pool grants show what the player picked; unresolved pools show the option label.
 	playerFeatIDs := make(map[string]bool)
-	if s.characterFeatsRepo != nil && sess.CharacterID > 0 {
+	if s.characterFeatsRepo != nil {
 		if ids, err := s.characterFeatsRepo.GetAll(context.Background(), sess.CharacterID); err == nil {
 			for _, id := range ids {
 				playerFeatIDs[id] = true
@@ -7059,8 +7059,9 @@ func (s *GameServiceServer) handleJobGrants(uid string) (*gamev1.ServerEvent, er
 		if fg == nil {
 			return
 		}
-		// Fixed feats always granted.
+		// Fixed feats always granted; mark attributed so general-count slots don't reclaim them.
 		for _, id := range fg.Fixed {
+			attributedFeatIDs[id] = true
 			featGrants = append(featGrants, &gamev1.JobFeatGrant{
 				GrantLevel: int32(level),
 				FeatId:     id,
@@ -7103,18 +7104,41 @@ func (s *GameServiceServer) handleJobGrants(uid string) (*gamev1.ServerEvent, er
 				})
 			}
 		}
-		// General feat pick — player freely selects from all general feats.
-		// Cannot attribute specific general feats to a level, so always show the count label.
+		// General feat pick — resolve from player's unattributed feats (sorted for determinism).
+		// Falls back to the selection label only if no unattributed player feats remain.
 		if fg.GeneralCount > 0 {
-			label := fmt.Sprintf("Choose %d general feat", fg.GeneralCount)
-			if fg.GeneralCount > 1 {
-				label += "s"
+			// Collect unattributed player feat IDs, sorted for deterministic output.
+			var unattributed []string
+			for id := range playerFeatIDs {
+				if !attributedFeatIDs[id] {
+					unattributed = append(unattributed, id)
+				}
 			}
-			featGrants = append(featGrants, &gamev1.JobFeatGrant{
-				GrantLevel: int32(level),
-				FeatId:     "",
-				FeatName:   label,
-			})
+			sort.Strings(unattributed)
+			if len(unattributed) > 0 {
+				cap := fg.GeneralCount
+				if cap > len(unattributed) {
+					cap = len(unattributed)
+				}
+				for _, id := range unattributed[:cap] {
+					attributedFeatIDs[id] = true
+					featGrants = append(featGrants, &gamev1.JobFeatGrant{
+						GrantLevel: int32(level),
+						FeatId:     id,
+						FeatName:   featName(id),
+					})
+				}
+			} else {
+				label := fmt.Sprintf("Choose %d general feat", fg.GeneralCount)
+				if fg.GeneralCount > 1 {
+					label += "s"
+				}
+				featGrants = append(featGrants, &gamev1.JobFeatGrant{
+					GrantLevel: int32(level),
+					FeatId:     "",
+					FeatName:   label,
+				})
+			}
 		}
 	}
 	// Collect tech grants from a TechnologyGrants at a given level.
