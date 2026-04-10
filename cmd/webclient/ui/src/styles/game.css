@@ -221,6 +221,7 @@ html, body, #root { margin: 0; padding: 0; height: 100%; overflow: hidden; }
   padding: 0 2px;
   min-width: 0;
   line-height: 1.1;
+  position: relative;
 }
 .hotbar-slot:hover:not(:disabled) { background: #252525; color: #e0c060; }
 .hotbar-slot:disabled { cursor: default; }
@@ -238,6 +239,16 @@ html, body, #root { margin: 0; padding: 0; height: 100%; overflow: hidden; }
   max-width: 100%;
   line-height: 1.2;
 }
+.hotbar-use-badge {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  font-size: 0.52rem;
+  color: #e0c060;
+  line-height: 1;
+  pointer-events: none;
+}
+.hotbar-slot-expended { opacity: 0.45; }
 
 /* Input panel */
 .input-form {

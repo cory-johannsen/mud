@@ -192,6 +192,12 @@ func TestProperty_FeatWithConditionInRegistry_MessageIsActivateText_REQ_BUG149_4
 		condName := rapid.StringMatching(`[A-Z][a-zA-Z ]{2,30}`).Draw(rt, "condName")
 		featID := rapid.StringMatching(`[a-z][a-z0-9_]{2,15}`).Draw(rt, "featID")
 		activateText := rapid.StringMatching(`[A-Z][a-zA-Z .!]{5,40}`).Draw(rt, "activateText")
+		// Discard cases where condName happens to be a substring of activateText;
+		// the property only tests that handleUse does not inject condName — not that
+		// randomly generated strings are disjoint.
+		if strings.Contains(activateText, condName) {
+			rt.Skip("condName is a substring of activateText by chance; skip")
+		}
 		uid := "prop-bug149-" + featID
 
 		sessMgr := session.NewManager()

@@ -3,6 +3,7 @@
 // REQ-HCA-7: web slot displays display_name (not raw ref).
 // REQ-HCA-8: hover tooltip shows display_name + description for typed; raw ref for command.
 import { useEffect, useRef, useState } from 'react'
+import ReactDOM from 'react-dom'
 import { useGame } from '../GameContext'
 import type { HotbarSlot } from '../../proto'
 
@@ -87,6 +88,59 @@ export function slotTooltip(slot: HotbarSlot): string {
   return `${name}${desc}\n(right-click to edit)`
 }
 
+interface HotbarTooltipProps {
+  slot: HotbarSlot
+  pos: { x: number; y: number }
+}
+
+function HotbarTooltip({ slot, pos }: HotbarTooltipProps) {
+  const name = slot.displayName ?? slot.display_name ?? slot.ref
+  const desc = slot.description
+  const maxUses = slot.maxUses ?? slot.max_uses ?? 0
+  const usesRemaining = slot.usesRemaining ?? slot.uses_remaining ?? 0
+  const rechargeCondition = slot.rechargeCondition ?? slot.recharge_condition ?? ''
+  const isCommand = !slot.kind || slot.kind === 'command'
+
+  const tooltipStyle: React.CSSProperties = {
+    position: 'fixed',
+    left: Math.min(pos.x, window.innerWidth - 240),
+    top: Math.max(4, pos.y - 10),
+    zIndex: 2000,
+    background: '#1a1a1a',
+    border: '1px solid #444',
+    borderRadius: '4px',
+    padding: '8px',
+    minWidth: '160px',
+    maxWidth: '240px',
+    pointerEvents: 'none',
+    fontFamily: 'monospace',
+    fontSize: '0.78rem',
+    lineHeight: '1.5',
+    color: '#ccc',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.6)',
+    transform: 'translateY(-100%)',
+  }
+
+  return ReactDOM.createPortal(
+    <div style={tooltipStyle}>
+      <div style={{ color: '#fff', fontWeight: 'bold', marginBottom: '0.15rem' }}>{name}</div>
+      {!isCommand && desc && (
+        <div style={{ color: '#ccc', marginBottom: '0.15rem' }}>{desc}</div>
+      )}
+      {maxUses > 0 && (
+        <div style={{ color: '#e0c060', marginBottom: '0.1rem' }}>
+          {usesRemaining} / {maxUses} uses remaining
+        </div>
+      )}
+      {rechargeCondition && (
+        <div style={{ color: '#888', marginBottom: '0.1rem' }}>{rechargeCondition}</div>
+      )}
+      <div style={{ color: '#666', fontSize: '0.7rem' }}>right-click to edit</div>
+    </div>,
+    document.body,
+  )
+}
+
 interface EditPopupProps {
   slotIndex: number
   slot: HotbarSlot
@@ -167,6 +221,7 @@ export function HotbarPanel() {
   const { state, sendCommand, sendMessage } = useGame()
   const { hotbarSlots, combatRound, characterInfo } = state
   const [editingSlot, setEditingSlot] = useState<number | null>(null)
+  const [tooltip, setTooltip] = useState<{ slot: HotbarSlot; pos: { x: number; y: number } } | null>(null)
 
   function activate(idx: number) {
     const slot = hotbarSlots[idx]
@@ -213,22 +268,37 @@ export function HotbarPanel() {
           onCancel={() => setEditingSlot(null)}
         />
       )}
+      {tooltip && <HotbarTooltip slot={tooltip.slot} pos={tooltip.pos} />}
       <div className="hotbar">
         {KEYS.map((key, i) => {
           const slot = hotbarSlots[i] ?? { kind: 'command', ref: '' }
           const label = slotDisplayLabel(slot)
           const isEmpty = !slot.ref
+          const maxUses = slot.maxUses ?? slot.max_uses ?? 0
+          const usesRemaining = slot.usesRemaining ?? slot.uses_remaining ?? 0
+          const isExpended = maxUses > 0 && usesRemaining === 0
+          let cls = 'hotbar-slot'
+          if (isEmpty) cls += ' hotbar-slot-empty'
+          if (isExpended) cls += ' hotbar-slot-expended'
           return (
             <button
               key={key}
-              className={`hotbar-slot${isEmpty ? ' hotbar-slot-empty' : ''}`}
+              className={cls}
               onClick={() => activate(i)}
               onContextMenu={(e) => { e.preventDefault(); setEditingSlot(i) }}
-              title={slotTooltip(slot)}
+              onMouseEnter={(e) => {
+                if (!slot.ref) return
+                const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
+                setTooltip({ slot, pos: { x: rect.left, y: rect.top } })
+              }}
+              onMouseLeave={() => setTooltip(null)}
               type="button"
             >
               <span className="hotbar-key">{key}</span>
               <span className="hotbar-label">{label || '—'}</span>
+              {maxUses > 0 && (
+                <span className="hotbar-use-badge">{usesRemaining}/{maxUses}</span>
+              )}
             </button>
           )
         })}

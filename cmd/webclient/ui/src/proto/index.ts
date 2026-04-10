@@ -578,6 +578,12 @@ export interface HotbarSlot {
   displayName?: string
   display_name?: string
   description?: string
+  usesRemaining?: number
+  uses_remaining?: number
+  maxUses?: number
+  max_uses?: number
+  rechargeCondition?: string
+  recharge_condition?: string
 }
 
 export interface ConditionEvent {
