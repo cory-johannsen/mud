@@ -13803,13 +13803,16 @@ func (x *SeduceRequest) GetTarget() string {
 // display_name: resolved by server from registries; empty falls back to ref
 // description: resolved by server; empty for command slots
 type HotbarSlot struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Kind          string                 `protobuf:"bytes,1,opt,name=kind,proto3" json:"kind,omitempty"`
-	Ref           string                 `protobuf:"bytes,2,opt,name=ref,proto3" json:"ref,omitempty"`
-	DisplayName   string                 `protobuf:"bytes,3,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
-	Description   string                 `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state             protoimpl.MessageState `protogen:"open.v1"`
+	Kind              string                 `protobuf:"bytes,1,opt,name=kind,proto3" json:"kind,omitempty"`
+	Ref               string                 `protobuf:"bytes,2,opt,name=ref,proto3" json:"ref,omitempty"`
+	DisplayName       string                 `protobuf:"bytes,3,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
+	Description       string                 `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
+	UsesRemaining     int32                  `protobuf:"varint,5,opt,name=uses_remaining,json=usesRemaining,proto3" json:"uses_remaining,omitempty"`
+	MaxUses           int32                  `protobuf:"varint,6,opt,name=max_uses,json=maxUses,proto3" json:"max_uses,omitempty"`
+	RechargeCondition string                 `protobuf:"bytes,7,opt,name=recharge_condition,json=rechargeCondition,proto3" json:"recharge_condition,omitempty"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
 }
 
 func (x *HotbarSlot) Reset() {
@@ -13866,6 +13869,27 @@ func (x *HotbarSlot) GetDisplayName() string {
 func (x *HotbarSlot) GetDescription() string {
 	if x != nil {
 		return x.Description
+	}
+	return ""
+}
+
+func (x *HotbarSlot) GetUsesRemaining() int32 {
+	if x != nil {
+		return x.UsesRemaining
+	}
+	return 0
+}
+
+func (x *HotbarSlot) GetMaxUses() int32 {
+	if x != nil {
+		return x.MaxUses
+	}
+	return 0
+}
+
+func (x *HotbarSlot) GetRechargeCondition() string {
+	if x != nil {
+		return x.RechargeCondition
 	}
 	return ""
 }
@@ -15515,13 +15539,16 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\rshadow_target\x18\x02 \x01(\tR\fshadowTarget\"\x10\n" +
 	"\x0eRefocusRequest\"'\n" +
 	"\rSeduceRequest\x12\x16\n" +
-	"\x06target\x18\x01 \x01(\tR\x06target\"w\n" +
+	"\x06target\x18\x01 \x01(\tR\x06target\"\xe8\x01\n" +
 	"\n" +
 	"HotbarSlot\x12\x12\n" +
 	"\x04kind\x18\x01 \x01(\tR\x04kind\x12\x10\n" +
 	"\x03ref\x18\x02 \x01(\tR\x03ref\x12!\n" +
 	"\fdisplay_name\x18\x03 \x01(\tR\vdisplayName\x12 \n" +
-	"\vdescription\x18\x04 \x01(\tR\vdescription\"u\n" +
+	"\vdescription\x18\x04 \x01(\tR\vdescription\x12%\n" +
+	"\x0euses_remaining\x18\x05 \x01(\x05R\rusesRemaining\x12\x19\n" +
+	"\bmax_uses\x18\x06 \x01(\x05R\amaxUses\x12-\n" +
+	"\x12recharge_condition\x18\a \x01(\tR\x11rechargeCondition\"u\n" +
 	"\rHotbarRequest\x12\x16\n" +
 	"\x06action\x18\x01 \x01(\tR\x06action\x12\x12\n" +
 	"\x04slot\x18\x02 \x01(\x05R\x04slot\x12\x12\n" +

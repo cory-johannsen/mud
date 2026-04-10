@@ -48,6 +48,9 @@ type Feat struct {
 	// RequiresCombat, when true, means this feat may only be activated while the player is in
 	// an active combat encounter. Attempting to use it outside combat returns an error message.
 	RequiresCombat bool `yaml:"requires_combat,omitempty"`
+	// RechargeCondition is a human-readable string describing when limited uses restore.
+	// Empty for unlimited-use feats. Examples: "Recharges on rest", "1 per combat".
+	RechargeCondition string `yaml:"recharge_condition,omitempty"`
 }
 
 // featsFile is the top-level YAML structure for content/feats.yaml.

@@ -176,7 +176,10 @@ type TechnologyDef struct {
 	ID        string `yaml:"id"`
 	ShortName string `yaml:"short_name,omitempty"`
 	Name      string `yaml:"name"`
-	Description string    `yaml:"description,omitempty"`
+	Description string `yaml:"description,omitempty"`
+	// RechargeCondition is a human-readable string describing when limited uses restore.
+	// Examples: "Recharges on rest", "Daily". Empty for unlimited techs.
+	RechargeCondition string `yaml:"recharge_condition,omitempty"`
 	Tradition   Tradition `yaml:"tradition"`
 	Level       int       `yaml:"level"`
 	UsageType   UsageType `yaml:"usage_type"`

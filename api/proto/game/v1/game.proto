@@ -1440,6 +1440,9 @@ message HotbarSlot {
   string ref          = 2;
   string display_name = 3;
   string description  = 4;
+  int32  uses_remaining     = 5;
+  int32  max_uses           = 6;
+  string recharge_condition = 7;
 }
 
 // HotbarRequest asks the server to set, clear, or show a hotbar slot.
