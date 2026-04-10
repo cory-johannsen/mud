@@ -7,6 +7,7 @@ types:
     name: Rain
     announce: "Rain begins to fall across Portland."
     end_announce: "The rain has stopped."
+    description: "Reduced visibility outdoors."
     seasons: [spring, fall, winter]
     weight: 10
     conditions: [reduced_visibility]
@@ -15,6 +16,7 @@ types:
     name: Heavy Rain
     announce: "Heavy rain lashes the streets of Portland."
     end_announce: "The heavy rain has eased."
+    description: "Reduced visibility and flooded terrain outdoors."
     seasons: [spring, fall, winter]
     weight: 6
     conditions: [reduced_visibility, terrain_flooded]
@@ -23,6 +25,7 @@ types:
     name: Dense Fog
     announce: "A thick fog rolls in across Portland."
     end_announce: "The fog has lifted."
+    description: "Severely reduced visibility outdoors."
     seasons: [spring, fall, winter]
     weight: 7
     conditions: [reduced_visibility]
@@ -31,6 +34,7 @@ types:
     name: Thunderstorm
     announce: "A violent thunderstorm sweeps across Portland!"
     end_announce: "The thunderstorm has passed."
+    description: "Reduced visibility and flooded terrain outdoors."
     seasons: [spring, summer, fall]
     weight: 5
     conditions: [reduced_visibility, terrain_flooded]
@@ -39,6 +43,7 @@ types:
     name: Blizzard
     announce: "A blizzard is blanketing Portland in snow and ice!"
     end_announce: "The blizzard has passed."
+    description: "Reduced visibility and icy terrain outdoors."
     seasons: [winter]
     weight: 3
     conditions: [reduced_visibility, terrain_ice]
@@ -47,6 +52,7 @@ types:
     name: Ice Storm
     announce: "An ice storm coats every surface in Portland with a treacherous glaze."
     end_announce: "The ice storm has ended."
+    description: "Icy terrain and reduced visibility outdoors."
     seasons: [winter]
     weight: 4
     conditions: [terrain_ice, reduced_visibility]
@@ -55,6 +61,7 @@ types:
     name: Sleet
     announce: "Sleet hammers down across Portland."
     end_announce: "The sleet has stopped."
+    description: "Icy terrain and reduced visibility outdoors."
     seasons: [winter, spring]
     weight: 5
     conditions: [terrain_ice, reduced_visibility]
@@ -63,6 +70,7 @@ types:
     name: Hailstorm
     announce: "Hailstones the size of marbles pelt down across Portland!"
     end_announce: "The hailstorm has ended."
+    description: "Reduced visibility outdoors."
     seasons: [spring, summer, fall]
     weight: 3
     conditions: [reduced_visibility]
@@ -71,6 +79,7 @@ types:
     name: Windstorm
     announce: "Gale-force winds tear through Portland's streets."
     end_announce: "The windstorm has died down."
+    description: "Reduced visibility outdoors."
     seasons: [spring, fall]
     weight: 4
     conditions: [reduced_visibility]
@@ -79,6 +88,7 @@ types:
     name: Extreme Heat
     announce: "An oppressive heat wave descends on Portland."
     end_announce: "The heat wave has broken."
+    description: "Dazzled condition applied outdoors."
     seasons: [summer]
     weight: 5
     conditions: [dazzled]

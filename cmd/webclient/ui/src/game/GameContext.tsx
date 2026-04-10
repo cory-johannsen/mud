@@ -90,6 +90,7 @@ export interface GameState {
   hotbarSlots: HotbarSlot[]
   timeOfDay: TimeOfDayEvent | null
   activeWeather: string | null
+  activeWeatherDescription: string | null
   shopView: ShopView | null
   healerView: import('../proto').HealerView | null
   trainerView: import('../proto').TrainerView | null
@@ -118,7 +119,7 @@ type Action =
   | { type: 'CLEAR_COMBATANT_AP' }
   | { type: 'SET_HOTBAR'; slots: HotbarSlot[] }
   | { type: 'SET_TIME_OF_DAY'; tod: TimeOfDayEvent }
-  | { type: 'SET_ACTIVE_WEATHER'; weather: string | null }
+  | { type: 'SET_ACTIVE_WEATHER'; weather: string | null; description: string | null }
   | { type: 'UPDATE_PLAYER_HP'; current: number; max: number }
   | { type: 'APPEND_FEED'; entry: FeedEntry }
   | { type: 'SET_SHOP_VIEW'; shop: ShopView | null }
@@ -183,7 +184,7 @@ function reducer(state: GameState, action: Action): GameState {
     case 'SET_TIME_OF_DAY':
       return { ...state, timeOfDay: action.tod }
     case 'SET_ACTIVE_WEATHER':
-      return { ...state, activeWeather: action.weather }
+      return { ...state, activeWeather: action.weather, activeWeatherDescription: action.description }
     case 'SET_SHOP_VIEW':
       return { ...state, shopView: action.shop }
     case 'SET_HEALER_VIEW':
@@ -234,6 +235,7 @@ const initialState: GameState = {
   hotbarSlots: Array(10).fill({ kind: 'command', ref: '' }) as HotbarSlot[],
   timeOfDay: null,
   activeWeather: null,
+  activeWeatherDescription: null,
   shopView: null,
   healerView: null,
   trainerView: null,
@@ -486,6 +488,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
           dispatch({
             type: 'SET_ACTIVE_WEATHER',
             weather: ev.active ? (ev.weatherName ?? ev.weather_name ?? null) : null,
+            description: ev.active ? (ev.description ?? null) : null,
           })
           break
         }

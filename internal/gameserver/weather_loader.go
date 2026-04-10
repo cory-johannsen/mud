@@ -13,6 +13,7 @@ type WeatherType struct {
 	Name        string   `yaml:"name"`
 	Announce    string   `yaml:"announce"`
 	EndAnnounce string   `yaml:"end_announce"`
+	Description string   `yaml:"description"`
 	Seasons     []string `yaml:"seasons"`
 	Weight      int      `yaml:"weight"`
 	Conditions  []string `yaml:"conditions"`

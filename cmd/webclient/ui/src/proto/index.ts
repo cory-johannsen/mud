@@ -529,6 +529,7 @@ export interface WeatherEvent {
   weatherName?: string
   weather_name?: string
   active?: boolean
+  description?: string
 }
 
 export interface JobFeatGrant {

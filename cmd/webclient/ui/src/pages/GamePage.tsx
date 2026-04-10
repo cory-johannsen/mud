@@ -54,6 +54,7 @@ function useIsDesktop() {
 function GameLayout() {
   const { state } = useGame()
   const activeWeather = state.activeWeather
+  const activeWeatherDescription = state.activeWeatherDescription
   const [openDrawer, setOpenDrawer] = useState<DrawerType | null>(null)
   const { defaultLayout: verticalLayout, onLayoutChanged: onVerticalLayoutChanged } = useDefaultLayout({
     id: 'game-vertical',
@@ -89,19 +90,23 @@ function GameLayout() {
         <button className="toolbar-btn" onClick={() => setShowHelp(true)}>Help</button>
         <LogoutDropdown />
         {activeWeather && (
-          <span style={{
-            background: 'rgba(0,0,0,0.7)',
-            color: '#f0a500',
-            border: '1px solid #f0a500',
-            borderRadius: '12px',
-            padding: '2px 12px',
-            fontSize: '0.8rem',
-            fontFamily: 'monospace',
-            fontWeight: 'bold',
-            letterSpacing: '0.05em',
-            whiteSpace: 'nowrap',
-            flexShrink: 0,
-          }}>
+          <span
+            style={{
+              background: 'rgba(0,0,0,0.7)',
+              color: '#f0a500',
+              border: '1px solid #f0a500',
+              borderRadius: '12px',
+              padding: '2px 12px',
+              fontSize: '0.8rem',
+              fontFamily: 'monospace',
+              fontWeight: 'bold',
+              letterSpacing: '0.05em',
+              whiteSpace: 'nowrap',
+              flexShrink: 0,
+              cursor: activeWeatherDescription ? 'help' : 'default',
+            }}
+            title={activeWeatherDescription ?? undefined}
+          >
             {'\u26C8'} {activeWeather}
           </span>
         )}

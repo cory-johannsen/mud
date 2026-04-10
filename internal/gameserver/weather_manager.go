@@ -142,6 +142,7 @@ func (wm *WeatherManager) OnTick(dt GameDateTime) {
 				Weather: &gamev1.WeatherEvent{
 					WeatherName: wt.Name,
 					Active:      true,
+					Description: wt.Description,
 				},
 			},
 		})
@@ -254,4 +255,20 @@ func (wm *WeatherManager) ActiveWeatherName() string {
 	wm.mu.RLock()
 	defer wm.mu.RUnlock()
 	return wm.activeName
+}
+
+// ActiveWeather returns the name and description of the currently active weather event.
+// Returns ("", "") when no event is active.
+func (wm *WeatherManager) ActiveWeather() (name, description string) {
+	wm.mu.RLock()
+	defer wm.mu.RUnlock()
+	if wm.activeName == "" {
+		return "", ""
+	}
+	for _, wt := range wm.weatherTypes {
+		if wt.Name == wm.activeName || wt.ID == wm.activeName {
+			return wt.Name, wt.Description
+		}
+	}
+	return wm.activeName, ""
 }

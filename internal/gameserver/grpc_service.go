@@ -1450,12 +1450,13 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 
 	// Notify joining player of any active weather event.
 	if s.weatherMgr != nil {
-		if name := s.weatherMgr.ActiveWeatherName(); name != "" {
+		if name, desc := s.weatherMgr.ActiveWeather(); name != "" {
 			_ = stream.Send(&gamev1.ServerEvent{
 				Payload: &gamev1.ServerEvent_Weather{
 					Weather: &gamev1.WeatherEvent{
 						WeatherName: name,
 						Active:      true,
+						Description: desc,
 					},
 				},
 			})

@@ -1499,6 +1499,7 @@ message UncurseRequest {
 message WeatherEvent {
   string weather_name = 1; // display name of the weather event
   bool   active       = 2; // true = event started, false = event ended
+  string description  = 3; // human-readable effects summary (e.g. "Reduced visibility, flooded terrain")
 }
 
 // JobGrantsRequest asks the server for the character's job feat and technology grant table.

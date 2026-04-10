@@ -14299,6 +14299,7 @@ type WeatherEvent struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	WeatherName   string                 `protobuf:"bytes,1,opt,name=weather_name,json=weatherName,proto3" json:"weather_name,omitempty"` // display name of the weather event
 	Active        bool                   `protobuf:"varint,2,opt,name=active,proto3" json:"active,omitempty"`                             // true = event started, false = event ended
+	Description   string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`                    // human-readable effects summary (e.g. "Reduced visibility, flooded terrain")
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -14345,6 +14346,13 @@ func (x *WeatherEvent) GetActive() bool {
 		return x.Active
 	}
 	return false
+}
+
+func (x *WeatherEvent) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
 }
 
 // JobGrantsRequest asks the server for the character's job feat and technology grant table.
@@ -15575,10 +15583,11 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\x0ematerials_lost\x18\x04 \x03(\v2\x15.game.v1.MaterialLossR\rmaterialsLost\"H\n" +
 	"\x0eUncurseRequest\x12\x19\n" +
 	"\bnpc_name\x18\x01 \x01(\tR\anpcName\x12\x1b\n" +
-	"\titem_name\x18\x02 \x01(\tR\bitemName\"I\n" +
+	"\titem_name\x18\x02 \x01(\tR\bitemName\"k\n" +
 	"\fWeatherEvent\x12!\n" +
 	"\fweather_name\x18\x01 \x01(\tR\vweatherName\x12\x16\n" +
-	"\x06active\x18\x02 \x01(\bR\x06active\"\x12\n" +
+	"\x06active\x18\x02 \x01(\bR\x06active\x12 \n" +
+	"\vdescription\x18\x03 \x01(\tR\vdescription\"\x12\n" +
 	"\x10JobGrantsRequest\"e\n" +
 	"\fJobFeatGrant\x12\x1f\n" +
 	"\vgrant_level\x18\x01 \x01(\x05R\n" +
