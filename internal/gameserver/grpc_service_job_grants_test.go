@@ -121,6 +121,7 @@ func TestHandleJobGrants_LevelUpGrantsIncludedWithCorrectLevel(t *testing.T) {
 	})
 	require.NoError(t, err)
 	sess.Class = "infiltrator"
+	sess.Level = 10 // must be at least 10 to see level-10 grants
 
 	resp, err := svc.handleJobGrants(uid)
 	require.NoError(t, err)
@@ -212,6 +213,7 @@ func TestHandleJobGrants_ArchetypeLevelUpFeatGrants_IncludedInResponse_REQ_BUG30
 	})
 	require.NoError(t, err)
 	sess.Class = "brawler"
+	sess.Level = 4 // must be at least 4 to see level-2 and level-4 grants
 
 	resp, err := svc.handleJobGrants(uid)
 	require.NoError(t, err)

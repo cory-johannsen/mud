@@ -7040,6 +7040,9 @@ func (s *GameServiceServer) handleJobGrants(uid string) (*gamev1.ServerEvent, er
 			}
 		}
 	}
+	// attributedFeatIDs tracks feats already attributed to a grant slot so that a feat chosen
+	// from a pool at level N is not duplicated in subsequent levels whose pools overlap.
+	attributedFeatIDs := make(map[string]bool)
 	// Helper to resolve tech name from technology registry.
 	techName := func(id string) string {
 		if s.techRegistry != nil {
@@ -7065,16 +7068,21 @@ func (s *GameServiceServer) handleJobGrants(uid string) (*gamev1.ServerEvent, er
 			})
 		}
 		// Choice pool — show what the player actually picked, or the selection label if not yet chosen.
+		// Only count feats that haven't already been attributed to a prior level's choice slot.
 		if fg.Choices != nil && fg.Choices.Count > 0 && len(fg.Choices.Pool) > 0 {
 			var chosen []string
 			for _, id := range fg.Choices.Pool {
-				if playerFeatIDs[id] {
+				if playerFeatIDs[id] && !attributedFeatIDs[id] {
 					chosen = append(chosen, id)
+					if len(chosen) == fg.Choices.Count {
+						break // cap at the number of choices granted at this level
+					}
 				}
 			}
 			if len(chosen) > 0 {
-				// Player has made a selection — show the actual feat(s) chosen.
+				// Player has made a selection — show the actual feat(s) chosen and mark attributed.
 				for _, id := range chosen {
+					attributedFeatIDs[id] = true
 					featGrants = append(featGrants, &gamev1.JobFeatGrant{
 						GrantLevel: int32(level),
 						FeatId:     id,
@@ -7162,8 +7170,12 @@ func (s *GameServiceServer) handleJobGrants(uid string) (*gamev1.ServerEvent, er
 	}
 	mergedFeatGrants := ruleset.MergeFeatLevelUpGrants(archetypeLevelUpFeatGrants, job.LevelUpFeatGrants)
 
-	// Level-up grants (sorted by level for consistent ordering).
-	for level := 2; level <= 20; level++ {
+	// Level-up grants — only up to the player's current level.
+	maxLevel := sess.Level
+	if maxLevel < 1 {
+		maxLevel = 1 // treat level 0 as level 1 (character creation grants already added)
+	}
+	for level := 2; level <= maxLevel; level++ {
 		if fg, ok := mergedFeatGrants[level]; ok {
 			addFeatGrants(fg, level)
 		}
