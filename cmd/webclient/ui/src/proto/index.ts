@@ -253,6 +253,10 @@ export interface CharacterSheetView {
   proficiencies?: ProficiencyEntry[]
   armorCategories?: Record<string, string>
   armor_categories?: Record<string, string>
+  proficiencyAcBonus?: number
+  proficiency_ac_bonus?: number
+  effectiveArmorCategory?: string
+  effective_armor_category?: string
 }
 
 export interface InventoryItem {

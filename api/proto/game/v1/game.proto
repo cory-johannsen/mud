@@ -1120,6 +1120,8 @@ message CharacterSheetView {
     repeated HardwiredSlotView     hardwired_slots     = 50; // always-available hardwired technologies
     repeated SpontaneousKnownEntry spontaneous_known   = 51; // known spontaneous technologies with names
     map<string, string> armor_categories = 52; // slot -> "light"/"medium"/"heavy" for equipped armor
+    int32  proficiency_ac_bonus     = 53; // proficiency contribution to AC (applied once per character)
+    string effective_armor_category = 54; // heaviest proficient armor category worn
 }
 
 // InnateSlotView delivers the per-tech innate use slot state for the character sheet.

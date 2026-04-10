@@ -10375,14 +10375,16 @@ type CharacterSheetView struct {
 	SpontaneousUsePools   []*SpontaneousUsePoolView `protobuf:"bytes,45,rep,name=spontaneous_use_pools,json=spontaneousUsePools,proto3" json:"spontaneous_use_pools,omitempty"`
 	InnateSlots           []*InnateSlotView         `protobuf:"bytes,46,rep,name=innate_slots,json=innateSlots,proto3" json:"innate_slots,omitempty"`
 	// active_set_bonuses lists human-readable descriptions of currently active equipment set bonuses (REQ-EM-31).
-	ActiveSetBonuses []string                 `protobuf:"bytes,47,rep,name=active_set_bonuses,json=activeSetBonuses,proto3" json:"active_set_bonuses,omitempty"`
-	FocusPoints      int32                    `protobuf:"varint,48,opt,name=focus_points,json=focusPoints,proto3" json:"focus_points,omitempty"`                                                                                      // current focus point pool
-	MaxFocusPoints   int32                    `protobuf:"varint,49,opt,name=max_focus_points,json=maxFocusPoints,proto3" json:"max_focus_points,omitempty"`                                                                           // maximum focus points
-	HardwiredSlots   []*HardwiredSlotView     `protobuf:"bytes,50,rep,name=hardwired_slots,json=hardwiredSlots,proto3" json:"hardwired_slots,omitempty"`                                                                              // always-available hardwired technologies
-	SpontaneousKnown []*SpontaneousKnownEntry `protobuf:"bytes,51,rep,name=spontaneous_known,json=spontaneousKnown,proto3" json:"spontaneous_known,omitempty"`                                                                        // known spontaneous technologies with names
-	ArmorCategories  map[string]string        `protobuf:"bytes,52,rep,name=armor_categories,json=armorCategories,proto3" json:"armor_categories,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"` // slot -> "light"/"medium"/"heavy" for equipped armor
-	unknownFields    protoimpl.UnknownFields
-	sizeCache        protoimpl.SizeCache
+	ActiveSetBonuses       []string                 `protobuf:"bytes,47,rep,name=active_set_bonuses,json=activeSetBonuses,proto3" json:"active_set_bonuses,omitempty"`
+	FocusPoints            int32                    `protobuf:"varint,48,opt,name=focus_points,json=focusPoints,proto3" json:"focus_points,omitempty"`                                                                                      // current focus point pool
+	MaxFocusPoints         int32                    `protobuf:"varint,49,opt,name=max_focus_points,json=maxFocusPoints,proto3" json:"max_focus_points,omitempty"`                                                                           // maximum focus points
+	HardwiredSlots         []*HardwiredSlotView     `protobuf:"bytes,50,rep,name=hardwired_slots,json=hardwiredSlots,proto3" json:"hardwired_slots,omitempty"`                                                                              // always-available hardwired technologies
+	SpontaneousKnown       []*SpontaneousKnownEntry `protobuf:"bytes,51,rep,name=spontaneous_known,json=spontaneousKnown,proto3" json:"spontaneous_known,omitempty"`                                                                        // known spontaneous technologies with names
+	ArmorCategories        map[string]string        `protobuf:"bytes,52,rep,name=armor_categories,json=armorCategories,proto3" json:"armor_categories,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"` // slot -> "light"/"medium"/"heavy" for equipped armor
+	ProficiencyAcBonus     int32                    `protobuf:"varint,53,opt,name=proficiency_ac_bonus,json=proficiencyAcBonus,proto3" json:"proficiency_ac_bonus,omitempty"`                                                               // proficiency contribution to AC (applied once per character)
+	EffectiveArmorCategory string                   `protobuf:"bytes,54,opt,name=effective_armor_category,json=effectiveArmorCategory,proto3" json:"effective_armor_category,omitempty"`                                                    // heaviest proficient armor category worn
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
 }
 
 func (x *CharacterSheetView) Reset() {
@@ -10777,6 +10779,20 @@ func (x *CharacterSheetView) GetArmorCategories() map[string]string {
 		return x.ArmorCategories
 	}
 	return nil
+}
+
+func (x *CharacterSheetView) GetProficiencyAcBonus() int32 {
+	if x != nil {
+		return x.ProficiencyAcBonus
+	}
+	return 0
+}
+
+func (x *CharacterSheetView) GetEffectiveArmorCategory() string {
+	if x != nil {
+		return x.EffectiveArmorCategory
+	}
+	return ""
 }
 
 // InnateSlotView delivers the per-tech innate use slot state for the character sheet.
@@ -15327,7 +15343,7 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\vdescription\x18\x04 \x01(\tR\vdescription\x12'\n" +
 	"\x0feffects_summary\x18\x05 \x01(\tR\x0eeffectsSummary\x12\x1d\n" +
 	"\n" +
-	"short_name\x18\x06 \x01(\tR\tshortName\"\xe5\x12\n" +
+	"short_name\x18\x06 \x01(\tR\tshortName\"\xd1\x13\n" +
 	"\x12CharacterSheetView\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x10\n" +
 	"\x03job\x18\x02 \x01(\tR\x03job\x12\x1c\n" +
@@ -15387,7 +15403,9 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\x10max_focus_points\x181 \x01(\x05R\x0emaxFocusPoints\x12C\n" +
 	"\x0fhardwired_slots\x182 \x03(\v2\x1a.game.v1.HardwiredSlotViewR\x0ehardwiredSlots\x12K\n" +
 	"\x11spontaneous_known\x183 \x03(\v2\x1e.game.v1.SpontaneousKnownEntryR\x10spontaneousKnown\x12[\n" +
-	"\x10armor_categories\x184 \x03(\v20.game.v1.CharacterSheetView.ArmorCategoriesEntryR\x0farmorCategories\x1a8\n" +
+	"\x10armor_categories\x184 \x03(\v20.game.v1.CharacterSheetView.ArmorCategoriesEntryR\x0farmorCategories\x120\n" +
+	"\x14proficiency_ac_bonus\x185 \x01(\x05R\x12proficiencyAcBonus\x128\n" +
+	"\x18effective_armor_category\x186 \x01(\tR\x16effectiveArmorCategory\x1a8\n" +
 	"\n" +
 	"ArmorEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
