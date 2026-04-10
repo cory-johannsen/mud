@@ -353,17 +353,3 @@ func itoa(n int) string {
 	return string(digits[n/10]) + string(digits[n%10])
 }
 
-// rankOrder returns a numeric order for proficiency ranks (higher = better).
-func rankOrder(rank string) int {
-	switch rank {
-	case "legendary":
-		return 4
-	case "master":
-		return 3
-	case "expert":
-		return 2
-	case "trained":
-		return 1
-	}
-	return 0
-}
