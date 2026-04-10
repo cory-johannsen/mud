@@ -7029,6 +7029,17 @@ func (s *GameServiceServer) handleJobGrants(uid string) (*gamev1.ServerEvent, er
 		}
 		return id
 	}
+
+	// Load the player's actual feat IDs for choice resolution.
+	// Choice-pool grants show what the player picked; unresolved pools show the option label.
+	playerFeatIDs := make(map[string]bool)
+	if s.characterFeatsRepo != nil && sess.CharacterID > 0 {
+		if ids, err := s.characterFeatsRepo.GetAll(context.Background(), sess.CharacterID); err == nil {
+			for _, id := range ids {
+				playerFeatIDs[id] = true
+			}
+		}
+	}
 	// Helper to resolve tech name from technology registry.
 	techName := func(id string) string {
 		if s.techRegistry != nil {
@@ -7039,6 +7050,8 @@ func (s *GameServiceServer) handleJobGrants(uid string) (*gamev1.ServerEvent, er
 		return id
 	}
 	// Collect all feat grants (fixed, choice pool, and general) from a FeatGrants at a given level.
+	// For choice-pool and general grants, show what the player actually chose when that can be
+	// determined from playerFeatIDs; otherwise show the selection label.
 	addFeatGrants := func(fg *ruleset.FeatGrants, level int) {
 		if fg == nil {
 			return
@@ -7051,25 +7064,44 @@ func (s *GameServiceServer) handleJobGrants(uid string) (*gamev1.ServerEvent, er
 				FeatName:   featName(id),
 			})
 		}
+		// Choice pool — show what the player actually picked, or the selection label if not yet chosen.
+		if fg.Choices != nil && fg.Choices.Count > 0 && len(fg.Choices.Pool) > 0 {
+			var chosen []string
+			for _, id := range fg.Choices.Pool {
+				if playerFeatIDs[id] {
+					chosen = append(chosen, id)
+				}
+			}
+			if len(chosen) > 0 {
+				// Player has made a selection — show the actual feat(s) chosen.
+				for _, id := range chosen {
+					featGrants = append(featGrants, &gamev1.JobFeatGrant{
+						GrantLevel: int32(level),
+						FeatId:     id,
+						FeatName:   featName(id),
+					})
+				}
+			} else {
+				// Player has not yet chosen — show the pool label.
+				poolNames := make([]string, 0, len(fg.Choices.Pool))
+				for _, id := range fg.Choices.Pool {
+					poolNames = append(poolNames, featName(id))
+				}
+				label := fmt.Sprintf("Choose %d: %s", fg.Choices.Count, strings.Join(poolNames, ", "))
+				featGrants = append(featGrants, &gamev1.JobFeatGrant{
+					GrantLevel: int32(level),
+					FeatId:     "",
+					FeatName:   label,
+				})
+			}
+		}
 		// General feat pick — player freely selects from all general feats.
+		// Cannot attribute specific general feats to a level, so always show the count label.
 		if fg.GeneralCount > 0 {
 			label := fmt.Sprintf("Choose %d general feat", fg.GeneralCount)
 			if fg.GeneralCount > 1 {
 				label += "s"
 			}
-			featGrants = append(featGrants, &gamev1.JobFeatGrant{
-				GrantLevel: int32(level),
-				FeatId:     "",
-				FeatName:   label,
-			})
-		}
-		// Choice pool — player picks fg.Choices.Count feats from the pool.
-		if fg.Choices != nil && fg.Choices.Count > 0 && len(fg.Choices.Pool) > 0 {
-			poolNames := make([]string, 0, len(fg.Choices.Pool))
-			for _, id := range fg.Choices.Pool {
-				poolNames = append(poolNames, featName(id))
-			}
-			label := fmt.Sprintf("Choose %d: %s", fg.Choices.Count, strings.Join(poolNames, ", "))
 			featGrants = append(featGrants, &gamev1.JobFeatGrant{
 				GrantLevel: int32(level),
 				FeatId:     "",
