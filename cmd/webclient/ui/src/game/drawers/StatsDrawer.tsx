@@ -13,11 +13,11 @@ function SectionHeader({ label }: { label: string }) {
   return <div className="stats-section-header">{label}</div>
 }
 
-function StatRow({ label, value, color }: { label: string; value: string | number; color?: string }) {
+function StatRow({ label, value, color, title }: { label: string; value: string | number; color?: string; title?: string }) {
   return (
     <div className="stats-row">
       <span className="stats-label">{label}</span>
-      <span className="stats-value" style={color ? { color } : undefined}>{value}</span>
+      <span className="stats-value" style={color ? { color } : undefined} title={title}>{value}</span>
     </div>
   )
 }
@@ -62,10 +62,22 @@ export function StatsDrawer({ onClose }: { onClose: () => void }) {
             </div>
 
             <SectionHeader label="— Defense —" />
-            <StatRow
-              label="AC"
-              value={`${sheet.totalAc ?? 0}${sheet.acBonus ? `  (armor +${sheet.acBonus})` : ''}${sheet.checkPenalty ? `  check ${sheet.checkPenalty}` : ''}${sheet.speedPenalty ? `  speed ${sheet.speedPenalty}` : ''}`}
-            />
+            {(() => {
+              const totalAc = sheet.totalAc ?? 0
+              const armorBonus = sheet.acBonus ?? 0
+              const effectiveDex = totalAc - 10 - armorBonus
+              const parts: string[] = [`Base: 10`]
+              if (effectiveDex !== 0) parts.push(`Dex: ${signedInt(effectiveDex)}`)
+              if (armorBonus !== 0) parts.push(`Armor: +${armorBonus}`)
+              const acTooltip = parts.join('  |  ') + `  =  ${totalAc}`
+              return (
+                <StatRow
+                  label="AC"
+                  value={`${totalAc}${armorBonus ? `  (armor +${armorBonus})` : ''}${sheet.checkPenalty ? `  check ${sheet.checkPenalty}` : ''}${sheet.speedPenalty ? `  speed ${sheet.speedPenalty}` : ''}`}
+                  title={acTooltip}
+                />
+              )
+            })()}
             {((sheet.playerResistances ?? sheet.player_resistances) ?? []).length > 0 && (
               <StatRow
                 label="Resist"

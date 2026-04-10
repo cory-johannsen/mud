@@ -205,9 +205,20 @@ export function CharacterPanel() {
         </div>
         <span className="hp-text">{currentHp} / {maxHp} HP</span>
 
-        {(characterSheet?.totalAc ?? 0) > 0 && (
-          <span className="hp-text" style={{ marginLeft: '0.5rem' }}>AC {characterSheet!.totalAc}</span>
-        )}
+        {(characterSheet?.totalAc ?? 0) > 0 && (() => {
+          const totalAc = characterSheet!.totalAc ?? 0
+          const armorBonus = characterSheet!.acBonus ?? 0
+          const effectiveDex = totalAc - 10 - armorBonus
+          const parts: string[] = ['Base: 10']
+          if (effectiveDex !== 0) parts.push(`Dex: ${effectiveDex >= 0 ? '+' : ''}${effectiveDex}`)
+          if (armorBonus !== 0) parts.push(`Armor: +${armorBonus}`)
+          const acTooltip = parts.join('  |  ') + `  =  ${totalAc}`
+          return (
+            <span className="hp-text" style={{ marginLeft: '0.5rem' }} title={acTooltip}>
+              AC {totalAc}
+            </span>
+          )
+        })()}
 
         {conditions.length > 0 && (
           <div className="conditions">
