@@ -749,10 +749,13 @@ func TestStartCombatLocked_WithRegistry_ACIncludesArmorBonus(t *testing.T) {
 	spawnTestNPC(t, h.npcMgr, roomID)
 	sess := addTestPlayer(t, h.sessions, "player-ac-armor", roomID)
 
-	// Set proficiency so armor AC bonus is applied (untrained armor contributes 0 AC).
+	// PF2E rule: "untrained" is a non-empty rank, so item AC applies — the armor physically
+	// protects the wearer regardless of proficiency. Proficiency bonus for untrained = 0
+	// (armorProfBonus returns 0 for any rank other than trained/expert/master/legendary).
+	// rank == "" (missing map entry) would exclude item AC entirely; "untrained" does not.
 	sess.Proficiencies = map[string]string{"light_armor": "untrained"}
 	// Level 1, untrained: proficiency bonus = 0. ACBonus from armor = 3. EffectiveDex = 1.
-	// Postcondition: AC = 10 + 3 + 1 = 14.
+	// Postcondition: AC = 10 + 3 (item AC, applies because rank != "") + 1 (dex) = 14.
 
 	// Equip the armor directly on the session's Equipment by setting the torso slot.
 	sess.Equipment.Armor[inventory.SlotTorso] = &inventory.SlottedItem{

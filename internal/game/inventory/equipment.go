@@ -287,12 +287,19 @@ func (e *Equipment) ComputedDefensesWithProficiencies(reg *Registry, dexMod int,
 			rank = profs[def.ProficiencyCategory]
 		}
 
+		// rank == "" means this armor category is not in the player's proficiency map
+		// (item has no ProficiencyCategory, or player has no entry for it). In that
+		// case we exclude the item's AC bonus. "untrained" is a valid rank meaning
+		// the player wears the armor but gains zero proficiency bonus — item AC still applies.
 		if rank != "" {
-			// Proficient: include item AC and track this category for the single prof bonus.
+			// Proficient (includes "untrained"): include item AC and track this category
+			// for the single prof bonus. "untrained" yields zero proficiency bonus via
+			// armorProfBonus but the armor's physical protection (item AC) still applies.
 			stats.ACBonus += slotAC
 			stats.EffectiveArmorCategory = heavierCategory(stats.EffectiveArmorCategory, def.ProficiencyCategory)
 		} else {
-			// Unproficient: exclude item AC; apply check and speed penalties.
+			// No registered proficiency entry for this category: exclude item AC entirely;
+			// apply check and speed penalties for wearing unregistered/uncategorized armor.
 			stats.CheckPenalty += def.CheckPenalty
 			stats.SpeedPenalty += def.SpeedPenalty
 		}
