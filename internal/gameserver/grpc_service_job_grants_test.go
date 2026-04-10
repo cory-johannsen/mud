@@ -487,3 +487,171 @@ func TestHandleJobGrants_NoJobReturnsMessage(t *testing.T) {
 	require.NotNil(t, resp)
 	assert.NotNil(t, resp.GetMessage(), "expected a message event when no job is set")
 }
+
+// TestHandleJobGrants_PreparedSlotsByLevel_EmittedAsSyntheticGrants verifies that
+// PreparedGrants.SlotsByLevel entries are emitted as synthetic prepared_slot JobTechGrant entries.
+//
+// Precondition: job TechnologyGrants.Prepared.SlotsByLevel = {1: 2, 2: 1}, player level = 1.
+// Postcondition: response contains 2 prepared_slot entries with correct TechName, TechLevel, TechId, GrantLevel.
+func TestHandleJobGrants_PreparedSlotsByLevel_EmittedAsSyntheticGrants(t *testing.T) {
+	const uid = "jg-prep-slots"
+
+	job := &ruleset.Job{
+		ID:   "techie",
+		Name: "Techie",
+		TechnologyGrants: &ruleset.TechnologyGrants{
+			Prepared: &ruleset.PreparedGrants{
+				SlotsByLevel: map[int]int{
+					1: 2,
+					2: 1,
+				},
+			},
+		},
+	}
+
+	svc, sessMgr := buildJobGrantsService(t, job, nil)
+
+	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID: uid, Username: "Techie", CharName: "Techie",
+		RoomID: "room_a", CurrentHP: 20, MaxHP: 20, Role: "player",
+	})
+	require.NoError(t, err)
+	sess.Class = "techie"
+
+	resp, err := svc.handleJobGrants(uid)
+	require.NoError(t, err)
+	require.NotNil(t, resp)
+
+	gr := resp.GetJobGrantsResponse()
+	require.NotNil(t, gr)
+
+	// Filter to prepared_slot grants only.
+	var slotGrants []*gamev1.JobTechGrant
+	for _, tg := range gr.TechGrants {
+		if tg.TechType == "prepared_slot" {
+			slotGrants = append(slotGrants, tg)
+		}
+	}
+	require.Len(t, slotGrants, 2, "expected 2 prepared_slot grants")
+
+	// Grants are emitted sorted by tech level.
+	assert.Equal(t, int32(1), slotGrants[0].TechLevel)
+	assert.Equal(t, "+2 Prepared Slot (Level 1 tech)", slotGrants[0].TechName)
+	assert.Empty(t, slotGrants[0].TechId, "synthetic grant has no TechId")
+	assert.Equal(t, int32(1), slotGrants[0].GrantLevel)
+
+	assert.Equal(t, int32(2), slotGrants[1].TechLevel)
+	assert.Equal(t, "+1 Prepared Slot (Level 2 tech)", slotGrants[1].TechName)
+	assert.Empty(t, slotGrants[1].TechId, "synthetic grant has no TechId")
+	assert.Equal(t, int32(1), slotGrants[1].GrantLevel)
+}
+
+// TestHandleJobGrants_SpontaneousUsesByLevel_EmittedAsSyntheticGrants verifies that
+// SpontaneousGrants.UsesByLevel entries are emitted as synthetic spontaneous_use JobTechGrant entries.
+//
+// Precondition: job TechnologyGrants.Spontaneous.UsesByLevel = {1: 3}, player level = 1.
+// Postcondition: response contains 1 spontaneous_use entry with correct TechName, TechLevel, TechId, GrantLevel.
+func TestHandleJobGrants_SpontaneousUsesByLevel_EmittedAsSyntheticGrants(t *testing.T) {
+	const uid = "jg-spont-uses"
+
+	job := &ruleset.Job{
+		ID:   "hacker",
+		Name: "Hacker",
+		TechnologyGrants: &ruleset.TechnologyGrants{
+			Spontaneous: &ruleset.SpontaneousGrants{
+				UsesByLevel: map[int]int{
+					1: 3,
+				},
+			},
+		},
+	}
+
+	svc, sessMgr := buildJobGrantsService(t, job, nil)
+
+	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID: uid, Username: "Hacker", CharName: "Hacker",
+		RoomID: "room_a", CurrentHP: 20, MaxHP: 20, Role: "player",
+	})
+	require.NoError(t, err)
+	sess.Class = "hacker"
+
+	resp, err := svc.handleJobGrants(uid)
+	require.NoError(t, err)
+	require.NotNil(t, resp)
+
+	gr := resp.GetJobGrantsResponse()
+	require.NotNil(t, gr)
+
+	var useGrants []*gamev1.JobTechGrant
+	for _, tg := range gr.TechGrants {
+		if tg.TechType == "spontaneous_use" {
+			useGrants = append(useGrants, tg)
+		}
+	}
+	require.Len(t, useGrants, 1, "expected 1 spontaneous_use grant")
+
+	assert.Equal(t, "+3 Use (Level 1 tech)", useGrants[0].TechName)
+	assert.Equal(t, int32(1), useGrants[0].TechLevel)
+	assert.Empty(t, useGrants[0].TechId, "synthetic grant has no TechId")
+	assert.Equal(t, int32(1), useGrants[0].GrantLevel)
+}
+
+// TestHandleJobGrants_LevelUp_SlotAndUseGrantsAtCorrectLevel verifies that slot and use grants
+// from LevelUpGrants carry the correct GrantLevel matching the level-up tier they belong to.
+//
+// Precondition: LevelUpGrants[3].Prepared.SlotsByLevel = {2: 1}, LevelUpGrants[5].Spontaneous.UsesByLevel = {1: 2}.
+// Player level = 5 (sees both level-3 and level-5 grants).
+// Postcondition: prepared_slot entry has GrantLevel=3; spontaneous_use entry has GrantLevel=5.
+func TestHandleJobGrants_LevelUp_SlotAndUseGrantsAtCorrectLevel(t *testing.T) {
+	const uid = "jg-levelup-slots"
+
+	job := &ruleset.Job{
+		ID:   "engineer",
+		Name: "Engineer",
+		LevelUpGrants: map[int]*ruleset.TechnologyGrants{
+			3: {
+				Prepared: &ruleset.PreparedGrants{
+					SlotsByLevel: map[int]int{2: 1},
+				},
+			},
+			5: {
+				Spontaneous: &ruleset.SpontaneousGrants{
+					UsesByLevel: map[int]int{1: 2},
+				},
+			},
+		},
+	}
+
+	svc, sessMgr := buildJobGrantsService(t, job, nil)
+
+	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID: uid, Username: "Engineer", CharName: "Engineer",
+		RoomID: "room_a", CurrentHP: 20, MaxHP: 20, Role: "player",
+	})
+	require.NoError(t, err)
+	sess.Class = "engineer"
+	sess.Level = 5
+
+	resp, err := svc.handleJobGrants(uid)
+	require.NoError(t, err)
+	require.NotNil(t, resp)
+
+	gr := resp.GetJobGrantsResponse()
+	require.NotNil(t, gr)
+
+	var slotGrant, useGrant *gamev1.JobTechGrant
+	for _, tg := range gr.TechGrants {
+		switch tg.TechType {
+		case "prepared_slot":
+			slotGrant = tg
+		case "spontaneous_use":
+			useGrant = tg
+		}
+	}
+
+	require.NotNil(t, slotGrant, "expected a prepared_slot grant")
+	assert.Equal(t, int32(3), slotGrant.GrantLevel, "prepared_slot should carry GrantLevel=3")
+
+	require.NotNil(t, useGrant, "expected a spontaneous_use grant")
+	assert.Equal(t, int32(5), useGrant.GrantLevel, "spontaneous_use should carry GrantLevel=5")
+}

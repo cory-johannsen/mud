@@ -7188,6 +7188,21 @@ func (s *GameServiceServer) handleJobGrants(uid string) (*gamev1.ServerEvent, er
 					TechType:   "prepared",
 				})
 			}
+			// Emit slot count grants sorted by tech level for deterministic ordering.
+			slotLevels := make([]int, 0, len(tg.Prepared.SlotsByLevel))
+			for tl := range tg.Prepared.SlotsByLevel {
+				slotLevels = append(slotLevels, tl)
+			}
+			sort.Ints(slotLevels)
+			for _, tl := range slotLevels {
+				count := tg.Prepared.SlotsByLevel[tl]
+				techGrants = append(techGrants, &gamev1.JobTechGrant{
+					GrantLevel: int32(level),
+					TechLevel:  int32(tl),
+					TechName:   fmt.Sprintf("+%d Prepared Slot (Level %d tech)", count, tl),
+					TechType:   "prepared_slot",
+				})
+			}
 		}
 		if tg.Spontaneous != nil {
 			for _, e := range tg.Spontaneous.Fixed {
@@ -7197,6 +7212,21 @@ func (s *GameServiceServer) handleJobGrants(uid string) (*gamev1.ServerEvent, er
 					TechName:   techName(e.ID),
 					TechLevel:  int32(e.Level),
 					TechType:   "spontaneous",
+				})
+			}
+			// Emit use pool grants sorted by tech level for deterministic ordering.
+			useLevels := make([]int, 0, len(tg.Spontaneous.UsesByLevel))
+			for tl := range tg.Spontaneous.UsesByLevel {
+				useLevels = append(useLevels, tl)
+			}
+			sort.Ints(useLevels)
+			for _, tl := range useLevels {
+				count := tg.Spontaneous.UsesByLevel[tl]
+				techGrants = append(techGrants, &gamev1.JobTechGrant{
+					GrantLevel: int32(level),
+					TechLevel:  int32(tl),
+					TechName:   fmt.Sprintf("+%d Use (Level %d tech)", count, tl),
+					TechType:   "spontaneous_use",
 				})
 			}
 		}
