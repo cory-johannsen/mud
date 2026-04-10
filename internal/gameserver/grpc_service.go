@@ -5860,7 +5860,11 @@ func (s *GameServiceServer) handleChar(uid string) (*gamev1.ServerEvent, error) 
 	// Defense stats (dex mod from Quickness). REQ-EM-35: apply set bonuses.
 	dexMod := (sess.Abilities.Quickness - 10) / 2
 	def := sess.Equipment.ComputedDefensesWithProficienciesAndSetBonuses(s.invRegistry, dexMod, sess.Proficiencies, sess.Level, sess.SetBonusSummary)
-	view.AcBonus = int32(def.ACBonus - def.ProficiencyACBonus) // item bonuses only (for UI breakdown)
+	itemAC := def.ACBonus - def.ProficiencyACBonus
+	if itemAC < 0 {
+		itemAC = 0
+	}
+	view.AcBonus = int32(itemAC) // item bonuses only (for UI breakdown)
 	view.ProficiencyAcBonus = int32(def.ProficiencyACBonus)
 	view.EffectiveArmorCategory = def.EffectiveArmorCategory
 	view.CheckPenalty = int32(def.CheckPenalty)

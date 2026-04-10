@@ -241,8 +241,10 @@ func heavierCategory(a, b string) string {
 }
 
 // ComputedDefensesWithProficiencies aggregates defense stats, applying armor proficiency rules:
-//   - For each slot proficient in its category: add the item's AC bonus to ACBonus; skip check/speed penalties.
-//   - For each slot NOT proficient: apply check/speed penalties; exclude item's AC bonus entirely.
+//   - For each slot with any non-empty proficiency rank (including "untrained"): add the item's
+//     AC bonus to ACBonus; skip check/speed penalties. Any rank means the item physically protects
+//     the wearer; the rank only affects ProficiencyACBonus, not item AC inclusion.
+//   - For each slot with no proficiency entry at all: apply check/speed penalties; exclude item's AC bonus entirely.
 //   - After all slots are processed, determine the heaviest proficient category worn, compute
 //     armorProfBonus once for that category, and add it to ACBonus.
 //

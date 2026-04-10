@@ -157,7 +157,7 @@ func TestHandleChar_ArmorProficiencyBonus_AppliedOnce(t *testing.T) {
 		inventory.SlotLeftLeg,
 		inventory.SlotRightLeg,
 	}
-	for i, slot := range slots {
+	for _, slot := range slots {
 		id := "med_piece_" + string(slot)
 		def := &inventory.ArmorDef{
 			ID:                  id,
@@ -169,7 +169,6 @@ func TestHandleChar_ArmorProficiencyBonus_AppliedOnce(t *testing.T) {
 			ProficiencyCategory: "medium_armor",
 			Rarity:              "street",
 		}
-		_ = i
 		if err := reg.RegisterArmor(def); err != nil {
 			t.Fatalf("RegisterArmor(%q): %v", id, err)
 		}
