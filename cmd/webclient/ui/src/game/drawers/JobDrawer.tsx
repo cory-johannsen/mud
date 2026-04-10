@@ -110,14 +110,18 @@ export function JobDrawer({ onClose }: { onClose: () => void }) {
                       {techs.map((g, i) => {
                         const type = g.techType ?? g.tech_type ?? ''
                         const techLvl = g.techLevel ?? g.tech_level ?? 0
-                        const typeColor = type === 'hardwired' ? '#c0e0a0' : type === 'prepared' ? '#ffd080' : '#e0a0ff'
-                        const typeBg = type === 'hardwired' ? 'rgba(100,180,80,0.15)' : type === 'prepared' ? 'rgba(200,140,40,0.15)' : 'rgba(180,80,255,0.15)'
-                        const typeBorder = type === 'hardwired' ? 'rgba(100,180,80,0.3)' : type === 'prepared' ? 'rgba(200,140,40,0.3)' : 'rgba(180,80,255,0.3)'
+                        const isSlot = type === 'prepared_slot'
+                        const isUse = type === 'spontaneous_use'
+                        const baseType = isSlot ? 'prepared' : isUse ? 'spontaneous' : type
+                        const typeColor = baseType === 'hardwired' ? '#88ccff' : baseType === 'prepared' ? '#ffcc88' : '#cc88ff'
+                        const typeBg = baseType === 'hardwired' ? 'rgba(100,180,255,0.12)' : baseType === 'prepared' ? 'rgba(200,140,40,0.12)' : 'rgba(180,80,255,0.12)'
+                        const typeBorder = baseType === 'hardwired' ? 'rgba(100,180,255,0.3)' : baseType === 'prepared' ? 'rgba(200,140,40,0.3)' : 'rgba(180,80,255,0.3)'
+                        const label = isSlot ? 'slot' : isUse ? 'use' : (type || 'tech')
                         return (
                           <div key={`tech-${i}`} style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '3px', paddingLeft: '4px' }}>
-                            <span style={{ fontSize: '0.7rem', color: typeColor, background: typeBg, border: `1px solid ${typeBorder}`, borderRadius: '4px', padding: '0 4px' }}>{type || 'tech'}</span>
+                            <span style={{ fontSize: '0.7rem', color: typeColor, background: typeBg, border: `1px solid ${typeBorder}`, borderRadius: '4px', padding: '0 4px' }}>{label}</span>
                             <span style={{ color: '#ddd', fontSize: '0.85rem' }}>{g.techName ?? g.tech_name ?? g.techId ?? g.tech_id}</span>
-                            {techLvl > 0 && <span style={{ fontSize: '0.75rem', color: '#888' }}>lv{techLvl}</span>}
+                            {techLvl > 0 && !isSlot && !isUse && <span style={{ fontSize: '0.75rem', color: '#888' }}>lv{techLvl}</span>}
                           </div>
                         )
                       })}
