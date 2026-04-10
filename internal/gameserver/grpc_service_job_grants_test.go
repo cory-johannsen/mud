@@ -12,6 +12,7 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/npc"
 	"github.com/cory-johannsen/mud/internal/game/ruleset"
 	"github.com/cory-johannsen/mud/internal/game/session"
+	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 )
 
 func buildJobGrantsService(t *testing.T, job *ruleset.Job, feats []*ruleset.Feat) (*GameServiceServer, *session.Manager) {
@@ -358,6 +359,97 @@ func TestHandleJobGrants_GeneralCount_ResolvesToPlayerFeat(t *testing.T) {
 	for _, fg := range gr.FeatGrants {
 		assert.NotContains(t, fg.FeatName, "general feat", "label must not appear when feat is resolved")
 	}
+}
+
+// TestHandleJobGrants_GeneralCount_DoesNotConsumeChoicePoolFeats verifies that feats belonging
+// to archetype/job choice pools are NOT attributed to general-count slots, ensuring they remain
+// available for their own choice slots at higher levels.
+func TestHandleJobGrants_GeneralCount_DoesNotConsumeChoicePoolFeats(t *testing.T) {
+	const uid = "jg-pool-exclusion"
+	const generalFeatID = "street_smarts" // not in any choice pool
+
+	job := &ruleset.Job{
+		ID:        "enforcer",
+		Name:      "Enforcer",
+		Archetype: "bruiser",
+		FeatGrants: &ruleset.FeatGrants{
+			GeneralCount: 1,
+			Fixed:        []string{"iron_fist"},
+		},
+	}
+	arch := &ruleset.Archetype{
+		ID:   "bruiser",
+		Name: "Bruiser",
+		LevelUpFeatGrants: map[int]*ruleset.FeatGrants{
+			2: {Choices: &ruleset.FeatChoices{Count: 1, Pool: []string{"rage", "overpower"}}},
+		},
+	}
+	feats := []*ruleset.Feat{
+		{ID: "iron_fist", Name: "Iron Fist"},
+		{ID: "rage", Name: "Rage"},
+		{ID: "overpower", Name: "Overpower"},
+		{ID: generalFeatID, Name: "Street Smarts"},
+	}
+
+	worldMgr, sessMgr := testWorldAndSession(t)
+	logger := zaptest.NewLogger(t)
+	jobReg := ruleset.NewJobRegistry()
+	jobReg.Register(job)
+	featReg := ruleset.NewFeatRegistry(feats)
+	archetypes := map[string]*ruleset.Archetype{arch.ID: arch}
+	// Player has iron_fist (fixed), rage (choice pool), and street_smarts (general).
+	featsRepo := &stubFeatsRepo{data: map[int64][]string{
+		0: {"iron_fist", "rage", generalFeatID},
+	}}
+
+	svc := newTestGameServiceServer(
+		worldMgr, sessMgr,
+		command.DefaultRegistry(),
+		NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil, nil, nil),
+		NewChatHandler(sessMgr),
+		logger,
+		nil, nil, nil, nil, nil, nil,
+		nil, nil, nil, nil, nil, nil,
+		nil, jobReg, nil, nil, nil, nil, nil, nil, "",
+		nil, nil, nil,
+		nil, featReg, featsRepo,
+		nil, nil, nil, nil, nil, archetypes, nil,
+		nil, nil,
+		nil, nil,
+		nil, nil,
+	)
+
+	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID: uid, Username: "Enforcer", CharName: "Enforcer",
+		RoomID: "room_a", CurrentHP: 20, MaxHP: 20, Role: "player",
+	})
+	require.NoError(t, err)
+	sess.Class = "enforcer"
+	sess.Level = 2
+
+	resp, err := svc.handleJobGrants(uid)
+	require.NoError(t, err)
+	gr := resp.GetJobGrantsResponse()
+	require.NotNil(t, gr)
+
+	byLevel := map[int32][]*gamev1.JobFeatGrant{}
+	for _, fg := range gr.FeatGrants {
+		byLevel[fg.GrantLevel] = append(byLevel[fg.GrantLevel], fg)
+	}
+
+	// Level 1: iron_fist (fixed) + street_smarts (general — NOT rage which is in pool).
+	require.Len(t, byLevel[1], 2, "level 1 must have fixed + general feat")
+	ids1 := map[string]bool{}
+	for _, fg := range byLevel[1] {
+		ids1[fg.FeatId] = true
+	}
+	assert.True(t, ids1["iron_fist"], "fixed feat must be at level 1")
+	assert.True(t, ids1[generalFeatID], "general feat must resolve to street_smarts, not a pool feat")
+	assert.False(t, ids1["rage"], "rage is a pool feat and must NOT be claimed by general slot")
+
+	// Level 2: rage (resolved from choice pool).
+	require.Len(t, byLevel[2], 1, "level 2 must have one choice grant")
+	assert.Equal(t, "rage", byLevel[2][0].FeatId, "choice pool must resolve to rage at level 2")
 }
 
 // TestHandleJobGrants_NoJobReturnsMessage verifies that a player with no job class gets a message.

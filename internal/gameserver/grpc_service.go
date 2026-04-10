@@ -7043,6 +7043,9 @@ func (s *GameServiceServer) handleJobGrants(uid string) (*gamev1.ServerEvent, er
 	// attributedFeatIDs tracks feats already attributed to a grant slot so that a feat chosen
 	// from a pool at level N is not duplicated in subsequent levels whose pools overlap.
 	attributedFeatIDs := make(map[string]bool)
+	// choicePoolIDs is populated after mergedFeatGrants is computed (below).
+	// Declared here so addFeatGrants (a closure) can reference it by the time it is called.
+	choicePoolIDs := make(map[string]bool)
 	// Helper to resolve tech name from technology registry.
 	techName := func(id string) string {
 		if s.techRegistry != nil {
@@ -7104,13 +7107,14 @@ func (s *GameServiceServer) handleJobGrants(uid string) (*gamev1.ServerEvent, er
 				})
 			}
 		}
-		// General feat pick — resolve from player's unattributed feats (sorted for determinism).
-		// Falls back to the selection label only if no unattributed player feats remain.
+		// General feat pick — resolve from player's unattributed, non-pool feats (sorted for determinism).
+		// Pool-member feats are excluded so they remain available for their specific choice slots.
+		// Falls back to the selection label only if no qualifying player feats remain.
 		if fg.GeneralCount > 0 {
-			// Collect unattributed player feat IDs, sorted for deterministic output.
+			// Collect unattributed, non-pool player feat IDs, sorted for deterministic output.
 			var unattributed []string
 			for id := range playerFeatIDs {
-				if !attributedFeatIDs[id] {
+				if !attributedFeatIDs[id] && !choicePoolIDs[id] {
 					unattributed = append(unattributed, id)
 				}
 			}
@@ -7178,10 +7182,6 @@ func (s *GameServiceServer) handleJobGrants(uid string) (*gamev1.ServerEvent, er
 		}
 	}
 
-	// Level 1 (character creation) grants.
-	addFeatGrants(job.FeatGrants, 1)
-	addTechGrants(job.TechnologyGrants, 1)
-
 	// Merge archetype level-up grants with job-specific level-up grants.
 	// Archetype grants take the base position; job-specific entries overlay or extend them.
 	var archetypeLevelUpFeatGrants map[int]*ruleset.FeatGrants
@@ -7193,6 +7193,25 @@ func (s *GameServiceServer) handleJobGrants(uid string) (*gamev1.ServerEvent, er
 		}
 	}
 	mergedFeatGrants := ruleset.MergeFeatLevelUpGrants(archetypeLevelUpFeatGrants, job.LevelUpFeatGrants)
+
+	// Populate choicePoolIDs BEFORE any addFeatGrants calls so the general-count branch
+	// can exclude pool feats when resolving which feat the player freely chose.
+	// General-count slots MUST NOT claim pool-member feats — they belong to specific choice slots.
+	collectPoolIDs := func(fg *ruleset.FeatGrants) {
+		if fg != nil && fg.Choices != nil {
+			for _, id := range fg.Choices.Pool {
+				choicePoolIDs[id] = true
+			}
+		}
+	}
+	collectPoolIDs(job.FeatGrants)
+	for _, fg := range mergedFeatGrants {
+		collectPoolIDs(fg)
+	}
+
+	// Level 1 (character creation) grants — after choicePoolIDs is fully populated.
+	addFeatGrants(job.FeatGrants, 1)
+	addTechGrants(job.TechnologyGrants, 1)
 
 	// Level-up grants — only up to the player's current level.
 	maxLevel := sess.Level
