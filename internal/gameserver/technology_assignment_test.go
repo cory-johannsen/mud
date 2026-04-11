@@ -479,7 +479,7 @@ func TestPropertyRearrangePreparedTechs_ChosenFromPool(t *testing.T) {
 			},
 		}
 
-		err := gameserver.RearrangePreparedTechs(context.Background(), sess, 1, job, nil, noPrompt, prep, nil, technology.TraditionFlavor{})
+		err := gameserver.RearrangePreparedTechs(context.Background(), sess, 1, job, nil, nil, noPrompt, prep, nil, technology.TraditionFlavor{})
 		if err != nil {
 			rt.Fatalf("RearrangePreparedTechs: %v", err)
 		}
@@ -520,7 +520,7 @@ func TestRearrangePreparedTechs_FixedFirst(t *testing.T) {
 		},
 	}
 
-	err := gameserver.RearrangePreparedTechs(ctx, sess, 1, job, nil, noPrompt, prep, nil, technology.TraditionFlavor{})
+	err := gameserver.RearrangePreparedTechs(ctx, sess, 1, job, nil, nil, noPrompt, prep, nil, technology.TraditionFlavor{})
 	require.NoError(t, err)
 	require.Len(t, sess.PreparedTechs[1], 2)
 	assert.Equal(t, "fixed_tech", sess.PreparedTechs[1][0].TechID, "fixed at index 0")
@@ -558,7 +558,7 @@ func TestRearrangePreparedTechs_LevelUpGrantsFiltered(t *testing.T) {
 		return options[0], nil
 	}
 
-	err := gameserver.RearrangePreparedTechs(ctx, sess, 1, job, nil, promptFn, prep, nil, technology.TraditionFlavor{})
+	err := gameserver.RearrangePreparedTechs(ctx, sess, 1, job, nil, nil, promptFn, prep, nil, technology.TraditionFlavor{})
 	require.NoError(t, err)
 
 	// Level3 excluded → pool has 1 entry for 1 slot → auto-assign, no prompt
@@ -577,7 +577,7 @@ func TestRearrangePreparedTechs_EmptySession_NoOp(t *testing.T) {
 
 	job := &ruleset.Job{} // no grants
 
-	err := gameserver.RearrangePreparedTechs(ctx, sess, 1, job, nil, noPrompt, prep, nil, technology.TraditionFlavor{})
+	err := gameserver.RearrangePreparedTechs(ctx, sess, 1, job, nil, nil, noPrompt, prep, nil, technology.TraditionFlavor{})
 	require.NoError(t, err)
 	// Repo unchanged: DeleteAll was not called
 	assert.NotNil(t, prep.slots, "repo.slots must not be nil on no-op")
@@ -626,7 +626,7 @@ func TestRearrangePreparedTechs_AutoAssignNoPrompt(t *testing.T) {
 		return options[0], nil
 	}
 
-	err := gameserver.RearrangePreparedTechs(ctx, sess, 1, job, nil, promptFn, prep, nil, technology.TraditionFlavor{})
+	err := gameserver.RearrangePreparedTechs(ctx, sess, 1, job, nil, nil, promptFn, prep, nil, technology.TraditionFlavor{})
 	require.NoError(t, err)
 	assert.False(t, promptCalled, "prompt must not be called when pool == open slots")
 	require.Len(t, sess.PreparedTechs[1], 1)
@@ -931,7 +931,7 @@ func TestRearrangePreparedTechs_SendFn_OpeningMessage(t *testing.T) {
 	var messages []string
 	sendFn := func(msg string) { messages = append(messages, msg) }
 
-	err := gameserver.RearrangePreparedTechs(context.Background(), sess, 1, job, nil, noPrompt, prep, sendFn, flavor)
+	err := gameserver.RearrangePreparedTechs(context.Background(), sess, 1, job, nil, nil, noPrompt, prep, sendFn, flavor)
 	require.NoError(t, err)
 	require.NotEmpty(t, messages, "sendFn must have been called")
 	assert.Equal(t, "Configuring Field Loadout...", messages[0], "first message must be the opening progress message")
@@ -977,7 +977,7 @@ func TestRearrangePreparedTechs_SendFn_SlotMessages(t *testing.T) {
 		return options[0], nil
 	}
 
-	err := gameserver.RearrangePreparedTechs(context.Background(), sess, 1, job, nil, promptFn, prep, sendFn, flavor)
+	err := gameserver.RearrangePreparedTechs(context.Background(), sess, 1, job, nil, nil, promptFn, prep, sendFn, flavor)
 	require.NoError(t, err)
 
 	// Check fixed-slot message appears
@@ -1166,4 +1166,75 @@ func TestParseTechID_LegacyFormat(t *testing.T) {
 func TestParseTechID_BareID(t *testing.T) {
 	id := gameserver.ExportedParseTechID("bio_synthetic")
 	assert.Equal(t, "bio_synthetic", id)
+}
+
+// REQ-RAR6: RearrangePreparedTechs must include archetype pool entries so that
+// all slots can be filled when the job pool alone is insufficient (bug #40).
+func TestRearrangePreparedTechs_ArchetypePoolIncluded(t *testing.T) {
+	// Engineer has 3 pool entries at level 1 and 1 slot.
+	// Nerd archetype has 5 pool entries at level 1 and 2 slots.
+	// Total slots from session: 4.  Without archetype pool only 3 options exist → error.
+	job := &ruleset.Job{
+		ID: "engineer",
+		TechnologyGrants: &ruleset.TechnologyGrants{
+			Prepared: &ruleset.PreparedGrants{
+				SlotsByLevel: map[int]int{1: 1},
+				Pool: []ruleset.PreparedEntry{
+					{ID: "rapid_forge_module", Level: 1},
+					{ID: "electroconductive_coating", Level: 1},
+					{ID: "servo_cable_actuator", Level: 1},
+				},
+			},
+		},
+	}
+	archetype := &ruleset.Archetype{
+		ID: "nerd",
+		TechnologyGrants: &ruleset.TechnologyGrants{
+			Prepared: &ruleset.PreparedGrants{
+				SlotsByLevel: map[int]int{1: 2},
+				Pool: []ruleset.PreparedEntry{
+					{ID: "nerd_tech_1", Level: 1},
+					{ID: "nerd_tech_2", Level: 1},
+					{ID: "nerd_tech_3", Level: 1},
+					{ID: "nerd_tech_4", Level: 1},
+					{ID: "nerd_tech_5", Level: 1},
+				},
+			},
+		},
+	}
+
+	// Session has 4 slots at level 1 (job 1 + archetype 2 + level-up 1).
+	sess := &session.PlayerSession{
+		Level: 2,
+		PreparedTechs: map[int][]*session.PreparedSlot{
+			1: {
+				{TechID: "old_tech_a"},
+				{TechID: "old_tech_b"},
+				{TechID: "old_tech_c"},
+				{TechID: "old_tech_d"},
+			},
+		},
+	}
+
+	prep := &fakePreparedRepo{slots: map[int][]*session.PreparedSlot{
+		1: {
+			{TechID: "old_tech_a"},
+			{TechID: "old_tech_b"},
+			{TechID: "old_tech_c"},
+			{TechID: "old_tech_d"},
+		},
+	}}
+
+	promptCallCount := 0
+	promptFn := func(options []string) (string, error) {
+		promptCallCount++
+		if len(options) == 0 {
+			return "", fmt.Errorf("empty options on prompt call %d", promptCallCount)
+		}
+		return options[0], nil
+	}
+
+	err := gameserver.RearrangePreparedTechs(context.Background(), sess, 1, job, archetype, nil, promptFn, prep, nil, technology.TraditionFlavor{})
+	require.NoError(t, err, "RearrangePreparedTechs must not fail when archetype pool entries are available")
+	assert.Equal(t, 4, len(sess.PreparedTechs[1]), "all 4 slots must be filled")
 }

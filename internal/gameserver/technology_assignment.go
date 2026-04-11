@@ -385,10 +385,11 @@ func LevelUpTechnologies(
 }
 
 // RearrangePreparedTechs deletes all existing prepared slots and re-fills them
-// by aggregating grants from job.TechnologyGrants and all job.LevelUpGrants
-// entries for levels 1..sess.Level.
+// by aggregating grants from job.TechnologyGrants, archetype.TechnologyGrants,
+// job.LevelUpGrants, and archetype.LevelUpGrants for levels 1..sess.Level.
 //
 // Precondition: sess, job, prepRepo are non-nil. promptFn must be non-nil.
+// archetype may be nil (skips archetype pool entries).
 // Postcondition: sess.PreparedTechs and prepRepo reflect the re-selected slots.
 // If sess.PreparedTechs is empty or all level slot counts are zero, returns nil (no-op).
 func RearrangePreparedTechs(
@@ -396,6 +397,7 @@ func RearrangePreparedTechs(
 	sess *session.PlayerSession,
 	characterID int64,
 	job *ruleset.Job,
+	archetype *ruleset.Archetype,
 	techReg *technology.Registry,
 	promptFn TechPromptFn,
 	prepRepo PreparedTechRepo,
@@ -422,12 +424,16 @@ func RearrangePreparedTechs(
 
 	send(fmt.Sprintf("%s %s...", flavor.PrepGerund, flavor.LoadoutTitle))
 
-	// Aggregate Fixed and Pool from all applicable grants.
+	// Aggregate Fixed and Pool from all applicable grants (job + archetype, creation + level-up).
 	var allFixed []ruleset.PreparedEntry
 	var allPool []ruleset.PreparedEntry
 	if job.TechnologyGrants != nil && job.TechnologyGrants.Prepared != nil {
 		allFixed = append(allFixed, job.TechnologyGrants.Prepared.Fixed...)
 		allPool = append(allPool, job.TechnologyGrants.Prepared.Pool...)
+	}
+	if archetype != nil && archetype.TechnologyGrants != nil && archetype.TechnologyGrants.Prepared != nil {
+		allFixed = append(allFixed, archetype.TechnologyGrants.Prepared.Fixed...)
+		allPool = append(allPool, archetype.TechnologyGrants.Prepared.Pool...)
 	}
 	for lvl, grants := range job.LevelUpGrants {
 		if lvl > sess.Level {
@@ -436,6 +442,17 @@ func RearrangePreparedTechs(
 		if grants != nil && grants.Prepared != nil {
 			allFixed = append(allFixed, grants.Prepared.Fixed...)
 			allPool = append(allPool, grants.Prepared.Pool...)
+		}
+	}
+	if archetype != nil {
+		for lvl, grants := range archetype.LevelUpGrants {
+			if lvl > sess.Level {
+				continue
+			}
+			if grants != nil && grants.Prepared != nil {
+				allFixed = append(allFixed, grants.Prepared.Fixed...)
+				allPool = append(allPool, grants.Prepared.Pool...)
+			}
 		}
 	}
 

@@ -4230,8 +4230,14 @@ func (s *GameServiceServer) applyFullLongRestCtx(uid string, sess *session.Playe
 	sendFn := func(text string) {
 		_ = sendMsg(text)
 	}
+	var rearrangeArchetype *ruleset.Archetype
+	if s.archetypes != nil {
+		if arch, ok := s.archetypes[job.Archetype]; ok {
+			rearrangeArchetype = arch
+		}
+	}
 	if err := RearrangePreparedTechs(ctx, sess, sess.CharacterID,
-		job, s.techRegistry, promptFn, s.preparedTechRepo,
+		job, rearrangeArchetype, s.techRegistry, promptFn, s.preparedTechRepo,
 		sendFn, restFlavor,
 	); err != nil {
 		s.logger.Warn("applyFullLongRest: RearrangePreparedTechs failed",
