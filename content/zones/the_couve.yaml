@@ -349,6 +349,10 @@ zone:
     exits:
     - direction: south
       target: couve_strip_mall_east
+    - direction: west
+      target: couve_fourth_plain
+    - direction: east
+      target: couve_chkalov_drive
     map_x: 4
     map_y: -8
     spawns:
@@ -373,6 +377,8 @@ zone:
     exits:
     - direction: south
       target: couve_strip_mall_west
+    - direction: east
+      target: couve_fourth_plain
     map_x: 0
     map_y: -8
     spawns:
@@ -451,8 +457,10 @@ zone:
       target: couve_mill_plain_blvd
     - direction: north
       target: couve_i5_north
+    - direction: west
+      target: couve_residential_blocks
     - direction: east
-      target: couve_fourth_plain_east
+      target: couve_applebees_fortress
     map_x: 2
     map_y: -8
     spawns:
@@ -480,7 +488,7 @@ zone:
     - direction: east
       target: vantucky_fourth_plain_west
     - direction: west
-      target: couve_fourth_plain
+      target: couve_chkalov_drive
     map_x: 8
     map_y: -8
     spawns:
@@ -537,6 +545,8 @@ zone:
     exits:
     - direction: south
       target: couve_vancouver_mall
+    - direction: west
+      target: couve_applebees_fortress
     - direction: east
       target: couve_fourth_plain_east
     map_x: 6
@@ -861,7 +871,7 @@ zone:
     danger_level: sketchy
     exits:
     - direction: west
-      target: couve_chkalov_drive
+      target: couve_fourth_plain_east
     map_x: 9
     map_y: -8
     spawns:
