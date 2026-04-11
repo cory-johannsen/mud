@@ -1134,6 +1134,7 @@ message InnateSlotView {
     bool   is_reaction      = 6;
     string effects_summary  = 7;
     string short_name       = 8;
+    bool   passive          = 9;
 }
 
 // SpontaneousUsePoolView delivers the daily use pool for one spontaneous tech level.

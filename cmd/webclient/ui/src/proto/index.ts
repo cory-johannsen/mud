@@ -147,6 +147,7 @@ export interface InnateSlotView {
   effectsSummary?: string
   shortName?: string
   short_name?: string
+  passive?: boolean
 }
 
 export interface HardwiredSlotView {

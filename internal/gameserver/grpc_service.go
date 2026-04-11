@@ -6157,6 +6157,7 @@ func (s *GameServiceServer) handleChar(uid string) (*gamev1.ServerEvent, error) 
 		techFX := ""
 		techShortName := ""
 		var isReaction bool
+		var isPassive bool
 		if s.techRegistry != nil {
 			if def, ok := s.techRegistry.Get(id); ok {
 				techName = def.Name
@@ -6164,6 +6165,7 @@ func (s *GameServiceServer) handleChar(uid string) (*gamev1.ServerEvent, error) 
 				techFX = technology.FormatEffectsSummary(def)
 				isReaction = def.Reaction != nil
 				techShortName = def.ShortName
+				isPassive = def.Passive
 			}
 		}
 		view.InnateSlots = append(view.InnateSlots, &gamev1.InnateSlotView{
@@ -6175,6 +6177,7 @@ func (s *GameServiceServer) handleChar(uid string) (*gamev1.ServerEvent, error) 
 			EffectsSummary: techFX,
 			IsReaction:     isReaction,
 			ShortName:      techShortName,
+			Passive:        isPassive,
 		})
 	}
 

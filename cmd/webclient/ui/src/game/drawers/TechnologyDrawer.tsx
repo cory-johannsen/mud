@@ -172,6 +172,22 @@ function SpontaneousItem({
   )
 }
 
+// Passive tech item — Innate with passive: true
+function PassiveInnateItem({ slot }: { slot: InnateSlotView }) {
+  const techId = slot.techId ?? slot.tech_id ?? ''
+  const name = slot.techName ?? slot.tech_name ?? techId
+  return (
+    <li style={styles.techItem}>
+      <div style={styles.techHeader}>
+        <strong style={{ color: '#aaa' }}>{name}</strong>
+        <span style={styles.badgePassive}>passive</span>
+      </div>
+      {slot.description && <p style={styles.techDesc}>{slot.description}</p>}
+      {slot.effectsSummary && <EffectsSummary text={slot.effectsSummary} />}
+    </li>
+  )
+}
+
 // Passive tech item — Hardwired
 function HardwiredItem({ slot }: { slot: HardwiredSlotView }) {
   const techId = slot.techId ?? slot.tech_id ?? ''
@@ -254,11 +270,12 @@ export function TechnologyDrawer({ onClose }: { onClose: () => void }) {
   const preparedGroups = [...preparedGroupMap.values()]
 
   const reactionInnate = innate.filter((s) => s.isReaction)
-  const normalInnate = innate.filter((s) => !s.isReaction)
+  const passiveInnate = innate.filter((s) => !s.isReaction && s.passive)
+  const normalInnate = innate.filter((s) => !s.isReaction && !s.passive)
 
   const hasReactions = reactionInnate.length > 0
   const hasActive = preparedGroups.length > 0 || normalInnate.length > 0 || spontKnown.length > 0
-  const hasPassive = hardwired.length > 0
+  const hasPassive = hardwired.length > 0 || passiveInnate.length > 0
   const hasAny = hasReactions || hasActive || hasPassive
 
   return (
@@ -350,6 +367,9 @@ export function TechnologyDrawer({ onClose }: { onClose: () => void }) {
               <section style={styles.section}>
                 <SectionLabel label="Passive" />
                 <ul style={styles.list}>
+                  {passiveInnate.map((s, i) => (
+                    <PassiveInnateItem key={s.techId ?? s.tech_id ?? i} slot={s} />
+                  ))}
                   {hardwired.map((h, i) => (
                     <HardwiredItem key={h.techId ?? h.tech_id ?? i} slot={h} />
                   ))}

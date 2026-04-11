@@ -10806,6 +10806,7 @@ type InnateSlotView struct {
 	IsReaction     bool                   `protobuf:"varint,6,opt,name=is_reaction,json=isReaction,proto3" json:"is_reaction,omitempty"`
 	EffectsSummary string                 `protobuf:"bytes,7,opt,name=effects_summary,json=effectsSummary,proto3" json:"effects_summary,omitempty"`
 	ShortName      string                 `protobuf:"bytes,8,opt,name=short_name,json=shortName,proto3" json:"short_name,omitempty"`
+	Passive        bool                   `protobuf:"varint,9,opt,name=passive,proto3" json:"passive,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -10894,6 +10895,13 @@ func (x *InnateSlotView) GetShortName() string {
 		return x.ShortName
 	}
 	return ""
+}
+
+func (x *InnateSlotView) GetPassive() bool {
+	if x != nil {
+		return x.Passive
+	}
+	return false
 }
 
 // SpontaneousUsePoolView delivers the daily use pool for one spontaneous tech level.
@@ -15415,7 +15423,7 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\x1aB\n" +
 	"\x14ArmorCategoriesEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\x93\x02\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xad\x02\n" +
 	"\x0eInnateSlotView\x12\x17\n" +
 	"\atech_id\x18\x01 \x01(\tR\x06techId\x12%\n" +
 	"\x0euses_remaining\x18\x02 \x01(\x05R\rusesRemaining\x12\x19\n" +
@@ -15426,7 +15434,8 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"isReaction\x12'\n" +
 	"\x0feffects_summary\x18\a \x01(\tR\x0eeffectsSummary\x12\x1d\n" +
 	"\n" +
-	"short_name\x18\b \x01(\tR\tshortName\"y\n" +
+	"short_name\x18\b \x01(\tR\tshortName\x12\x18\n" +
+	"\apassive\x18\t \x01(\bR\apassive\"y\n" +
 	"\x16SpontaneousUsePoolView\x12\x1d\n" +
 	"\n" +
 	"tech_level\x18\x01 \x01(\x05R\ttechLevel\x12%\n" +
