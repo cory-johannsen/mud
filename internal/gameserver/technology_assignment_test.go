@@ -1237,4 +1237,5 @@ func TestRearrangePreparedTechs_ArchetypePoolIncluded(t *testing.T) {
 	err := gameserver.RearrangePreparedTechs(context.Background(), sess, 1, job, archetype, nil, promptFn, prep, nil, technology.TraditionFlavor{})
 	require.NoError(t, err, "RearrangePreparedTechs must not fail when archetype pool entries are available")
 	assert.Equal(t, 4, len(sess.PreparedTechs[1]), "all 4 slots must be filled")
+	assert.Equal(t, 4, promptCallCount, "prompt must fire once per open slot")
 }

@@ -4231,7 +4231,7 @@ func (s *GameServiceServer) applyFullLongRestCtx(uid string, sess *session.Playe
 		_ = sendMsg(text)
 	}
 	var rearrangeArchetype *ruleset.Archetype
-	if s.archetypes != nil {
+	if s.archetypes != nil && job.Archetype != "" {
 		if arch, ok := s.archetypes[job.Archetype]; ok {
 			rearrangeArchetype = arch
 		}
