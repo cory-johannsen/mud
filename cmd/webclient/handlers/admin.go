@@ -33,6 +33,7 @@ type ManagedSession interface {
 type SessionManager interface {
 	AllSessions() []ManagedSession
 	GetSession(charID int64) (ManagedSession, bool)
+	TeleportPlayer(charID int64, roomID string) error
 }
 
 // AdminAccountStore is the subset of AccountRepository required by the admin handler.
@@ -211,10 +212,11 @@ func (ah *AdminHandler) HandleTeleportPlayer(w http.ResponseWriter, r *http.Requ
 		writeError(w, http.StatusNotFound, "session not found")
 		return
 	}
-	// Teleport is a best-effort in-process operation; the game server manages
-	// the actual room transition via gRPC. For now, respond 503 to indicate
-	// that the admin-stream dependency is not yet wired.
-	writeJSON(w, http.StatusOK, map[string]string{"status": "teleport_enqueued"})
+	if err := ah.sessions.TeleportPlayer(charID, body.RoomID); err != nil {
+		writeError(w, http.StatusBadGateway, "teleport failed")
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]string{"status": "ok"})
 }
 
 // accountResponse is the JSON shape for an account in admin search results.

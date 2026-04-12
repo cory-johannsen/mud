@@ -69,6 +69,8 @@ func (m *stubSessionManager) GetSession(charID int64) (handlers.ManagedSession, 
 	return nil, false
 }
 
+func (m *stubSessionManager) TeleportPlayer(_ int64, _ string) error { return nil }
+
 // stubAccountStore implements handlers.AdminAccountStore.
 type stubAccountStore struct {
 	accounts []postgres.Account

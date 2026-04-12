@@ -252,7 +252,7 @@ func (s *Server) registerRoutes(mux *http.ServeMux) {
 	// WorldEditor and SessionManager are not yet wired from the game server;
 	// a no-op implementation is used so routes are live and testable.
 	adminHandler := handlers.NewAdminHandler(
-		handlers.NewNoOpSessionManager(),
+		handlers.NewGRPCSessionManager(s.gameClient),
 		s.accountRepo,
 		handlers.NewNoOpWorldEditor(),
 		s.bus,
