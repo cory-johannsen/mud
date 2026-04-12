@@ -142,13 +142,9 @@ func TestAdminListSessions_PropertyZone(t *testing.T) {
 			RoomID:      "room_a", // valid room so AddPlayer doesn't fail
 			Role:        "player",
 		})
-		// Manually mutate RoomID to an unknown room after session is created.
-		players := sessMgr.AllPlayers()
-		for _, p := range players {
-			if p.CharacterID == charID {
-				p.RoomID = "nonexistent_room"
-			}
-		}
+		// Move the player to a nonexistent room via the session Manager to avoid
+		// bypassing the Manager's mutex with a direct field mutation.
+		sessMgr.MovePlayer("u_prop", "nonexistent_room")
 
 		resp, err := svc.AdminListSessions(context.Background(), &gamev1.AdminListSessionsRequest{})
 		require.NoError(rt, err)
