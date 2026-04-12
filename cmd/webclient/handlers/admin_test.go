@@ -14,6 +14,8 @@ import (
 	"github.com/cory-johannsen/mud/cmd/webclient/eventbus"
 	"github.com/cory-johannsen/mud/cmd/webclient/handlers"
 	"github.com/cory-johannsen/mud/internal/storage/postgres"
+	"google.golang.org/grpc/codes"
+	grpcstatus "google.golang.org/grpc/status"
 )
 
 // ---- Stub implementations ----
@@ -69,7 +71,14 @@ func (m *stubSessionManager) GetSession(charID int64) (handlers.ManagedSession, 
 	return nil, false
 }
 
-func (m *stubSessionManager) TeleportPlayer(_ int64, _ string) error { return nil }
+func (m *stubSessionManager) TeleportPlayer(charID int64, _ string) error {
+	for _, s := range m.sessions {
+		if s.charID == charID {
+			return nil
+		}
+	}
+	return grpcstatus.Error(codes.NotFound, "session not found")
+}
 
 // stubAccountStore implements handlers.AdminAccountStore.
 type stubAccountStore struct {

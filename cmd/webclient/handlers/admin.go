@@ -12,6 +12,8 @@ import (
 
 	"github.com/cory-johannsen/mud/cmd/webclient/eventbus"
 	"github.com/cory-johannsen/mud/internal/storage/postgres"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 // ManagedSession is the subset of a live player session that the admin API requires.
@@ -212,13 +214,12 @@ func (ah *AdminHandler) HandleTeleportPlayer(w http.ResponseWriter, r *http.Requ
 		writeError(w, http.StatusBadRequest, "room_id must not be empty")
 		return
 	}
-	_, found := ah.sessions.GetSession(charID)
-	if !found {
-		writeError(w, http.StatusNotFound, "session not found")
-		return
-	}
 	if err := ah.sessions.TeleportPlayer(charID, body.RoomID); err != nil {
-		writeError(w, http.StatusBadGateway, "teleport failed")
+		if st, ok := status.FromError(err); ok && st.Code() == codes.NotFound {
+			writeError(w, http.StatusNotFound, "session not found")
+			return
+		}
+		writeError(w, http.StatusBadGateway, "gameserver unavailable")
 		return
 	}
 	writeJSON(w, http.StatusOK, map[string]string{"status": "ok"})
@@ -369,14 +370,9 @@ func (ah *AdminHandler) HandleSpawnNPC(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadRequest, "count must be >= 1")
 		return
 	}
-	// Spawn via game server is not yet wired through an admin gRPC stream.
-	// Return 200 with an informational message; the caller may retry once the
-	// game-server admin endpoint is available (REQ-WC-38).
-	writeJSON(w, http.StatusOK, map[string]any{
-		"status": "spawn_enqueued",
-		"npc_id": body.NPCID,
-		"count":  body.Count,
-	})
+	// Spawn via game server is not yet wired through an admin gRPC stream (REQ-WC-38).
+	writeError(w, http.StatusNotImplemented, "not implemented")
+	return
 }
 
 // HandleAdminEvents handles GET /api/admin/events — an SSE stream of game events.

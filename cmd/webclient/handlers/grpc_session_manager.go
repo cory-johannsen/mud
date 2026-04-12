@@ -4,8 +4,6 @@ import (
 	"context"
 
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 )
 
 // grpcSessionManager implements SessionManager via the gameserver gRPC admin RPCs.
@@ -55,9 +53,6 @@ func (g *grpcSessionManager) TeleportPlayer(charID int64, roomID string) error {
 		RoomId: roomID,
 	})
 	if err != nil {
-		if st, ok := status.FromError(err); ok && st.Code() == codes.NotFound {
-			return err
-		}
 		return err
 	}
 	return nil
