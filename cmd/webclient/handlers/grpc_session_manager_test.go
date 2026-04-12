@@ -76,8 +76,9 @@ func TestGRPCSessionManager_AllSessions_MapsFields(t *testing.T) {
 	}
 
 	mgr := NewGRPCSessionManager(mock)
-	sessions := mgr.AllSessions()
+	sessions, err := mgr.AllSessions()
 
+	require.NoError(t, err)
 	require.Len(t, sessions, 2)
 
 	assert.Equal(t, int64(101), sessions[0].CharID())
@@ -97,17 +98,19 @@ func TestGRPCSessionManager_AllSessions_MapsFields(t *testing.T) {
 	assert.Equal(t, 99, sessions[1].CurrentHP())
 }
 
-// TestGRPCSessionManager_AllSessions_RPCError_ReturnsNil verifies that an RPC error
-// causes AllSessions to return nil rather than panic.
-func TestGRPCSessionManager_AllSessions_RPCError_ReturnsNil(t *testing.T) {
+// TestGRPCSessionManager_AllSessions_RPCError_ReturnsError verifies that an RPC error
+// causes AllSessions to return nil sessions and a non-nil error.
+func TestGRPCSessionManager_AllSessions_RPCError_ReturnsError(t *testing.T) {
 	mock := &mockGameServiceClient{
 		listSessionsErr: errors.New("connection refused"),
 	}
 
 	mgr := NewGRPCSessionManager(mock)
-	sessions := mgr.AllSessions()
+	sessions, err := mgr.AllSessions()
 
 	assert.Nil(t, sessions)
+	assert.Error(t, err)
+	assert.Equal(t, "connection refused", err.Error())
 }
 
 // TestGRPCSessionManager_GetSession_Found verifies that a session with a matching
@@ -194,4 +197,38 @@ func TestGRPCManagedSession_SendAdminMessage_CallsRPC(t *testing.T) {
 	require.NotNil(t, mock.messageReq)
 	assert.Equal(t, int64(33), mock.messageReq.CharId)
 	assert.Equal(t, "hello admin world", mock.messageReq.Text)
+}
+
+// TestGRPCManagedSession_Kick_RPCError verifies that Kick propagates the RPC error
+// returned by AdminKickPlayer.
+func TestGRPCManagedSession_Kick_RPCError(t *testing.T) {
+	mock := &mockGameServiceClient{
+		kickErr: errors.New("kick rpc failed"),
+	}
+	sess := &grpcManagedSession{
+		info:   &gamev1.AdminSessionInfo{CharId: 55},
+		client: mock,
+	}
+
+	err := sess.Kick()
+
+	assert.Error(t, err)
+	assert.Equal(t, "kick rpc failed", err.Error())
+}
+
+// TestGRPCManagedSession_SendAdminMessage_RPCError verifies that SendAdminMessage
+// propagates the RPC error returned by AdminMessagePlayer.
+func TestGRPCManagedSession_SendAdminMessage_RPCError(t *testing.T) {
+	mock := &mockGameServiceClient{
+		messageErr: errors.New("message rpc failed"),
+	}
+	sess := &grpcManagedSession{
+		info:   &gamev1.AdminSessionInfo{CharId: 33},
+		client: mock,
+	}
+
+	err := sess.SendAdminMessage("hello")
+
+	assert.Error(t, err)
+	assert.Equal(t, "message rpc failed", err.Error())
 }

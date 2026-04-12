@@ -52,12 +52,12 @@ type stubSessionManager struct {
 	sessions []*stubManagedSession
 }
 
-func (m *stubSessionManager) AllSessions() []handlers.ManagedSession {
+func (m *stubSessionManager) AllSessions() ([]handlers.ManagedSession, error) {
 	result := make([]handlers.ManagedSession, len(m.sessions))
 	for i, s := range m.sessions {
 		result[i] = s
 	}
-	return result
+	return result, nil
 }
 
 func (m *stubSessionManager) GetSession(charID int64) (handlers.ManagedSession, bool) {

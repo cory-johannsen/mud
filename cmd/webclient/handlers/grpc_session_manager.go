@@ -20,22 +20,26 @@ func NewGRPCSessionManager(client gamev1.GameServiceClient) SessionManager {
 }
 
 // AllSessions calls AdminListSessions and returns mapped ManagedSession slice.
-// On RPC error, returns nil (HTTP layer propagates as 502).
-func (g *grpcSessionManager) AllSessions() []ManagedSession {
+// On RPC error, returns nil and the error so the HTTP layer can respond with 502.
+func (g *grpcSessionManager) AllSessions() ([]ManagedSession, error) {
 	resp, err := g.client.AdminListSessions(context.Background(), &gamev1.AdminListSessionsRequest{})
 	if err != nil {
-		return nil
+		return nil, err
 	}
 	out := make([]ManagedSession, 0, len(resp.Sessions))
 	for _, info := range resp.Sessions {
 		out = append(out, &grpcManagedSession{info: info, client: g.client})
 	}
-	return out
+	return out, nil
 }
 
 // GetSession finds the session with the given charID.
+// On RPC error, returns nil, false — the session is effectively not found.
 func (g *grpcSessionManager) GetSession(charID int64) (ManagedSession, bool) {
-	sessions := g.AllSessions()
+	sessions, err := g.AllSessions()
+	if err != nil {
+		return nil, false
+	}
 	for _, s := range sessions {
 		if s.CharID() == charID {
 			return s, true

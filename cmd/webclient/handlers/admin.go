@@ -31,7 +31,7 @@ type ManagedSession interface {
 
 // SessionManager enumerates and retrieves live player sessions.
 type SessionManager interface {
-	AllSessions() []ManagedSession
+	AllSessions() ([]ManagedSession, error)
 	GetSession(charID int64) (ManagedSession, bool)
 	TeleportPlayer(charID int64, roomID string) error
 }
@@ -118,8 +118,13 @@ type playerResponse struct {
 // HandleListPlayers handles GET /api/admin/players.
 //
 // Postcondition: Returns JSON array of playerResponse for all online players.
+// Postcondition: Returns HTTP 502 with {"error":"gameserver unavailable"} on RPC error.
 func (ah *AdminHandler) HandleListPlayers(w http.ResponseWriter, r *http.Request) {
-	sessions := ah.sessions.AllSessions()
+	sessions, err := ah.sessions.AllSessions()
+	if err != nil {
+		writeError(w, http.StatusBadGateway, "gameserver unavailable")
+		return
+	}
 	resp := make([]playerResponse, 0, len(sessions))
 	for _, s := range sessions {
 		resp = append(resp, playerResponse{
