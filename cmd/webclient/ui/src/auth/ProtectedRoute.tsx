@@ -2,9 +2,11 @@ import { type ReactNode } from 'react'
 import { Navigate } from 'react-router-dom'
 import { useAuth } from './AuthContext'
 
+export type Role = 'player' | 'editor' | 'moderator' | 'admin'
+
 interface ProtectedRouteProps {
   children: ReactNode
-  requiredRole?: string | string[]
+  requiredRole?: Role | Role[]
 }
 
 export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) {
@@ -16,7 +18,7 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
 
   if (requiredRole) {
     const allowed = Array.isArray(requiredRole) ? requiredRole : [requiredRole]
-    if (!allowed.includes(user.role)) {
+    if (!allowed.includes(user.role as Role)) {
       return <Navigate to="/game" replace />
     }
   }
