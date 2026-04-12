@@ -4,7 +4,7 @@ import { useAuth } from './AuthContext'
 
 interface ProtectedRouteProps {
   children: ReactNode
-  requiredRole?: string
+  requiredRole?: string | string[]
 }
 
 export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) {
@@ -14,8 +14,11 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
     return <Navigate to="/login" replace />
   }
 
-  if (requiredRole && user.role !== requiredRole && user.role !== 'admin') {
-    return <Navigate to="/characters" replace />
+  if (requiredRole) {
+    const allowed = Array.isArray(requiredRole) ? requiredRole : [requiredRole]
+    if (!allowed.includes(user.role)) {
+      return <Navigate to="/game" replace />
+    }
   }
 
   return <>{children}</>
