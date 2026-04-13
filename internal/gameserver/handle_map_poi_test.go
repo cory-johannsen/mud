@@ -21,6 +21,7 @@ func TestNpcRoleToPOIIDIntegration(t *testing.T) {
 		{"motel_keeper", "motel"},
 		{"brothel_keeper", "brothel"},
 		{"quest_giver", "quest_giver"},
+		{"banker", "banker"},
 		{"", ""},
 	}
 	for _, tc := range cases {
@@ -49,7 +50,7 @@ func TestHandleMap_POI_NPCTypeFallback(t *testing.T) {
 		{"healer", "", "healer"},
 		{"job_trainer", "", "trainer"},
 		{"guard", "", "guard"},
-		{"banker", "", "npc"},
+		{"banker", "", "banker"},
 		{"chip_doc", "", "npc"},
 		// combat NPC must never contribute a POI.
 		{"combat", "", ""},

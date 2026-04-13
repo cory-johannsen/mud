@@ -49,7 +49,7 @@ const POI_BY_ID = new Map(POI_DEFS.map(p => [p.id, p]))
 // are always visible against the SVG background (not the dark tile fill).
 // ex/ey are offsets from tile top-left to the arrow centre point.
 // Use U+2190-2199 arrows — universally supported in all SVG fonts.
-const ZONE_EXIT_ARROW: Record<string, { glyph: string; ex: number; ey: number; anchor: string }> = {
+const ZONE_EXIT_ARROW: Record<string, { glyph: string; ex: number; ey: number; anchor: 'start' | 'middle' | 'end' | 'inherit' }> = {
   north:     { glyph: '↑', ex: CELL_W / 2,        ey: -(GAP / 2),        anchor: 'middle' },
   south:     { glyph: '↓', ex: CELL_W / 2,        ey: CELL_H + GAP / 2,  anchor: 'middle' },
   east:      { glyph: '→', ex: CELL_W + GAP / 2,  ey: CELL_H / 2,        anchor: 'middle' },
@@ -139,8 +139,6 @@ export function ZoneMapSvg({ tiles, onHover, onHoverEnd }: ZoneMapSvgProps): JSX
   for (const tile of tiles) {
     const tx = tile.x ?? 0
     const ty = tile.y ?? 0
-    const isZoneExit = !!(tile.zoneExits?.length || tile.zone_exits?.length)
-
     for (const dir of tile.exits ?? []) {
       const offsets = DIR_OFFSETS[dir]
       if (!offsets) continue
