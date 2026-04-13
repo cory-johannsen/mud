@@ -15,8 +15,9 @@ import (
 // creates a command slot (backward compatibility with telnet hotbar command).
 //
 // Precondition: uid identifies a connected player; req is non-nil.
-// Postcondition: On "set"/"clear", sess.Hotbar updated, SaveHotbar called, HotbarUpdateEvent returned.
+// Postcondition: On "set"/"clear", sess.Hotbar updated, SaveHotbar called, HotbarUpdateEvent pushed
 //
+//	via entity (for web client refresh), and a confirmation MessageEvent returned (for telnet feedback).
 //	On "show", per-slot MessageEvents pushed to entity; nil returned.
 //	On out-of-range slot or empty set payload, MessageEvent returned with no side effects.
 func (s *GameServiceServer) handleHotbar(uid string, req *gamev1.HotbarRequest) (*gamev1.ServerEvent, error) {
@@ -41,7 +42,10 @@ func (s *GameServiceServer) handleHotbar(uid string, req *gamev1.HotbarRequest) 
 				s.logger.Warn("SaveHotbar failed", zap.String("uid", uid), zap.Error(err))
 			}
 		}
-		return s.hotbarUpdateEvent(sess), nil
+		// Push HotbarUpdateEvent so web client hotbar refreshes; return confirmation message
+		// so telnet players see text feedback (REQ-HB-12).
+		s.pushEventToUID(uid, s.hotbarUpdateEvent(sess))
+		return messageEvent(fmt.Sprintf("Slot %d set.", req.Slot)), nil
 
 	case "clear":
 		if req.Slot < 1 || req.Slot > 10 {
@@ -54,7 +58,10 @@ func (s *GameServiceServer) handleHotbar(uid string, req *gamev1.HotbarRequest) 
 				s.logger.Warn("SaveHotbar failed", zap.String("uid", uid), zap.Error(err))
 			}
 		}
-		return s.hotbarUpdateEvent(sess), nil
+		// Push HotbarUpdateEvent so web client hotbar refreshes; return confirmation message
+		// so telnet players see text feedback (REQ-HB-12).
+		s.pushEventToUID(uid, s.hotbarUpdateEvent(sess))
+		return messageEvent(fmt.Sprintf("Slot %d cleared.", req.Slot)), nil
 
 	case "show":
 		for i := 0; i < 10; i++ {

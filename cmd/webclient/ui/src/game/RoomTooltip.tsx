@@ -1,22 +1,36 @@
 import ReactDOM from 'react-dom'
 import type { MapTile, PoiWithNpc, ZoneExitInfo } from '../proto'
-import { POI_TYPES, DANGER_COLOR, ZONE_EXIT_COLOR } from './mapRenderer'
 
-interface RoomTooltipProps {
-  tile: MapTile
-  pos: { x: number; y: number }
+const DANGER_COLOR: Record<string, string> = {
+  safe:        '#4a8',
+  sketchy:     '#cc0',
+  dangerous:   '#f80',
+  all_out_war: '#f44',
 }
 
-export function RoomTooltip({ tile, pos }: RoomTooltipProps) {
-  const name = tile.roomName ?? tile.name ?? 'Unknown Room'
-  const danger = tile.dangerLevel ?? tile.danger_level ?? ''
-  const dangerColor = DANGER_COLOR[danger] ?? '#8ab'
-  const pois = Array.isArray(tile.pois) ? tile.pois : []
-  const poiNpcs: PoiWithNpc[] = tile.poiNpcs ?? tile.poi_npcs ?? []
-  const exits = Array.isArray(tile.exits) ? tile.exits : []
-  const zoneExits: ZoneExitInfo[] = tile.zoneExits ?? tile.zone_exits ?? []
-  const isCurrent = tile.current === true
+const ZONE_EXIT_COLOR = '#c8f'
 
+const POI_TYPES: Array<{ id: string; symbol: string; color: string; label: string }> = [
+  { id: 'merchant',    symbol: '$', color: '#0bc', label: 'Merchant'    },
+  { id: 'healer',      symbol: '+', color: '#4a8', label: 'Healer'      },
+  { id: 'trainer',     symbol: 'T', color: '#48f', label: 'Trainer'     },
+  { id: 'guard',       symbol: 'G', color: '#cc0', label: 'Guard'       },
+  { id: 'motel',       symbol: 'R', color: '#d8f', label: 'Motel'       },
+  { id: 'brothel',     symbol: 'B', color: '#f64', label: 'Brothel'     },
+  { id: 'quest_giver', symbol: '!', color: '#fa0', label: 'Quest'       },
+  { id: 'npc',         symbol: 'N', color: '#aaa', label: 'NPC'         },
+  { id: 'map',         symbol: 'M', color: '#0cc', label: 'Map'         },
+  { id: 'cover',       symbol: 'C', color: '#cc0', label: 'Cover'       },
+  { id: 'equipment',   symbol: 'E', color: '#c8f', label: 'Equipment'   },
+]
+
+interface RoomTooltipProps {
+  tile: MapTile | null
+  pos: { x: number; y: number }
+  overrideText?: string
+}
+
+export function RoomTooltip({ tile, pos, overrideText }: RoomTooltipProps) {
   // Resolve tooltip position: appear below the hovered element, clamp to viewport.
   const style: React.CSSProperties = {
     position:    'fixed',
@@ -36,6 +50,26 @@ export function RoomTooltip({ tile, pos }: RoomTooltipProps) {
     color:       '#ccc',
     boxShadow:   '0 4px 12px rgba(0,0,0,0.6)',
   }
+
+  if (overrideText) {
+    return ReactDOM.createPortal(
+      <div style={style}>
+        <div style={{ color: '#fff', fontWeight: 'bold' }}>{overrideText}</div>
+      </div>,
+      document.body,
+    )
+  }
+
+  if (!tile) return null
+
+  const name = tile.roomName ?? tile.name ?? 'Unknown Room'
+  const danger = tile.dangerLevel ?? tile.danger_level ?? ''
+  const dangerColor = DANGER_COLOR[danger] ?? '#8ab'
+  const pois = Array.isArray(tile.pois) ? tile.pois : []
+  const poiNpcs: PoiWithNpc[] = tile.poiNpcs ?? tile.poi_npcs ?? []
+  const exits = Array.isArray(tile.exits) ? tile.exits : []
+  const zoneExits: ZoneExitInfo[] = tile.zoneExits ?? tile.zone_exits ?? []
+  const isCurrent = tile.current === true
 
   return ReactDOM.createPortal(
     <div style={style}>

@@ -741,11 +741,12 @@ func TestSession_FavoredTargetPromptedWhenMissing(t *testing.T) {
 	require.NoError(t, err)
 
 	// The server sends the room view first (to initialize split-screen), then the prompt.
+	// The HotbarUpdateEvent is sent after all prompts and LoadTechnologies, so it is not
+	// present between the RoomView and the first prompt.
 	// Receive the room view.
 	roomResp, recvErr := stream.Recv()
 	require.NoError(t, recvErr)
 	require.NotNil(t, roomResp.GetRoomView(), "expected RoomView before prompt")
-	drainHotbarEvent(t, stream)
 
 	// Receive the prompt message.
 	promptResp, recvErr2 := stream.Recv()
@@ -852,11 +853,11 @@ func TestSession_FavoredTargetPromptedWhenMissing_InvalidInput(t *testing.T) {
 	require.NoError(t, err)
 
 	// The server sends the room view first (to initialize split-screen), then the prompt.
+	// The HotbarUpdateEvent is sent after all prompts and LoadTechnologies.
 	// Receive the room view.
 	roomResp, recvErr := stream.Recv()
 	require.NoError(t, recvErr)
 	require.NotNil(t, roomResp.GetRoomView(), "expected RoomView before prompt")
-	drainHotbarEvent(t, stream)
 
 	// Receive the prompt message.
 	promptResp, recvErr2 := stream.Recv()
@@ -904,4 +905,111 @@ func drainHotbarEvent(t *testing.T, stream gamev1.GameService_SessionClient) {
 	resp, err := stream.Recv()
 	require.NoError(t, err, "expected HotbarUpdateEvent after RoomView")
 	require.NotNil(t, resp.GetHotbarUpdate(), "expected HotbarUpdateEvent after RoomView; got other event type")
+}
+
+// mockCharSaverWithLoginHotbar embeds mockCharSaverFull and overrides LoadHotbar to return
+// a pre-populated hotbar array. Used to test the login-path hotbar event ordering.
+type mockCharSaverWithLoginHotbar struct {
+	mockCharSaverFull
+	hotbar [10]session.HotbarSlot
+}
+
+func (m *mockCharSaverWithLoginHotbar) LoadHotbar(_ context.Context, _ int64) ([10]session.HotbarSlot, error) {
+	return m.hotbar, nil
+}
+
+func (m *mockCharSaverWithLoginHotbar) SaveHotbar(_ context.Context, _ int64, _ [10]session.HotbarSlot) error {
+	return nil
+}
+
+// testGRPCServerWithTechRepos starts an in-process gRPC server wired with the supplied
+// CharacterSaver and tech repos. Used to test that login-path events reflect loaded tech state.
+func testGRPCServerWithTechRepos(
+	t *testing.T,
+	saver CharacterSaver,
+	hwRepo HardwiredTechRepo,
+	prepRepo PreparedTechRepo,
+	spontRepo SpontaneousTechRepo,
+	innateRepo InnateTechRepo,
+	usePoolRepo SpontaneousUsePoolRepo,
+) (gamev1.GameServiceClient, *session.Manager) {
+	t.Helper()
+
+	worldMgr, sessMgr := testWorldAndSession(t)
+	cmdRegistry := command.DefaultRegistry()
+	npcMgr := npc.NewManager()
+	worldHandler := NewWorldHandler(worldMgr, sessMgr, npcMgr, nil, nil, nil)
+	chatHandler := NewChatHandler(sessMgr)
+	logger := zaptest.NewLogger(t)
+
+	svc := newTestGameServiceServer(
+		worldMgr, sessMgr, cmdRegistry,
+		worldHandler, chatHandler, logger,
+		saver, nil, nil, npcMgr, nil, nil,
+		nil, nil, nil, nil, nil, nil,
+		nil, nil, nil, nil,
+		hwRepo, prepRepo, spontRepo, innateRepo,
+		"",
+		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
+		nil, nil,
+		usePoolRepo,
+		nil, nil, nil,
+	)
+
+	lis, err := net.Listen("tcp", "127.0.0.1:0")
+	require.NoError(t, err)
+
+	grpcServer := grpc.NewServer()
+	gamev1.RegisterGameServiceServer(grpcServer, svc)
+	go func() { _ = grpcServer.Serve(lis) }()
+	t.Cleanup(func() { grpcServer.Stop() })
+
+	conn, err := grpc.NewClient(lis.Addr().String(), grpc.WithTransportCredentials(insecure.NewCredentials()))
+	require.NoError(t, err)
+	t.Cleanup(func() { conn.Close() })
+
+	return gamev1.NewGameServiceClient(conn), sessMgr
+}
+
+// REQ-HB-UC-LOGIN: the HotbarUpdateEvent emitted at login must reflect use counts populated by
+// LoadTechnologies, not a nil InnateTechs map. This test catches the sequencing bug where the
+// event was sent before LoadTechnologies ran, causing use counts to always appear as 0/0.
+func TestSession_InitialHotbarEvent_IncludesInnateTechUseState(t *testing.T) {
+	const techID = "test_innate_login_tech"
+	const charID = int64(42)
+
+	hotbar := [10]session.HotbarSlot{}
+	hotbar[0] = session.HotbarSlot{Kind: session.HotbarSlotKindTechnology, Ref: techID}
+	saver := &mockCharSaverWithLoginHotbar{hotbar: hotbar}
+
+	innateRepo := &innateRepoInternal{slots: map[string]*session.InnateSlot{
+		techID: {MaxUses: 3, UsesRemaining: 1},
+	}}
+
+	client, _ := testGRPCServerWithTechRepos(t, saver,
+		&hwRepoInternal{}, &prepRepoInternal{}, &spontRepoInternal{},
+		innateRepo, newStubSpontaneousUsePoolRepo(nil),
+	)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	stream, err := client.Session(ctx)
+	require.NoError(t, err)
+
+	// RoomView is the first event; consumed by joinWorldWithCharID.
+	joinWorldWithCharID(t, stream, "u1", "Alice", charID)
+
+	// The next event must be HotbarUpdateEvent with populated use counts.
+	resp, err := stream.Recv()
+	require.NoError(t, err)
+	hu := resp.GetHotbarUpdate()
+	require.NotNil(t, hu, "expected HotbarUpdateEvent as next event after RoomView")
+	require.Len(t, hu.Slots, 10)
+
+	slot0 := hu.Slots[0]
+	assert.Equal(t, int32(3), slot0.GetMaxUses(),
+		"MaxUses must equal InnateSlot.MaxUses loaded by LoadTechnologies (not zero from nil map)")
+	assert.Equal(t, int32(1), slot0.GetUsesRemaining(),
+		"UsesRemaining must equal InnateSlot.UsesRemaining loaded by LoadTechnologies")
 }

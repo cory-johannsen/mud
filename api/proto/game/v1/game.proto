@@ -10,6 +10,12 @@ service GameService {
   // Session establishes a bidirectional stream for a single player session.
   // The client sends commands; the server sends events.
   rpc Session(stream ClientMessage) returns (stream ServerEvent);
+
+  // Admin RPCs — unary, require admin role on the server side.
+  rpc AdminListSessions(AdminListSessionsRequest) returns (AdminListSessionsResponse);
+  rpc AdminKickPlayer(AdminKickRequest) returns (AdminKickResponse);
+  rpc AdminMessagePlayer(AdminMessageRequest) returns (AdminMessageResponse);
+  rpc AdminTeleportPlayer(AdminTeleportRequest) returns (AdminTeleportResponse);
 }
 
 // ClientMessage wraps all client-to-server commands.
@@ -876,6 +882,8 @@ message RoundStartEvent {
   int32                      duration_ms       = 3;
   repeated string            turn_order        = 4;
   repeated CombatantPosition initial_positions = 5;
+  int32                      grid_width        = 6;
+  int32                      grid_height       = 7;
 }
 
 // RoundEndEvent is broadcast when a round's actions have resolved.
@@ -1529,3 +1537,26 @@ message JobGrantsResponse {
   repeated JobFeatGrant feat_grants = 1;
   repeated JobTechGrant tech_grants = 2;
 }
+
+// Admin session snapshot for a single connected player.
+message AdminSessionInfo {
+  int64  char_id     = 1;
+  string player_name = 2;
+  int32  level       = 3;
+  string room_id     = 4;
+  string zone        = 5;
+  int32  current_hp  = 6;
+  int64  account_id  = 7;
+}
+
+message AdminListSessionsRequest  {}
+message AdminListSessionsResponse { repeated AdminSessionInfo sessions = 1; }
+
+message AdminKickRequest     { int64 char_id = 1; }
+message AdminKickResponse    {}
+
+message AdminMessageRequest  { int64 char_id = 1; string text = 2; }
+message AdminMessageResponse {}
+
+message AdminTeleportRequest  { int64 char_id = 1; string room_id = 2; }
+message AdminTeleportResponse {}

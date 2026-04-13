@@ -1752,6 +1752,8 @@ func (h *CombatHandler) startPursuitCombatLocked(playerSess *session.PlayerSessi
 			DurationMs:       int32(h.roundDuration.Milliseconds()),
 			TurnOrder:        pursuitTurnOrder,
 			InitialPositions: initialPositions,
+			GridWidth:        int32(cbt.GridWidth),
+			GridHeight:       int32(cbt.GridHeight),
 		})
 	}
 
@@ -2657,6 +2659,8 @@ func (h *CombatHandler) resolveAndAdvanceLocked(roomID string, cbt *combat.Comba
 			DurationMs:       int32(h.roundDuration.Milliseconds()),
 			TurnOrder:        nextTurnOrder,
 			InitialPositions: initialPositions,
+			GridWidth:        int32(cbt.GridWidth),
+			GridHeight:       int32(cbt.GridHeight),
 		})
 	}
 
@@ -2994,6 +2998,8 @@ func (h *CombatHandler) startCombatLocked(sess *session.PlayerSession, inst *npc
 			DurationMs:       int32(h.roundDuration.Milliseconds()),
 			TurnOrder:        turnOrder,
 			InitialPositions: initialPositions,
+			GridWidth:        int32(cbt.GridWidth),
+			GridHeight:       int32(cbt.GridHeight),
 		})
 	}
 

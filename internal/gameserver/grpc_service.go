@@ -1463,11 +1463,6 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 		}
 	}
 
-	// Send initial HotbarUpdateEvent so the frontend can render the hotbar row (REQ-HB-12).
-	if err := stream.Send(s.hotbarUpdateEvent(sess)); err != nil {
-		s.logger.Warn("failed to send initial hotbar update", zap.Error(err))
-	}
-
 	// Resolve any missing feature/feat choices interactively now that split-screen is active.
 	// promptFeatureChoice blocks on stream.Recv(); no entity/clock goroutines are running yet
 	// so there are no concurrent stream.Send calls during this phase.
@@ -1854,6 +1849,13 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 				sess.Reactions.Register(uid, techID, techDef.Name, *techDef.Reaction)
 			}
 		}
+	}
+
+	// Send initial HotbarUpdateEvent after LoadTechnologies and ActiveFeatUses initialization so
+	// use counts (InnateTechs, PreparedTechs, SpontaneousUsePools, ActiveFeatUses) are populated.
+	// REQ-HB-12: web client renders the hotbar row on receipt of this event.
+	if err := stream.Send(s.hotbarUpdateEvent(sess)); err != nil {
+		s.logger.Warn("failed to send initial hotbar update", zap.Error(err))
 	}
 
 	// REQ-RXN20: build and store the interactive reaction callback.
