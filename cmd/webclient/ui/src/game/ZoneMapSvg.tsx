@@ -31,6 +31,10 @@ const DIR_OFFSETS: Record<string, [number, number]> = {
   sw: [-1, 1],
 }
 
+const OPPOSITE_DIR: Record<string, string> = {
+  n: 's', s: 'n', e: 'w', w: 'e', ne: 'sw', sw: 'ne', nw: 'se', se: 'nw',
+}
+
 interface ZoneMapSvgProps {
   tiles: MapTile[]
   onHover?: (tile: MapTile, e: React.MouseEvent) => void
@@ -61,10 +65,6 @@ export function ZoneMapSvg({ tiles, onHover, onHoverEnd }: ZoneMapSvgProps): JSX
   const maxY = Math.max(...ys)
 
   const viewBox = `${minX * CELL_W - 8} ${minY * CELL_H - 8} ${(maxX - minX + 1) * CELL_W + 16} ${(maxY - minY + 1) * CELL_H + 16}`
-
-  const OPPOSITE_DIR: Record<string, string> = {
-    n: 's', s: 'n', e: 'w', w: 'e', ne: 'sw', sw: 'ne', nw: 'se', se: 'nw',
-  }
 
   // Build connectors, deduplicating pairs
   const drawnPairs = new Set<string>()
@@ -143,7 +143,7 @@ export function ZoneMapSvg({ tiles, onHover, onHoverEnd }: ZoneMapSvgProps): JSX
     const isBoss = tile.bossRoom ?? false
     const stroke = isCurrent ? '#f0c040' : isBoss ? '#cc4444' : '#333'
     const strokeWidth = isCurrent || isBoss ? 2 : 1
-    const name = tile.roomName ?? tile.room_name ?? ''
+    const name = tile.roomName ?? ''
     const id = clipId(tile)
 
     return (

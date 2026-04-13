@@ -49,7 +49,7 @@ export function WorldMapSvg({ tiles, onTravel }: WorldMapSvgProps): JSX.Element 
       >
         <defs>
           {tiles.map(tile => {
-            const id = tile.zoneId ?? ''
+            const id = tile.zoneId ?? `${tile.worldX ?? 0}-${tile.worldY ?? 0}`
             const cx = (tile.worldX ?? 0) * ZONE_W
             const cy = (tile.worldY ?? 0) * ZONE_H
             return (
@@ -61,7 +61,7 @@ export function WorldMapSvg({ tiles, onTravel }: WorldMapSvgProps): JSX.Element 
         </defs>
 
         {tiles.map(tile => {
-          const id = tile.zoneId ?? ''
+          const id = tile.zoneId ?? `${tile.worldX ?? 0}-${tile.worldY ?? 0}`
           const wx = tile.worldX ?? 0
           const wy = tile.worldY ?? 0
           const cx = wx * ZONE_W

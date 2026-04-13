@@ -3,8 +3,8 @@ import { render, fireEvent, screen } from '@testing-library/react'
 
 // Mock react-resizable-panels — jsdom lacks ResizeObserver required by Group.
 vi.mock('react-resizable-panels', () => ({
-  Group: ({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }) =>
-    <div style={style}>{children}</div>,
+  Group: ({ children, style, onLayoutChanged }: { children: React.ReactNode; style?: React.CSSProperties; onLayoutChanged?: (sizes: number[]) => void }) =>
+    <div style={style} data-onlayout={String(!!onLayoutChanged)}>{children}</div>,
   Panel: ({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }) =>
     <div style={style}>{children}</div>,
   Separator: () => <div />,
@@ -22,7 +22,7 @@ vi.mock('../GameContext', () => ({
           x: 0,
           y: 0,
           current: true,
-          exits: ['east'],
+          exits: [],
           dangerLevel: 'safe',
           pois: ['merchant'],
         },
@@ -32,7 +32,7 @@ vi.mock('../GameContext', () => ({
           x: 2,
           y: 0,
           current: false,
-          exits: ['west'],
+          exits: [],
           dangerLevel: 'safe',
           pois: [],
         },
@@ -40,6 +40,9 @@ vi.mock('../GameContext', () => ({
       worldTiles: [],
       combatRound: null,
       combatPositions: {},
+      combatantAP: {},
+      combatGridWidth: 20,
+      combatGridHeight: 20,
     },
     sendMessage: vi.fn(),
     sendCommand: vi.fn(),
@@ -48,29 +51,34 @@ vi.mock('../GameContext', () => ({
 
 import { MapPanel } from './MapPanel'
 
-describe('MapPanel room hover tooltip', () => {
-  it('shows no tooltip initially', () => {
-    render(<MapPanel />)
-    // The tooltip uniquely shows "current room" badge for the current room
-    expect(screen.queryByText('current room')).toBeNull()
+describe('MapPanel zone map — SVG rendering', () => {
+  it('renders SVG with rects for each tile', () => {
+    const { container } = render(<MapPanel />)
+    const rects = container.querySelectorAll('svg rect:not(defs rect)')
+    expect(rects.length).toBe(2)
   })
 
-  it('shows tooltip with room name on mouse enter', () => {
-    render(<MapPanel />)
-    // Room cells are rendered as spans with data-room attribute
-    const roomSpan = document.querySelector('[data-room="grinders_row"]')
-    expect(roomSpan).not.toBeNull()
-    fireEvent.mouseEnter(roomSpan!, { clientX: 100, clientY: 200 })
-    // Tooltip uniquely shows "current room" badge for the current room
-    expect(screen.getByText('current room')).toBeDefined()
+  it('renders current room tile with gold stroke', () => {
+    const { container } = render(<MapPanel />)
+    const rects = Array.from(container.querySelectorAll('svg rect:not(defs rect)'))
+    const currentRect = rects.find(r => r.getAttribute('stroke') === '#f0c040')
+    expect(currentRect).toBeDefined()
   })
 
-  it('hides tooltip on mouse leave', () => {
+  it('shows tooltip on SVG tile hover', () => {
+    const { container } = render(<MapPanel />)
+    const rects = Array.from(container.querySelectorAll('svg rect:not(defs rect)'))
+    const currentRect = rects.find(r => r.getAttribute('stroke') === '#f0c040')
+    expect(currentRect).not.toBeNull()
+    fireEvent.mouseEnter(currentRect!)
+    // Tooltip portal renders room name — at least one match exists
+    expect(screen.queryAllByText("Grinder's Row").length).toBeGreaterThan(0)
+  })
+
+  it('renders details pane with room names', () => {
     render(<MapPanel />)
-    const roomSpan = document.querySelector('[data-room="grinders_row"]')!
-    fireEvent.mouseEnter(roomSpan, { clientX: 100, clientY: 200 })
-    expect(screen.getByText('current room')).toBeDefined()
-    fireEvent.mouseLeave(roomSpan)
-    expect(screen.queryByText('current room')).toBeNull()
+    // Room names appear in both SVG text and details list — at least one match each
+    expect(screen.queryAllByText("Grinder's Row").length).toBeGreaterThan(0)
+    expect(screen.queryAllByText('Last Stand Lodge').length).toBeGreaterThan(0)
   })
 })

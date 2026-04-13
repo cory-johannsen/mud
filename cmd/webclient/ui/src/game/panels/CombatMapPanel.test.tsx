@@ -119,7 +119,6 @@ describe('MapPanel combat mode — AP gating', () => {
       combatantAP: { Hero: { remaining: 0, total: 3 } },
     }))
     render(<MapPanel />)
-    const nBtn = screen.queryByTitle('N') as HTMLButtonElement | null
     // Button exists but may be disabled — just check the flee button is still enabled
     const fleeBtn = screen.getByText('Flee!')
     expect(fleeBtn).toBeDefined()
