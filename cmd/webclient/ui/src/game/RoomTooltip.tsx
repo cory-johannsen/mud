@@ -3,20 +3,12 @@ import type { MapTile, PoiWithNpc, ZoneExitInfo } from '../proto'
 import { POI_TYPES, DANGER_COLOR, ZONE_EXIT_COLOR } from './mapRenderer'
 
 interface RoomTooltipProps {
-  tile: MapTile
+  tile: MapTile | null
   pos: { x: number; y: number }
+  overrideText?: string
 }
 
-export function RoomTooltip({ tile, pos }: RoomTooltipProps) {
-  const name = tile.roomName ?? tile.name ?? 'Unknown Room'
-  const danger = tile.dangerLevel ?? tile.danger_level ?? ''
-  const dangerColor = DANGER_COLOR[danger] ?? '#8ab'
-  const pois = Array.isArray(tile.pois) ? tile.pois : []
-  const poiNpcs: PoiWithNpc[] = tile.poiNpcs ?? tile.poi_npcs ?? []
-  const exits = Array.isArray(tile.exits) ? tile.exits : []
-  const zoneExits: ZoneExitInfo[] = tile.zoneExits ?? tile.zone_exits ?? []
-  const isCurrent = tile.current === true
-
+export function RoomTooltip({ tile, pos, overrideText }: RoomTooltipProps) {
   // Resolve tooltip position: appear below the hovered element, clamp to viewport.
   const style: React.CSSProperties = {
     position:    'fixed',
@@ -36,6 +28,26 @@ export function RoomTooltip({ tile, pos }: RoomTooltipProps) {
     color:       '#ccc',
     boxShadow:   '0 4px 12px rgba(0,0,0,0.6)',
   }
+
+  if (overrideText) {
+    return ReactDOM.createPortal(
+      <div style={style}>
+        <div style={{ color: '#fff', fontWeight: 'bold' }}>{overrideText}</div>
+      </div>,
+      document.body,
+    )
+  }
+
+  if (!tile) return null
+
+  const name = tile.roomName ?? tile.name ?? 'Unknown Room'
+  const danger = tile.dangerLevel ?? tile.danger_level ?? ''
+  const dangerColor = DANGER_COLOR[danger] ?? '#8ab'
+  const pois = Array.isArray(tile.pois) ? tile.pois : []
+  const poiNpcs: PoiWithNpc[] = tile.poiNpcs ?? tile.poi_npcs ?? []
+  const exits = Array.isArray(tile.exits) ? tile.exits : []
+  const zoneExits: ZoneExitInfo[] = tile.zoneExits ?? tile.zone_exits ?? []
+  const isCurrent = tile.current === true
 
   return ReactDOM.createPortal(
     <div style={style}>
