@@ -264,39 +264,96 @@ cd cmd/webclient/ui && npm run build
 
 ---
 
-## Phase B: Zone & World Map Polish
+## Phase B: Sprite-Based Zone & World Maps
 
-### Step B1 — Section separators in legend (REQ-PB-1)
+### Step B1 — TDD: write failing render tests
 
-**File:** `cmd/webclient/ui/src/game/mapRenderer.ts` (or wherever `legendLines` is built)
+**File:** `cmd/webclient/ui/src/game/ZoneMapSvg.test.tsx` (new)
 
-Identify where legend lines are generated. Add section header rows (`LEGEND`, `POINTS OF INTEREST`, `ROOMS`) and separator lines between sections in the output.
+Write tests using `@testing-library/react` that:
+- Render `ZoneMapSvg` with 3 tiles: one current, one boss, one with a merchant POI
+- Assert a `<rect>` exists for each tile at expected pixel positions
+- Assert the current tile has a `stroke` of `#f0c040`
+- Assert the merchant tile has a `$` text element
+- Assert at least one `<line>` connector exists between adjacent tiles
 
-If `renderMapTiles` returns `{ gridLines, legendLines }`, split `legendLines` into sections and inject separator `ColoredLine` entries with `color: '#555'` and text `─────────────`.
+Run — tests MUST fail before implementation.
 
 ---
 
-### Step B2 — Resizable splitter for map/legend (REQ-PB-2)
+### Step B2 — Implement `ZoneMapSvg` (REQ-PB-1)
+
+**File:** `cmd/webclient/ui/src/game/ZoneMapSvg.tsx` (new)
+
+```typescript
+const CELL_W = 56
+const CELL_H = 36
+const DANGER_FILLS: Record<string, string> = {
+  safe: '#2a4a2a', sketchy: '#3a3a1a', dangerous: '#4a2a1a',
+  deadly: '#4a1a1a',
+}
+const POI_SYMBOLS: Record<string, string> = {
+  merchant: '$', healer: '+', trainer: 'T', quest_giver: '!',
+  motel: 'Z', npc: '@', guard: 'G',
+}
+const DIR_OFFSETS: Record<string, [number, number]> = {
+  n:[0,-1], s:[0,1], e:[1,0], w:[-1,0],
+  ne:[1,-1], nw:[-1,-1], se:[1,1], sw:[-1,1],
+}
+```
+
+Implementation outline:
+1. Build a `Map<string, MapTile>` keyed by `"${x},${y}"` for fast adjacency lookup
+2. Render connectors first (below tiles): for each tile, for each exit direction, if adjacent tile exists at offset, draw a `<line>` between centers. Zone exits → dashed blue line. Normal exits → `#555` line. Skip if already drawn from the other side (track rendered pairs)
+3. Render tile `<rect>` elements with fill from `DANGER_FILLS`, current/boss stroke styling
+4. Render room name `<text>` (centered, clipped)
+5. Render POI `<text>` icons (top-right corner, iterate `tile.pois`)
+6. Wire `onMouseEnter`/`onMouseLeave` to existing `RoomTooltip` pattern
+7. Compute SVG `viewBox` from min/max tile coordinates + padding
+
+---
+
+### Step B3 — Implement `WorldMapSvg` (REQ-PB-2)
+
+**File:** `cmd/webclient/ui/src/game/WorldMapSvg.tsx` (new)
+
+```typescript
+const ZONE_W = 80
+const ZONE_H = 50
+```
+
+Implementation outline:
+1. Render each `WorldZoneTile` as a `<rect>` at `(worldX * ZONE_W, worldY * ZONE_H)`
+2. Discovered tiles: fill from `DANGER_FILLS`, zone name label, `pointer` cursor if not current
+3. Undiscovered tiles: `#111` fill, no label
+4. Current tile: `#f0c040` stroke
+5. `onClick` → `onTravel(zoneId)` for non-current discovered tiles
+6. Danger level color legend below the SVG (matching existing legend)
+
+---
+
+### Step B4 — Wire into `MapPanel.tsx` (REQ-PB-1a, REQ-PB-2a, REQ-PB-3)
 
 **File:** `cmd/webclient/ui/src/game/panels/MapPanel.tsx`
 
-Replace the static flex layout for zone map (the `display: 'flex', gap: '1rem'` div at lines 318-330) with a resizable split. Use the same pattern as the existing horizontal splitters in the main layout.
-
-```typescript
-const [legendWidthPct, setLegendWidthPct] = useState(() => {
-  const saved = localStorage.getItem('mud-map-splitter')
-  return saved ? Number(saved) : 40
-})
-```
-
-Render as two panels with a draggable 6px divider between them. On drag end, persist to `localStorage`.
+1. Replace the `<pre className="map-ascii">` + `renderLines(gridLines, hoverHandlers)` block with `<ZoneMapSvg tiles={state.mapTiles} onHover={handleRoomEnter} onHoverEnd={handleRoomLeave} />`
+2. Replace `<WorldMapView>` with `<WorldMapSvg tiles={state.worldTiles} onTravel={handleTravel} />`
+3. Add resizable splitter for zone view: left pane = `ZoneMapSvg`, right pane = details list (rooms grouped by danger level + POI icons)
+4. Persist splitter position in `localStorage('mud-map-splitter')`, default 70/30
 
 ---
 
-### Step B3 — Run Phase B build
+### Step B5 — Delete ASCII renderer (REQ-PB-4)
+
+1. Delete `cmd/webclient/ui/src/game/mapRenderer.ts`
+2. Remove all imports of `renderMapTiles`, `ColoredLine`, `renderLines` from `MapPanel.tsx`
+
+---
+
+### Step B6 — Run Phase B tests and build
 
 ```bash
-cd cmd/webclient/ui && npm run build
+cd cmd/webclient/ui && npm test -- --testPathPattern="ZoneMapSvg|WorldMapSvg" && npm run build
 ```
 
 ---
@@ -357,11 +414,14 @@ A4 ──────────▶ A6 (GameContext AP)
 A6 ──────────▶ A5d (AP-gated nav)
 A5 + A6 ─────▶ A7
 
-B1 + B2 ─────▶ B3
+B1 ──▶ B2 (ZoneMapSvg) ──┐
+B3 (WorldMapSvg) ─────────┼──▶ B4 (wire MapPanel) ──▶ B5 (delete ASCII) ──▶ B6
+                           ┘
 
 A7 ──▶ B (can run after Phase A)
-B3 ──▶ C (can run after Phase B)
+B6 ──▶ C (can run after Phase B)
 ```
 
-Steps A1 and A3 are independent of A2 and can run in parallel.
-Phase B is independent of Phase C.
+Steps A1 and A3 are independent and can run in parallel.
+Steps B2 and B3 are independent and can run in parallel.
+Phase C has no dependency on Phase B internals — only on Phase B being complete.

@@ -59,19 +59,49 @@ The 2D combat grid (`renderBattleGrid`) is already implemented in `MapPanel.tsx`
 
 ---
 
-## Phase B: Zone & World Map Polish
+## Phase B: Sprite-Based Zone & World Maps
 
-### REQ-PB-1: Section separators in zone map legend
+### Context
 
-- REQ-PB-1a: The legend rendered alongside the ASCII zone map MUST visually separate the Legend, POIs, and Rooms sections with a horizontal rule between each
-- REQ-PB-1b: Each section MUST have a bold uppercase header label (e.g. `LEGEND`, `POINTS OF INTEREST`, `ROOMS`)
+The ASCII zone map is too information-dense to be legible. Phase B replaces both the zone map and world map with SVG-based graphical renderers. No external asset pipeline is required — all tiles and icons are drawn programmatically. `mapRenderer.ts` and the `renderLines` rendering path are replaced entirely.
 
-### REQ-PB-2: Resizable splitter between map grid and legend
+The data model is already sufficient: each `MapTile` has `(x, y)` grid coordinates, exit directions, danger level, POI types, boss flag, and zone-exit info. Room connectivity is inferred by finding adjacent tiles at the expected offset for each exit direction.
 
-- REQ-PB-2a: A draggable vertical splitter bar MUST divide the ASCII map grid and the legend panel, consistent with the existing horizontal splitters between Room/Map and Map/Character panels
-- REQ-PB-2b: The splitter MUST be draggable; dragging adjusts the width ratio between map and legend
-- REQ-PB-2c: The splitter position MUST be persisted in `localStorage` under key `mud-map-splitter` and restored on load
-- REQ-PB-2d: Default split: 60% map, 40% legend
+### REQ-PB-1: SVG zone map renderer
+
+- REQ-PB-1a: A new `ZoneMapSvg` React component MUST replace the `<pre className="map-ascii">` + `renderLines` rendering path in `MapPanel.tsx`
+- REQ-PB-1b: `ZoneMapSvg` MUST accept `tiles: MapTile[]` and render an SVG element that fills its container
+- REQ-PB-1c: Each tile MUST be rendered as a rounded rectangle (`<rect>`) at pixel position `(x * CELL_W, y * CELL_H)`. Default cell size: 56×36 px
+- REQ-PB-1d: Tile fill color MUST be determined by `dangerLevel` using the existing color palette: `safe` → `#2a4a2a`, `sketchy` → `#3a3a1a`, `dangerous` → `#4a2a1a`, `deadly` → `#4a1a1a`, unknown/undiscovered → `#1e1e2e`
+- REQ-PB-1e: The current room tile MUST be outlined with a 2px `#f0c040` stroke and rendered on top of all others
+- REQ-PB-1f: Boss room tiles MUST use a 2px `#cc4444` stroke
+- REQ-PB-1g: Each tile MUST display the room name as a `<text>` element centered within the tile, font size 9px, clipped to tile width. If the name exceeds the tile, it MUST be truncated with an ellipsis
+- REQ-PB-1h: Exit connectors MUST be drawn as `<line>` elements between the centers of adjacent tiles. Connector color: `#555`. Zone-crossing exits MUST use a dashed `<line>` with color `#8888ff`
+- REQ-PB-1i: Exit direction offsets for connector inference MUST be: `n`=(0,−1), `s`=(0,+1), `e`=(+1,0), `w`=(−1,0), `ne`=(+1,−1), `nw`=(−1,−1), `se`=(+1,+1), `sw`=(−1,+1). Diagonal connectors connect tile corners rather than centers
+- REQ-PB-1j: POI icons MUST be rendered as small `<text>` elements (unicode symbols) in the top-right corner of the tile at 10px. Symbols: `merchant` → `$`, `healer` → `+`, `trainer` → `T`, `quest_giver` → `!`, `motel` → `Z`, `npc` → `@`, `guard` → `G`
+- REQ-PB-1k: Hovering a tile MUST trigger the existing `RoomTooltip` portal with room details, preserving current hover behavior
+- REQ-PB-1l: The SVG MUST be scrollable within its container when the map exceeds the panel bounds
+
+### REQ-PB-2: SVG world map renderer
+
+- REQ-PB-2a: A new `WorldMapSvg` React component MUST replace the `<table>`-based `WorldMapView` component
+- REQ-PB-2b: Each `WorldZoneTile` MUST be rendered as a rectangle at `(worldX * ZONE_W, worldY * ZONE_H)`. Default zone cell size: 80×50 px
+- REQ-PB-2c: Tile fill color MUST follow the same danger-level palette as REQ-PB-1d. Undiscovered tiles MUST render as dark `#111` with no label
+- REQ-PB-2d: Discovered tiles MUST display the zone name as centered `<text>`, font size 10px, truncated if needed
+- REQ-PB-2e: The current zone tile MUST have a 2px `#f0c040` stroke
+- REQ-PB-2f: Clicking a discovered, non-current tile MUST call the existing `onTravel(zoneId)` handler. Cursor MUST be `pointer` on hoverable tiles
+- REQ-PB-2g: A legend row below the SVG MUST show color swatches for each danger level and "Undiscovered", matching the existing legend
+
+### REQ-PB-3: Resizable splitter — map panel layout
+
+- REQ-PB-3a: The zone map view MUST be divided into a left SVG map pane and a right details pane (showing POI legend and room list) with a draggable vertical splitter
+- REQ-PB-3b: The splitter position MUST be persisted in `localStorage` under key `mud-map-splitter` and restored on load; default split 70% map / 30% details
+- REQ-PB-3c: The details pane MUST list discovered rooms grouped by danger level with their POI icons
+
+### REQ-PB-4: Remove ASCII map infrastructure
+
+- REQ-PB-4a: `cmd/webclient/ui/src/game/mapRenderer.ts` MUST be deleted once `ZoneMapSvg` and `WorldMapSvg` are complete
+- REQ-PB-4b: All imports of `renderMapTiles` and `ColoredLine` MUST be removed from `MapPanel.tsx`
 
 ---
 
@@ -101,7 +131,10 @@ Phase C carries forward the approved design from `docs/superpowers/specs/2026-03
 
 ### Phase B
 
-- `cmd/webclient/ui/src/game/panels/MapPanel.tsx` — section separators, resizable splitter
+- `cmd/webclient/ui/src/game/panels/MapPanel.tsx` — replace ASCII rendering with `ZoneMapSvg` and `WorldMapSvg`
+- `cmd/webclient/ui/src/game/ZoneMapSvg.tsx` (new component)
+- `cmd/webclient/ui/src/game/WorldMapSvg.tsx` (new component)
+- `cmd/webclient/ui/src/game/mapRenderer.ts` — delete after Phase B
 
 ### Phase C
 
