@@ -86,6 +86,10 @@ function plainLine(text: string): ColoredLine {
   return [seg(text)]
 }
 
+function separatorLine(width: number): ColoredLine {
+  return [seg('─'.repeat(width), '#444')]
+}
+
 function coordKey(x: number, y: number): string {
   return `${x},${y}`
 }
@@ -272,6 +276,7 @@ export function renderMapTiles(tiles: MapTile[]): MapRenderResult {
   ])
 
   if (presentPOIs.size > 0) {
+    legendLines.push(separatorLine(LEGEND_COLS * LEGEND_COL_WIDTH))
     legendLines.push(plainLine('Points of Interest'))
     const poiEntries = POI_TYPES.filter(pt => presentPOIs.has(pt.id))
     const POI_LABEL_WIDTH = LEGEND_COL_WIDTH - 3  // 3 = symbol(1) + "  "(2)
@@ -289,6 +294,9 @@ export function renderMapTiles(tiles: MapTile[]): MapRenderResult {
       legendLines.push(rowSegs)
     }
   }
+
+  legendLines.push(separatorLine(LEGEND_COLS * LEGEND_COL_WIDTH))
+  legendLines.push(plainLine('Rooms'))
 
   // Collect all room entries in row-major order.
   const roomEntries: Array<{ num: number; name: string; current: boolean; color: string }> = []

@@ -1,6 +1,15 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, fireEvent, screen } from '@testing-library/react'
 
+// Mock react-resizable-panels — jsdom lacks ResizeObserver required by Group.
+vi.mock('react-resizable-panels', () => ({
+  Group: ({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }) =>
+    <div style={style}>{children}</div>,
+  Panel: ({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }) =>
+    <div style={style}>{children}</div>,
+  Separator: () => <div />,
+}))
+
 // Mock GameContext so MapPanel can render without a real WebSocket.
 vi.mock('../GameContext', () => ({
   useGame: () => ({

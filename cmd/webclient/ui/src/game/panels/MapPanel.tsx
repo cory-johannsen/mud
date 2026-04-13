@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from 'react'
+import { Panel, Group as PanelGroup, Separator as PanelResizeHandle } from 'react-resizable-panels'
 import { useGame } from '../GameContext'
 import { renderMapTiles } from '../mapRenderer'
 import type { ColoredLine } from '../mapRenderer'
@@ -316,17 +317,22 @@ export function MapPanel() {
       ) : state.mapTiles.length === 0 ? (
         <p className="map-empty">No map data.</p>
       ) : (
-        <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start', overflow: 'auto' }}>
-          <pre className="map-ascii" style={{ margin: 0, flexShrink: 0 }}>
-            {renderLines(gridLines, hoverHandlers)}
-          </pre>
-          <pre className="map-ascii" style={{ margin: 0, flexShrink: 1, minWidth: 0 }}>
-            {renderLines(legendLines)}
-          </pre>
-          {hoveredTile && (
-            <RoomTooltip tile={hoveredTile} pos={tooltipPos} />
-          )}
-        </div>
+        <PanelGroup orientation="horizontal" style={{ flex: 1, minHeight: 0 }}>
+          <Panel defaultSize={60} minSize={20} style={{ overflow: 'auto', position: 'relative' }}>
+            <pre className="map-ascii" style={{ margin: 0 }}>
+              {renderLines(gridLines, hoverHandlers)}
+            </pre>
+            {hoveredTile && (
+              <RoomTooltip tile={hoveredTile} pos={tooltipPos} />
+            )}
+          </Panel>
+          <PanelResizeHandle className="resize-handle resize-handle-h" />
+          <Panel defaultSize={40} minSize={20} style={{ overflow: 'auto' }}>
+            <pre className="map-ascii" style={{ margin: 0 }}>
+              {renderLines(legendLines)}
+            </pre>
+          </Panel>
+        </PanelGroup>
       )}
     </div>
   )
