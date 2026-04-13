@@ -1,0 +1,9 @@
+id: scrap_shield
+name: Scrap Shield
+description: A makeshift defensive barrier fashioned from salvaged metal scraps, dented and poorly balanced but functional.
+kind: weapon
+weapon_ref: scrap_shield
+weight: 3.0
+stackable: false
+max_stack: 1
+value: 40

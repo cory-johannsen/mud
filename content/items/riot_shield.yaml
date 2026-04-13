@@ -1,0 +1,9 @@
+id: riot_shield
+name: Riot Shield
+description: A polycarbonate shield standard-issue for law enforcement and security personnel, transparent reinforced design provides excellent visibility and protection.
+kind: weapon
+weapon_ref: riot_shield
+weight: 4.0
+stackable: false
+max_stack: 1
+value: 110

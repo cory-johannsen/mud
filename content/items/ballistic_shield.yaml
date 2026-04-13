@@ -1,0 +1,9 @@
+id: ballistic_shield
+name: Ballistic Shield
+description: A military-grade composite shield with reinforced edges, capable of stopping high-velocity projectiles. Advanced engineering and materials provide superior protection.
+kind: weapon
+weapon_ref: ballistic_shield
+weight: 5.5
+stackable: false
+max_stack: 1
+value: 290
