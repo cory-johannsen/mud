@@ -1,6 +1,28 @@
 import ReactDOM from 'react-dom'
 import type { MapTile, PoiWithNpc, ZoneExitInfo } from '../proto'
-import { POI_TYPES, DANGER_COLOR, ZONE_EXIT_COLOR } from './mapRenderer'
+
+const DANGER_COLOR: Record<string, string> = {
+  safe:        '#4a8',
+  sketchy:     '#cc0',
+  dangerous:   '#f80',
+  all_out_war: '#f44',
+}
+
+const ZONE_EXIT_COLOR = '#c8f'
+
+const POI_TYPES: Array<{ id: string; symbol: string; color: string; label: string }> = [
+  { id: 'merchant',    symbol: '$', color: '#0bc', label: 'Merchant'    },
+  { id: 'healer',      symbol: '+', color: '#4a8', label: 'Healer'      },
+  { id: 'trainer',     symbol: 'T', color: '#48f', label: 'Trainer'     },
+  { id: 'guard',       symbol: 'G', color: '#cc0', label: 'Guard'       },
+  { id: 'motel',       symbol: 'R', color: '#d8f', label: 'Motel'       },
+  { id: 'brothel',     symbol: 'B', color: '#f64', label: 'Brothel'     },
+  { id: 'quest_giver', symbol: '!', color: '#fa0', label: 'Quest'       },
+  { id: 'npc',         symbol: 'N', color: '#aaa', label: 'NPC'         },
+  { id: 'map',         symbol: 'M', color: '#0cc', label: 'Map'         },
+  { id: 'cover',       symbol: 'C', color: '#cc0', label: 'Cover'       },
+  { id: 'equipment',   symbol: 'E', color: '#c8f', label: 'Equipment'   },
+]
 
 interface RoomTooltipProps {
   tile: MapTile | null
