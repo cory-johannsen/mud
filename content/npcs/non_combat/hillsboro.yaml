@@ -19,6 +19,10 @@
         base_price: 55
         init_stock: 5
         max_stock: 10
+      - item_id: ballistic_shield
+        base_price: 350
+        init_stock: 1
+        max_stock: 2
     replenish_rate:
       min_hours: 8
       max_hours: 14

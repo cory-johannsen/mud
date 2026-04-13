@@ -19,6 +19,10 @@
         base_price: 40
         init_stock: 4
         max_stock: 8
+      - item_id: scrap_shield
+        base_price: 50
+        init_stock: 2
+        max_stock: 3
     replenish_rate:
       min_hours: 8
       max_hours: 16

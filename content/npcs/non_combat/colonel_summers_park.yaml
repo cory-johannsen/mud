@@ -94,6 +94,11 @@
     sell_margin: 1.5
     buy_margin: 0.6
     budget: 500
+    inventory:
+      - item_id: scrap_shield
+        base_price: 55
+        init_stock: 2
+        max_stock: 3
     replenish_rate:
       min_hours: 6
       max_hours: 12

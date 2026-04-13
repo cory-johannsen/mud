@@ -19,6 +19,10 @@
         base_price: 45
         init_stock: 5
         max_stock: 10
+      - item_id: riot_shield
+        base_price: 130
+        init_stock: 2
+        max_stock: 3
     replenish_rate:
       min_hours: 6
       max_hours: 10

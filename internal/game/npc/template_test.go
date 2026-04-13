@@ -1291,3 +1291,72 @@ brothel:
 	assert.Error(t, err, "brothel_keeper with rest_cost=0 must error")
 	assert.Contains(t, err.Error(), "rest_cost")
 }
+
+// TestEachZoneHasShieldMerchant verifies that every zone has at least one merchant
+// (primary or black-market) with a shield in their inventory (REQ #53).
+func TestEachZoneHasShieldMerchant(t *testing.T) {
+	templates, err := npc.LoadTemplates("../../../content/npcs")
+	require.NoError(t, err)
+
+	tmplByID := make(map[string]*npc.Template, len(templates))
+	for _, tmpl := range templates {
+		tmplByID[tmpl.ID] = tmpl
+	}
+
+	shieldIDs := map[string]bool{
+		"scrap_shield":     true,
+		"riot_shield":      true,
+		"ballistic_shield": true,
+	}
+
+	hasShield := func(tmpl *npc.Template) bool {
+		if tmpl == nil || tmpl.Merchant == nil {
+			return false
+		}
+		for _, item := range tmpl.Merchant.Inventory {
+			if shieldIDs[item.ItemID] {
+				return true
+			}
+		}
+		return false
+	}
+
+	zones := []struct {
+		zone    string
+		primary string
+		bm      string
+	}{
+		{"aloha", "aloha_merchant", "aloha_black_market_merchant"},
+		{"battleground", "battleground_merchant", "battleground_black_market_merchant"},
+		{"beaverton", "beaverton_merchant", "beaverton_black_market_merchant"},
+		{"clown_camp", "", "clown_camp_black_market_merchant"},
+		{"club_privata", "", "club_privata_black_market_merchant"},
+		{"colonel_summers_park", "", "colonel_summers_park_black_market_merchant"},
+		{"downtown", "downtown_merchant", "downtown_black_market_merchant"},
+		{"felony_flats", "felony_flats_merchant", "felony_flats_black_market_merchant"},
+		{"hillsboro", "hillsboro_merchant", "hillsboro_black_market_merchant"},
+		{"lake_oswego", "lake_oswego_merchant", "lake_oswego_black_market_merchant"},
+		{"ne_portland", "ne_portland_merchant", "ne_portland_black_market_merchant"},
+		{"oregon_country_fair", "juggalo_black_market_merchant", "wook_ocf_black_market_merchant"},
+		{"pdx_international", "pdx_international_merchant", "pdx_international_black_market_merchant"},
+		{"ross_island", "ross_island_merchant", "ross_island_black_market_merchant"},
+		{"rustbucket_ridge", "rustbucket_ridge_merchant", "rustbucket_ridge_black_market_merchant"},
+		{"sauvie_island", "sauvie_island_merchant", "sauvie_island_black_market_merchant"},
+		{"se_industrial", "se_industrial_merchant", "se_industrial_black_market_merchant"},
+		{"steampdx", "", "steampdx_black_market_merchant"},
+		{"the_couve", "the_couve_merchant", "the_couve_black_market_merchant"},
+		{"the_velvet_rope", "", "the_velvet_rope_black_market_merchant"},
+		{"troutdale", "troutdale_merchant", "troutdale_black_market_merchant"},
+		{"vantucky", "vantucky_merchant", "vantucky_black_market_merchant"},
+		{"wooklyn", "", "wooklyn_black_market_merchant"},
+	}
+
+	for _, z := range zones {
+		t.Run(z.zone, func(t *testing.T) {
+			if hasShield(tmplByID[z.primary]) || hasShield(tmplByID[z.bm]) {
+				return
+			}
+			t.Errorf("zone %q: no merchant sells a shield (checked %q and %q)", z.zone, z.primary, z.bm)
+		})
+	}
+}
