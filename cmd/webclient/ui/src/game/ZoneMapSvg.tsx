@@ -70,25 +70,27 @@ function clipId(tile: MapTile): string {
 }
 
 // Split a room name into up to 2 lines that fit within the tile width.
-// At font-size 9, ~9 chars fit across CELL_W=52.
-function wrapRoomName(name: string, maxChars = 9): [string, string | null] {
+// At font-size 9, ~10 chars fit across CELL_W=52.
+function wrapRoomName(name: string, maxChars = 10): [string, string | null] {
   if (name.length <= maxChars) return [name, null]
+
+  // Try to break at the last word boundary that fits in maxChars
   const words = name.split(' ')
   let line1 = ''
-  let rest = words
   for (let i = 0; i < words.length; i++) {
     const attempt = words.slice(0, i + 1).join(' ')
-    if (attempt.length <= maxChars) {
-      line1 = attempt
-    } else {
-      rest = words.slice(i)
-      break
-    }
-    rest = words.slice(i + 1)
+    if (attempt.length <= maxChars) line1 = attempt
+    else break
   }
-  if (!line1) line1 = name.slice(0, maxChars)
-  const line2 = rest.join(' ').slice(0, maxChars) || null
-  return [line1, line2]
+
+  if (line1) {
+    // Break after line1; remainder starts after the trailing space
+    const line2 = name.slice(line1.length + 1, line1.length + 1 + maxChars).trim() || null
+    return [line1, line2]
+  }
+
+  // First word itself exceeds maxChars — hard-split by character
+  return [name.slice(0, maxChars), name.slice(maxChars, maxChars * 2).trim() || null]
 }
 
 export function ZoneMapSvg({ tiles, onHover, onHoverEnd }: ZoneMapSvgProps): JSX.Element {
