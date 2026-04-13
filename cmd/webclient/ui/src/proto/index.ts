@@ -513,6 +513,10 @@ export interface RoundStartEvent {
   turnOrder?: string[]
   turn_order?: string[]
   initialPositions?: CombatantPosition[]
+  gridWidth?: number
+  grid_width?: number
+  gridHeight?: number
+  grid_height?: number
 }
 
 export interface RoundEndEvent {
