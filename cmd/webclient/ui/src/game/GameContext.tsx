@@ -84,6 +84,8 @@ export interface GameState {
   worldTiles: WorldZoneTile[]
   feedEntries: FeedEntry[]
   combatRound: RoundStartEvent | null
+  combatGridWidth: number
+  combatGridHeight: number
   combatPositions: Record<string, { x: number; y: number }>
   combatantHp: Record<string, CombatantHp>
   combatantAP: Record<string, CombatantAP>
@@ -111,6 +113,7 @@ type Action =
   | { type: 'SET_MAP_TILES'; tiles: MapTile[] }
   | { type: 'SET_WORLD_TILES'; tiles: WorldZoneTile[] }
   | { type: 'SET_COMBAT_ROUND'; round: RoundStartEvent | null }
+  | { type: 'SET_COMBAT_GRID'; width: number; height: number }
   | { type: 'UPDATE_COMBAT_POSITION'; combatantName: string; x: number; y: number }
   | { type: 'CLEAR_COMBAT_POSITIONS' }
   | { type: 'UPDATE_COMBATANT_HP'; name: string; current: number; max: number }
@@ -151,6 +154,8 @@ function reducer(state: GameState, action: Action): GameState {
       return { ...state, worldTiles: action.tiles }
     case 'SET_COMBAT_ROUND':
       return { ...state, combatRound: action.round }
+    case 'SET_COMBAT_GRID':
+      return { ...state, combatGridWidth: action.width, combatGridHeight: action.height }
     case 'UPDATE_COMBAT_POSITION':
       return { ...state, combatPositions: { ...state.combatPositions, [action.combatantName]: { x: action.x, y: action.y } } }
     case 'CLEAR_COMBAT_POSITIONS':
@@ -229,6 +234,8 @@ const initialState: GameState = {
   worldTiles: [],
   feedEntries: [],
   combatRound: null,
+  combatGridWidth: 20,
+  combatGridHeight: 20,
   combatPositions: {},
   combatantHp: {},
   combatantAP: {},
@@ -454,6 +461,12 @@ export function GameProvider({ children }: { children: ReactNode }) {
               })
             }
           }
+          // Store grid dimensions from server
+          dispatch({
+            type: 'SET_COMBAT_GRID',
+            width: rs.gridWidth ?? rs.grid_width ?? 20,
+            height: rs.gridHeight ?? rs.grid_height ?? 20,
+          })
           const order = Array.isArray(rs.turnOrder) ? rs.turnOrder.join(', ') : ''
           dispatch({
             type: 'APPEND_FEED',
