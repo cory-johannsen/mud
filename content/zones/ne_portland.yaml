@@ -33,10 +33,6 @@ zone:
       target: ne_corner_store
     map_x: 0
     map_y: 0
-    spawns:
-    - template: bike_courier
-      count: 2
-      respawn_after: 3m
     equipment:
     - item_id: zone_map
       max_count: 1

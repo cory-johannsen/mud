@@ -5287,7 +5287,17 @@ func (s *GameServiceServer) tickNPCIdle(inst *npc.Instance, zoneID string, aiReg
 		}
 	}
 	if isCombatCapable && isHostileToPlayers && s.combatH != nil && !s.combatH.IsInCombat(inst.ID) {
-		s.evaluateThreatEngagement(inst, inst.RoomID)
+		// REQ-57-1: NPCs MUST NOT initiate combat in rooms with effective danger_level "safe".
+		canEngage := false
+		if room, roomOK := s.world.GetRoom(inst.RoomID); roomOK {
+			if zone, zoneOK := s.world.GetZone(room.ZoneID); zoneOK {
+				effectiveLevel := danger.EffectiveDangerLevel(zone.DangerLevel, room.DangerLevel)
+				canEngage = danger.CanInitiateCombat(effectiveLevel, "npc")
+			}
+		}
+		if canEngage {
+			s.evaluateThreatEngagement(inst, inst.RoomID)
+		}
 	}
 
 	// Schedule evaluation. REQ-NB-19–22, 24.
