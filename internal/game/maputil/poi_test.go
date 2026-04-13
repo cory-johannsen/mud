@@ -49,7 +49,7 @@ func TestNpcRoleToPOIID_KnownRoles(t *testing.T) {
 		{"motel_keeper", "motel"},
 		{"brothel_keeper", "brothel"},
 		{"quest_giver", "quest_giver"},
-		{"banker", "npc"},
+		{"banker", "banker"},
 		{"chip_doc", "npc"},
 	}
 	for _, tc := range cases {

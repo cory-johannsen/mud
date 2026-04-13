@@ -24,6 +24,7 @@ var POITypes = []POIType{
 	{ID: "motel", Symbol: 'R', Color: "\033[95m", Label: "Motel"},
 	{ID: "brothel", Symbol: 'B', Color: "\033[91m", Label: "Brothel"},
 	{ID: "quest_giver", Symbol: 'Q', Color: "\033[93m", Label: "Quest"},
+	{ID: "banker", Symbol: '¤', Color: "\033[93m", Label: "Banker"},
 	{ID: "npc", Symbol: 'N', Color: "\033[37m", Label: "NPC"},
 	{ID: "map", Symbol: 'M', Color: "\033[96m", Label: "Map"},
 	{ID: "cover", Symbol: 'C', Color: "\033[33m", Label: "Cover"},
@@ -78,6 +79,8 @@ func NpcRoleToPOIID(npcRole string) string {
 		return "brothel"
 	case "quest_giver":
 		return "quest_giver"
+	case "banker":
+		return "banker"
 	default:
 		return "npc"
 	}

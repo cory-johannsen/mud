@@ -35,6 +35,7 @@ const POI_DEFS: Array<{ id: string; symbol: string; color: string; label: string
   { id: 'quest_giver', symbol: '!',  color: '#fa0', label: 'Quest'        },
   { id: 'motel',       symbol: '💤', color: '#d8f', label: 'Motel (rest)' },
   { id: 'brothel',     symbol: 'B',  color: '#f64', label: 'Brothel'      },
+  { id: 'banker',      symbol: '¤',  color: '#fa0', label: 'Banker'       },
   { id: 'npc',         symbol: '@',  color: '#aaa', label: 'NPC'          },
   { id: 'guard',       symbol: 'G',  color: '#cc0', label: 'Guard'        },
   { id: 'cover',       symbol: 'C',  color: '#cc0', label: 'Cover'        },
@@ -43,6 +44,19 @@ const POI_DEFS: Array<{ id: string; symbol: string; color: string; label: string
 ]
 
 const POI_BY_ID = new Map(POI_DEFS.map(p => [p.id, p]))
+
+// Zone exit arrow glyphs (hollow directional arrows) and their tile-edge positions.
+// anchor: SVG textAnchor; ex/ey: offset from tile top-left corner.
+const ZONE_EXIT_ARROW: Record<string, { glyph: string; ex: number; ey: number; anchor: string }> = {
+  north:     { glyph: '⇧', ex: CELL_W / 2,     ey: 2,              anchor: 'middle' },
+  south:     { glyph: '⇩', ex: CELL_W / 2,     ey: CELL_H - 2,     anchor: 'middle' },
+  east:      { glyph: '⇨', ex: CELL_W - 2,     ey: CELL_H / 2,     anchor: 'end'    },
+  west:      { glyph: '⇦', ex: 2,              ey: CELL_H / 2,     anchor: 'start'  },
+  northeast: { glyph: '⇗', ex: CELL_W - 2,     ey: 2,              anchor: 'end'    },
+  northwest: { glyph: '⇖', ex: 2,              ey: 2,              anchor: 'start'  },
+  southeast: { glyph: '⇘', ex: CELL_W - 2,     ey: CELL_H - 2,     anchor: 'end'    },
+  southwest: { glyph: '⇙', ex: 2,              ey: CELL_H - 2,     anchor: 'start'  },
+}
 
 const STEP = CELL_W + GAP
 const STEP_H = CELL_H + GAP
@@ -158,16 +172,12 @@ export function ZoneMapSvg({ tiles, onHover, onHoverEnd }: ZoneMapSvgProps): JSX
       if (drawnPairs.has(pairKey)) continue
       drawnPairs.add(pairKey)
 
-      const neighborIsZoneExit = !!(found.zoneExits?.length || found.zone_exits?.length)
-      const zoneConnector = isZoneExit || neighborIsZoneExit
-
       connectors.push(
         <line
           key={pairKey}
           x1={centerX(tx)} y1={centerY(ty)} x2={centerX(fnx)} y2={centerY(fny)}
-          stroke={zoneConnector ? '#8888ff' : '#888'}
+          stroke="#888"
           strokeWidth={2}
-          strokeDasharray={zoneConnector ? '4 2' : undefined}
         />
       )
     }
@@ -241,6 +251,25 @@ export function ZoneMapSvg({ tiles, onHover, onHoverEnd }: ZoneMapSvgProps): JSX
               pointerEvents="none"
             >
               {def?.symbol ?? '?'}
+            </text>
+          )
+        })}
+        {(tile.zoneExits ?? tile.zone_exits ?? []).map((ze, idx) => {
+          const dir = ze.direction ?? ''
+          const arrow = ZONE_EXIT_ARROW[dir]
+          if (!arrow) return null
+          return (
+            <text
+              key={`ze-${id}-${idx}`}
+              x={rx + arrow.ex}
+              y={ry + arrow.ey}
+              textAnchor={arrow.anchor}
+              dominantBaseline="middle"
+              fontSize={10}
+              fill="#8888ff"
+              pointerEvents="none"
+            >
+              {arrow.glyph}
             </text>
           )
         })}

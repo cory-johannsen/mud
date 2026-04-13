@@ -18,6 +18,7 @@ const POI_TYPES: Array<{ id: string; symbol: string; color: string; label: strin
   { id: 'motel',       symbol: '💤', color: '#d8f', label: 'Motel'       },
   { id: 'brothel',     symbol: 'B', color: '#f64', label: 'Brothel'     },
   { id: 'quest_giver', symbol: '!', color: '#fa0', label: 'Quest'       },
+  { id: 'banker',      symbol: '¤', color: '#fa0', label: 'Banker'      },
   { id: 'npc',         symbol: '@', color: '#aaa', label: 'NPC'         },
   { id: 'map',         symbol: 'M', color: '#0cc', label: 'Map'         },
   { id: 'cover',       symbol: 'C', color: '#cc0', label: 'Cover'       },
