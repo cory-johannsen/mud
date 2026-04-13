@@ -119,7 +119,7 @@ function renderBattleGrid(
             fontSize: '0.75rem',
             color: isPlayer ? '#7bb8ff' : isEnemy ? '#ff7b7b' : '#555',
             fontWeight: 'bold',
-            cursor: name !== '' ? 'default' : 'default',
+            cursor: 'default',
             flexShrink: 0,
           }}
           onMouseEnter={name !== '' ? e => onHover(name, { x, y }, e) : undefined}
@@ -322,16 +322,13 @@ export function MapPanel() {
               },
               () => setCombatHoverName(null)
             )}
-            {combatHoverName && (() => {
-              const ap = state.combatantAP[combatHoverName]
-              return (
-                <RoomTooltip
-                  tile={null}
-                  pos={combatHoverPos}
-                  overrideText={`${combatHoverName} — AP: ${ap?.remaining ?? '?'}/${ap?.total ?? '?'}`}
-                />
-              )
-            })()}
+            {combatHoverName && (
+              <RoomTooltip
+                tile={null}
+                pos={combatHoverPos}
+                overrideText={`${combatHoverName} — AP: ${state.combatantAP[combatHoverName]?.remaining ?? '?'}/${state.combatantAP[combatHoverName]?.total ?? '?'}`}
+              />
+            )}
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', justifyContent: 'center' }}>
             <DPad onDir={dir => sendCommand(`${stepMode ? 'step' : 'stride'} ${dir}`)} disabledDirs={disabledDirs} disabled={apDisabled} />
