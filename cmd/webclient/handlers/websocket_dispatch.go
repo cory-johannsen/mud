@@ -824,7 +824,12 @@ func protoMessageByName(name string) (proto.Message, error) {
 		"HotbarRequest":         func() proto.Message { return &gamev1.HotbarRequest{} },
 		"UseEquipmentRequest":   func() proto.Message { return &gamev1.UseEquipmentRequest{} },
 		"BrowseRequest":         func() proto.Message { return &gamev1.BrowseRequest{} },
-		"BuyRequest":             func() proto.Message { return &gamev1.BuyRequest{} },
+		"BuyRequest":            func() proto.Message { return &gamev1.BuyRequest{} },
+		"SellRequest":           func() proto.Message { return &gamev1.SellRequest{} },
+		"TalkRequest":           func() proto.Message { return &gamev1.TalkRequest{} },
+		"BribeRequest":          func() proto.Message { return &gamev1.BribeRequest{} },
+		"StepRequest":           func() proto.Message { return &gamev1.StepRequest{} },
+		"GetItemRequest":        func() proto.Message { return &gamev1.GetItemRequest{} },
 		"HealRequest":            func() proto.Message { return &gamev1.HealRequest{} },
 		"TrainJobRequest":        func() proto.Message { return &gamev1.TrainJobRequest{} },
 		"TravelRequest":          func() proto.Message { return &gamev1.TravelRequest{} },
@@ -897,6 +902,16 @@ func wrapProtoAsClientMessage(reqID, typeName string, msg proto.Message) (*gamev
 		cm.Payload = &gamev1.ClientMessage_Browse{Browse: m}
 	case *gamev1.BuyRequest:
 		cm.Payload = &gamev1.ClientMessage_Buy{Buy: m}
+	case *gamev1.SellRequest:
+		cm.Payload = &gamev1.ClientMessage_Sell{Sell: m}
+	case *gamev1.TalkRequest:
+		cm.Payload = &gamev1.ClientMessage_Talk{Talk: m}
+	case *gamev1.BribeRequest:
+		cm.Payload = &gamev1.ClientMessage_BribeRequest{BribeRequest: m}
+	case *gamev1.StepRequest:
+		cm.Payload = &gamev1.ClientMessage_Step{Step: m}
+	case *gamev1.GetItemRequest:
+		cm.Payload = &gamev1.ClientMessage_GetItem{GetItem: m}
 	case *gamev1.HealRequest:
 		cm.Payload = &gamev1.ClientMessage_Heal{Heal: m}
 	case *gamev1.TrainJobRequest:
