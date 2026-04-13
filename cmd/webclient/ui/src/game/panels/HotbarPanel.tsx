@@ -48,6 +48,16 @@ export const ACTION_NAMES: Record<string, string> = {
   s: 'South',
   e: 'East',
   w: 'West',
+  'explore lay_low': 'Lay Low',
+  'explore hold_ground': 'Hold Ground',
+  'explore active_sensors': 'Active Sensors',
+  'explore case_it': 'Case It',
+  'explore run_point': 'Run Point',
+  'explore shadow': 'Shadow',
+  'explore poke_around': 'Poke Around',
+  'explore off': 'Explore Off',
+  explore: 'Explore',
+  exp: 'Explore',
 }
 
 export function slotActivationCommand(slot: HotbarSlot): string {
@@ -70,9 +80,11 @@ export function slotDisplayLabel(slot: HotbarSlot): string {
   if (typed) return typed
   const ref = slot.ref || ''
   if (!ref) return ''
-  // For command slots, check if ref matches a known built-in action
+  // For command slots, check full command then verb against known action names
   if (!slot.kind || slot.kind === 'command') {
-    const verb = ref.split(/\s+/)[0].toLowerCase()
+    const lower = ref.toLowerCase()
+    if (ACTION_NAMES[lower]) return ACTION_NAMES[lower]
+    const verb = lower.split(/\s+/)[0]
     if (ACTION_NAMES[verb]) return ACTION_NAMES[verb]
   }
   return ref
