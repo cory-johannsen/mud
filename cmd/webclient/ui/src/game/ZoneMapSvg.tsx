@@ -26,35 +26,23 @@ const DIR_OFFSETS: Record<string, [number, number]> = {
   ne: [1, -1], nw: [-1, -1], se: [1, 1], sw: [-1, 1],
 }
 
-// POI id → symbol shown inside tile cell
-const POI_SYMBOLS: Record<string, string> = {
-  merchant:    '$',
-  healer:      '+',
-  trainer:     'T',
-  quest_giver: '!',
-  motel:       '💤',
-  brothel:     'B',
-  npc:         '@',
-  guard:       'G',
-  cover:       'C',
-  equipment:   'E',
-  map:         'M',
-}
-
-// POI legend entries: id → label shown below the map
-const POI_LEGEND: Array<{ id: string; label: string }> = [
-  { id: 'merchant',    label: 'Merchant'    },
-  { id: 'healer',      label: 'Healer'      },
-  { id: 'trainer',     label: 'Trainer'     },
-  { id: 'quest_giver', label: 'Quest'       },
-  { id: 'motel',       label: 'Motel (rest)' },
-  { id: 'brothel',     label: 'Brothel'      },
-  { id: 'npc',         label: 'NPC'          },
-  { id: 'guard',       label: 'Guard'       },
-  { id: 'cover',       label: 'Cover'       },
-  { id: 'equipment',   label: 'Equipment'   },
-  { id: 'map',         label: 'Map'         },
+// Single source of truth for POI display — symbol, color, and label.
+// Colors match RoomTooltip POI_TYPES so tiles and hover are consistent.
+const POI_DEFS: Array<{ id: string; symbol: string; color: string; label: string }> = [
+  { id: 'merchant',    symbol: '$',  color: '#0bc', label: 'Merchant'     },
+  { id: 'healer',      symbol: '+',  color: '#4a8', label: 'Healer'       },
+  { id: 'trainer',     symbol: 'T',  color: '#48f', label: 'Trainer'      },
+  { id: 'quest_giver', symbol: '!',  color: '#fa0', label: 'Quest'        },
+  { id: 'motel',       symbol: '💤', color: '#d8f', label: 'Motel (rest)' },
+  { id: 'brothel',     symbol: 'B',  color: '#f64', label: 'Brothel'      },
+  { id: 'npc',         symbol: '@',  color: '#aaa', label: 'NPC'          },
+  { id: 'guard',       symbol: 'G',  color: '#cc0', label: 'Guard'        },
+  { id: 'cover',       symbol: 'C',  color: '#cc0', label: 'Cover'        },
+  { id: 'equipment',   symbol: 'E',  color: '#c8f', label: 'Equipment'    },
+  { id: 'map',         symbol: 'M',  color: '#0cc', label: 'Map'          },
 ]
+
+const POI_BY_ID = new Map(POI_DEFS.map(p => [p.id, p]))
 
 const STEP = CELL_W + GAP
 const STEP_H = CELL_H + GAP
@@ -240,24 +228,27 @@ export function ZoneMapSvg({ tiles, onHover, onHoverEnd }: ZoneMapSvgProps): JSX
             {line1}
           </text>
         )}
-        {(tile.pois ?? []).map((poi, idx) => (
-          <text
-            key={`poi-${id}-${idx}`}
-            x={rx + 4 + idx * 11}
-            y={ry + CELL_H - 4}
-            textAnchor="start"
-            fontSize={9}
-            fill="#f0c040"
-            pointerEvents="none"
-          >
-            {POI_SYMBOLS[poi] ?? '?'}
-          </text>
-        ))}
+        {(tile.pois ?? []).map((poi, idx) => {
+          const def = POI_BY_ID.get(poi)
+          return (
+            <text
+              key={`poi-${id}-${idx}`}
+              x={rx + 4 + idx * 11}
+              y={ry + CELL_H - 4}
+              textAnchor="start"
+              fontSize={9}
+              fill={def?.color ?? '#aaa'}
+              pointerEvents="none"
+            >
+              {def?.symbol ?? '?'}
+            </text>
+          )
+        })}
       </g>
     )
   }
 
-  const legendEntries = POI_LEGEND.filter(e => presentPois.has(e.id))
+  const legendEntries = POI_DEFS.filter(e => presentPois.has(e.id))
 
   return (
     <div style={{ overflow: 'auto', width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
@@ -288,7 +279,7 @@ export function ZoneMapSvg({ tiles, onHover, onHoverEnd }: ZoneMapSvgProps): JSX
         }}>
           {legendEntries.map(e => (
             <span key={e.id}>
-              <span style={{ color: '#f0c040' }}>{POI_SYMBOLS[e.id]}</span>
+              <span style={{ color: e.color }}>{e.symbol}</span>
               {' '}{e.label}
             </span>
           ))}
