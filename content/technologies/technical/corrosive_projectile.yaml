@@ -2,8 +2,8 @@ id: corrosive_projectile
 name: Corrosive Projectile
 description: 'You fire a precision-guided acid projectile that continues corroding
   the target. Make a spell attack against the target. On a hit, you deal 3d8 acid
-  damage plus @Damage[(floor(@item.rank/2))d6[persistent,acid]] damage. On a critical
-  hit, double the initial damage, but not the persistent damage.
+  damage plus 1d6 persistent acid damage. On a critical hit, double the initial
+  damage, but not the persistent damage.
 
 
   Heightened (+2) The initial damage increases by 2d8, and the persistent acid damage
