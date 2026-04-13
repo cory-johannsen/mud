@@ -39,9 +39,10 @@ const MERCHANT_TILE: MapTile = {
 const ALL_TILES: MapTile[] = [CURRENT_TILE, BOSS_TILE, MERCHANT_TILE]
 
 describe('ZoneMapSvg', () => {
-  it('renders one <rect> per tile', () => {
+  it('renders one <rect> per tile (excluding defs/clipPath rects)', () => {
     const { container: c } = render(<ZoneMapSvg tiles={ALL_TILES} />)
-    const rects = c.querySelectorAll('rect')
+    // Exclude rects inside <defs> (used for clipPaths) — only count visible tile rects
+    const rects = c.querySelectorAll('svg rect:not(defs rect)')
     expect(rects.length).toBe(3)
   })
 
