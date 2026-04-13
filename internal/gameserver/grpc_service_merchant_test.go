@@ -149,6 +149,99 @@ func TestHandleBuy_SuccessAddsItemToBackpack(t *testing.T) {
 	assert.Equal(t, 1, items[0].Quantity)
 }
 
+// newWeaponMerchantTestServer builds a GameServiceServer with a merchant that sells a weapon item (scrap_shield).
+// Tests weapon purchase flow: ItemDef (kind=weapon) must be registered for Backpack.Add to succeed.
+func newWeaponMerchantTestServer(t *testing.T) (*GameServiceServer, string, *npc.Instance) {
+	t.Helper()
+
+	worldMgr, sessMgr := testWorldAndSession(t)
+	npcManager := npc.NewManager()
+	svc := testServiceWithNPCMgr(t, worldMgr, sessMgr, npcManager)
+
+	invReg := inventory.NewRegistry()
+	// Register the weapon ItemDef — required for Backpack.Add to succeed (REQ-NPC-BUY-1).
+	err := invReg.RegisterItem(&inventory.ItemDef{
+		ID:        "scrap_shield",
+		Name:      "Scrap Shield",
+		Kind:      "weapon",
+		WeaponRef: "scrap_shield",
+		Weight:    3.0,
+		MaxStack:  1,
+		Value:     40,
+	})
+	require.NoError(t, err)
+	svc.invRegistry = invReg
+
+	uid := "shield_u1"
+	_, err = svc.sessions.AddPlayer(session.AddPlayerOptions{
+		UID:       uid,
+		Username:  "shield_user",
+		CharName:  "ShieldChar",
+		RoomID:    "room_a",
+		CurrentHP: 10,
+		MaxHP:     10,
+		Role:      "player",
+	})
+	require.NoError(t, err)
+
+	sess, ok := svc.sessions.GetPlayer(uid)
+	require.True(t, ok)
+	sess.Currency = 500
+
+	tmpl := &npc.Template{
+		ID:      "test_arms_dealer",
+		Name:    "Arms Dealer",
+		NPCType: "merchant",
+		MaxHP:   20,
+		AC:      10,
+		Level:   1,
+		Merchant: &npc.MerchantConfig{
+			MerchantType: "weapons",
+			SellMargin:   1.0,
+			BuyMargin:    0.5,
+			Budget:       300,
+			Inventory: []npc.MerchantItem{
+				{ItemID: "scrap_shield", BasePrice: 50, InitStock: 3, MaxStock: 5},
+			},
+			ReplenishRate: npc.ReplenishConfig{MinHours: 1, MaxHours: 4},
+		},
+	}
+	inst, err := svc.npcMgr.Spawn(tmpl, "room_a")
+	require.NoError(t, err)
+	svc.initMerchantRuntimeState(inst)
+
+	return svc, uid, inst
+}
+
+// REQ-NPC-BUY-3: Buying a weapon item MUST add it to the backpack and deduct currency.
+// Regression test for the bug where shields could be purchased (stock decremented) but the
+// item was never added to the backpack because no ItemDef was registered for weapon items.
+func TestHandleBuy_WeaponItemAddsToBackpackAndDeductsCredits(t *testing.T) {
+	svc, uid, inst := newWeaponMerchantTestServer(t)
+
+	sess, ok := svc.sessions.GetPlayer(uid)
+	require.True(t, ok)
+	require.Empty(t, sess.Backpack.FindByItemDefID("scrap_shield"), "backpack must be empty before purchase")
+	initialCurrency := sess.Currency
+
+	evt, err := svc.handleBuy(uid, &gamev1.BuyRequest{NpcName: inst.Name(), ItemId: "scrap_shield", Quantity: 1})
+	require.NoError(t, err)
+	assert.Contains(t, evt.GetMessage().Content, "buy", "purchase should succeed")
+
+	// Item must be in backpack.
+	items := sess.Backpack.FindByItemDefID("scrap_shield")
+	assert.Len(t, items, 1, "backpack must contain exactly 1 scrap_shield after purchase")
+	assert.Equal(t, 1, items[0].Quantity)
+
+	// Currency must be deducted.
+	assert.Less(t, sess.Currency, initialCurrency, "currency must be deducted after weapon purchase")
+
+	// Stock must be decremented.
+	state := svc.merchantStateFor(inst.ID)
+	require.NotNil(t, state)
+	assert.Equal(t, 2, state.Stock["scrap_shield"], "merchant stock must decrement by 1")
+}
+
 // REQ-NPC-BUY-2: buy MUST match items by display name, slug, or partial case-insensitive name.
 func TestHandleBuy_MatchByDisplayName(t *testing.T) {
 	svc, uid, inst := newMerchantTestServer(t)
