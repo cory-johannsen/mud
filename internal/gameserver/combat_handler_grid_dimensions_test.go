@@ -49,12 +49,13 @@ func makeGridDimHandler(
 }
 
 // TestRoundStartEvent_GridDimensions_PopulatedOnAttack verifies that the RoundStartEvent
-// broadcast during combat initiation carries non-zero GridWidth and GridHeight values.
+// broadcast during combat initiation carries the correct GridWidth and GridHeight values.
 //
 // REQ-PA-1b: RoundStartEvent MUST carry the grid width and height of the combat arena.
 //
 // Precondition: NPC survives; player initiates combat via Attack.
-// Postcondition: At least one RoundStartEvent is captured with GridWidth > 0 and GridHeight > 0.
+// Postcondition: At least one RoundStartEvent is captured with GridWidth = 20 and GridHeight = 20
+// (the engine default defined in internal/game/combat/engine.go).
 func TestRoundStartEvent_GridDimensions_PopulatedOnAttack(t *testing.T) {
 	h, npcMgr, sessMgr, getRoundStartEvents := makeGridDimHandler(t)
 
@@ -95,7 +96,7 @@ func TestRoundStartEvent_GridDimensions_PopulatedOnAttack(t *testing.T) {
 	require.NotEmpty(t, evts, "expected at least one RoundStartEvent to be broadcast")
 
 	for _, evt := range evts {
-		assert.Greater(t, evt.GridWidth, int32(0), "RoundStartEvent.GridWidth must be > 0")
-		assert.Greater(t, evt.GridHeight, int32(0), "RoundStartEvent.GridHeight must be > 0")
+		assert.Equal(t, int32(20), evt.GridWidth, "RoundStartEvent.GridWidth must equal the engine default of 20")
+		assert.Equal(t, int32(20), evt.GridHeight, "RoundStartEvent.GridHeight must equal the engine default of 20")
 	}
 }
