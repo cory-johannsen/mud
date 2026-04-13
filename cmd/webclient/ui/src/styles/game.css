@@ -180,15 +180,6 @@ html, body, #root { margin: 0; padding: 0; height: 100%; overflow: hidden; }
 .item-link { background: none; border: none; color: #aad; cursor: pointer; font-family: monospace; font-size: 0.82rem; text-decoration: underline; padding: 0; }
 
 /* Map panel */
-.map-ascii {
-  margin: 0;
-  font-family: monospace;
-  font-size: 0.7rem;
-  line-height: 1.3;
-  color: #8ab;
-  white-space: pre;
-  overflow-x: auto;
-}
 .map-empty { color: #555; font-size: 0.8rem; }
 .map-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem; }
 .map-header h3 { margin: 0; color: #e0c060; font-size: 0.9rem; }

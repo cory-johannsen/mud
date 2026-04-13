@@ -332,6 +332,7 @@ export interface WorldZoneTile {
   discovered?: boolean
   current?: boolean
   dangerLevel?: string
+  danger_level?: string
 }
 
 export interface MapResponse {

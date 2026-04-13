@@ -68,7 +68,7 @@ export function WorldMapSvg({ tiles, onTravel }: WorldMapSvgProps): JSX.Element 
           const cy = wy * ZONE_H
           const discovered = tile.discovered ?? false
           const isCurrent = tile.current ?? false
-          const danger = tile.dangerLevel ?? ''
+          const danger = tile.dangerLevel ?? tile.danger_level ?? ''
           const fill = discovered ? (DANGER_FILLS[danger] ?? DANGER_FILLS['safe']) : UNDISCOVERED_FILL
           const stroke = isCurrent ? CURRENT_STROKE : DEFAULT_STROKE
           const strokeWidth = isCurrent ? CURRENT_STROKE_WIDTH : DEFAULT_STROKE_WIDTH

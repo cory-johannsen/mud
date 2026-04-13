@@ -3,10 +3,10 @@ import { render, fireEvent, screen } from '@testing-library/react'
 
 // Mock react-resizable-panels — jsdom lacks ResizeObserver required by Group.
 vi.mock('react-resizable-panels', () => ({
-  Group: ({ children, style, onLayoutChanged }: { children: React.ReactNode; style?: React.CSSProperties; onLayoutChanged?: (sizes: number[]) => void }) =>
+  Group: ({ children, style, onLayoutChanged }: { children: React.ReactNode; style?: React.CSSProperties; onLayoutChanged?: (layout: Record<string, number>) => void }) =>
     <div style={style} data-onlayout={String(!!onLayoutChanged)}>{children}</div>,
-  Panel: ({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }) =>
-    <div style={style}>{children}</div>,
+  Panel: ({ children, style, id }: { children: React.ReactNode; style?: React.CSSProperties; id?: string }) =>
+    <div style={style} data-panel-id={id}>{children}</div>,
   Separator: () => <div />,
 }))
 

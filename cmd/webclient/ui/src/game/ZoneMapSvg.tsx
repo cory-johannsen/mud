@@ -140,7 +140,7 @@ export function ZoneMapSvg({ tiles, onHover, onHoverEnd }: ZoneMapSvgProps): JSX
     const dangerKey = tile.dangerLevel ?? tile.danger_level ?? ''
     const fill = DANGER_FILLS[dangerKey] ?? '#1e1e2e'
     const isCurrent = tile.current ?? false
-    const isBoss = tile.bossRoom ?? false
+    const isBoss = tile.bossRoom ?? tile.boss ?? false
     const stroke = isCurrent ? '#f0c040' : isBoss ? '#cc4444' : '#333'
     const strokeWidth = isCurrent || isBoss ? 2 : 1
     const name = tile.roomName ?? ''

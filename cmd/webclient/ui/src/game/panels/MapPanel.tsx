@@ -123,7 +123,7 @@ export function MapPanel() {
   })
 
   const handleRoomEnter = useCallback((tile: MapTile, e: React.MouseEvent) => {
-    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
+    const rect = (e.currentTarget as Element).getBoundingClientRect()
     setTooltipPos({ x: rect.left, y: rect.bottom })
     setHoveredTile(tile)
   }, [])
@@ -193,7 +193,7 @@ export function MapPanel() {
           <div style={{ overflow: 'auto', flexShrink: 0, position: 'relative' }}>
             {renderBattleGrid(state.combatPositions, playerName, gridWidth, gridHeight,
               (name, _pos, e) => {
-                const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
+                const rect = (e.currentTarget as Element).getBoundingClientRect()
                 setCombatHoverPos({ x: rect.left, y: rect.bottom })
                 setCombatHoverName(name)
               },
@@ -247,13 +247,13 @@ export function MapPanel() {
         <PanelGroup
           orientation="horizontal"
           style={{ flex: 1, minHeight: 0 }}
-          onLayoutChanged={(sizes) => {
-            const pct = Math.round(sizes[0])
+          onLayoutChanged={(layout) => {
+            const pct = Math.round(layout['map-tiles'] ?? mapPct)
             setMapPct(pct)
             localStorage.setItem('mud-map-splitter', String(pct))
           }}
         >
-          <Panel defaultSize={mapPct} minSize={20} style={{ overflow: 'hidden', position: 'relative', display: 'flex', flexDirection: 'column' }}>
+          <Panel id="map-tiles" defaultSize={mapPct} minSize={20} style={{ overflow: 'hidden', position: 'relative', display: 'flex', flexDirection: 'column' }}>
             <ZoneMapSvg
               tiles={state.mapTiles}
               onHover={handleRoomEnter}
@@ -264,7 +264,7 @@ export function MapPanel() {
             )}
           </Panel>
           <PanelResizeHandle className="resize-handle resize-handle-h" />
-          <Panel defaultSize={100 - mapPct} minSize={20} style={{ overflow: 'auto', padding: '0.5rem' }}>
+          <Panel id="map-details" defaultSize={100 - mapPct} minSize={20} style={{ overflow: 'auto', padding: '0.5rem' }}>
             <div style={{ fontSize: '0.75rem', color: '#aaa' }}>
               <strong style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Rooms</strong>
               {state.mapTiles
