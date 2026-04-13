@@ -8793,6 +8793,8 @@ type RoundStartEvent struct {
 	DurationMs       int32                  `protobuf:"varint,3,opt,name=duration_ms,json=durationMs,proto3" json:"duration_ms,omitempty"`
 	TurnOrder        []string               `protobuf:"bytes,4,rep,name=turn_order,json=turnOrder,proto3" json:"turn_order,omitempty"`
 	InitialPositions []*CombatantPosition   `protobuf:"bytes,5,rep,name=initial_positions,json=initialPositions,proto3" json:"initial_positions,omitempty"`
+	GridWidth        int32                  `protobuf:"varint,6,opt,name=grid_width,json=gridWidth,proto3" json:"grid_width,omitempty"`
+	GridHeight       int32                  `protobuf:"varint,7,opt,name=grid_height,json=gridHeight,proto3" json:"grid_height,omitempty"`
 	unknownFields    protoimpl.UnknownFields
 	sizeCache        protoimpl.SizeCache
 }
@@ -8860,6 +8862,20 @@ func (x *RoundStartEvent) GetInitialPositions() []*CombatantPosition {
 		return x.InitialPositions
 	}
 	return nil
+}
+
+func (x *RoundStartEvent) GetGridWidth() int32 {
+	if x != nil {
+		return x.GridWidth
+	}
+	return 0
+}
+
+func (x *RoundStartEvent) GetGridHeight() int32 {
+	if x != nil {
+		return x.GridHeight
+	}
+	return 0
 }
 
 // RoundEndEvent is broadcast when a round's actions have resolved.
@@ -10375,14 +10391,16 @@ type CharacterSheetView struct {
 	SpontaneousUsePools   []*SpontaneousUsePoolView `protobuf:"bytes,45,rep,name=spontaneous_use_pools,json=spontaneousUsePools,proto3" json:"spontaneous_use_pools,omitempty"`
 	InnateSlots           []*InnateSlotView         `protobuf:"bytes,46,rep,name=innate_slots,json=innateSlots,proto3" json:"innate_slots,omitempty"`
 	// active_set_bonuses lists human-readable descriptions of currently active equipment set bonuses (REQ-EM-31).
-	ActiveSetBonuses []string                 `protobuf:"bytes,47,rep,name=active_set_bonuses,json=activeSetBonuses,proto3" json:"active_set_bonuses,omitempty"`
-	FocusPoints      int32                    `protobuf:"varint,48,opt,name=focus_points,json=focusPoints,proto3" json:"focus_points,omitempty"`                                                                                      // current focus point pool
-	MaxFocusPoints   int32                    `protobuf:"varint,49,opt,name=max_focus_points,json=maxFocusPoints,proto3" json:"max_focus_points,omitempty"`                                                                           // maximum focus points
-	HardwiredSlots   []*HardwiredSlotView     `protobuf:"bytes,50,rep,name=hardwired_slots,json=hardwiredSlots,proto3" json:"hardwired_slots,omitempty"`                                                                              // always-available hardwired technologies
-	SpontaneousKnown []*SpontaneousKnownEntry `protobuf:"bytes,51,rep,name=spontaneous_known,json=spontaneousKnown,proto3" json:"spontaneous_known,omitempty"`                                                                        // known spontaneous technologies with names
-	ArmorCategories  map[string]string        `protobuf:"bytes,52,rep,name=armor_categories,json=armorCategories,proto3" json:"armor_categories,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"` // slot -> "light"/"medium"/"heavy" for equipped armor
-	unknownFields    protoimpl.UnknownFields
-	sizeCache        protoimpl.SizeCache
+	ActiveSetBonuses       []string                 `protobuf:"bytes,47,rep,name=active_set_bonuses,json=activeSetBonuses,proto3" json:"active_set_bonuses,omitempty"`
+	FocusPoints            int32                    `protobuf:"varint,48,opt,name=focus_points,json=focusPoints,proto3" json:"focus_points,omitempty"`                                                                                      // current focus point pool
+	MaxFocusPoints         int32                    `protobuf:"varint,49,opt,name=max_focus_points,json=maxFocusPoints,proto3" json:"max_focus_points,omitempty"`                                                                           // maximum focus points
+	HardwiredSlots         []*HardwiredSlotView     `protobuf:"bytes,50,rep,name=hardwired_slots,json=hardwiredSlots,proto3" json:"hardwired_slots,omitempty"`                                                                              // always-available hardwired technologies
+	SpontaneousKnown       []*SpontaneousKnownEntry `protobuf:"bytes,51,rep,name=spontaneous_known,json=spontaneousKnown,proto3" json:"spontaneous_known,omitempty"`                                                                        // known spontaneous technologies with names
+	ArmorCategories        map[string]string        `protobuf:"bytes,52,rep,name=armor_categories,json=armorCategories,proto3" json:"armor_categories,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"` // slot -> "light"/"medium"/"heavy" for equipped armor
+	ProficiencyAcBonus     int32                    `protobuf:"varint,53,opt,name=proficiency_ac_bonus,json=proficiencyAcBonus,proto3" json:"proficiency_ac_bonus,omitempty"`                                                               // proficiency contribution to AC (applied once per character)
+	EffectiveArmorCategory string                   `protobuf:"bytes,54,opt,name=effective_armor_category,json=effectiveArmorCategory,proto3" json:"effective_armor_category,omitempty"`                                                    // heaviest proficient armor category worn
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
 }
 
 func (x *CharacterSheetView) Reset() {
@@ -10779,6 +10797,20 @@ func (x *CharacterSheetView) GetArmorCategories() map[string]string {
 	return nil
 }
 
+func (x *CharacterSheetView) GetProficiencyAcBonus() int32 {
+	if x != nil {
+		return x.ProficiencyAcBonus
+	}
+	return 0
+}
+
+func (x *CharacterSheetView) GetEffectiveArmorCategory() string {
+	if x != nil {
+		return x.EffectiveArmorCategory
+	}
+	return ""
+}
+
 // InnateSlotView delivers the per-tech innate use slot state for the character sheet.
 type InnateSlotView struct {
 	state          protoimpl.MessageState `protogen:"open.v1"`
@@ -10790,6 +10822,7 @@ type InnateSlotView struct {
 	IsReaction     bool                   `protobuf:"varint,6,opt,name=is_reaction,json=isReaction,proto3" json:"is_reaction,omitempty"`
 	EffectsSummary string                 `protobuf:"bytes,7,opt,name=effects_summary,json=effectsSummary,proto3" json:"effects_summary,omitempty"`
 	ShortName      string                 `protobuf:"bytes,8,opt,name=short_name,json=shortName,proto3" json:"short_name,omitempty"`
+	Passive        bool                   `protobuf:"varint,9,opt,name=passive,proto3" json:"passive,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -10878,6 +10911,13 @@ func (x *InnateSlotView) GetShortName() string {
 		return x.ShortName
 	}
 	return ""
+}
+
+func (x *InnateSlotView) GetPassive() bool {
+	if x != nil {
+		return x.Passive
+	}
+	return false
 }
 
 // SpontaneousUsePoolView delivers the daily use pool for one spontaneous tech level.
@@ -14583,6 +14623,435 @@ func (x *JobGrantsResponse) GetTechGrants() []*JobTechGrant {
 	return nil
 }
 
+// Admin session snapshot for a single connected player.
+type AdminSessionInfo struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	CharId        int64                  `protobuf:"varint,1,opt,name=char_id,json=charId,proto3" json:"char_id,omitempty"`
+	PlayerName    string                 `protobuf:"bytes,2,opt,name=player_name,json=playerName,proto3" json:"player_name,omitempty"`
+	Level         int32                  `protobuf:"varint,3,opt,name=level,proto3" json:"level,omitempty"`
+	RoomId        string                 `protobuf:"bytes,4,opt,name=room_id,json=roomId,proto3" json:"room_id,omitempty"`
+	Zone          string                 `protobuf:"bytes,5,opt,name=zone,proto3" json:"zone,omitempty"`
+	CurrentHp     int32                  `protobuf:"varint,6,opt,name=current_hp,json=currentHp,proto3" json:"current_hp,omitempty"`
+	AccountId     int64                  `protobuf:"varint,7,opt,name=account_id,json=accountId,proto3" json:"account_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AdminSessionInfo) Reset() {
+	*x = AdminSessionInfo{}
+	mi := &file_game_proto_msgTypes[202]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AdminSessionInfo) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AdminSessionInfo) ProtoMessage() {}
+
+func (x *AdminSessionInfo) ProtoReflect() protoreflect.Message {
+	mi := &file_game_proto_msgTypes[202]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AdminSessionInfo.ProtoReflect.Descriptor instead.
+func (*AdminSessionInfo) Descriptor() ([]byte, []int) {
+	return file_game_proto_rawDescGZIP(), []int{202}
+}
+
+func (x *AdminSessionInfo) GetCharId() int64 {
+	if x != nil {
+		return x.CharId
+	}
+	return 0
+}
+
+func (x *AdminSessionInfo) GetPlayerName() string {
+	if x != nil {
+		return x.PlayerName
+	}
+	return ""
+}
+
+func (x *AdminSessionInfo) GetLevel() int32 {
+	if x != nil {
+		return x.Level
+	}
+	return 0
+}
+
+func (x *AdminSessionInfo) GetRoomId() string {
+	if x != nil {
+		return x.RoomId
+	}
+	return ""
+}
+
+func (x *AdminSessionInfo) GetZone() string {
+	if x != nil {
+		return x.Zone
+	}
+	return ""
+}
+
+func (x *AdminSessionInfo) GetCurrentHp() int32 {
+	if x != nil {
+		return x.CurrentHp
+	}
+	return 0
+}
+
+func (x *AdminSessionInfo) GetAccountId() int64 {
+	if x != nil {
+		return x.AccountId
+	}
+	return 0
+}
+
+type AdminListSessionsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AdminListSessionsRequest) Reset() {
+	*x = AdminListSessionsRequest{}
+	mi := &file_game_proto_msgTypes[203]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AdminListSessionsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AdminListSessionsRequest) ProtoMessage() {}
+
+func (x *AdminListSessionsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_game_proto_msgTypes[203]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AdminListSessionsRequest.ProtoReflect.Descriptor instead.
+func (*AdminListSessionsRequest) Descriptor() ([]byte, []int) {
+	return file_game_proto_rawDescGZIP(), []int{203}
+}
+
+type AdminListSessionsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Sessions      []*AdminSessionInfo    `protobuf:"bytes,1,rep,name=sessions,proto3" json:"sessions,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AdminListSessionsResponse) Reset() {
+	*x = AdminListSessionsResponse{}
+	mi := &file_game_proto_msgTypes[204]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AdminListSessionsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AdminListSessionsResponse) ProtoMessage() {}
+
+func (x *AdminListSessionsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_game_proto_msgTypes[204]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AdminListSessionsResponse.ProtoReflect.Descriptor instead.
+func (*AdminListSessionsResponse) Descriptor() ([]byte, []int) {
+	return file_game_proto_rawDescGZIP(), []int{204}
+}
+
+func (x *AdminListSessionsResponse) GetSessions() []*AdminSessionInfo {
+	if x != nil {
+		return x.Sessions
+	}
+	return nil
+}
+
+type AdminKickRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	CharId        int64                  `protobuf:"varint,1,opt,name=char_id,json=charId,proto3" json:"char_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AdminKickRequest) Reset() {
+	*x = AdminKickRequest{}
+	mi := &file_game_proto_msgTypes[205]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AdminKickRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AdminKickRequest) ProtoMessage() {}
+
+func (x *AdminKickRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_game_proto_msgTypes[205]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AdminKickRequest.ProtoReflect.Descriptor instead.
+func (*AdminKickRequest) Descriptor() ([]byte, []int) {
+	return file_game_proto_rawDescGZIP(), []int{205}
+}
+
+func (x *AdminKickRequest) GetCharId() int64 {
+	if x != nil {
+		return x.CharId
+	}
+	return 0
+}
+
+type AdminKickResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AdminKickResponse) Reset() {
+	*x = AdminKickResponse{}
+	mi := &file_game_proto_msgTypes[206]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AdminKickResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AdminKickResponse) ProtoMessage() {}
+
+func (x *AdminKickResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_game_proto_msgTypes[206]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AdminKickResponse.ProtoReflect.Descriptor instead.
+func (*AdminKickResponse) Descriptor() ([]byte, []int) {
+	return file_game_proto_rawDescGZIP(), []int{206}
+}
+
+type AdminMessageRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	CharId        int64                  `protobuf:"varint,1,opt,name=char_id,json=charId,proto3" json:"char_id,omitempty"`
+	Text          string                 `protobuf:"bytes,2,opt,name=text,proto3" json:"text,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AdminMessageRequest) Reset() {
+	*x = AdminMessageRequest{}
+	mi := &file_game_proto_msgTypes[207]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AdminMessageRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AdminMessageRequest) ProtoMessage() {}
+
+func (x *AdminMessageRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_game_proto_msgTypes[207]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AdminMessageRequest.ProtoReflect.Descriptor instead.
+func (*AdminMessageRequest) Descriptor() ([]byte, []int) {
+	return file_game_proto_rawDescGZIP(), []int{207}
+}
+
+func (x *AdminMessageRequest) GetCharId() int64 {
+	if x != nil {
+		return x.CharId
+	}
+	return 0
+}
+
+func (x *AdminMessageRequest) GetText() string {
+	if x != nil {
+		return x.Text
+	}
+	return ""
+}
+
+type AdminMessageResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AdminMessageResponse) Reset() {
+	*x = AdminMessageResponse{}
+	mi := &file_game_proto_msgTypes[208]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AdminMessageResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AdminMessageResponse) ProtoMessage() {}
+
+func (x *AdminMessageResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_game_proto_msgTypes[208]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AdminMessageResponse.ProtoReflect.Descriptor instead.
+func (*AdminMessageResponse) Descriptor() ([]byte, []int) {
+	return file_game_proto_rawDescGZIP(), []int{208}
+}
+
+type AdminTeleportRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	CharId        int64                  `protobuf:"varint,1,opt,name=char_id,json=charId,proto3" json:"char_id,omitempty"`
+	RoomId        string                 `protobuf:"bytes,2,opt,name=room_id,json=roomId,proto3" json:"room_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AdminTeleportRequest) Reset() {
+	*x = AdminTeleportRequest{}
+	mi := &file_game_proto_msgTypes[209]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AdminTeleportRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AdminTeleportRequest) ProtoMessage() {}
+
+func (x *AdminTeleportRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_game_proto_msgTypes[209]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AdminTeleportRequest.ProtoReflect.Descriptor instead.
+func (*AdminTeleportRequest) Descriptor() ([]byte, []int) {
+	return file_game_proto_rawDescGZIP(), []int{209}
+}
+
+func (x *AdminTeleportRequest) GetCharId() int64 {
+	if x != nil {
+		return x.CharId
+	}
+	return 0
+}
+
+func (x *AdminTeleportRequest) GetRoomId() string {
+	if x != nil {
+		return x.RoomId
+	}
+	return ""
+}
+
+type AdminTeleportResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AdminTeleportResponse) Reset() {
+	*x = AdminTeleportResponse{}
+	mi := &file_game_proto_msgTypes[210]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AdminTeleportResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AdminTeleportResponse) ProtoMessage() {}
+
+func (x *AdminTeleportResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_game_proto_msgTypes[210]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AdminTeleportResponse.ProtoReflect.Descriptor instead.
+func (*AdminTeleportResponse) Descriptor() ([]byte, []int) {
+	return file_game_proto_rawDescGZIP(), []int{210}
+}
+
 var File_game_proto protoreflect.FileDescriptor
 
 const file_game_proto_rawDesc = "" +
@@ -15206,7 +15675,7 @@ const file_game_proto_rawDesc = "" +
 	"\x01x\x18\x02 \x01(\x05R\x01x\x12\f\n" +
 	"\x01y\x18\x03 \x01(\x05R\x01y\x12!\n" +
 	"\fap_remaining\x18\x04 \x01(\x05R\vapRemaining\x12\x19\n" +
-	"\bap_total\x18\x05 \x01(\x05R\aapTotal\"\xda\x01\n" +
+	"\bap_total\x18\x05 \x01(\x05R\aapTotal\"\x9a\x02\n" +
 	"\x0fRoundStartEvent\x12\x14\n" +
 	"\x05round\x18\x01 \x01(\x05R\x05round\x12(\n" +
 	"\x10actions_per_turn\x18\x02 \x01(\x05R\x0eactionsPerTurn\x12\x1f\n" +
@@ -15214,7 +15683,11 @@ const file_game_proto_rawDesc = "" +
 	"durationMs\x12\x1d\n" +
 	"\n" +
 	"turn_order\x18\x04 \x03(\tR\tturnOrder\x12G\n" +
-	"\x11initial_positions\x18\x05 \x03(\v2\x1a.game.v1.CombatantPositionR\x10initialPositions\"%\n" +
+	"\x11initial_positions\x18\x05 \x03(\v2\x1a.game.v1.CombatantPositionR\x10initialPositions\x12\x1d\n" +
+	"\n" +
+	"grid_width\x18\x06 \x01(\x05R\tgridWidth\x12\x1f\n" +
+	"\vgrid_height\x18\a \x01(\x05R\n" +
+	"gridHeight\"%\n" +
 	"\rRoundEndEvent\x12\x14\n" +
 	"\x05round\x18\x01 \x01(\x05R\x05round\"a\n" +
 	"\rAPUpdateEvent\x12\x12\n" +
@@ -15328,7 +15801,7 @@ const file_game_proto_rawDesc = "" +
 	"\vdescription\x18\x04 \x01(\tR\vdescription\x12'\n" +
 	"\x0feffects_summary\x18\x05 \x01(\tR\x0eeffectsSummary\x12\x1d\n" +
 	"\n" +
-	"short_name\x18\x06 \x01(\tR\tshortName\"\xe5\x12\n" +
+	"short_name\x18\x06 \x01(\tR\tshortName\"\xd1\x13\n" +
 	"\x12CharacterSheetView\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x10\n" +
 	"\x03job\x18\x02 \x01(\tR\x03job\x12\x1c\n" +
@@ -15388,7 +15861,9 @@ const file_game_proto_rawDesc = "" +
 	"\x10max_focus_points\x181 \x01(\x05R\x0emaxFocusPoints\x12C\n" +
 	"\x0fhardwired_slots\x182 \x03(\v2\x1a.game.v1.HardwiredSlotViewR\x0ehardwiredSlots\x12K\n" +
 	"\x11spontaneous_known\x183 \x03(\v2\x1e.game.v1.SpontaneousKnownEntryR\x10spontaneousKnown\x12[\n" +
-	"\x10armor_categories\x184 \x03(\v20.game.v1.CharacterSheetView.ArmorCategoriesEntryR\x0farmorCategories\x1a8\n" +
+	"\x10armor_categories\x184 \x03(\v20.game.v1.CharacterSheetView.ArmorCategoriesEntryR\x0farmorCategories\x120\n" +
+	"\x14proficiency_ac_bonus\x185 \x01(\x05R\x12proficiencyAcBonus\x128\n" +
+	"\x18effective_armor_category\x186 \x01(\tR\x16effectiveArmorCategory\x1a8\n" +
 	"\n" +
 	"ArmorEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
@@ -15398,7 +15873,7 @@ const file_game_proto_rawDesc = "" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\x1aB\n" +
 	"\x14ArmorCategoriesEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\x93\x02\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xad\x02\n" +
 	"\x0eInnateSlotView\x12\x17\n" +
 	"\atech_id\x18\x01 \x01(\tR\x06techId\x12%\n" +
 	"\x0euses_remaining\x18\x02 \x01(\x05R\rusesRemaining\x12\x19\n" +
@@ -15409,7 +15884,8 @@ const file_game_proto_rawDesc = "" +
 	"isReaction\x12'\n" +
 	"\x0feffects_summary\x18\a \x01(\tR\x0eeffectsSummary\x12\x1d\n" +
 	"\n" +
-	"short_name\x18\b \x01(\tR\tshortName\"y\n" +
+	"short_name\x18\b \x01(\tR\tshortName\x12\x18\n" +
+	"\apassive\x18\t \x01(\bR\apassive\"y\n" +
 	"\x16SpontaneousUsePoolView\x12\x1d\n" +
 	"\n" +
 	"tech_level\x18\x01 \x01(\x05R\ttechLevel\x12%\n" +
@@ -15607,7 +16083,32 @@ const file_game_proto_rawDesc = "" +
 	"\vfeat_grants\x18\x01 \x03(\v2\x15.game.v1.JobFeatGrantR\n" +
 	"featGrants\x126\n" +
 	"\vtech_grants\x18\x02 \x03(\v2\x15.game.v1.JobTechGrantR\n" +
-	"techGrants*Y\n" +
+	"techGrants\"\xcd\x01\n" +
+	"\x10AdminSessionInfo\x12\x17\n" +
+	"\achar_id\x18\x01 \x01(\x03R\x06charId\x12\x1f\n" +
+	"\vplayer_name\x18\x02 \x01(\tR\n" +
+	"playerName\x12\x14\n" +
+	"\x05level\x18\x03 \x01(\x05R\x05level\x12\x17\n" +
+	"\aroom_id\x18\x04 \x01(\tR\x06roomId\x12\x12\n" +
+	"\x04zone\x18\x05 \x01(\tR\x04zone\x12\x1d\n" +
+	"\n" +
+	"current_hp\x18\x06 \x01(\x05R\tcurrentHp\x12\x1d\n" +
+	"\n" +
+	"account_id\x18\a \x01(\x03R\taccountId\"\x1a\n" +
+	"\x18AdminListSessionsRequest\"R\n" +
+	"\x19AdminListSessionsResponse\x125\n" +
+	"\bsessions\x18\x01 \x03(\v2\x19.game.v1.AdminSessionInfoR\bsessions\"+\n" +
+	"\x10AdminKickRequest\x12\x17\n" +
+	"\achar_id\x18\x01 \x01(\x03R\x06charId\"\x13\n" +
+	"\x11AdminKickResponse\"B\n" +
+	"\x13AdminMessageRequest\x12\x17\n" +
+	"\achar_id\x18\x01 \x01(\x03R\x06charId\x12\x12\n" +
+	"\x04text\x18\x02 \x01(\tR\x04text\"\x16\n" +
+	"\x14AdminMessageResponse\"H\n" +
+	"\x14AdminTeleportRequest\x12\x17\n" +
+	"\achar_id\x18\x01 \x01(\x03R\x06charId\x12\x17\n" +
+	"\aroom_id\x18\x02 \x01(\tR\x06roomId\"\x17\n" +
+	"\x15AdminTeleportResponse*Y\n" +
 	"\vMessageType\x12\x1c\n" +
 	"\x18MESSAGE_TYPE_UNSPECIFIED\x10\x00\x12\x14\n" +
 	"\x10MESSAGE_TYPE_SAY\x10\x01\x12\x16\n" +
@@ -15632,9 +16133,13 @@ const file_game_proto_rawDesc = "" +
 	"\x1bCOMBAT_EVENT_TYPE_CONDITION\x10\x06\x12\x1c\n" +
 	"\x18COMBAT_EVENT_TYPE_RELOAD\x10\a\x12\x1b\n" +
 	"\x17COMBAT_EVENT_TYPE_THROW\x10\b\x12\x1e\n" +
-	"\x1aCOMBAT_EVENT_TYPE_POSITION\x10\t2J\n" +
+	"\x1aCOMBAT_EVENT_TYPE_POSITION\x10\t2\x99\x03\n" +
 	"\vGameService\x12;\n" +
-	"\aSession\x12\x16.game.v1.ClientMessage\x1a\x14.game.v1.ServerEvent(\x010\x01B:Z8github.com/cory-johannsen/mud/internal/gameserver/gamev1b\x06proto3"
+	"\aSession\x12\x16.game.v1.ClientMessage\x1a\x14.game.v1.ServerEvent(\x010\x01\x12Z\n" +
+	"\x11AdminListSessions\x12!.game.v1.AdminListSessionsRequest\x1a\".game.v1.AdminListSessionsResponse\x12H\n" +
+	"\x0fAdminKickPlayer\x12\x19.game.v1.AdminKickRequest\x1a\x1a.game.v1.AdminKickResponse\x12Q\n" +
+	"\x12AdminMessagePlayer\x12\x1c.game.v1.AdminMessageRequest\x1a\x1d.game.v1.AdminMessageResponse\x12T\n" +
+	"\x13AdminTeleportPlayer\x12\x1d.game.v1.AdminTeleportRequest\x1a\x1e.game.v1.AdminTeleportResponseB:Z8github.com/cory-johannsen/mud/internal/gameserver/gamev1b\x06proto3"
 
 var (
 	file_game_proto_rawDescOnce sync.Once
@@ -15649,7 +16154,7 @@ func file_game_proto_rawDescGZIP() []byte {
 }
 
 var file_game_proto_enumTypes = make([]protoimpl.EnumInfo, 4)
-var file_game_proto_msgTypes = make([]protoimpl.MessageInfo, 206)
+var file_game_proto_msgTypes = make([]protoimpl.MessageInfo, 215)
 var file_game_proto_goTypes = []any{
 	(MessageType)(0),                  // 0: game.v1.MessageType
 	(RoomEventType)(0),                // 1: game.v1.RoomEventType
@@ -15857,10 +16362,19 @@ var file_game_proto_goTypes = []any{
 	(*JobFeatGrant)(nil),              // 203: game.v1.JobFeatGrant
 	(*JobTechGrant)(nil),              // 204: game.v1.JobTechGrant
 	(*JobGrantsResponse)(nil),         // 205: game.v1.JobGrantsResponse
-	nil,                               // 206: game.v1.FixerView.BribeCostsEntry
-	nil,                               // 207: game.v1.CharacterSheetView.ArmorEntry
-	nil,                               // 208: game.v1.CharacterSheetView.AccessoriesEntry
-	nil,                               // 209: game.v1.CharacterSheetView.ArmorCategoriesEntry
+	(*AdminSessionInfo)(nil),          // 206: game.v1.AdminSessionInfo
+	(*AdminListSessionsRequest)(nil),  // 207: game.v1.AdminListSessionsRequest
+	(*AdminListSessionsResponse)(nil), // 208: game.v1.AdminListSessionsResponse
+	(*AdminKickRequest)(nil),          // 209: game.v1.AdminKickRequest
+	(*AdminKickResponse)(nil),         // 210: game.v1.AdminKickResponse
+	(*AdminMessageRequest)(nil),       // 211: game.v1.AdminMessageRequest
+	(*AdminMessageResponse)(nil),      // 212: game.v1.AdminMessageResponse
+	(*AdminTeleportRequest)(nil),      // 213: game.v1.AdminTeleportRequest
+	(*AdminTeleportResponse)(nil),     // 214: game.v1.AdminTeleportResponse
+	nil,                               // 215: game.v1.FixerView.BribeCostsEntry
+	nil,                               // 216: game.v1.CharacterSheetView.ArmorEntry
+	nil,                               // 217: game.v1.CharacterSheetView.AccessoriesEntry
+	nil,                               // 218: game.v1.CharacterSheetView.ArmorCategoriesEntry
 }
 var file_game_proto_depIdxs = []int32{
 	37,  // 0: game.v1.ClientMessage.join_world:type_name -> game.v1.JoinWorldRequest
@@ -16046,7 +16560,7 @@ var file_game_proto_depIdxs = []int32{
 	2,   // 180: game.v1.PlayerInfo.status:type_name -> game.v1.CombatStatus
 	47,  // 181: game.v1.ExitList.exits:type_name -> game.v1.ExitInfo
 	61,  // 182: game.v1.TrainerView.jobs:type_name -> game.v1.JobOfferEntry
-	206, // 183: game.v1.FixerView.bribe_costs:type_name -> game.v1.FixerView.BribeCostsEntry
+	215, // 183: game.v1.FixerView.bribe_costs:type_name -> game.v1.FixerView.BribeCostsEntry
 	80,  // 184: game.v1.LoadoutView.presets:type_name -> game.v1.LoadoutWeaponPreset
 	90,  // 185: game.v1.MapTile.poi_npcs:type_name -> game.v1.PoiWithNpc
 	91,  // 186: game.v1.MapTile.zone_exits:type_name -> game.v1.ZoneExitInfo
@@ -16060,8 +16574,8 @@ var file_game_proto_depIdxs = []int32{
 	117, // 194: game.v1.ClassFeaturesResponse.archetype_features:type_name -> game.v1.ClassFeatureEntry
 	117, // 195: game.v1.ClassFeaturesResponse.job_features:type_name -> game.v1.ClassFeatureEntry
 	114, // 196: game.v1.UseResponse.choices:type_name -> game.v1.FeatEntry
-	207, // 197: game.v1.CharacterSheetView.armor:type_name -> game.v1.CharacterSheetView.ArmorEntry
-	208, // 198: game.v1.CharacterSheetView.accessories:type_name -> game.v1.CharacterSheetView.AccessoriesEntry
+	216, // 197: game.v1.CharacterSheetView.armor:type_name -> game.v1.CharacterSheetView.ArmorEntry
+	217, // 198: game.v1.CharacterSheetView.accessories:type_name -> game.v1.CharacterSheetView.AccessoriesEntry
 	129, // 199: game.v1.CharacterSheetView.player_resistances:type_name -> game.v1.ResistanceEntry
 	129, // 200: game.v1.CharacterSheetView.player_weaknesses:type_name -> game.v1.ResistanceEntry
 	96,  // 201: game.v1.CharacterSheetView.skills:type_name -> game.v1.SkillEntry
@@ -16073,19 +16587,28 @@ var file_game_proto_depIdxs = []int32{
 	127, // 207: game.v1.CharacterSheetView.innate_slots:type_name -> game.v1.InnateSlotView
 	124, // 208: game.v1.CharacterSheetView.hardwired_slots:type_name -> game.v1.HardwiredSlotView
 	125, // 209: game.v1.CharacterSheetView.spontaneous_known:type_name -> game.v1.SpontaneousKnownEntry
-	209, // 210: game.v1.CharacterSheetView.armor_categories:type_name -> game.v1.CharacterSheetView.ArmorCategoriesEntry
+	218, // 210: game.v1.CharacterSheetView.armor_categories:type_name -> game.v1.CharacterSheetView.ArmorCategoriesEntry
 	131, // 211: game.v1.ProficienciesResponse.proficiencies:type_name -> game.v1.ProficiencyEntry
 	193, // 212: game.v1.HotbarUpdateEvent.slots:type_name -> game.v1.HotbarSlot
 	198, // 213: game.v1.CraftResultEvent.materials_lost:type_name -> game.v1.MaterialLoss
 	203, // 214: game.v1.JobGrantsResponse.feat_grants:type_name -> game.v1.JobFeatGrant
 	204, // 215: game.v1.JobGrantsResponse.tech_grants:type_name -> game.v1.JobTechGrant
-	4,   // 216: game.v1.GameService.Session:input_type -> game.v1.ClientMessage
-	33,  // 217: game.v1.GameService.Session:output_type -> game.v1.ServerEvent
-	217, // [217:218] is the sub-list for method output_type
-	216, // [216:217] is the sub-list for method input_type
-	216, // [216:216] is the sub-list for extension type_name
-	216, // [216:216] is the sub-list for extension extendee
-	0,   // [0:216] is the sub-list for field type_name
+	206, // 216: game.v1.AdminListSessionsResponse.sessions:type_name -> game.v1.AdminSessionInfo
+	4,   // 217: game.v1.GameService.Session:input_type -> game.v1.ClientMessage
+	207, // 218: game.v1.GameService.AdminListSessions:input_type -> game.v1.AdminListSessionsRequest
+	209, // 219: game.v1.GameService.AdminKickPlayer:input_type -> game.v1.AdminKickRequest
+	211, // 220: game.v1.GameService.AdminMessagePlayer:input_type -> game.v1.AdminMessageRequest
+	213, // 221: game.v1.GameService.AdminTeleportPlayer:input_type -> game.v1.AdminTeleportRequest
+	33,  // 222: game.v1.GameService.Session:output_type -> game.v1.ServerEvent
+	208, // 223: game.v1.GameService.AdminListSessions:output_type -> game.v1.AdminListSessionsResponse
+	210, // 224: game.v1.GameService.AdminKickPlayer:output_type -> game.v1.AdminKickResponse
+	212, // 225: game.v1.GameService.AdminMessagePlayer:output_type -> game.v1.AdminMessageResponse
+	214, // 226: game.v1.GameService.AdminTeleportPlayer:output_type -> game.v1.AdminTeleportResponse
+	222, // [222:227] is the sub-list for method output_type
+	217, // [217:222] is the sub-list for method input_type
+	217, // [217:217] is the sub-list for extension type_name
+	217, // [217:217] is the sub-list for extension extendee
+	0,   // [0:217] is the sub-list for field type_name
 }
 
 func init() { file_game_proto_init() }
@@ -16274,7 +16797,7 @@ func file_game_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_game_proto_rawDesc), len(file_game_proto_rawDesc)),
 			NumEnums:      4,
-			NumMessages:   206,
+			NumMessages:   215,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
