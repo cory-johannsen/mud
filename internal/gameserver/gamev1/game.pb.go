@@ -8793,6 +8793,8 @@ type RoundStartEvent struct {
 	DurationMs       int32                  `protobuf:"varint,3,opt,name=duration_ms,json=durationMs,proto3" json:"duration_ms,omitempty"`
 	TurnOrder        []string               `protobuf:"bytes,4,rep,name=turn_order,json=turnOrder,proto3" json:"turn_order,omitempty"`
 	InitialPositions []*CombatantPosition   `protobuf:"bytes,5,rep,name=initial_positions,json=initialPositions,proto3" json:"initial_positions,omitempty"`
+	GridWidth        int32                  `protobuf:"varint,6,opt,name=grid_width,json=gridWidth,proto3" json:"grid_width,omitempty"`
+	GridHeight       int32                  `protobuf:"varint,7,opt,name=grid_height,json=gridHeight,proto3" json:"grid_height,omitempty"`
 	unknownFields    protoimpl.UnknownFields
 	sizeCache        protoimpl.SizeCache
 }
@@ -8860,6 +8862,20 @@ func (x *RoundStartEvent) GetInitialPositions() []*CombatantPosition {
 		return x.InitialPositions
 	}
 	return nil
+}
+
+func (x *RoundStartEvent) GetGridWidth() int32 {
+	if x != nil {
+		return x.GridWidth
+	}
+	return 0
+}
+
+func (x *RoundStartEvent) GetGridHeight() int32 {
+	if x != nil {
+		return x.GridHeight
+	}
+	return 0
 }
 
 // RoundEndEvent is broadcast when a round's actions have resolved.
@@ -15658,7 +15674,7 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\x01x\x18\x02 \x01(\x05R\x01x\x12\f\n" +
 	"\x01y\x18\x03 \x01(\x05R\x01y\x12!\n" +
 	"\fap_remaining\x18\x04 \x01(\x05R\vapRemaining\x12\x19\n" +
-	"\bap_total\x18\x05 \x01(\x05R\aapTotal\"\xda\x01\n" +
+	"\bap_total\x18\x05 \x01(\x05R\aapTotal\"\x9a\x02\n" +
 	"\x0fRoundStartEvent\x12\x14\n" +
 	"\x05round\x18\x01 \x01(\x05R\x05round\x12(\n" +
 	"\x10actions_per_turn\x18\x02 \x01(\x05R\x0eactionsPerTurn\x12\x1f\n" +
@@ -15666,7 +15682,11 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"durationMs\x12\x1d\n" +
 	"\n" +
 	"turn_order\x18\x04 \x03(\tR\tturnOrder\x12G\n" +
-	"\x11initial_positions\x18\x05 \x03(\v2\x1a.game.v1.CombatantPositionR\x10initialPositions\"%\n" +
+	"\x11initial_positions\x18\x05 \x03(\v2\x1a.game.v1.CombatantPositionR\x10initialPositions\x12\x1d\n" +
+	"\n" +
+	"grid_width\x18\x06 \x01(\x05R\tgridWidth\x12\x1f\n" +
+	"\vgrid_height\x18\a \x01(\x05R\n" +
+	"gridHeight\"%\n" +
 	"\rRoundEndEvent\x12\x14\n" +
 	"\x05round\x18\x01 \x01(\x05R\x05round\"a\n" +
 	"\rAPUpdateEvent\x12\x12\n" +
