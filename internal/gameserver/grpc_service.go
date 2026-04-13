@@ -2626,7 +2626,16 @@ func (s *GameServiceServer) handleMove(uid string, req *gamev1.MoveRequest) (*ga
 				}
 			}
 			if s.questSvc != nil {
-				_, _ = s.questSvc.RecordExplore(context.Background(), sess, sess.CharacterID, newRoom.ID)
+				if exploreMsgs, exploreErr := s.questSvc.RecordExplore(context.Background(), sess, sess.CharacterID, newRoom.ID); exploreErr == nil {
+					for _, em := range exploreMsgs {
+						s.pushMessageToUID(uid, em)
+					}
+					if len(exploreMsgs) > 0 {
+						s.pushCharacterSheet(sess)
+					}
+				} else {
+					s.logger.Warn("RecordExplore failed", zap.String("uid", uid), zap.Error(exploreErr))
+				}
 			}
 			// Award room discovery XP on first physical entry.
 			if s.xpSvc != nil {
@@ -2650,6 +2659,7 @@ func (s *GameServiceServer) handleMove(uid string, req *gamev1.MoveRequest) (*ga
 					}
 					if len(xpMsgs) > 0 {
 						s.pushHPUpdate(uid, sess)
+						s.pushCharacterSheet(sess)
 					}
 				}
 			}
@@ -2933,6 +2943,7 @@ func (s *GameServiceServer) applyRoomSkillChecks(uid string, room *world.Room) [
 				msgs = append(msgs, xpMsgs...)
 				if len(xpMsgs) > 0 {
 					s.pushHPUpdate(uid, sess)
+					s.pushCharacterSheet(sess)
 				}
 			}
 		}
@@ -3077,6 +3088,7 @@ func (s *GameServiceServer) applyNPCSkillChecks(uid string, roomID string) []str
 					msgs = append(msgs, xpMsgs...)
 					if len(xpMsgs) > 0 {
 						s.pushHPUpdate(uid, sess)
+						s.pushCharacterSheet(sess)
 					}
 				}
 			}
@@ -6439,6 +6451,9 @@ func (s *GameServiceServer) handleGetItem(uid, target string) (*gamev1.ServerEve
 					for _, qm := range questMsgs {
 						s.pushMessageToUID(uid, qm)
 					}
+					if len(questMsgs) > 0 {
+						s.pushCharacterSheet(sess)
+					}
 				}
 			}
 			picked++
@@ -6468,6 +6483,9 @@ func (s *GameServiceServer) handleGetItem(uid, target string) (*gamev1.ServerEve
 				if questMsgs, questErr := s.questSvc.RecordFetch(context.Background(), sess, sess.CharacterID, picked.ItemDefID, picked.Quantity); questErr == nil {
 					for _, qm := range questMsgs {
 						s.pushMessageToUID(uid, qm)
+					}
+					if len(questMsgs) > 0 {
+						s.pushCharacterSheet(sess)
 					}
 				}
 			}

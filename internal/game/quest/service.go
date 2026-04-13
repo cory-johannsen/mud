@@ -339,9 +339,12 @@ func (s *Service) Complete(ctx context.Context, sess SessionState, characterID i
 	delete(sess.GetActiveQuests(), questID)
 	sess.GetCompletedQuests()[questID] = &now
 
-	// Award XP if service is wired.
+	// Award XP if service is wired. Capture level-up messages to return to caller.
+	var levelUpMsgs []string
 	if s.xpSvc != nil && def.Rewards.XP > 0 {
-		if _, err := s.xpSvc.AwardXPAmount(ctx, sess, characterID, def.Rewards.XP); err != nil {
+		var err error
+		levelUpMsgs, err = s.xpSvc.AwardXPAmount(ctx, sess, characterID, def.Rewards.XP)
+		if err != nil {
 			return nil, fmt.Errorf("awarding quest XP: %w", err)
 		}
 	}
@@ -366,7 +369,7 @@ func (s *Service) Complete(ctx context.Context, sess SessionState, characterID i
 		}
 	}
 
-	return CompletionMessage(def, s.invRegistry), nil
+	return append(CompletionMessage(def, s.invRegistry), levelUpMsgs...), nil
 }
 
 // Abandon removes a quest from the player's active quests.

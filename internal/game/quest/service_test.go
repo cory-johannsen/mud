@@ -257,6 +257,50 @@ func TestService_RecordKill_CompletesQuestWhenAllObjectivesMet(t *testing.T) {
 	}
 }
 
+// fakeXPAwarder implements XPAwarder for unit testing.
+// It returns a pre-configured set of level-up messages on every AwardXPAmount call.
+type fakeXPAwarder struct {
+	levelUpMsgs []string
+}
+
+func (f *fakeXPAwarder) AwardXPAmount(_ context.Context, _ quest.SessionState, _ int64, _ int) ([]string, error) {
+	return f.levelUpMsgs, nil
+}
+
+// TestService_Complete_IncludesLevelUpMessages verifies that when AwardXPAmount returns
+// level-up messages, Complete() includes them in its return value.
+//
+// REQ-58-1: quest.Service.Complete() MUST include level-up messages returned by AwardXPAmount
+// in its return value so callers can notify the player of pending boosts immediately upon
+// quest completion.
+func TestService_Complete_IncludesLevelUpMessages(t *testing.T) {
+	awarder := &fakeXPAwarder{levelUpMsgs: []string{"You have levelled up!", "You have 1 pending stat boost."}}
+	reg := quest.QuestRegistry{"kill_rats": killQuestDef()}
+	repo := newFakeRepo()
+	svc := quest.NewService(reg, repo, awarder, nil, nil)
+	sess := newFakeSession()
+	// Progress at 2/3 — one more kill triggers completion.
+	sess.activeQuests["kill_rats"] = &quest.ActiveQuest{QuestID: "kill_rats", ObjectiveProgress: map[string]int{"o1": 2}}
+
+	msgs, err := svc.RecordKill(context.Background(), sess, 1, "rat")
+	if err != nil {
+		t.Fatalf("RecordKill: %v", err)
+	}
+
+	for _, want := range awarder.levelUpMsgs {
+		found := false
+		for _, got := range msgs {
+			if got == want {
+				found = true
+				break
+			}
+		}
+		if !found {
+			t.Errorf("level-up message %q not found in returned messages: %v", want, msgs)
+		}
+	}
+}
+
 func TestService_HydrateSession_LoadsActiveAndCompleted(t *testing.T) {
 	reg := quest.QuestRegistry{"kill_rats": killQuestDef()}
 	svc := quest.NewService(reg, newFakeRepo(), nil, nil, nil)

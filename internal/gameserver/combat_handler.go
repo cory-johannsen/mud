@@ -4217,6 +4217,11 @@ func (h *CombatHandler) removeDeadNPCsLocked(cbt *combat.Combat) {
 					h.logger.Warn("RecordKill failed", zap.String("uid", p.UID), zap.Error(questErr))
 				}
 				h.pushQuestMessages(p, questMsgs)
+				// REQ-58-3: push CharacterSheetView when quest completes so the web UI
+				// Stats tab shows pending boosts without requiring a relog.
+				if len(questMsgs) > 0 && h.pushCharacterSheetFn != nil {
+					h.pushCharacterSheetFn(p)
+				}
 			}
 		}
 
