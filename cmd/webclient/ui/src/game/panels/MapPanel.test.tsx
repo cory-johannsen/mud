@@ -1,12 +1,11 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, fireEvent, screen } from '@testing-library/react'
 
-// Mock react-resizable-panels — jsdom lacks ResizeObserver required by Group.
+// MapPanel no longer uses react-resizable-panels for the zone view,
+// but mock it to be safe if any import remains.
 vi.mock('react-resizable-panels', () => ({
-  Group: ({ children, style, onLayoutChanged }: { children: React.ReactNode; style?: React.CSSProperties; onLayoutChanged?: (layout: Record<string, number>) => void }) =>
-    <div style={style} data-onlayout={String(!!onLayoutChanged)}>{children}</div>,
-  Panel: ({ children, style, id }: { children: React.ReactNode; style?: React.CSSProperties; id?: string }) =>
-    <div style={style} data-panel-id={id}>{children}</div>,
+  Group: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  Panel: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   Separator: () => <div />,
 }))
 
@@ -75,10 +74,11 @@ describe('MapPanel zone map — SVG rendering', () => {
     expect(screen.queryAllByText("Grinder's Row").length).toBeGreaterThan(0)
   })
 
-  it('renders details pane with room names', () => {
-    render(<MapPanel />)
-    // Room names appear in both SVG text and details list — at least one match each
-    expect(screen.queryAllByText("Grinder's Row").length).toBeGreaterThan(0)
-    expect(screen.queryAllByText('Last Stand Lodge').length).toBeGreaterThan(0)
+  it('renders room names in SVG text elements', () => {
+    const { container } = render(<MapPanel />)
+    // Names may be word-wrapped across tspans; check the text container's full textContent
+    const allText = container.querySelector('svg')?.textContent ?? ''
+    expect(allText).toContain("Grinder")
+    expect(allText).toContain("Last")
   })
 })

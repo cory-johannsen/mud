@@ -11,33 +11,53 @@ const DANGER_FILLS: Record<string, string> = {
   deadly: '#4a1a1a',
 }
 
-const POI_SYMBOLS: Record<string, string> = {
-  merchant: '$',
-  healer: '+',
-  trainer: 'T',
-  quest_giver: '!',
-  motel: 'Z',
-  npc: '@',
-  guard: 'G',
-}
-
+// Server sends full direction names (e.g. "north"), not abbreviations.
 const DIR_OFFSETS: Record<string, [number, number]> = {
-  n: [0, -1],
-  s: [0, 1],
-  e: [1, 0],
-  w: [-1, 0],
-  ne: [1, -1],
-  nw: [-1, -1],
-  se: [1, 1],
-  sw: [-1, 1],
+  north:     [0, -1],
+  south:     [0,  1],
+  east:      [1,  0],
+  west:      [-1, 0],
+  northeast: [1, -1],
+  northwest: [-1,-1],
+  southeast: [1,  1],
+  southwest: [-1, 1],
+  // short forms as fallback
+  n: [0, -1], s: [0, 1], e: [1, 0], w: [-1, 0],
+  ne: [1, -1], nw: [-1, -1], se: [1, 1], sw: [-1, 1],
 }
 
-const OPPOSITE_DIR: Record<string, string> = {
-  n: 's', s: 'n', e: 'w', w: 'e', ne: 'sw', sw: 'ne', nw: 'se', se: 'nw',
+// POI id → symbol shown inside tile cell
+const POI_SYMBOLS: Record<string, string> = {
+  merchant:    '$',
+  healer:      '+',
+  trainer:     'T',
+  quest_giver: '!',
+  motel:       'Z',
+  brothel:     'B',
+  npc:         '@',
+  guard:       'G',
+  cover:       'C',
+  equipment:   'E',
+  map:         'M',
 }
 
-const STEP = CELL_W + GAP  // horizontal step between tile origins
-const STEP_H = CELL_H + GAP  // vertical step between tile origins
+// POI legend entries: id → label shown below the map
+const POI_LEGEND: Array<{ id: string; label: string }> = [
+  { id: 'merchant',    label: 'Merchant'    },
+  { id: 'healer',      label: 'Healer'      },
+  { id: 'trainer',     label: 'Trainer'     },
+  { id: 'quest_giver', label: 'Quest'       },
+  { id: 'motel',       label: 'Motel'       },
+  { id: 'brothel',     label: 'Brothel'     },
+  { id: 'npc',         label: 'NPC'         },
+  { id: 'guard',       label: 'Guard'       },
+  { id: 'cover',       label: 'Cover'       },
+  { id: 'equipment',   label: 'Equipment'   },
+  { id: 'map',         label: 'Map'         },
+]
+
+const STEP = CELL_W + GAP
+const STEP_H = CELL_H + GAP
 
 interface ZoneMapSvgProps {
   tiles: MapTile[]
@@ -82,8 +102,7 @@ export function ZoneMapSvg({ tiles, onHover, onHoverEnd }: ZoneMapSvgProps): JSX
     tileMap.set(`${tile.x ?? 0},${tile.y ?? 0}`, tile)
   }
 
-  // Normalize coordinates: compress sparse grid to consecutive indices so
-  // there's no wasted blank space between non-adjacent rooms.
+  // Normalize coordinates: compress sparse grid to consecutive indices
   const rawXs = tiles.map(t => t.x ?? 0)
   const rawYs = tiles.map(t => t.y ?? 0)
   const sortedUniqueXs = [...new Set(rawXs)].sort((a, b) => a - b)
@@ -91,25 +110,23 @@ export function ZoneMapSvg({ tiles, onHover, onHoverEnd }: ZoneMapSvgProps): JSX
   const normX = new Map(sortedUniqueXs.map((x, i) => [x, i]))
   const normY = new Map(sortedUniqueYs.map((y, i) => [y, i]))
 
-  // Convert original tile coordinate to SVG pixel position (top-left of tile)
   const px = (tx: number) => (normX.get(tx) ?? 0) * STEP
   const py = (ty: number) => (normY.get(ty) ?? 0) * STEP_H
-
-  // Center of a tile in SVG space
-  const cx = (tx: number) => px(tx) + CELL_W / 2
-  const cy = (ty: number) => py(ty) + CELL_H / 2
+  const centerX = (tx: number) => px(tx) + CELL_W / 2
+  const centerY = (ty: number) => py(ty) + CELL_H / 2
 
   const totalW = sortedUniqueXs.length * STEP - GAP
   const totalH = sortedUniqueYs.length * STEP_H - GAP
   const viewBox = `-8 -8 ${totalW + 16} ${totalH + 16}`
 
-  // Compute original bounds (for connector search loop limit)
   const minX = Math.min(...rawXs)
   const maxX = Math.max(...rawXs)
   const minY = Math.min(...rawYs)
   const maxY = Math.max(...rawYs)
 
-  // Build connectors, deduplicating pairs
+  // Build connectors, deduplicating pairs.
+  // Draw a connector whenever a tile has an exit that reaches another tile
+  // in the map, regardless of whether the other side lists the opposite exit.
   const drawnPairs = new Set<string>()
   const connectors: JSX.Element[] = []
 
@@ -123,7 +140,6 @@ export function ZoneMapSvg({ tiles, onHover, onHoverEnd }: ZoneMapSvgProps): JSX
       if (!offsets) continue
 
       const [dx, dy] = offsets
-      const oppDir = OPPOSITE_DIR[dir]
 
       // Search along direction in original coordinate space
       let step = 1
@@ -134,9 +150,7 @@ export function ZoneMapSvg({ tiles, onHover, onHoverEnd }: ZoneMapSvgProps): JSX
         if (Math.abs(nx - tx) > maxX - minX + 1 || Math.abs(ny - ty) > maxY - minY + 1) break
         const candidate = tileMap.get(`${nx},${ny}`)
         if (candidate) {
-          if (oppDir && (candidate.exits ?? []).includes(oppDir)) {
-            found = candidate
-          }
+          found = candidate
           break
         }
         step++
@@ -160,7 +174,7 @@ export function ZoneMapSvg({ tiles, onHover, onHoverEnd }: ZoneMapSvgProps): JSX
       connectors.push(
         <line
           key={pairKey}
-          x1={cx(tx)} y1={cy(ty)} x2={cx(fnx)} y2={cy(fny)}
+          x1={centerX(tx)} y1={centerY(ty)} x2={centerX(fnx)} y2={centerY(fny)}
           stroke={zoneConnector ? '#8888ff' : '#888'}
           strokeWidth={2}
           strokeDasharray={zoneConnector ? '4 2' : undefined}
@@ -173,6 +187,9 @@ export function ZoneMapSvg({ tiles, onHover, onHoverEnd }: ZoneMapSvgProps): JSX
   const nonCurrentTiles = tiles.filter(t => !(t.current ?? false))
   const currentTiles = tiles.filter(t => t.current ?? false)
   const orderedTiles = [...nonCurrentTiles, ...currentTiles]
+
+  // Collect which POI types are actually present in this zone for the legend
+  const presentPois = new Set(tiles.flatMap(t => t.pois ?? []))
 
   function renderTile(tile: MapTile): JSX.Element {
     const tx = tile.x ?? 0
@@ -188,10 +205,9 @@ export function ZoneMapSvg({ tiles, onHover, onHoverEnd }: ZoneMapSvgProps): JSX
     const name = tile.roomName ?? ''
     const id = clipId(tile)
     const [line1, line2] = wrapRoomName(name)
-    // Vertically center text block; shift up slightly when there are POIs at bottom
     const hasPois = (tile.pois ?? []).length > 0
     const textMidY = hasPois ? ry + CELL_H / 2 - 4 : ry + CELL_H / 2
-    const lineH = 10  // px between baselines
+    const lineH = 10
 
     return (
       <g key={`tile-${tile.roomId ?? tx}-${ty}`}>
@@ -204,10 +220,7 @@ export function ZoneMapSvg({ tiles, onHover, onHoverEnd }: ZoneMapSvgProps): JSX
           onMouseLeave={onHoverEnd}
         />
         {line2 ? (
-          <text
-            fontSize={9} fill="#ccc" pointerEvents="none"
-            clipPath={`url(#${id})`}
-          >
+          <text fontSize={9} fill="#ccc" pointerEvents="none" clipPath={`url(#${id})`}>
             <tspan x={rx + CELL_W / 2} y={textMidY - lineH / 2} textAnchor="middle" dominantBaseline="middle">
               {line1}
             </tspan>
@@ -217,13 +230,9 @@ export function ZoneMapSvg({ tiles, onHover, onHoverEnd }: ZoneMapSvgProps): JSX
           </text>
         ) : (
           <text
-            x={rx + CELL_W / 2}
-            y={textMidY}
-            textAnchor="middle"
-            dominantBaseline="middle"
-            fontSize={9}
-            fill="#ccc"
-            pointerEvents="none"
+            x={rx + CELL_W / 2} y={textMidY}
+            textAnchor="middle" dominantBaseline="middle"
+            fontSize={9} fill="#ccc" pointerEvents="none"
             clipPath={`url(#${id})`}
           >
             {line1}
@@ -246,25 +255,43 @@ export function ZoneMapSvg({ tiles, onHover, onHoverEnd }: ZoneMapSvgProps): JSX
     )
   }
 
+  const legendEntries = POI_LEGEND.filter(e => presentPois.has(e.id))
+
   return (
-    <div style={{ overflow: 'auto', width: '100%', height: '100%' }}>
-      <svg viewBox={viewBox} style={{ display: 'block', minWidth: '100%' }}>
-        <defs>
-          {tiles.map(tile => {
-            const tx = tile.x ?? 0
-            const ty = tile.y ?? 0
-            return (
-              <clipPath key={`clip-${clipId(tile)}`} id={clipId(tile)}>
-                <rect x={px(tx)} y={py(ty)} width={CELL_W} height={CELL_H} />
-              </clipPath>
-            )
-          })}
-        </defs>
-        {/* connectors rendered first; visible in the GAP between tiles */}
-        {connectors}
-        {/* tiles: non-current first, then current tile on top */}
-        {orderedTiles.map(renderTile)}
-      </svg>
+    <div style={{ overflow: 'auto', width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
+      <div style={{ overflow: 'auto', flex: 1 }}>
+        <svg viewBox={viewBox} style={{ display: 'block', minWidth: '100%' }}>
+          <defs>
+            {tiles.map(tile => {
+              const tx = tile.x ?? 0
+              const ty = tile.y ?? 0
+              return (
+                <clipPath key={`clip-${clipId(tile)}`} id={clipId(tile)}>
+                  <rect x={px(tx)} y={py(ty)} width={CELL_W} height={CELL_H} />
+                </clipPath>
+              )
+            })}
+          </defs>
+          {connectors}
+          {orderedTiles.map(renderTile)}
+        </svg>
+      </div>
+      {legendEntries.length > 0 && (
+        <div style={{
+          display: 'flex', flexWrap: 'wrap', gap: '0.4rem 0.75rem',
+          padding: '0.35rem 0.5rem',
+          borderTop: '1px solid #333',
+          fontSize: '0.68rem', fontFamily: 'monospace', color: '#aaa',
+          flexShrink: 0,
+        }}>
+          {legendEntries.map(e => (
+            <span key={e.id}>
+              <span style={{ color: '#f0c040' }}>{POI_SYMBOLS[e.id]}</span>
+              {' '}{e.label}
+            </span>
+          ))}
+        </div>
+      )}
     </div>
   )
 }

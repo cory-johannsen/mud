@@ -1,7 +1,11 @@
 import type { WorldZoneTile } from '../proto'
 
-const ZONE_W = 80
-const ZONE_H = 50
+const ZONE_W = 72
+const ZONE_H = 44
+const GAP = 6  // gap between adjacent zone tiles
+
+const STEP = ZONE_W + GAP
+const STEP_H = ZONE_H + GAP
 
 const DANGER_FILLS: Record<string, string> = {
   safe: '#2a4a2a',
@@ -26,35 +30,37 @@ export function WorldMapSvg({ tiles, onTravel }: WorldMapSvgProps): JSX.Element 
     return <p style={{ color: '#666', fontFamily: 'monospace', padding: '0.5rem' }}>No world map data.</p>
   }
 
-  const xs = tiles.map(t => t.worldX ?? 0)
-  const ys = tiles.map(t => t.worldY ?? 0)
-  const minX = Math.min(...xs)
-  const maxX = Math.max(...xs)
-  const minY = Math.min(...ys)
-  const maxY = Math.max(...ys)
+  // Normalize coordinates: compress sparse grid to consecutive indices
+  const rawXs = tiles.map(t => t.worldX ?? 0)
+  const rawYs = tiles.map(t => t.worldY ?? 0)
+  const sortedUniqueXs = [...new Set(rawXs)].sort((a, b) => a - b)
+  const sortedUniqueYs = [...new Set(rawYs)].sort((a, b) => a - b)
+  const normX = new Map(sortedUniqueXs.map((x, i) => [x, i]))
+  const normY = new Map(sortedUniqueYs.map((y, i) => [y, i]))
 
-  const vbX = minX * ZONE_W
-  const vbY = minY * ZONE_H
-  const vbW = (maxX - minX + 1) * ZONE_W
-  const vbH = (maxY - minY + 1) * ZONE_H
-  const viewBox = `${vbX} ${vbY} ${vbW} ${vbH}`
+  const px = (wx: number) => (normX.get(wx) ?? 0) * STEP
+  const py = (wy: number) => (normY.get(wy) ?? 0) * STEP_H
+
+  const totalW = sortedUniqueXs.length * STEP - GAP
+  const totalH = sortedUniqueYs.length * STEP_H - GAP
+  const viewBox = `-4 -4 ${totalW + 8} ${totalH + 8}`
 
   return (
     <div style={{ overflow: 'auto', padding: '0.5rem' }}>
       <svg
         viewBox={viewBox}
-        width={vbW}
-        height={vbH}
+        width={totalW + 8}
+        height={totalH + 8}
         style={{ display: 'block', fontFamily: 'monospace' }}
       >
         <defs>
           {tiles.map(tile => {
             const id = tile.zoneId ?? `${tile.worldX ?? 0}-${tile.worldY ?? 0}`
-            const cx = (tile.worldX ?? 0) * ZONE_W
-            const cy = (tile.worldY ?? 0) * ZONE_H
+            const rx = px(tile.worldX ?? 0)
+            const ry = py(tile.worldY ?? 0)
             return (
               <clipPath key={`clip-${id}`} id={`clip-${id}`}>
-                <rect x={cx + 2} y={cy + 2} width={ZONE_W - 4} height={ZONE_H - 4} />
+                <rect x={rx + 2} y={ry + 2} width={ZONE_W - 4} height={ZONE_H - 4} />
               </clipPath>
             )
           })}
@@ -62,10 +68,8 @@ export function WorldMapSvg({ tiles, onTravel }: WorldMapSvgProps): JSX.Element 
 
         {tiles.map(tile => {
           const id = tile.zoneId ?? `${tile.worldX ?? 0}-${tile.worldY ?? 0}`
-          const wx = tile.worldX ?? 0
-          const wy = tile.worldY ?? 0
-          const cx = wx * ZONE_W
-          const cy = wy * ZONE_H
+          const rx = px(tile.worldX ?? 0)
+          const ry = py(tile.worldY ?? 0)
           const discovered = tile.discovered ?? false
           const isCurrent = tile.current ?? false
           const danger = tile.dangerLevel ?? tile.danger_level ?? ''
@@ -82,8 +86,8 @@ export function WorldMapSvg({ tiles, onTravel }: WorldMapSvgProps): JSX.Element 
               style={{ cursor: canTravel ? 'pointer' : 'default' }}
             >
               <rect
-                x={cx}
-                y={cy}
+                x={rx}
+                y={ry}
                 width={ZONE_W}
                 height={ZONE_H}
                 fill={fill}
@@ -92,8 +96,8 @@ export function WorldMapSvg({ tiles, onTravel }: WorldMapSvgProps): JSX.Element 
               />
               {discovered && (
                 <text
-                  x={cx + ZONE_W / 2}
-                  y={cy + ZONE_H / 2}
+                  x={rx + ZONE_W / 2}
+                  y={ry + ZONE_H / 2}
                   textAnchor="middle"
                   dominantBaseline="middle"
                   fontSize={10}

@@ -1,5 +1,4 @@
 import { useEffect, useState, useCallback } from 'react'
-import { Panel, Group as PanelGroup, Separator as PanelResizeHandle } from 'react-resizable-panels'
 import { useGame } from '../GameContext'
 import type { MapTile } from '../../proto'
 import { RoomTooltip } from '../RoomTooltip'
@@ -116,11 +115,6 @@ export function MapPanel() {
   const [stepMode, setStepMode] = useState(false)
   const [combatHoverName, setCombatHoverName] = useState<string | null>(null)
   const [combatHoverPos, setCombatHoverPos] = useState({ x: 0, y: 0 })
-  const [mapPct, setMapPct] = useState<number>(() => {
-    const stored = localStorage.getItem('mud-map-splitter')
-    const n = stored ? Number(stored) : NaN
-    return isNaN(n) ? 70 : Math.max(20, Math.min(80, n))
-  })
 
   const handleRoomEnter = useCallback((tile: MapTile, e: React.MouseEvent) => {
     const rect = (e.currentTarget as Element).getBoundingClientRect()
@@ -244,55 +238,16 @@ export function MapPanel() {
       ) : state.mapTiles.length === 0 ? (
         <p className="map-empty">No map data.</p>
       ) : (
-        <PanelGroup
-          orientation="horizontal"
-          style={{ flex: 1, minHeight: 0 }}
-          onLayoutChanged={(layout) => {
-            const pct = Math.round(layout['map-tiles'] ?? mapPct)
-            setMapPct(pct)
-            localStorage.setItem('mud-map-splitter', String(pct))
-          }}
-        >
-          <Panel id="map-tiles" defaultSize={mapPct} minSize={20} style={{ overflow: 'hidden', position: 'relative', display: 'flex', flexDirection: 'column' }}>
-            <ZoneMapSvg
-              tiles={state.mapTiles}
-              onHover={handleRoomEnter}
-              onHoverEnd={handleRoomLeave}
-            />
-            {hoveredTile && (
-              <RoomTooltip tile={hoveredTile} pos={tooltipPos} />
-            )}
-          </Panel>
-          <PanelResizeHandle className="resize-handle resize-handle-h" />
-          <Panel id="map-details" defaultSize={100 - mapPct} minSize={20} style={{ overflow: 'auto', padding: '0.5rem' }}>
-            <div style={{ fontSize: '0.75rem', color: '#aaa' }}>
-              <strong style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Rooms</strong>
-              {state.mapTiles
-                .slice()
-                .sort((a, b) => {
-                  const order = ['safe', 'sketchy', 'dangerous', 'deadly']
-                  const ai = order.indexOf(a.dangerLevel ?? a.danger_level ?? '')
-                  const bi = order.indexOf(b.dangerLevel ?? b.danger_level ?? '')
-                  return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi)
-                })
-                .map(tile => {
-                  const pois = tile.pois ?? []
-                  const name = tile.roomName ?? tile.roomId ?? ''
-                  return (
-                    <div key={tile.roomId} style={{ padding: '2px 0', borderBottom: '1px solid #222' }}>
-                      <span style={{ color: tile.current ? '#f0c040' : '#aaa' }}>{name}</span>
-                      {pois.length > 0 && (
-                        <span style={{ marginLeft: '0.3rem', color: '#888', fontSize: '0.65rem' }}>
-                          {pois.join(' ')}
-                        </span>
-                      )}
-                    </div>
-                  )
-                })
-              }
-            </div>
-          </Panel>
-        </PanelGroup>
+        <div style={{ flex: 1, minHeight: 0, position: 'relative' }}>
+          <ZoneMapSvg
+            tiles={state.mapTiles}
+            onHover={handleRoomEnter}
+            onHoverEnd={handleRoomLeave}
+          />
+          {hoveredTile && (
+            <RoomTooltip tile={hoveredTile} pos={tooltipPos} />
+          )}
+        </div>
       )}
     </div>
   )
