@@ -139,7 +139,9 @@ export function ZoneMapSvg({ tiles, onHover, onHoverEnd }: ZoneMapSvgProps): JSX
   for (const tile of tiles) {
     const tx = tile.x ?? 0
     const ty = tile.y ?? 0
+    const zoneExitDirs = new Set((tile.zoneExits ?? tile.zone_exits ?? []).map(ze => ze.direction))
     for (const dir of tile.exits ?? []) {
+      if (zoneExitDirs.has(dir)) continue  // zone exits render as arrows, not connectors
       const offsets = DIR_OFFSETS[dir]
       if (!offsets) continue
 
