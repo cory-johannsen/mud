@@ -248,11 +248,11 @@ func TestSession_AbilityBoostsPromptedAndApplied(t *testing.T) {
 	})
 	require.NoError(t, err)
 
-	// Receive initial room view.
+	// Receive initial room view. The HotbarUpdateEvent is sent after all prompts complete
+	// and LoadTechnologies runs, so it does not appear between RoomView and the first prompt.
 	resp, recvErr := stream.Recv()
 	require.NoError(t, recvErr)
 	require.NotNil(t, resp.GetRoomView(), "expected RoomView as first server event")
-	drainHotbarEvent(t, stream)
 
 	// Helper: receive a prompt message and respond with choice "1".
 	answerPrompt := func(index int) {

@@ -19,7 +19,11 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	GameService_Session_FullMethodName = "/game.v1.GameService/Session"
+	GameService_Session_FullMethodName             = "/game.v1.GameService/Session"
+	GameService_AdminListSessions_FullMethodName   = "/game.v1.GameService/AdminListSessions"
+	GameService_AdminKickPlayer_FullMethodName     = "/game.v1.GameService/AdminKickPlayer"
+	GameService_AdminMessagePlayer_FullMethodName  = "/game.v1.GameService/AdminMessagePlayer"
+	GameService_AdminTeleportPlayer_FullMethodName = "/game.v1.GameService/AdminTeleportPlayer"
 )
 
 // GameServiceClient is the client API for GameService service.
@@ -32,6 +36,11 @@ type GameServiceClient interface {
 	// Session establishes a bidirectional stream for a single player session.
 	// The client sends commands; the server sends events.
 	Session(ctx context.Context, opts ...grpc.CallOption) (grpc.BidiStreamingClient[ClientMessage, ServerEvent], error)
+	// Admin RPCs — unary, require admin role on the server side.
+	AdminListSessions(ctx context.Context, in *AdminListSessionsRequest, opts ...grpc.CallOption) (*AdminListSessionsResponse, error)
+	AdminKickPlayer(ctx context.Context, in *AdminKickRequest, opts ...grpc.CallOption) (*AdminKickResponse, error)
+	AdminMessagePlayer(ctx context.Context, in *AdminMessageRequest, opts ...grpc.CallOption) (*AdminMessageResponse, error)
+	AdminTeleportPlayer(ctx context.Context, in *AdminTeleportRequest, opts ...grpc.CallOption) (*AdminTeleportResponse, error)
 }
 
 type gameServiceClient struct {
@@ -55,6 +64,46 @@ func (c *gameServiceClient) Session(ctx context.Context, opts ...grpc.CallOption
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type GameService_SessionClient = grpc.BidiStreamingClient[ClientMessage, ServerEvent]
 
+func (c *gameServiceClient) AdminListSessions(ctx context.Context, in *AdminListSessionsRequest, opts ...grpc.CallOption) (*AdminListSessionsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(AdminListSessionsResponse)
+	err := c.cc.Invoke(ctx, GameService_AdminListSessions_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *gameServiceClient) AdminKickPlayer(ctx context.Context, in *AdminKickRequest, opts ...grpc.CallOption) (*AdminKickResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(AdminKickResponse)
+	err := c.cc.Invoke(ctx, GameService_AdminKickPlayer_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *gameServiceClient) AdminMessagePlayer(ctx context.Context, in *AdminMessageRequest, opts ...grpc.CallOption) (*AdminMessageResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(AdminMessageResponse)
+	err := c.cc.Invoke(ctx, GameService_AdminMessagePlayer_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *gameServiceClient) AdminTeleportPlayer(ctx context.Context, in *AdminTeleportRequest, opts ...grpc.CallOption) (*AdminTeleportResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(AdminTeleportResponse)
+	err := c.cc.Invoke(ctx, GameService_AdminTeleportPlayer_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // GameServiceServer is the server API for GameService service.
 // All implementations must embed UnimplementedGameServiceServer
 // for forward compatibility.
@@ -65,6 +114,11 @@ type GameServiceServer interface {
 	// Session establishes a bidirectional stream for a single player session.
 	// The client sends commands; the server sends events.
 	Session(grpc.BidiStreamingServer[ClientMessage, ServerEvent]) error
+	// Admin RPCs — unary, require admin role on the server side.
+	AdminListSessions(context.Context, *AdminListSessionsRequest) (*AdminListSessionsResponse, error)
+	AdminKickPlayer(context.Context, *AdminKickRequest) (*AdminKickResponse, error)
+	AdminMessagePlayer(context.Context, *AdminMessageRequest) (*AdminMessageResponse, error)
+	AdminTeleportPlayer(context.Context, *AdminTeleportRequest) (*AdminTeleportResponse, error)
 	mustEmbedUnimplementedGameServiceServer()
 }
 
@@ -77,6 +131,18 @@ type UnimplementedGameServiceServer struct{}
 
 func (UnimplementedGameServiceServer) Session(grpc.BidiStreamingServer[ClientMessage, ServerEvent]) error {
 	return status.Error(codes.Unimplemented, "method Session not implemented")
+}
+func (UnimplementedGameServiceServer) AdminListSessions(context.Context, *AdminListSessionsRequest) (*AdminListSessionsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method AdminListSessions not implemented")
+}
+func (UnimplementedGameServiceServer) AdminKickPlayer(context.Context, *AdminKickRequest) (*AdminKickResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method AdminKickPlayer not implemented")
+}
+func (UnimplementedGameServiceServer) AdminMessagePlayer(context.Context, *AdminMessageRequest) (*AdminMessageResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method AdminMessagePlayer not implemented")
+}
+func (UnimplementedGameServiceServer) AdminTeleportPlayer(context.Context, *AdminTeleportRequest) (*AdminTeleportResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method AdminTeleportPlayer not implemented")
 }
 func (UnimplementedGameServiceServer) mustEmbedUnimplementedGameServiceServer() {}
 func (UnimplementedGameServiceServer) testEmbeddedByValue()                     {}
@@ -106,13 +172,102 @@ func _GameService_Session_Handler(srv interface{}, stream grpc.ServerStream) err
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type GameService_SessionServer = grpc.BidiStreamingServer[ClientMessage, ServerEvent]
 
+func _GameService_AdminListSessions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AdminListSessionsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GameServiceServer).AdminListSessions(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: GameService_AdminListSessions_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GameServiceServer).AdminListSessions(ctx, req.(*AdminListSessionsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _GameService_AdminKickPlayer_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AdminKickRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GameServiceServer).AdminKickPlayer(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: GameService_AdminKickPlayer_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GameServiceServer).AdminKickPlayer(ctx, req.(*AdminKickRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _GameService_AdminMessagePlayer_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AdminMessageRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GameServiceServer).AdminMessagePlayer(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: GameService_AdminMessagePlayer_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GameServiceServer).AdminMessagePlayer(ctx, req.(*AdminMessageRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _GameService_AdminTeleportPlayer_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AdminTeleportRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GameServiceServer).AdminTeleportPlayer(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: GameService_AdminTeleportPlayer_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GameServiceServer).AdminTeleportPlayer(ctx, req.(*AdminTeleportRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // GameService_ServiceDesc is the grpc.ServiceDesc for GameService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var GameService_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "game.v1.GameService",
 	HandlerType: (*GameServiceServer)(nil),
-	Methods:     []grpc.MethodDesc{},
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "AdminListSessions",
+			Handler:    _GameService_AdminListSessions_Handler,
+		},
+		{
+			MethodName: "AdminKickPlayer",
+			Handler:    _GameService_AdminKickPlayer_Handler,
+		},
+		{
+			MethodName: "AdminMessagePlayer",
+			Handler:    _GameService_AdminMessagePlayer_Handler,
+		},
+		{
+			MethodName: "AdminTeleportPlayer",
+			Handler:    _GameService_AdminTeleportPlayer_Handler,
+		},
+	},
 	Streams: []grpc.StreamDesc{
 		{
 			StreamName:    "Session",
