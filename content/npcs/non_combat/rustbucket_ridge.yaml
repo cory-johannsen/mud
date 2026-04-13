@@ -19,6 +19,34 @@
         base_price: 50
         init_stock: 5
         max_stock: 10
+      - item_id: suburban_machete
+        base_price: 35
+        init_stock: 3
+        max_stock: 5
+      - item_id: bike_chain
+        base_price: 10
+        init_stock: 5
+        max_stock: 10
+      - item_id: shiv
+        base_price: 10
+        init_stock: 5
+        max_stock: 10
+      - item_id: spiked_knuckles
+        base_price: 60
+        init_stock: 2
+        max_stock: 4
+      - item_id: rebar_club
+        base_price: 120
+        init_stock: 2
+        max_stock: 3
+      - item_id: four_loko
+        base_price: 10
+        init_stock: 8
+        max_stock: 15
+      - item_id: poontangesca
+        base_price: 18
+        init_stock: 5
+        max_stock: 10
     replenish_rate:
       min_hours: 6
       max_hours: 12

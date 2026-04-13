@@ -19,6 +19,30 @@
         base_price: 48
         init_stock: 5
         max_stock: 10
+      - item_id: ganger_pistol
+        base_price: 90
+        init_stock: 3
+        max_stock: 5
+      - item_id: pipe_pistol
+        base_price: 145
+        init_stock: 2
+        max_stock: 4
+      - item_id: sawn_off
+        base_price: 350
+        init_stock: 2
+        max_stock: 3
+      - item_id: street_sweeper_smg
+        base_price: 480
+        init_stock: 1
+        max_stock: 2
+      - item_id: old_english
+        base_price: 10
+        init_stock: 8
+        max_stock: 15
+      - item_id: whores_pasta
+        base_price: 18
+        init_stock: 5
+        max_stock: 10
     replenish_rate:
       min_hours: 6
       max_hours: 12
