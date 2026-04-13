@@ -6772,18 +6772,26 @@ func (s *GameServiceServer) handleMap(uid string, req *gamev1.MapRequest) (*game
 		}
 		var exits []string
 		var zoneExits []*gamev1.ZoneExitInfo
+		var sameZoneExitTargets []*gamev1.SameZoneExitTarget
 		for _, e := range r.Exits {
 			exits = append(exits, string(e.Direction))
 			if e.TargetRoom != "" {
-				if targetRoom, ok := s.world.GetRoom(e.TargetRoom); ok && targetRoom.ZoneID != r.ZoneID {
-					info := &gamev1.ZoneExitInfo{
-						Direction:  string(e.Direction),
-						DestZoneId: targetRoom.ZoneID,
+				if targetRoom, ok := s.world.GetRoom(e.TargetRoom); ok {
+					if targetRoom.ZoneID != r.ZoneID {
+						info := &gamev1.ZoneExitInfo{
+							Direction:  string(e.Direction),
+							DestZoneId: targetRoom.ZoneID,
+						}
+						if destZone, ok := s.world.GetZone(targetRoom.ZoneID); ok {
+							info.DestZoneName = destZone.Name
+						}
+						zoneExits = append(zoneExits, info)
+					} else {
+						sameZoneExitTargets = append(sameZoneExitTargets, &gamev1.SameZoneExitTarget{
+							Direction:    string(e.Direction),
+							TargetRoomId: targetRoom.ID,
+						})
 					}
-					if destZone, ok := s.world.GetZone(targetRoom.ZoneID); ok {
-						info.DestZoneName = destZone.Name
-					}
-					zoneExits = append(zoneExits, info)
 				}
 			}
 		}
@@ -6833,17 +6841,18 @@ func (s *GameServiceServer) handleMap(uid string, req *gamev1.MapRequest) (*game
 		}
 
 		tiles = append(tiles, &gamev1.MapTile{
-			RoomId:      r.ID,
-			RoomName:    r.Title,
-			X:           int32(r.MapX),
-			Y:           int32(r.MapY),
-			Current:     r.ID == sess.RoomID,
-			Exits:       exits,
-			DangerLevel: effectiveLevelStr,
-			Pois:        poiSlice,
-			BossRoom:    r.BossRoom,
-			PoiNpcs:     poiNpcs,
-			ZoneExits:   zoneExits,
+			RoomId:                r.ID,
+			RoomName:              r.Title,
+			X:                     int32(r.MapX),
+			Y:                     int32(r.MapY),
+			Current:               r.ID == sess.RoomID,
+			Exits:                 exits,
+			DangerLevel:           effectiveLevelStr,
+			Pois:                  poiSlice,
+			BossRoom:              r.BossRoom,
+			PoiNpcs:               poiNpcs,
+			ZoneExits:             zoneExits,
+			SameZoneExitTargets:   sameZoneExitTargets,
 		})
 	}
 	return &gamev1.ServerEvent{

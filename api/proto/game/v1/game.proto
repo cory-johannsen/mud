@@ -779,6 +779,12 @@ message ZoneExitInfo {
     string dest_zone_name  = 3; // destination zone display name (may be empty if undiscovered)
 }
 
+// SameZoneExitTarget maps a compass direction to the target room ID for same-zone connections.
+message SameZoneExitTarget {
+    string direction      = 1; // compass direction of the exit, e.g. "north"
+    string target_room_id = 2; // room ID of the destination (within the same zone)
+}
+
 // MapTile represents one discovered room on the automap grid.
 message MapTile {
     string room_id   = 1;
@@ -792,6 +798,7 @@ message MapTile {
     bool   boss_room     = 9; // true when this room is a boss arena (REQ-AE-24)
     repeated PoiWithNpc poi_npcs = 10; // NPC-backed POIs with display names; non-NPC POIs (equipment, map, cover) are absent. Every poi_id here appears in pois.
     repeated ZoneExitInfo zone_exits = 11; // zone-crossing exits from this room
+    repeated SameZoneExitTarget same_zone_exit_targets = 12; // same-zone exits with target room IDs for connector rendering
 }
 
 // WorldZoneTile represents one zone on the world map.

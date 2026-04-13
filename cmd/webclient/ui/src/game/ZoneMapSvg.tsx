@@ -1,4 +1,4 @@
-import type { MapTile } from '../proto'
+import type { MapTile, SameZoneExitTarget } from '../proto'
 
 const CELL_W = 52
 const CELL_H = 32
@@ -12,20 +12,6 @@ const DANGER_FILLS: Record<string, string> = {
 }
 
 // Server sends full direction names (e.g. "north"), not abbreviations.
-const DIR_OFFSETS: Record<string, [number, number]> = {
-  north:     [0, -1],
-  south:     [0,  1],
-  east:      [1,  0],
-  west:      [-1, 0],
-  northeast: [1, -1],
-  northwest: [-1,-1],
-  southeast: [1,  1],
-  southwest: [-1, 1],
-  // short forms as fallback
-  n: [0, -1], s: [0, 1], e: [1, 0], w: [-1, 0],
-  ne: [1, -1], nw: [-1, -1], se: [1, 1], sw: [-1, 1],
-}
-
 // Single source of truth for POI display — symbol, color, and label.
 // Colors match RoomTooltip POI_TYPES so tiles and hover are consistent.
 const POI_DEFS: Array<{ id: string; symbol: string; color: string; label: string }> = [
@@ -125,43 +111,24 @@ export function ZoneMapSvg({ tiles, onHover, onHoverEnd }: ZoneMapSvgProps): JSX
   const totalH = sortedUniqueYs.length * STEP_H - GAP
   const viewBox = `-8 -8 ${totalW + 16} ${totalH + 16}`
 
-  const minX = Math.min(...rawXs)
-  const maxX = Math.max(...rawXs)
-  const minY = Math.min(...rawYs)
-  const maxY = Math.max(...rawYs)
+  // Build a room-ID → tile lookup for connector drawing.
+  const tileByRoomId = new Map<string, MapTile>()
+  for (const tile of tiles) {
+    if (tile.roomId) tileByRoomId.set(tile.roomId, tile)
+  }
 
-  // Build connectors, deduplicating pairs.
-  // Draw a connector whenever a tile has an exit that reaches another tile
-  // in the map, regardless of whether the other side lists the opposite exit.
+  // Build connectors using same-zone exit targets (direction → target room ID).
+  // This correctly handles exits that are not spatially adjacent in the grid.
   const drawnPairs = new Set<string>()
   const connectors: JSX.Element[] = []
 
   for (const tile of tiles) {
     const tx = tile.x ?? 0
     const ty = tile.y ?? 0
-    const zoneExitDirs = new Set((tile.zoneExits ?? tile.zone_exits ?? []).map(ze => ze.direction))
-    for (const dir of tile.exits ?? []) {
-      if (zoneExitDirs.has(dir)) continue  // zone exits render as arrows, not connectors
-      const offsets = DIR_OFFSETS[dir]
-      if (!offsets) continue
-
-      const [dx, dy] = offsets
-
-      // Search along direction in original coordinate space
-      let step = 1
-      let found: MapTile | undefined
-      while (step <= maxX - minX + maxY - minY + 2) {
-        const nx = tx + dx * step
-        const ny = ty + dy * step
-        if (Math.abs(nx - tx) > maxX - minX + 1 || Math.abs(ny - ty) > maxY - minY + 1) break
-        const candidate = tileMap.get(`${nx},${ny}`)
-        if (candidate) {
-          found = candidate
-          break
-        }
-        step++
-      }
-
+    const exitTargets: SameZoneExitTarget[] = tile.sameZoneExitTargets ?? tile.same_zone_exit_targets ?? []
+    for (const et of exitTargets) {
+      const targetId = et.targetRoomId ?? et.target_room_id ?? ''
+      const found = tileByRoomId.get(targetId)
       if (!found) continue
 
       const fnx = found.x ?? 0

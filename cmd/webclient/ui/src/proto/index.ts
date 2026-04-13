@@ -305,6 +305,12 @@ export interface ZoneExitInfo {
   dest_zone_name?: string
 }
 
+export interface SameZoneExitTarget {
+  direction?: string
+  targetRoomId?: string
+  target_room_id?: string
+}
+
 export interface MapTile {
   roomId?: string
   roomName?: string
@@ -322,6 +328,8 @@ export interface MapTile {
   poi_npcs?: PoiWithNpc[]
   zoneExits?: ZoneExitInfo[]
   zone_exits?: ZoneExitInfo[]
+  sameZoneExitTargets?: SameZoneExitTarget[]
+  same_zone_exit_targets?: SameZoneExitTarget[]
 }
 
 export interface WorldZoneTile {
