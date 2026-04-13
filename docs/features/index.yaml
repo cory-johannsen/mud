@@ -857,3 +857,15 @@ features:
       - factions
       - non-combat-npcs
       - map-poi
+
+  - slug: telnet-deprecation
+    name: Telnet Interface Deprecation
+    status: backlog
+    priority: 490
+    category: meta
+    file: docs/features/telnet-deprecation.md
+    effort: "M"  # remove player-facing telnet login; restrict port to loopback; retain headless port for tests/debugging; update docs and k8s
+    dependencies:
+      - web-client
+      - interactive-test-suite
+      - claude-gameserver-skill
