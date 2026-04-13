@@ -56,9 +56,9 @@ describe('slotDisplayLabel', () => {
     expect(slotDisplayLabel(slot)).toBe('Power Strike')
   })
 
-  it('falls back to ref when both display names absent', () => {
-    const slot: HotbarSlot = { kind: 'command', ref: 'look' }
-    expect(slotDisplayLabel(slot)).toBe('look')
+  it('falls back to ref when both display names absent and ref not in ACTION_NAMES', () => {
+    const slot: HotbarSlot = { kind: 'command', ref: 'sit' }
+    expect(slotDisplayLabel(slot)).toBe('sit')
   })
 })
 

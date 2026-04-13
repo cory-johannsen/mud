@@ -22,12 +22,6 @@ function npcTypeTag(npcType: string): string {
   }
 }
 
-// Maps full or short direction names to the short compass form accepted by StrideRequest/StepRequest.
-const SHORT_DIR: Record<string, string> = {
-  n: 'n', s: 's', e: 'e', w: 'w', ne: 'ne', nw: 'nw', se: 'se', sw: 'sw',
-  north: 'n', south: 's', east: 'e', west: 'w',
-  northeast: 'ne', northwest: 'nw', southeast: 'se', southwest: 'sw',
-}
 
 export function RoomPanel() {
   const { state, sendMessage, sendCommand } = useGame()
@@ -69,12 +63,82 @@ export function RoomPanel() {
   const title = room.title ?? ''
   const description = room.description ?? ''
 
+  // Combat movement: 8-direction compass grid on the battle grid.
+  // Enabled only when the step is within grid bounds, the target cell is unoccupied,
+  // and the player has at least 1 AP remaining.
+  const COMBAT_GRID_SIZE = 20
+  const DIR_DELTAS: Record<string, [number, number]> = {
+    nw: [-1, -1], n: [0, -1], ne: [1, -1],
+    w:  [-1,  0],             e:  [1,  0],
+    sw: [-1,  1], s: [0,  1], se: [1,  1],
+  }
+  const DIR_LABELS: Record<string, string> = {
+    nw: 'NW', n: 'N', ne: 'NE',
+    w:  'W',           e: 'E',
+    sw: 'SW', s: 'S', se: 'SE',
+  }
+  const playerName = state.characterInfo?.name ?? ''
+  const playerPos = state.combatPositions[playerName]
+  const playerAP = state.combatantAP[playerName]
+  const apRemaining = playerAP?.remaining ?? 0
+
+  function canStepDir(dir: string): boolean {
+    if (apRemaining < 1) return false
+    if (!playerPos) return true // position unknown — allow attempt
+    const [dx, dy] = DIR_DELTAS[dir]!
+    const nx = playerPos.x + dx
+    const ny = playerPos.y + dy
+    if (nx < 0 || nx >= COMBAT_GRID_SIZE || ny < 0 || ny >= COMBAT_GRID_SIZE) return false
+    // Disable if the target cell is occupied by another combatant
+    return !Object.entries(state.combatPositions).some(
+      ([name, p]) => name !== playerName && p.x === nx && p.y === ny
+    )
+  }
+
+  // 3x3 compass layout: [row][col] = dir key or null for center
+  const combatCompassGrid: (string | null)[][] = [
+    ['nw', 'n',  'ne'],
+    ['w',   null, 'e'],
+    ['sw', 's',  'se'],
+  ]
+
   return (
     <div>
       <h2 className="room-title">{title}</h2>
       <p className="room-description">{description}</p>
 
-      {exits.length > 0 && (() => {
+      {inCombat ? (
+        <>
+          <div className="room-section-label">Step (1 AP)</div>
+          <div className="room-exits">
+            {combatCompassGrid.map((row, ri) =>
+              row.map((dir, ci) => {
+                if (dir === null) {
+                  // Center cell: show player position if known
+                  const posLabel = playerPos ? `${playerPos.x},${playerPos.y}` : '·'
+                  return (
+                    <div key={`${ri}-${ci}`} className="exit-cell-center" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <span style={{ color: '#555', fontSize: '0.65rem', fontFamily: 'monospace' }}>{posLabel}</span>
+                    </div>
+                  )
+                }
+                const enabled = canStepDir(dir)
+                return (
+                  <button
+                    key={`${ri}-${ci}`}
+                    className="exit-btn"
+                    onClick={() => sendMessage('StepRequest', { direction: dir })}
+                    disabled={!enabled}
+                    title={enabled ? `Step ${DIR_LABELS[dir]} (1 AP)` : apRemaining < 1 ? 'No AP remaining' : 'Cannot step — out of bounds or cell occupied'}
+                  >
+                    {DIR_LABELS[dir]}
+                  </button>
+                )
+              })
+            )}
+          </div>
+        </>
+      ) : exits.length > 0 && (() => {
         const visibleExits = exits.filter((ex) => !ex.hidden)
         // Build a lookup map keyed by normalized (lowercase) direction
         const exitMap = new Map(visibleExits.map((ex) => [ex.direction.toLowerCase(), ex]))
@@ -127,7 +191,6 @@ export function RoomPanel() {
                             onClick={() => { handleExitLeave(); sendMessage('MoveRequest', { direction: upExit.direction }) }}
                             onMouseEnter={(e) => handleExitEnter(upExit, e)}
                             onMouseLeave={handleExitLeave}
-                            disabled={inCombat}
                           >
                             {upExit.locked ? '↑*' : '↑'}
                           </button>
@@ -140,7 +203,6 @@ export function RoomPanel() {
                             onClick={() => { handleExitLeave(); sendMessage('MoveRequest', { direction: downExit.direction }) }}
                             onMouseEnter={(e) => handleExitEnter(downExit, e)}
                             onMouseLeave={handleExitLeave}
-                            disabled={inCombat}
                           >
                             {downExit.locked ? '↓*' : '↓'}
                           </button>
@@ -154,18 +216,13 @@ export function RoomPanel() {
                   if (!ex) {
                     return <div key={`${ri}-${ci}`} className="exit-cell-empty" />
                   }
-                  const shortDir = SHORT_DIR[ex.direction.toLowerCase()]
                   return (
                     <button
                       key={`${ri}-${ci}`}
                       className="exit-btn"
                       onClick={() => {
                         handleExitLeave()
-                        if (inCombat && shortDir) {
-                          sendMessage('StepRequest', { direction: shortDir })
-                        } else {
-                          sendMessage('MoveRequest', { direction: ex.direction })
-                        }
+                        sendMessage('MoveRequest', { direction: ex.direction })
                       }}
                       onMouseEnter={(e) => handleExitEnter(ex, e)}
                       onMouseLeave={handleExitLeave}
