@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import ReactDOM from 'react-dom'
 import { useGame } from './GameContext'
 import type { ShopItem, ShopView } from '../proto'
@@ -141,6 +141,47 @@ function ShopRow({
   )
 }
 
+// ---------- Sell row ----------
+
+function SellRow({
+  instanceId,
+  name,
+  quantity,
+  sellPrice,
+  onSell,
+}: {
+  instanceId: string
+  name: string
+  quantity: number
+  sellPrice: number
+  onSell: (instanceId: string, qty: number) => void
+}) {
+  return (
+    <tr style={styles.row}>
+      <td style={styles.tdName}>{name}{quantity > 1 ? ` (×${quantity})` : ''}</td>
+      <td style={styles.tdNum}>{sellPrice} Crypto</td>
+      <td style={styles.tdAction}>
+        <button
+          style={styles.sellBtn}
+          onClick={() => onSell(instanceId, 1)}
+          type="button"
+        >
+          Sell
+        </button>
+        {quantity > 1 && (
+          <button
+            style={{ ...styles.sellBtn, marginLeft: '0.25rem' }}
+            onClick={() => onSell(instanceId, quantity)}
+            type="button"
+          >
+            All
+          </button>
+        )}
+      </td>
+    </tr>
+  )
+}
+
 // ---------- Modal ----------
 
 interface ShopModalProps {
@@ -150,12 +191,39 @@ interface ShopModalProps {
 
 function ShopModal({ shop, onClose }: ShopModalProps) {
   const { state, sendMessage, sendCommand } = useGame()
+  const [tab, setTab] = useState<'buy' | 'sell'>('buy')
   const npcName = shop.npcName ?? shop.npc_name ?? 'Merchant'
+
+  // Ensure inventory is loaded for the sell tab
+  useEffect(() => {
+    if (!state.inventoryView) {
+      sendMessage('InventoryRequest', {})
+    }
+  }, [state.inventoryView, sendMessage])
   const items = shop.items ?? []
   const currency = state.characterSheet?.currency ?? state.inventoryView?.currency ?? null
+  const invItems = state.inventoryView?.items ?? []
+
+  // Build a sell-price lookup from shop inventory (item def ID → sell price)
+  const sellPriceById = new Map<string, number>()
+  for (const si of items) {
+    const id = si.itemId ?? si.item_id ?? ''
+    const price = si.sellPrice ?? si.sell_price ?? 0
+    if (id && price > 0) sellPriceById.set(id, price)
+  }
+
+  // Player inventory items that this merchant will buy (matching item def ID, sell price > 0)
+  const sellableItems = invItems.filter((inv) => {
+    const defId = inv.itemDefId ?? inv.item_def_id ?? ''
+    return defId !== '' && sellPriceById.has(defId)
+  })
 
   function handleBuy(itemId: string, quantity: number) {
     sendMessage('BuyRequest', { npc_name: npcName, item_id: itemId, quantity })
+  }
+
+  function handleSell(itemDefId: string, quantity: number) {
+    sendMessage('SellRequest', { npc_name: npcName, item_id: itemDefId, quantity })
   }
 
   function handleNegotiate() {
@@ -173,38 +241,93 @@ function ShopModal({ shop, onClose }: ShopModalProps) {
           </div>
           <button style={styles.closeBtn} onClick={onClose} type="button">✕</button>
         </div>
+        <div style={styles.tabs}>
+          <button
+            style={{ ...styles.tab, ...(tab === 'buy' ? styles.tabActive : {}) }}
+            onClick={() => setTab('buy')}
+            type="button"
+          >
+            Buy
+          </button>
+          <button
+            style={{ ...styles.tab, ...(tab === 'sell' ? styles.tabActive : {}) }}
+            onClick={() => setTab('sell')}
+            type="button"
+          >
+            Sell {sellableItems.length > 0 ? `(${sellableItems.length})` : ''}
+          </button>
+        </div>
         <div style={styles.body}>
-          {items.length === 0 ? (
-            <p style={{ color: '#666' }}>No items in stock.</p>
+          {tab === 'buy' ? (
+            <>
+              {items.length === 0 ? (
+                <p style={{ color: '#666' }}>No items in stock.</p>
+              ) : (
+                <table style={styles.table}>
+                  <thead>
+                    <tr>
+                      <th style={{ ...styles.th, textAlign: 'left' }}>Item</th>
+                      <th style={styles.th}>Buy</th>
+                      <th style={styles.th}>Sell</th>
+                      <th style={styles.th}>Stock</th>
+                      <th style={styles.th}></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {items.map((item, i) => (
+                      <ShopRow
+                        key={item.itemId ?? item.item_id ?? i}
+                        item={item}
+                        sheet={state.characterSheet}
+                        onBuy={handleBuy}
+                      />
+                    ))}
+                  </tbody>
+                </table>
+              )}
+              <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.75rem', flexWrap: 'wrap' }}>
+                <button style={styles.negotiateBtn} onClick={handleNegotiate} type="button">
+                  Negotiate
+                </button>
+              </div>
+            </>
           ) : (
-            <table style={styles.table}>
-              <thead>
-                <tr>
-                  <th style={{ ...styles.th, textAlign: 'left' }}>Item</th>
-                  <th style={styles.th}>Buy</th>
-                  <th style={styles.th}>Sell</th>
-                  <th style={styles.th}>Stock</th>
-                  <th style={styles.th}></th>
-                </tr>
-              </thead>
-              <tbody>
-                {items.map((item, i) => (
-                  <ShopRow
-                    key={item.itemId ?? item.item_id ?? i}
-                    item={item}
-                    sheet={state.characterSheet}
-                    onBuy={handleBuy}
-                  />
-                ))}
-              </tbody>
-            </table>
+            <>
+              {sellableItems.length === 0 ? (
+                <p style={{ color: '#666' }}>
+                  {invItems.length === 0
+                    ? 'Your inventory is empty.'
+                    : 'This merchant is not buying any items you carry.'}
+                </p>
+              ) : (
+                <table style={styles.table}>
+                  <thead>
+                    <tr>
+                      <th style={{ ...styles.th, textAlign: 'left' }}>Item</th>
+                      <th style={styles.th}>Price</th>
+                      <th style={styles.th}></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {sellableItems.map((inv, i) => {
+                      const defId = inv.itemDefId ?? inv.item_def_id ?? ''
+                      const price = sellPriceById.get(defId) ?? 0
+                      return (
+                        <SellRow
+                          key={inv.instanceId ?? i}
+                          instanceId={defId}
+                          name={inv.name ?? ''}
+                          quantity={inv.quantity ?? 1}
+                          sellPrice={price}
+                          onSell={handleSell}
+                        />
+                      )
+                    })}
+                  </tbody>
+                </table>
+              )}
+            </>
           )}
-          <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.75rem', flexWrap: 'wrap' }}>
-            <button style={styles.negotiateBtn} onClick={handleNegotiate} type="button">
-              Negotiate
-            </button>
-          </div>
-          <p style={styles.hint}>Type <code>sell &lt;item&gt;</code> to sell items to this merchant.</p>
         </div>
       </div>
     </div>
@@ -333,6 +456,25 @@ const styles: Record<string, React.CSSProperties> = {
     padding: '0.25rem 0.5rem',
     textAlign: 'center' as const,
   },
+  tabs: {
+    display: 'flex',
+    borderBottom: '1px solid #2a2a2a',
+    flexShrink: 0,
+  },
+  tab: {
+    padding: '0.4rem 1rem',
+    background: 'none',
+    border: 'none',
+    borderBottom: '2px solid transparent',
+    color: '#666',
+    cursor: 'pointer',
+    fontFamily: 'monospace',
+    fontSize: '0.8rem',
+  },
+  tabActive: {
+    color: '#e0c060',
+    borderBottom: '2px solid #e0c060',
+  },
   buyBtn: {
     padding: '0.15rem 0.5rem',
     background: '#1a2a1a',
@@ -343,11 +485,15 @@ const styles: Record<string, React.CSSProperties> = {
     fontFamily: 'monospace',
     fontSize: '0.75rem',
   },
-  hint: {
-    marginTop: '0.5rem',
-    color: '#555',
-    fontSize: '0.75rem',
+  sellBtn: {
+    padding: '0.15rem 0.5rem',
+    background: '#2a1a1a',
+    border: '1px solid #6a3a2a',
+    color: '#e84',
+    borderRadius: '3px',
+    cursor: 'pointer',
     fontFamily: 'monospace',
+    fontSize: '0.75rem',
   },
   negotiateBtn: {
     padding: '0.25rem 0.75rem',
