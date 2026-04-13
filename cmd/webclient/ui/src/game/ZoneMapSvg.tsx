@@ -45,17 +45,19 @@ const POI_DEFS: Array<{ id: string; symbol: string; color: string; label: string
 
 const POI_BY_ID = new Map(POI_DEFS.map(p => [p.id, p]))
 
-// Zone exit arrow glyphs (hollow directional arrows) and their tile-edge positions.
-// anchor: SVG textAnchor; ex/ey: offset from tile top-left corner.
+// Zone exit arrow glyphs rendered OUTSIDE the tile in the gap area so they
+// are always visible against the SVG background (not the dark tile fill).
+// ex/ey are offsets from tile top-left to the arrow centre point.
+// Use U+2190-2199 arrows — universally supported in all SVG fonts.
 const ZONE_EXIT_ARROW: Record<string, { glyph: string; ex: number; ey: number; anchor: string }> = {
-  north:     { glyph: '⇧', ex: CELL_W / 2,     ey: 2,              anchor: 'middle' },
-  south:     { glyph: '⇩', ex: CELL_W / 2,     ey: CELL_H - 2,     anchor: 'middle' },
-  east:      { glyph: '⇨', ex: CELL_W - 2,     ey: CELL_H / 2,     anchor: 'end'    },
-  west:      { glyph: '⇦', ex: 2,              ey: CELL_H / 2,     anchor: 'start'  },
-  northeast: { glyph: '⇗', ex: CELL_W - 2,     ey: 2,              anchor: 'end'    },
-  northwest: { glyph: '⇖', ex: 2,              ey: 2,              anchor: 'start'  },
-  southeast: { glyph: '⇘', ex: CELL_W - 2,     ey: CELL_H - 2,     anchor: 'end'    },
-  southwest: { glyph: '⇙', ex: 2,              ey: CELL_H - 2,     anchor: 'start'  },
+  north:     { glyph: '↑', ex: CELL_W / 2,        ey: -(GAP / 2),        anchor: 'middle' },
+  south:     { glyph: '↓', ex: CELL_W / 2,        ey: CELL_H + GAP / 2,  anchor: 'middle' },
+  east:      { glyph: '→', ex: CELL_W + GAP / 2,  ey: CELL_H / 2,        anchor: 'middle' },
+  west:      { glyph: '←', ex: -(GAP / 2),         ey: CELL_H / 2,        anchor: 'middle' },
+  northeast: { glyph: '↗', ex: CELL_W + GAP / 2,  ey: -(GAP / 2),        anchor: 'middle' },
+  northwest: { glyph: '↖', ex: -(GAP / 2),         ey: -(GAP / 2),        anchor: 'middle' },
+  southeast: { glyph: '↘', ex: CELL_W + GAP / 2,  ey: CELL_H + GAP / 2,  anchor: 'middle' },
+  southwest: { glyph: '↙', ex: -(GAP / 2),         ey: CELL_H + GAP / 2,  anchor: 'middle' },
 }
 
 const STEP = CELL_W + GAP
