@@ -136,7 +136,7 @@ type Action =
   | { type: 'CLEAR_CHOICE_PROMPT' }
   | { type: 'SET_JOB_GRANTS'; grants: JobGrantsResponse | null }
 
-function reducer(state: GameState, action: Action): GameState {
+export function reducer(state: GameState, action: Action): GameState {
   switch (action.type) {
     case 'SET_CONNECTED':
       return { ...state, connected: action.connected }
@@ -224,7 +224,7 @@ function reducer(state: GameState, action: Action): GameState {
   }
 }
 
-const initialState: GameState = {
+export const initialState: GameState = {
   connected: false,
   roomView: null,
   characterInfo: null,
@@ -322,6 +322,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
         dispatch({ type: 'CLEAR_COMBAT_POSITIONS' })
         dispatch({ type: 'CLEAR_COMBATANT_HP' })
         dispatch({ type: 'CLEAR_COMBATANT_AP' })
+        dispatch({ type: 'SET_COMBAT_GRID', width: 20, height: 20 })
         // Reconnect notification suppressed — server restores state seamlessly (BUG-143).
       }
       while (queueRef.current.length > 0) {
@@ -425,6 +426,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
             dispatch({ type: 'CLEAR_COMBAT_POSITIONS' })
             dispatch({ type: 'CLEAR_COMBATANT_HP' })
             dispatch({ type: 'CLEAR_COMBATANT_AP' })
+            dispatch({ type: 'SET_COMBAT_GRID', width: 20, height: 20 })
           }
           // Track target HP from attack events.
           const tHp = ce.targetHp ?? ce.target_hp
