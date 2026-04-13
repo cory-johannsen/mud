@@ -359,13 +359,7 @@ function GenericNpcModal({
   view: { name: string; description: string; npcType: string; level: number; health: string }
   onClose: () => void
 }) {
-  const { sendCommand } = useGame()
   const typeLabel = NPC_TYPE_LABELS[view.npcType] ?? view.npcType.replace(/_/g, ' ')
-
-  function handleSteal() {
-    sendCommand(`steal ${view.name}`)
-    onClose()
-  }
 
   return (
     <div style={styles.overlay} onClick={onClose}>
@@ -389,11 +383,6 @@ function GenericNpcModal({
               <span style={styles.infoValue}>{view.health}</span>
             </div>
           )}
-          <div style={{ ...styles.actions, marginTop: '0.75rem' }}>
-            <button style={{ ...styles.actionBtn, ...styles.actionBtnOrange }} onClick={handleSteal} type="button">
-              Steal
-            </button>
-          </div>
         </div>
       </div>
     </div>
