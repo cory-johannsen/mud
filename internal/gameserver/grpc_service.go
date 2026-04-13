@@ -4932,6 +4932,10 @@ func (s *GameServiceServer) handleEquip(uid string, req *gamev1.EquipRequest) (*
 	if s.combatH != nil {
 		_, _ = s.combatH.Equip(uid, req.GetWeaponId(), req.GetSlot())
 	}
+	// Push updated inventory (item removed from backpack) and loadout (weapon now in slot)
+	// so the web UI refreshes both panels immediately without requiring re-login (REQ-UI-EQUIP-1).
+	s.pushInventory(sess)
+	s.pushLoadout(sess)
 	return messageEvent(result), nil
 }
 
@@ -5640,6 +5644,29 @@ func (s *GameServiceServer) handleInventory(uid string) (*gamev1.ServerEvent, er
 	return &gamev1.ServerEvent{Payload: &gamev1.ServerEvent_InventoryView{InventoryView: view}}, nil
 }
 
+// pushLoadout pushes a fresh LoadoutView event to the given player session.
+//
+// Precondition: sess must be non-nil and have a non-nil Entity.
+// Postcondition: A LoadoutView event is marshaled and pushed; errors are
+// logged and silently dropped so the calling handler is unaffected.
+func (s *GameServiceServer) pushLoadout(sess *session.PlayerSession) {
+	if sess == nil || sess.Entity == nil {
+		return
+	}
+	evt := s.buildLoadoutView(sess)
+	if evt == nil {
+		return
+	}
+	data, err := proto.Marshal(evt)
+	if err != nil {
+		s.logger.Warn("pushLoadout: marshal failed", zap.Error(err))
+		return
+	}
+	if err := sess.Entity.Push(data); err != nil {
+		s.logger.Warn("pushLoadout: push failed", zap.String("uid", sess.UID), zap.Error(err))
+	}
+}
+
 // handleBalance sends the player's currency breakdown.
 //
 // Precondition: uid must be a valid connected player.
@@ -5738,7 +5765,12 @@ func (s *GameServiceServer) handleUnequip(uid string, req *gamev1.UnequipRequest
 	if !ok {
 		return errorEvent("player not found"), nil
 	}
-	return messageEvent(command.HandleUnequip(sess, req.GetSlot())), nil
+	result := command.HandleUnequip(sess, req.GetSlot())
+	// Push updated inventory (item returned to backpack) and loadout (slot now empty)
+	// so the web UI refreshes both panels immediately (REQ-UI-EQUIP-1).
+	s.pushInventory(sess)
+	s.pushLoadout(sess)
+	return messageEvent(result), nil
 }
 
 // handleEquipment displays all equipped armor, accessories, and weapon presets.
