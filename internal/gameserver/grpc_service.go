@@ -2400,6 +2400,8 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 		return s.handleUncover(uid)
 	case *gamev1.ClientMessage_JobGrantsRequest:
 		return s.handleJobGrants(uid)
+	case *gamev1.ClientMessage_QuestLogRequest:
+		return s.handleQuestLog(uid)
 	case *gamev1.ClientMessage_HotbarRequest:
 		evt, hbErr := s.handleHotbar(uid, p.HotbarRequest)
 		if hbErr != nil {

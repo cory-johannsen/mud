@@ -345,6 +345,8 @@ func serverEventInner(event *gamev1.ServerEvent) (proto.Message, string) {
 		return p.Weather, "WeatherEvent"
 	case *gamev1.ServerEvent_QuestGiverView:
 		return p.QuestGiverView, "QuestGiverView"
+	case *gamev1.ServerEvent_QuestLogView:
+		return p.QuestLogView, "QuestLogView"
 	default:
 		return nil, ""
 	}

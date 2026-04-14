@@ -157,6 +157,7 @@ message ClientMessage {
     KillNPCRequest       kill_npc_request      = 134;
     UncoverRequest       uncover_request       = 135;
     JobGrantsRequest     job_grants_request    = 136;
+    QuestLogRequest      quest_log_request     = 137;
   }
 }
 
@@ -342,6 +343,7 @@ message ServerEvent {
     RestView             rest_view              = 36;
     APUpdateEvent        ap_update              = 37;
     QuestGiverView       quest_giver_view       = 38;
+    QuestLogView         quest_log_view         = 39;
   }
 }
 
@@ -746,6 +748,15 @@ message QuestGiverView {
   string npc_instance_id      = 2;
   repeated QuestEntryView quests = 3;
 }
+
+// QuestLogView delivers the player's active quest list.
+// Field 39 of ServerEvent.payload.
+message QuestLogView {
+  repeated QuestEntryView quests = 1;
+}
+
+// QuestLogRequest asks the server for the player's current quest log.
+message QuestLogRequest {}
 
 // UnequipRequest removes the item in the named slot and returns it to the backpack.
 message UnequipRequest {

@@ -100,7 +100,7 @@ function GameLayout() {
 
         {/* Right: nav buttons + help + logout */}
         <div className="toolbar-right">
-          {(['inventory', 'equipment', 'skills', 'feats', 'stats', 'technology', 'job', 'explore'] as DrawerType[]).map((d) => (
+          {(['inventory', 'equipment', 'skills', 'feats', 'stats', 'technology', 'job', 'explore', 'quests'] as DrawerType[]).map((d) => (
             <button
               key={d}
               className={`toolbar-btn${openDrawer === d ? ' active' : ''}`}

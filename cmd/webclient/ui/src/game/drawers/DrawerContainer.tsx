@@ -6,8 +6,9 @@ import { StatsDrawer } from './StatsDrawer'
 import { TechnologyDrawer } from './TechnologyDrawer'
 import { JobDrawer } from './JobDrawer'
 import { ExploreDrawer } from './ExploreDrawer'
+import { QuestsDrawer } from './QuestsDrawer'
 
-export type DrawerType = 'inventory' | 'equipment' | 'skills' | 'feats' | 'stats' | 'technology' | 'job' | 'explore'
+export type DrawerType = 'inventory' | 'equipment' | 'skills' | 'feats' | 'stats' | 'technology' | 'job' | 'explore' | 'quests'
 
 interface Props {
   openDrawer: DrawerType | null
@@ -29,6 +30,7 @@ export function DrawerContainer({ openDrawer, onClose }: Props) {
         {openDrawer === 'technology'  && <TechnologyDrawer onClose={onClose} />}
         {openDrawer === 'job'         && <JobDrawer onClose={onClose} />}
         {openDrawer === 'explore'     && <ExploreDrawer onClose={onClose} />}
+        {openDrawer === 'quests'     && <QuestsDrawer onClose={onClose} />}
       </div>
     </>
   )

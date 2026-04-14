@@ -100,6 +100,7 @@ export interface GameState {
   restView: import('../proto').RestView | null
   npcView: { name: string; description: string; npcType: string; level: number; health: string } | null
   questGiverView: import('../proto').QuestGiverView | null
+  questLogView: import('../proto').QuestLogView | null
   loadoutView: LoadoutView | null
   choicePrompt: ChoicePrompt | null
   jobGrants: JobGrantsResponse | null
@@ -133,6 +134,7 @@ type Action =
   | { type: 'SET_REST_VIEW'; view: import('../proto').RestView | null }
   | { type: 'SET_NPC_VIEW'; view: { name: string; description: string; npcType: string; level: number; health: string } | null }
   | { type: 'SET_QUEST_GIVER_VIEW'; view: import('../proto').QuestGiverView | null }
+  | { type: 'SET_QUEST_LOG_VIEW'; view: import('../proto').QuestLogView | null }
   | { type: 'SET_LOADOUT_VIEW'; view: LoadoutView | null }
   | { type: 'SET_CHOICE_PROMPT'; prompt: ChoicePrompt }
   | { type: 'CLEAR_CHOICE_PROMPT' }
@@ -206,6 +208,8 @@ export function reducer(state: GameState, action: Action): GameState {
       return { ...state, npcView: action.view }
     case 'SET_QUEST_GIVER_VIEW':
       return { ...state, questGiverView: action.view }
+    case 'SET_QUEST_LOG_VIEW':
+      return { ...state, questLogView: action.view }
     case 'SET_LOADOUT_VIEW':
       return { ...state, loadoutView: action.view }
     case 'SET_CHOICE_PROMPT':
@@ -254,6 +258,7 @@ export const initialState: GameState = {
   restView: null,
   npcView: null,
   questGiverView: null,
+  questLogView: null,
   loadoutView: null,
   choicePrompt: null,
   jobGrants: null,
@@ -592,6 +597,10 @@ export function GameProvider({ children }: { children: ReactNode }) {
         }
         case 'QuestGiverView': {
           dispatch({ type: 'SET_QUEST_GIVER_VIEW', view: payload as import('../proto').QuestGiverView })
+          break
+        }
+        case 'QuestLogView': {
+          dispatch({ type: 'SET_QUEST_LOG_VIEW', view: payload as import('../proto').QuestLogView })
           break
         }
         case 'LoadoutView': {

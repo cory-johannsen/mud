@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/cory-johannsen/mud/internal/game/npc"
+	questpkg "github.com/cory-johannsen/mud/internal/game/quest"
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 )
 
@@ -145,4 +146,57 @@ func (s *GameServiceServer) handleTalk(uid string, req *gamev1.TalkRequest) (*ga
 
 	// Return structured QuestGiverView so the frontend can display the quest modal.
 	return s.buildQuestGiverView(uid, inst)
+}
+
+// handleQuestLog returns a QuestLogView containing all of the player's active quests.
+//
+// Precondition: uid identifies an active player session.
+// Postcondition: Returns a non-nil ServerEvent wrapping QuestLogView; error is always nil.
+func (s *GameServiceServer) handleQuestLog(uid string) (*gamev1.ServerEvent, error) {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return messageEvent("player not found"), nil
+	}
+
+	reg := questpkg.QuestRegistry(nil)
+	if s.questSvc != nil {
+		reg = s.questSvc.Registry()
+	}
+
+	var entries []*gamev1.QuestEntryView
+	for questID, aq := range sess.ActiveQuests {
+		def, ok := reg[questID]
+		if !ok {
+			continue
+		}
+		entry := &gamev1.QuestEntryView{
+			QuestId:       def.ID,
+			Title:         def.Title,
+			Description:   def.Description,
+			XpReward:      int32(def.Rewards.XP),
+			CreditsReward: int32(def.Rewards.Credits),
+			Status:        "active",
+		}
+		for _, obj := range def.Objectives {
+			progress := 0
+			if aq.ObjectiveProgress != nil {
+				progress = aq.ObjectiveProgress[obj.ID]
+			}
+			entry.Objectives = append(entry.Objectives, &gamev1.QuestObjectiveView{
+				Id:          obj.ID,
+				Description: obj.Description,
+				Current:     int32(progress),
+				Required:    int32(obj.Quantity),
+			})
+		}
+		entries = append(entries, entry)
+	}
+
+	return &gamev1.ServerEvent{
+		Payload: &gamev1.ServerEvent_QuestLogView{
+			QuestLogView: &gamev1.QuestLogView{
+				Quests: entries,
+			},
+		},
+	}, nil
 }

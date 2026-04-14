@@ -301,6 +301,10 @@ export interface QuestGiverView {
   quests?: QuestEntryView[]
 }
 
+export interface QuestLogView {
+  quests?: QuestEntryView[]
+}
+
 export interface InventoryItem {
   instanceId?: string
   name: string
@@ -681,4 +685,5 @@ export type ServerEvent =
   | { type: 'JobGrantsResponse'; payload: JobGrantsResponse }
   | { type: 'APUpdateEvent'; payload: APUpdateEvent }
   | { type: 'QuestGiverView'; payload: QuestGiverView }
+  | { type: 'QuestLogView'; payload: QuestLogView }
   | { type: string; payload: unknown }
