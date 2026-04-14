@@ -353,7 +353,14 @@ func (s *GameServiceServer) handleBuy(uid string, req *gamev1.BuyRequest) (*game
 	// Push CharacterSheetView so Crypto balance updates immediately after purchase (REQ-BUG74).
 	s.pushCharacterSheet(sess)
 
-	return messageEvent(fmt.Sprintf("You buy %d× %s for %d credits.", qty, itemID, total)), nil
+	// Resolve display name from registry; fall back to itemID if not found (REQ-BUG76).
+	itemName := itemID
+	if s.invRegistry != nil {
+		if def, ok := s.invRegistry.Item(itemID); ok {
+			itemName = def.Name
+		}
+	}
+	return messageEvent(fmt.Sprintf("You buy %d× %s for %d credits.", qty, itemName, total)), nil
 }
 
 // handleSell executes a player sale to a merchant.
@@ -474,7 +481,14 @@ func (s *GameServiceServer) handleSell(uid string, req *gamev1.SellRequest) (*ga
 	// Push CharacterSheetView so Crypto balance updates immediately after sale (REQ-BUG74).
 	s.pushCharacterSheet(sess)
 
-	return messageEvent(fmt.Sprintf("%s buys %d× %s from you for %d credits.", inst.Name(), qty, itemID, payout)), nil
+	// Resolve display name from registry; fall back to itemID if not found (REQ-BUG76).
+	itemName := itemID
+	if s.invRegistry != nil {
+		if def, ok := s.invRegistry.Item(itemID); ok {
+			itemName = def.Name
+		}
+	}
+	return messageEvent(fmt.Sprintf("%s buys %d× %s from you for %d credits.", inst.Name(), qty, itemName, payout)), nil
 }
 
 // handleNegotiate attempts a skill check for a session-scoped price modifier. REQ-NPC-5.
