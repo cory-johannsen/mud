@@ -1,8 +1,26 @@
 import type { MapTile, SameZoneExitTarget } from '../proto'
 
-const CELL_W = 52
-const CELL_H = 32
-const GAP = 10  // gap between adjacent tiles — connectors are visible here
+const BASE_CELL_W = 52
+const BASE_CELL_H = 32
+const BASE_GAP = 10  // gap between adjacent tiles at reference width
+
+// Reference container width at which base constants apply.
+export const REFERENCE_W = 400
+
+// computeZoneMapLayout returns cell and gap dimensions for the given container width.
+// Gap grows linearly with container width (fast); cells grow by sqrt (slow).
+// This makes map expansion primarily widen spacing rather than just enlarging cells.
+//
+// Precondition: containerW > 0.
+// Postcondition: All returned values are >= the base constants.
+export function computeZoneMapLayout(containerW: number): { cellW: number; cellH: number; gap: number } {
+  const ratio = Math.max(1, containerW / REFERENCE_W)
+  const gap = Math.round(BASE_GAP * ratio)
+  const cellScale = Math.sqrt(ratio)
+  const cellW = Math.round(BASE_CELL_W * cellScale)
+  const cellH = Math.round(BASE_CELL_H * cellScale)
+  return { cellW, cellH, gap }
+}
 
 const DANGER_FILLS: Record<string, string> = {
   safe: '#2a4a2a',
@@ -31,28 +49,27 @@ const POI_DEFS: Array<{ id: string; symbol: string; color: string; label: string
 
 const POI_BY_ID = new Map(POI_DEFS.map(p => [p.id, p]))
 
-// Zone exit arrow glyphs rendered OUTSIDE the tile in the gap area so they
-// are always visible against the SVG background (not the dark tile fill).
-// ex/ey are offsets from tile top-left to the arrow centre point.
-// Use U+2190-2199 arrows — universally supported in all SVG fonts.
-const ZONE_EXIT_ARROW: Record<string, { glyph: string; ex: number; ey: number; anchor: 'start' | 'middle' | 'end' | 'inherit' }> = {
-  north:     { glyph: '↑', ex: CELL_W / 2,        ey: -(GAP / 2),        anchor: 'middle' },
-  south:     { glyph: '↓', ex: CELL_W / 2,        ey: CELL_H + GAP / 2,  anchor: 'middle' },
-  east:      { glyph: '→', ex: CELL_W + GAP / 2,  ey: CELL_H / 2,        anchor: 'middle' },
-  west:      { glyph: '←', ex: -(GAP / 2),         ey: CELL_H / 2,        anchor: 'middle' },
-  northeast: { glyph: '↗', ex: CELL_W + GAP / 2,  ey: -(GAP / 2),        anchor: 'middle' },
-  northwest: { glyph: '↖', ex: -(GAP / 2),         ey: -(GAP / 2),        anchor: 'middle' },
-  southeast: { glyph: '↘', ex: CELL_W + GAP / 2,  ey: CELL_H + GAP / 2,  anchor: 'middle' },
-  southwest: { glyph: '↙', ex: -(GAP / 2),         ey: CELL_H + GAP / 2,  anchor: 'middle' },
+// buildZoneExitArrows returns directional arrow descriptors computed from cell and gap dimensions.
+// Arrows are rendered outside the tile in the gap area so they remain visible.
+function buildZoneExitArrows(cellW: number, cellH: number, gap: number): Record<string, { glyph: string; ex: number; ey: number; anchor: 'start' | 'middle' | 'end' | 'inherit' }> {
+  return {
+    north:     { glyph: '↑', ex: cellW / 2,       ey: -(gap / 2),       anchor: 'middle' },
+    south:     { glyph: '↓', ex: cellW / 2,       ey: cellH + gap / 2,  anchor: 'middle' },
+    east:      { glyph: '→', ex: cellW + gap / 2, ey: cellH / 2,        anchor: 'middle' },
+    west:      { glyph: '←', ex: -(gap / 2),       ey: cellH / 2,        anchor: 'middle' },
+    northeast: { glyph: '↗', ex: cellW + gap / 2, ey: -(gap / 2),       anchor: 'middle' },
+    northwest: { glyph: '↖', ex: -(gap / 2),       ey: -(gap / 2),       anchor: 'middle' },
+    southeast: { glyph: '↘', ex: cellW + gap / 2, ey: cellH + gap / 2,  anchor: 'middle' },
+    southwest: { glyph: '↙', ex: -(gap / 2),       ey: cellH + gap / 2,  anchor: 'middle' },
+  }
 }
-
-const STEP = CELL_W + GAP
-const STEP_H = CELL_H + GAP
 
 interface ZoneMapSvgProps {
   tiles: MapTile[]
   onHover?: (tile: MapTile, e: React.MouseEvent) => void
   onHoverEnd?: () => void
+  // containerWidth drives adaptive gap/cell scaling. Defaults to REFERENCE_W.
+  containerWidth?: number
 }
 
 function clipId(tile: MapTile): string {
@@ -83,10 +100,16 @@ function wrapRoomName(name: string, maxChars = 10): [string, string | null] {
   return [name.slice(0, maxChars), name.slice(maxChars, maxChars * 2).trim() || null]
 }
 
-export function ZoneMapSvg({ tiles, onHover, onHoverEnd }: ZoneMapSvgProps): JSX.Element {
+export function ZoneMapSvg({ tiles, onHover, onHoverEnd, containerWidth }: ZoneMapSvgProps): JSX.Element {
   if (tiles.length === 0) {
     return <p style={{ color: '#666', fontFamily: 'monospace', padding: '0.5rem' }}>No map data.</p>
   }
+
+  // Compute adaptive cell and gap sizes based on the container width.
+  const { cellW, cellH, gap } = computeZoneMapLayout(containerWidth ?? REFERENCE_W)
+  const STEP = cellW + gap
+  const STEP_H = cellH + gap
+  const ZONE_EXIT_ARROW = buildZoneExitArrows(cellW, cellH, gap)
 
   // Build lookup map keyed by original "x,y"
   const tileMap = new Map<string, MapTile>()
@@ -104,11 +127,11 @@ export function ZoneMapSvg({ tiles, onHover, onHoverEnd }: ZoneMapSvgProps): JSX
 
   const px = (tx: number) => (normX.get(tx) ?? 0) * STEP
   const py = (ty: number) => (normY.get(ty) ?? 0) * STEP_H
-  const centerX = (tx: number) => px(tx) + CELL_W / 2
-  const centerY = (ty: number) => py(ty) + CELL_H / 2
+  const centerX = (tx: number) => px(tx) + cellW / 2
+  const centerY = (ty: number) => py(ty) + cellH / 2
 
-  const totalW = sortedUniqueXs.length * STEP - GAP
-  const totalH = sortedUniqueYs.length * STEP_H - GAP
+  const totalW = sortedUniqueXs.length * STEP - gap
+  const totalH = sortedUniqueYs.length * STEP_H - gap
   const viewBox = `-8 -8 ${totalW + 16} ${totalH + 16}`
 
   // Build a room-ID → tile lookup for connector drawing.
@@ -175,14 +198,14 @@ export function ZoneMapSvg({ tiles, onHover, onHoverEnd }: ZoneMapSvgProps): JSX
     const id = clipId(tile)
     const [line1, line2] = wrapRoomName(name)
     const hasPois = (tile.pois ?? []).length > 0
-    const textMidY = hasPois ? ry + CELL_H / 2 - 4 : ry + CELL_H / 2
+    const textMidY = hasPois ? ry + cellH / 2 - 4 : ry + cellH / 2
     const lineH = 10
 
     return (
       <g key={`tile-${tile.roomId ?? tx}-${ty}`}>
         <rect
           x={rx} y={ry}
-          width={CELL_W} height={CELL_H}
+          width={cellW} height={cellH}
           rx={4}
           fill={fill} stroke={stroke} strokeWidth={strokeWidth}
           onMouseEnter={onHover ? e => onHover(tile, e) : undefined}
@@ -190,16 +213,16 @@ export function ZoneMapSvg({ tiles, onHover, onHoverEnd }: ZoneMapSvgProps): JSX
         />
         {line2 ? (
           <text fontSize={9} fill="#ccc" pointerEvents="none" clipPath={`url(#${id})`}>
-            <tspan x={rx + CELL_W / 2} y={textMidY - lineH / 2} textAnchor="middle" dominantBaseline="middle">
+            <tspan x={rx + cellW / 2} y={textMidY - lineH / 2} textAnchor="middle" dominantBaseline="middle">
               {line1}
             </tspan>
-            <tspan x={rx + CELL_W / 2} dy={lineH} textAnchor="middle" dominantBaseline="middle">
+            <tspan x={rx + cellW / 2} dy={lineH} textAnchor="middle" dominantBaseline="middle">
               {line2}
             </tspan>
           </text>
         ) : (
           <text
-            x={rx + CELL_W / 2} y={textMidY}
+            x={rx + cellW / 2} y={textMidY}
             textAnchor="middle" dominantBaseline="middle"
             fontSize={9} fill="#ccc" pointerEvents="none"
             clipPath={`url(#${id})`}
@@ -213,7 +236,7 @@ export function ZoneMapSvg({ tiles, onHover, onHoverEnd }: ZoneMapSvgProps): JSX
             <text
               key={`poi-${id}-${idx}`}
               x={rx + 4 + idx * 11}
-              y={ry + CELL_H - 4}
+              y={ry + cellH - 4}
               textAnchor="start"
               fontSize={9}
               fill={def?.color ?? '#aaa'}
@@ -258,7 +281,7 @@ export function ZoneMapSvg({ tiles, onHover, onHoverEnd }: ZoneMapSvgProps): JSX
               const ty = tile.y ?? 0
               return (
                 <clipPath key={`clip-${clipId(tile)}`} id={clipId(tile)}>
-                  <rect x={px(tx)} y={py(ty)} width={CELL_W} height={CELL_H} />
+                  <rect x={px(tx)} y={py(ty)} width={cellW} height={cellH} />
                 </clipPath>
               )
             })}

@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { render } from '@testing-library/react'
-import { ZoneMapSvg } from './ZoneMapSvg'
+import { ZoneMapSvg, computeZoneMapLayout, REFERENCE_W } from './ZoneMapSvg'
 import type { MapTile } from '../proto'
 
 const CURRENT_TILE: MapTile = {
@@ -12,6 +12,8 @@ const CURRENT_TILE: MapTile = {
   pois: [],
   current: true,
   bossRoom: false,
+  // Connector to boss via sameZoneExitTargets (required for line rendering).
+  sameZoneExitTargets: [{ direction: 'east', targetRoomId: 'room_boss' }],
 }
 
 const BOSS_TILE: MapTile = {
@@ -23,6 +25,7 @@ const BOSS_TILE: MapTile = {
   pois: [],
   current: false,
   bossRoom: true,
+  sameZoneExitTargets: [{ direction: 'west', targetRoomId: 'room_current' }],
 }
 
 const MERCHANT_TILE: MapTile = {
@@ -67,10 +70,51 @@ describe('ZoneMapSvg', () => {
     expect(merchantText).toBeDefined()
   })
 
-  it('renders at least one <line> connecting adjacent tiles with matching exits', () => {
-    // CURRENT_TILE at (0,0) has exit 'e'; BOSS_TILE at (2,0) has exit 'w' — they face each other
+  // REQ-MAP-CONN-1: Connectors MUST be drawn between rooms that share sameZoneExitTargets.
+  it('renders at least one <line> connecting tiles that share sameZoneExitTargets', () => {
+    // CURRENT_TILE and BOSS_TILE both declare sameZoneExitTargets pointing at each other.
     const { container: c } = render(<ZoneMapSvg tiles={[CURRENT_TILE, BOSS_TILE]} />)
     const lines = c.querySelectorAll('line')
     expect(lines.length).toBeGreaterThanOrEqual(1)
+  })
+})
+
+// REQ-MAP-SCALE-1: computeZoneMapLayout MUST produce larger gap growth than cell growth
+//   as containerW increases, so expanding the pane primarily widens spacing.
+describe('computeZoneMapLayout', () => {
+  it('returns base values at REFERENCE_W', () => {
+    const { cellW, gap } = computeZoneMapLayout(REFERENCE_W)
+    // At reference width the values should be the base constants.
+    expect(cellW).toBeGreaterThan(0)
+    expect(gap).toBeGreaterThan(0)
+  })
+
+  it('gap grows faster than cell size as containerW doubles', () => {
+    const base = computeZoneMapLayout(REFERENCE_W)
+    const doubled = computeZoneMapLayout(REFERENCE_W * 2)
+
+    const gapGrowth = doubled.gap / base.gap
+    const cellGrowth = doubled.cellW / base.cellW
+
+    expect(gapGrowth).toBeGreaterThan(cellGrowth)
+  })
+
+  it('gap grows faster than cell size as containerW quadruples', () => {
+    const base = computeZoneMapLayout(REFERENCE_W)
+    const quad = computeZoneMapLayout(REFERENCE_W * 4)
+
+    const gapGrowth = quad.gap / base.gap
+    const cellGrowth = quad.cellW / base.cellW
+
+    expect(gapGrowth).toBeGreaterThan(cellGrowth)
+  })
+
+  it('values do not decrease for containers narrower than REFERENCE_W', () => {
+    const narrow = computeZoneMapLayout(REFERENCE_W / 2)
+    const base = computeZoneMapLayout(REFERENCE_W)
+
+    // Must not shrink below base values when container is smaller.
+    expect(narrow.cellW).toBe(base.cellW)
+    expect(narrow.gap).toBe(base.gap)
   })
 })

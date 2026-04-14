@@ -1,8 +1,8 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import { useGame } from '../GameContext'
 import type { MapTile } from '../../proto'
 import { RoomTooltip } from '../RoomTooltip'
-import { ZoneMapSvg } from '../ZoneMapSvg'
+import { ZoneMapSvg, REFERENCE_W } from '../ZoneMapSvg'
 import { WorldMapSvg } from '../WorldMapSvg'
 
 const COMPASS_DIRS = [
@@ -115,6 +115,19 @@ export function MapPanel() {
   const [stepMode, setStepMode] = useState(false)
   const [combatHoverName, setCombatHoverName] = useState<string | null>(null)
   const [combatHoverPos, setCombatHoverPos] = useState({ x: 0, y: 0 })
+  const mapContainerRef = useRef<HTMLDivElement>(null)
+  const [mapContainerW, setMapContainerW] = useState(REFERENCE_W)
+
+  useEffect(() => {
+    const el = mapContainerRef.current
+    if (!el) return
+    const ro = new ResizeObserver(entries => {
+      const w = entries[0]?.contentRect.width ?? REFERENCE_W
+      setMapContainerW(w)
+    })
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
 
   const handleRoomEnter = useCallback((tile: MapTile, e: React.MouseEvent) => {
     const rect = (e.currentTarget as Element).getBoundingClientRect()
@@ -238,9 +251,10 @@ export function MapPanel() {
       ) : state.mapTiles.length === 0 ? (
         <p className="map-empty">No map data.</p>
       ) : (
-        <div style={{ flex: 1, minHeight: 0, position: 'relative' }}>
+        <div ref={mapContainerRef} style={{ flex: 1, minHeight: 0, position: 'relative' }}>
           <ZoneMapSvg
             tiles={state.mapTiles}
+            containerWidth={mapContainerW}
             onHover={handleRoomEnter}
             onHoverEnd={handleRoomLeave}
           />
