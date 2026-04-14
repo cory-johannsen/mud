@@ -117,6 +117,7 @@ export function MapPanel() {
   const [combatHoverPos, setCombatHoverPos] = useState({ x: 0, y: 0 })
   const mapContainerRef = useRef<HTMLDivElement>(null)
   const [mapContainerW, setMapContainerW] = useState(REFERENCE_W)
+  const prevRoomIdRef = useRef<string | null>(null)
 
   useEffect(() => {
     const el = mapContainerRef.current
@@ -128,6 +129,18 @@ export function MapPanel() {
     ro.observe(el)
     return () => ro.disconnect()
   }, [])
+
+  // REQ-MAP-TRAVEL-1: Auto-switch back to zone map when travel completes.
+  // When the room ID changes while the world map is showing, the player has
+  // fast-travelled to a new zone — switch back to zone view automatically.
+  const currentRoomId = state.roomView?.roomId ?? null
+  useEffect(() => {
+    if (showWorld && currentRoomId !== null && currentRoomId !== prevRoomIdRef.current) {
+      setShowWorld(false)
+      sendMessage('MapRequest', { view: 'zone' })
+    }
+    prevRoomIdRef.current = currentRoomId
+  }, [currentRoomId])
 
   const handleRoomEnter = useCallback((tile: MapTile, e: React.MouseEvent) => {
     const rect = (e.currentTarget as Element).getBoundingClientRect()
