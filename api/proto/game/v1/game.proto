@@ -341,6 +341,7 @@ message ServerEvent {
     JobGrantsResponse    job_grants_response    = 35;
     RestView             rest_view              = 36;
     APUpdateEvent        ap_update              = 37;
+    QuestGiverView       quest_giver_view       = 38;
   }
 }
 
@@ -717,6 +718,33 @@ message LoadoutWeaponPreset {
 message LoadoutView {
   repeated LoadoutWeaponPreset presets = 1; // all available weapon presets
   int32 active_index                  = 2; // 0-based index of active preset
+}
+
+// QuestObjectiveView describes one objective within a quest entry.
+message QuestObjectiveView {
+  string id          = 1;
+  string description = 2;
+  int32  current     = 3; // current progress
+  int32  required    = 4; // total required
+}
+
+// QuestEntryView describes a single quest as shown in the quest giver modal.
+message QuestEntryView {
+  string quest_id             = 1;
+  string title                = 2;
+  string description          = 3;
+  int32  xp_reward            = 4;
+  int32  credits_reward       = 5;
+  repeated QuestObjectiveView objectives = 6;
+  string status               = 7; // "available" | "active" | "completed" | "locked"
+}
+
+// QuestGiverView delivers all quests offered by a quest giver NPC.
+// Field 38 of ServerEvent.payload.
+message QuestGiverView {
+  string npc_name             = 1;
+  string npc_instance_id      = 2;
+  repeated QuestEntryView quests = 3;
 }
 
 // UnequipRequest removes the item in the named slot and returns it to the backpack.

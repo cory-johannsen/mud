@@ -17,6 +17,7 @@ import { HelpModal } from '../game/HelpModal'
 import { NpcModal } from '../game/NpcModal'
 import { NpcInteractModal } from '../game/NpcInteractModal'
 import { FeatureChoiceModal } from '../game/drawers/FeatureChoiceModal'
+import { QuestGiverModal } from '../game/QuestGiverModal'
 import { LogoutDropdown } from '../components/LogoutDropdown'
 import '../styles/game.css'
 
@@ -123,6 +124,7 @@ function GameLayout() {
       )}
       {state.shopView && <NpcModal />}
       <NpcInteractModal />
+      <QuestGiverModal />
       {state.choicePrompt && <FeatureChoiceModal onClose={() => { /* modal self-closes on selection */ }} />}
     </>
   )

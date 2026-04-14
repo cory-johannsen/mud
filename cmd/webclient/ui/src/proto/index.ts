@@ -273,6 +273,34 @@ export interface CharacterSheetView {
   off_hand_prof_rank?: string
 }
 
+export interface QuestObjectiveView {
+  id?: string
+  description?: string
+  current?: number
+  required?: number
+}
+
+export interface QuestEntryView {
+  questId?: string
+  quest_id?: string
+  title?: string
+  description?: string
+  xpReward?: number
+  xp_reward?: number
+  creditsReward?: number
+  credits_reward?: number
+  objectives?: QuestObjectiveView[]
+  status?: string // "available" | "active" | "completed" | "locked"
+}
+
+export interface QuestGiverView {
+  npcName?: string
+  npc_name?: string
+  npcInstanceId?: string
+  npc_instance_id?: string
+  quests?: QuestEntryView[]
+}
+
 export interface InventoryItem {
   instanceId?: string
   name: string
@@ -652,4 +680,5 @@ export type ServerEvent =
   | { type: 'WeatherEvent'; payload: WeatherEvent }
   | { type: 'JobGrantsResponse'; payload: JobGrantsResponse }
   | { type: 'APUpdateEvent'; payload: APUpdateEvent }
+  | { type: 'QuestGiverView'; payload: QuestGiverView }
   | { type: string; payload: unknown }

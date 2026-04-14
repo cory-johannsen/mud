@@ -99,6 +99,7 @@ export interface GameState {
   fixerView: import('../proto').FixerView | null
   restView: import('../proto').RestView | null
   npcView: { name: string; description: string; npcType: string; level: number; health: string } | null
+  questGiverView: import('../proto').QuestGiverView | null
   loadoutView: LoadoutView | null
   choicePrompt: ChoicePrompt | null
   jobGrants: JobGrantsResponse | null
@@ -131,6 +132,7 @@ type Action =
   | { type: 'SET_FIXER_VIEW'; view: import('../proto').FixerView | null }
   | { type: 'SET_REST_VIEW'; view: import('../proto').RestView | null }
   | { type: 'SET_NPC_VIEW'; view: { name: string; description: string; npcType: string; level: number; health: string } | null }
+  | { type: 'SET_QUEST_GIVER_VIEW'; view: import('../proto').QuestGiverView | null }
   | { type: 'SET_LOADOUT_VIEW'; view: LoadoutView | null }
   | { type: 'SET_CHOICE_PROMPT'; prompt: ChoicePrompt }
   | { type: 'CLEAR_CHOICE_PROMPT' }
@@ -202,6 +204,8 @@ export function reducer(state: GameState, action: Action): GameState {
       return { ...state, restView: action.view }
     case 'SET_NPC_VIEW':
       return { ...state, npcView: action.view }
+    case 'SET_QUEST_GIVER_VIEW':
+      return { ...state, questGiverView: action.view }
     case 'SET_LOADOUT_VIEW':
       return { ...state, loadoutView: action.view }
     case 'SET_CHOICE_PROMPT':
@@ -249,6 +253,7 @@ export const initialState: GameState = {
   fixerView: null,
   restView: null,
   npcView: null,
+  questGiverView: null,
   loadoutView: null,
   choicePrompt: null,
   jobGrants: null,
@@ -264,6 +269,7 @@ interface GameContextValue {
   clearFixer: () => void
   clearRestView: () => void
   clearNpcView: () => void
+  clearQuestGiverView: () => void
   clearLoadout: () => void
   clearChoicePrompt: () => void
 }
@@ -584,6 +590,10 @@ export function GameProvider({ children }: { children: ReactNode }) {
           dispatch({ type: 'SET_REST_VIEW', view: payload as import('../proto').RestView })
           break
         }
+        case 'QuestGiverView': {
+          dispatch({ type: 'SET_QUEST_GIVER_VIEW', view: payload as import('../proto').QuestGiverView })
+          break
+        }
         case 'LoadoutView': {
           dispatch({ type: 'SET_LOADOUT_VIEW', view: payload as LoadoutView })
           break
@@ -668,6 +678,10 @@ export function GameProvider({ children }: { children: ReactNode }) {
     dispatch({ type: 'SET_NPC_VIEW', view: null })
   }, [])
 
+  const clearQuestGiverView = useCallback(() => {
+    dispatch({ type: 'SET_QUEST_GIVER_VIEW', view: null })
+  }, [])
+
   const clearLoadout = useCallback(() => {
     dispatch({ type: 'SET_LOADOUT_VIEW', view: null })
   }, [])
@@ -677,7 +691,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   }, [])
 
   return (
-    <GameContext.Provider value={{ state, sendMessage, sendCommand, clearShop, clearHealer, clearTrainer, clearFixer, clearRestView, clearNpcView, clearLoadout, clearChoicePrompt }}>
+    <GameContext.Provider value={{ state, sendMessage, sendCommand, clearShop, clearHealer, clearTrainer, clearFixer, clearRestView, clearNpcView, clearQuestGiverView, clearLoadout, clearChoicePrompt }}>
       {children}
     </GameContext.Provider>
   )

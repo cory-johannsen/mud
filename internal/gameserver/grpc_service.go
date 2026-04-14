@@ -3279,6 +3279,8 @@ func (s *GameServiceServer) handleExamine(uid string, req *gamev1.ExamineRequest
 				return s.buildFixerView(uid, inst)
 			case "motel_keeper", "brothel_keeper":
 				return s.buildRestView(uid, inst)
+			case "quest_giver":
+				return s.buildQuestGiverView(uid, inst)
 			}
 		}
 		view, err := s.npcH.Examine(uid, req.Target)

@@ -5,6 +5,7 @@ import (
 	"sort"
 
 	"github.com/cory-johannsen/mud/internal/game/npc"
+	"github.com/cory-johannsen/mud/internal/game/quest"
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 )
 
@@ -153,6 +154,103 @@ func (s *GameServiceServer) buildRestView(uid string, inst *npc.Instance) (*game
 				PlayerCurrency: int32(sess.Currency),
 				CurrentHp:     int32(sess.CurrentHP),
 				MaxHp:         int32(sess.MaxHP),
+			},
+		},
+	}, nil
+}
+
+// buildQuestGiverView constructs a QuestGiverView ServerEvent for a quest giver NPC examine.
+//
+// Precondition: uid identifies an active player session; inst is a quest_giver NPC.
+// Postcondition: Returns a non-nil ServerEvent wrapping QuestGiverView; error is always nil.
+func (s *GameServiceServer) buildQuestGiverView(uid string, inst *npc.Instance) (*gamev1.ServerEvent, error) {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return messageEvent("player not found"), nil
+	}
+	tmpl := s.npcMgr.TemplateByID(inst.TemplateID)
+	if tmpl == nil || tmpl.QuestGiver == nil {
+		return messageEvent("That NPC has no quests configured."), nil
+	}
+
+	var entries []*gamev1.QuestEntryView
+	reg := quest.QuestRegistry(nil)
+	if s.questSvc != nil {
+		reg = s.questSvc.Registry()
+	}
+
+	for _, questID := range tmpl.QuestGiver.QuestIDs {
+		def, ok := reg[questID]
+		if !ok {
+			continue
+		}
+		// Determine status.
+		status := "available"
+		if aq, active := sess.ActiveQuests[questID]; active {
+			status = "active"
+			// Build objectives with progress.
+			entry := &gamev1.QuestEntryView{
+				QuestId:       def.ID,
+				Title:         def.Title,
+				Description:   def.Description,
+				XpReward:      int32(def.Rewards.XP),
+				CreditsReward: int32(def.Rewards.Credits),
+				Status:        status,
+			}
+			for _, obj := range def.Objectives {
+				progress := 0
+				if aq.ObjectiveProgress != nil {
+					progress = aq.ObjectiveProgress[obj.ID]
+				}
+				entry.Objectives = append(entry.Objectives, &gamev1.QuestObjectiveView{
+					Id:          obj.ID,
+					Description: obj.Description,
+					Current:     int32(progress),
+					Required:    int32(obj.Quantity),
+				})
+			}
+			entries = append(entries, entry)
+			continue
+		}
+		if _, completed := sess.CompletedQuests[questID]; completed {
+			if !def.Repeatable {
+				status = "completed"
+			}
+		}
+		// Check prerequisites.
+		if status == "available" {
+			for _, prereq := range def.Prerequisites {
+				if _, done := sess.CompletedQuests[prereq]; !done {
+					status = "locked"
+					break
+				}
+			}
+		}
+		entry := &gamev1.QuestEntryView{
+			QuestId:       def.ID,
+			Title:         def.Title,
+			Description:   def.Description,
+			XpReward:      int32(def.Rewards.XP),
+			CreditsReward: int32(def.Rewards.Credits),
+			Status:        status,
+		}
+		for _, obj := range def.Objectives {
+			entry.Objectives = append(entry.Objectives, &gamev1.QuestObjectiveView{
+				Id:          obj.ID,
+				Description: obj.Description,
+				Current:     0,
+				Required:    int32(obj.Quantity),
+			})
+		}
+		entries = append(entries, entry)
+	}
+
+	return &gamev1.ServerEvent{
+		Payload: &gamev1.ServerEvent_QuestGiverView{
+			QuestGiverView: &gamev1.QuestGiverView{
+				NpcName:       inst.Name(),
+				NpcInstanceId: inst.ID,
+				Quests:        entries,
 			},
 		},
 	}, nil
