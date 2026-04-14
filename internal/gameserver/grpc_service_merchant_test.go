@@ -290,21 +290,65 @@ func TestHandleBuy_OutOfStock(t *testing.T) {
 
 func TestHandleSell_SuccessPaysPlayer(t *testing.T) {
 	svc, uid, inst := newMerchantTestServer(t)
-	evt, err := svc.handleSell(uid, &gamev1.SellRequest{NpcName: inst.Name(), ItemId: "stim_pack", Quantity: 1})
+
+	// Player must have the item in their backpack before selling.
+	sess, ok := svc.sessions.GetPlayer(uid)
+	require.True(t, ok)
+	_, err := sess.Backpack.Add("stim_pack", 1, svc.invRegistry)
 	require.NoError(t, err)
+
+	evt, sellErr := svc.handleSell(uid, &gamev1.SellRequest{NpcName: inst.Name(), ItemId: "stim_pack", Quantity: 1})
+	require.NoError(t, sellErr)
 	assert.Contains(t, evt.GetMessage().Content, "buy")
+
+	// 500 + floor(50 * 0.5 * 1) = 525
+	assert.Equal(t, 525, sess.Currency)
+}
+
+// REQ-NPC-SELL-1: A successful sale MUST remove the sold item from the player's backpack.
+func TestHandleSell_SuccessRemovesItemFromBackpack(t *testing.T) {
+	svc, uid, inst := newMerchantTestServer(t)
 
 	sess, ok := svc.sessions.GetPlayer(uid)
 	require.True(t, ok)
-	// 500 + floor(50 * 0.5 * 1) = 525
-	assert.Equal(t, 525, sess.Currency)
+	_, err := sess.Backpack.Add("stim_pack", 1, svc.invRegistry)
+	require.NoError(t, err)
+	require.Len(t, sess.Backpack.FindByItemDefID("stim_pack"), 1, "backpack must have stim_pack before sell")
+
+	_, sellErr := svc.handleSell(uid, &gamev1.SellRequest{NpcName: inst.Name(), ItemId: "stim_pack", Quantity: 1})
+	require.NoError(t, sellErr)
+
+	items := sess.Backpack.FindByItemDefID("stim_pack")
+	assert.Empty(t, items, "backpack must be empty after selling the only stim_pack")
+}
+
+// REQ-NPC-SELL-2: Selling an item the player does not own MUST return an error message.
+func TestHandleSell_ItemNotInInventory_ReturnsError(t *testing.T) {
+	svc, uid, inst := newMerchantTestServer(t)
+
+	// Backpack is empty — no stim_pack to sell.
+	evt, err := svc.handleSell(uid, &gamev1.SellRequest{NpcName: inst.Name(), ItemId: "stim_pack", Quantity: 1})
+	require.NoError(t, err)
+	assert.Contains(t, evt.GetMessage().Content, "don't have")
+
+	// Currency must be unchanged.
+	sess, ok := svc.sessions.GetPlayer(uid)
+	require.True(t, ok)
+	assert.Equal(t, 500, sess.Currency)
 }
 
 func TestHandleSell_BudgetExhausted(t *testing.T) {
 	svc, uid, inst := newMerchantTestServer(t)
 	svc.merchantStateFor(inst.ID).CurrentBudget = 0
-	evt, err := svc.handleSell(uid, &gamev1.SellRequest{NpcName: inst.Name(), ItemId: "stim_pack", Quantity: 1})
+
+	// Player must have the item to reach the budget check.
+	sess, ok := svc.sessions.GetPlayer(uid)
+	require.True(t, ok)
+	_, err := sess.Backpack.Add("stim_pack", 1, svc.invRegistry)
 	require.NoError(t, err)
+
+	evt, sellErr := svc.handleSell(uid, &gamev1.SellRequest{NpcName: inst.Name(), ItemId: "stim_pack", Quantity: 1})
+	require.NoError(t, sellErr)
 	assert.Contains(t, evt.GetMessage().Content, "can't afford")
 }
 

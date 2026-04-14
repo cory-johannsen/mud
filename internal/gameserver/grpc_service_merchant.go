@@ -378,6 +378,23 @@ func (s *GameServiceServer) handleSell(uid string, req *gamev1.SellRequest) (*ga
 	if itemCfg == nil {
 		return messageEvent(fmt.Sprintf("%s doesn't buy %q.", inst.Name(), itemID)), nil
 	}
+	// Verify the player actually has the item in their backpack.
+	if sess.Backpack == nil {
+		return messageEvent("You don't have that item."), nil
+	}
+	instances := sess.Backpack.FindByItemDefID(itemID)
+	if len(instances) == 0 {
+		return messageEvent(fmt.Sprintf("You don't have %q to sell.", itemID)), nil
+	}
+	// Tally total owned quantity.
+	owned := 0
+	for _, inst2 := range instances {
+		owned += inst2.Quantity
+	}
+	if owned < qty {
+		return messageEvent(fmt.Sprintf("You only have %d of %q.", owned, itemID)), nil
+	}
+
 	payout := npc.ComputeSellPayout(itemCfg.BasePrice, tmpl.Merchant.BuyMargin, qty, sess.NegotiateModifier)
 	merchantRuntimeMu.RLock()
 	budget := state.CurrentBudget
@@ -388,7 +405,56 @@ func (s *GameServiceServer) handleSell(uid string, req *gamev1.SellRequest) (*ga
 	merchantRuntimeMu.Lock()
 	state.CurrentBudget -= payout
 	merchantRuntimeMu.Unlock()
+
+	// Remove qty items from the backpack, draining stacks in order.
+	remaining := qty
+	for _, backpackInst := range instances {
+		if remaining <= 0 {
+			break
+		}
+		take := backpackInst.Quantity
+		if take > remaining {
+			take = remaining
+		}
+		if removeErr := sess.Backpack.Remove(backpackInst.InstanceID, take); removeErr != nil {
+			s.logger.Warn("handleSell: failed to remove item from backpack",
+				zap.String("uid", uid),
+				zap.String("itemID", itemID),
+				zap.Error(removeErr),
+			)
+		}
+		remaining -= take
+	}
+
 	sess.Currency += payout
+
+	// Persist inventory and currency.
+	if s.charSaver != nil && sess.CharacterID > 0 {
+		ctx := context.Background()
+		if err := s.charSaver.SaveInventory(ctx, sess.CharacterID, backpackToInventoryItems(sess.Backpack)); err != nil {
+			s.logger.Warn("handleSell: SaveInventory failed", zap.Error(err))
+		}
+		if err := s.charSaver.SaveCurrency(ctx, sess.CharacterID, sess.Currency); err != nil {
+			s.logger.Warn("handleSell: SaveCurrency failed", zap.Error(err))
+		}
+	}
+
+	// Push updated InventoryView so the frontend reflects the sold item.
+	if invEvt, _ := s.handleInventory(uid); invEvt != nil && sess.Entity != nil {
+		if data, marshalErr := proto.Marshal(invEvt); marshalErr == nil {
+			_ = sess.Entity.PushBlocking(data, time.Second)
+		}
+	}
+
+	// Push updated ShopView so client reflects new budget.
+	if shopEvt, shopErr := s.buildShopView(uid, req.GetNpcName()); shopErr == nil && shopEvt != nil {
+		if sess.Entity != nil {
+			if data, marshalErr := proto.Marshal(shopEvt); marshalErr == nil {
+				_ = sess.Entity.PushBlocking(data, time.Second)
+			}
+		}
+	}
+
 	return messageEvent(fmt.Sprintf("%s buys %d× %s from you for %d credits.", inst.Name(), qty, itemID, payout)), nil
 }
 
