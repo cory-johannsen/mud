@@ -7956,6 +7956,10 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string, targetX, 
 				if f.ID == "rage" {
 					return s.handleRage(uid)
 				}
+				// REQ-60-1 / REQ-60-2: Overpower requires an empty off-hand and consumes 1 AP.
+				if f.ID == "overpower" {
+					return s.handleOverpower(uid)
+				}
 				// REQ-BUG-132: Adrenaline Surge requires the player to be Enraged.
 				if f.ID == "adrenaline_surge" && s.mentalStateMgr != nil {
 					sev := s.mentalStateMgr.CurrentSeverity(uid, mentalstate.TrackRage)
@@ -10564,6 +10568,69 @@ func (s *GameServiceServer) handleRage(uid string) (*gamev1.ServerEvent, error) 
 		narrative = changes[0].Message
 	}
 	return messageEvent(narrative), nil
+}
+
+// handleOverpower activates the Overpower feat, applying the brutal_surge_active condition.
+//
+// REQ-60-1: Overpower costs 1 AP when activated during combat.
+// REQ-60-2: Overpower requires an empty off-hand slot (it is a two-handed wind-up strike).
+//
+// Precondition: uid must be a valid player session; player must be in active combat.
+// Postcondition: On success, brutal_surge_active condition is applied and 1 AP is spent.
+func (s *GameServiceServer) handleOverpower(uid string) (*gamev1.ServerEvent, error) {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return nil, fmt.Errorf("player %q not found", uid)
+	}
+
+	// REQ-60-2: Overpower requires an empty off-hand (two-handed wind-up strike).
+	if sess.LoadoutSet != nil {
+		if preset := sess.LoadoutSet.ActivePreset(); preset != nil && preset.OffHand != nil {
+			return messageEvent("Overpower requires a free off-hand — unequip your off-hand item first."), nil
+		}
+	}
+
+	// RequiresCombat: player must be in an active encounter.
+	var inCombat bool
+	if s.combatH != nil {
+		inCombat = s.combatH.ActiveCombatForPlayer(uid) != nil
+	}
+	if !inCombat {
+		return messageEvent("You must be in combat to use Overpower."), nil
+	}
+
+	// REQ-60-1: Spend 1 AP.
+	if err := s.combatH.SpendAP(uid, 1); err != nil {
+		return errorEvent(err.Error()), nil
+	}
+
+	// Apply brutal_surge_active to self (combat condition set preferred).
+	if s.condRegistry != nil {
+		if def, ok := s.condRegistry.Get("brutal_surge_active"); ok {
+			var cbt *combat.Combat
+			if s.combatH != nil {
+				cbt = s.combatH.ActiveCombatForPlayer(uid)
+			}
+			if cbt != nil {
+				if applySet := cbt.Conditions[sess.UID]; applySet != nil {
+					if err := applySet.Apply(sess.UID, def, 1, -1); err != nil {
+						s.logger.Warn("handleOverpower: failed to apply brutal_surge_active",
+							zap.String("uid", uid),
+							zap.Error(err),
+						)
+					}
+				}
+			} else if sess.Conditions != nil {
+				if err := sess.Conditions.Apply(sess.UID, def, 1, -1); err != nil {
+					s.logger.Warn("handleOverpower: failed to apply brutal_surge_active (session)",
+						zap.String("uid", uid),
+						zap.Error(err),
+					)
+				}
+			}
+		}
+	}
+	return messageEvent("You put everything into it."), nil
 }
 
 // handleCalm attempts to calm the player's worst active mental state via a Grit check.

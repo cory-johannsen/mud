@@ -58,11 +58,11 @@ func buildFeatUseServiceWithCondReg(
 // that when a feat with a condition_id is activated and the condition is in the registry,
 // the UseResponse.Message is exactly the feat's ActivateText (no condition name parenthetical).
 //
-// Precondition: feat has ConditionID="overpower_active"; registry contains that condition.
+// Precondition: feat has ConditionID="power_surge_active"; registry contains that condition.
 // Postcondition: UseResponse.Message equals ActivateText only.
 func TestHandleUse_FeatWithCondition_MessageIsActivateText_REQ_BUG149_1(t *testing.T) {
-	const condID = "overpower_active"
-	const featID = "overpower"
+	const condID = "power_surge_active"
+	const featID = "power_surge"
 	const uid = "bug149-user-1"
 
 	sessMgr := session.NewManager()
@@ -70,7 +70,7 @@ func TestHandleUse_FeatWithCondition_MessageIsActivateText_REQ_BUG149_1(t *testi
 	condReg := condition.NewRegistry()
 	condReg.Register(&condition.ConditionDef{
 		ID:           condID,
-		Name:         "Overpower Active",
+		Name:         "Power Surge Active",
 		DurationType: "encounter",
 		DamageBonus:  2,
 		ACPenalty:    2,
@@ -78,9 +78,9 @@ func TestHandleUse_FeatWithCondition_MessageIsActivateText_REQ_BUG149_1(t *testi
 
 	feat := &ruleset.Feat{
 		ID:           featID,
-		Name:         "Overpower",
+		Name:         "Power Surge",
 		Active:       true,
-		ActivateText: "You put everything into it.",
+		ActivateText: "You channel raw force.",
 		ConditionID:  condID,
 	}
 
@@ -141,8 +141,8 @@ func TestHandleUse_FeatWithUnknownCondition_FallsBackToActivateText_REQ_BUG149_2
 // Precondition: feat has PreparedUses=2, ConditionID set; sess.ActiveFeatUses == 2.
 // Postcondition: UseResponse.Message contains "(1 uses remaining.)" but not a condition name.
 func TestHandleUse_FeatWithPreparedUsesAndCondition_MessageContainsUseCount_REQ_BUG149_3(t *testing.T) {
-	const condID = "overpower_active"
-	const featID = "overpower"
+	const condID = "power_surge_active"
+	const featID = "power_surge"
 	const uid = "bug149-user-3"
 
 	sessMgr := session.NewManager()
@@ -150,7 +150,7 @@ func TestHandleUse_FeatWithPreparedUsesAndCondition_MessageContainsUseCount_REQ_
 	condReg := condition.NewRegistry()
 	condReg.Register(&condition.ConditionDef{
 		ID:           condID,
-		Name:         "Overpower Active",
+		Name:         "Power Surge Active",
 		DurationType: "encounter",
 		DamageBonus:  2,
 		ACPenalty:    2,
@@ -158,10 +158,10 @@ func TestHandleUse_FeatWithPreparedUsesAndCondition_MessageContainsUseCount_REQ_
 
 	feat := &ruleset.Feat{
 		ID:           featID,
-		Name:         "Overpower",
+		Name:         "Power Surge",
 		Active:       true,
 		PreparedUses: 2,
-		ActivateText: "You put everything into it.",
+		ActivateText: "You channel raw force.",
 		ConditionID:  condID,
 	}
 
@@ -177,7 +177,7 @@ func TestHandleUse_FeatWithPreparedUsesAndCondition_MessageContainsUseCount_REQ_
 	useResp := event.GetUseResponse()
 	require.NotNil(t, useResp, "expected UseResponse")
 	assert.Contains(t, useResp.Message, "(1 uses remaining.)", "message must include remaining uses")
-	assert.NotContains(t, useResp.Message, "Overpower Active", "message must NOT include condition name parenthetical (REQ-BUG29)")
+	assert.NotContains(t, useResp.Message, "Power Surge Active", "message must NOT include condition name parenthetical (REQ-BUG29)")
 }
 
 // TestProperty_FeatWithConditionInRegistry_MessageIsActivateText_REQ_BUG149_4
