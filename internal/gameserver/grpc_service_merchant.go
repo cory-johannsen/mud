@@ -350,6 +350,9 @@ func (s *GameServiceServer) handleBuy(uid string, req *gamev1.BuyRequest) (*game
 		}
 	}
 
+	// Push CharacterSheetView so Crypto balance updates immediately after purchase (REQ-BUG74).
+	s.pushCharacterSheet(sess)
+
 	return messageEvent(fmt.Sprintf("You buy %d× %s for %d credits.", qty, itemID, total)), nil
 }
 
@@ -467,6 +470,9 @@ func (s *GameServiceServer) handleSell(uid string, req *gamev1.SellRequest) (*ga
 			}
 		}
 	}
+
+	// Push CharacterSheetView so Crypto balance updates immediately after sale (REQ-BUG74).
+	s.pushCharacterSheet(sess)
 
 	return messageEvent(fmt.Sprintf("%s buys %d× %s from you for %d credits.", inst.Name(), qty, itemID, payout)), nil
 }
