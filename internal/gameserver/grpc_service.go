@@ -3816,8 +3816,21 @@ func (s *GameServiceServer) handleBrothelRest(uid string, sess *session.PlayerSe
 		}
 	}
 
-	// REQ-BR-10: independent robbery roll (REQ-BR-11). Rest already completed above.
-	if rand.Float64() < brothelConfig.RobberyChance {
+	// REQ-BR-10: robbery gated by Awareness check vs zone-danger DC (REQ-BR-11, REQ-BR-14).
+	// RobberyChance == 0 disables robbery entirely; otherwise the player's Awareness skill
+	// is checked against the room's danger DC — failure or critical failure triggers robbery.
+	var robbed bool
+	if brothelConfig.RobberyChance > 0 {
+		if room, roomOk := s.world.GetRoom(sess.RoomID); roomOk {
+			dc := s.exploreDangerDC(room)
+			outcome := s.exploreRoll(sess, "awareness", dc)
+			robbed = outcome == skillcheck.Failure || outcome == skillcheck.CritFailure
+		} else {
+			// Room not found — default to robbery to preserve safe fallback.
+			robbed = true
+		}
+	}
+	if robbed {
 		var robDetails []string
 		// Steal crypto.
 		if sess.Currency > 0 {

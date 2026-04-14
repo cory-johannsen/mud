@@ -527,6 +527,69 @@ done:
 	assert.True(t, foundCharSheet, "CharacterSheetView must be sent to entity channel after brothel rest (BUG-150)")
 }
 
+// TestBrothelRest_RobberyUsesAwarenessCheck_PassedCheck_Safe verifies REQ-BR-14:
+// When RobberyChance > 0 and the player passes the Awareness check, no robbery occurs.
+//
+// Precondition: brothelConfig.RobberyChance == 1.0; player has awareness="trained" skill;
+// nil dice (roll=10); safe zone (DC=12); total=12 >= DC=12 → SUCCESS → no robbery.
+// Postcondition: sess.Currency == startCurrency - RestCost (no robbery deduction).
+func TestBrothelRest_RobberyUsesAwarenessCheck_PassedCheck_Safe(t *testing.T) {
+	svc, sessMgr, npcMgr := newBrothelSvcWithSafeRoom(t)
+	// After paying 50 credits, currency is 150.
+	sess := addBrothelPlayer(t, sessMgr, "br-aware", "room_brothel", 200, 20)
+	sess.CurrentHP = 5
+
+	svc.condRegistry = loadTestCondRegistry(t)
+	sess.Conditions = condition.NewActiveSet()
+
+	// Give the player trained awareness: roll=10 + proficiency=2 = 12 >= DC=12 → SUCCESS.
+	sess.Skills = map[string]string{"awareness": "trained"}
+
+	charSaver := &fakeCharSaver{}
+	svc.SetCharSaver(charSaver)
+
+	cfg := defaultBrothelCfg()
+	cfg.RobberyChance = 1.0
+	spawnBrothelNPC(t, npcMgr, "room_brothel", cfg)
+
+	stream := &fakeSessionStream{}
+	require.NoError(t, svc.handleRest("br-aware", "req", stream))
+
+	// Currency should only be reduced by rest cost — no robbery.
+	assert.Equal(t, 150, sess.Currency, "awareness check passed: no robbery deduction; only rest cost taken")
+}
+
+// TestBrothelRest_RobberyUsesAwarenessCheck_FailedCheck_Robbed verifies REQ-BR-14:
+// When RobberyChance > 0 and the player fails the Awareness check, robbery occurs.
+//
+// Precondition: brothelConfig.RobberyChance == 1.0; no awareness skill;
+// nil dice (roll=10); safe zone (DC=12); total=10 < DC=12 → FAILURE → robbery.
+// Postcondition: sess.Currency < startCurrency - RestCost (robbery deduction applied).
+func TestBrothelRest_RobberyUsesAwarenessCheck_FailedCheck_Robbed(t *testing.T) {
+	svc, sessMgr, npcMgr := newBrothelSvcWithSafeRoom(t)
+	// After paying 50 credits, currency is 150. Robbery = 5% of 150 = 7.
+	sess := addBrothelPlayer(t, sessMgr, "br-unaware", "room_brothel", 200, 20)
+	sess.CurrentHP = 5
+
+	svc.condRegistry = loadTestCondRegistry(t)
+	sess.Conditions = condition.NewActiveSet()
+
+	// No awareness skill: roll=10 + 0 = 10 < DC=12 → FAILURE.
+	charSaver := &fakeCharSaver{}
+	svc.SetCharSaver(charSaver)
+
+	cfg := defaultBrothelCfg()
+	cfg.RobberyChance = 1.0
+	spawnBrothelNPC(t, npcMgr, "room_brothel", cfg)
+
+	stream := &fakeSessionStream{}
+	require.NoError(t, svc.handleRest("br-unaware", "req", stream))
+
+	// Robbery: 5% of 150 = 7 credits stolen.
+	assert.Equal(t, 143, sess.Currency, "awareness check failed: robbery deduction applied")
+	assert.True(t, hasAnyMessage(stream, "belongings"), "robbery message must mention belongings")
+}
+
 // TestPropertyBrothelRest_AlwaysPushesCharacterSheet is a property-based test
 // verifying that CharacterSheetView is sent after any valid brothel rest, regardless
 // of currency amount or side effects (disease/robbery) (property, BUG-150).
