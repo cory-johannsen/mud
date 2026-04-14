@@ -1,0 +1,17 @@
+id: vtq_gang_enforcer_takedown
+title: Gang Enforcer Takedown
+description: >
+  The gang's enforcers are running protection rackets all over the east side.
+  Put three of them down and send a message.
+giver_npc_id: vantucky_quest_giver
+repeatable: true
+cooldown: 24h
+objectives:
+  - id: kill_enforcers
+    type: kill
+    description: Kill 3 Vantucky gang enforcers
+    target_id: vantucky_gang_enforcer
+    quantity: 3
+rewards:
+  xp: 225
+  credits: 110

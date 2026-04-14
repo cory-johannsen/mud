@@ -22,6 +22,11 @@ quest_giver:
     - "Got a few jobs posted. Nothing fancy — mostly recovery and recon. Pay's fair."
     - "Board's full. Pick something and stop blocking the doorway."
     - "You looking for work or just sightseeing? Because this isn't the place for sightseeing."
+  quest_ids:
+    - rrq_scavenger_sweep
+    - rrq_rail_gang_bounty
+    - rrq_barrel_house_cleanup
+    - rrq_take_down_big_grizz
 loot:
   currency:
     min: 0

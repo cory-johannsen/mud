@@ -108,3 +108,30 @@ func TestQuestRegistry_CrossValidate_Valid(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 }
+
+// TestLoadFromDir_AllZoneQuests verifies that all 8 zone quests load successfully
+// from content/quests (REQ-1b, REQ-2, REQ-6).
+//
+// Precondition: 8 zone quest YAML files exist in ../../../content/quests.
+// Postcondition: registry contains all 8 quest IDs.
+func TestLoadFromDir_AllZoneQuests(t *testing.T) {
+	reg, err := quest.LoadFromDir("../../../content/quests")
+	if err != nil {
+		t.Fatalf("LoadFromDir: %v", err)
+	}
+	want := []string{
+		"rrq_scavenger_sweep",
+		"rrq_rail_gang_bounty",
+		"rrq_barrel_house_cleanup",
+		"rrq_take_down_big_grizz",
+		"vtq_militia_patrol",
+		"vtq_scavenger_drive",
+		"vtq_bandit_bounty",
+		"vtq_gang_enforcer_takedown",
+	}
+	for _, id := range want {
+		if reg[id] == nil {
+			t.Errorf("missing quest %q", id)
+		}
+	}
+}

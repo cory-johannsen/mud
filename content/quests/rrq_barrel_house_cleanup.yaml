@@ -1,0 +1,16 @@
+id: rrq_barrel_house_cleanup
+title: Barrel House Cleanup
+description: >
+  Pete's muscle has been shaking down locals near the Barrel House. Go
+  put two of his enforcers down and remind him this is still our Ridge.
+giver_npc_id: rustbucket_ridge_quest_giver
+repeatable: false
+objectives:
+  - id: kill_enforcers
+    type: kill
+    description: Kill 2 Barrel House Enforcers
+    target_id: barrel_house_enforcer
+    quantity: 2
+rewards:
+  xp: 250
+  credits: 125

@@ -1,0 +1,17 @@
+id: rrq_rail_gang_bounty
+title: Rail Gang Bounty
+description: >
+  Rail Gang's been pushing into our territory again. Take out five of their
+  raiders and collect the bounty.
+giver_npc_id: rustbucket_ridge_quest_giver
+repeatable: true
+cooldown: 24h
+objectives:
+  - id: kill_raiders
+    type: kill
+    description: Kill 5 rail gang raiders
+    target_id: rail_gang_raider
+    quantity: 5
+rewards:
+  xp: 200
+  credits: 100

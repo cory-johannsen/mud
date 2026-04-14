@@ -1,0 +1,24 @@
+id: vantucky_quest_giver
+name: "Militia Quartermaster"
+npc_type: quest_giver
+npc_role: quest_giver
+type: human
+level: 3
+max_hp: 22
+ac: 10
+awareness: 5
+disposition: neutral
+personality: neutral
+quest_giver:
+  placeholder_dialog:
+    - "We've got work if you've got the stomach for it. Check the board."
+    - "You looking to earn, or just taking up space?"
+  quest_ids:
+    - vtq_militia_patrol
+    - vtq_scavenger_drive
+    - vtq_bandit_bounty
+    - vtq_gang_enforcer_takedown
+loot:
+  currency:
+    min: 0
+    max: 0

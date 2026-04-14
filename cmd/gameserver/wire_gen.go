@@ -16,6 +16,7 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/dice"
 	"github.com/cory-johannsen/mud/internal/game/downtime"
 	"github.com/cory-johannsen/mud/internal/game/faction"
+	"github.com/cory-johannsen/mud/internal/game/quest"
 	"github.com/cory-johannsen/mud/internal/game/inventory"
 	"github.com/cory-johannsen/mud/internal/game/mentalstate"
 	"github.com/cory-johannsen/mud/internal/game/npc"
@@ -215,6 +216,11 @@ func Initialize(ctx context.Context, cfg *AppConfig, clock *gameserver.GameClock
 	if err != nil {
 		return nil, fmt.Errorf("loading downtime queue limits: %w", err)
 	}
+	// Load quest registry (REQ-1b/1c: fatal on error).
+	questRegistry, err := quest.LoadFromDir(cfg.QuestsDir)
+	if err != nil {
+		return nil, fmt.Errorf("loading quest registry: %w", err)
+	}
 	contentDeps := gameserver.ContentDeps{
 		WorldMgr:             manager,
 		NpcMgr:               npcManager,
@@ -245,6 +251,7 @@ func Initialize(ctx context.Context, cfg *AppConfig, clock *gameserver.GameClock
 		MaterialRegistry:           materialRegistry,
 		RecipeRegistry:             recipeRegistry,
 		DowntimeQueueLimitRegistry: downtimeQueueLimitRegistry,
+		QuestRegistry:              questRegistry,
 	}
 	sessionManager := gameserver.NewSessionManager()
 	worldHandler := gameserver.NewWorldHandlerProvider(manager, sessionManager, npcManager, clock, roomEquipmentManager, registry)

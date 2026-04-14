@@ -1,0 +1,17 @@
+id: rrq_scavenger_sweep
+title: Scavenger Sweep
+description: >
+  Scavengers keep picking through our supplies on the Ridge. Go put five of them
+  down and maybe they'll get the message.
+giver_npc_id: rustbucket_ridge_quest_giver
+repeatable: true
+cooldown: 24h
+objectives:
+  - id: kill_scavengers
+    type: kill
+    description: Kill 5 scavengers
+    target_id: scavenger
+    quantity: 5
+rewards:
+  xp: 150
+  credits: 75

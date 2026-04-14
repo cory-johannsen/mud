@@ -1,0 +1,17 @@
+id: vtq_militia_patrol
+title: Neutralize the Militia Patrol
+description: >
+  Militia patrols are making the roads impassable. Take out three of them
+  and open the routes back up.
+giver_npc_id: vantucky_quest_giver
+repeatable: true
+cooldown: 24h
+objectives:
+  - id: kill_militiamen
+    type: kill
+    description: Kill 3 Vantucky militiamen
+    target_id: vantucky_militiaman
+    quantity: 3
+rewards:
+  xp: 175
+  credits: 90

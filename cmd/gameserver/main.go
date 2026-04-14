@@ -66,6 +66,7 @@ type AppConfig struct {
 	DowntimeQueueLimitsFile string
 	WeatherChancePerTick    float64
 	WeatherFile             string
+	QuestsDir               string
 }
 
 // AppConfigToDatabase extracts database config from AppConfig for wire.
@@ -107,6 +108,7 @@ func main() {
 	materialsFile := flag.String("materials-file", "content/materials.yaml", "path to crafting materials YAML file")
 	recipesDir := flag.String("recipes-dir", "content/recipes", "path to crafting recipe YAML definitions directory")
 	downtimeQueueLimitsFile := flag.String("downtime-queue-limits", "content/downtime_queue_limits.yaml", "path to downtime queue limits YAML file")
+	questsDir := flag.String("quests-dir", "content/quests", "path to quest YAML files directory")
 	flag.Parse()
 
 	ctx := context.Background()
@@ -167,6 +169,7 @@ func main() {
 		DowntimeQueueLimitsFile: *downtimeQueueLimitsFile,
 		WeatherChancePerTick:    cfg.Weather.ChancePerTick,
 		WeatherFile:             cfg.Weather.ContentFile,
+		QuestsDir:               *questsDir,
 	}
 
 	app, err := Initialize(ctx, appCfg, gameClock, logger)

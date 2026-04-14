@@ -1,0 +1,17 @@
+id: vtq_bandit_bounty
+title: Highway Bandit Bounty
+description: >
+  Highway bandits are taxing every crew that tries to move through I-84.
+  Three of them, dead. That's the job.
+giver_npc_id: vantucky_quest_giver
+repeatable: true
+cooldown: 24h
+objectives:
+  - id: kill_bandits
+    type: kill
+    description: Kill 3 highway bandits
+    target_id: highway_bandit
+    quantity: 3
+rewards:
+  xp: 200
+  credits: 100

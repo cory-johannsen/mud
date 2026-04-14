@@ -1,0 +1,18 @@
+id: rrq_take_down_big_grizz
+title: Take Down Big Grizz
+description: >
+  Big Grizz runs the Keg Hole and he's been bleeding this district dry.
+  Nobody's been able to touch him. Show us you can.
+giver_npc_id: rustbucket_ridge_quest_giver
+repeatable: false
+prerequisites:
+  - rrq_barrel_house_cleanup
+objectives:
+  - id: kill_big_grizz
+    type: kill
+    description: Kill Big Grizz
+    target_id: big_grizz
+    quantity: 1
+rewards:
+  xp: 500
+  credits: 300
