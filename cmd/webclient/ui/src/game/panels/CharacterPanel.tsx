@@ -210,7 +210,7 @@ export function CharacterPanel() {
           const armorBonus = characterSheet!.acBonus ?? 0
           const effectiveDex = totalAc - 10 - armorBonus
           const parts: string[] = ['Base: 10']
-          if (effectiveDex !== 0) parts.push(`Dex: ${effectiveDex >= 0 ? '+' : ''}${effectiveDex}`)
+          if (effectiveDex !== 0) parts.push(`Defense: ${effectiveDex >= 0 ? '+' : ''}${effectiveDex}`)
           if (armorBonus !== 0) parts.push(`Armor: +${armorBonus}`)
           const acTooltip = parts.join('  |  ') + `  =  ${totalAc}`
           return (
