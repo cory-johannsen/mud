@@ -5006,8 +5006,17 @@ func (s *GameServiceServer) handleWear(uid string, req *gamev1.WearRequest) (*ga
 		}
 	}
 
-	// REQ-BUG101-1: push inventory refresh after wear so the web UI removes the item.
+	// Persist and refresh UI after a successful wear.
 	if strings.HasPrefix(result, "Wore ") {
+		ctx := context.Background()
+		invItems := backpackToInventoryItems(sess.Backpack)
+		if err := s.charSaver.SaveInventory(ctx, sess.CharacterID, invItems); err != nil {
+			s.logger.Error("handleWear: SaveInventory failed", zap.String("uid", uid), zap.Error(err))
+		}
+		if err := s.charSaver.SaveEquipment(ctx, sess.CharacterID, sess.Equipment); err != nil {
+			s.logger.Error("handleWear: SaveEquipment failed", zap.String("uid", uid), zap.Error(err))
+		}
+		// REQ-BUG101-1: push inventory refresh after wear so the web UI removes the item.
 		if sess2, ok2 := s.sessions.GetPlayer(uid); ok2 {
 			s.pushInventory(sess2)
 		}
@@ -5034,6 +5043,16 @@ func (s *GameServiceServer) handleRemoveArmor(uid string, req *gamev1.RemoveArmo
 				sess.PassiveMaterials = inventory.ComputePassiveMaterials(equipped, sess.Equipment.Armor, s.invRegistry)
 			}
 		}
+		// Persist immediately so removal survives a disconnect or crash.
+		ctx := context.Background()
+		invItems := backpackToInventoryItems(sess.Backpack)
+		if err := s.charSaver.SaveInventory(ctx, sess.CharacterID, invItems); err != nil {
+			s.logger.Error("handleRemoveArmor: SaveInventory failed", zap.String("uid", uid), zap.Error(err))
+		}
+		if err := s.charSaver.SaveEquipment(ctx, sess.CharacterID, sess.Equipment); err != nil {
+			s.logger.Error("handleRemoveArmor: SaveEquipment failed", zap.String("uid", uid), zap.Error(err))
+		}
+		s.pushInventory(sess)
 	}
 	return messageEvent(result), nil
 }

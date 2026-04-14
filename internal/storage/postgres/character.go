@@ -446,16 +446,19 @@ func (r *CharacterRepository) LoadEquipment(ctx context.Context, characterID int
 	return eq, rows.Err()
 }
 
-// SaveEquipment replaces all equipment rows for characterID.
+// SaveEquipment replaces all equipment rows for characterID atomically.
 //
 // Precondition: characterID must be > 0; eq must not be nil.
 // Postcondition: DB rows reflect eq exactly; returns nil on success.
+// The delete and inserts run inside a single transaction so a crash between
+// steps cannot leave equipment slots empty.
 func (r *CharacterRepository) SaveEquipment(ctx context.Context, characterID int64, eq *inventory.Equipment) error {
-	_, err := r.db.Exec(ctx, `
-		DELETE FROM character_equipment WHERE character_id = $1`,
-		characterID,
-	)
+	tx, err := r.db.Begin(ctx)
 	if err != nil {
+		return fmt.Errorf("beginning equipment transaction for character %d: %w", characterID, err)
+	}
+	defer tx.Rollback(ctx) //nolint:errcheck
+	if _, err := tx.Exec(ctx, `DELETE FROM character_equipment WHERE character_id = $1`, characterID); err != nil {
 		return fmt.Errorf("clearing equipment for character %d: %w", characterID, err)
 	}
 
@@ -467,7 +470,7 @@ func (r *CharacterRepository) SaveEquipment(ctx context.Context, characterID int
 		if armorMaterials == nil {
 			armorMaterials = []string{}
 		}
-		if _, err := r.db.Exec(ctx, `
+		if _, err := tx.Exec(ctx, `
 			INSERT INTO character_equipment (character_id, slot, item_def_id, affixed_materials, material_max_durability_bonus)
 			VALUES ($1, $2, $3, $4, $5)
 			ON CONFLICT (character_id, slot)
@@ -487,7 +490,7 @@ func (r *CharacterRepository) SaveEquipment(ctx context.Context, characterID int
 		if accMaterials == nil {
 			accMaterials = []string{}
 		}
-		if _, err := r.db.Exec(ctx, `
+		if _, err := tx.Exec(ctx, `
 			INSERT INTO character_equipment (character_id, slot, item_def_id, affixed_materials, material_max_durability_bonus)
 			VALUES ($1, $2, $3, $4, $5)
 			ON CONFLICT (character_id, slot)
@@ -498,6 +501,9 @@ func (r *CharacterRepository) SaveEquipment(ctx context.Context, characterID int
 		); err != nil {
 			return fmt.Errorf("saving accessory slot %s for character %d: %w", slot, characterID, err)
 		}
+	}
+	if err := tx.Commit(ctx); err != nil {
+		return fmt.Errorf("committing equipment for character %d: %w", characterID, err)
 	}
 	return nil
 }
@@ -529,16 +535,23 @@ func (r *CharacterRepository) LoadInventory(ctx context.Context, characterID int
 	return items, rows.Err()
 }
 
-// SaveInventory replaces all backpack rows for characterID.
+// SaveInventory replaces all backpack rows for characterID atomically.
 //
 // Precondition: characterID must be > 0.
 // Postcondition: DB rows reflect items exactly; returns nil on success.
+// The delete and inserts run inside a single transaction so a crash between
+// steps cannot leave the inventory empty.
 func (r *CharacterRepository) SaveInventory(ctx context.Context, characterID int64, items []inventory.InventoryItem) error {
-	if _, err := r.db.Exec(ctx, `DELETE FROM character_inventory WHERE character_id = $1`, characterID); err != nil {
+	tx, err := r.db.Begin(ctx)
+	if err != nil {
+		return fmt.Errorf("beginning inventory transaction for character %d: %w", characterID, err)
+	}
+	defer tx.Rollback(ctx) //nolint:errcheck
+	if _, err := tx.Exec(ctx, `DELETE FROM character_inventory WHERE character_id = $1`, characterID); err != nil {
 		return fmt.Errorf("clearing inventory for character %d: %w", characterID, err)
 	}
 	for _, it := range items {
-		if _, err := r.db.Exec(ctx, `
+		if _, err := tx.Exec(ctx, `
 			INSERT INTO character_inventory (character_id, item_def_id, quantity)
 			VALUES ($1, $2, $3)
 			ON CONFLICT (character_id, item_def_id) DO UPDATE SET quantity = EXCLUDED.quantity`,
@@ -546,6 +559,9 @@ func (r *CharacterRepository) SaveInventory(ctx context.Context, characterID int
 		); err != nil {
 			return fmt.Errorf("saving inventory item %q for character %d: %w", it.ItemDefID, characterID, err)
 		}
+	}
+	if err := tx.Commit(ctx); err != nil {
+		return fmt.Errorf("committing inventory for character %d: %w", characterID, err)
 	}
 	return nil
 }
