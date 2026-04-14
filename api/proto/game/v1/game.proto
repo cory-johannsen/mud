@@ -930,6 +930,8 @@ message CombatantPosition {
   int32  y            = 3;
   int32  ap_remaining = 4; // current remaining action points
   int32  ap_total     = 5; // total action points this round
+  int32  hp_current   = 6; // current hit points at round start
+  int32  hp_max       = 7; // maximum hit points
 }
 
 // RoundStartEvent is broadcast to all combatants when a new round begins.

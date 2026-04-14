@@ -481,6 +481,11 @@ export function GameProvider({ children }: { children: ReactNode }) {
                 remaining: apRemaining,
                 total: apTotal,
               })
+              const hpMax = pos.hpMax ?? pos.hp_max ?? 0
+              const hpCurrent = pos.hpCurrent ?? pos.hp_current ?? 0
+              if (hpMax > 0) {
+                dispatch({ type: 'UPDATE_COMBATANT_HP', name: pos.name, current: hpCurrent, max: hpMax })
+              }
             }
           }
           // Store grid dimensions from server

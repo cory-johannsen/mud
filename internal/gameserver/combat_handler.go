@@ -1569,7 +1569,7 @@ func (h *CombatHandler) startPursuitCombatLocked(playerSess *session.PlayerSessi
 		ID:        playerSess.UID,
 		Kind:      combat.KindPlayer,
 		Name:      playerSess.CharName,
-		MaxHP:     playerSess.CurrentHP,
+		MaxHP:     playerSess.MaxHP,
 		CurrentHP: playerSess.CurrentHP,
 		AC:        playerAC,
 		Level:     playerSess.Level,
@@ -1745,6 +1745,8 @@ func (h *CombatHandler) startPursuitCombatLocked(playerSess *session.PlayerSessi
 				Y:           int32(c.GridY),
 				ApRemaining: apRemaining,
 				ApTotal:     apTotal,
+				HpCurrent:   int32(c.CurrentHP),
+				HpMax:       int32(c.MaxHP),
 			})
 		}
 		h.roundStartBroadcastFn(playerSess.RoomID, &gamev1.RoundStartEvent{
@@ -2652,6 +2654,8 @@ func (h *CombatHandler) resolveAndAdvanceLocked(roomID string, cbt *combat.Comba
 				Y:           int32(c.GridY),
 				ApRemaining: apRemaining,
 				ApTotal:     apTotal,
+				HpCurrent:   int32(c.CurrentHP),
+				HpMax:       int32(c.MaxHP),
 			})
 		}
 		h.roundStartBroadcastFn(roomID, &gamev1.RoundStartEvent{
@@ -2992,6 +2996,8 @@ func (h *CombatHandler) startCombatLocked(sess *session.PlayerSession, inst *npc
 				Y:           int32(c.GridY),
 				ApRemaining: apRemaining,
 				ApTotal:     apTotal,
+				HpCurrent:   int32(c.CurrentHP),
+				HpMax:       int32(c.MaxHP),
 			})
 		}
 		h.roundStartBroadcastFn(sess.RoomID, &gamev1.RoundStartEvent{

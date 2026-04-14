@@ -9226,6 +9226,8 @@ type CombatantPosition struct {
 	Y             int32                  `protobuf:"varint,3,opt,name=y,proto3" json:"y,omitempty"`
 	ApRemaining   int32                  `protobuf:"varint,4,opt,name=ap_remaining,json=apRemaining,proto3" json:"ap_remaining,omitempty"` // current remaining action points
 	ApTotal       int32                  `protobuf:"varint,5,opt,name=ap_total,json=apTotal,proto3" json:"ap_total,omitempty"`             // total action points this round
+	HpCurrent     int32                  `protobuf:"varint,6,opt,name=hp_current,json=hpCurrent,proto3" json:"hp_current,omitempty"`       // current hit points at round start
+	HpMax         int32                  `protobuf:"varint,7,opt,name=hp_max,json=hpMax,proto3" json:"hp_max,omitempty"`                   // maximum hit points
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -9291,6 +9293,20 @@ func (x *CombatantPosition) GetApRemaining() int32 {
 func (x *CombatantPosition) GetApTotal() int32 {
 	if x != nil {
 		return x.ApTotal
+	}
+	return 0
+}
+
+func (x *CombatantPosition) GetHpCurrent() int32 {
+	if x != nil {
+		return x.HpCurrent
+	}
+	return 0
+}
+
+func (x *CombatantPosition) GetHpMax() int32 {
+	if x != nil {
+		return x.HpMax
 	}
 	return 0
 }
@@ -16263,13 +16279,16 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\n" +
 	"max_weight\x18\x05 \x01(\x01R\tmaxWeight\x12\x1a\n" +
 	"\bcurrency\x18\x06 \x01(\tR\bcurrency\x12!\n" +
-	"\ftotal_crypto\x18\a \x01(\x05R\vtotalCrypto\"\x81\x01\n" +
+	"\ftotal_crypto\x18\a \x01(\x05R\vtotalCrypto\"\xb7\x01\n" +
 	"\x11CombatantPosition\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\f\n" +
 	"\x01x\x18\x02 \x01(\x05R\x01x\x12\f\n" +
 	"\x01y\x18\x03 \x01(\x05R\x01y\x12!\n" +
 	"\fap_remaining\x18\x04 \x01(\x05R\vapRemaining\x12\x19\n" +
-	"\bap_total\x18\x05 \x01(\x05R\aapTotal\"\x9a\x02\n" +
+	"\bap_total\x18\x05 \x01(\x05R\aapTotal\x12\x1d\n" +
+	"\n" +
+	"hp_current\x18\x06 \x01(\x05R\thpCurrent\x12\x15\n" +
+	"\x06hp_max\x18\a \x01(\x05R\x05hpMax\"\x9a\x02\n" +
 	"\x0fRoundStartEvent\x12\x14\n" +
 	"\x05round\x18\x01 \x01(\x05R\x05round\x12(\n" +
 	"\x10actions_per_turn\x18\x02 \x01(\x05R\x0eactionsPerTurn\x12\x1f\n" +

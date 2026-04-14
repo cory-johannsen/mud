@@ -543,6 +543,10 @@ export interface CombatantPosition {
   ap_remaining?: number
   apTotal?: number
   ap_total?: number
+  hpCurrent?: number
+  hp_current?: number
+  hpMax?: number
+  hp_max?: number
 }
 
 export interface APUpdateEvent {
