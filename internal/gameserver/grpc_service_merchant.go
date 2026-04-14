@@ -299,15 +299,28 @@ func (s *GameServiceServer) handleBuy(uid string, req *gamev1.BuyRequest) (*game
 	sess.Currency -= total
 
 	// Add purchased item to player backpack.
-	if sess.Backpack != nil {
-		if _, addErr := sess.Backpack.Add(itemID, qty, s.invRegistry); addErr != nil {
-			s.logger.Warn("handleBuy: failed to add item to backpack",
-				zap.String("uid", uid),
-				zap.String("itemID", itemID),
-				zap.Int("qty", qty),
-				zap.Error(addErr),
-			)
-		}
+	// Precondition: Backpack is non-nil (guaranteed by session.AddPlayer).
+	// Postcondition: On failure the stock and currency changes are rolled back so
+	// the player does not lose credits for items they cannot carry.
+	if sess.Backpack == nil || s.invRegistry == nil {
+		merchantRuntimeMu.Lock()
+		state.Stock[itemID] += qty
+		merchantRuntimeMu.Unlock()
+		sess.Currency += total
+		return messageEvent("Purchase failed: inventory unavailable."), nil
+	}
+	if _, addErr := sess.Backpack.Add(itemID, qty, s.invRegistry); addErr != nil {
+		merchantRuntimeMu.Lock()
+		state.Stock[itemID] += qty
+		merchantRuntimeMu.Unlock()
+		sess.Currency += total
+		s.logger.Warn("handleBuy: failed to add item to backpack — rolled back",
+			zap.String("uid", uid),
+			zap.String("itemID", itemID),
+			zap.Int("qty", qty),
+			zap.Error(addErr),
+		)
+		return messageEvent(fmt.Sprintf("Purchase failed: %s", addErr.Error())), nil
 	}
 
 	// Persist inventory and currency.

@@ -1,6 +1,7 @@
 package gameserver
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -147,6 +148,128 @@ func TestHandleBuy_SuccessAddsItemToBackpack(t *testing.T) {
 	items := sess.Backpack.FindByItemDefID("stim_pack")
 	assert.Len(t, items, 1, "backpack must contain exactly 1 stim_pack after purchase")
 	assert.Equal(t, 1, items[0].Quantity)
+}
+
+// newArmorMerchantTestServer builds a GameServiceServer with a merchant that sells an armor item (leather_jacket).
+// Tests armor purchase flow: ItemDef (kind=armor) must be registered for Backpack.Add to succeed.
+func newArmorMerchantTestServer(t *testing.T) (*GameServiceServer, string, *npc.Instance) {
+	t.Helper()
+
+	worldMgr, sessMgr := testWorldAndSession(t)
+	npcManager := npc.NewManager()
+	svc := testServiceWithNPCMgr(t, worldMgr, sessMgr, npcManager)
+
+	invReg := inventory.NewRegistry()
+	err := invReg.RegisterItem(&inventory.ItemDef{
+		ID:       "leather_jacket",
+		Name:     "Leather Jacket",
+		Kind:     "armor",
+		ArmorRef: "leather_jacket",
+		Weight:   1.0,
+		MaxStack: 1,
+		Value:    150,
+	})
+	require.NoError(t, err)
+	svc.invRegistry = invReg
+
+	uid := "armor_u1"
+	_, err = svc.sessions.AddPlayer(session.AddPlayerOptions{
+		UID:       uid,
+		Username:  "armor_user",
+		CharName:  "ArmorChar",
+		RoomID:    "room_a",
+		CurrentHP: 10,
+		MaxHP:     10,
+		Role:      "player",
+	})
+	require.NoError(t, err)
+
+	sess, ok := svc.sessions.GetPlayer(uid)
+	require.True(t, ok)
+	sess.Currency = 500
+
+	tmpl := &npc.Template{
+		ID:      "test_armor_merchant",
+		Name:    "Ellie Mack",
+		NPCType: "merchant",
+		MaxHP:   20,
+		AC:      10,
+		Level:   1,
+		Merchant: &npc.MerchantConfig{
+			MerchantType: "armor",
+			SellMargin:   1.3,
+			BuyMargin:    0.4,
+			Budget:       2000,
+			Inventory: []npc.MerchantItem{
+				{ItemID: "leather_jacket", BasePrice: 100, InitStock: 3, MaxStock: 5},
+			},
+			ReplenishRate: npc.ReplenishConfig{MinHours: 8, MaxHours: 16},
+		},
+	}
+	inst, err := svc.npcMgr.Spawn(tmpl, "room_a")
+	require.NoError(t, err)
+	svc.initMerchantRuntimeState(inst)
+
+	return svc, uid, inst
+}
+
+// REQ-NPC-BUY-4: Buying an armor item MUST add it to the backpack and deduct currency.
+// Regression test for the bug where armor items (non-stackable, kind=armor) were purchased
+// (stock decremented, currency deducted) but not added to the backpack.
+func TestHandleBuy_ArmorItemAddsToBackpackAndDeductsCredits(t *testing.T) {
+	svc, uid, inst := newArmorMerchantTestServer(t)
+
+	sess, ok := svc.sessions.GetPlayer(uid)
+	require.True(t, ok)
+	require.Empty(t, sess.Backpack.FindByItemDefID("leather_jacket"), "backpack must be empty before purchase")
+	initialCurrency := sess.Currency
+
+	evt, err := svc.handleBuy(uid, &gamev1.BuyRequest{NpcName: inst.Name(), ItemId: "leather_jacket", Quantity: 1})
+	require.NoError(t, err)
+	assert.Contains(t, evt.GetMessage().Content, "buy", "purchase should succeed")
+
+	// Item must be in backpack.
+	items := sess.Backpack.FindByItemDefID("leather_jacket")
+	assert.Len(t, items, 1, "backpack must contain exactly 1 leather_jacket after purchase")
+	assert.Equal(t, 1, items[0].Quantity)
+
+	// Currency must be deducted.
+	assert.Less(t, sess.Currency, initialCurrency, "currency must be deducted after armor purchase")
+
+	// Stock must be decremented.
+	state := svc.merchantStateFor(inst.ID)
+	require.NotNil(t, state)
+	assert.Equal(t, 2, state.Stock["leather_jacket"], "merchant stock must decrement by 1")
+}
+
+// REQ-NPC-BUY-5: When Backpack.Add fails, handleBuy MUST roll back stock and currency.
+func TestHandleBuy_RollsBackOnBackpackAddFailure(t *testing.T) {
+	svc, uid, inst := newArmorMerchantTestServer(t)
+
+	sess, ok := svc.sessions.GetPlayer(uid)
+	require.True(t, ok)
+	// Fill the backpack to capacity so Add will fail.
+	for i := 0; i < 20; i++ {
+		inst2 := &inventory.ItemInstance{
+			InstanceID: fmt.Sprintf("filler-%d", i),
+			ItemDefID:  "leather_jacket",
+			Quantity:   1,
+		}
+		_ = sess.Backpack.AddInstance(inst2)
+	}
+	initialCurrency := sess.Currency
+	initialStock := svc.merchantStateFor(inst.ID).Stock["leather_jacket"]
+
+	evt, err := svc.handleBuy(uid, &gamev1.BuyRequest{NpcName: inst.Name(), ItemId: "leather_jacket", Quantity: 1})
+	require.NoError(t, err)
+	assert.Contains(t, evt.GetMessage().Content, "Purchase failed", "should report failure when backpack is full")
+
+	// Currency must NOT be deducted.
+	assert.Equal(t, initialCurrency, sess.Currency, "currency must be restored on backpack add failure")
+
+	// Stock must NOT be decremented.
+	finalStock := svc.merchantStateFor(inst.ID).Stock["leather_jacket"]
+	assert.Equal(t, initialStock, finalStock, "stock must be restored on backpack add failure")
 }
 
 // newWeaponMerchantTestServer builds a GameServiceServer with a merchant that sells a weapon item (scrap_shield).

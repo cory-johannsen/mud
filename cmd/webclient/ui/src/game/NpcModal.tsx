@@ -220,6 +220,10 @@ function ShopModal({ shop, onClose }: ShopModalProps) {
 
   function handleBuy(itemId: string, quantity: number) {
     sendMessage('BuyRequest', { npc_name: npcName, item_id: itemId, quantity })
+    // Force inventory refresh: the server pushes InventoryView after a buy, but
+    // PushBlocking can fail under load. An explicit InventoryRequest guarantees
+    // the client sees the updated backpack even if the push was dropped.
+    sendMessage('InventoryRequest', {})
   }
 
   function handleSell(itemDefId: string, quantity: number) {
