@@ -501,6 +501,29 @@ func RenderConditionEvent(ce *gamev1.ConditionEvent) string {
 		ce.ConditionName, ce.TargetName)
 }
 
+// RenderQuestCompleteEvent formats a QuestCompleteEvent as colored Telnet text.
+//
+// Precondition: qce must not be nil.
+// Postcondition: Returns a human-readable quest completion announcement.
+func RenderQuestCompleteEvent(qce *gamev1.QuestCompleteEvent) string {
+	var b strings.Builder
+	b.WriteString(telnet.Colorf(telnet.BrightGreen, "✓ Quest Complete: %s", qce.Title))
+	b.WriteString("\r\n")
+	if qce.XpReward > 0 {
+		b.WriteString(telnet.Colorf(telnet.Cyan, "  +%d XP", qce.XpReward))
+		b.WriteString("\r\n")
+	}
+	if qce.CreditsReward > 0 {
+		b.WriteString(telnet.Colorf(telnet.Cyan, "  +%d Credits", qce.CreditsReward))
+		b.WriteString("\r\n")
+	}
+	for _, item := range qce.ItemRewards {
+		b.WriteString(telnet.Colorf(telnet.Cyan, "  +%s", item))
+		b.WriteString("\r\n")
+	}
+	return strings.TrimRight(b.String(), "\r\n")
+}
+
 // RenderCombatEvent formats a CombatEvent as colored Telnet text.
 // RenderInventoryView formats an InventoryView as colored Telnet text.
 func RenderInventoryView(iv *gamev1.InventoryView) string {

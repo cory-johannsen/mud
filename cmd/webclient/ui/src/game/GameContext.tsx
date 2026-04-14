@@ -613,7 +613,20 @@ export function GameProvider({ children }: { children: ReactNode }) {
           break
         }
         case 'QuestCompleteEvent': {
-          dispatch({ type: 'ENQUEUE_QUEST_COMPLETE', event: payload as import('../proto').QuestCompleteEvent })
+          const qce = payload as import('../proto').QuestCompleteEvent
+          dispatch({ type: 'ENQUEUE_QUEST_COMPLETE', event: qce })
+          const xp = qce.xpReward ?? qce.xp_reward ?? 0
+          const credits = qce.creditsReward ?? qce.credits_reward ?? 0
+          const items = qce.itemRewards ?? qce.item_rewards ?? []
+          const rewards = [
+            xp > 0 ? `+${xp} XP` : '',
+            credits > 0 ? `+${credits} Credits` : '',
+            ...items.map((it: string) => `+${it}`),
+          ].filter(Boolean).join('  ')
+          const text = rewards
+            ? `✓ Quest Complete: ${qce.title ?? ''} — ${rewards}`
+            : `✓ Quest Complete: ${qce.title ?? ''}`
+          dispatch({ type: 'APPEND_FEED', entry: makeFeedEntry('system', text) })
           break
         }
         case 'LoadoutView': {

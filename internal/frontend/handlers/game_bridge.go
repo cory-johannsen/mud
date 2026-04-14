@@ -1051,6 +1051,10 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 				text = RenderInteractResponse(p.InteractResponse)
 			case *gamev1.ServerEvent_UseResponse:
 				text = RenderUseResponse(p.UseResponse)
+			case *gamev1.ServerEvent_QuestComplete:
+				text = RenderQuestCompleteEvent(p.QuestComplete)
+			case *gamev1.ServerEvent_QuestGiverView, *gamev1.ServerEvent_QuestLogView:
+				// Quest UI events are web-only; silently discard in telnet.
 			case *gamev1.ServerEvent_HpUpdate:
 				hpu := p.HpUpdate
 				currentHP.Store(hpu.GetCurrentHp())

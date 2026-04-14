@@ -4212,17 +4212,16 @@ func (h *CombatHandler) removeDeadNPCsLocked(cbt *combat.Combat) {
 		// Record kill progress for all living quest participants (REQ-QU-19).
 		if h.questSvc != nil {
 			for _, p := range h.livingParticipantSessions(cbt) {
-				completions, questMsgs, questErr := h.questSvc.RecordKillWithResults(context.Background(), p, p.CharacterID, templateID)
+				completions, _, questErr := h.questSvc.RecordKillWithResults(context.Background(), p, p.CharacterID, templateID)
 				if questErr != nil && h.logger != nil {
 					h.logger.Warn("RecordKill failed", zap.String("uid", p.UID), zap.Error(questErr))
 				}
-				h.pushQuestMessages(p, questMsgs)
 				for _, cr := range completions {
 					h.pushQuestCompleteEvent(p, cr)
 				}
 				// REQ-58-3: push CharacterSheetView when quest completes so the web UI
 				// Stats tab shows pending boosts without requiring a relog.
-				if len(questMsgs) > 0 && h.pushCharacterSheetFn != nil {
+				if len(completions) > 0 && h.pushCharacterSheetFn != nil {
 					h.pushCharacterSheetFn(p)
 				}
 			}
