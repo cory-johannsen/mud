@@ -2691,8 +2691,8 @@ func buildPlayerCombatant(sess *session.PlayerSession, h *CombatHandler) *combat
 		MaxHP:     sess.MaxHP,
 		CurrentHP: sess.CurrentHP,
 		AC:        playerAC,
-		Level:     1,
-		StrMod:    2,
+		Level:     sess.Level,
+		StrMod:    combat.AbilityMod(sess.Abilities.Brutality),
 		DexMod:    dexMod,
 	}
 
