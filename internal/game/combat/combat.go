@@ -113,6 +113,9 @@ type Combatant struct {
 	// AttackMod is a temporary mid-round attack roll modifier applied by conditions (e.g. frightened).
 	// Negative values reduce the attacker's roll total.
 	AttackMod int
+	// WeaponBonus is the item bonus from the equipped weapon's "+" designation.
+	// Applied to both attack rolls and damage rolls. Zero for NPCs and unarmed combatants.
+	WeaponBonus int
 	// SpeedFt is this combatant's movement speed in feet per stride action.
 	// 0 means 25 ft (PF2e default). Populated from NPC template at combat start;
 	// always 0 (= 25 ft default) for players.

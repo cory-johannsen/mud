@@ -6022,9 +6022,9 @@ func (s *GameServiceServer) handleChar(uid string) (*gamev1.ServerEvent, error) 
 				view.MainHand = def.Name
 				profRank := sess.Proficiencies[def.ProficiencyCategory]
 				profBonus := combat.CombatProficiencyBonus(weaponLevel, profRank)
-				atkBonus := brutalityMod + profBonus
+				atkBonus := brutalityMod + profBonus + def.Bonus
 				view.MainHandAttackBonus = signedInt(atkBonus)
-				view.MainHandDamage = weaponDamageString(def.DamageDice, brutalityMod, def.IsMelee())
+				view.MainHandDamage = weaponDamageString(def.DamageDice, brutalityMod+def.Bonus, def.IsMelee())
 				view.MainHandAbilityBonus = int32(brutalityMod)
 				view.MainHandProfBonus = int32(profBonus)
 				view.MainHandProfRank = string(profRank)
@@ -6034,9 +6034,9 @@ func (s *GameServiceServer) handleChar(uid string) (*gamev1.ServerEvent, error) 
 				view.OffHand = def.Name
 				profRank := sess.Proficiencies[def.ProficiencyCategory]
 				profBonus := combat.CombatProficiencyBonus(weaponLevel, profRank)
-				atkBonus := brutalityMod + profBonus
+				atkBonus := brutalityMod + profBonus + def.Bonus
 				view.OffHandAttackBonus = signedInt(atkBonus)
-				view.OffHandDamage = weaponDamageString(def.DamageDice, brutalityMod, def.IsMelee())
+				view.OffHandDamage = weaponDamageString(def.DamageDice, brutalityMod+def.Bonus, def.IsMelee())
 				view.OffHandAbilityBonus = int32(brutalityMod)
 				view.OffHandProfBonus = int32(profBonus)
 				view.OffHandProfRank = string(profRank)

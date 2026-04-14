@@ -54,19 +54,19 @@ type Source interface {
 // Precondition: attacker and target must be non-nil and not dead; src must be non-nil.
 // Postcondition: Returns a fully populated AttackResult.
 func ResolveAttack(attacker, target *Combatant, src Source) AttackResult {
-	// Attack roll: d20 + STR modifier + proficiency bonus
+	// Attack roll: d20 + STR modifier + proficiency bonus + weapon item bonus
 	d20 := src.Intn(20) + 1
-	atkMod := attacker.StrMod + CombatProficiencyBonus(attacker.Level, attacker.WeaponProficiencyRank)
+	atkMod := attacker.StrMod + CombatProficiencyBonus(attacker.Level, attacker.WeaponProficiencyRank) + attacker.WeaponBonus
 	atkTotal := d20 + atkMod
 	outcome := OutcomeFor(atkTotal+attacker.AttackMod, target.AC+target.ACMod)
 
-	// Damage roll: 1d6 + STR modifier (unarmed baseline)
+	// Damage roll: 1d6 + STR modifier (unarmed baseline) + weapon item bonus
 	dmgDie := src.Intn(6) + 1
 	strMod := attacker.StrMod
 	if strMod < 0 {
 		strMod = 0
 	}
-	baseDmg := dmgDie + strMod
+	baseDmg := dmgDie + strMod + attacker.WeaponBonus
 
 	return AttackResult{
 		AttackerID:  attacker.ID,
@@ -104,9 +104,9 @@ func ResolveFirearmAttack(attacker, target *Combatant, weapon *inventory.WeaponD
 		rangeIncrements = 0
 	}
 	rangePenalty := rangeIncrements * 2
-	total := rawRoll + attacker.DexMod + profBonus - rangePenalty
+	total := rawRoll + attacker.DexMod + profBonus - rangePenalty + attacker.WeaponBonus
 
-	// Damage roll using weapon's damage dice expression
+	// Damage roll using weapon's damage dice expression + weapon item bonus
 	dmgRoll, err := dice.RollExpr(weapon.DamageDice, src)
 	var dmgTotal int
 	var dmgDice []int
@@ -117,6 +117,7 @@ func ResolveFirearmAttack(attacker, target *Combatant, weapon *inventory.WeaponD
 	if dmgTotal < 0 {
 		dmgTotal = 0
 	}
+	dmgTotal += attacker.WeaponBonus
 
 	return AttackResult{
 		AttackerID:  attacker.ID,

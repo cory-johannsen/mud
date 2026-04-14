@@ -1572,8 +1572,8 @@ func (h *CombatHandler) startPursuitCombatLocked(playerSess *session.PlayerSessi
 		MaxHP:     playerSess.CurrentHP,
 		CurrentHP: playerSess.CurrentHP,
 		AC:        playerAC,
-		Level:     1,
-		StrMod:    2,
+		Level:     playerSess.Level,
+		StrMod:    combat.AbilityMod(playerSess.Abilities.Brutality),
 		DexMod:    dexMod,
 	}
 
@@ -1597,10 +1597,11 @@ func (h *CombatHandler) startPursuitCombatLocked(playerSess *session.PlayerSessi
 	}
 	playerCbt.WeaponProficiencyRank = weaponProfRank
 
-	// Wire weapon name and damage type from equipped main-hand weapon.
+	// Wire weapon name, damage type, and item bonus from equipped main-hand weapon.
 	if playerCbt.Loadout != nil && playerCbt.Loadout.MainHand != nil && playerCbt.Loadout.MainHand.Def != nil {
 		playerCbt.WeaponName = playerCbt.Loadout.MainHand.Def.Name
 		playerCbt.WeaponDamageType = playerCbt.Loadout.MainHand.Def.DamageType
+		playerCbt.WeaponBonus = playerCbt.Loadout.MainHand.Def.Bonus
 	} else {
 		playerCbt.WeaponName = "fists"
 		playerCbt.WeaponDamageType = "bludgeoning"
@@ -2716,10 +2717,11 @@ func buildPlayerCombatant(sess *session.PlayerSession, h *CombatHandler) *combat
 	}
 	playerCbt.WeaponProficiencyRank = weaponProfRank
 
-	// Wire weapon name and damage type from equipped main-hand weapon.
+	// Wire weapon name, damage type, and item bonus from equipped main-hand weapon.
 	if playerCbt.Loadout != nil && playerCbt.Loadout.MainHand != nil && playerCbt.Loadout.MainHand.Def != nil {
 		playerCbt.WeaponName = playerCbt.Loadout.MainHand.Def.Name
 		playerCbt.WeaponDamageType = playerCbt.Loadout.MainHand.Def.DamageType
+		playerCbt.WeaponBonus = playerCbt.Loadout.MainHand.Def.Bonus
 	} else {
 		playerCbt.WeaponName = "fists"
 		playerCbt.WeaponDamageType = "bludgeoning"

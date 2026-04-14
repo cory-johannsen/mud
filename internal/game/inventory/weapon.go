@@ -59,7 +59,11 @@ type WeaponDef struct {
 	// UpgradeSlots is the number of material upgrade slots available on this weapon.
 	// Derived from RarityDef.FeatureSlots at load time. NOT loaded from YAML.
 	UpgradeSlots int `yaml:"-"`
-	Hardness     int `yaml:"hardness"`
+	Hardness int `yaml:"hardness"`
+	// Bonus is the item bonus applied to both attack rolls and damage rolls.
+	// Maps to the "+" designation on a weapon (e.g. Vibroblade +3 has Bonus: 3).
+	// Zero means no item bonus (default). Always >= 0.
+	Bonus int `yaml:"bonus,omitempty"`
 }
 
 // IsMelee reports whether the weapon is a melee weapon (RangeIncrement == 0).
