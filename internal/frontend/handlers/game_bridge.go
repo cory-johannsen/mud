@@ -949,7 +949,7 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 				}
 				turnOrder := make([]string, len(rs.GetTurnOrder()))
 				copy(turnOrder, rs.GetTurnOrder())
-				combatHandler.UpdateRoundStart(int(rs.GetRound()), int(rs.GetActionsPerTurn()), turnOrder)
+				combatHandler.UpdateRoundStart(int(rs.GetRound()), int(rs.GetActionsPerTurn()), int(rs.GetDurationMs()), turnOrder)
 				// Seed initial 2D grid positions from the round-start event.
 				combatHandler.SetInitialPositions(rs.GetInitialPositions())
 				// Seed player HP from stored values so the HP bar shows immediately.

@@ -10,6 +10,33 @@ import (
 // combatLogDisplayLines is the maximum number of log lines shown on screen.
 const combatLogDisplayLines = 5
 
+// roundTimerBar renders a countdown progress bar for the current round.
+// It returns an empty string when durationMs == 0 (REQ-61-4).
+// Format: [####....] 4.2s
+// REQ-61-1: present when DurationMs > 0.
+// REQ-61-2: fully filled when elapsedMs == 0.
+// REQ-61-3: fully empty when elapsedMs >= durationMs.
+func roundTimerBar(durationMs, elapsedMs, width int) string {
+	if durationMs <= 0 {
+		return ""
+	}
+	if elapsedMs < 0 {
+		elapsedMs = 0
+	}
+	if elapsedMs > durationMs {
+		elapsedMs = durationMs
+	}
+	// remaining fraction: 1.0 at start, 0.0 at end.
+	remaining := durationMs - elapsedMs
+	filled := (remaining * width) / durationMs
+	if filled > width {
+		filled = width
+	}
+	empty := width - filled
+	remainingSec := float64(remaining) / 1000.0
+	return fmt.Sprintf("[%s%s] %.1fs", strings.Repeat("#", filled), strings.Repeat(".", empty), remainingSec)
+}
+
 // RenderCombatScreen renders the full combat screen for a telnet client.
 // The output uses \r\n line endings (telnet convention).
 func RenderCombatScreen(snap CombatRenderSnapshot, width int) string {
@@ -24,7 +51,23 @@ func RenderCombatScreen(snap CombatRenderSnapshot, width int) string {
 	sb.WriteString(centerPad(header, width))
 	sb.WriteString("\r\n")
 
-	// Line 2: battlefield.
+	// Line 2 (optional): round countdown timer bar (REQ-61-1).
+	if snap.DurationMs > 0 {
+		// Bar inner width: leave room for "Timer: [" prefix (8 chars) + "] Ns" suffix (~7 chars).
+		const timerPrefix = "Timer: "
+		barWidth := width - len(timerPrefix) - 2 - 7 // 2 = brackets, 7 = " N.Ns\r\n"
+		if barWidth < 4 {
+			barWidth = 4
+		}
+		if barWidth > 30 {
+			barWidth = 30
+		}
+		timerLine := timerPrefix + roundTimerBar(snap.DurationMs, snap.ElapsedMs, barWidth)
+		sb.WriteString(truncateLine(timerLine, width))
+		sb.WriteString("\r\n")
+	}
+
+	// Line 3: battlefield.
 	sb.WriteString(truncateLine(RenderBattlefield(snap, width), width))
 	sb.WriteString("\r\n")
 

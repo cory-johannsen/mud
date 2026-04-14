@@ -1,4 +1,45 @@
+import { useState, useEffect, useRef } from 'react'
 import { useGame } from './GameContext'
+
+// REQ-61-5: RoundTimerBar renders a countdown progress bar depleting over durationMs.
+// REQ-61-6: Fill starts at 100% and decreases to 0% over the round duration.
+function RoundTimerBar({ durationMs }: { durationMs: number }) {
+  const [elapsed, setElapsed] = useState(0)
+  const startRef = useRef(Date.now())
+
+  useEffect(() => {
+    // Reset on new round (durationMs prop changes).
+    startRef.current = Date.now()
+    setElapsed(0)
+
+    const interval = setInterval(() => {
+      const e = Date.now() - startRef.current
+      setElapsed(Math.min(e, durationMs))
+    }, 100)
+
+    return () => clearInterval(interval)
+  }, [durationMs])
+
+  const fraction = Math.max(0, Math.min(1, 1 - elapsed / durationMs))
+  const pct = Math.round(fraction * 100)
+
+  return (
+    <div
+      className="round-timer-track"
+      role="progressbar"
+      aria-label="Round timer"
+      aria-valuenow={pct}
+      aria-valuemin={0}
+      aria-valuemax={100}
+    >
+      <div
+        className="round-timer-fill"
+        data-testid="round-timer-fill"
+        style={{ width: `${pct}%` }}
+      />
+    </div>
+  )
+}
 
 export function CombatBanner() {
   const { state } = useGame()
@@ -12,10 +53,12 @@ export function CombatBanner() {
       : []
   const actionsPerTurn = round.actionsPerTurn ?? round.actions_per_turn ?? 3
   const roundNum = round.round ?? 0
+  const durationMs = round.durationMs ?? 0
 
   return (
     <div className="combat-banner">
       <strong>⚔ COMBAT — Round {roundNum}</strong>
+      {durationMs > 0 && <RoundTimerBar durationMs={durationMs} />}
       <div className="combat-turn-order">
         {turnOrder.map((name) => {
           const ap = state.combatantAP[name]

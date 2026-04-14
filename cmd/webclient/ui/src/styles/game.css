@@ -155,6 +155,22 @@ html, body, #root { margin: 0; padding: 0; height: 100%; overflow: hidden; }
   border-color: rgba(255, 255, 255, 0.3);
 }
 
+/* Round countdown timer bar (REQ-61-5) */
+.round-timer-track {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  height: 8px;
+  overflow: hidden;
+  width: 120px;
+  flex-shrink: 0;
+}
+.round-timer-fill {
+  height: 100%;
+  border-radius: 4px;
+  background: #ffdd00;
+  transition: width 0.1s linear;
+}
+
 /* Room panel */
 .room-title { margin: 0 0 0.5rem; color: #e0c060; font-size: 1rem; }
 .room-description { color: #bbb; font-size: 0.85rem; line-height: 1.4; margin: 0 0 0.5rem; }

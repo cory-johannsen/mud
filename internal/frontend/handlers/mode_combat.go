@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/cory-johannsen/mud/internal/frontend/telnet"
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
@@ -74,21 +75,27 @@ type CombatRenderSnapshot struct {
 	Log        []string
 	Summary    string
 	PlayerName string
+	// REQ-61-1: DurationMs > 0 causes a countdown bar to be rendered.
+	DurationMs int
+	// ElapsedMs is milliseconds elapsed since round start, used to fill the bar.
+	ElapsedMs int
 }
 
 // CombatModeHandler implements ModeHandler for the combat display.
 // REQ-IMR-19.
 type CombatModeHandler struct {
-	mu            sync.Mutex
-	playerName    string
-	onExitFn      func()
-	round         int
-	maxAP         int
-	turnOrder     []string
-	combatants    map[string]*CombatantState
-	gridPositions map[string]combatGridCoord
-	log           []string
-	summary       string
+	mu             sync.Mutex
+	playerName     string
+	onExitFn       func()
+	round          int
+	maxAP          int
+	durationMs     int
+	roundStartedAt time.Time
+	turnOrder      []string
+	combatants     map[string]*CombatantState
+	gridPositions  map[string]combatGridCoord
+	log            []string
+	summary        string
 }
 
 // NewCombatModeHandler constructs a CombatModeHandler.
@@ -139,11 +146,14 @@ func (h *CombatModeHandler) CombatantByName(name string) *CombatantState {
 
 // UpdateRoundStart updates the round number, resets AP, adds new combatants,
 // and marks missing combatants as dead.
-func (h *CombatModeHandler) UpdateRoundStart(round, actionsPerTurn int, turnOrder []string) {
+// REQ-61-1: durationMs is stored so SnapshotForRender can compute ElapsedMs.
+func (h *CombatModeHandler) UpdateRoundStart(round, actionsPerTurn, durationMs int, turnOrder []string) {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 	h.round = round
 	h.maxAP = actionsPerTurn
+	h.durationMs = durationMs
+	h.roundStartedAt = time.Now()
 
 	// Mark combatants not in the new turn order as dead.
 	present := make(map[string]bool, len(turnOrder))
@@ -296,6 +306,13 @@ func (h *CombatModeHandler) SnapshotForRender() CombatRenderSnapshot {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 
+	elapsedMs := 0
+	if h.durationMs > 0 && !h.roundStartedAt.IsZero() {
+		elapsedMs = int(time.Since(h.roundStartedAt).Milliseconds())
+		if elapsedMs > h.durationMs {
+			elapsedMs = h.durationMs
+		}
+	}
 	snap := CombatRenderSnapshot{
 		Round:      h.round,
 		PlayerName: h.playerName,
@@ -303,6 +320,8 @@ func (h *CombatModeHandler) SnapshotForRender() CombatRenderSnapshot {
 		TurnOrder:  make([]string, len(h.turnOrder)),
 		Combatants: make(map[string]*CombatantState, len(h.combatants)),
 		Log:        make([]string, len(h.log)),
+		DurationMs: h.durationMs,
+		ElapsedMs:  elapsedMs,
 	}
 	copy(snap.TurnOrder, h.turnOrder)
 	copy(snap.Log, h.log)
@@ -383,6 +402,8 @@ func (h *CombatModeHandler) Reset() {
 	defer h.mu.Unlock()
 	h.round = 0
 	h.maxAP = 0
+	h.durationMs = 0
+	h.roundStartedAt = time.Time{}
 	h.turnOrder = nil
 	h.combatants = make(map[string]*CombatantState)
 	h.gridPositions = make(map[string]combatGridCoord)

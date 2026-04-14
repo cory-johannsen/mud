@@ -1,0 +1,201 @@
+// REQ-61-5: CombatBanner MUST render a round countdown progress bar when combatRound.durationMs > 0.
+// REQ-61-6: The countdown bar's fill width MUST start at 100% and decrease toward 0% over durationMs.
+// REQ-61-7: CombatBanner MUST NOT render a countdown bar when combatRound is null.
+
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { render, screen, act } from '@testing-library/react'
+import fc from 'fast-check'
+import { CombatBanner } from './CombatBanner'
+import type { GameState } from './GameContext'
+import { initialState } from './GameContext'
+
+// Mock useGame so we can control state without a full provider.
+vi.mock('./GameContext', async (importOriginal) => {
+  const real = await importOriginal<typeof import('./GameContext')>()
+  return {
+    ...real,
+    useGame: vi.fn(),
+  }
+})
+
+import { useGame } from './GameContext'
+const mockUseGame = useGame as ReturnType<typeof vi.fn>
+
+function makeState(overrides: Partial<GameState>): GameState {
+  return { ...initialState, ...overrides }
+}
+
+beforeEach(() => {
+  vi.useFakeTimers()
+})
+afterEach(() => {
+  vi.useRealTimers()
+  vi.clearAllMocks()
+})
+
+describe('CombatBanner — round countdown timer bar', () => {
+  it('renders a timer progress bar when combatRound has durationMs > 0 (REQ-61-5)', () => {
+    mockUseGame.mockReturnValue({
+      state: makeState({
+        combatRound: {
+          round: 1,
+          durationMs: 6000,
+          turnOrder: ['Alice'],
+          actionsPerTurn: 3,
+        },
+        combatantAP: {},
+      }),
+      dispatch: vi.fn(),
+    })
+
+    render(<CombatBanner />)
+
+    const bar = screen.getByRole('progressbar', { name: /round timer/i })
+    expect(bar).toBeDefined()
+  })
+
+  it('timer bar starts at 100% fill on round start (REQ-61-6)', () => {
+    mockUseGame.mockReturnValue({
+      state: makeState({
+        combatRound: {
+          round: 1,
+          durationMs: 6000,
+          turnOrder: ['Alice'],
+          actionsPerTurn: 3,
+        },
+        combatantAP: {},
+      }),
+      dispatch: vi.fn(),
+    })
+
+    render(<CombatBanner />)
+
+    const fill = screen.getByTestId('round-timer-fill')
+    const style = fill.getAttribute('style') ?? ''
+    // Should start at 100% width.
+    expect(style).toContain('width: 100%')
+  })
+
+  it('timer bar depletes over time (REQ-61-6)', () => {
+    mockUseGame.mockReturnValue({
+      state: makeState({
+        combatRound: {
+          round: 1,
+          durationMs: 6000,
+          turnOrder: ['Alice'],
+          actionsPerTurn: 3,
+        },
+        combatantAP: {},
+      }),
+      dispatch: vi.fn(),
+    })
+
+    render(<CombatBanner />)
+
+    // Advance 3000ms — half the round should be gone.
+    act(() => {
+      vi.advanceTimersByTime(3000)
+    })
+
+    const fill = screen.getByTestId('round-timer-fill')
+    const style = fill.getAttribute('style') ?? ''
+    // At 3000ms of a 6000ms round, fill should be near 50%.
+    // We check it's not 100% anymore.
+    expect(style).not.toContain('width: 100%')
+  })
+
+  it('timer bar reaches 0% at round end (REQ-61-6)', () => {
+    mockUseGame.mockReturnValue({
+      state: makeState({
+        combatRound: {
+          round: 1,
+          durationMs: 6000,
+          turnOrder: ['Alice'],
+          actionsPerTurn: 3,
+        },
+        combatantAP: {},
+      }),
+      dispatch: vi.fn(),
+    })
+
+    render(<CombatBanner />)
+
+    act(() => {
+      vi.advanceTimersByTime(6000)
+    })
+
+    const fill = screen.getByTestId('round-timer-fill')
+    const style = fill.getAttribute('style') ?? ''
+    expect(style).toContain('width: 0%')
+  })
+
+  it('does not render a timer bar when combatRound is null (REQ-61-7)', () => {
+    mockUseGame.mockReturnValue({
+      state: makeState({ combatRound: null }),
+      dispatch: vi.fn(),
+    })
+
+    render(<CombatBanner />)
+
+    expect(screen.queryByRole('progressbar', { name: /round timer/i })).toBeNull()
+  })
+
+  it('does not render a timer bar when durationMs is 0', () => {
+    mockUseGame.mockReturnValue({
+      state: makeState({
+        combatRound: {
+          round: 1,
+          durationMs: 0,
+          turnOrder: ['Alice'],
+          actionsPerTurn: 3,
+        },
+        combatantAP: {},
+      }),
+      dispatch: vi.fn(),
+    })
+
+    render(<CombatBanner />)
+
+    expect(screen.queryByRole('progressbar', { name: /round timer/i })).toBeNull()
+  })
+
+  it('property: fill width is always a percentage in [0%, 100%]', () => {
+    fc.assert(
+      fc.property(
+        fc.integer({ min: 1, max: 30000 }),
+        fc.integer({ min: 0, max: 30000 }),
+        (durationMs, elapsedMs) => {
+          mockUseGame.mockReturnValue({
+            state: makeState({
+              combatRound: {
+                round: 1,
+                durationMs,
+                turnOrder: ['Alice'],
+                actionsPerTurn: 3,
+              },
+              combatantAP: {},
+            }),
+            dispatch: vi.fn(),
+          })
+
+          const { unmount } = render(<CombatBanner />)
+
+          act(() => {
+            vi.advanceTimersByTime(elapsedMs)
+          })
+
+          const fill = document.querySelector('[data-testid="round-timer-fill"]')
+          if (fill) {
+            const style = (fill as HTMLElement).style.width
+            const pct = parseFloat(style)
+            const ok = pct >= 0 && pct <= 100
+            unmount()
+            return ok
+          }
+          unmount()
+          return true // durationMs=0 means no bar, which is acceptable
+        }
+      )
+    )
+  })
+})

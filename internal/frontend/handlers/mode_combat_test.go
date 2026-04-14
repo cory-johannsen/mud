@@ -15,7 +15,7 @@ func TestNewCombatModeHandler_Mode(t *testing.T) {
 
 func TestCombatModeHandler_UpdateRoundStart_SetsRound(t *testing.T) {
 	h := NewCombatModeHandler("Alice", func() {})
-	h.UpdateRoundStart(2, 3, []string{"Alice", "Goblin"})
+	h.UpdateRoundStart(2, 3, 0, []string{"Alice", "Goblin"})
 	if got := h.Round(); got != 2 {
 		t.Fatalf("expected round 2, got %d", got)
 	}
@@ -23,7 +23,7 @@ func TestCombatModeHandler_UpdateRoundStart_SetsRound(t *testing.T) {
 
 func TestCombatModeHandler_UpdateRoundStart_ResetsCombatants(t *testing.T) {
 	h := NewCombatModeHandler("Alice", func() {})
-	h.UpdateRoundStart(1, 3, []string{"Alice", "Goblin"})
+	h.UpdateRoundStart(1, 3, 0, []string{"Alice", "Goblin"})
 	combatants := h.Combatants()
 	if len(combatants) != 2 {
 		t.Fatalf("expected 2 combatants, got %d", len(combatants))
@@ -56,7 +56,7 @@ func TestCombatModeHandler_UpdateRoundStart_ResetsCombatants(t *testing.T) {
 
 func TestCombatModeHandler_UpdateCombatEvent_UpdatesHP(t *testing.T) {
 	h := NewCombatModeHandler("Alice", func() {})
-	h.UpdateRoundStart(1, 3, []string{"Alice", "Goblin"})
+	h.UpdateRoundStart(1, 3, 0, []string{"Alice", "Goblin"})
 	h.UpdateCombatEvent("Alice", "Goblin", 5, 15, 20, "Alice hits Goblin for 5 damage.", 0)
 	goblin := h.CombatantByName("Goblin")
 	if goblin == nil {
@@ -80,7 +80,7 @@ func TestCombatModeHandler_Prompt(t *testing.T) {
 
 func TestCombatModeHandler_Reset_ClearsCombatants(t *testing.T) {
 	h := NewCombatModeHandler("Alice", func() {})
-	h.UpdateRoundStart(1, 3, []string{"Alice", "Goblin"})
+	h.UpdateRoundStart(1, 3, 0, []string{"Alice", "Goblin"})
 	if len(h.Combatants()) == 0 {
 		t.Fatal("expected combatants before reset")
 	}
@@ -111,9 +111,9 @@ func TestCombatModeHandler_APDots(t *testing.T) {
 
 func TestCombatModeHandler_UpdateRoundStart_MarksMissingAsDead(t *testing.T) {
 	h := NewCombatModeHandler("Alice", func() {})
-	h.UpdateRoundStart(1, 3, []string{"Alice", "Goblin"})
+	h.UpdateRoundStart(1, 3, 0, []string{"Alice", "Goblin"})
 	// Round 2: Goblin removed from turn order.
-	h.UpdateRoundStart(2, 3, []string{"Alice"})
+	h.UpdateRoundStart(2, 3, 0, []string{"Alice"})
 	goblin := h.CombatantByName("Goblin")
 	if goblin == nil {
 		t.Fatal("expected Goblin combatant to still exist")
@@ -125,7 +125,7 @@ func TestCombatModeHandler_UpdateRoundStart_MarksMissingAsDead(t *testing.T) {
 
 func TestCombatModeHandler_UpdateCombatEvent_AppendsLog(t *testing.T) {
 	h := NewCombatModeHandler("Alice", func() {})
-	h.UpdateRoundStart(1, 3, []string{"Alice", "Goblin"})
+	h.UpdateRoundStart(1, 3, 0, []string{"Alice", "Goblin"})
 	h.UpdateCombatEvent("Alice", "Goblin", 5, 15, 20, "Alice hits Goblin.", 0)
 	h.UpdateCombatEvent("Goblin", "Alice", 3, 27, 30, "Goblin hits Alice.", 0)
 	snap := h.SnapshotForRender()
@@ -187,7 +187,7 @@ func TestIsMovementCommand_Property(t *testing.T) {
 
 func TestCombatModeHandler_UpdatePosition_UpdatesCombatantPosition(t *testing.T) {
 	h := NewCombatModeHandler("Alice", func() {})
-	h.UpdateRoundStart(1, 3, []string{"Alice", "Goblin"})
+	h.UpdateRoundStart(1, 3, 0, []string{"Alice", "Goblin"})
 	h.UpdatePosition("Goblin", 15)
 	goblin := h.CombatantByName("Goblin")
 	if goblin == nil {
@@ -200,7 +200,7 @@ func TestCombatModeHandler_UpdatePosition_UpdatesCombatantPosition(t *testing.T)
 
 func TestCombatModeHandler_UpdatePosition_PlayerPosition(t *testing.T) {
 	h := NewCombatModeHandler("Alice", func() {})
-	h.UpdateRoundStart(1, 3, []string{"Alice", "Goblin"})
+	h.UpdateRoundStart(1, 3, 0, []string{"Alice", "Goblin"})
 	h.UpdatePosition("Alice", 25)
 	alice := h.CombatantByName("Alice")
 	if alice == nil {
@@ -213,7 +213,7 @@ func TestCombatModeHandler_UpdatePosition_PlayerPosition(t *testing.T) {
 
 func TestCombatModeHandler_UpdatePosition_UnknownNameNoOp(t *testing.T) {
 	h := NewCombatModeHandler("Alice", func() {})
-	h.UpdateRoundStart(1, 3, []string{"Alice"})
+	h.UpdateRoundStart(1, 3, 0, []string{"Alice"})
 	// Should not panic for unknown combatant.
 	h.UpdatePosition("Unknown", 10)
 }
@@ -223,7 +223,7 @@ func TestCombatModeHandler_UpdatePosition_Property(t *testing.T) {
 		name := rapid.StringMatching(`[A-Za-z]{2,8}`).Draw(t, "name")
 		pos := rapid.IntRange(0, 100).Draw(t, "pos")
 		h := NewCombatModeHandler(name, func() {})
-		h.UpdateRoundStart(1, 3, []string{name, "NPC"})
+		h.UpdateRoundStart(1, 3, 0, []string{name, "NPC"})
 		h.UpdatePosition(name, pos)
 		c := h.CombatantByName(name)
 		if c == nil {
