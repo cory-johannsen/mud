@@ -240,6 +240,10 @@ export function CharacterPanel() {
               <span className="hp-text">
                 {xp}{xpToNext > 0 ? ` / ${xpToNext} XP` : ' XP (max)'}
               </span>
+              {/* REQ-70-3: Crypto balance displayed directly beneath XP. */}
+              {characterSheet.currency && (
+                <span className="hp-text">Crypto: {characterSheet.currency}</span>
+              )}
               {pendingBoosts > 0 && (
                 <button style={styles.pendingBtn} onClick={() => setModal('boost')} type="button">
                   ★ {pendingBoosts} Pending Boost{pendingBoosts !== 1 ? 's' : ''} — Apply
