@@ -3,7 +3,6 @@ package gameserver
 import (
 	"context"
 	"fmt"
-	"math/rand"
 	"strings"
 
 	"github.com/cory-johannsen/mud/internal/game/npc"
@@ -99,9 +98,8 @@ func (s *GameServiceServer) handleTalk(uid string, req *gamev1.TalkRequest) (*ga
 		}
 	}
 
-	var msgs []string
-
-	// Check for pending deliver objectives across all active quests.
+	// Process pending deliver objectives silently: remove items and record progress.
+	// The updated quest state will be reflected in the QuestGiverView returned below.
 	if s.questSvc != nil && sess.Backpack != nil {
 		reg := s.questSvc.Registry()
 		for qid, aq := range sess.ActiveQuests {
@@ -109,7 +107,6 @@ func (s *GameServiceServer) handleTalk(uid string, req *gamev1.TalkRequest) (*ga
 			if !ok {
 				continue
 			}
-			// Only process quests given by this NPC.
 			if def.GiverNPCID != inst.TemplateID {
 				continue
 			}
@@ -120,12 +117,10 @@ func (s *GameServiceServer) handleTalk(uid string, req *gamev1.TalkRequest) (*ga
 				if aq.ObjectiveProgress[obj.ID] >= obj.Quantity {
 					continue
 				}
-				// Check if player has the required item.
 				instances := sess.Backpack.FindByItemDefID(obj.ItemID)
 				if len(instances) == 0 {
 					continue
 				}
-				// Consume items from backpack (take up to Quantity needed).
 				needed := obj.Quantity - aq.ObjectiveProgress[obj.ID]
 				removed := 0
 				for _, inst2 := range instances {
@@ -142,36 +137,12 @@ func (s *GameServiceServer) handleTalk(uid string, req *gamev1.TalkRequest) (*ga
 					removed += take
 				}
 				if removed > 0 {
-					if completionMsgs, err := s.questSvc.RecordDeliver(context.Background(), sess, sess.CharacterID, qid, obj.ID); err == nil {
-						if len(completionMsgs) > 0 {
-							msgs = append(msgs, completionMsgs...)
-						} else {
-							msgs = append(msgs, fmt.Sprintf("%s says: 'Thank you!'", inst.Name()))
-						}
-					}
+					_, _ = s.questSvc.RecordDeliver(context.Background(), sess, sess.CharacterID, qid, obj.ID)
 				}
 			}
 		}
 	}
 
-	// Show offerable quests.
-	if s.questSvc != nil {
-		offerable := s.questSvc.GetOfferable(sess, tmpl.QuestGiver.QuestIDs)
-		for _, def := range offerable {
-			msgs = append(msgs, fmt.Sprintf("%s offers: [%s] %s — %s", inst.Name(), def.ID, def.Title, def.Description))
-			msgs = append(msgs, fmt.Sprintf("  Type 'talk %s accept %s' to accept.", inst.Name(), def.ID))
-		}
-	}
-
-	if len(msgs) > 0 {
-		return messageEvent(strings.Join(msgs, "\n")), nil
-	}
-
-	// Fallback: random placeholder dialog.
-	dialog := tmpl.QuestGiver.PlaceholderDialog
-	if len(dialog) == 0 {
-		return messageEvent(fmt.Sprintf("%s nods but says nothing.", inst.Name())), nil
-	}
-	line := dialog[rand.Intn(len(dialog))]
-	return messageEvent(fmt.Sprintf("%s says: %q", inst.Name(), line)), nil
+	// Return structured QuestGiverView so the frontend can display the quest modal.
+	return s.buildQuestGiverView(uid, inst)
 }

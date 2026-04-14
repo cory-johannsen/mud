@@ -42,11 +42,9 @@ func TestHandleTalk_QuestGiverFound(t *testing.T) {
 	svc, uid := newQuestGiverTestServer(t, dialog)
 	evt, err := svc.handleTalk(uid, &gamev1.TalkRequest{NpcName: "Gail"})
 	require.NoError(t, err)
-	content := evt.GetMessage().Content
-	assert.True(t,
-		content == `Gail says: "Hello, stranger."` || content == `Gail says: "Got work if you want it."`,
-		"unexpected response: %s", content,
-	)
+	view := evt.GetQuestGiverView()
+	require.NotNil(t, view, "expected QuestGiverView, got: %T", evt.GetPayload())
+	assert.Equal(t, "Gail", view.NpcName)
 }
 
 func TestHandleTalk_NPCNotInRoom(t *testing.T) {
@@ -87,10 +85,12 @@ func TestHandleTalk_CaseInsensitiveMatch(t *testing.T) {
 	svc, uid := newQuestGiverTestServer(t, dialog)
 	evt, err := svc.handleTalk(uid, &gamev1.TalkRequest{NpcName: "gail"}) // lowercase
 	require.NoError(t, err)
-	assert.Contains(t, evt.GetMessage().Content, "What do you want?")
+	view := evt.GetQuestGiverView()
+	require.NotNil(t, view, "expected QuestGiverView for case-insensitive match")
+	assert.Equal(t, "Gail", view.NpcName)
 }
 
-func TestProperty_HandleTalk_AlwaysReturnsDialogLine(t *testing.T) {
+func TestProperty_HandleTalk_AlwaysReturnsQuestGiverView(t *testing.T) {
 	// Create the server once outside rapid.Check to avoid data races with the
 	// zap test logger (which is tied to the outer *testing.T and races when
 	// testWorldAndSession is called from within rapid's goroutine).
@@ -125,17 +125,12 @@ func TestProperty_HandleTalk_AlwaysReturnsDialogLine(t *testing.T) {
 			rt.Fatal("handleTalk failed:", talkErr)
 		}
 
-		content := evt.GetMessage().Content
-		found := false
-		for _, line := range dialog {
-			if content == `PropGiver says: "`+line+`"` {
-				found = true
-				break
-			}
+		view := evt.GetQuestGiverView()
+		if view == nil {
+			rt.Fatalf("expected QuestGiverView, got payload type %T", evt.GetPayload())
 		}
-		rt.Log("response:", content)
-		if !found {
-			rt.Fatalf("response %q is not one of the dialog lines", content)
+		if view.NpcName != "PropGiver" {
+			rt.Fatalf("expected NpcName=PropGiver, got %q", view.NpcName)
 		}
 	})
 }
