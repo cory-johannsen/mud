@@ -883,8 +883,9 @@ func RenderCharacterSheet(csv *gamev1.CharacterSheetView, width int) string {
 	}
 	left = append(left, slPlain(xpLine))
 	// REQ-70-1: Crypto balance appears directly beneath XP.
+	// curr is already formatted as "N Crypto"; display it directly.
 	if curr := csv.GetCurrency(); curr != "" {
-		left = append(left, slPlain(fmt.Sprintf("Crypto: %s", curr)))
+		left = append(left, slPlain(curr))
 	}
 	if csv.GetPendingBoosts() > 0 {
 		left = append(left, sl(telnet.Colorf(telnet.BrightYellow, "  (type 'levelup' to assign)")))

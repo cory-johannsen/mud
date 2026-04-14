@@ -33,8 +33,7 @@ func TestRenderCharacterSheet_ShowsCryptoUnderXP(t *testing.T) {
 	result := RenderCharacterSheet(csv, 80)
 	stripped := telnet.StripANSI(result)
 
-	assert.Contains(t, stripped, "Crypto:", "character sheet must show Crypto balance (REQ-70-1)")
-	assert.Contains(t, stripped, "340 Crypto", "character sheet must show the currency amount (REQ-70-2)")
+	assert.Contains(t, stripped, "340 Crypto", "character sheet must show the currency amount (REQ-70-1, REQ-70-2)")
 
 	// Verify Crypto appears directly after the XP line.
 	lines := strings.Split(stripped, "\n")
@@ -47,10 +46,10 @@ func TestRenderCharacterSheet_ShowsCryptoUnderXP(t *testing.T) {
 	}
 	require.True(t, xpIdx >= 0, "XP line must be present in character sheet")
 
-	// Search the two lines immediately following XP for the Crypto line.
+	// Search the two lines immediately following XP for the currency line.
 	found := false
 	for _, offset := range []int{1, 2} {
-		if xpIdx+offset < len(lines) && strings.Contains(lines[xpIdx+offset], "Crypto:") {
+		if xpIdx+offset < len(lines) && strings.Contains(lines[xpIdx+offset], "Crypto") {
 			found = true
 			break
 		}
@@ -73,7 +72,7 @@ func TestRenderCharacterSheet_ShowsCryptoWhenZero(t *testing.T) {
 	}
 	result := RenderCharacterSheet(csv, 80)
 	stripped := telnet.StripANSI(result)
-	assert.Contains(t, stripped, "Crypto:", "Crypto line must appear even when balance is 0 (REQ-70-1)")
+	assert.Contains(t, stripped, "0 Crypto", "Crypto line must appear even when balance is 0 (REQ-70-1)")
 }
 
 // TestRenderCharacterSheet_NoCryptoWhenCurrencyEmpty verifies that when
@@ -86,7 +85,7 @@ func TestRenderCharacterSheet_NoCryptoWhenCurrencyEmpty(t *testing.T) {
 	}
 	result := RenderCharacterSheet(csv, 80)
 	stripped := telnet.StripANSI(result)
-	assert.NotContains(t, stripped, "Crypto:", "no Crypto line when Currency field is empty")
+	assert.NotContains(t, stripped, "Crypto", "no Crypto line when Currency field is empty")
 }
 
 // TestProperty_RenderCharacterSheet_CryptoAlwaysAfterXP is a property test
@@ -122,7 +121,7 @@ func TestProperty_RenderCharacterSheet_CryptoAlwaysAfterXP(t *testing.T) {
 
 		found := false
 		for _, offset := range []int{1, 2} {
-			if xpIdx+offset < len(lines) && strings.Contains(lines[xpIdx+offset], "Crypto:") {
+			if xpIdx+offset < len(lines) && strings.Contains(lines[xpIdx+offset], "Crypto") {
 				found = true
 				break
 			}

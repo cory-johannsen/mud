@@ -242,7 +242,7 @@ export function CharacterPanel() {
               </span>
               {/* REQ-70-3: Crypto balance displayed directly beneath XP. */}
               {characterSheet.currency && (
-                <span className="hp-text">Crypto: {characterSheet.currency}</span>
+                <span className="hp-text">{characterSheet.currency}</span>
               )}
               {pendingBoosts > 0 && (
                 <button style={styles.pendingBtn} onClick={() => setModal('boost')} type="button">

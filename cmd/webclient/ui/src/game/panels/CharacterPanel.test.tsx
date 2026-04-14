@@ -56,7 +56,7 @@ describe('CharacterPanel — Crypto balance display', () => {
     expect(screen.getByText(/340 Crypto/)).toBeDefined()
   })
 
-  it('renders the Crypto label alongside the currency value (REQ-70-4)', () => {
+  it('renders the currency string including Crypto (REQ-70-4)', () => {
     mockUseGame.mockReturnValue(
       makeState({
         name: 'Alice',
@@ -71,8 +71,7 @@ describe('CharacterPanel — Crypto balance display', () => {
 
     render(<CharacterPanel />)
 
-    // The label "Crypto:" or the currency string must be visible.
-    expect(screen.getByText(/Crypto/)).toBeDefined()
+    expect(screen.getByText('99 Crypto')).toBeDefined()
   })
 
   it('does not render a Crypto line when currency is absent (REQ-70-3)', () => {
