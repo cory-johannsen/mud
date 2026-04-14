@@ -5459,12 +5459,21 @@ func (s *GameServiceServer) evaluateThreatEngagement(inst *npc.Instance, roomID 
 		return
 	}
 	snapshots := make([]behavior.PlayerSnapshot, len(players))
+	sumLevel := 0
 	for i, p := range players {
 		snapshots[i] = behavior.PlayerSnapshot{
 			Level:     p.Level,
 			CurrentHP: p.CurrentHP,
 			MaxHP:     p.MaxHP,
 		}
+		sumLevel += p.Level
+	}
+	avgPlayerLevel := sumLevel / len(players)
+	// REQ-79-1: NPCs MUST NOT initiate combat when the average player level exceeds
+	// the NPC level by more than 4. At this gap the NPC cannot realistically land a hit.
+	const levelGapThreshold = 4
+	if avgPlayerLevel-inst.Level > levelGapThreshold {
+		return
 	}
 	score := behavior.ThreatScore(snapshots, inst.Level)
 	if score <= inst.CourageThreshold {
