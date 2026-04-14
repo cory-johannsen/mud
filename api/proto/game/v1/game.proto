@@ -344,6 +344,7 @@ message ServerEvent {
     APUpdateEvent        ap_update              = 37;
     QuestGiverView       quest_giver_view       = 38;
     QuestLogView         quest_log_view         = 39;
+    QuestCompleteEvent   quest_complete          = 40;
   }
 }
 
@@ -753,6 +754,16 @@ message QuestGiverView {
 // Field 39 of ServerEvent.payload.
 message QuestLogView {
   repeated QuestEntryView quests = 1;
+}
+
+// QuestCompleteEvent is pushed to the player when a quest is completed and rewards are granted.
+// Field 40 of ServerEvent.payload.
+message QuestCompleteEvent {
+  string quest_id      = 1;
+  string title         = 2;
+  int32  xp_reward     = 3;
+  int32  credits_reward = 4;
+  repeated string item_rewards = 5; // human-readable item reward strings (e.g. "Combat Stims x2")
 }
 
 // QuestLogRequest asks the server for the player's current quest log.

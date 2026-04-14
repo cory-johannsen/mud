@@ -203,6 +203,77 @@ func (s *Service) RecordKill(ctx context.Context, sess SessionState, characterID
 	})
 }
 
+// RecordKillWithResults increments progress for kill objectives matching npcTemplateID
+// and returns structured CompletionResult data for any quests that completed.
+//
+// Precondition: sess non-nil; npcTemplateID non-empty.
+// Postcondition: matching objectives are incremented; completed quests are removed from ActiveQuests.
+// Returns ([]*CompletionResult, []string messages, error).
+func (s *Service) RecordKillWithResults(ctx context.Context, sess SessionState, characterID int64, npcTemplateID string) ([]*CompletionResult, []string, error) {
+	return s.recordProgressWithResults(ctx, sess, characterID, 1, func(obj QuestObjective) bool {
+		return obj.Type == "kill" && obj.TargetID == npcTemplateID
+	})
+}
+
+// recordProgressWithResults increments by n all matching objectives across active quests
+// and returns structured completion results alongside messages.
+func (s *Service) recordProgressWithResults(ctx context.Context, sess SessionState, characterID int64, n int, match func(QuestObjective) bool) ([]*CompletionResult, []string, error) {
+	var allResults []*CompletionResult
+	var allMsgs []string
+	for questID, aq := range sess.GetActiveQuests() {
+		def, ok := s.registry[questID]
+		if !ok {
+			continue
+		}
+		changed := false
+		for _, obj := range def.Objectives {
+			if !match(obj) {
+				continue
+			}
+			current := aq.ObjectiveProgress[obj.ID]
+			if current >= obj.Quantity {
+				continue
+			}
+			next := current + n
+			if next > obj.Quantity {
+				next = obj.Quantity
+			}
+			aq.ObjectiveProgress[obj.ID] = next
+			changed = true
+			if err := s.repo.SaveObjectiveProgress(ctx, characterID, questID, obj.ID, next); err != nil {
+				return nil, nil, fmt.Errorf("saving objective progress: %w", err)
+			}
+		}
+		if changed {
+			msgs, err := s.maybeComplete(ctx, sess, characterID, questID)
+			if err != nil {
+				return nil, nil, err
+			}
+			if len(msgs) > 0 {
+				// Quest completed — build a CompletionResult.
+				result := &CompletionResult{
+					QuestID:       def.ID,
+					Title:         def.Title,
+					XPReward:      def.Rewards.XP,
+					CreditsReward: def.Rewards.Credits,
+				}
+				for _, ri := range def.Rewards.Items {
+					name := ri.ItemID
+					if s.invRegistry != nil {
+						if itemDef, ok := s.invRegistry.Item(ri.ItemID); ok {
+							name = itemDef.Name
+						}
+					}
+					result.ItemRewards = append(result.ItemRewards, fmt.Sprintf("%s x%d", name, ri.Quantity))
+				}
+				allResults = append(allResults, result)
+				allMsgs = append(allMsgs, msgs...)
+			}
+		}
+	}
+	return allResults, allMsgs, nil
+}
+
 // RecordFetch increments progress for all active fetch objectives matching itemDefID.
 //
 // Precondition: sess non-nil; itemDefID non-empty; qty >= 1.

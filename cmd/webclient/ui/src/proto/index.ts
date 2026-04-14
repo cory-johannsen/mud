@@ -305,6 +305,18 @@ export interface QuestLogView {
   quests?: QuestEntryView[]
 }
 
+export interface QuestCompleteEvent {
+  questId?: string
+  quest_id?: string
+  title?: string
+  xpReward?: number
+  xp_reward?: number
+  creditsReward?: number
+  credits_reward?: number
+  itemRewards?: string[]
+  item_rewards?: string[]
+}
+
 export interface InventoryItem {
   instanceId?: string
   name: string
@@ -686,4 +698,5 @@ export type ServerEvent =
   | { type: 'APUpdateEvent'; payload: APUpdateEvent }
   | { type: 'QuestGiverView'; payload: QuestGiverView }
   | { type: 'QuestLogView'; payload: QuestLogView }
+  | { type: 'QuestCompleteEvent'; payload: QuestCompleteEvent }
   | { type: string; payload: unknown }

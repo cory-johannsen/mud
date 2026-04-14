@@ -4212,11 +4212,14 @@ func (h *CombatHandler) removeDeadNPCsLocked(cbt *combat.Combat) {
 		// Record kill progress for all living quest participants (REQ-QU-19).
 		if h.questSvc != nil {
 			for _, p := range h.livingParticipantSessions(cbt) {
-				questMsgs, questErr := h.questSvc.RecordKill(context.Background(), p, p.CharacterID, templateID)
+				completions, questMsgs, questErr := h.questSvc.RecordKillWithResults(context.Background(), p, p.CharacterID, templateID)
 				if questErr != nil && h.logger != nil {
 					h.logger.Warn("RecordKill failed", zap.String("uid", p.UID), zap.Error(questErr))
 				}
 				h.pushQuestMessages(p, questMsgs)
+				for _, cr := range completions {
+					h.pushQuestCompleteEvent(p, cr)
+				}
 				// REQ-58-3: push CharacterSheetView when quest completes so the web UI
 				// Stats tab shows pending boosts without requiring a relog.
 				if len(questMsgs) > 0 && h.pushCharacterSheetFn != nil {
@@ -4360,6 +4363,27 @@ func (h *CombatHandler) pushQuestMessages(sess *session.PlayerSession, msgs []st
 		if data, marshalErr := proto.Marshal(evt); marshalErr == nil {
 			_ = sess.Entity.Push(data)
 		}
+	}
+}
+
+// pushQuestCompleteEvent sends a QuestCompleteEvent to the player's event stream.
+//
+// Precondition: sess must not be nil; cr must not be nil.
+// Postcondition: a QuestCompleteEvent is pushed to sess.Entity.
+func (h *CombatHandler) pushQuestCompleteEvent(sess *session.PlayerSession, cr *quest.CompletionResult) {
+	evt := &gamev1.ServerEvent{
+		Payload: &gamev1.ServerEvent_QuestComplete{
+			QuestComplete: &gamev1.QuestCompleteEvent{
+				QuestId:       cr.QuestID,
+				Title:         cr.Title,
+				XpReward:      int32(cr.XPReward),
+				CreditsReward: int32(cr.CreditsReward),
+				ItemRewards:   cr.ItemRewards,
+			},
+		},
+	}
+	if data, marshalErr := proto.Marshal(evt); marshalErr == nil {
+		_ = sess.Entity.Push(data)
 	}
 }
 

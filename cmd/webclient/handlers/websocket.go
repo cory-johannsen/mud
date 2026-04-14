@@ -347,6 +347,8 @@ func serverEventInner(event *gamev1.ServerEvent) (proto.Message, string) {
 		return p.QuestGiverView, "QuestGiverView"
 	case *gamev1.ServerEvent_QuestLogView:
 		return p.QuestLogView, "QuestLogView"
+	case *gamev1.ServerEvent_QuestComplete:
+		return p.QuestComplete, "QuestCompleteEvent"
 	default:
 		return nil, ""
 	}

@@ -319,3 +319,64 @@ func TestService_HydrateSession_LoadsActiveAndCompleted(t *testing.T) {
 		t.Fatal("expected other_quest in CompletedQuests")
 	}
 }
+
+// REQ-QC-1: RecordKillWithResults MUST return a CompletionResult when a kill completes a quest.
+func TestRecordKillWithResults_ReturnsCompletionResult(t *testing.T) {
+	def := &quest.QuestDef{
+		ID: "q1", Title: "Rat Hunt", Description: "Kill some rats.",
+		Objectives: []quest.QuestObjective{{ID: "o1", Type: "kill", TargetID: "rat", Quantity: 1}},
+		Rewards:    quest.QuestRewards{XP: 100, Credits: 50},
+	}
+	repo := newFakeRepo()
+	svc := quest.NewService(quest.QuestRegistry{"q1": def}, repo, nil, nil, nil)
+	sess := newFakeSession()
+	sess.activeQuests["q1"] = &quest.ActiveQuest{QuestID: "q1", ObjectiveProgress: map[string]int{"o1": 0}}
+
+	results, msgs, err := svc.RecordKillWithResults(context.Background(), sess, 1, "rat")
+	if err != nil {
+		t.Fatal("unexpected error:", err)
+	}
+	if len(results) != 1 {
+		t.Fatalf("expected 1 CompletionResult, got %d", len(results))
+	}
+	r := results[0]
+	if r.QuestID != "q1" {
+		t.Errorf("expected QuestID=q1, got %q", r.QuestID)
+	}
+	if r.Title != "Rat Hunt" {
+		t.Errorf("expected Title=Rat Hunt, got %q", r.Title)
+	}
+	if r.XPReward != 100 {
+		t.Errorf("expected XPReward=100, got %d", r.XPReward)
+	}
+	if r.CreditsReward != 50 {
+		t.Errorf("expected CreditsReward=50, got %d", r.CreditsReward)
+	}
+	if len(msgs) == 0 {
+		t.Error("expected completion messages")
+	}
+}
+
+// REQ-QC-2: RecordKillWithResults MUST return empty results when no quest completes.
+func TestRecordKillWithResults_EmptyWhenNoCompletion(t *testing.T) {
+	def := &quest.QuestDef{
+		ID: "q1", Title: "Rat Hunt", Description: "Kill some rats.",
+		Objectives: []quest.QuestObjective{{ID: "o1", Type: "kill", TargetID: "rat", Quantity: 5}},
+		Rewards:    quest.QuestRewards{XP: 100, Credits: 50},
+	}
+	repo := newFakeRepo()
+	svc := quest.NewService(quest.QuestRegistry{"q1": def}, repo, nil, nil, nil)
+	sess := newFakeSession()
+	sess.activeQuests["q1"] = &quest.ActiveQuest{QuestID: "q1", ObjectiveProgress: map[string]int{"o1": 0}}
+
+	results, msgs, err := svc.RecordKillWithResults(context.Background(), sess, 1, "rat")
+	if err != nil {
+		t.Fatal("unexpected error:", err)
+	}
+	if len(results) != 0 {
+		t.Errorf("expected 0 CompletionResults, got %d", len(results))
+	}
+	if len(msgs) != 0 {
+		t.Errorf("expected 0 messages, got %d: %v", len(msgs), msgs)
+	}
+}

@@ -5,6 +5,16 @@ import (
 	"time"
 )
 
+// CompletionResult carries structured data about a quest that just completed,
+// for use by callers that need to build UI events (e.g. QuestCompleteEvent).
+type CompletionResult struct {
+	QuestID       string
+	Title         string
+	XPReward      int
+	CreditsReward int
+	ItemRewards   []string // human-readable strings, e.g. "Combat Stims x2"
+}
+
 // ActiveQuest is the in-session state of a quest the player is currently on.
 type ActiveQuest struct {
 	QuestID           string

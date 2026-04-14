@@ -101,6 +101,7 @@ export interface GameState {
   npcView: { name: string; description: string; npcType: string; level: number; health: string } | null
   questGiverView: import('../proto').QuestGiverView | null
   questLogView: import('../proto').QuestLogView | null
+  questCompleteQueue: import('../proto').QuestCompleteEvent[]
   loadoutView: LoadoutView | null
   choicePrompt: ChoicePrompt | null
   jobGrants: JobGrantsResponse | null
@@ -135,6 +136,8 @@ type Action =
   | { type: 'SET_NPC_VIEW'; view: { name: string; description: string; npcType: string; level: number; health: string } | null }
   | { type: 'SET_QUEST_GIVER_VIEW'; view: import('../proto').QuestGiverView | null }
   | { type: 'SET_QUEST_LOG_VIEW'; view: import('../proto').QuestLogView | null }
+  | { type: 'ENQUEUE_QUEST_COMPLETE'; event: import('../proto').QuestCompleteEvent }
+  | { type: 'DEQUEUE_QUEST_COMPLETE' }
   | { type: 'SET_LOADOUT_VIEW'; view: LoadoutView | null }
   | { type: 'SET_CHOICE_PROMPT'; prompt: ChoicePrompt }
   | { type: 'CLEAR_CHOICE_PROMPT' }
@@ -210,6 +213,10 @@ export function reducer(state: GameState, action: Action): GameState {
       return { ...state, questGiverView: action.view }
     case 'SET_QUEST_LOG_VIEW':
       return { ...state, questLogView: action.view }
+    case 'ENQUEUE_QUEST_COMPLETE':
+      return { ...state, questCompleteQueue: [...state.questCompleteQueue, action.event] }
+    case 'DEQUEUE_QUEST_COMPLETE':
+      return { ...state, questCompleteQueue: state.questCompleteQueue.slice(1) }
     case 'SET_LOADOUT_VIEW':
       return { ...state, loadoutView: action.view }
     case 'SET_CHOICE_PROMPT':
@@ -259,6 +266,7 @@ export const initialState: GameState = {
   npcView: null,
   questGiverView: null,
   questLogView: null,
+  questCompleteQueue: [],
   loadoutView: null,
   choicePrompt: null,
   jobGrants: null,
@@ -275,6 +283,7 @@ interface GameContextValue {
   clearRestView: () => void
   clearNpcView: () => void
   clearQuestGiverView: () => void
+  dismissQuestComplete: () => void
   clearLoadout: () => void
   clearChoicePrompt: () => void
 }
@@ -603,6 +612,10 @@ export function GameProvider({ children }: { children: ReactNode }) {
           dispatch({ type: 'SET_QUEST_LOG_VIEW', view: payload as import('../proto').QuestLogView })
           break
         }
+        case 'QuestCompleteEvent': {
+          dispatch({ type: 'ENQUEUE_QUEST_COMPLETE', event: payload as import('../proto').QuestCompleteEvent })
+          break
+        }
         case 'LoadoutView': {
           dispatch({ type: 'SET_LOADOUT_VIEW', view: payload as LoadoutView })
           break
@@ -691,6 +704,9 @@ export function GameProvider({ children }: { children: ReactNode }) {
     dispatch({ type: 'SET_QUEST_GIVER_VIEW', view: null })
   }, [])
 
+  const dismissQuestComplete = useCallback(() => {
+    dispatch({ type: 'DEQUEUE_QUEST_COMPLETE' })
+  }, [])
   const clearLoadout = useCallback(() => {
     dispatch({ type: 'SET_LOADOUT_VIEW', view: null })
   }, [])
@@ -700,7 +716,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   }, [])
 
   return (
-    <GameContext.Provider value={{ state, sendMessage, sendCommand, clearShop, clearHealer, clearTrainer, clearFixer, clearRestView, clearNpcView, clearQuestGiverView, clearLoadout, clearChoicePrompt }}>
+    <GameContext.Provider value={{ state, sendMessage, sendCommand, clearShop, clearHealer, clearTrainer, clearFixer, clearRestView, clearNpcView, clearQuestGiverView, dismissQuestComplete, clearLoadout, clearChoicePrompt }}>
       {children}
     </GameContext.Provider>
   )
