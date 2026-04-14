@@ -1137,6 +1137,13 @@ message CharacterSheetView {
     map<string, string> armor_categories = 52; // slot -> "light"/"medium"/"heavy" for equipped armor
     int32  proficiency_ac_bonus     = 53; // proficiency contribution to AC (applied once per character)
     string effective_armor_category = 54; // heaviest proficient armor category worn
+    // Attack bonus breakdown components for equipped weapons (REQ-WEC-71).
+    int32  main_hand_ability_bonus = 55; // ability modifier (Brutality) component of main-hand to-hit
+    int32  main_hand_prof_bonus    = 56; // proficiency bonus component of main-hand to-hit
+    string main_hand_prof_rank     = 57; // proficiency rank string ("untrained"/"trained"/"expert"/"master"/"legendary")
+    int32  off_hand_ability_bonus  = 58; // ability modifier component of off-hand to-hit
+    int32  off_hand_prof_bonus     = 59; // proficiency bonus component of off-hand to-hit
+    string off_hand_prof_rank      = 60; // proficiency rank string for off-hand weapon
 }
 
 // InnateSlotView delivers the per-tech innate use slot state for the character sheet.

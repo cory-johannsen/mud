@@ -2,27 +2,83 @@ import { useEffect, useState } from 'react'
 import { useGame } from '../GameContext'
 import type { LoadoutWeaponPreset } from '../../proto'
 
+interface WeaponTooltipData {
+  name: string
+  damage: string
+  attackBonus: string
+  abilityBonus: number
+  profBonus: number
+  profRank: string
+}
+
+function WeaponTooltip({ data }: { data: WeaponTooltipData }): JSX.Element {
+  const fmt = (n: number) => n >= 0 ? `+${n}` : `${n}`
+  return (
+    <div
+      data-testid="weapon-tooltip"
+      style={{
+        position: 'absolute',
+        zIndex: 100,
+        background: '#1a1a2e',
+        border: '1px solid #4a5a7a',
+        borderRadius: 4,
+        padding: '0.4rem 0.6rem',
+        color: '#ccc',
+        fontFamily: 'monospace',
+        fontSize: '0.75rem',
+        whiteSpace: 'nowrap',
+        pointerEvents: 'none',
+        minWidth: '12rem',
+      }}
+    >
+      <div style={{ color: '#e0c060', fontWeight: 'bold', marginBottom: '0.25rem' }}>{data.name}</div>
+      <div><span style={{ color: '#7af' }}>Damage:</span> {data.damage}</div>
+      <div style={{ marginTop: '0.2rem' }}>
+        <span style={{ color: '#7af' }}>To-hit:</span> {data.attackBonus}
+      </div>
+      <div style={{ paddingLeft: '0.75rem', color: '#aaa', fontSize: '0.7rem' }}>
+        <div>Ability:      {fmt(data.abilityBonus)}</div>
+        <div>Proficiency ({data.profRank || 'untrained'}): {fmt(data.profBonus)}</div>
+      </div>
+    </div>
+  )
+}
+
 function EquipSlot({
   label,
   value,
   bonus,
   dmg,
   onUnequip,
+  weaponTooltip,
 }: {
   label: string
   value?: string | null
   bonus?: string | null
   dmg?: string | null
   onUnequip?: () => void
+  weaponTooltip?: WeaponTooltipData | null
 }) {
+  const [hovered, setHovered] = useState(false)
   return (
     <div className="equip-slot">
       <div className="equip-slot-label">{label}</div>
       {value ? (
-        <div className="equip-slot-value" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+        <div
+          className="equip-slot-value"
+          style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', position: 'relative' }}
+          data-weapon-slot={weaponTooltip ? 'true' : undefined}
+          onMouseEnter={weaponTooltip ? () => setHovered(true) : undefined}
+          onMouseLeave={weaponTooltip ? () => setHovered(false) : undefined}
+        >
           <span>{value}{bonus ? ` (${bonus})` : ''}{dmg ? ` [${dmg}]` : ''}</span>
           {onUnequip && (
             <button style={styles.unequipBtn} onClick={onUnequip} type="button">Unequip</button>
+          )}
+          {weaponTooltip && hovered && (
+            <div style={{ position: 'absolute', top: '100%', left: 0, marginTop: '0.25rem' }}>
+              <WeaponTooltip data={weaponTooltip} />
+            </div>
           )}
         </div>
       ) : (
@@ -159,6 +215,24 @@ export function EquipmentDrawer({ onClose }: { onClose: () => void }) {
   const offHand = sheet?.offHand ?? sheet?.off_hand ?? null
   const offHandBonus = sheet?.offHandAttackBonus ?? null
   const offHandDamage = sheet?.offHandDamage ?? null
+
+  // REQ-WEC-71: build weapon tooltip data from character sheet breakdown fields.
+  const mainHandTooltip: WeaponTooltipData | null = (mainHand && mainHandBonus && mainHandDamage) ? {
+    name: mainHand,
+    damage: mainHandDamage,
+    attackBonus: mainHandBonus,
+    abilityBonus: sheet?.mainHandAbilityBonus ?? sheet?.main_hand_ability_bonus ?? 0,
+    profBonus: sheet?.mainHandProfBonus ?? sheet?.main_hand_prof_bonus ?? 0,
+    profRank: sheet?.mainHandProfRank ?? sheet?.main_hand_prof_rank ?? '',
+  } : null
+  const offHandTooltip: WeaponTooltipData | null = (offHand && offHandBonus && offHandDamage) ? {
+    name: offHand,
+    damage: offHandDamage,
+    attackBonus: offHandBonus,
+    abilityBonus: sheet?.offHandAbilityBonus ?? sheet?.off_hand_ability_bonus ?? 0,
+    profBonus: sheet?.offHandProfBonus ?? sheet?.off_hand_prof_bonus ?? 0,
+    profRank: sheet?.offHandProfRank ?? sheet?.off_hand_prof_rank ?? '',
+  } : null
   const lv = state.loadoutView
   const activeIndex = lv?.activeIndex ?? 0
   const presets = lv?.presets ?? []
@@ -202,6 +276,7 @@ export function EquipmentDrawer({ onClose }: { onClose: () => void }) {
               bonus={mainHandBonus}
               dmg={mainHandDamage}
               onUnequip={mainHand ? () => handleUnequip('main') : undefined}
+              weaponTooltip={mainHandTooltip}
             />
             <EquipSlot
               label="Off Hand"
@@ -209,6 +284,7 @@ export function EquipmentDrawer({ onClose }: { onClose: () => void }) {
               bonus={offHandBonus}
               dmg={offHandDamage}
               onUnequip={offHand ? () => handleUnequip('off') : undefined}
+              weaponTooltip={offHandTooltip}
             />
 
             {/* Armor */}

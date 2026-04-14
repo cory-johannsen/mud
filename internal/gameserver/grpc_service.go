@@ -6017,17 +6017,25 @@ func (s *GameServiceServer) handleChar(uid string) (*gamev1.ServerEvent, error) 
 				def := preset.MainHand.Def
 				view.MainHand = def.Name
 				profRank := sess.Proficiencies[def.ProficiencyCategory]
-				atkBonus := brutalityMod + combat.CombatProficiencyBonus(weaponLevel, profRank)
+				profBonus := combat.CombatProficiencyBonus(weaponLevel, profRank)
+				atkBonus := brutalityMod + profBonus
 				view.MainHandAttackBonus = signedInt(atkBonus)
 				view.MainHandDamage = weaponDamageString(def.DamageDice, brutalityMod, def.IsMelee())
+				view.MainHandAbilityBonus = int32(brutalityMod)
+				view.MainHandProfBonus = int32(profBonus)
+				view.MainHandProfRank = string(profRank)
 			}
 			if preset.OffHand != nil {
 				def := preset.OffHand.Def
 				view.OffHand = def.Name
 				profRank := sess.Proficiencies[def.ProficiencyCategory]
-				atkBonus := brutalityMod + combat.CombatProficiencyBonus(weaponLevel, profRank)
+				profBonus := combat.CombatProficiencyBonus(weaponLevel, profRank)
+				atkBonus := brutalityMod + profBonus
 				view.OffHandAttackBonus = signedInt(atkBonus)
 				view.OffHandDamage = weaponDamageString(def.DamageDice, brutalityMod, def.IsMelee())
+				view.OffHandAbilityBonus = int32(brutalityMod)
+				view.OffHandProfBonus = int32(profBonus)
+				view.OffHandProfRank = string(profRank)
 			}
 		}
 	}

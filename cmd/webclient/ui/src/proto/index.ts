@@ -258,6 +258,19 @@ export interface CharacterSheetView {
   proficiency_ac_bonus?: number
   effectiveArmorCategory?: string
   effective_armor_category?: string
+  // Attack bonus breakdown components (REQ-WEC-71).
+  mainHandAbilityBonus?: number
+  main_hand_ability_bonus?: number
+  mainHandProfBonus?: number
+  main_hand_prof_bonus?: number
+  mainHandProfRank?: string
+  main_hand_prof_rank?: string
+  offHandAbilityBonus?: number
+  off_hand_ability_bonus?: number
+  offHandProfBonus?: number
+  off_hand_prof_bonus?: number
+  offHandProfRank?: string
+  off_hand_prof_rank?: string
 }
 
 export interface InventoryItem {

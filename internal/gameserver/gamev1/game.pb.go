@@ -10460,8 +10460,15 @@ type CharacterSheetView struct {
 	ArmorCategories        map[string]string        `protobuf:"bytes,52,rep,name=armor_categories,json=armorCategories,proto3" json:"armor_categories,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"` // slot -> "light"/"medium"/"heavy" for equipped armor
 	ProficiencyAcBonus     int32                    `protobuf:"varint,53,opt,name=proficiency_ac_bonus,json=proficiencyAcBonus,proto3" json:"proficiency_ac_bonus,omitempty"`                                                               // proficiency contribution to AC (applied once per character)
 	EffectiveArmorCategory string                   `protobuf:"bytes,54,opt,name=effective_armor_category,json=effectiveArmorCategory,proto3" json:"effective_armor_category,omitempty"`                                                    // heaviest proficient armor category worn
-	unknownFields          protoimpl.UnknownFields
-	sizeCache              protoimpl.SizeCache
+	// Attack bonus breakdown components for equipped weapons (REQ-WEC-71).
+	MainHandAbilityBonus int32  `protobuf:"varint,55,opt,name=main_hand_ability_bonus,json=mainHandAbilityBonus,proto3" json:"main_hand_ability_bonus,omitempty"` // ability modifier (Brutality) component of main-hand to-hit
+	MainHandProfBonus    int32  `protobuf:"varint,56,opt,name=main_hand_prof_bonus,json=mainHandProfBonus,proto3" json:"main_hand_prof_bonus,omitempty"`          // proficiency bonus component of main-hand to-hit
+	MainHandProfRank     string `protobuf:"bytes,57,opt,name=main_hand_prof_rank,json=mainHandProfRank,proto3" json:"main_hand_prof_rank,omitempty"`              // proficiency rank string ("untrained"/"trained"/"expert"/"master"/"legendary")
+	OffHandAbilityBonus  int32  `protobuf:"varint,58,opt,name=off_hand_ability_bonus,json=offHandAbilityBonus,proto3" json:"off_hand_ability_bonus,omitempty"`    // ability modifier component of off-hand to-hit
+	OffHandProfBonus     int32  `protobuf:"varint,59,opt,name=off_hand_prof_bonus,json=offHandProfBonus,proto3" json:"off_hand_prof_bonus,omitempty"`             // proficiency bonus component of off-hand to-hit
+	OffHandProfRank      string `protobuf:"bytes,60,opt,name=off_hand_prof_rank,json=offHandProfRank,proto3" json:"off_hand_prof_rank,omitempty"`                 // proficiency rank string for off-hand weapon
+	unknownFields        protoimpl.UnknownFields
+	sizeCache            protoimpl.SizeCache
 }
 
 func (x *CharacterSheetView) Reset() {
@@ -10868,6 +10875,48 @@ func (x *CharacterSheetView) GetProficiencyAcBonus() int32 {
 func (x *CharacterSheetView) GetEffectiveArmorCategory() string {
 	if x != nil {
 		return x.EffectiveArmorCategory
+	}
+	return ""
+}
+
+func (x *CharacterSheetView) GetMainHandAbilityBonus() int32 {
+	if x != nil {
+		return x.MainHandAbilityBonus
+	}
+	return 0
+}
+
+func (x *CharacterSheetView) GetMainHandProfBonus() int32 {
+	if x != nil {
+		return x.MainHandProfBonus
+	}
+	return 0
+}
+
+func (x *CharacterSheetView) GetMainHandProfRank() string {
+	if x != nil {
+		return x.MainHandProfRank
+	}
+	return ""
+}
+
+func (x *CharacterSheetView) GetOffHandAbilityBonus() int32 {
+	if x != nil {
+		return x.OffHandAbilityBonus
+	}
+	return 0
+}
+
+func (x *CharacterSheetView) GetOffHandProfBonus() int32 {
+	if x != nil {
+		return x.OffHandProfBonus
+	}
+	return 0
+}
+
+func (x *CharacterSheetView) GetOffHandProfRank() string {
+	if x != nil {
+		return x.OffHandProfRank
 	}
 	return ""
 }
@@ -15865,7 +15914,7 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\vdescription\x18\x04 \x01(\tR\vdescription\x12'\n" +
 	"\x0feffects_summary\x18\x05 \x01(\tR\x0eeffectsSummary\x12\x1d\n" +
 	"\n" +
-	"short_name\x18\x06 \x01(\tR\tshortName\"\xd1\x13\n" +
+	"short_name\x18\x06 \x01(\tR\tshortName\"\xf9\x15\n" +
 	"\x12CharacterSheetView\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x10\n" +
 	"\x03job\x18\x02 \x01(\tR\x03job\x12\x1c\n" +
@@ -15927,7 +15976,13 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\x11spontaneous_known\x183 \x03(\v2\x1e.game.v1.SpontaneousKnownEntryR\x10spontaneousKnown\x12[\n" +
 	"\x10armor_categories\x184 \x03(\v20.game.v1.CharacterSheetView.ArmorCategoriesEntryR\x0farmorCategories\x120\n" +
 	"\x14proficiency_ac_bonus\x185 \x01(\x05R\x12proficiencyAcBonus\x128\n" +
-	"\x18effective_armor_category\x186 \x01(\tR\x16effectiveArmorCategory\x1a8\n" +
+	"\x18effective_armor_category\x186 \x01(\tR\x16effectiveArmorCategory\x125\n" +
+	"\x17main_hand_ability_bonus\x187 \x01(\x05R\x14mainHandAbilityBonus\x12/\n" +
+	"\x14main_hand_prof_bonus\x188 \x01(\x05R\x11mainHandProfBonus\x12-\n" +
+	"\x13main_hand_prof_rank\x189 \x01(\tR\x10mainHandProfRank\x123\n" +
+	"\x16off_hand_ability_bonus\x18: \x01(\x05R\x13offHandAbilityBonus\x12-\n" +
+	"\x13off_hand_prof_bonus\x18; \x01(\x05R\x10offHandProfBonus\x12+\n" +
+	"\x12off_hand_prof_rank\x18< \x01(\tR\x0foffHandProfRank\x1a8\n" +
 	"\n" +
 	"ArmorEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
