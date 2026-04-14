@@ -146,26 +146,38 @@ func towardDelta(fx, fy, tx, ty int) (int, int) {
 // attackNarrative builds a human-readable attack result string.
 // When dmg > 0 (a hit landed), the damage dealt is included.
 // When weaponName is non-empty, the weapon is included as "with a <weaponName>".
-func attackNarrative(actorName, verb, targetName, weaponName string, outcome Outcome, total, dmg int) string {
+// REQ-67-1: The raw d20 result MUST appear as "1d20 (N)".
+// REQ-67-2: The target's effective AC MUST appear as "vs AC N".
+func attackNarrative(actorName, verb, targetName, weaponName string, outcome Outcome, d20Roll, total, targetAC, dmg int) string {
 	with := ""
 	if weaponName != "" {
 		with = " with a " + weaponName
 	}
+	mod := total - d20Roll
+	var rollBreakdown string
+	switch {
+	case mod > 0:
+		rollBreakdown = fmt.Sprintf("[1d20 (%d) +%d = %d vs AC %d]", d20Roll, mod, total, targetAC)
+	case mod < 0:
+		rollBreakdown = fmt.Sprintf("[1d20 (%d) %d = %d vs AC %d]", d20Roll, mod, total, targetAC)
+	default:
+		rollBreakdown = fmt.Sprintf("[1d20 (%d) = %d vs AC %d]", d20Roll, total, targetAC)
+	}
 	switch outcome {
 	case CritSuccess:
 		if dmg > 0 {
-			return fmt.Sprintf("*** CRITICAL HIT! *** %s %s %s%s (total %d) for %d damage!", actorName, verb, targetName, with, total, dmg)
+			return fmt.Sprintf("*** CRITICAL HIT! *** %s %s %s%s %s for %d damage!", actorName, verb, targetName, with, rollBreakdown, dmg)
 		}
-		return fmt.Sprintf("*** CRITICAL HIT! *** %s %s %s%s (total %d)!", actorName, verb, targetName, with, total)
+		return fmt.Sprintf("*** CRITICAL HIT! *** %s %s %s%s %s!", actorName, verb, targetName, with, rollBreakdown)
 	case CritFailure:
-		return fmt.Sprintf("*** CRITICAL MISS! *** %s fumbles against %s (total %d)!", actorName, targetName, total)
+		return fmt.Sprintf("*** CRITICAL MISS! *** %s fumbles against %s %s!", actorName, targetName, rollBreakdown)
 	case Success:
 		if dmg > 0 {
-			return fmt.Sprintf("%s %s %s%s (total %d) for %d damage.", actorName, verb, targetName, with, total, dmg)
+			return fmt.Sprintf("%s %s %s%s %s for %d damage.", actorName, verb, targetName, with, rollBreakdown, dmg)
 		}
-		return fmt.Sprintf("%s %s %s%s (total %d).", actorName, verb, targetName, with, total)
+		return fmt.Sprintf("%s %s %s%s %s.", actorName, verb, targetName, with, rollBreakdown)
 	default: // Failure
-		return fmt.Sprintf("%s %s %s%s (total %d) — miss.", actorName, verb, targetName, with, total)
+		return fmt.Sprintf("%s %s %s%s %s — miss.", actorName, verb, targetName, with, rollBreakdown)
 	}
 }
 
@@ -783,7 +795,7 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 				if attackVerb1 == "" {
 					attackVerb1 = "attacks"
 				}
-				narrative := attackNarrative(actor.Name, attackVerb1, target.Name, r.WeaponName, r.Outcome, r.AttackTotal, dmg)
+				narrative := attackNarrative(actor.Name, attackVerb1, target.Name, r.WeaponName, r.Outcome, r.AttackRoll, r.AttackTotal, effectiveAC, dmg)
 				if len(rwAnnotations) > 0 {
 					narrative += " (" + strings.Join(rwAnnotations, "; ") + ")"
 				}
@@ -917,7 +929,7 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 				if strikeVerb1 == "" {
 					strikeVerb1 = "strikes"
 				}
-				narrative1 := attackNarrative(actor.Name, strikeVerb1, target.Name, r1.WeaponName, r1.Outcome, r1.AttackTotal, dmg1)
+				narrative1 := attackNarrative(actor.Name, strikeVerb1, target.Name, r1.WeaponName, r1.Outcome, r1.AttackRoll, r1.AttackTotal, effectiveAC1, dmg1)
 				if len(rwAnnotations1) > 0 {
 					narrative1 += " (" + strings.Join(rwAnnotations1, "; ") + ")"
 				}
@@ -1023,7 +1035,7 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 				if strikeVerb2 == "" {
 					strikeVerb2 = "strikes"
 				}
-				narrative2 := attackNarrative(actor.Name, strikeVerb2, target.Name, r2.WeaponName, r2.Outcome, r2.AttackTotal, dmg2)
+				narrative2 := attackNarrative(actor.Name, strikeVerb2, target.Name, r2.WeaponName, r2.Outcome, r2.AttackRoll, r2.AttackTotal, effectiveAC2, dmg2)
 				if len(rwAnnotations2) > 0 {
 					narrative2 += " (" + strings.Join(rwAnnotations2, "; ") + ")"
 				}
