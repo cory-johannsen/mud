@@ -159,6 +159,51 @@ describe('CombatBanner — round countdown timer bar', () => {
     expect(screen.queryByRole('progressbar', { name: /round timer/i })).toBeNull()
   })
 
+  // REQ-61-8: Timer bar MUST reset to 100% at the start of each new round,
+  // even when durationMs is unchanged between rounds.
+  it('timer bar resets to 100% on a new round when durationMs stays the same', () => {
+    mockUseGame.mockReturnValue({
+      state: makeState({
+        combatRound: {
+          round: 1,
+          durationMs: 6000,
+          turnOrder: ['Alice'],
+          actionsPerTurn: 3,
+        },
+        combatantAP: {},
+      }),
+      dispatch: vi.fn(),
+    })
+
+    const { rerender } = render(<CombatBanner />)
+
+    // Deplete half the round.
+    act(() => {
+      vi.advanceTimersByTime(3000)
+    })
+
+    const fill = screen.getByTestId('round-timer-fill')
+    expect(fill.getAttribute('style')).not.toContain('width: 100%')
+
+    // Simulate a new round with the same durationMs.
+    mockUseGame.mockReturnValue({
+      state: makeState({
+        combatRound: {
+          round: 2,
+          durationMs: 6000,
+          turnOrder: ['Alice'],
+          actionsPerTurn: 3,
+        },
+        combatantAP: {},
+      }),
+      dispatch: vi.fn(),
+    })
+    rerender(<CombatBanner />)
+
+    // Timer must reset to full at the start of the new round.
+    expect(fill.getAttribute('style')).toContain('width: 100%')
+  })
+
   it('property: fill width is always a percentage in [0%, 100%]', () => {
     fc.assert(
       fc.property(
