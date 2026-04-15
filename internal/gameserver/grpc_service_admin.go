@@ -91,6 +91,47 @@ func (s *GameServiceServer) AdminMessagePlayer(_ context.Context, req *gamev1.Ad
 	return &gamev1.AdminMessageResponse{}, nil
 }
 
+// AdminListZones returns a summary of all zones loaded in the world manager.
+//
+// Precondition: s.world must be non-nil.
+// Postcondition: Returns all zones; never returns an error for an empty world.
+// REQ-AUI-1, REQ-AUI-2.
+func (s *GameServiceServer) AdminListZones(_ context.Context, _ *gamev1.AdminListZonesRequest) (*gamev1.AdminListZonesResponse, error) {
+	zones := s.world.AllZones()
+	out := make([]*gamev1.AdminZoneSummary, 0, len(zones))
+	for _, z := range zones {
+		out = append(out, &gamev1.AdminZoneSummary{
+			Id:          z.ID,
+			Name:        z.Name,
+			DangerLevel: z.DangerLevel,
+			RoomCount:   int32(len(z.Rooms)),
+		})
+	}
+	return &gamev1.AdminListZonesResponse{Zones: out}, nil
+}
+
+// AdminListRooms returns a summary of all rooms in the given zone.
+//
+// Precondition: req.ZoneId must be non-empty.
+// Postcondition: Returns codes.NotFound if zone does not exist; otherwise returns all rooms.
+// REQ-AUI-3.
+func (s *GameServiceServer) AdminListRooms(_ context.Context, req *gamev1.AdminListRoomsRequest) (*gamev1.AdminListRoomsResponse, error) {
+	zone, ok := s.world.GetZone(req.ZoneId)
+	if !ok {
+		return nil, status.Errorf(codes.NotFound, "zone %q not found", req.ZoneId)
+	}
+	out := make([]*gamev1.AdminRoomSummary, 0, len(zone.Rooms))
+	for _, r := range zone.Rooms {
+		out = append(out, &gamev1.AdminRoomSummary{
+			Id:          r.ID,
+			Title:       r.Title,
+			Description: r.Description,
+			DangerLevel: r.DangerLevel,
+		})
+	}
+	return &gamev1.AdminListRoomsResponse{Rooms: out}, nil
+}
+
 // AdminTeleportPlayer (REQ-AGA-7) teleports a player to a specific room by character and room ID.
 //
 // Precondition: req.CharId must identify an online player; req.RoomId must identify a loaded room.
