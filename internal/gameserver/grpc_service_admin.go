@@ -164,6 +164,48 @@ func (s *GameServiceServer) AdminUpdateRoom(_ context.Context, req *gamev1.Admin
 	return &gamev1.AdminUpdateRoomResponse{}, nil
 }
 
+// AdminListNPCTemplates returns a summary of all NPC templates registered in the NPC manager.
+//
+// Postcondition: Never returns error; returns empty list if no templates are registered.
+// REQ-AUI-6, REQ-AUI-7.
+func (s *GameServiceServer) AdminListNPCTemplates(_ context.Context, _ *gamev1.AdminListNPCTemplatesRequest) (*gamev1.AdminListNPCTemplatesResponse, error) {
+	templates := s.npcMgr.AllTemplates()
+	out := make([]*gamev1.AdminNPCTemplateSummary, 0, len(templates))
+	for _, tmpl := range templates {
+		out = append(out, &gamev1.AdminNPCTemplateSummary{
+			Id:    tmpl.ID,
+			Name:  tmpl.Name,
+			Level: int32(tmpl.Level),
+			Type:  tmpl.Type,
+		})
+	}
+	return &gamev1.AdminListNPCTemplatesResponse{Templates: out}, nil
+}
+
+// AdminSpawnNPC spawns count instances of the named template in the given room.
+//
+// Precondition: template_id must match a registered template; count must be in [1,20].
+// Postcondition: Returns codes.NotFound for unknown template; codes.InvalidArgument for
+// bad count; codes.Internal if any spawn fails; codes.OK with spawned_count otherwise.
+// REQ-AUI-8, REQ-AUI-9, REQ-AUI-10, REQ-AUI-11, REQ-AUI-12.
+func (s *GameServiceServer) AdminSpawnNPC(_ context.Context, req *gamev1.AdminSpawnNPCRequest) (*gamev1.AdminSpawnNPCResponse, error) {
+	if req.Count < 1 || req.Count > 20 {
+		return nil, status.Errorf(codes.InvalidArgument, "count must be in [1,20], got %d", req.Count)
+	}
+	tmpl := s.npcMgr.TemplateByID(req.TemplateId)
+	if tmpl == nil {
+		return nil, status.Errorf(codes.NotFound, "NPC template %q not found", req.TemplateId)
+	}
+	var spawned int32
+	for i := int32(0); i < req.Count; i++ {
+		if _, err := s.npcMgr.Spawn(tmpl, req.RoomId); err != nil {
+			return nil, status.Errorf(codes.Internal, "spawn %d/%d failed: %v", i+1, req.Count, err)
+		}
+		spawned++
+	}
+	return &gamev1.AdminSpawnNPCResponse{SpawnedCount: spawned}, nil
+}
+
 // AdminTeleportPlayer (REQ-AGA-7) teleports a player to a specific room by character and room ID.
 //
 // Precondition: req.CharId must identify an online player; req.RoomId must identify a loaded room.
