@@ -553,6 +553,10 @@ func NewGameServiceServer(
 			for _, sess := range sessions {
 				sess.Status = int32(1) // gamev1.CombatStatus_COMBAT_STATUS_IDLE
 				if sess.Conditions != nil {
+					// REQ-80-1: apply 1-minute Wrath cooldown before clearing encounter conditions.
+					if sess.Conditions.Has("wrath_active") {
+						sess.WrathCooldownUntil = time.Now().Add(time.Minute)
+					}
 					sess.Conditions.ClearEncounter()
 				}
 				sess.MaterialState.CombatUsed = make(map[string]bool)
@@ -8010,18 +8014,20 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string, targetX, 
 				if f.ID == "brutal_charge" {
 					return s.handleBrutalCharge(uid, targetID)
 				}
-				if f.ID == "rage" {
-					return s.handleRage(uid)
+				if f.ID == "wrath" {
+					return s.handleWrath(uid)
 				}
 				// REQ-60-1 / REQ-60-2: Overpower requires an empty off-hand and consumes 1 AP.
 				if f.ID == "overpower" {
 					return s.handleOverpower(uid)
 				}
 				// REQ-BUG-132: Adrenaline Surge requires the player to be Enraged.
-				if f.ID == "adrenaline_surge" && s.mentalStateMgr != nil {
-					sev := s.mentalStateMgr.CurrentSeverity(uid, mentalstate.TrackRage)
-					if sev < mentalstate.SeverityMod {
-						return messageEvent("You must be Enraged to use Adrenaline Surge."), nil
+				if f.ID == "adrenaline_surge" {
+					enraged := s.mentalStateMgr != nil &&
+						s.mentalStateMgr.CurrentSeverity(uid, mentalstate.TrackRage) >= mentalstate.SeverityMod
+					inWrath := sess != nil && sess.Conditions != nil && sess.Conditions.Has("wrath_active")
+					if !enraged && !inWrath {
+						return messageEvent("You must be in Wrath or Enraged to use Adrenaline Surge."), nil
 					}
 				}
 				condID := f.ConditionID
@@ -10587,22 +10593,25 @@ func formatResistanceMap(m map[string]int) string {
 	return strings.Join(parts, ", ")
 }
 
-// handleRage processes the "rage" active feat, advancing the player's Rage mental
-// state track to SeverityMod (Enraged). In combat: costs 1 AP.
+// handleWrath processes the "wrath" active feat (PF2E Barbarian Rage analogue).
+// Costs 1 AP in combat. Applies wrath_active condition (encounter duration, +2 damage,
+// blocks concentrate actions). Cannot be reactivated for 1 minute after it ends (REQ-80-1).
 //
-// Precondition: uid must be a valid player session; mentalStateMgr must be non-nil.
-// Postcondition: Rage track is at least SeverityMod; rage_enraged condition applied to session/combat.
-func (s *GameServiceServer) handleRage(uid string) (*gamev1.ServerEvent, error) {
+// Precondition: uid must be a valid player session; condRegistry must contain wrath_active.
+// Postcondition: wrath_active condition applied to combat or session conditions; 1 AP spent if in combat.
+func (s *GameServiceServer) handleWrath(uid string) (*gamev1.ServerEvent, error) {
 	sess, ok := s.sessions.GetPlayer(uid)
 	if !ok {
 		return nil, fmt.Errorf("player %q not found", uid)
 	}
-	if s.mentalStateMgr == nil {
-		return errorEvent("Mental state system unavailable."), nil
+	// Block if already in Wrath.
+	if sess.Conditions != nil && sess.Conditions.Has("wrath_active") {
+		return messageEvent("You are already in Wrath."), nil
 	}
-	current := s.mentalStateMgr.CurrentSeverity(uid, mentalstate.TrackRage)
-	if current >= mentalstate.SeverityMod {
-		return messageEvent("You are already enraged."), nil
+	// REQ-80-1: block if within the 1-minute cooldown window.
+	if time.Now().Before(sess.WrathCooldownUntil) {
+		remaining := time.Until(sess.WrathCooldownUntil).Round(time.Second)
+		return messageEvent(fmt.Sprintf("Your fury is spent. You cannot enter Wrath again for %v.", remaining)), nil
 	}
 	// Spend 1 AP when in active combat.
 	if sess.Status == statusInCombat && s.combatH != nil {
@@ -10610,21 +10619,30 @@ func (s *GameServiceServer) handleRage(uid string) (*gamev1.ServerEvent, error) 
 			return errorEvent(err.Error()), nil
 		}
 	}
-	changes := s.mentalStateMgr.ApplyTrigger(uid, mentalstate.TrackRage, mentalstate.SeverityMod)
-	if sess.Status == statusInCombat && s.combatH != nil {
-		msgs := s.combatH.applyMentalStateChanges(uid, changes)
-		narrative := "Fury overtakes you. You stop holding back."
-		if len(msgs) > 0 && msgs[0] != "" {
-			narrative = msgs[0]
+	// Apply wrath_active condition.
+	if s.condRegistry != nil {
+		if def, ok := s.condRegistry.Get("wrath_active"); ok {
+			var cbt *combat.Combat
+			if s.combatH != nil {
+				cbt = s.combatH.ActiveCombatForPlayer(uid)
+			}
+			if cbt != nil {
+				if applySet := cbt.Conditions[sess.UID]; applySet != nil {
+					if err := applySet.Apply(sess.UID, def, 1, -1); err != nil {
+						s.logger.Warn("handleWrath: failed to apply wrath_active (combat)",
+							zap.String("uid", uid), zap.Error(err))
+					}
+				}
+			}
+			if sess.Conditions != nil {
+				if err := sess.Conditions.Apply(sess.UID, def, 1, -1); err != nil {
+					s.logger.Warn("handleWrath: failed to apply wrath_active (session)",
+						zap.String("uid", uid), zap.Error(err))
+				}
+			}
 		}
-		return messageEvent(narrative), nil
 	}
-	applyMentalChangesToSession(sess, uid, changes, s.condRegistry, s.logger)
-	narrative := "Fury overtakes you. You stop holding back."
-	if len(changes) > 0 && changes[0].Message != "" {
-		narrative = changes[0].Message
-	}
-	return messageEvent(narrative), nil
+	return messageEvent("Fury overtakes you. You stop holding back."), nil
 }
 
 // handleOverpower activates the Overpower feat, applying the brutal_surge_active condition.

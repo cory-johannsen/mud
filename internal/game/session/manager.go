@@ -233,6 +233,10 @@ type PlayerSession struct {
 	// PendingBribeAmount is the credit cost of the pending bribe.
 	// Only valid when PendingBribeNPCName is non-empty.
 	PendingBribeAmount int
+	// WrathCooldownUntil is the wall-clock time until which the player cannot activate
+	// the Wrath class feat again. Zero value means no cooldown is active.
+	// REQ-80-1: Wrath cannot be reactivated for 1 minute after it ends.
+	WrathCooldownUntil time.Time
 	// DetainedUntil is non-nil when the player is serving a detention sentence.
 	// nil means not detained; non-nil is the wall-clock expiry time.
 	// REQ-WC-14a: persisted to DB.

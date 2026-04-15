@@ -1,0 +1,13 @@
+id: wrath_active
+name: Wrath Active
+description: |
+  You have channeled your battle fury into controlled violence. Melee strikes
+  deal extra damage. The intensity of your focus leaves no room for concentration.
+duration_type: encounter
+max_stacks: 0
+damage_bonus: 2
+restrict_actions:
+  - concentrate
+lua_on_apply: ""
+lua_on_remove: ""
+lua_on_tick: ""
