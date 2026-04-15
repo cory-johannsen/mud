@@ -71,6 +71,34 @@ func (s *Service) tierIndex(factionID, tierID string) int {
 	return -1
 }
 
+// TierIndex returns the 0-based index of the tier with the given ID within the faction, or -1.
+// Exported for use by external packages (e.g., tech trainer prerequisite evaluation).
+//
+// Precondition: factionID and tierID must be non-empty for meaningful results.
+// Postcondition: Returns -1 if the faction or tier is not found.
+func (s *Service) TierIndex(factionID, tierID string) int {
+	return s.tierIndex(factionID, tierID)
+}
+
+// PlayerMeetsTier returns true iff the player's faction rep in factionID is at or above
+// the tier identified by minTierID.
+//
+// Precondition: factionID, minTierID, and factionRep are non-nil for meaningful results.
+// Postcondition: Returns false if the faction or tier is unknown.
+func (s *Service) PlayerMeetsTier(factionID, minTierID string, factionRep map[string]int) bool {
+	rep := factionRep[factionID]
+	playerTier := s.TierFor(factionID, rep)
+	if playerTier == nil {
+		return false
+	}
+	playerIdx := s.tierIndex(factionID, playerTier.ID)
+	requiredIdx := s.tierIndex(factionID, minTierID)
+	if requiredIdx < 0 {
+		return false
+	}
+	return playerIdx >= requiredIdx
+}
+
 // IsHostile returns true iff factionB appears in factionA's HostileFactions list.
 //
 // Precondition: none.
