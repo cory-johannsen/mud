@@ -167,6 +167,7 @@ message ClientMessage {
     UncoverRequest       uncover_request       = 135;
     JobGrantsRequest     job_grants_request    = 136;
     QuestLogRequest      quest_log_request     = 137;
+    TrainTechRequest     train_tech            = 138;
   }
 }
 
@@ -254,6 +255,13 @@ message HealAmountRequest {
 message TrainJobRequest {
   string npc_name = 1;
   string job_id   = 2;
+}
+
+// TrainTechRequest asks a tech trainer NPC to teach the player a technology.
+// If tech_id is empty, the server returns a list of learnable options (list mode).
+message TrainTechRequest {
+  string npc_name = 1;
+  string tech_id  = 2;  // empty = list mode
 }
 
 // ListJobsRequest asks the server to list all jobs held by the player.
@@ -354,6 +362,7 @@ message ServerEvent {
     QuestGiverView       quest_giver_view       = 38;
     QuestLogView         quest_log_view         = 39;
     QuestCompleteEvent   quest_complete          = 40;
+    TechTrainerView      tech_trainer_view       = 41;
   }
 }
 
@@ -619,6 +628,23 @@ message TrainerView {
   string description          = 2;
   repeated JobOfferEntry jobs = 3;
   int32  player_currency      = 4;
+}
+
+// TechTrainerView lists technologies available from a tech trainer NPC.
+message TechTrainerView {
+  string npc_name                = 1;
+  string tradition               = 2;
+  repeated TechOfferEntry offers = 3;
+  int32  player_currency         = 4;
+}
+
+// TechOfferEntry describes one learnable technology at a tech trainer.
+message TechOfferEntry {
+  string tech_id      = 1;
+  string tech_name    = 2;
+  string description  = 3;
+  int32  cost         = 4;
+  int32  tech_level   = 5;
 }
 
 // FixerView delivers structured fixer NPC information in response to examine.
