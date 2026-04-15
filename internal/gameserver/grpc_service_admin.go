@@ -138,8 +138,13 @@ func (s *GameServiceServer) AdminListRooms(_ context.Context, req *gamev1.AdminL
 // AdminUpdateRoom applies a patch to a room's title, description, and/or danger_level.
 //
 // Precondition: req.RoomId must be non-empty; s.worldEditor must be non-nil.
-// Postcondition: Returns codes.InvalidArgument for empty room_id; codes.Internal if worldEditor
-// is not wired or SetRoomField fails; codes.OK on success. REQ-AUI-4, REQ-AUI-5.
+// Postcondition: Returns codes.InvalidArgument for empty room_id; codes.Internal if
+// worldEditor is not wired or SetRoomField fails; codes.OK on success (including when
+// all patch fields are empty — treated as a no-op). REQ-AUI-4, REQ-AUI-5.
+//
+// Note: the worldEditor nil-check precedes field iteration, so a no-op request
+// (all fields empty) still requires a non-nil worldEditor and returns codes.Internal
+// when worldEditor is nil, even if no fields would be applied.
 func (s *GameServiceServer) AdminUpdateRoom(_ context.Context, req *gamev1.AdminUpdateRoomRequest) (*gamev1.AdminUpdateRoomResponse, error) {
 	if req.RoomId == "" {
 		return nil, status.Error(codes.InvalidArgument, "room_id must not be empty")

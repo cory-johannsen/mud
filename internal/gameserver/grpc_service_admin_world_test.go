@@ -148,6 +148,48 @@ func TestAdminUpdateRoom_NilWorldEditor_ReturnsInternal(t *testing.T) {
 	assertAdminGRPCCode(t, err, codes.Internal)
 }
 
+// TestAdminUpdateRoom_NoopUpdate_NilEditor_ReturnsInternal verifies that a request
+// with a valid room_id but all empty patch fields still returns codes.Internal when
+// worldEditor is nil. The worldEditor nil-check precedes field iteration, so even a
+// no-op request requires a wired editor. REQ-AUI-4, REQ-AUI-5.
+func TestAdminUpdateRoom_NoopUpdate_NilEditor_ReturnsInternal(t *testing.T) {
+	svc, _ := newAdminSvc(t)
+	// newAdminSvc does not wire a worldEditor; s.worldEditor is nil.
+	// All patch fields are empty — this would be a no-op if the editor were wired,
+	// but the nil-check fires before the field loop, so codes.Internal is expected.
+	_, err := svc.AdminUpdateRoom(context.Background(), &gamev1.AdminUpdateRoomRequest{
+		RoomId:      "room_lg",
+		Title:       "",
+		Description: "",
+		DangerLevel: "",
+	})
+	require.Error(t, err)
+	assertAdminGRPCCode(t, err, codes.Internal)
+}
+
+// TestProperty_AdminUpdateRoom_EmptyRoomIDAlwaysInvalid is a property test verifying
+// that an empty room_id always returns codes.InvalidArgument, regardless of what other
+// fields contain. REQ-AUI-4.
+func TestProperty_AdminUpdateRoom_EmptyRoomIDAlwaysInvalid(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		svc, _ := newAdminSvc(t)
+		title := rapid.StringOf(rapid.RuneFrom([]rune("abcdefghijklmnopqrstuvwxyz "))).Draw(rt, "title")
+		_, err := svc.AdminUpdateRoom(context.Background(), &gamev1.AdminUpdateRoomRequest{
+			RoomId:      "",
+			Title:       title,
+			Description: "",
+			DangerLevel: "",
+		})
+		if err == nil {
+			rt.Fatal("expected error for empty room_id, got nil")
+		}
+		st, ok := status.FromError(err)
+		if !ok || st.Code() != codes.InvalidArgument {
+			rt.Fatalf("expected codes.InvalidArgument, got: %v", err)
+		}
+	})
+}
+
 // ---------------------------------------------------------------------------
 // AdminListNPCTemplates tests
 // REQ-AUI-6: AdminListNPCTemplates MUST return all registered NPC templates.
