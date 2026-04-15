@@ -593,6 +593,8 @@ func NewGameServiceServer(
 		}
 		// REQ-BUG61-1: wire pushCharacterSheet so the web UI Stats tab updates after XP award.
 		s.combatH.SetPushCharacterSheetFn(s.pushCharacterSheet)
+		// REQ-BUG99-1: wire applyLevelUpTechGrants so organic XP level-ups issue trainer quests.
+		s.combatH.SetOnLevelUpFn(s.applyLevelUpTechGrants)
 		// REQ-BUG92-1: wire pushInventory so the web UI Inventory tab updates after currency award.
 		s.combatH.SetPushInventoryFn(s.pushInventory)
 		// REQ-BUG96-1: wire saveInventory so looted items are persisted immediately.
@@ -2669,6 +2671,7 @@ func (s *GameServiceServer) handleMove(uid string, req *gamev1.MoveRequest) (*ga
 			}
 			// Award room discovery XP on first physical entry.
 			if s.xpSvc != nil {
+				oldLevel := sess.Level
 				if xpMsgs, xpErr := s.xpSvc.AwardRoomDiscovery(context.Background(), sess, sess.CharacterID); xpErr != nil {
 					s.logger.Warn("awarding room discovery XP", zap.String("uid", uid), zap.Error(xpErr))
 				} else {
@@ -2690,6 +2693,8 @@ func (s *GameServiceServer) handleMove(uid string, req *gamev1.MoveRequest) (*ga
 					if len(xpMsgs) > 0 {
 						s.pushHPUpdate(uid, sess)
 						s.pushCharacterSheet(sess)
+						// REQ-BUG99-3: apply tech grants for organic level-ups from room discovery XP.
+						s.applyLevelUpTechGrants(context.Background(), sess, oldLevel, sess.Level)
 					}
 				}
 			}
@@ -2967,6 +2972,7 @@ func (s *GameServiceServer) applyRoomSkillChecks(uid string, room *world.Room) [
 		// Award XP for successful skill checks.
 		if s.xpSvc != nil && (result.Outcome == skillcheck.CritSuccess || result.Outcome == skillcheck.Success) {
 			isCrit := result.Outcome == skillcheck.CritSuccess
+			oldLevel := sess.Level
 			if xpMsgs, xpErr := s.xpSvc.AwardSkillCheck(context.Background(), sess, trigger.Skill, trigger.DC, isCrit, sess.CharacterID); xpErr != nil {
 				s.logger.Warn("awarding skill check XP", zap.String("uid", uid), zap.Error(xpErr))
 			} else {
@@ -2974,6 +2980,8 @@ func (s *GameServiceServer) applyRoomSkillChecks(uid string, room *world.Room) [
 				if len(xpMsgs) > 0 {
 					s.pushHPUpdate(uid, sess)
 					s.pushCharacterSheet(sess)
+					// REQ-BUG99-4: apply tech grants for organic level-ups from skill check XP.
+					s.applyLevelUpTechGrants(context.Background(), sess, oldLevel, sess.Level)
 				}
 			}
 		}
@@ -3112,6 +3120,7 @@ func (s *GameServiceServer) applyNPCSkillChecks(uid string, roomID string) []str
 			// Award XP for successful NPC skill checks.
 			if s.xpSvc != nil && (result.Outcome == skillcheck.CritSuccess || result.Outcome == skillcheck.Success) {
 				isCrit := result.Outcome == skillcheck.CritSuccess
+				oldLevel := sess.Level
 				if xpMsgs, xpErr := s.xpSvc.AwardSkillCheck(context.Background(), sess, trigger.Skill, trigger.DC, isCrit, sess.CharacterID); xpErr != nil {
 					s.logger.Warn("awarding NPC skill check XP", zap.String("uid", uid), zap.Error(xpErr))
 				} else {
@@ -3119,6 +3128,8 @@ func (s *GameServiceServer) applyNPCSkillChecks(uid string, roomID string) []str
 					if len(xpMsgs) > 0 {
 						s.pushHPUpdate(uid, sess)
 						s.pushCharacterSheet(sess)
+						// REQ-BUG99-5: apply tech grants for organic level-ups from NPC skill check XP.
+						s.applyLevelUpTechGrants(context.Background(), sess, oldLevel, sess.Level)
 					}
 				}
 			}
@@ -11416,6 +11427,143 @@ func (s *GameServiceServer) issueTechTrainerQuests(
 	}
 }
 
+// applyLevelUpTechGrants processes technology grants for each level gained between
+// fromLevel+1 and toLevel (inclusive). Immediate grants (pool <= open slots) are applied
+// at once; deferred L2+ grants are stored in sess.PendingTechGrants, persisted, and
+// the matching find-trainer quest is auto-issued (REQ-TTA-7).
+//
+// Precondition: sess non-nil; fromLevel >= 0; toLevel >= fromLevel; sess.CharacterID > 0.
+// Postcondition: PendingTechGrants updated; trainer quests issued for deferred L2+ grants.
+func (s *GameServiceServer) applyLevelUpTechGrants(ctx context.Context, sess *session.PlayerSession, fromLevel, toLevel int) {
+	if s.hardwiredTechRepo == nil || s.jobRegistry == nil || sess.CharacterID <= 0 {
+		return
+	}
+	job, ok := s.jobRegistry.Job(sess.Class)
+	if !ok {
+		return
+	}
+	var archetypeLevelUpGrants map[int]*ruleset.TechnologyGrants
+	if job.Archetype != "" {
+		if archetype, archetypeOK := s.archetypes[job.Archetype]; archetypeOK {
+			archetypeLevelUpGrants = archetype.LevelUpGrants
+		}
+	}
+	mergedLevelUpGrants := ruleset.MergeLevelUpGrants(archetypeLevelUpGrants, job.LevelUpGrants)
+	if sess.PendingTechGrants == nil {
+		sess.PendingTechGrants = make(map[int]*ruleset.TechnologyGrants)
+	}
+	for lvl := fromLevel + 1; lvl <= toLevel; lvl++ {
+		techGrants, hasGrants := mergedLevelUpGrants[lvl]
+		if !hasGrants {
+			continue
+		}
+		immediate, deferred := PartitionTechGrants(techGrants)
+		if immediate != nil {
+			hwBefore := append([]string{}, sess.HardwiredTechs...)
+			prepBefore := snapshotPreparedTechIDs(sess.PreparedTechs)
+			spontBefore := snapshotSpontaneousTechIDs(sess.SpontaneousTechs)
+
+			if err := LevelUpTechnologies(ctx, sess, sess.CharacterID,
+				immediate, s.techRegistry, nil,
+				s.hardwiredTechRepo, s.preparedTechRepo,
+				s.spontaneousTechRepo, s.innateTechRepo, s.spontaneousUsePoolRepo,
+			); err != nil {
+				s.logger.Warn("applyLevelUpTechGrants: LevelUpTechnologies failed",
+					zap.Int64("character_id", sess.CharacterID),
+					zap.Int("level", lvl),
+					zap.Error(err))
+			}
+
+			for _, id := range newTechIDs(hwBefore, sess.HardwiredTechs) {
+				notifMsg := messageEvent(fmt.Sprintf("You gained %s (auto-assigned).", id))
+				if data, mErr := proto.Marshal(notifMsg); mErr == nil {
+					_ = sess.Entity.Push(data)
+				}
+			}
+			for _, id := range newTechIDsFromPrepared(prepBefore, sess.PreparedTechs) {
+				notifMsg := messageEvent(fmt.Sprintf("You gained %s (auto-assigned).", id))
+				if data, mErr := proto.Marshal(notifMsg); mErr == nil {
+					_ = sess.Entity.Push(data)
+				}
+			}
+			for _, id := range newTechIDsFromSpontaneous(spontBefore, sess.SpontaneousTechs) {
+				notifMsg := messageEvent(fmt.Sprintf("You gained %s (auto-assigned).", id))
+				if data, mErr := proto.Marshal(notifMsg); mErr == nil {
+					_ = sess.Entity.Push(data)
+				}
+			}
+		}
+		if deferred != nil {
+			sess.PendingTechGrants[lvl] = deferred
+			// REQ-TTA-12: persist L2+ pending slots so trainer can resolve on login.
+			if s.pendingTechSlotsRepo != nil && sess.CharacterID > 0 {
+				if deferred.Prepared != nil {
+					for techLvl, slots := range deferred.Prepared.SlotsByLevel {
+						if techLvl < 2 {
+							continue
+						}
+						tradition := ""
+						for _, e := range deferred.Prepared.Pool {
+							if e.Level == techLvl && s.techRegistry != nil {
+								if def, ok := s.techRegistry.Get(e.ID); ok {
+									tradition = string(def.Tradition)
+									break
+								}
+							}
+						}
+						for i := 0; i < slots; i++ {
+							if err := s.pendingTechSlotsRepo.AddPendingTechSlot(
+								ctx, sess.CharacterID, lvl, techLvl, tradition, "prepared",
+							); err != nil {
+								s.logger.Warn("applyLevelUpTechGrants: AddPendingTechSlot failed", zap.Error(err))
+							}
+						}
+					}
+				}
+				if deferred.Spontaneous != nil {
+					for techLvl, slots := range deferred.Spontaneous.KnownByLevel {
+						if techLvl < 2 {
+							continue
+						}
+						tradition := ""
+						for _, e := range deferred.Spontaneous.Pool {
+							if e.Level == techLvl && s.techRegistry != nil {
+								if def, ok := s.techRegistry.Get(e.ID); ok {
+									tradition = string(def.Tradition)
+									break
+								}
+							}
+						}
+						for i := 0; i < slots; i++ {
+							if err := s.pendingTechSlotsRepo.AddPendingTechSlot(
+								ctx, sess.CharacterID, lvl, techLvl, tradition, "spontaneous",
+							); err != nil {
+								s.logger.Warn("applyLevelUpTechGrants: AddPendingTechSlot failed", zap.Error(err))
+							}
+						}
+					}
+				}
+			}
+			// REQ-TTA-7: auto-issue find-trainer quests for L2+ pending traditions.
+			s.issueTechTrainerQuests(ctx, sess, lvl, deferred)
+		}
+	}
+	if len(sess.PendingTechGrants) > 0 && s.progressRepo != nil {
+		levels := make([]int, 0, len(sess.PendingTechGrants))
+		for lvl := range sess.PendingTechGrants {
+			levels = append(levels, lvl)
+		}
+		sort.Ints(levels)
+		if err := s.progressRepo.SetPendingTechLevels(ctx, sess.CharacterID, levels); err != nil {
+			s.logger.Warn("applyLevelUpTechGrants: SetPendingTechLevels failed", zap.Error(err))
+		}
+		selectNotif := messageEvent("You have pending technology selections! Type 'selecttech' to choose your technologies.")
+		if data, mErr := proto.Marshal(selectNotif); mErr == nil {
+			_ = sess.Entity.Push(data)
+		}
+	}
+}
+
 // handleGrant awards XP, money, or an item to a named or room-scoped player (editor/admin command).
 //
 // Precondition: uid identifies an active session with role "editor" or "admin"; req is non-nil.
@@ -11528,135 +11676,9 @@ func (s *GameServiceServer) handleGrant(uid string, req *gamev1.GrantRequest) (*
 					}
 				}
 				levelMsgs = append(levelMsgs, "You earned 1 hero point!")
-				// Apply technology level-up grants for each level gained (ascending order).
-				// Grants come from the archetype (primary) and job (secondary), merged per level.
-				// Immediate grants (pool <= open slots) are auto-assigned and a notification is
-				// pushed to the target. Deferred grants (pool > open slots, player must choose)
-				// are stored in PendingTechGrants and persisted via progressRepo.
-				if s.hardwiredTechRepo != nil && s.jobRegistry != nil && target.CharacterID > 0 {
-					if job, ok := s.jobRegistry.Job(target.Class); ok {
-						var archetypeLevelUpGrants map[int]*ruleset.TechnologyGrants
-						if job.Archetype != "" {
-							if archetype, archetypeOK := s.archetypes[job.Archetype]; archetypeOK {
-								archetypeLevelUpGrants = archetype.LevelUpGrants
-							}
-						}
-						mergedLevelUpGrants := ruleset.MergeLevelUpGrants(archetypeLevelUpGrants, job.LevelUpGrants)
-						if target.PendingTechGrants == nil {
-							target.PendingTechGrants = make(map[int]*ruleset.TechnologyGrants)
-						}
-						for lvl := oldLevel + 1; lvl <= result.NewLevel; lvl++ {
-							techGrants, hasGrants := mergedLevelUpGrants[lvl]
-							if !hasGrants {
-								continue
-							}
-							immediate, deferred := PartitionTechGrants(techGrants)
-							if immediate != nil {
-								hwBefore := append([]string{}, target.HardwiredTechs...)
-								prepBefore := snapshotPreparedTechIDs(target.PreparedTechs)
-								spontBefore := snapshotSpontaneousTechIDs(target.SpontaneousTechs)
-
-								if err := LevelUpTechnologies(ctx, target, target.CharacterID,
-									immediate, s.techRegistry, nil,
-									s.hardwiredTechRepo, s.preparedTechRepo,
-									s.spontaneousTechRepo, s.innateTechRepo, s.spontaneousUsePoolRepo,
-								); err != nil {
-									s.logger.Warn("handleGrant: LevelUpTechnologies failed",
-										zap.Int64("character_id", target.CharacterID),
-										zap.Int("level", lvl),
-										zap.Error(err))
-								}
-
-								for _, id := range newTechIDs(hwBefore, target.HardwiredTechs) {
-									notifMsg := messageEvent(fmt.Sprintf("You gained %s (auto-assigned).", id))
-									if data, mErr := proto.Marshal(notifMsg); mErr == nil {
-										_ = target.Entity.Push(data)
-									}
-								}
-								for _, id := range newTechIDsFromPrepared(prepBefore, target.PreparedTechs) {
-									notifMsg := messageEvent(fmt.Sprintf("You gained %s (auto-assigned).", id))
-									if data, mErr := proto.Marshal(notifMsg); mErr == nil {
-										_ = target.Entity.Push(data)
-									}
-								}
-								for _, id := range newTechIDsFromSpontaneous(spontBefore, target.SpontaneousTechs) {
-									notifMsg := messageEvent(fmt.Sprintf("You gained %s (auto-assigned).", id))
-									if data, mErr := proto.Marshal(notifMsg); mErr == nil {
-										_ = target.Entity.Push(data)
-									}
-								}
-							}
-							if deferred != nil {
-								target.PendingTechGrants[lvl] = deferred
-								// REQ-TTA-12: persist L2+ pending slots so trainer can resolve on login.
-								if s.pendingTechSlotsRepo != nil && target.CharacterID > 0 {
-									if deferred.Prepared != nil {
-										for techLvl, slots := range deferred.Prepared.SlotsByLevel {
-											if techLvl < 2 {
-												continue
-											}
-											tradition := ""
-											for _, e := range deferred.Prepared.Pool {
-												if e.Level == techLvl && s.techRegistry != nil {
-													if def, ok := s.techRegistry.Get(e.ID); ok {
-														tradition = string(def.Tradition)
-														break
-													}
-												}
-											}
-											for i := 0; i < slots; i++ {
-												if err := s.pendingTechSlotsRepo.AddPendingTechSlot(
-													ctx, target.CharacterID, lvl, techLvl, tradition, "prepared",
-												); err != nil {
-													s.logger.Warn("handleGrant: AddPendingTechSlot failed", zap.Error(err))
-												}
-											}
-										}
-									}
-									if deferred.Spontaneous != nil {
-										for techLvl, slots := range deferred.Spontaneous.KnownByLevel {
-											if techLvl < 2 {
-												continue
-											}
-											tradition := ""
-											for _, e := range deferred.Spontaneous.Pool {
-												if e.Level == techLvl && s.techRegistry != nil {
-													if def, ok := s.techRegistry.Get(e.ID); ok {
-														tradition = string(def.Tradition)
-														break
-													}
-												}
-											}
-											for i := 0; i < slots; i++ {
-												if err := s.pendingTechSlotsRepo.AddPendingTechSlot(
-													ctx, target.CharacterID, lvl, techLvl, tradition, "spontaneous",
-												); err != nil {
-													s.logger.Warn("handleGrant: AddPendingTechSlot failed", zap.Error(err))
-												}
-											}
-										}
-									}
-								}
-								// REQ-TTA-7: auto-issue find-trainer quests for L2+ pending traditions.
-								s.issueTechTrainerQuests(ctx, target, lvl, deferred)
-							}
-						}
-						if len(target.PendingTechGrants) > 0 && s.progressRepo != nil {
-							levels := make([]int, 0, len(target.PendingTechGrants))
-							for lvl := range target.PendingTechGrants {
-								levels = append(levels, lvl)
-							}
-							sort.Ints(levels)
-							if err := s.progressRepo.SetPendingTechLevels(ctx, target.CharacterID, levels); err != nil {
-								s.logger.Warn("handleGrant: SetPendingTechLevels failed", zap.Error(err))
-							}
-							selectNotif := messageEvent("You have pending technology selections! Type 'selecttech' to choose your technologies.")
-							if data, mErr := proto.Marshal(selectNotif); mErr == nil {
-								_ = target.Entity.Push(data)
-							}
-						}
-					}
-				}
+				// REQ-BUG99-2: apply technology level-up grants via shared method so all
+				// grant paths (admin and organic) behave identically.
+				s.applyLevelUpTechGrants(ctx, target, oldLevel, result.NewLevel)
 			}
 			// Apply feat level-up grants for each level gained.
 			// Fixed feats are granted immediately; choice feats are auto-picked

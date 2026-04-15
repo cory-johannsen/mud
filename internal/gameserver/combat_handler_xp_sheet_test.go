@@ -47,7 +47,7 @@ func TestPushXPMessages_CallsPushCharacterSheetFn(t *testing.T) {
 	}
 
 	// No level-up messages (empty slice).
-	h.pushXPMessages(sess, nil, 50, "Goblin")
+	h.pushXPMessages(sess, nil, 50, "Goblin", sess.Level)
 
 	mu.Lock()
 	defer mu.Unlock()
@@ -79,7 +79,7 @@ func TestPushXPMessages_CallsPushCharacterSheetFn_WithLevelUp(t *testing.T) {
 	}
 
 	levelUpMsgs := []string{"You leveled up to level 2!"}
-	h.pushXPMessages(sess, levelUpMsgs, 200, "Boss")
+	h.pushXPMessages(sess, levelUpMsgs, 200, "Boss", 1)
 
 	assert.Equal(t, int32(1), atomic.LoadInt32(&callCount),
 		"pushCharacterSheetFn must be called exactly once even with level-up messages")
@@ -115,7 +115,7 @@ func TestProperty_PushXPMessages_AlwaysCallsCharacterSheetFn(t *testing.T) {
 			Entity:    session.NewBridgeEntity("prop-player", 64),
 		}
 
-		h.pushXPMessages(sess, levelMsgs, xpAmount, "NPC")
+		h.pushXPMessages(sess, levelMsgs, xpAmount, "NPC", sess.Level)
 
 		assert.Equal(rt, int32(1), atomic.LoadInt32(&callCount),
 			"pushCharacterSheetFn must be called exactly once per XP award")

@@ -129,6 +129,10 @@ type CombatHandler struct {
 	// saveInventoryFn is an optional callback invoked after items are directly granted to a
 	// player's backpack to persist the new inventory state. May be nil; persistence is skipped.
 	saveInventoryFn func(sess *session.PlayerSession) error
+	// onLevelUpFn is an optional callback invoked when a player levels up during combat XP award.
+	// fromLevel is the level before the award; toLevel is the level after.
+	// May be nil; no-op when nil.
+	onLevelUpFn func(ctx context.Context, sess *session.PlayerSession, fromLevel, toLevel int)
 }
 
 // NewCombatHandler creates a CombatHandler with a round timer and broadcast function.
@@ -287,6 +291,15 @@ func (h *CombatHandler) SetPushInventoryFn(fn func(sess *session.PlayerSession))
 // Postcondition: fn is called once per player after their backpack is updated with loot.
 func (h *CombatHandler) SetSaveInventoryFn(fn func(sess *session.PlayerSession) error) {
 	h.saveInventoryFn = fn
+}
+
+// SetOnLevelUpFn registers a callback invoked when organic XP causes a level-up,
+// used to apply technology grants from the new level(s).
+//
+// Precondition: fn may be nil (no-op when nil).
+// Postcondition: fn is called once per level-up with fromLevel and toLevel.
+func (h *CombatHandler) SetOnLevelUpFn(fn func(ctx context.Context, sess *session.PlayerSession, fromLevel, toLevel int)) {
+	h.onLevelUpFn = fn
 }
 
 // SetCurrencySaver registers the saver used to persist player currency after loot award.
@@ -4161,9 +4174,10 @@ func (h *CombatHandler) removeDeadNPCsLocked(cbt *combat.Combat) {
 				share := totalXP / len(livingParticipants)
 				if share == 0 && totalXP > 0 {
 					p := livingParticipants[0]
+					oldLevel := p.Level
 					xpMsgs, xpErr := h.xpSvc.AwardXPAmount(context.Background(), p, p.CharacterID, 1)
 					if xpErr == nil {
-						h.pushXPMessages(p, xpMsgs, 1, c.Name)
+						h.pushXPMessages(p, xpMsgs, 1, c.Name, oldLevel)
 					} else if h.logger != nil {
 						h.logger.Warn("AwardXPAmount failed",
 							zap.String("uid", p.UID),
@@ -4172,9 +4186,10 @@ func (h *CombatHandler) removeDeadNPCsLocked(cbt *combat.Combat) {
 					}
 				} else {
 					for _, p := range livingParticipants {
+						oldLevel := p.Level
 						xpMsgs, xpErr := h.xpSvc.AwardXPAmount(context.Background(), p, p.CharacterID, share)
 						if xpErr == nil {
-							h.pushXPMessages(p, xpMsgs, share, c.Name)
+							h.pushXPMessages(p, xpMsgs, share, c.Name, oldLevel)
 						} else if h.logger != nil {
 							h.logger.Warn("AwardXPAmount failed",
 								zap.String("uid", p.UID),
@@ -4198,9 +4213,10 @@ func (h *CombatHandler) removeDeadNPCsLocked(cbt *combat.Combat) {
 				if tierForBonus == "boss" {
 					allRoomPlayers := h.sessions.PlayersInRoomDetails(roomID)
 					for _, p := range allRoomPlayers {
+						oldLevel := p.Level
 						xpMsgs, xpErr := h.xpSvc.AwardXPAmount(context.Background(), p, p.CharacterID, bonusXP)
 						if xpErr == nil {
-							h.pushXPMessages(p, xpMsgs, bonusXP, "boss kill bonus")
+							h.pushXPMessages(p, xpMsgs, bonusXP, "boss kill bonus", oldLevel)
 						} else if h.logger != nil {
 							h.logger.Warn("boss kill bonus XP failed",
 								zap.String("uid", p.UID),
@@ -4323,9 +4339,10 @@ func (h *CombatHandler) distributeCurrencyLocked(ctx context.Context, livingPart
 
 // pushXPMessages sends XP narrative messages to sess after an AwardXPAmount call.
 //
-// Precondition: sess must not be nil; xpAmount must be >= 0.
-// Postcondition: XP grant message and any level-up messages are pushed to the player's entity stream.
-func (h *CombatHandler) pushXPMessages(sess *session.PlayerSession, levelMsgs []string, xpAmount int, npcName string) {
+// Precondition: sess must not be nil; xpAmount must be >= 0; fromLevel is the level before the award.
+// Postcondition: XP grant message and any level-up messages are pushed to the player's entity stream;
+// onLevelUpFn is called if a level-up occurred and onLevelUpFn is non-nil.
+func (h *CombatHandler) pushXPMessages(sess *session.PlayerSession, levelMsgs []string, xpAmount int, npcName string, fromLevel int) {
 	xpGrantEvt := &gamev1.ServerEvent{
 		Payload: &gamev1.ServerEvent_Message{
 			Message: &gamev1.MessageEvent{
@@ -4366,6 +4383,10 @@ func (h *CombatHandler) pushXPMessages(sess *session.PlayerSession, levelMsgs []
 	// Push an updated CharacterSheetView so the web UI Stats tab reflects the new XP total.
 	if h.pushCharacterSheetFn != nil {
 		h.pushCharacterSheetFn(sess)
+	}
+	// REQ-BUG99-6: invoke onLevelUpFn for organic XP level-ups so tech trainer quests are issued.
+	if len(levelMsgs) > 0 && h.onLevelUpFn != nil {
+		h.onLevelUpFn(context.Background(), sess, fromLevel, sess.Level)
 	}
 }
 
