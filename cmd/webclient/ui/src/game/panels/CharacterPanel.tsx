@@ -179,6 +179,8 @@ export function CharacterPanel() {
   const hpPct = maxHp > 0 ? (currentHp / maxHp) * 100 : 0
   const hpClass = hpPct > 50 ? 'hp-green' : hpPct > 25 ? 'hp-yellow' : 'hp-red'
   const conditions = state.roomView?.activeConditions ?? state.roomView?.active_conditions ?? []
+  const coverConditionIDs = new Set(['greater_cover', 'standard_cover', 'lesser_cover'])
+  const inCover = conditions.some(c => typeof c !== 'string' && coverConditionIDs.has((c as { id?: string }).id ?? ''))
   const xp = characterSheet?.experience ?? 0
   const xpToNext = characterSheet?.xpToNext ?? characterSheet?.xp_to_next ?? 0
   const xpPct = xpToNext > 0 ? Math.min(100, (xp / xpToNext) * 100) : 100
@@ -230,6 +232,16 @@ export function CharacterPanel() {
           </div>
         )}
 
+        {inCover && (
+          <button
+            style={styles.leaveCoverBtn}
+            onClick={() => sendMessage('UncoverRequest', {})}
+            type="button"
+          >
+            Leave Cover
+          </button>
+        )}
+
         {characterSheet && (
           <>
             <span className="hero-points">✦ Hero: {heroPoints}</span>
@@ -279,6 +291,19 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: '0.72rem',
     padding: '0.15rem 0.4rem',
     textAlign: 'left',
+  },
+  leaveCoverBtn: {
+    background: '#2a1a1a',
+    border: '1px solid #c64',
+    color: '#c86',
+    borderRadius: '3px',
+    cursor: 'pointer',
+    fontFamily: 'monospace',
+    fontSize: '0.72rem',
+    padding: '0.15rem 0.4rem',
+    marginTop: '0.25rem',
+    width: '100%',
+    textAlign: 'left' as const,
   },
 }
 
