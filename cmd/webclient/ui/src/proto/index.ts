@@ -271,6 +271,8 @@ export interface CharacterSheetView {
   off_hand_prof_bonus?: number
   offHandProfRank?: string
   off_hand_prof_rank?: string
+  exploreMode?: string
+  explore_mode?: string
 }
 
 export interface QuestObjectiveView {

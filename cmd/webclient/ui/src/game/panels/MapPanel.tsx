@@ -235,10 +235,27 @@ export function MapPanel() {
     )
   }
 
+  const exploreMode = state.characterSheet?.exploreMode ?? state.characterSheet?.explore_mode ?? ''
+  const EXPLORE_MODE_LABELS: Record<string, string> = {
+    lay_low: 'Lay Low',
+    hold_ground: 'Hold Ground',
+    active_sensors: 'Active Sensors',
+    case_it: 'Case It',
+    run_point: 'Run Point',
+    shadow: 'Shadow',
+    poke_around: 'Poke Around',
+  }
+  const exploreModeLabel = exploreMode ? (EXPLORE_MODE_LABELS[exploreMode] ?? exploreMode) : ''
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       <div className="map-header">
         <h3>{showWorld ? 'World Map' : 'Zone Map'}</h3>
+        {!showWorld && exploreModeLabel && (
+          <span style={{ color: '#8d4', fontSize: '0.72rem', fontFamily: 'monospace', fontWeight: 600, flex: 1, textAlign: 'center' }}>
+            ◆ {exploreModeLabel}
+          </span>
+        )}
         <div style={{ display: 'flex', gap: '0.3rem' }}>
           <button
             className={`map-refresh-btn${!showWorld ? ' active' : ''}`}
