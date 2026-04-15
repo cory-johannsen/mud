@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
+	"go.uber.org/zap"
 )
 
 // grpcWorldEditor implements WorldEditor via the gameserver admin gRPC RPCs.
@@ -12,19 +13,25 @@ import (
 // Precondition: client must be non-nil.
 // Postcondition: Each method makes one unary gRPC call and maps the result to the
 // handlers layer types; gRPC errors are propagated as-is.
+//
+// Note: All gRPC calls use context.Background() because the WorldEditor interface
+// does not thread request contexts. Admin operations are low-frequency and
+// operator-facing, making this a known acceptable trade-off.
 type grpcWorldEditor struct {
 	client gamev1.GameServiceClient
+	logger *zap.Logger
 }
 
 // NewGRPCWorldEditor returns a WorldEditor backed by the gameserver admin gRPC RPCs.
-func NewGRPCWorldEditor(client gamev1.GameServiceClient) WorldEditor {
-	return &grpcWorldEditor{client: client}
+func NewGRPCWorldEditor(client gamev1.GameServiceClient, logger *zap.Logger) WorldEditor {
+	return &grpcWorldEditor{client: client, logger: logger}
 }
 
 // AllZones calls AdminListZones and maps the result to []ZoneSummary.
 func (g *grpcWorldEditor) AllZones() []ZoneSummary {
 	resp, err := g.client.AdminListZones(context.Background(), &gamev1.AdminListZonesRequest{})
 	if err != nil {
+		g.logger.Error("AdminListZones failed", zap.Error(err))
 		return []ZoneSummary{}
 	}
 	out := make([]ZoneSummary, 0, len(resp.Zones))
@@ -72,6 +79,7 @@ func (g *grpcWorldEditor) UpdateRoom(roomID string, patch RoomPatch) error {
 func (g *grpcWorldEditor) AllNPCTemplates() []NPCTemplate {
 	resp, err := g.client.AdminListNPCTemplates(context.Background(), &gamev1.AdminListNPCTemplatesRequest{})
 	if err != nil {
+		g.logger.Error("AdminListNPCTemplates failed", zap.Error(err))
 		return []NPCTemplate{}
 	}
 	out := make([]NPCTemplate, 0, len(resp.Templates))
