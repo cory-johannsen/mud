@@ -101,12 +101,20 @@ export function JobDrawer({ onClose }: { onClose: () => void }) {
                       <div style={{ fontSize: '0.75rem', color: '#888', marginBottom: '4px', borderBottom: '1px solid #333', paddingBottom: '2px' }}>
                         Level {level}
                       </div>
-                      {feats.map((g, i) => (
-                        <div key={`feat-${i}`} style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '3px', paddingLeft: '4px' }}>
-                          <span style={{ fontSize: '0.7rem', color: '#a0c8ff', background: 'rgba(100,150,255,0.15)', border: '1px solid rgba(100,150,255,0.3)', borderRadius: '4px', padding: '0 4px' }}>feat</span>
-                          <span style={{ color: '#ddd', fontSize: '0.85rem' }}>{g.featName ?? g.feat_name ?? g.featId ?? g.feat_id}</span>
-                        </div>
-                      ))}
+                      {feats.map((g, i) => {
+                        const fid = g.featId ?? g.feat_id ?? ''
+                        const fname = g.featName ?? g.feat_name ?? ''
+                        const isPending = !fid && !fname
+                        return (
+                          <div key={`feat-${i}`} style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '3px', paddingLeft: '4px' }}>
+                            <span style={{ fontSize: '0.7rem', color: '#a0c8ff', background: 'rgba(100,150,255,0.15)', border: '1px solid rgba(100,150,255,0.3)', borderRadius: '4px', padding: '0 4px' }}>feat</span>
+                            {isPending
+                              ? <span style={{ color: '#e0c060', fontSize: '0.85rem', fontStyle: 'italic' }}>Pending choice</span>
+                              : <span style={{ color: '#ddd', fontSize: '0.85rem' }}>{fname || fid}</span>
+                            }
+                          </div>
+                        )
+                      })}
                       {techs.map((g, i) => {
                         const type = g.techType ?? g.tech_type ?? ''
                         const techLvl = g.techLevel ?? g.tech_level ?? 0
