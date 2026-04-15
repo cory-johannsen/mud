@@ -620,6 +620,28 @@ export interface JobFeatGrant {
   feat_name?: string
 }
 
+export interface FeatOption {
+  featId?: string
+  feat_id?: string
+  name?: string
+  description?: string
+  category?: string
+}
+
+export interface PendingFeatChoice {
+  grantLevel?: number
+  grant_level?: number
+  count?: number
+  options?: FeatOption[]
+}
+
+export interface ChooseFeatRequest {
+  grantLevel?: number
+  grant_level?: number
+  featId?: string
+  feat_id?: string
+}
+
 export interface JobTechGrant {
   grantLevel?: number
   grant_level?: number
@@ -638,6 +660,8 @@ export interface JobGrantsResponse {
   feat_grants?: JobFeatGrant[]
   techGrants?: JobTechGrant[]
   tech_grants?: JobTechGrant[]
+  pendingFeatChoices?: PendingFeatChoice[]
+  pending_feat_choices?: PendingFeatChoice[]
 }
 
 export interface LoadoutWeaponPreset {
