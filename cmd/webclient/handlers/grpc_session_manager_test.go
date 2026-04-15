@@ -47,6 +47,26 @@ func (m *mockGameServiceClient) AdminTeleportPlayer(_ context.Context, in *gamev
 	return &gamev1.AdminTeleportResponse{}, m.teleportErr
 }
 
+func (m *mockGameServiceClient) AdminListZones(_ context.Context, _ *gamev1.AdminListZonesRequest, _ ...grpc.CallOption) (*gamev1.AdminListZonesResponse, error) {
+	panic("not used in tests")
+}
+
+func (m *mockGameServiceClient) AdminListRooms(_ context.Context, _ *gamev1.AdminListRoomsRequest, _ ...grpc.CallOption) (*gamev1.AdminListRoomsResponse, error) {
+	panic("not used in tests")
+}
+
+func (m *mockGameServiceClient) AdminUpdateRoom(_ context.Context, _ *gamev1.AdminUpdateRoomRequest, _ ...grpc.CallOption) (*gamev1.AdminUpdateRoomResponse, error) {
+	panic("not used in tests")
+}
+
+func (m *mockGameServiceClient) AdminListNPCTemplates(_ context.Context, _ *gamev1.AdminListNPCTemplatesRequest, _ ...grpc.CallOption) (*gamev1.AdminListNPCTemplatesResponse, error) {
+	panic("not used in tests")
+}
+
+func (m *mockGameServiceClient) AdminSpawnNPC(_ context.Context, _ *gamev1.AdminSpawnNPCRequest, _ ...grpc.CallOption) (*gamev1.AdminSpawnNPCResponse, error) {
+	panic("not used in tests")
+}
+
 // TestGRPCSessionManager_AllSessions_MapsFields verifies that two AdminSessionInfo entries
 // are correctly mapped to ManagedSession implementations.
 func TestGRPCSessionManager_AllSessions_MapsFields(t *testing.T) {

@@ -249,12 +249,10 @@ func (s *Server) registerRoutes(mux *http.ServeMux) {
 	mux.Handle("GET /ws", http.HandlerFunc(wsHandler.ServeHTTP))
 
 	// Admin API — all protected by JWT + RequireAdminRole.
-	// WorldEditor and SessionManager are not yet wired from the game server;
-	// a no-op implementation is used so routes are live and testable.
 	adminHandler := handlers.NewAdminHandler(
 		handlers.NewGRPCSessionManager(s.gameClient),
 		s.accountRepo,
-		handlers.NewNoOpWorldEditor(),
+		handlers.NewGRPCWorldEditor(s.gameClient, s.logger),
 		s.bus,
 	)
 	mux.Handle("GET /api/admin/players", s.adminMiddleware(http.HandlerFunc(adminHandler.HandleListPlayers)))

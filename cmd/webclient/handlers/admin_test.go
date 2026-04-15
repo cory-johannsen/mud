@@ -133,6 +133,7 @@ func (w *stubWorldEditor) UpdateRoom(roomID string, patch handlers.RoomPatch) er
 	return nil
 }
 func (w *stubWorldEditor) AllNPCTemplates() []handlers.NPCTemplate { return nil }
+func (w *stubWorldEditor) SpawnNPC(_ string, _ string, _ int) (int, error)  { return 0, nil }
 
 // ---- Test helpers ----
 
