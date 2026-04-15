@@ -91,3 +91,36 @@ func TestProperty_AdminListZones_NeverErrors(t *testing.T) {
 		}
 	})
 }
+
+// ---------------------------------------------------------------------------
+// AdminUpdateRoom tests
+// REQ-AUI-4: AdminUpdateRoom MUST reject empty room_id with codes.InvalidArgument.
+// REQ-AUI-5: AdminUpdateRoom MUST return codes.Internal when world editor is not wired.
+// ---------------------------------------------------------------------------
+
+// TestAdminUpdateRoom_EmptyRoomID_ReturnsInvalidArgument verifies that an empty
+// room_id is rejected. REQ-AUI-4.
+func TestAdminUpdateRoom_EmptyRoomID_ReturnsInvalidArgument(t *testing.T) {
+	svc, _ := newAdminSvc(t)
+	_, err := svc.AdminUpdateRoom(context.Background(), &gamev1.AdminUpdateRoomRequest{
+		RoomId: "",
+		Title:  "Title",
+	})
+	require.Error(t, err)
+	assertAdminGRPCCode(t, err, codes.InvalidArgument)
+}
+
+// TestAdminUpdateRoom_NilWorldEditor_ReturnsInternal verifies that AdminUpdateRoom
+// returns codes.Internal when no world editor is wired. REQ-AUI-5.
+func TestAdminUpdateRoom_NilWorldEditor_ReturnsInternal(t *testing.T) {
+	svc, _ := newAdminSvc(t)
+	// newAdminSvc does not wire a worldEditor; s.worldEditor is nil.
+	_, err := svc.AdminUpdateRoom(context.Background(), &gamev1.AdminUpdateRoomRequest{
+		RoomId:      "room_safe",
+		Title:       "New Title",
+		Description: "New description.",
+		DangerLevel: "safe",
+	})
+	require.Error(t, err)
+	assertAdminGRPCCode(t, err, codes.Internal)
+}

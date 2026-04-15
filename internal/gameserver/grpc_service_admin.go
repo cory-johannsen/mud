@@ -132,6 +132,38 @@ func (s *GameServiceServer) AdminListRooms(_ context.Context, req *gamev1.AdminL
 	return &gamev1.AdminListRoomsResponse{Rooms: out}, nil
 }
 
+// AdminUpdateRoom applies a patch to a room's title, description, and/or danger_level.
+//
+// Precondition: req.RoomId must be non-empty; s.worldEditor must be non-nil.
+// Postcondition: Returns codes.InvalidArgument for empty room_id; codes.Internal if worldEditor
+// is not wired or SetRoomField fails; codes.OK on success. REQ-AUI-4, REQ-AUI-5.
+func (s *GameServiceServer) AdminUpdateRoom(_ context.Context, req *gamev1.AdminUpdateRoomRequest) (*gamev1.AdminUpdateRoomResponse, error) {
+	if req.RoomId == "" {
+		return nil, status.Error(codes.InvalidArgument, "room_id must not be empty")
+	}
+	if s.worldEditor == nil {
+		return nil, status.Error(codes.Internal, "world editor not available")
+	}
+	type fieldUpdate struct {
+		field string
+		value string
+	}
+	updates := []fieldUpdate{
+		{"title", req.Title},
+		{"description", req.Description},
+		{"danger_level", req.DangerLevel},
+	}
+	for _, u := range updates {
+		if u.value == "" {
+			continue
+		}
+		if err := s.worldEditor.SetRoomField(req.RoomId, u.field, u.value); err != nil {
+			return nil, status.Errorf(codes.Internal, "setting %s on room %s: %v", u.field, req.RoomId, err)
+		}
+	}
+	return &gamev1.AdminUpdateRoomResponse{}, nil
+}
+
 // AdminTeleportPlayer (REQ-AGA-7) teleports a player to a specific room by character and room ID.
 //
 // Precondition: req.CharId must identify an online player; req.RoomId must identify a loaded room.
