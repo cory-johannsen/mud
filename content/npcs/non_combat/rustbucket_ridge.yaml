@@ -51,6 +51,10 @@
         base_price: 50
         init_stock: 2
         max_stock: 4
+      - item_id: scrap_metal
+        base_price: 6
+        init_stock: 0
+        max_stock: 50
     replenish_rate:
       min_hours: 6
       max_hours: 12

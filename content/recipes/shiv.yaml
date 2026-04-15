@@ -1,0 +1,14 @@
+id: shiv
+name: Shiv
+output_item_id: shiv
+output_count: 1
+category: weapon
+complexity: 1
+dc: 12
+quick_craft_min_rank: untrained
+materials:
+  - id: scrap_metal
+    quantity: 2
+  - id: duct_tape
+    quantity: 1
+description: "An improvised stabbing weapon fashioned from scrap metal and tape."

@@ -1,0 +1,14 @@
+id: scrap_shield
+name: Scrap Shield
+output_item_id: scrap_shield
+output_count: 1
+category: weapon
+complexity: 2
+dc: 14
+quick_craft_min_rank: untrained
+materials:
+  - id: scrap_metal
+    quantity: 4
+  - id: duct_tape
+    quantity: 2
+description: "A makeshift shield hammered together from salvaged metal scraps."
