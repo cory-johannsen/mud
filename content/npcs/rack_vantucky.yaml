@@ -1,0 +1,72 @@
+id: rack_vantucky
+name: "The Rack"
+npc_type: merchant
+description: >
+  A lean woman in her thirties who runs the armor wall of the neutral pawn shop.
+  Pegboard lines the whole left side — helmets, vests, gloves, boots, every piece
+  tagged with condition and price. She knows every dent. She'll sell you what
+  stops bullets, not what looks good.
+max_hp: 22
+ac: 12
+level: 3
+awareness: 4
+personality: neutral
+merchant:
+  merchant_type: armor
+  sell_margin: 1.35
+  buy_margin: 0.40
+  budget: 1500
+  inventory:
+    - item_id: leather_jacket
+      base_price: 100
+      init_stock: 3
+      max_stock: 5
+    - item_id: tactical_vest
+      base_price: 300
+      init_stock: 2
+      max_stock: 4
+    - item_id: ballistic_cap
+      base_price: 120
+      init_stock: 3
+      max_stock: 5
+    - item_id: combat_helmet
+      base_price: 250
+      init_stock: 2
+      max_stock: 4
+    - item_id: fingerless_gloves
+      base_price: 45
+      init_stock: 4
+      max_stock: 6
+    - item_id: tactical_gloves
+      base_price: 80
+      init_stock: 3
+      max_stock: 5
+    - item_id: street_boots
+      base_price: 60
+      init_stock: 4
+      max_stock: 6
+    - item_id: tactical_boots
+      base_price: 150
+      init_stock: 2
+      max_stock: 4
+    - item_id: left_arm_guards
+      base_price: 100
+      init_stock: 3
+      max_stock: 5
+    - item_id: right_arm_guards
+      base_price: 100
+      init_stock: 3
+      max_stock: 5
+    - item_id: left_leg_guards
+      base_price: 100
+      init_stock: 3
+      max_stock: 5
+    - item_id: right_leg_guards
+      base_price: 100
+      init_stock: 3
+      max_stock: 5
+  replenish_rate:
+    min_hours: 8
+    max_hours: 16
+    stock_refill: 1
+    budget_refill: 300

@@ -965,6 +965,10 @@ zone:
       target: vantucky_neutral_back
     map_x: -2
     map_y: -2
+    spawns:
+    - template: rack_vantucky
+      count: 1
+      respawn_after: 0s
     properties:
       lighting: dim
       atmosphere: tense_neutral
