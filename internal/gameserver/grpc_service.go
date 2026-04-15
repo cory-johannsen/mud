@@ -2334,6 +2334,8 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 		return s.handleHealAmount(uid, p.HealAmount)
 	case *gamev1.ClientMessage_TrainJob:
 		return s.handleTrainJob(uid, p.TrainJob)
+	case *gamev1.ClientMessage_TrainTech:
+		return s.handleTrainTech(uid, p.TrainTech.GetNpcName(), p.TrainTech.GetTechId())
 	case *gamev1.ClientMessage_ListJobs:
 		return s.handleListJobs(uid, p.ListJobs)
 	case *gamev1.ClientMessage_SetJob:
