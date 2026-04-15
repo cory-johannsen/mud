@@ -254,6 +254,27 @@ func (s *ActiveSet) Active(uid string) []ActiveCondition {
 	return result
 }
 
+// CopyTo copies all conditions from s into dst, preserving Stacks, DurationRemaining,
+// Source, and ExpiresAt. Existing conditions in dst with the same ID are overwritten.
+//
+// Precondition: s may be nil (no-op); dst may be nil (no-op); uid is the entity owning dst.
+// Postcondition: dst contains all conditions from s with identical state.
+func (s *ActiveSet) CopyTo(dst *ActiveSet, uid string) {
+	if s == nil || dst == nil {
+		return
+	}
+	for _, ac := range s.conditions {
+		_ = dst.Apply(uid, ac.Def, ac.Stacks, ac.DurationRemaining)
+		if entry, ok := dst.conditions[ac.Def.ID]; ok {
+			entry.Source = ac.Source
+			if ac.ExpiresAt != nil {
+				t := *ac.ExpiresAt
+				entry.ExpiresAt = &t
+			}
+		}
+	}
+}
+
 // All returns a slice of pointers to the active conditions.
 // The slice itself is a new allocation (mutating the slice does not affect the set),
 // but the pointed-to ActiveCondition values are shared — callers must not modify them.

@@ -1,6 +1,7 @@
 package condition_test
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
@@ -299,6 +300,73 @@ func TestProperty_ClearEncounter_OnlyRemovesEncounterType(t *testing.T) {
 			assert.False(t, s.Has("c1"), "encounter condition must be cleared")
 		} else {
 			assert.True(t, s.Has("c1"), "non-encounter condition must remain")
+		}
+	})
+}
+
+func TestActiveSet_CopyTo_TransfersConditions(t *testing.T) {
+	src := condition.NewActiveSet()
+	def := &condition.ConditionDef{ID: "reduced_visibility", Name: "Reduced Visibility", DurationType: "permanent", MaxStacks: 0, AttackPenalty: 2}
+	require.NoError(t, src.Apply("p1", def, 1, -1))
+
+	dst := condition.NewActiveSet()
+	src.CopyTo(dst, "p1")
+
+	assert.True(t, dst.Has("reduced_visibility"), "destination must have copied condition")
+	assert.Equal(t, 1, dst.Stacks("reduced_visibility"), "stack count must be preserved")
+}
+
+func TestActiveSet_CopyTo_NilSrc_NoPanic(t *testing.T) {
+	var src *condition.ActiveSet
+	dst := condition.NewActiveSet()
+	assert.NotPanics(t, func() { src.CopyTo(dst, "p1") })
+	assert.Empty(t, dst.All(), "nil source must not add anything to dst")
+}
+
+func TestActiveSet_CopyTo_NilDst_NoPanic(t *testing.T) {
+	src := condition.NewActiveSet()
+	def := &condition.ConditionDef{ID: "prone", Name: "Prone", DurationType: "permanent", MaxStacks: 0}
+	require.NoError(t, src.Apply("p1", def, 1, -1))
+	assert.NotPanics(t, func() { src.CopyTo(nil, "p1") })
+}
+
+func TestActiveSet_CopyTo_PreservesStacks(t *testing.T) {
+	src := condition.NewActiveSet()
+	def := &condition.ConditionDef{ID: "wounded", Name: "Wounded", DurationType: "permanent", MaxStacks: 4}
+	require.NoError(t, src.Apply("p1", def, 3, -1))
+
+	dst := condition.NewActiveSet()
+	src.CopyTo(dst, "p1")
+
+	assert.Equal(t, 3, dst.Stacks("wounded"), "CopyTo must preserve stack count")
+}
+
+func TestActiveSet_CopyTo_PreservesSource(t *testing.T) {
+	src := condition.NewActiveSet()
+	def := &condition.ConditionDef{ID: "frightened", Name: "Frightened", DurationType: "permanent", MaxStacks: 0}
+	require.NoError(t, src.ApplyTagged("p1", def, 1, -1, "drawback:goon"))
+
+	dst := condition.NewActiveSet()
+	src.CopyTo(dst, "p1")
+
+	require.True(t, dst.Has("frightened"))
+	assert.Equal(t, "drawback:goon", dst.SourceOf("frightened"), "CopyTo must preserve source tag")
+}
+
+func TestProperty_CopyTo_AllConditionsPresent(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		n := rapid.IntRange(1, 5).Draw(rt, "n")
+		src := condition.NewActiveSet()
+		for i := 0; i < n; i++ {
+			id := fmt.Sprintf("cond_%d", i)
+			def := &condition.ConditionDef{ID: id, Name: id, DurationType: "permanent", MaxStacks: 0}
+			_ = src.Apply("p1", def, 1, -1)
+		}
+		dst := condition.NewActiveSet()
+		src.CopyTo(dst, "p1")
+		for i := 0; i < n; i++ {
+			id := fmt.Sprintf("cond_%d", i)
+			assert.True(t, dst.Has(id), "CopyTo: destination must contain all conditions from source")
 		}
 	})
 }

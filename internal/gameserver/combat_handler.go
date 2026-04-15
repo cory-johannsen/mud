@@ -1671,6 +1671,11 @@ func (h *CombatHandler) startPursuitCombatLocked(playerSess *session.PlayerSessi
 	}
 	playerSess.Status = int32(2) // in combat
 
+	// Copy pre-existing session conditions (e.g. weather effects) into the combat set.
+	if playerSess.Conditions != nil && cbt.Conditions[playerSess.UID] != nil {
+		playerSess.Conditions.CopyTo(cbt.Conditions[playerSess.UID], playerSess.UID)
+	}
+
 	// Apply flat_footed to all pursuing NPC combatants at combat start — same
 	// pattern as startCombatLocked.
 	if h.condRegistry != nil {
@@ -2819,6 +2824,11 @@ func (h *CombatHandler) startCombatLocked(sess *session.PlayerSession, inst *npc
 	}
 	sess.Status = int32(2) // gamev1.CombatStatus_COMBAT_STATUS_IN_COMBAT
 
+	// Copy pre-existing session conditions (e.g. weather effects) into the combat set.
+	if sess.Conditions != nil && cbt.Conditions[sess.UID] != nil {
+		sess.Conditions.CopyTo(cbt.Conditions[sess.UID], sess.UID)
+	}
+
 	// Auto-join group members in the same room.
 	roomID := sess.RoomID
 	if group := h.sessions.GroupByUID(sess.UID); group != nil {
@@ -2851,6 +2861,12 @@ func (h *CombatHandler) startCombatLocked(sess *session.PlayerSession, inst *npc
 						zap.Error(addErr),
 					)
 					continue
+				}
+				// Copy pre-existing session conditions (e.g. weather effects) for the joining member.
+				if memberSess.Conditions != nil {
+					if memberCbtConds := cbt.Conditions[memberUID]; memberCbtConds != nil {
+						memberSess.Conditions.CopyTo(memberCbtConds, memberUID)
+					}
 				}
 				memberSess.Status = statusInCombat
 				joinMsg := fmt.Sprintf("Your group entered combat! You join the fight (initiative %d).", memberCbt.Initiative)

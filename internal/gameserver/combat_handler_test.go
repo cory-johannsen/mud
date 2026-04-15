@@ -14,6 +14,8 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/character"
 	"github.com/cory-johannsen/mud/internal/game/session"
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 	"pgregory.net/rapid"
 )
@@ -2010,6 +2012,103 @@ func TestPropertyCombatHandler_ApplyCombatCondition_AlwaysAppliesCondition(t *te
 		}
 		if !condSet.Has("grabbed") {
 			rt.Fatalf("expected grabbed condition on NPC %q; not found", inst.ID)
+		}
+	})
+}
+
+// TestCombatHandler_Attack_CopiesSessionConditionsToCombat verifies that conditions
+// already active on the player's session (e.g. weather-applied reduced_visibility)
+// are copied into the combat condition set when combat starts.
+//
+// Precondition: player session has reduced_visibility in sess.Conditions before Attack.
+// Postcondition: cbt.Conditions[uid].Has("reduced_visibility") is true after Attack.
+func TestCombatHandler_Attack_CopiesSessionConditionsToCombat(t *testing.T) {
+	h := makeCombatHandler(t, func(string, []*gamev1.CombatEvent) {})
+	const roomID = "weather-room"
+	const uid = "p-weather"
+
+	// Register reduced_visibility in the condition registry so it can be applied.
+	h.condRegistry.Register(&condition.ConditionDef{
+		ID: "reduced_visibility", Name: "Reduced Visibility",
+		DurationType: "permanent", MaxStacks: 0, AttackPenalty: 2, SkillPenalty: 1,
+	})
+
+	spawnTestNPC(t, h.npcMgr, roomID)
+	sess := addTestPlayer(t, h.sessions, uid, roomID)
+
+	// Simulate weather condition applied on room entry.
+	sess.Conditions = condition.NewActiveSet()
+	def, _ := h.condRegistry.Get("reduced_visibility")
+	require.NoError(t, sess.Conditions.Apply(uid, def, 1, -1))
+
+	_, err := h.Attack(uid, "Goblin")
+	require.NoError(t, err)
+	h.cancelTimer(roomID)
+
+	h.combatMu.Lock()
+	defer h.combatMu.Unlock()
+	cbt, ok := h.engine.GetCombat(roomID)
+	require.True(t, ok, "expected active combat")
+
+	condSet, ok := cbt.Conditions[uid]
+	require.True(t, ok, "no condition set for player %q", uid)
+	assert.True(t, condSet.Has("reduced_visibility"),
+		"session weather condition must be present in combat conditions")
+}
+
+func TestProperty_CombatHandler_Attack_SessionConditionsAlwaysCopied(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		hasCondition := rapid.Bool().Draw(rt, "hasCondition")
+
+		h := makeCombatHandler(t, func(string, []*gamev1.CombatEvent) {})
+		roomID := "prop-weather-room"
+		uid := "prop-weather-player"
+
+		h.condRegistry.Register(&condition.ConditionDef{
+			ID: "reduced_visibility", Name: "Reduced Visibility",
+			DurationType: "permanent", MaxStacks: 0, AttackPenalty: 2,
+		})
+
+		inst, spawnErr := h.npcMgr.Spawn(&npc.Template{ID: "goblin", Name: "Goblin", Level: 1, MaxHP: 20, AC: 13, Awareness: 2}, roomID)
+		if spawnErr != nil {
+			rt.Fatalf("spawn: %v", spawnErr)
+		}
+		_ = inst
+
+		sess, addErr := h.sessions.AddPlayer(session.AddPlayerOptions{
+			UID: uid, Username: "u", CharName: "Hero", CharacterID: 1,
+			RoomID: roomID, CurrentHP: 10, MaxHP: 10, Role: "player",
+		})
+		if addErr != nil {
+			rt.Fatalf("AddPlayer: %v", addErr)
+		}
+
+		sess.Conditions = condition.NewActiveSet()
+		if hasCondition {
+			def, _ := h.condRegistry.Get("reduced_visibility")
+			_ = sess.Conditions.Apply(uid, def, 1, -1)
+		}
+
+		if _, err := h.Attack(uid, "Goblin"); err != nil {
+			rt.Fatalf("Attack: %v", err)
+		}
+		h.cancelTimer(roomID)
+
+		h.combatMu.Lock()
+		defer h.combatMu.Unlock()
+		cbt, ok := h.engine.GetCombat(roomID)
+		if !ok {
+			rt.Fatal("no active combat")
+		}
+		condSet, ok := cbt.Conditions[uid]
+		if !ok {
+			rt.Fatalf("no condition set for player")
+		}
+		if hasCondition && !condSet.Has("reduced_visibility") {
+			rt.Fatal("session condition must be in combat conditions when present")
+		}
+		if !hasCondition && condSet.Has("reduced_visibility") {
+			rt.Fatal("condition must not appear in combat when not in session")
 		}
 	})
 }
