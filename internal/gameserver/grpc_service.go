@@ -4961,10 +4961,12 @@ func (s *GameServiceServer) handleEquip(uid string, req *gamev1.EquipRequest) (*
 	if s.combatH != nil {
 		_, _ = s.combatH.Equip(uid, req.GetWeaponId(), req.GetSlot())
 	}
-	// Push updated inventory (item removed from backpack) and loadout (weapon now in slot)
-	// so the web UI refreshes both panels immediately without requiring re-login (REQ-UI-EQUIP-1).
+	// Push updated inventory (item removed from backpack), loadout (weapon now in slot),
+	// and character sheet (main/off hand displayed in equipment drawer) immediately
+	// so the web UI refreshes all panels without requiring re-login (REQ-UI-EQUIP-1, REQ-88-1).
 	s.pushInventory(sess)
 	s.pushLoadout(sess)
+	s.pushCharacterSheet(sess)
 	return messageEvent(result), nil
 }
 
@@ -5017,8 +5019,10 @@ func (s *GameServiceServer) handleWear(uid string, req *gamev1.WearRequest) (*ga
 			s.logger.Error("handleWear: SaveEquipment failed", zap.String("uid", uid), zap.Error(err))
 		}
 		// REQ-BUG101-1: push inventory refresh after wear so the web UI removes the item.
+		// REQ-88-1: push character sheet after wear so the equipment drawer reflects the new armor.
 		if sess2, ok2 := s.sessions.GetPlayer(uid); ok2 {
 			s.pushInventory(sess2)
+			s.pushCharacterSheet(sess2)
 		}
 	}
 	return messageEvent(result), nil
