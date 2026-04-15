@@ -7272,6 +7272,7 @@ func (s *GameServiceServer) handleJobGrants(uid string) (*gamev1.ServerEvent, er
 				}
 			} else {
 				// Player has not yet chosen — emit an empty grant row and a structured PendingFeatChoice.
+				// Options exclude feats the player already owns (from any source).
 				featGrants = append(featGrants, &gamev1.JobFeatGrant{
 					GrantLevel: int32(level),
 					FeatId:     "",
@@ -7279,6 +7280,9 @@ func (s *GameServiceServer) handleJobGrants(uid string) (*gamev1.ServerEvent, er
 				})
 				opts := make([]*gamev1.FeatOption, 0, len(fg.Choices.Pool))
 				for _, id := range fg.Choices.Pool {
+					if playerFeatIDs[id] {
+						continue // player already owns this feat; exclude from choices
+					}
 					opt := &gamev1.FeatOption{FeatId: id, Name: featName(id)}
 					if s.featRegistry != nil {
 						if f, ok := s.featRegistry.Feat(id); ok {
@@ -7288,11 +7292,16 @@ func (s *GameServiceServer) handleJobGrants(uid string) (*gamev1.ServerEvent, er
 					}
 					opts = append(opts, opt)
 				}
-				pendingFeatChoices = append(pendingFeatChoices, &gamev1.PendingFeatChoice{
-					GrantLevel: int32(level),
-					Count:      int32(fg.Choices.Count),
-					Options:    opts,
-				})
+				if len(opts) == 0 {
+					// All pool feats are already owned; no choice needed — remove the empty grant row.
+					featGrants = featGrants[:len(featGrants)-1]
+				} else {
+					pendingFeatChoices = append(pendingFeatChoices, &gamev1.PendingFeatChoice{
+						GrantLevel: int32(level),
+						Count:      int32(fg.Choices.Count),
+						Options:    opts,
+					})
+				}
 			}
 		}
 		// General feat pick — resolve from player's unattributed, non-pool feats (sorted for determinism).

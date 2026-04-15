@@ -198,6 +198,98 @@ func TestHandleJobGrants_UnresolvedChoicePool_PopulatesPendingFeatChoices(t *tes
 	assert.Equal(t, "Overpower", optByID["overpower"].Name)
 }
 
+// TestHandleJobGrants_AlreadyOwnedPoolFeat_ExcludedFromOptions verifies that
+// feats the player already owns (attributed to a prior level's fixed grant) are
+// excluded from PendingFeatChoice options at a later level.
+//
+// Precondition: Player owns "rage" (attributed at level 1 fixed); level 2 pool is ["rage", "overpower"].
+// Postcondition: PendingFeatChoice options contain only "overpower" (rage excluded as already owned).
+func TestHandleJobGrants_AlreadyOwnedPoolFeat_ExcludedFromOptions(t *testing.T) {
+	const uid = "fcm-owned-player"
+
+	feats := []*ruleset.Feat{
+		{ID: "rage", Name: "Rage", Description: "You enter a furious rage.", Category: "combat"},
+		{ID: "overpower", Name: "Overpower", Description: "Overwhelm your foe.", Category: "combat"},
+	}
+	// Level 1 base grants: rage is a fixed feat (attributed to level 1 slot).
+	// Level 2 level-up grants: choice pool [rage, overpower] — rage must be excluded
+	// from options since the player already owns it.
+	job := &ruleset.Job{
+		ID:   "brawler_owned",
+		Name: "Brawler Owned",
+		FeatGrants: &ruleset.FeatGrants{Fixed: []string{"rage"}},
+		LevelUpFeatGrants: map[int]*ruleset.FeatGrants{
+			2: {Choices: &ruleset.FeatChoices{Count: 1, Pool: []string{"rage", "overpower"}}},
+		},
+	}
+
+	worldMgr, sessMgr := testWorldAndSession(t)
+	logger := zaptest.NewLogger(t)
+
+	jobReg := ruleset.NewJobRegistry()
+	jobReg.Register(job)
+	featReg := ruleset.NewFeatRegistry(feats)
+
+	// Player owns "rage" (granted as level 1 fixed).
+	featsRepo := &stubFeatsRepo{data: map[int64][]string{0: {"rage"}}}
+
+	svc := newTestGameServiceServer(
+		worldMgr, sessMgr,
+		command.DefaultRegistry(),
+		NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil, nil, nil),
+		NewChatHandler(sessMgr),
+		logger,
+		nil, nil, nil, nil, nil, nil,
+		nil, nil, nil, nil, nil, nil,
+		nil, jobReg, nil, nil, nil, nil, nil, nil, "",
+		nil, nil, nil,
+		nil, featReg, featsRepo,
+		nil, nil, nil, nil, nil, nil, nil,
+		nil, nil,
+		nil, nil,
+		nil, nil,
+	)
+
+	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID: uid, Username: uid, CharName: uid,
+		RoomID: "room_a", CurrentHP: 20, MaxHP: 20, Role: "player",
+	})
+	require.NoError(t, err)
+	sess.Class = "brawler_owned"
+	sess.Level = 2
+
+	resp, err := svc.handleJobGrants(uid)
+	require.NoError(t, err)
+	require.NotNil(t, resp)
+
+	gr := resp.GetJobGrantsResponse()
+	require.NotNil(t, gr, "expected JobGrantsResponse")
+
+	// Level 1 fixed grant attributes "rage"; level 2 pool check finds "rage" attributed,
+	// chosen=[] → PendingFeatChoice emitted, but rage is filtered from opts.
+	require.Len(t, gr.PendingFeatChoices, 1, "must have 1 PendingFeatChoice at level 2")
+	pfc := gr.PendingFeatChoices[0]
+	require.Len(t, pfc.Options, 1, "already-owned 'rage' must be excluded; only 'overpower' remains")
+	assert.Equal(t, "overpower", pfc.Options[0].FeatId, "remaining option must be overpower")
+}
+
+// TestFeatRegistry_PF2EFallback verifies that Feat() resolves a legacy PF2E ID
+// to the current feat when the direct ID lookup fails.
+//
+// Precondition: Registry has feat with id="wrath", pf2e="rage".
+// Postcondition: Feat("rage") returns the wrath feat.
+func TestFeatRegistry_PF2EFallback(t *testing.T) {
+	feats := []*ruleset.Feat{
+		{ID: "wrath", Name: "Wrath", PF2E: "rage", Category: "job"},
+	}
+	reg := ruleset.NewFeatRegistry(feats)
+
+	got, ok := reg.Feat("rage")
+	require.True(t, ok, "Feat('rage') must succeed via pf2e fallback")
+	assert.Equal(t, "wrath", got.ID)
+	assert.Equal(t, "Wrath", got.Name)
+}
+
 // ---------------------------------------------------------------------------
 // handleChooseFeat tests (REQ-FCM-8, REQ-FCM-9)
 // ---------------------------------------------------------------------------

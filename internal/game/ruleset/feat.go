@@ -85,6 +85,7 @@ func LoadFeats(path string) ([]*Feat, error) {
 // FeatRegistry provides fast lookup of feats by ID, category, skill, and archetype.
 type FeatRegistry struct {
 	byID        map[string]*Feat
+	byPF2E      map[string]*Feat
 	byCategory  map[string][]*Feat
 	bySkill     map[string][]*Feat
 	byArchetype map[string][]*Feat
@@ -97,12 +98,16 @@ type FeatRegistry struct {
 func NewFeatRegistry(feats []*Feat) *FeatRegistry {
 	r := &FeatRegistry{
 		byID:        make(map[string]*Feat, len(feats)),
+		byPF2E:      make(map[string]*Feat, len(feats)),
 		byCategory:  make(map[string][]*Feat),
 		bySkill:     make(map[string][]*Feat),
 		byArchetype: make(map[string][]*Feat),
 	}
 	for _, f := range feats {
 		r.byID[f.ID] = f
+		if f.PF2E != "" {
+			r.byPF2E[f.PF2E] = f
+		}
 		r.byCategory[f.Category] = append(r.byCategory[f.Category], f)
 		if f.Skill != "" {
 			r.bySkill[f.Skill] = append(r.bySkill[f.Skill], f)
@@ -124,12 +129,19 @@ func NewFeatRegistryFromSlice(feats []*Feat) *FeatRegistry {
 }
 
 // Feat returns the feat with the given ID and true, or nil and false if not found.
+// Falls back to matching against the pf2e field to resolve legacy IDs.
 //
 // Precondition: id must be non-empty.
 // Postcondition: Returns the feat and true, or nil and false.
 func (r *FeatRegistry) Feat(id string) (*Feat, bool) {
-	f, ok := r.byID[id]
-	return f, ok
+	if f, ok := r.byID[id]; ok {
+		return f, true
+	}
+	// Fallback: resolve legacy PF2E IDs (e.g. "rage" → wrath feat).
+	if f, ok := r.byPF2E[id]; ok {
+		return f, true
+	}
+	return nil, false
 }
 
 // ByCategory returns all feats in the given category.
