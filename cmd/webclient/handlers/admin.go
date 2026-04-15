@@ -82,6 +82,7 @@ type WorldEditor interface {
 	RoomsInZone(zoneID string) ([]RoomSummary, error)
 	UpdateRoom(roomID string, patch RoomPatch) error
 	AllNPCTemplates() []NPCTemplate
+	SpawnNPC(templateID, roomID string, count int) (int, error)
 }
 
 // AdminHandler implements all /api/admin/* endpoints.
@@ -370,9 +371,24 @@ func (ah *AdminHandler) HandleSpawnNPC(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadRequest, "count must be >= 1")
 		return
 	}
-	// Spawn via game server is not yet wired through an admin gRPC stream (REQ-WC-38).
-	writeError(w, http.StatusNotImplemented, "not implemented")
-	return
+	roomID := r.PathValue("room_id")
+	if roomID == "" {
+		roomID = body.RoomID
+	}
+	if strings.TrimSpace(roomID) == "" {
+		writeError(w, http.StatusBadRequest, "room_id must not be empty")
+		return
+	}
+	if body.Count > 20 {
+		writeError(w, http.StatusBadRequest, "count must not exceed 20")
+		return
+	}
+	spawned, err := ah.world.SpawnNPC(body.NPCID, roomID, body.Count)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]any{"spawned_count": spawned})
 }
 
 // HandleAdminEvents handles GET /api/admin/events — an SSE stream of game events.

@@ -22,7 +22,8 @@ func (n *noOpWorldEditor) RoomsInZone(zoneID string) ([]RoomSummary, error) {
 	return nil, errZoneNotFound(zoneID)
 }
 func (n *noOpWorldEditor) UpdateRoom(_ string, _ RoomPatch) error { return nil }
-func (n *noOpWorldEditor) AllNPCTemplates() []NPCTemplate         { return []NPCTemplate{} }
+func (n *noOpWorldEditor) AllNPCTemplates() []NPCTemplate                              { return []NPCTemplate{} }
+func (n *noOpWorldEditor) SpawnNPC(_ string, _ string, _ int) (int, error) { return 0, nil }
 
 // errZoneNotFound returns a sentinel error for a missing zone ID.
 func errZoneNotFound(id string) error {
