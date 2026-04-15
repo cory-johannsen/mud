@@ -241,3 +241,20 @@
     currency:
       min: 10
       max: 50
+
+- id: vantucky_neural_trainer
+  name: "Mama Zen"
+  npc_type: tech_trainer
+  type: human
+  description: "Runs neural conditioning sessions out of a repurposed shipping container. Her eyes have the unfocused look of someone who sees more than most."
+  level: 5
+  max_hp: 30
+  ac: 12
+  awareness: 8
+  disposition: neutral
+  personality: neutral
+  tech_trainer:
+    tradition: neural
+    offered_levels: [2, 3]
+    base_cost: 150
+    find_quest_id: find_neural_trainer_vantucky

@@ -245,3 +245,20 @@
     currency:
       min: 10
       max: 50
+
+- id: rustbucket_ridge_technical_trainer
+  name: "Grinder"
+  npc_type: tech_trainer
+  type: human
+  description: "A wiry mechanic who trains anyone willing to pay in the art of technical augmentation. His workshop smells of machine oil and burnt circuitry."
+  level: 4
+  max_hp: 25
+  ac: 11
+  awareness: 7
+  disposition: neutral
+  personality: neutral
+  tech_trainer:
+    tradition: technical
+    offered_levels: [2, 3]
+    base_cost: 120
+    find_quest_id: find_technical_trainer_vantucky
