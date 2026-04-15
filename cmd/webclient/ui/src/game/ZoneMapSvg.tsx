@@ -230,22 +230,25 @@ export function ZoneMapSvg({ tiles, onHover, onHoverEnd, containerWidth }: ZoneM
             {line1}
           </text>
         )}
-        {(tile.pois ?? []).map((poi, idx) => {
-          const def = POI_BY_ID.get(poi)
-          return (
-            <text
-              key={`poi-${id}-${idx}`}
-              x={rx + 4 + idx * 11}
-              y={ry + cellH - 4}
-              textAnchor="start"
-              fontSize={9}
-              fill={def?.color ?? '#aaa'}
-              pointerEvents="none"
-            >
-              {def?.symbol ?? '?'}
-            </text>
-          )
-        })}
+        {(tile.pois ?? []).length > 0 && (
+          <text
+            x={rx + 2}
+            y={ry + cellH - 4}
+            textAnchor="start"
+            fontSize={9}
+            pointerEvents="none"
+            clipPath={`url(#${id})`}
+          >
+            {(tile.pois ?? []).map((poi, idx) => {
+              const def = POI_BY_ID.get(poi)
+              return (
+                <tspan key={`poi-${id}-${idx}`} fill={def?.color ?? '#aaa'}>
+                  {def?.symbol ?? '?'}
+                </tspan>
+              )
+            })}
+          </text>
+        )}
         {(tile.zoneExits ?? tile.zone_exits ?? []).map((ze, idx) => {
           const dir = ze.direction ?? ''
           const arrow = ZONE_EXIT_ARROW[dir]

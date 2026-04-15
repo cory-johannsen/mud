@@ -77,6 +77,34 @@ describe('ZoneMapSvg', () => {
     const lines = c.querySelectorAll('line')
     expect(lines.length).toBeGreaterThanOrEqual(1)
   })
+
+  // REQ-MAP-POI-1: Multiple POI symbols MUST be rendered without whitespace between them,
+  //   so all indicators fit within their cell's boundaries.
+  it('renders multiple POI symbols packed into a single text element with no overflow', () => {
+    const multiPoiTile: MapTile = {
+      roomId: 'room_multi_poi',
+      roomName: 'Hub',
+      x: 0,
+      y: 0,
+      exits: [],
+      pois: ['merchant', 'healer', 'trainer', 'quest_giver', 'banker'],
+      current: false,
+      bossRoom: false,
+    }
+    const { container: c } = render(<ZoneMapSvg tiles={[multiPoiTile]} />)
+    // All POI symbols MUST live inside a single <text> element (via <tspan> children)
+    // so they are packed together without spacing — preventing overflow.
+    // Find the text element containing the merchant '$' symbol.
+    const merchantText = Array.from(c.querySelectorAll('text')).find(t =>
+      t.textContent?.includes('$'),
+    )
+    expect(merchantText).toBeDefined()
+    // The same element must also contain all other POI symbols packed adjacently.
+    expect(merchantText?.textContent).toContain('+')
+    expect(merchantText?.textContent).toContain('T')
+    expect(merchantText?.textContent).toContain('!')
+    expect(merchantText?.textContent).toContain('¤')
+  })
 })
 
 // REQ-MAP-SCALE-1: computeZoneMapLayout MUST produce larger gap growth than cell growth
