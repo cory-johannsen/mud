@@ -128,7 +128,7 @@ zone:
       target: courthouse_steps
     - direction: west
       target: director_park
-    - direction: south
+    - direction: southwest
       target: dt_park_blocks_south
     map_x: 0
     map_y: 2
@@ -158,6 +158,8 @@ zone:
       target: sauvie_bridge_south
     - direction: south
       target: dt_naito_parkway
+    - direction: west
+      target: dt_steel_bridge_west
     map_x: -2
     map_y: -2
     properties:
@@ -381,7 +383,7 @@ zone:
       interior smells of wet stone and old paper. Collapsed sorting racks form strange
       metallic sculptures on the flooded floor.
     exits:
-    - direction: south
+    - direction: northeast
       target: dt_union_station_ruins
     - direction: east
       target: dt_park_blocks_north
@@ -402,7 +404,7 @@ zone:
       target: dt_old_post_office
     - direction: south
       target: dt_park_blocks_south
-    - direction: east
+    - direction: north
       target: dt_union_station_ruins
     map_x: -2
     map_y: -4
@@ -419,7 +421,7 @@ zone:
     exits:
     - direction: north
       target: dt_park_blocks_north
-    - direction: east
+    - direction: northeast
       target: market_district
     map_x: -2
     map_y: 4
@@ -436,7 +438,7 @@ zone:
     exits:
     - direction: west
       target: broadway_ruins
-    - direction: north
+    - direction: northwest
       target: dt_union_station_ruins
     - direction: south
       target: dt_powell_books_ruin
@@ -455,7 +457,7 @@ zone:
     exits:
     - direction: west
       target: burnside_crossing
-    - direction: east
+    - direction: southeast
       target: dt_chinatown_gate
     map_x: 4
     map_y: -5
@@ -471,13 +473,13 @@ zone:
       multiple entrances make it impossible to hold, so no one tries. People pass through
       without incident, by unspoken agreement.
     exits:
-    - direction: south
+    - direction: southwest
       target: dt_old_post_office
-    - direction: east
-      target: dt_park_blocks_north
-    - direction: southeast
-      target: dt_chinatown_gate
     - direction: south
+      target: dt_park_blocks_north
+    - direction: east
+      target: dt_chinatown_gate
+    - direction: southeast
       target: dt_pearl_district_edge
     map_x: -2
     map_y: -6
@@ -494,9 +496,9 @@ zone:
       marks the edge of a dozen overlapping claims. Gang tags have been painted over
       gang tags so many times the wall is thick with pigment.
     exits:
-    - direction: west
-      target: dt_burnside_overpass
     - direction: northwest
+      target: dt_burnside_overpass
+    - direction: west
       target: dt_union_station_ruins
     - direction: south
       target: dt_old_town_square
@@ -606,8 +608,6 @@ zone:
       target: dt_city_hall
     - direction: north
       target: dt_powell_books_ruin
-    - direction: east
-      target: dt_naito_parkway
     map_x: 8
     map_y: 0
     spawns:
@@ -638,6 +638,8 @@ zone:
       target: dt_esplanade_north
     - direction: south
       target: dt_sw_hills_road
+    - direction: southwest
+      target: dt_naito_parkway
     map_x: 2
     map_y: -4
     spawns:
@@ -725,9 +727,9 @@ zone:
       leaving a gap that can only be crossed on a narrow steel catwalk someone bolted
       on afterward. The catwalk is solid but narrow. Wind off the river is constant.
     exits:
-    - direction: east
+    - direction: southeast
       target: dt_naito_parkway
-    - direction: south
+    - direction: east
       target: waterfront_trail
     map_x: -4
     map_y: -2
@@ -752,11 +754,9 @@ zone:
     exits:
     - direction: north
       target: waterfront_trail
-    - direction: west
+    - direction: northwest
       target: dt_steel_bridge_west
-    - direction: east
-      target: dt_main_library
-    - direction: south
+    - direction: northeast
       target: dt_salmon_street_springs
     map_x: -3
     map_y: 0
