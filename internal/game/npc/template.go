@@ -213,8 +213,9 @@ type Template struct {
 	QuestGiver *QuestGiverConfig `yaml:"quest_giver,omitempty"`
 	Hireling   *HirelingConfig   `yaml:"hireling,omitempty"`
 	Banker     *BankerConfig     `yaml:"banker,omitempty"`
-	JobTrainer *JobTrainerConfig `yaml:"job_trainer,omitempty"`
-	Crafter    *CrafterConfig    `yaml:"crafter,omitempty"`
+	JobTrainer  *JobTrainerConfig  `yaml:"job_trainer,omitempty"`
+	TechTrainer *TechTrainerConfig `yaml:"tech_trainer,omitempty"`
+	Crafter     *CrafterConfig     `yaml:"crafter,omitempty"`
 	Fixer      *FixerConfig      `yaml:"fixer,omitempty"`
 	ChipDoc    *ChipDocConfig    `yaml:"chip_doc,omitempty"`
 	Motel      *MotelConfig      `yaml:"motel,omitempty"`
@@ -294,7 +295,7 @@ func (t *Template) Validate() error {
 	validTypes := map[string]bool{
 		"combat": true, "merchant": true, "black_market_merchant": true, "guard": true, "healer": true,
 		"quest_giver": true, "hireling": true, "banker": true,
-		"job_trainer": true, "crafter": true, "fixer": true,
+		"job_trainer": true, "tech_trainer": true, "crafter": true, "fixer": true,
 		"chip_doc": true, "motel_keeper": true, "brothel_keeper": true,
 	}
 	if !validTypes[t.NPCType] {
@@ -340,6 +341,19 @@ func (t *Template) Validate() error {
 	case "job_trainer":
 		if t.JobTrainer == nil {
 			return fmt.Errorf("npc template %q: npc_type 'job_trainer' requires a job_trainer: config block", t.ID)
+		}
+	case "tech_trainer":
+		if t.TechTrainer == nil {
+			return fmt.Errorf("template %q: npc_type tech_trainer requires a tech_trainer block", t.ID)
+		}
+		if t.TechTrainer.Tradition == "" {
+			return fmt.Errorf("template %q: tech_trainer requires tradition", t.ID)
+		}
+		if len(t.TechTrainer.OfferedLevels) == 0 {
+			return fmt.Errorf("template %q: tech_trainer requires at least one offered_level", t.ID)
+		}
+		if t.TechTrainer.BaseCost <= 0 {
+			return fmt.Errorf("template %q: tech_trainer base_cost must be > 0", t.ID)
 		}
 	case "crafter":
 		if t.Crafter == nil {

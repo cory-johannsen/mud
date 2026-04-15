@@ -624,6 +624,43 @@ fixer:
 	assert.Contains(t, err.Error(), "personality")
 }
 
+// TestTemplate_TechTrainer_Validate_ValidConfig verifies that a tech_trainer template
+// with a valid TechTrainerConfig passes validation.
+//
+// Precondition: Template with npc_type "tech_trainer" and non-nil TechTrainer config.
+// Postcondition: Validate returns nil.
+func TestTemplate_TechTrainer_Validate_ValidConfig(t *testing.T) {
+	tmpl := &npc.Template{
+		ID:      "vantucky_neural_trainer",
+		Name:    "Mama Zen",
+		NPCType: "tech_trainer",
+		Level:   5, MaxHP: 30, AC: 12,
+		TechTrainer: &npc.TechTrainerConfig{
+			Tradition:     "neural",
+			OfferedLevels: []int{2, 3},
+			BaseCost:      150,
+		},
+	}
+	assert.NoError(t, tmpl.Validate())
+}
+
+// TestTemplate_TechTrainer_Validate_NilConfig verifies that a tech_trainer template
+// without a TechTrainer config block fails validation.
+//
+// Precondition: Template with npc_type "tech_trainer" but nil TechTrainer.
+// Postcondition: Validate returns a non-nil error.
+func TestTemplate_TechTrainer_Validate_NilConfig(t *testing.T) {
+	tmpl := &npc.Template{
+		ID:      "bad_trainer",
+		Name:    "Nobody",
+		NPCType: "tech_trainer",
+		Level:   1, MaxHP: 10, AC: 10,
+		TechTrainer: nil,
+	}
+	err := tmpl.Validate()
+	assert.Error(t, err)
+}
+
 // TestProperty_AllExistingNPCTemplatesStillLoad verifies that adding NPCType/Validate changes
 // does not break any existing NPC YAML file. Reads all *.yaml in content/npcs/.
 func TestProperty_AllExistingNPCTemplatesStillLoad(t *testing.T) {
@@ -632,6 +669,7 @@ func TestProperty_AllExistingNPCTemplatesStillLoad(t *testing.T) {
 		"quest_giver": true, "hireling": true, "banker": true,
 		"job_trainer": true, "crafter": true, "fixer": true,
 		"chip_doc": true, "motel_keeper": true, "brothel_keeper": true,
+		"tech_trainer": true,
 	}
 	templates, err := npc.LoadTemplates("../../../content/npcs")
 	require.NoError(t, err, "all existing NPC templates must still load after Validate() changes")
