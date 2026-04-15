@@ -1873,8 +1873,14 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 		s.logger.Warn("failed to send initial hotbar update", zap.Error(err))
 	}
 
+	// Wrap the stream in a mutex-protected sender so that forwardEvents,
+	// the calendar goroutine, and commandLoop can all call Send concurrently
+	// without data races.  Recv and other stream methods are not affected.
+	ss := &syncStream{GameService_SessionServer: stream}
+
 	// REQ-RXN20: build and store the interactive reaction callback.
-	sess.ReactionFn = s.buildReactionCallback(uid, sess, stream)
+	// Must use ss so that reaction prompts go through the mutex.
+	sess.ReactionFn = s.buildReactionCallback(uid, sess, ss)
 
 	// Subscribe to calendar ticks for this session (nil-safe: calendar may be nil).
 	var calCh chan GameDateTime
@@ -1892,7 +1898,7 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		s.forwardEvents(ctx, sess.Entity, stream)
+		s.forwardEvents(ctx, sess.Entity, ss)
 	}()
 
 	// Spawn goroutine to forward calendar ticks to stream as TimeOfDayEvents.
@@ -1921,7 +1927,7 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 							},
 						},
 					}
-					if err := stream.Send(evt); err != nil {
+					if err := ss.Send(evt); err != nil {
 						return
 					}
 					// Expire time-limited conditions for this player on each calendar tick (REQ-JD-11).
@@ -1984,7 +1990,7 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 	close(sess.InitDone)
 
 	// Step 4: Main command loop
-	err = s.commandLoop(ctx, uid, stream)
+	err = s.commandLoop(ctx, uid, ss)
 
 	// Step 5: Cleanup happens via defer
 	cancel()
@@ -3399,6 +3405,24 @@ func (s *GameServiceServer) pushRoomViewToAllInRoom(roomID string) {
 			}
 		}
 	}
+}
+
+// syncStream wraps a GameService_SessionServer to make Send goroutine-safe.
+// gRPC-Go ServerStream.SendMsg is NOT documented as goroutine-safe; multiple
+// goroutines (commandLoop, forwardEvents, calendar ticker) must share one stream.
+//
+// Precondition: GameService_SessionServer must be non-nil.
+// Postcondition: concurrent Send calls are serialized; Recv and other methods
+// delegate to the underlying stream unchanged.
+type syncStream struct {
+	mu sync.Mutex
+	gamev1.GameService_SessionServer
+}
+
+func (ss *syncStream) Send(evt *gamev1.ServerEvent) error {
+	ss.mu.Lock()
+	defer ss.mu.Unlock()
+	return ss.GameService_SessionServer.Send(evt)
 }
 
 // forwardEvents reads from the BridgeEntity events channel and sends
