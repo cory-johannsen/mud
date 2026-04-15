@@ -567,6 +567,74 @@ func FilterGrantsByMaxTechLevel(grants *ruleset.TechnologyGrants, maxLevel int) 
 	return &result
 }
 
+// filterGrantsByMinTechLevel returns grants containing only tech slots at or above minLevel.
+// Hardwired entries are not included (they are always immediate).
+// Returns nil if nothing remains.
+//
+// Precondition: minLevel >= 1.
+// Postcondition: All returned slots have Level >= minLevel.
+func filterGrantsByMinTechLevel(grants *ruleset.TechnologyGrants, minLevel int) *ruleset.TechnologyGrants {
+	if grants == nil {
+		return nil
+	}
+	var result ruleset.TechnologyGrants
+
+	if grants.Prepared != nil {
+		for lvl, slots := range grants.Prepared.SlotsByLevel {
+			if lvl < minLevel {
+				continue
+			}
+			if result.Prepared == nil {
+				result.Prepared = &ruleset.PreparedGrants{SlotsByLevel: make(map[int]int)}
+			}
+			result.Prepared.SlotsByLevel[lvl] = slots
+			for _, e := range grants.Prepared.Fixed {
+				if e.Level == lvl {
+					result.Prepared.Fixed = append(result.Prepared.Fixed, e)
+				}
+			}
+			for _, e := range grants.Prepared.Pool {
+				if e.Level == lvl {
+					result.Prepared.Pool = append(result.Prepared.Pool, e)
+				}
+			}
+		}
+	}
+
+	if grants.Spontaneous != nil {
+		for lvl, known := range grants.Spontaneous.KnownByLevel {
+			if lvl < minLevel {
+				continue
+			}
+			if result.Spontaneous == nil {
+				result.Spontaneous = &ruleset.SpontaneousGrants{
+					KnownByLevel: make(map[int]int),
+					UsesByLevel:  make(map[int]int),
+				}
+			}
+			result.Spontaneous.KnownByLevel[lvl] = known
+			if grants.Spontaneous.UsesByLevel != nil {
+				result.Spontaneous.UsesByLevel[lvl] = grants.Spontaneous.UsesByLevel[lvl]
+			}
+			for _, e := range grants.Spontaneous.Fixed {
+				if e.Level == lvl {
+					result.Spontaneous.Fixed = append(result.Spontaneous.Fixed, e)
+				}
+			}
+			for _, e := range grants.Spontaneous.Pool {
+				if e.Level == lvl {
+					result.Spontaneous.Pool = append(result.Spontaneous.Pool, e)
+				}
+			}
+		}
+	}
+
+	if result.Prepared == nil && result.Spontaneous == nil {
+		return nil
+	}
+	return &result
+}
+
 // PartitionTechGrants splits grants into immediate (no player choice needed) and
 // deferred (pool > open slots, player must choose) parts.
 //
@@ -778,19 +846,33 @@ func ResolvePendingTechGrants(
 
 	for _, lvl := range levels {
 		grants := sess.PendingTechGrants[lvl]
-		if err := LevelUpTechnologies(ctx, sess, characterID, grants, techReg, promptFn,
-			hwRepo, prepRepo, spontRepo, innateRepo, usePoolRepo,
-		); err != nil {
-			return fmt.Errorf("ResolvePendingTechGrants level %d: %w", lvl, err)
+
+		// Split: only auto-resolve L1. L2+ requires a trainer (REQ-TTA-2).
+		l1Grants := FilterGrantsByMaxTechLevel(grants, 1)
+		l2Grants := filterGrantsByMinTechLevel(grants, 2)
+
+		if l1Grants != nil {
+			if err := LevelUpTechnologies(ctx, sess, characterID, l1Grants, techReg, promptFn,
+				hwRepo, prepRepo, spontRepo, innateRepo, usePoolRepo,
+			); err != nil {
+				return fmt.Errorf("ResolvePendingTechGrants level %d (L1): %w", lvl, err)
+			}
 		}
-		delete(sess.PendingTechGrants, lvl)
-		remaining := make([]int, 0, len(sess.PendingTechGrants))
-		for k := range sess.PendingTechGrants {
-			remaining = append(remaining, k)
-		}
-		sort.Ints(remaining)
-		if err := progressRepo.SetPendingTechLevels(ctx, characterID, remaining); err != nil {
-			return fmt.Errorf("ResolvePendingTechGrants SetPendingTechLevels: %w", err)
+
+		if l2Grants != nil {
+			// Keep L2+ in PendingTechGrants for trainer resolution.
+			sess.PendingTechGrants[lvl] = l2Grants
+		} else {
+			// All grants at this char level are resolved — remove from pending.
+			delete(sess.PendingTechGrants, lvl)
+			remaining := make([]int, 0, len(sess.PendingTechGrants))
+			for k := range sess.PendingTechGrants {
+				remaining = append(remaining, k)
+			}
+			sort.Ints(remaining)
+			if err := progressRepo.SetPendingTechLevels(ctx, characterID, remaining); err != nil {
+				return fmt.Errorf("ResolvePendingTechGrants SetPendingTechLevels: %w", err)
+			}
 		}
 	}
 	return nil

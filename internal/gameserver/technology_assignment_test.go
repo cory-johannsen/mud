@@ -843,6 +843,49 @@ func TestPropertyResolvePendingTechGrants_ChosenFromPool(t *testing.T) {
 	})
 }
 
+// TestResolvePendingTechGrants_SkipsL2AndAbove verifies that ResolvePendingTechGrants
+// auto-resolves L1 grants but leaves L2+ grants in sess.PendingTechGrants (REQ-TTA-2).
+//
+// Precondition: sess.PendingTechGrants[3] has both L1 and L2 prepared grants.
+// Postcondition: L1 slot is filled; PendingTechGrants[3] still exists with only L2 grants.
+func TestResolvePendingTechGrants_SkipsL2AndAbove(t *testing.T) {
+	ctx := context.Background()
+	prep := &fakePreparedRepo{}
+	hw := &fakeHardwiredRepo{}
+	spont := &fakeSpontaneousRepo{}
+	innate := &fakeInnateRepo{}
+	progressRepo := &fakePendingTechLevelsRepo{}
+
+	// char level 3 has an L1 slot (auto-resolvable) and an L2 slot (trainer-required).
+	sess := &session.PlayerSession{
+		Level: 5,
+		PendingTechGrants: map[int]*ruleset.TechnologyGrants{
+			3: {Prepared: &ruleset.PreparedGrants{
+				SlotsByLevel: map[int]int{1: 1, 2: 1},
+				Pool: []ruleset.PreparedEntry{
+					{ID: "l1_tech", Level: 1},
+					{ID: "l2_tech", Level: 2},
+				},
+			}},
+		},
+	}
+
+	err := gameserver.ResolvePendingTechGrants(ctx, sess, 1, &ruleset.Job{}, nil, noPrompt,
+		hw, prep, spont, innate, nil, progressRepo)
+	require.NoError(t, err)
+
+	// L1 slot must be resolved into PreparedTechs.
+	require.NotEmpty(t, prep.slots[1], "L1 prepared slot must be filled after resolve")
+
+	// L2 grant must still be pending (not resolved).
+	remaining, ok := sess.PendingTechGrants[3]
+	require.True(t, ok, "PendingTechGrants[3] must still exist because L2 grant was not resolved")
+	require.NotNil(t, remaining.Prepared, "remaining Prepared must be non-nil")
+	assert.Equal(t, 1, remaining.Prepared.SlotsByLevel[2], "L2 slot must still be pending")
+	_, l1Still := remaining.Prepared.SlotsByLevel[1]
+	assert.False(t, l1Still, "L1 slot must be removed from PendingTechGrants after resolution")
+}
+
 // REQ-JTG6: AssignTechnologies returns a wrapped error when merged grants fail Validate().
 // REQ-JTG7: AssignTechnologies calls Validate() on the merged result before processing
 //
