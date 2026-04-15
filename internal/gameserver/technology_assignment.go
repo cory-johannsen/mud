@@ -974,6 +974,14 @@ func fillFromPreparedPoolWithSend(
 					keepName = def.Name
 				}
 			}
+			// Remove prevTechID from the regular pool options before prepending the keep
+			// option so the same tech is not offered twice (REQ-BUG101-1).
+			for i, opt := range options {
+				if parseTechID(opt) == prevTechID {
+					options = append(options[:i], options[i+1:]...)
+					break
+				}
+			}
 			options = append([]string{keepSentinel + "Keep current: " + keepName}, options...)
 		}
 

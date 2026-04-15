@@ -753,6 +753,53 @@ func TestRearrangePreparedTechs_NoKeepOption_WhenTechNotInPool(t *testing.T) {
 	}
 }
 
+// REQ-BUG101-1: When a "[keep]" option is prepended, the kept tech MUST NOT also appear
+// as a regular pool option so the player cannot accidentally re-select the same tech.
+func TestRearrangePreparedTechs_KeepCurrentOption_NotDuplicatedInPoolList(t *testing.T) {
+	ctx := context.Background()
+	prep := &fakePreparedRepo{slots: map[int][]*session.PreparedSlot{
+		1: {{TechID: "current_tech"}},
+	}}
+	sess := &session.PlayerSession{
+		PreparedTechs: map[int][]*session.PreparedSlot{
+			1: {{TechID: "current_tech"}},
+		},
+	}
+	job := &ruleset.Job{
+		TechnologyGrants: &ruleset.TechnologyGrants{
+			Prepared: &ruleset.PreparedGrants{
+				SlotsByLevel: map[int]int{1: 1},
+				Pool: []ruleset.PreparedEntry{
+					{ID: "current_tech", Level: 1},
+					{ID: "other_tech", Level: 1},
+				},
+			},
+		},
+	}
+
+	var capturedOptions []string
+	promptFn := func(options []string) (string, error) {
+		capturedOptions = options
+		return options[0], nil
+	}
+
+	err := gameserver.RearrangePreparedTechs(ctx, sess, 1, job, nil, nil, promptFn, prep, nil, technology.TraditionFlavor{})
+	require.NoError(t, err)
+	require.NotEmpty(t, capturedOptions)
+	// Count how many times current_tech appears in options (keep + pool).
+	keepCount := 0
+	poolCount := 0
+	for _, opt := range capturedOptions {
+		if strings.HasPrefix(opt, "[keep]") {
+			keepCount++
+		} else if strings.Contains(opt, "current_tech") {
+			poolCount++
+		}
+	}
+	assert.Equal(t, 1, keepCount, "exactly one keep option must be present")
+	assert.Equal(t, 0, poolCount, "current_tech must NOT appear as a regular pool option when keep is offered")
+}
+
 // REQ-ILT2: All-immediate grants (pool <= open slots) → deferred is nil.
 func TestPartitionTechGrants_AllImmediate(t *testing.T) {
 	grants := &ruleset.TechnologyGrants{
