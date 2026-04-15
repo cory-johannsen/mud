@@ -168,6 +168,7 @@ message ClientMessage {
     JobGrantsRequest     job_grants_request    = 136;
     QuestLogRequest      quest_log_request     = 137;
     TrainTechRequest     train_tech            = 138;
+    ChooseFeatRequest    choose_feat           = 139;
   }
 }
 
@@ -1635,8 +1636,36 @@ message JobTechGrant {
 
 // JobGrantsResponse delivers the job's feat and technology grant table to the client.
 message JobGrantsResponse {
-  repeated JobFeatGrant feat_grants = 1;
-  repeated JobTechGrant tech_grants = 2;
+  repeated JobFeatGrant      feat_grants          = 1;
+  repeated JobTechGrant      tech_grants          = 2;
+  repeated PendingFeatChoice pending_feat_choices = 3;
+}
+
+// FeatOption describes a single selectable feat in a pending choice pool.
+//
+// Precondition: feat_id is a valid feat ID in the server's feat registry.
+message FeatOption {
+  string feat_id     = 1;
+  string name        = 2;
+  string description = 3;
+  string category    = 4;
+}
+
+// PendingFeatChoice describes one unresolved feat choice pool at a specific grant level.
+//
+// Precondition: count >= 1; options is non-empty; grant_level >= 1.
+message PendingFeatChoice {
+  int32             grant_level = 1;
+  int32             count       = 2;
+  repeated FeatOption options   = 3;
+}
+
+// ChooseFeatRequest asks the server to resolve one pending feat choice slot.
+//
+// Precondition: grant_level >= 1; feat_id is non-empty.
+message ChooseFeatRequest {
+  int32  grant_level = 1;
+  string feat_id     = 2;
 }
 
 // Admin session snapshot for a single connected player.
