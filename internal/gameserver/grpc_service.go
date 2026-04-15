@@ -4324,6 +4324,7 @@ func (s *GameServiceServer) applyFullLongRestCtx(uid string, sess *session.Playe
 	}
 
 	s.pushEventToUID(uid, s.hotbarUpdateEvent(sess))
+	s.pushCharacterSheet(sess)
 	return sendMsg(fmt.Sprintf("You finish your rest. HP restored to maximum. %s", restFlavor.RestMessage))
 }
 
