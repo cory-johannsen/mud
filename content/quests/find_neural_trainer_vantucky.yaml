@@ -1,0 +1,7 @@
+id: find_neural_trainer_vantucky
+title: "Neural Training Available"
+description: >
+  Your neural potential has expanded to level 2. A trainer somewhere in Vantucky
+  can unlock it — ask around and explore to find them.
+type: find_trainer
+auto_complete: true

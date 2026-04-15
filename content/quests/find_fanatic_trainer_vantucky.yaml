@@ -1,0 +1,7 @@
+id: find_fanatic_trainer_vantucky
+title: "Fanatic Doctrine Training Available"
+description: >
+  Your conviction has deepened to level 2. A doctrine instructor in Vantucky
+  can guide you further — they are not easy to find.
+type: find_trainer
+auto_complete: true

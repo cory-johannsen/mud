@@ -1,0 +1,7 @@
+id: find_technical_trainer_vantucky
+title: "Technical Training Available"
+description: >
+  Your technical knowledge has grown to level 2. A trainer in Vantucky can teach
+  you the next tier — explore the area to find them.
+type: find_trainer
+auto_complete: true
