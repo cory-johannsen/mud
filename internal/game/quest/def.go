@@ -33,8 +33,10 @@ type QuestDef struct {
 	ID            string           `yaml:"id"`
 	Title         string           `yaml:"title"`
 	Description   string           `yaml:"description"`
+	Type          string           `yaml:"type,omitempty"`
 	GiverNPCID    string           `yaml:"giver_npc_id"`
 	Repeatable    bool             `yaml:"repeatable"`
+	AutoComplete  bool             `yaml:"auto_complete,omitempty"`
 	Cooldown      string           `yaml:"cooldown,omitempty"`
 	Prerequisites []string         `yaml:"prerequisites,omitempty"`
 	Objectives    []QuestObjective `yaml:"objectives"`
@@ -47,6 +49,10 @@ func (d QuestDef) Validate() error {
 	}
 	if d.Title == "" {
 		return fmt.Errorf("quest %q: Title must not be empty", d.ID)
+	}
+	// find_trainer quests have no NPC giver and no objectives — skip those checks.
+	if d.Type == "find_trainer" {
+		return nil
 	}
 	if d.GiverNPCID == "" {
 		return fmt.Errorf("quest %q: GiverNPCID must not be empty", d.ID)

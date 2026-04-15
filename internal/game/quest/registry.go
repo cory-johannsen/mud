@@ -51,7 +51,8 @@ func LoadFromDir(dir string) (QuestRegistry, error) {
 // Postcondition: Returns a fatal error if any reference is unresolvable.
 func (r QuestRegistry) CrossValidate(npcIDs, itemIDs, roomIDs map[string]bool) error {
 	for _, def := range r {
-		if !npcIDs[def.GiverNPCID] {
+		// Skip NPC check for find_trainer quests — they have no giver NPC.
+		if def.Type != "find_trainer" && !npcIDs[def.GiverNPCID] {
 			return fmt.Errorf("quest %q: GiverNPCID %q not found in NPC registry", def.ID, def.GiverNPCID)
 		}
 		for _, prereq := range def.Prerequisites {

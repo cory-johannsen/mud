@@ -84,6 +84,45 @@ func TestQuestDef_Validate_ValidDeliver(t *testing.T) {
 	}
 }
 
+// TestQuestDef_FindTrainer_ValidatesWithoutGiverNPCOrObjectives verifies that a
+// quest of type "find_trainer" passes Validate() with no GiverNPCID and no objectives.
+//
+// Precondition: QuestDef with Type "find_trainer", no GiverNPCID, no Objectives.
+// Postcondition: Validate returns nil.
+func TestQuestDef_FindTrainer_ValidatesWithoutGiverNPCOrObjectives(t *testing.T) {
+	def := quest.QuestDef{
+		ID:           "find_neural_trainer_vantucky",
+		Title:        "Neural Training Available",
+		Description:  "Find a trainer in Vantucky.",
+		Type:         "find_trainer",
+		AutoComplete: true,
+	}
+	if err := def.Validate(); err != nil {
+		t.Fatalf("unexpected error for find_trainer quest: %v", err)
+	}
+}
+
+// TestQuestDef_FindTrainer_CrossValidate_SkipsNPCCheck verifies that CrossValidate
+// does not require GiverNPCID to exist in npcIDs for find_trainer quests.
+//
+// Precondition: QuestRegistry with a find_trainer quest; empty npcIDs map.
+// Postcondition: CrossValidate returns nil.
+func TestQuestDef_FindTrainer_CrossValidate_SkipsNPCCheck(t *testing.T) {
+	reg := quest.QuestRegistry{
+		"find_neural_trainer_vantucky": &quest.QuestDef{
+			ID:           "find_neural_trainer_vantucky",
+			Title:        "Neural Training Available",
+			Description:  "Find a trainer.",
+			Type:         "find_trainer",
+			AutoComplete: true,
+		},
+	}
+	err := reg.CrossValidate(map[string]bool{}, map[string]bool{}, map[string]bool{})
+	if err != nil {
+		t.Fatalf("unexpected error for find_trainer CrossValidate: %v", err)
+	}
+}
+
 func TestQuestDef_Validate_Property(t *testing.T) {
 	rapid.Check(t, func(rt *rapid.T) {
 		qty := rapid.IntRange(1, 100).Draw(rt, "qty")
