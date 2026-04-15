@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useGame } from '../GameContext'
 import type { SkillEntry } from '../../proto'
+import { FeatChoiceModal } from '../drawers/FeatChoiceModal'
 
 function HpBar({ current, max }: { current: number; max: number }) {
   const pct = max > 0 ? (current / max) * 100 : 0
@@ -122,7 +123,7 @@ function SkillIncreaseModal({ skills, onSelect, onCancel }: { skills: SkillEntry
   )
 }
 
-type Modal = 'boost' | 'skill' | null
+type Modal = 'boost' | 'skill' | 'feat' | null
 
 export function CharacterPanel() {
   const { state, sendMessage } = useGame()
@@ -131,6 +132,7 @@ export function CharacterPanel() {
   const [modal, setModal] = useState<Modal>(null)
 
   useEffect(() => {
+    sendMessage('JobGrantsRequest', {})
     if (!characterSheet) {
       sendMessage('CharacterSheetRequest', {})
       retryRef.current = setInterval(() => {
@@ -186,6 +188,7 @@ export function CharacterPanel() {
   const xpPct = xpToNext > 0 ? Math.min(100, (xp / xpToNext) * 100) : 100
   const pendingBoosts = characterSheet?.pendingBoosts ?? characterSheet?.pending_boosts ?? 0
   const pendingSkillInc = characterSheet?.pendingSkillIncreases ?? 0
+  const pendingFeatChoices = state.jobGrants?.pendingFeatChoices ?? state.jobGrants?.pending_feat_choices ?? []
 
   return (
     <>
@@ -194,6 +197,12 @@ export function CharacterPanel() {
       )}
       {modal === 'skill' && (
         <SkillIncreaseModal skills={characterSheet?.skills ?? []} onSelect={handleSkillSelect} onCancel={() => setModal(null)} />
+      )}
+      {modal === 'feat' && (
+        <FeatChoiceModal
+          choices={pendingFeatChoices}
+          onClose={() => setModal(null)}
+        />
       )}
       <div>
         <h3 className="char-name">{name}</h3>
@@ -264,6 +273,11 @@ export function CharacterPanel() {
               {pendingSkillInc > 0 && (
                 <button style={styles.pendingBtn} onClick={() => setModal('skill')} type="button">
                   ★ {pendingSkillInc} Pending Skill Increase{pendingSkillInc !== 1 ? 's' : ''} — Apply
+                </button>
+              )}
+              {pendingFeatChoices.length > 0 && (
+                <button style={styles.pendingBtn} onClick={() => setModal('feat')} type="button">
+                  ★ {pendingFeatChoices.length} Feat Choice{pendingFeatChoices.length !== 1 ? 's' : ''} Available — Choose
                 </button>
               )}
             </div>
