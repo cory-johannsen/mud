@@ -17,7 +17,8 @@ func TestCleanupPlayer_LeaderDisconnect_DisbandGroup(t *testing.T) {
 	group := sessMgr.CreateGroup("leader")
 	require.NoError(t, sessMgr.AddGroupMember(group.ID, "member"))
 
-	svc.cleanupPlayer("leader", "alice")
+	leader, _ := sessMgr.GetPlayer("leader")
+	svc.cleanupPlayer("leader", "alice", leader.Entity)
 
 	assert.Empty(t, member.GroupID, "member GroupID should be cleared after leader disconnects")
 	_, exists := sessMgr.GroupByID(group.ID)
@@ -34,7 +35,7 @@ func TestCleanupPlayer_InviteePendingInvite_InviteCleared(t *testing.T) {
 	group := sessMgr.CreateGroup("leader")
 	invitee.PendingGroupInvite = group.ID
 
-	svc.cleanupPlayer("invitee", "bob")
+	svc.cleanupPlayer("invitee", "bob", invitee.Entity)
 
 	assert.Empty(t, invitee.PendingGroupInvite, "PendingGroupInvite must be cleared on disconnect")
 	// Note: the push notification to the leader ("X disconnected before responding to your invitation.")
@@ -52,7 +53,8 @@ func TestCleanupPlayer_NonLeaderDisconnect_LeaderGroupPreserved(t *testing.T) {
 	group := sessMgr.CreateGroup("leader")
 	require.NoError(t, sessMgr.AddGroupMember(group.ID, "member"))
 
-	svc.cleanupPlayer("member", "bob")
+	member, _ := sessMgr.GetPlayer("member")
+	svc.cleanupPlayer("member", "bob", member.Entity)
 
 	assert.NotEmpty(t, leader.GroupID, "leader GroupID must remain after non-leader disconnects")
 	g, exists := sessMgr.GroupByID(group.ID)

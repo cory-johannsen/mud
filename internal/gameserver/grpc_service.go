@@ -865,7 +865,10 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 	if err != nil {
 		return fmt.Errorf("adding player: %w", err)
 	}
-	defer s.cleanupPlayer(uid, username)
+	// Capture the entity assigned to THIS session so cleanupPlayer can guard
+	// against stale cleanup after a rapid reconnect evicts this session.
+	myEntity := sess.Entity
+	defer func() { s.cleanupPlayer(uid, username, myEntity) }()
 
 	// Restore combat status if the player reconnected mid-combat.
 	// AddPlayer always initialises Status=1 (idle); if an active combat in this room
@@ -4711,11 +4714,21 @@ func (s *GameServiceServer) handleKick(uid string, req *gamev1.KickRequest) (*ga
 
 // cleanupPlayer removes a player from the session manager, persists character state, and broadcasts departure.
 //
-// Precondition: uid must be non-empty.
-// Postcondition: Player is removed from all tracking; character state is saved if charSaver is configured.
-func (s *GameServiceServer) cleanupPlayer(uid, username string) {
+// Precondition: uid must be non-empty; myEntity must be the BridgeEntity allocated for this session.
+// Postcondition: If the session in the registry is still the one identified by myEntity, it is removed
+// and character state is saved. If the session was evicted by a rapid reconnect (different entity),
+// this is a no-op to avoid disrupting the new session.
+func (s *GameServiceServer) cleanupPlayer(uid, username string, myEntity *session.BridgeEntity) {
 	sess, ok := s.sessions.GetPlayer(uid)
 	if !ok {
+		return
+	}
+	// Guard against stale cleanup: if the session in the registry has a different entity,
+	// a rapid reconnect already evicted our session and created a new one. Skip cleanup
+	// so we don't remove the replacement session.
+	if sess.Entity != myEntity {
+		s.logger.Debug("cleanupPlayer: session was replaced by reconnect, skipping stale cleanup",
+			zap.String("uid", uid))
 		return
 	}
 	roomID := sess.RoomID
