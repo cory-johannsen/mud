@@ -242,7 +242,7 @@
       min: 10
       max: 50
 
-- id: vantucky_neural_trainer
+- id: vantucky_tech_trainer
   name: "Mama Zen"
   npc_type: tech_trainer
   type: human
