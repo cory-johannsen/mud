@@ -116,6 +116,9 @@ func (s *GameServiceServer) AdminListZones(_ context.Context, _ *gamev1.AdminLis
 // Postcondition: Returns codes.NotFound if zone does not exist; otherwise returns all rooms.
 // REQ-AUI-3.
 func (s *GameServiceServer) AdminListRooms(_ context.Context, req *gamev1.AdminListRoomsRequest) (*gamev1.AdminListRoomsResponse, error) {
+	if req.ZoneId == "" {
+		return nil, status.Error(codes.InvalidArgument, "zone_id must not be empty")
+	}
 	zone, ok := s.world.GetZone(req.ZoneId)
 	if !ok {
 		return nil, status.Errorf(codes.NotFound, "zone %q not found", req.ZoneId)

@@ -86,8 +86,17 @@ func TestAdminListRooms_UnknownZone_ReturnsNotFound(t *testing.T) {
 	assertAdminGRPCCode(t, err, codes.NotFound)
 }
 
+// TestAdminListRooms_EmptyZoneID_ReturnsInvalidArgument verifies that an empty
+// zone_id returns codes.InvalidArgument. REQ-AUI-3.
+func TestAdminListRooms_EmptyZoneID_ReturnsInvalidArgument(t *testing.T) {
+	svc, _ := newAdminSvc(t)
+	_, err := svc.AdminListRooms(context.Background(), &gamev1.AdminListRoomsRequest{ZoneId: ""})
+	require.Error(t, err)
+	assertAdminGRPCCode(t, err, codes.InvalidArgument)
+}
+
 // TestProperty_AdminListZones_NeverErrors is a property test verifying AdminListZones
-// never returns an error for the standard world state. REQ-AUI-1.
+// is always consistent with the world manager's zone count. REQ-AUI-1.
 func TestProperty_AdminListZones_NeverErrors(t *testing.T) {
 	rapid.Check(t, func(rt *rapid.T) {
 		svc, _ := newAdminSvc(t)
@@ -97,6 +106,11 @@ func TestProperty_AdminListZones_NeverErrors(t *testing.T) {
 		}
 		if resp == nil {
 			rt.Fatal("nil response")
+		}
+		// Verify count is consistent with the world manager.
+		allZones := svc.world.AllZones()
+		if len(resp.Zones) != len(allZones) {
+			rt.Fatalf("zone count mismatch: response has %d, world has %d", len(resp.Zones), len(allZones))
 		}
 	})
 }
