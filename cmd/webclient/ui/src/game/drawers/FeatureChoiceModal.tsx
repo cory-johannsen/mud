@@ -7,6 +7,17 @@ import { useGame } from '../GameContext'
 // REQ-FCM-2: Each option rendered as a numbered, clickable button.
 // REQ-FCM-3: Clicking an option sends the 1-based option number as a CommandText message.
 // REQ-FCM-4: After selection, clearChoicePrompt() is called and onClose() is invoked.
+// REQ-FCM-5: Internal ID prefixes of the form "[xxx] " MUST be stripped before display.
+
+// stripOptionPrefix removes a leading "[xxx] " tag (e.g. "[keep] " or "[tech_id] ") from an option
+// string so that players never see internal identifiers.
+function stripOptionPrefix(opt: string): string {
+  if (opt.startsWith('[')) {
+    const end = opt.indexOf('] ')
+    if (end > 0) return opt.slice(end + 2)
+  }
+  return opt
+}
 
 export function FeatureChoiceModal({ onClose }: { onClose: () => void }) {
   const { state, sendCommand, clearChoicePrompt } = useGame()
@@ -35,7 +46,7 @@ export function FeatureChoiceModal({ onClose }: { onClose: () => void }) {
               type="button"
             >
               <span style={styles.optionNumber}>{i + 1}.</span>
-              <span style={styles.optionText}>{opt}</span>
+              <span style={styles.optionText}>{stripOptionPrefix(opt)}</span>
             </button>
           ))}
         </div>

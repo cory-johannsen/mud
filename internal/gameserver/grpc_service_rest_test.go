@@ -239,7 +239,13 @@ func TestHandleRest_NotInCombat_Rearranges(t *testing.T) {
 	prepRepo := &fakePreparedRepoRest{}
 	svc.SetPreparedTechRepo(prepRepo)
 
-	stream := &fakeSessionStream{}
+	// Pre-load the player's choice response: "1" selects the first (and only) pool option.
+	// This is required because RearrangePreparedTechs always prompts for pool slots now.
+	stream := &fakeSessionStream{
+		recv: []*gamev1.ClientMessage{
+			{Payload: &gamev1.ClientMessage_Say{Say: &gamev1.SayRequest{Message: "1"}}},
+		},
+	}
 	require.NoError(t, svc.handleRest(uid, "req2", stream))
 
 	msg := lastMessage(stream)

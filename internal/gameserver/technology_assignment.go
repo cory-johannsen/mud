@@ -12,8 +12,12 @@ import (
 )
 
 // TechPromptFn presents a list of technology options to the player and returns
-// the selected option string. Called only when pool size exceeds open slots.
+// the selected option string.
 type TechPromptFn func(options []string) (string, error)
+
+// keepSentinel is the option prefix used to offer "keep current" in pool slot prompts.
+// Callers that see this prefix in the chosen string use the existing tech rather than parsing a new ID.
+const keepSentinel = "[keep] "
 
 // HardwiredTechRepo defines persistence for hardwired technology assignments.
 type HardwiredTechRepo interface {
@@ -481,6 +485,14 @@ func RearrangePreparedTechs(
 		Pool:         allPool,
 	}
 
+	// Snapshot current assignments before clearing — used to offer "keep" options during re-selection.
+	prevSlots := make(map[int][]*session.PreparedSlot, len(sess.PreparedTechs))
+	for lvl, slots := range sess.PreparedTechs {
+		cp := make([]*session.PreparedSlot, len(slots))
+		copy(cp, slots)
+		prevSlots[lvl] = cp
+	}
+
 	// Clear existing slots before re-filling.
 	if err := prepRepo.DeleteAll(ctx, characterID); err != nil {
 		return fmt.Errorf("RearrangePreparedTechs DeleteAll: %w", err)
@@ -489,7 +501,7 @@ func RearrangePreparedTechs(
 
 	// Re-fill each level.
 	for lvl, slots := range slotsByLevel {
-		chosen, err := fillFromPreparedPoolWithSend(ctx, lvl, slots, 0, merged, techReg, promptFn, characterID, prepRepo, send, flavor)
+		chosen, err := fillFromPreparedPoolWithSend(ctx, lvl, slots, 0, merged, techReg, promptFn, characterID, prepRepo, send, prevSlots[lvl], flavor)
 		if err != nil {
 			return fmt.Errorf("RearrangePreparedTechs level %d: %w", lvl, err)
 		}
@@ -880,7 +892,13 @@ func ResolvePendingTechGrants(
 
 // fillFromPreparedPoolWithSend fills prepared slots like fillFromPreparedPool but emits
 // per-slot progress messages via send using the provided flavor strings.
+// It always prompts the player for each pool slot (no auto-assign shortcut) so that
+// all slots are visible and changeable during rearrangement.
+// When prevSlots is non-nil and the previously assigned tech is still in the available pool,
+// a "[keep]" option is prepended so the player can retain their current selection.
+//
 // Precondition: send is non-nil; flavor fields are used for SlotNoun display.
+// Postcondition: All slots (fixed + pool) are filled; pool slots always prompt the player.
 func fillFromPreparedPoolWithSend(
 	ctx context.Context,
 	lvl, slots, startIdx int,
@@ -890,6 +908,7 @@ func fillFromPreparedPoolWithSend(
 	characterID int64,
 	repo PreparedTechRepo,
 	send func(string),
+	prevSlots []*session.PreparedSlot,
 	flavor technology.TraditionFlavor,
 ) ([]*session.PreparedSlot, error) {
 	result := make([]*session.PreparedSlot, 0, slots)
@@ -922,33 +941,54 @@ func fillFromPreparedPoolWithSend(
 		}
 	}
 
-	if len(pool) == open {
-		// Auto-assign without prompt.
-		for _, e := range pool {
-			slotNum := idx - startIdx + 1
-			send(fmt.Sprintf("Level %d, %s %d: %s", lvl, flavor.SlotNoun, slotNum, e.ID))
-			slot := &session.PreparedSlot{TechID: e.ID}
-			result = append(result, slot)
-			if err := repo.Set(ctx, characterID, lvl, idx, e.ID); err != nil {
-				return nil, err
-			}
-			idx++
-		}
-		return result, nil
+	// Build a set of pool IDs for fast lookup (used to gate the "keep" option).
+	poolIDSet := make(map[string]bool, len(pool))
+	for _, e := range pool {
+		poolIDSet[e.ID] = true
 	}
 
-	// Prompt player to choose from pool.
+	// fixedCount is the number of fixed slots filled above; pool slots start at this offset.
+	fixedCount := len(result)
+
+	// Prompt player to choose from pool for every open slot.
+	// The auto-assign shortcut (pool size == open slots) is intentionally omitted here
+	// so the player can review and optionally change each slot during rearrangement.
 	remaining := make([]ruleset.PreparedEntry, len(pool))
 	copy(remaining, pool)
+	poolSlotI := 0
 	for open > 0 {
 		slotNum := idx - startIdx + 1
 		send(fmt.Sprintf("Level %d, %s %d: choose from pool", lvl, flavor.SlotNoun, slotNum))
+
+		// Build option list; prepend a "keep" option when the current tech is still available.
 		options := buildPreparedOptions(remaining, techReg)
+		prevSlotIdx := fixedCount + poolSlotI
+		var prevTechID string
+		if prevSlots != nil && prevSlotIdx < len(prevSlots) && prevSlots[prevSlotIdx] != nil {
+			prevTechID = prevSlots[prevSlotIdx].TechID
+		}
+		if prevTechID != "" && poolIDSet[prevTechID] {
+			keepName := prevTechID
+			if techReg != nil {
+				if def, ok := techReg.Get(prevTechID); ok {
+					keepName = def.Name
+				}
+			}
+			options = append([]string{keepSentinel + "Keep current: " + keepName}, options...)
+		}
+
 		chosen, err := promptFn(options)
 		if err != nil {
 			return nil, err
 		}
-		techID := parseTechID(chosen)
+
+		var techID string
+		if strings.HasPrefix(chosen, keepSentinel) {
+			techID = prevTechID
+		} else {
+			techID = parseTechID(chosen)
+		}
+
 		slot := &session.PreparedSlot{TechID: techID}
 		result = append(result, slot)
 		if err := repo.Set(ctx, characterID, lvl, idx, techID); err != nil {
@@ -957,6 +997,7 @@ func fillFromPreparedPoolWithSend(
 		idx++
 		remaining = removePreparedByID(remaining, techID)
 		open--
+		poolSlotI++
 	}
 	return result, nil
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -528,8 +529,9 @@ func TestRearrangePreparedTechs_FixedFirst(t *testing.T) {
 }
 
 // REQ-RAR3: LevelUpGrants entries above sess.Level are excluded from the pool.
-// With level 3 excluded, the pool has exactly 1 entry for 1 slot → auto-assign fires.
-// If level 3 were included, pool would have 2 entries for 1 slot → prompt would fire.
+// With level 3 excluded, only the level2 entry is in the pool.
+// RearrangePreparedTechs always prompts for pool slots (no auto-assign shortcut),
+// so the prompt fires exactly once and the player selects from the single available option.
 func TestRearrangePreparedTechs_LevelUpGrantsFiltered(t *testing.T) {
 	ctx := context.Background()
 	prep := &fakePreparedRepo{slots: map[int][]*session.PreparedSlot{
@@ -555,14 +557,20 @@ func TestRearrangePreparedTechs_LevelUpGrantsFiltered(t *testing.T) {
 	promptCalled := false
 	promptFn := func(options []string) (string, error) {
 		promptCalled = true
+		// Select the first non-keep option (level2_pool).
+		for _, opt := range options {
+			if !strings.HasPrefix(opt, "[keep]") {
+				return opt, nil
+			}
+		}
 		return options[0], nil
 	}
 
 	err := gameserver.RearrangePreparedTechs(ctx, sess, 1, job, nil, nil, promptFn, prep, nil, technology.TraditionFlavor{})
 	require.NoError(t, err)
 
-	// Level3 excluded → pool has 1 entry for 1 slot → auto-assign, no prompt
-	assert.False(t, promptCalled, "auto-assign fires when level3 excluded (pool==open)")
+	// Level3 excluded → pool has 1 entry → prompt always fires for pool slots.
+	assert.True(t, promptCalled, "prompt must always fire for pool slots in RearrangePreparedTechs")
 	require.Len(t, sess.PreparedTechs[1], 1)
 	assert.Equal(t, "level2_pool", sess.PreparedTechs[1][0].TechID)
 }
@@ -600,8 +608,9 @@ func (r *fakePendingTechLevelsRepo) SetPendingTechLevels(_ context.Context, _ in
 	return nil
 }
 
-// REQ-RAR5: Auto-assign fires when len(pool at level) == open slots; no prompt invoked.
-func TestRearrangePreparedTechs_AutoAssignNoPrompt(t *testing.T) {
+// REQ-RAR5: RearrangePreparedTechs MUST always prompt for pool slots, even when
+// pool size equals available slots, so the player can review their selection.
+func TestRearrangePreparedTechs_AlwaysPromptsPoolSlots(t *testing.T) {
 	ctx := context.Background()
 	prep := &fakePreparedRepo{slots: map[int][]*session.PreparedSlot{
 		1: {{TechID: "old"}},
@@ -628,9 +637,120 @@ func TestRearrangePreparedTechs_AutoAssignNoPrompt(t *testing.T) {
 
 	err := gameserver.RearrangePreparedTechs(ctx, sess, 1, job, nil, nil, promptFn, prep, nil, technology.TraditionFlavor{})
 	require.NoError(t, err)
-	assert.False(t, promptCalled, "prompt must not be called when pool == open slots")
+	// Prompt must fire even when pool size == open slots.
+	assert.True(t, promptCalled, "prompt must always fire for pool slots in RearrangePreparedTechs")
 	require.Len(t, sess.PreparedTechs[1], 1)
+	// "old" is not in the current pool, so no [keep] option is presented; first option is "only_option".
 	assert.Equal(t, "only_option", sess.PreparedTechs[1][0].TechID)
+}
+
+// REQ-RAR6: When the currently assigned tech is still in the available pool, RearrangePreparedTechs
+// MUST present a "[keep] Keep current: <name>" option as the first choice.
+func TestRearrangePreparedTechs_KeepCurrentOption_OfferedWhenTechInPool(t *testing.T) {
+	ctx := context.Background()
+	prep := &fakePreparedRepo{slots: map[int][]*session.PreparedSlot{
+		1: {{TechID: "current_tech"}},
+	}}
+	sess := &session.PlayerSession{
+		PreparedTechs: map[int][]*session.PreparedSlot{
+			1: {{TechID: "current_tech"}},
+		},
+	}
+	job := &ruleset.Job{
+		TechnologyGrants: &ruleset.TechnologyGrants{
+			Prepared: &ruleset.PreparedGrants{
+				SlotsByLevel: map[int]int{1: 1},
+				Pool: []ruleset.PreparedEntry{
+					{ID: "current_tech", Level: 1},
+					{ID: "other_tech", Level: 1},
+				},
+			},
+		},
+	}
+
+	var capturedOptions []string
+	promptFn := func(options []string) (string, error) {
+		capturedOptions = options
+		return options[0], nil // select first option ([keep])
+	}
+
+	err := gameserver.RearrangePreparedTechs(ctx, sess, 1, job, nil, nil, promptFn, prep, nil, technology.TraditionFlavor{})
+	require.NoError(t, err)
+	require.NotEmpty(t, capturedOptions, "prompt must have been called")
+	// First option must be the keep sentinel.
+	assert.True(t, strings.HasPrefix(capturedOptions[0], "[keep] "), "first option must be [keep] prefix; got: %s", capturedOptions[0])
+}
+
+// REQ-RAR7: When the player selects the "[keep]" option, the previously assigned tech ID is preserved.
+func TestRearrangePreparedTechs_SelectKeep_PreservesCurrentTech(t *testing.T) {
+	ctx := context.Background()
+	prep := &fakePreparedRepo{slots: map[int][]*session.PreparedSlot{
+		1: {{TechID: "current_tech"}},
+	}}
+	sess := &session.PlayerSession{
+		PreparedTechs: map[int][]*session.PreparedSlot{
+			1: {{TechID: "current_tech"}},
+		},
+	}
+	job := &ruleset.Job{
+		TechnologyGrants: &ruleset.TechnologyGrants{
+			Prepared: &ruleset.PreparedGrants{
+				SlotsByLevel: map[int]int{1: 1},
+				Pool: []ruleset.PreparedEntry{
+					{ID: "current_tech", Level: 1},
+					{ID: "other_tech", Level: 1},
+				},
+			},
+		},
+	}
+
+	promptFn := func(options []string) (string, error) {
+		// Always select the [keep] option (first).
+		return options[0], nil
+	}
+
+	err := gameserver.RearrangePreparedTechs(ctx, sess, 1, job, nil, nil, promptFn, prep, nil, technology.TraditionFlavor{})
+	require.NoError(t, err)
+	require.Len(t, sess.PreparedTechs[1], 1)
+	assert.Equal(t, "current_tech", sess.PreparedTechs[1][0].TechID, "keep option must preserve current tech")
+}
+
+// REQ-RAR8: When the currently assigned tech is NOT in the available pool, no "[keep]" option is offered.
+func TestRearrangePreparedTechs_NoKeepOption_WhenTechNotInPool(t *testing.T) {
+	ctx := context.Background()
+	prep := &fakePreparedRepo{slots: map[int][]*session.PreparedSlot{
+		1: {{TechID: "removed_tech"}},
+	}}
+	sess := &session.PlayerSession{
+		PreparedTechs: map[int][]*session.PreparedSlot{
+			1: {{TechID: "removed_tech"}},
+		},
+	}
+	job := &ruleset.Job{
+		TechnologyGrants: &ruleset.TechnologyGrants{
+			Prepared: &ruleset.PreparedGrants{
+				SlotsByLevel: map[int]int{1: 1},
+				Pool: []ruleset.PreparedEntry{
+					{ID: "new_tech_a", Level: 1},
+					{ID: "new_tech_b", Level: 1},
+				},
+			},
+		},
+	}
+
+	var capturedOptions []string
+	promptFn := func(options []string) (string, error) {
+		capturedOptions = options
+		return options[0], nil
+	}
+
+	err := gameserver.RearrangePreparedTechs(ctx, sess, 1, job, nil, nil, promptFn, prep, nil, technology.TraditionFlavor{})
+	require.NoError(t, err)
+	require.NotEmpty(t, capturedOptions)
+	// No [keep] option when current tech is not in the current pool.
+	for _, opt := range capturedOptions {
+		assert.False(t, strings.HasPrefix(opt, "[keep] "), "no [keep] option when current tech absent from pool; got: %s", opt)
+	}
 }
 
 // REQ-ILT2: All-immediate grants (pool <= open slots) → deferred is nil.
