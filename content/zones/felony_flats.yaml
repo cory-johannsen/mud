@@ -90,6 +90,8 @@ zone:
       target: flats_82nd_ave
     - direction: west
       target: flats_motel_back_lot
+    - direction: south
+      target: flats_mechanic_lot
     map_x: -2
     map_y: 0
     spawns:
@@ -118,6 +120,8 @@ zone:
       target: flats_strip_mall_south
     - direction: east
       target: flats_parking_lot_east
+    - direction: northeast
+      target: flats_crack_house_row
     map_x: 2
     map_y: 0
     spawns:
@@ -280,6 +284,10 @@ zone:
       target: flats_johnson_creek
     - direction: west
       target: flats_foster_south
+    - direction: east
+      target: flats_dumpster_yard
+    - direction: southwest
+      target: flats_apartments_south
     map_x: 2
     map_y: 4
     spawns:
@@ -341,6 +349,8 @@ zone:
       target: flats_powell_blvd
     - direction: northwest
       target: courthouse_steps
+    - direction: west
+      target: flats_alley_north
     map_x: -2
     map_y: -2
     spawns:
@@ -394,7 +404,9 @@ zone:
       railings. The doors to several rooms stand open, dark inside.
 
       '
-    exits: []
+    exits:
+    - direction: north
+      target: flats_motel_back_lot
     map_x: -4
     map_y: 2
     spawns:
@@ -478,7 +490,7 @@ zone:
     - direction: west
       target: flats_strip_mall_south
     - direction: south
-      target: flats_lents_park
+      target: flats_dumpster_yard
       hidden: true
     map_x: 4
     map_y: 2
@@ -492,7 +504,7 @@ zone:
       trigger: on_enter
       outcomes:
         crit_success:
-          message: "Your sharp eye catches a narrow gap between the cinderblock walls — a hidden passage leads south toward the park."
+          message: "Your sharp eye catches a narrow gap between the cinderblock walls — a hidden passage leads south through the dumpster yard."
           effect:
             type: reveal
             target: south
@@ -526,6 +538,10 @@ zone:
     exits:
     - direction: east
       target: flats_foster_road
+    - direction: west
+      target: flats_mechanic_lot
+    - direction: south
+      target: flats_convenience_store
     map_x: -2
     map_y: 2
     spawns:
@@ -555,10 +571,10 @@ zone:
     exits:
     - direction: west
       target: flats_pawn_shop
-    - direction: north
-      target: flats_convenience_store
-    map_x: 202
-    map_y: 0
+    - direction: northeast
+      target: flats_lents_park
+    map_x: 0
+    map_y: 6
     spawns:
     - template: strip_mall_scav
       count: 1
@@ -647,8 +663,8 @@ zone:
       target: flats_apartments_south
     - direction: north
       target: flats_convenience_store
-    map_x: 202
-    map_y: 2
+    map_x: -2
+    map_y: 6
     spawns:
     - template: felony_flats_banker
       count: 1
@@ -675,10 +691,10 @@ zone:
       '
     exits:
     - direction: south
-      target: flats_apartments_south
-    - direction: west
       target: flats_pawn_shop
-    map_x: 202
+    - direction: north
+      target: flats_apartments_west
+    map_x: -2
     map_y: 4
     spawns:
     - template: felony_flats_job_trainer
@@ -728,8 +744,8 @@ zone:
 
       '
     exits:
-    - direction: west
-      target: flats_82nd_ave
+    - direction: southwest
+      target: flats_strip_mall_north
     - direction: north
       target: flats_enforcer_den
     map_x: 3
@@ -787,10 +803,10 @@ zone:
 
       '
     exits:
+    - direction: east
+      target: flats_hawthorne_approach
     - direction: south
       target: flats_powell_blvd
-    - direction: east
-      target: flats_gas_station
     map_x: -3
     map_y: -2
     spawns:
@@ -816,9 +832,9 @@ zone:
       '
     exits:
     - direction: north
-      target: flats_strip_mall_south
-    - direction: west
       target: flats_alley_east
+    - direction: west
+      target: flats_lents_park
     map_x: 4
     map_y: 4
     spawns:
@@ -844,7 +860,7 @@ zone:
       '
     exits:
     - direction: east
-      target: flats_foster_road
+      target: flats_apartments_west
     - direction: north
       target: flats_motel_row
     map_x: -3
@@ -944,8 +960,8 @@ zone:
     title: The Broken Arrow Lounge
     danger_level: safe
     description: A reinforced back room above the safe house, reached through a door that has no number and is only ever mentioned by address. Scavenged velvet curtains, a locked cashbox, and a bouncer who doesn't make conversation. Cash first, questions never.
-    map_x: 0
-    map_y: 100
+    map_x: 4
+    map_y: -6
     exits:
     - direction: west
       target: flats_safe_house
