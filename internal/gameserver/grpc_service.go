@@ -2694,7 +2694,10 @@ func (s *GameServiceServer) handleMove(uid string, req *gamev1.MoveRequest) (*ga
 						s.pushHPUpdate(uid, sess)
 						s.pushCharacterSheet(sess)
 						// REQ-BUG99-3: apply tech grants for organic level-ups from room discovery XP.
-						s.applyLevelUpTechGrants(context.Background(), sess, oldLevel, sess.Level)
+						// Guard on actual level change: AwardRoomDiscovery always returns >= 1 message.
+						if sess.Level > oldLevel {
+							s.applyLevelUpTechGrants(context.Background(), sess, oldLevel, sess.Level)
+						}
 					}
 				}
 			}
@@ -2981,7 +2984,10 @@ func (s *GameServiceServer) applyRoomSkillChecks(uid string, room *world.Room) [
 					s.pushHPUpdate(uid, sess)
 					s.pushCharacterSheet(sess)
 					// REQ-BUG99-4: apply tech grants for organic level-ups from skill check XP.
-					s.applyLevelUpTechGrants(context.Background(), sess, oldLevel, sess.Level)
+					// Guard on actual level change: AwardSkillCheck always returns >= 1 message.
+					if sess.Level > oldLevel {
+						s.applyLevelUpTechGrants(context.Background(), sess, oldLevel, sess.Level)
+					}
 				}
 			}
 		}
@@ -3129,7 +3135,10 @@ func (s *GameServiceServer) applyNPCSkillChecks(uid string, roomID string) []str
 						s.pushHPUpdate(uid, sess)
 						s.pushCharacterSheet(sess)
 						// REQ-BUG99-5: apply tech grants for organic level-ups from NPC skill check XP.
-						s.applyLevelUpTechGrants(context.Background(), sess, oldLevel, sess.Level)
+						// Guard on actual level change: AwardSkillCheck always returns >= 1 message.
+						if sess.Level > oldLevel {
+							s.applyLevelUpTechGrants(context.Background(), sess, oldLevel, sess.Level)
+						}
 					}
 				}
 			}
