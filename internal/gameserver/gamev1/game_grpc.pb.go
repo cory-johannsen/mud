@@ -19,11 +19,16 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	GameService_Session_FullMethodName             = "/game.v1.GameService/Session"
-	GameService_AdminListSessions_FullMethodName   = "/game.v1.GameService/AdminListSessions"
-	GameService_AdminKickPlayer_FullMethodName     = "/game.v1.GameService/AdminKickPlayer"
-	GameService_AdminMessagePlayer_FullMethodName  = "/game.v1.GameService/AdminMessagePlayer"
-	GameService_AdminTeleportPlayer_FullMethodName = "/game.v1.GameService/AdminTeleportPlayer"
+	GameService_Session_FullMethodName               = "/game.v1.GameService/Session"
+	GameService_AdminListSessions_FullMethodName     = "/game.v1.GameService/AdminListSessions"
+	GameService_AdminKickPlayer_FullMethodName       = "/game.v1.GameService/AdminKickPlayer"
+	GameService_AdminMessagePlayer_FullMethodName    = "/game.v1.GameService/AdminMessagePlayer"
+	GameService_AdminTeleportPlayer_FullMethodName   = "/game.v1.GameService/AdminTeleportPlayer"
+	GameService_AdminListZones_FullMethodName        = "/game.v1.GameService/AdminListZones"
+	GameService_AdminListRooms_FullMethodName        = "/game.v1.GameService/AdminListRooms"
+	GameService_AdminUpdateRoom_FullMethodName       = "/game.v1.GameService/AdminUpdateRoom"
+	GameService_AdminListNPCTemplates_FullMethodName = "/game.v1.GameService/AdminListNPCTemplates"
+	GameService_AdminSpawnNPC_FullMethodName         = "/game.v1.GameService/AdminSpawnNPC"
 )
 
 // GameServiceClient is the client API for GameService service.
@@ -41,6 +46,13 @@ type GameServiceClient interface {
 	AdminKickPlayer(ctx context.Context, in *AdminKickRequest, opts ...grpc.CallOption) (*AdminKickResponse, error)
 	AdminMessagePlayer(ctx context.Context, in *AdminMessageRequest, opts ...grpc.CallOption) (*AdminMessageResponse, error)
 	AdminTeleportPlayer(ctx context.Context, in *AdminTeleportRequest, opts ...grpc.CallOption) (*AdminTeleportResponse, error)
+	// World admin RPCs.
+	AdminListZones(ctx context.Context, in *AdminListZonesRequest, opts ...grpc.CallOption) (*AdminListZonesResponse, error)
+	AdminListRooms(ctx context.Context, in *AdminListRoomsRequest, opts ...grpc.CallOption) (*AdminListRoomsResponse, error)
+	AdminUpdateRoom(ctx context.Context, in *AdminUpdateRoomRequest, opts ...grpc.CallOption) (*AdminUpdateRoomResponse, error)
+	// NPC admin RPCs.
+	AdminListNPCTemplates(ctx context.Context, in *AdminListNPCTemplatesRequest, opts ...grpc.CallOption) (*AdminListNPCTemplatesResponse, error)
+	AdminSpawnNPC(ctx context.Context, in *AdminSpawnNPCRequest, opts ...grpc.CallOption) (*AdminSpawnNPCResponse, error)
 }
 
 type gameServiceClient struct {
@@ -104,6 +116,56 @@ func (c *gameServiceClient) AdminTeleportPlayer(ctx context.Context, in *AdminTe
 	return out, nil
 }
 
+func (c *gameServiceClient) AdminListZones(ctx context.Context, in *AdminListZonesRequest, opts ...grpc.CallOption) (*AdminListZonesResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(AdminListZonesResponse)
+	err := c.cc.Invoke(ctx, GameService_AdminListZones_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *gameServiceClient) AdminListRooms(ctx context.Context, in *AdminListRoomsRequest, opts ...grpc.CallOption) (*AdminListRoomsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(AdminListRoomsResponse)
+	err := c.cc.Invoke(ctx, GameService_AdminListRooms_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *gameServiceClient) AdminUpdateRoom(ctx context.Context, in *AdminUpdateRoomRequest, opts ...grpc.CallOption) (*AdminUpdateRoomResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(AdminUpdateRoomResponse)
+	err := c.cc.Invoke(ctx, GameService_AdminUpdateRoom_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *gameServiceClient) AdminListNPCTemplates(ctx context.Context, in *AdminListNPCTemplatesRequest, opts ...grpc.CallOption) (*AdminListNPCTemplatesResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(AdminListNPCTemplatesResponse)
+	err := c.cc.Invoke(ctx, GameService_AdminListNPCTemplates_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *gameServiceClient) AdminSpawnNPC(ctx context.Context, in *AdminSpawnNPCRequest, opts ...grpc.CallOption) (*AdminSpawnNPCResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(AdminSpawnNPCResponse)
+	err := c.cc.Invoke(ctx, GameService_AdminSpawnNPC_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // GameServiceServer is the server API for GameService service.
 // All implementations must embed UnimplementedGameServiceServer
 // for forward compatibility.
@@ -119,6 +181,13 @@ type GameServiceServer interface {
 	AdminKickPlayer(context.Context, *AdminKickRequest) (*AdminKickResponse, error)
 	AdminMessagePlayer(context.Context, *AdminMessageRequest) (*AdminMessageResponse, error)
 	AdminTeleportPlayer(context.Context, *AdminTeleportRequest) (*AdminTeleportResponse, error)
+	// World admin RPCs.
+	AdminListZones(context.Context, *AdminListZonesRequest) (*AdminListZonesResponse, error)
+	AdminListRooms(context.Context, *AdminListRoomsRequest) (*AdminListRoomsResponse, error)
+	AdminUpdateRoom(context.Context, *AdminUpdateRoomRequest) (*AdminUpdateRoomResponse, error)
+	// NPC admin RPCs.
+	AdminListNPCTemplates(context.Context, *AdminListNPCTemplatesRequest) (*AdminListNPCTemplatesResponse, error)
+	AdminSpawnNPC(context.Context, *AdminSpawnNPCRequest) (*AdminSpawnNPCResponse, error)
 	mustEmbedUnimplementedGameServiceServer()
 }
 
@@ -143,6 +212,21 @@ func (UnimplementedGameServiceServer) AdminMessagePlayer(context.Context, *Admin
 }
 func (UnimplementedGameServiceServer) AdminTeleportPlayer(context.Context, *AdminTeleportRequest) (*AdminTeleportResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method AdminTeleportPlayer not implemented")
+}
+func (UnimplementedGameServiceServer) AdminListZones(context.Context, *AdminListZonesRequest) (*AdminListZonesResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method AdminListZones not implemented")
+}
+func (UnimplementedGameServiceServer) AdminListRooms(context.Context, *AdminListRoomsRequest) (*AdminListRoomsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method AdminListRooms not implemented")
+}
+func (UnimplementedGameServiceServer) AdminUpdateRoom(context.Context, *AdminUpdateRoomRequest) (*AdminUpdateRoomResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method AdminUpdateRoom not implemented")
+}
+func (UnimplementedGameServiceServer) AdminListNPCTemplates(context.Context, *AdminListNPCTemplatesRequest) (*AdminListNPCTemplatesResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method AdminListNPCTemplates not implemented")
+}
+func (UnimplementedGameServiceServer) AdminSpawnNPC(context.Context, *AdminSpawnNPCRequest) (*AdminSpawnNPCResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method AdminSpawnNPC not implemented")
 }
 func (UnimplementedGameServiceServer) mustEmbedUnimplementedGameServiceServer() {}
 func (UnimplementedGameServiceServer) testEmbeddedByValue()                     {}
@@ -244,6 +328,96 @@ func _GameService_AdminTeleportPlayer_Handler(srv interface{}, ctx context.Conte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _GameService_AdminListZones_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AdminListZonesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GameServiceServer).AdminListZones(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: GameService_AdminListZones_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GameServiceServer).AdminListZones(ctx, req.(*AdminListZonesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _GameService_AdminListRooms_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AdminListRoomsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GameServiceServer).AdminListRooms(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: GameService_AdminListRooms_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GameServiceServer).AdminListRooms(ctx, req.(*AdminListRoomsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _GameService_AdminUpdateRoom_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AdminUpdateRoomRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GameServiceServer).AdminUpdateRoom(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: GameService_AdminUpdateRoom_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GameServiceServer).AdminUpdateRoom(ctx, req.(*AdminUpdateRoomRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _GameService_AdminListNPCTemplates_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AdminListNPCTemplatesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GameServiceServer).AdminListNPCTemplates(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: GameService_AdminListNPCTemplates_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GameServiceServer).AdminListNPCTemplates(ctx, req.(*AdminListNPCTemplatesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _GameService_AdminSpawnNPC_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AdminSpawnNPCRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GameServiceServer).AdminSpawnNPC(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: GameService_AdminSpawnNPC_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GameServiceServer).AdminSpawnNPC(ctx, req.(*AdminSpawnNPCRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // GameService_ServiceDesc is the grpc.ServiceDesc for GameService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -266,6 +440,26 @@ var GameService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "AdminTeleportPlayer",
 			Handler:    _GameService_AdminTeleportPlayer_Handler,
+		},
+		{
+			MethodName: "AdminListZones",
+			Handler:    _GameService_AdminListZones_Handler,
+		},
+		{
+			MethodName: "AdminListRooms",
+			Handler:    _GameService_AdminListRooms_Handler,
+		},
+		{
+			MethodName: "AdminUpdateRoom",
+			Handler:    _GameService_AdminUpdateRoom_Handler,
+		},
+		{
+			MethodName: "AdminListNPCTemplates",
+			Handler:    _GameService_AdminListNPCTemplates_Handler,
+		},
+		{
+			MethodName: "AdminSpawnNPC",
+			Handler:    _GameService_AdminSpawnNPC_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

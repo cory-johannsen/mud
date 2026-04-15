@@ -15627,6 +15627,666 @@ func (*AdminTeleportResponse) Descriptor() ([]byte, []int) {
 	return file_game_v1_game_proto_rawDescGZIP(), []int{217}
 }
 
+type AdminListZonesRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AdminListZonesRequest) Reset() {
+	*x = AdminListZonesRequest{}
+	mi := &file_game_v1_game_proto_msgTypes[218]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AdminListZonesRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AdminListZonesRequest) ProtoMessage() {}
+
+func (x *AdminListZonesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_game_v1_game_proto_msgTypes[218]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AdminListZonesRequest.ProtoReflect.Descriptor instead.
+func (*AdminListZonesRequest) Descriptor() ([]byte, []int) {
+	return file_game_v1_game_proto_rawDescGZIP(), []int{218}
+}
+
+type AdminZoneSummary struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	DangerLevel   string                 `protobuf:"bytes,3,opt,name=danger_level,json=dangerLevel,proto3" json:"danger_level,omitempty"`
+	RoomCount     int32                  `protobuf:"varint,4,opt,name=room_count,json=roomCount,proto3" json:"room_count,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AdminZoneSummary) Reset() {
+	*x = AdminZoneSummary{}
+	mi := &file_game_v1_game_proto_msgTypes[219]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AdminZoneSummary) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AdminZoneSummary) ProtoMessage() {}
+
+func (x *AdminZoneSummary) ProtoReflect() protoreflect.Message {
+	mi := &file_game_v1_game_proto_msgTypes[219]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AdminZoneSummary.ProtoReflect.Descriptor instead.
+func (*AdminZoneSummary) Descriptor() ([]byte, []int) {
+	return file_game_v1_game_proto_rawDescGZIP(), []int{219}
+}
+
+func (x *AdminZoneSummary) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *AdminZoneSummary) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *AdminZoneSummary) GetDangerLevel() string {
+	if x != nil {
+		return x.DangerLevel
+	}
+	return ""
+}
+
+func (x *AdminZoneSummary) GetRoomCount() int32 {
+	if x != nil {
+		return x.RoomCount
+	}
+	return 0
+}
+
+type AdminListZonesResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Zones         []*AdminZoneSummary    `protobuf:"bytes,1,rep,name=zones,proto3" json:"zones,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AdminListZonesResponse) Reset() {
+	*x = AdminListZonesResponse{}
+	mi := &file_game_v1_game_proto_msgTypes[220]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AdminListZonesResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AdminListZonesResponse) ProtoMessage() {}
+
+func (x *AdminListZonesResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_game_v1_game_proto_msgTypes[220]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AdminListZonesResponse.ProtoReflect.Descriptor instead.
+func (*AdminListZonesResponse) Descriptor() ([]byte, []int) {
+	return file_game_v1_game_proto_rawDescGZIP(), []int{220}
+}
+
+func (x *AdminListZonesResponse) GetZones() []*AdminZoneSummary {
+	if x != nil {
+		return x.Zones
+	}
+	return nil
+}
+
+type AdminListRoomsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ZoneId        string                 `protobuf:"bytes,1,opt,name=zone_id,json=zoneId,proto3" json:"zone_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AdminListRoomsRequest) Reset() {
+	*x = AdminListRoomsRequest{}
+	mi := &file_game_v1_game_proto_msgTypes[221]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AdminListRoomsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AdminListRoomsRequest) ProtoMessage() {}
+
+func (x *AdminListRoomsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_game_v1_game_proto_msgTypes[221]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AdminListRoomsRequest.ProtoReflect.Descriptor instead.
+func (*AdminListRoomsRequest) Descriptor() ([]byte, []int) {
+	return file_game_v1_game_proto_rawDescGZIP(), []int{221}
+}
+
+func (x *AdminListRoomsRequest) GetZoneId() string {
+	if x != nil {
+		return x.ZoneId
+	}
+	return ""
+}
+
+type AdminRoomSummary struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Title         string                 `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
+	Description   string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	DangerLevel   string                 `protobuf:"bytes,4,opt,name=danger_level,json=dangerLevel,proto3" json:"danger_level,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AdminRoomSummary) Reset() {
+	*x = AdminRoomSummary{}
+	mi := &file_game_v1_game_proto_msgTypes[222]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AdminRoomSummary) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AdminRoomSummary) ProtoMessage() {}
+
+func (x *AdminRoomSummary) ProtoReflect() protoreflect.Message {
+	mi := &file_game_v1_game_proto_msgTypes[222]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AdminRoomSummary.ProtoReflect.Descriptor instead.
+func (*AdminRoomSummary) Descriptor() ([]byte, []int) {
+	return file_game_v1_game_proto_rawDescGZIP(), []int{222}
+}
+
+func (x *AdminRoomSummary) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *AdminRoomSummary) GetTitle() string {
+	if x != nil {
+		return x.Title
+	}
+	return ""
+}
+
+func (x *AdminRoomSummary) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+func (x *AdminRoomSummary) GetDangerLevel() string {
+	if x != nil {
+		return x.DangerLevel
+	}
+	return ""
+}
+
+type AdminListRoomsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Rooms         []*AdminRoomSummary    `protobuf:"bytes,1,rep,name=rooms,proto3" json:"rooms,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AdminListRoomsResponse) Reset() {
+	*x = AdminListRoomsResponse{}
+	mi := &file_game_v1_game_proto_msgTypes[223]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AdminListRoomsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AdminListRoomsResponse) ProtoMessage() {}
+
+func (x *AdminListRoomsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_game_v1_game_proto_msgTypes[223]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AdminListRoomsResponse.ProtoReflect.Descriptor instead.
+func (*AdminListRoomsResponse) Descriptor() ([]byte, []int) {
+	return file_game_v1_game_proto_rawDescGZIP(), []int{223}
+}
+
+func (x *AdminListRoomsResponse) GetRooms() []*AdminRoomSummary {
+	if x != nil {
+		return x.Rooms
+	}
+	return nil
+}
+
+type AdminUpdateRoomRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	RoomId        string                 `protobuf:"bytes,1,opt,name=room_id,json=roomId,proto3" json:"room_id,omitempty"`
+	Title         string                 `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
+	Description   string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	DangerLevel   string                 `protobuf:"bytes,4,opt,name=danger_level,json=dangerLevel,proto3" json:"danger_level,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AdminUpdateRoomRequest) Reset() {
+	*x = AdminUpdateRoomRequest{}
+	mi := &file_game_v1_game_proto_msgTypes[224]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AdminUpdateRoomRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AdminUpdateRoomRequest) ProtoMessage() {}
+
+func (x *AdminUpdateRoomRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_game_v1_game_proto_msgTypes[224]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AdminUpdateRoomRequest.ProtoReflect.Descriptor instead.
+func (*AdminUpdateRoomRequest) Descriptor() ([]byte, []int) {
+	return file_game_v1_game_proto_rawDescGZIP(), []int{224}
+}
+
+func (x *AdminUpdateRoomRequest) GetRoomId() string {
+	if x != nil {
+		return x.RoomId
+	}
+	return ""
+}
+
+func (x *AdminUpdateRoomRequest) GetTitle() string {
+	if x != nil {
+		return x.Title
+	}
+	return ""
+}
+
+func (x *AdminUpdateRoomRequest) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+func (x *AdminUpdateRoomRequest) GetDangerLevel() string {
+	if x != nil {
+		return x.DangerLevel
+	}
+	return ""
+}
+
+type AdminUpdateRoomResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AdminUpdateRoomResponse) Reset() {
+	*x = AdminUpdateRoomResponse{}
+	mi := &file_game_v1_game_proto_msgTypes[225]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AdminUpdateRoomResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AdminUpdateRoomResponse) ProtoMessage() {}
+
+func (x *AdminUpdateRoomResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_game_v1_game_proto_msgTypes[225]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AdminUpdateRoomResponse.ProtoReflect.Descriptor instead.
+func (*AdminUpdateRoomResponse) Descriptor() ([]byte, []int) {
+	return file_game_v1_game_proto_rawDescGZIP(), []int{225}
+}
+
+type AdminListNPCTemplatesRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AdminListNPCTemplatesRequest) Reset() {
+	*x = AdminListNPCTemplatesRequest{}
+	mi := &file_game_v1_game_proto_msgTypes[226]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AdminListNPCTemplatesRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AdminListNPCTemplatesRequest) ProtoMessage() {}
+
+func (x *AdminListNPCTemplatesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_game_v1_game_proto_msgTypes[226]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AdminListNPCTemplatesRequest.ProtoReflect.Descriptor instead.
+func (*AdminListNPCTemplatesRequest) Descriptor() ([]byte, []int) {
+	return file_game_v1_game_proto_rawDescGZIP(), []int{226}
+}
+
+type AdminNPCTemplateSummary struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Level         int32                  `protobuf:"varint,3,opt,name=level,proto3" json:"level,omitempty"`
+	Type          string                 `protobuf:"bytes,4,opt,name=type,proto3" json:"type,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AdminNPCTemplateSummary) Reset() {
+	*x = AdminNPCTemplateSummary{}
+	mi := &file_game_v1_game_proto_msgTypes[227]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AdminNPCTemplateSummary) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AdminNPCTemplateSummary) ProtoMessage() {}
+
+func (x *AdminNPCTemplateSummary) ProtoReflect() protoreflect.Message {
+	mi := &file_game_v1_game_proto_msgTypes[227]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AdminNPCTemplateSummary.ProtoReflect.Descriptor instead.
+func (*AdminNPCTemplateSummary) Descriptor() ([]byte, []int) {
+	return file_game_v1_game_proto_rawDescGZIP(), []int{227}
+}
+
+func (x *AdminNPCTemplateSummary) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *AdminNPCTemplateSummary) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *AdminNPCTemplateSummary) GetLevel() int32 {
+	if x != nil {
+		return x.Level
+	}
+	return 0
+}
+
+func (x *AdminNPCTemplateSummary) GetType() string {
+	if x != nil {
+		return x.Type
+	}
+	return ""
+}
+
+type AdminListNPCTemplatesResponse struct {
+	state         protoimpl.MessageState     `protogen:"open.v1"`
+	Templates     []*AdminNPCTemplateSummary `protobuf:"bytes,1,rep,name=templates,proto3" json:"templates,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AdminListNPCTemplatesResponse) Reset() {
+	*x = AdminListNPCTemplatesResponse{}
+	mi := &file_game_v1_game_proto_msgTypes[228]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AdminListNPCTemplatesResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AdminListNPCTemplatesResponse) ProtoMessage() {}
+
+func (x *AdminListNPCTemplatesResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_game_v1_game_proto_msgTypes[228]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AdminListNPCTemplatesResponse.ProtoReflect.Descriptor instead.
+func (*AdminListNPCTemplatesResponse) Descriptor() ([]byte, []int) {
+	return file_game_v1_game_proto_rawDescGZIP(), []int{228}
+}
+
+func (x *AdminListNPCTemplatesResponse) GetTemplates() []*AdminNPCTemplateSummary {
+	if x != nil {
+		return x.Templates
+	}
+	return nil
+}
+
+type AdminSpawnNPCRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	TemplateId    string                 `protobuf:"bytes,1,opt,name=template_id,json=templateId,proto3" json:"template_id,omitempty"`
+	RoomId        string                 `protobuf:"bytes,2,opt,name=room_id,json=roomId,proto3" json:"room_id,omitempty"`
+	Count         int32                  `protobuf:"varint,3,opt,name=count,proto3" json:"count,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AdminSpawnNPCRequest) Reset() {
+	*x = AdminSpawnNPCRequest{}
+	mi := &file_game_v1_game_proto_msgTypes[229]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AdminSpawnNPCRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AdminSpawnNPCRequest) ProtoMessage() {}
+
+func (x *AdminSpawnNPCRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_game_v1_game_proto_msgTypes[229]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AdminSpawnNPCRequest.ProtoReflect.Descriptor instead.
+func (*AdminSpawnNPCRequest) Descriptor() ([]byte, []int) {
+	return file_game_v1_game_proto_rawDescGZIP(), []int{229}
+}
+
+func (x *AdminSpawnNPCRequest) GetTemplateId() string {
+	if x != nil {
+		return x.TemplateId
+	}
+	return ""
+}
+
+func (x *AdminSpawnNPCRequest) GetRoomId() string {
+	if x != nil {
+		return x.RoomId
+	}
+	return ""
+}
+
+func (x *AdminSpawnNPCRequest) GetCount() int32 {
+	if x != nil {
+		return x.Count
+	}
+	return 0
+}
+
+type AdminSpawnNPCResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	SpawnedCount  int32                  `protobuf:"varint,1,opt,name=spawned_count,json=spawnedCount,proto3" json:"spawned_count,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AdminSpawnNPCResponse) Reset() {
+	*x = AdminSpawnNPCResponse{}
+	mi := &file_game_v1_game_proto_msgTypes[230]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AdminSpawnNPCResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AdminSpawnNPCResponse) ProtoMessage() {}
+
+func (x *AdminSpawnNPCResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_game_v1_game_proto_msgTypes[230]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AdminSpawnNPCResponse.ProtoReflect.Descriptor instead.
+func (*AdminSpawnNPCResponse) Descriptor() ([]byte, []int) {
+	return file_game_v1_game_proto_rawDescGZIP(), []int{230}
+}
+
+func (x *AdminSpawnNPCResponse) GetSpawnedCount() int32 {
+	if x != nil {
+		return x.SpawnedCount
+	}
+	return 0
+}
+
 var File_game_v1_game_proto protoreflect.FileDescriptor
 
 const file_game_v1_game_proto_rawDesc = "" +
@@ -16727,7 +17387,46 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\x14AdminTeleportRequest\x12\x17\n" +
 	"\achar_id\x18\x01 \x01(\x03R\x06charId\x12\x17\n" +
 	"\aroom_id\x18\x02 \x01(\tR\x06roomId\"\x17\n" +
-	"\x15AdminTeleportResponse*Y\n" +
+	"\x15AdminTeleportResponse\"\x17\n" +
+	"\x15AdminListZonesRequest\"x\n" +
+	"\x10AdminZoneSummary\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12!\n" +
+	"\fdanger_level\x18\x03 \x01(\tR\vdangerLevel\x12\x1d\n" +
+	"\n" +
+	"room_count\x18\x04 \x01(\x05R\troomCount\"I\n" +
+	"\x16AdminListZonesResponse\x12/\n" +
+	"\x05zones\x18\x01 \x03(\v2\x19.game.v1.AdminZoneSummaryR\x05zones\"0\n" +
+	"\x15AdminListRoomsRequest\x12\x17\n" +
+	"\azone_id\x18\x01 \x01(\tR\x06zoneId\"}\n" +
+	"\x10AdminRoomSummary\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x14\n" +
+	"\x05title\x18\x02 \x01(\tR\x05title\x12 \n" +
+	"\vdescription\x18\x03 \x01(\tR\vdescription\x12!\n" +
+	"\fdanger_level\x18\x04 \x01(\tR\vdangerLevel\"I\n" +
+	"\x16AdminListRoomsResponse\x12/\n" +
+	"\x05rooms\x18\x01 \x03(\v2\x19.game.v1.AdminRoomSummaryR\x05rooms\"\x8c\x01\n" +
+	"\x16AdminUpdateRoomRequest\x12\x17\n" +
+	"\aroom_id\x18\x01 \x01(\tR\x06roomId\x12\x14\n" +
+	"\x05title\x18\x02 \x01(\tR\x05title\x12 \n" +
+	"\vdescription\x18\x03 \x01(\tR\vdescription\x12!\n" +
+	"\fdanger_level\x18\x04 \x01(\tR\vdangerLevel\"\x19\n" +
+	"\x17AdminUpdateRoomResponse\"\x1e\n" +
+	"\x1cAdminListNPCTemplatesRequest\"g\n" +
+	"\x17AdminNPCTemplateSummary\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12\x14\n" +
+	"\x05level\x18\x03 \x01(\x05R\x05level\x12\x12\n" +
+	"\x04type\x18\x04 \x01(\tR\x04type\"_\n" +
+	"\x1dAdminListNPCTemplatesResponse\x12>\n" +
+	"\ttemplates\x18\x01 \x03(\v2 .game.v1.AdminNPCTemplateSummaryR\ttemplates\"f\n" +
+	"\x14AdminSpawnNPCRequest\x12\x1f\n" +
+	"\vtemplate_id\x18\x01 \x01(\tR\n" +
+	"templateId\x12\x17\n" +
+	"\aroom_id\x18\x02 \x01(\tR\x06roomId\x12\x14\n" +
+	"\x05count\x18\x03 \x01(\x05R\x05count\"<\n" +
+	"\x15AdminSpawnNPCResponse\x12#\n" +
+	"\rspawned_count\x18\x01 \x01(\x05R\fspawnedCount*Y\n" +
 	"\vMessageType\x12\x1c\n" +
 	"\x18MESSAGE_TYPE_UNSPECIFIED\x10\x00\x12\x14\n" +
 	"\x10MESSAGE_TYPE_SAY\x10\x01\x12\x16\n" +
@@ -16752,13 +17451,18 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\x1bCOMBAT_EVENT_TYPE_CONDITION\x10\x06\x12\x1c\n" +
 	"\x18COMBAT_EVENT_TYPE_RELOAD\x10\a\x12\x1b\n" +
 	"\x17COMBAT_EVENT_TYPE_THROW\x10\b\x12\x1e\n" +
-	"\x1aCOMBAT_EVENT_TYPE_POSITION\x10\t2\x99\x03\n" +
+	"\x1aCOMBAT_EVENT_TYPE_POSITION\x10\t2\xcd\x06\n" +
 	"\vGameService\x12;\n" +
 	"\aSession\x12\x16.game.v1.ClientMessage\x1a\x14.game.v1.ServerEvent(\x010\x01\x12Z\n" +
 	"\x11AdminListSessions\x12!.game.v1.AdminListSessionsRequest\x1a\".game.v1.AdminListSessionsResponse\x12H\n" +
 	"\x0fAdminKickPlayer\x12\x19.game.v1.AdminKickRequest\x1a\x1a.game.v1.AdminKickResponse\x12Q\n" +
 	"\x12AdminMessagePlayer\x12\x1c.game.v1.AdminMessageRequest\x1a\x1d.game.v1.AdminMessageResponse\x12T\n" +
-	"\x13AdminTeleportPlayer\x12\x1d.game.v1.AdminTeleportRequest\x1a\x1e.game.v1.AdminTeleportResponseB:Z8github.com/cory-johannsen/mud/internal/gameserver/gamev1b\x06proto3"
+	"\x13AdminTeleportPlayer\x12\x1d.game.v1.AdminTeleportRequest\x1a\x1e.game.v1.AdminTeleportResponse\x12Q\n" +
+	"\x0eAdminListZones\x12\x1e.game.v1.AdminListZonesRequest\x1a\x1f.game.v1.AdminListZonesResponse\x12Q\n" +
+	"\x0eAdminListRooms\x12\x1e.game.v1.AdminListRoomsRequest\x1a\x1f.game.v1.AdminListRoomsResponse\x12T\n" +
+	"\x0fAdminUpdateRoom\x12\x1f.game.v1.AdminUpdateRoomRequest\x1a .game.v1.AdminUpdateRoomResponse\x12f\n" +
+	"\x15AdminListNPCTemplates\x12%.game.v1.AdminListNPCTemplatesRequest\x1a&.game.v1.AdminListNPCTemplatesResponse\x12N\n" +
+	"\rAdminSpawnNPC\x12\x1d.game.v1.AdminSpawnNPCRequest\x1a\x1e.game.v1.AdminSpawnNPCResponseB:Z8github.com/cory-johannsen/mud/internal/gameserver/gamev1b\x06proto3"
 
 var (
 	file_game_v1_game_proto_rawDescOnce sync.Once
@@ -16773,234 +17477,247 @@ func file_game_v1_game_proto_rawDescGZIP() []byte {
 }
 
 var file_game_v1_game_proto_enumTypes = make([]protoimpl.EnumInfo, 4)
-var file_game_v1_game_proto_msgTypes = make([]protoimpl.MessageInfo, 222)
+var file_game_v1_game_proto_msgTypes = make([]protoimpl.MessageInfo, 235)
 var file_game_v1_game_proto_goTypes = []any{
-	(MessageType)(0),                  // 0: game.v1.MessageType
-	(RoomEventType)(0),                // 1: game.v1.RoomEventType
-	(CombatStatus)(0),                 // 2: game.v1.CombatStatus
-	(CombatEventType)(0),              // 3: game.v1.CombatEventType
-	(*ClientMessage)(nil),             // 4: game.v1.ClientMessage
-	(*UncoverRequest)(nil),            // 5: game.v1.UncoverRequest
-	(*RestRequest)(nil),               // 6: game.v1.RestRequest
-	(*SelectTechRequest)(nil),         // 7: game.v1.SelectTechRequest
-	(*AidRequest)(nil),                // 8: game.v1.AidRequest
-	(*DisarmTrapRequest)(nil),         // 9: game.v1.DisarmTrapRequest
-	(*ReadyRequest)(nil),              // 10: game.v1.ReadyRequest
-	(*BrowseRequest)(nil),             // 11: game.v1.BrowseRequest
-	(*BuyRequest)(nil),                // 12: game.v1.BuyRequest
-	(*SellRequest)(nil),               // 13: game.v1.SellRequest
-	(*NegotiateRequest)(nil),          // 14: game.v1.NegotiateRequest
-	(*StashDepositRequest)(nil),       // 15: game.v1.StashDepositRequest
-	(*StashWithdrawRequest)(nil),      // 16: game.v1.StashWithdrawRequest
-	(*StashBalanceRequest)(nil),       // 17: game.v1.StashBalanceRequest
-	(*HealRequest)(nil),               // 18: game.v1.HealRequest
-	(*HealAmountRequest)(nil),         // 19: game.v1.HealAmountRequest
-	(*TrainJobRequest)(nil),           // 20: game.v1.TrainJobRequest
-	(*ListJobsRequest)(nil),           // 21: game.v1.ListJobsRequest
-	(*SetJobRequest)(nil),             // 22: game.v1.SetJobRequest
-	(*HireRequest)(nil),               // 23: game.v1.HireRequest
-	(*DismissRequest)(nil),            // 24: game.v1.DismissRequest
-	(*TalkRequest)(nil),               // 25: game.v1.TalkRequest
-	(*BribeRequest)(nil),              // 26: game.v1.BribeRequest
-	(*BribeConfirmRequest)(nil),       // 27: game.v1.BribeConfirmRequest
-	(*SurrenderRequest)(nil),          // 28: game.v1.SurrenderRequest
-	(*ReleaseRequest)(nil),            // 29: game.v1.ReleaseRequest
-	(*DeployTrapRequest)(nil),         // 30: game.v1.DeployTrapRequest
-	(*TravelRequest)(nil),             // 31: game.v1.TravelRequest
-	(*ActivateItemRequest)(nil),       // 32: game.v1.ActivateItemRequest
-	(*ServerEvent)(nil),               // 33: game.v1.ServerEvent
-	(*ShopItem)(nil),                  // 34: game.v1.ShopItem
-	(*ShopView)(nil),                  // 35: game.v1.ShopView
-	(*HpUpdateEvent)(nil),             // 36: game.v1.HpUpdateEvent
-	(*JoinWorldRequest)(nil),          // 37: game.v1.JoinWorldRequest
-	(*MoveRequest)(nil),               // 38: game.v1.MoveRequest
-	(*LookRequest)(nil),               // 39: game.v1.LookRequest
-	(*SayRequest)(nil),                // 40: game.v1.SayRequest
-	(*EmoteRequest)(nil),              // 41: game.v1.EmoteRequest
-	(*WhoRequest)(nil),                // 42: game.v1.WhoRequest
-	(*ExitsRequest)(nil),              // 43: game.v1.ExitsRequest
-	(*QuitRequest)(nil),               // 44: game.v1.QuitRequest
-	(*SwitchCharacterRequest)(nil),    // 45: game.v1.SwitchCharacterRequest
-	(*RoomView)(nil),                  // 46: game.v1.RoomView
-	(*ExitInfo)(nil),                  // 47: game.v1.ExitInfo
-	(*MessageEvent)(nil),              // 48: game.v1.MessageEvent
-	(*RoomEvent)(nil),                 // 49: game.v1.RoomEvent
-	(*PlayerList)(nil),                // 50: game.v1.PlayerList
-	(*PlayerInfo)(nil),                // 51: game.v1.PlayerInfo
-	(*ExitList)(nil),                  // 52: game.v1.ExitList
-	(*ErrorEvent)(nil),                // 53: game.v1.ErrorEvent
-	(*Disconnected)(nil),              // 54: game.v1.Disconnected
-	(*TimeOfDayEvent)(nil),            // 55: game.v1.TimeOfDayEvent
-	(*CharacterInfo)(nil),             // 56: game.v1.CharacterInfo
-	(*NpcInfo)(nil),                   // 57: game.v1.NpcInfo
-	(*ExamineRequest)(nil),            // 58: game.v1.ExamineRequest
-	(*NpcView)(nil),                   // 59: game.v1.NpcView
-	(*HealerView)(nil),                // 60: game.v1.HealerView
-	(*JobOfferEntry)(nil),             // 61: game.v1.JobOfferEntry
-	(*TrainerView)(nil),               // 62: game.v1.TrainerView
-	(*FixerView)(nil),                 // 63: game.v1.FixerView
-	(*RestView)(nil),                  // 64: game.v1.RestView
-	(*AttackRequest)(nil),             // 65: game.v1.AttackRequest
-	(*FleeRequest)(nil),               // 66: game.v1.FleeRequest
-	(*PassRequest)(nil),               // 67: game.v1.PassRequest
-	(*StrikeRequest)(nil),             // 68: game.v1.StrikeRequest
-	(*EquipRequest)(nil),              // 69: game.v1.EquipRequest
-	(*ReloadRequest)(nil),             // 70: game.v1.ReloadRequest
-	(*FireBurstRequest)(nil),          // 71: game.v1.FireBurstRequest
-	(*FireAutomaticRequest)(nil),      // 72: game.v1.FireAutomaticRequest
-	(*ThrowRequest)(nil),              // 73: game.v1.ThrowRequest
-	(*InventoryRequest)(nil),          // 74: game.v1.InventoryRequest
-	(*GetItemRequest)(nil),            // 75: game.v1.GetItemRequest
-	(*DropItemRequest)(nil),           // 76: game.v1.DropItemRequest
-	(*BalanceRequest)(nil),            // 77: game.v1.BalanceRequest
-	(*SetRoleRequest)(nil),            // 78: game.v1.SetRoleRequest
-	(*LoadoutRequest)(nil),            // 79: game.v1.LoadoutRequest
-	(*LoadoutWeaponPreset)(nil),       // 80: game.v1.LoadoutWeaponPreset
-	(*LoadoutView)(nil),               // 81: game.v1.LoadoutView
-	(*QuestObjectiveView)(nil),        // 82: game.v1.QuestObjectiveView
-	(*QuestEntryView)(nil),            // 83: game.v1.QuestEntryView
-	(*QuestGiverView)(nil),            // 84: game.v1.QuestGiverView
-	(*QuestLogView)(nil),              // 85: game.v1.QuestLogView
-	(*QuestCompleteEvent)(nil),        // 86: game.v1.QuestCompleteEvent
-	(*QuestLogRequest)(nil),           // 87: game.v1.QuestLogRequest
-	(*UnequipRequest)(nil),            // 88: game.v1.UnequipRequest
-	(*EquipmentRequest)(nil),          // 89: game.v1.EquipmentRequest
-	(*TeleportRequest)(nil),           // 90: game.v1.TeleportRequest
-	(*SummonItemRequest)(nil),         // 91: game.v1.SummonItemRequest
-	(*FloorItem)(nil),                 // 92: game.v1.FloorItem
-	(*RoomEquipmentItem)(nil),         // 93: game.v1.RoomEquipmentItem
-	(*UseEquipmentRequest)(nil),       // 94: game.v1.UseEquipmentRequest
-	(*MapRequest)(nil),                // 95: game.v1.MapRequest
-	(*PoiWithNpc)(nil),                // 96: game.v1.PoiWithNpc
-	(*ZoneExitInfo)(nil),              // 97: game.v1.ZoneExitInfo
-	(*SameZoneExitTarget)(nil),        // 98: game.v1.SameZoneExitTarget
-	(*MapTile)(nil),                   // 99: game.v1.MapTile
-	(*WorldZoneTile)(nil),             // 100: game.v1.WorldZoneTile
-	(*MapResponse)(nil),               // 101: game.v1.MapResponse
-	(*SkillsRequest)(nil),             // 102: game.v1.SkillsRequest
-	(*SkillEntry)(nil),                // 103: game.v1.SkillEntry
-	(*SkillsResponse)(nil),            // 104: game.v1.SkillsResponse
-	(*RoomEquipRequest)(nil),          // 105: game.v1.RoomEquipRequest
-	(*InventoryItem)(nil),             // 106: game.v1.InventoryItem
-	(*InventoryView)(nil),             // 107: game.v1.InventoryView
-	(*CombatantPosition)(nil),         // 108: game.v1.CombatantPosition
-	(*RoundStartEvent)(nil),           // 109: game.v1.RoundStartEvent
-	(*RoundEndEvent)(nil),             // 110: game.v1.RoundEndEvent
-	(*APUpdateEvent)(nil),             // 111: game.v1.APUpdateEvent
-	(*CombatEvent)(nil),               // 112: game.v1.CombatEvent
-	(*StatusRequest)(nil),             // 113: game.v1.StatusRequest
-	(*ConditionEvent)(nil),            // 114: game.v1.ConditionEvent
-	(*WearRequest)(nil),               // 115: game.v1.WearRequest
-	(*RemoveArmorRequest)(nil),        // 116: game.v1.RemoveArmorRequest
-	(*ConditionInfo)(nil),             // 117: game.v1.ConditionInfo
-	(*CharacterSheetRequest)(nil),     // 118: game.v1.CharacterSheetRequest
-	(*ArchetypeSelectionRequest)(nil), // 119: game.v1.ArchetypeSelectionRequest
-	(*FeatsRequest)(nil),              // 120: game.v1.FeatsRequest
-	(*FeatEntry)(nil),                 // 121: game.v1.FeatEntry
-	(*FeatsResponse)(nil),             // 122: game.v1.FeatsResponse
-	(*ClassFeaturesRequest)(nil),      // 123: game.v1.ClassFeaturesRequest
-	(*ClassFeatureEntry)(nil),         // 124: game.v1.ClassFeatureEntry
-	(*ClassFeaturesResponse)(nil),     // 125: game.v1.ClassFeaturesResponse
-	(*InteractRequest)(nil),           // 126: game.v1.InteractRequest
-	(*InteractResponse)(nil),          // 127: game.v1.InteractResponse
-	(*UseRequest)(nil),                // 128: game.v1.UseRequest
-	(*UseResponse)(nil),               // 129: game.v1.UseResponse
-	(*PreparedSlotView)(nil),          // 130: game.v1.PreparedSlotView
-	(*HardwiredSlotView)(nil),         // 131: game.v1.HardwiredSlotView
-	(*SpontaneousKnownEntry)(nil),     // 132: game.v1.SpontaneousKnownEntry
-	(*CharacterSheetView)(nil),        // 133: game.v1.CharacterSheetView
-	(*InnateSlotView)(nil),            // 134: game.v1.InnateSlotView
-	(*SpontaneousUsePoolView)(nil),    // 135: game.v1.SpontaneousUsePoolView
-	(*ResistanceEntry)(nil),           // 136: game.v1.ResistanceEntry
-	(*ProficienciesRequest)(nil),      // 137: game.v1.ProficienciesRequest
-	(*ProficiencyEntry)(nil),          // 138: game.v1.ProficiencyEntry
-	(*ProficienciesResponse)(nil),     // 139: game.v1.ProficienciesResponse
-	(*LevelUpRequest)(nil),            // 140: game.v1.LevelUpRequest
-	(*CombatDefaultRequest)(nil),      // 141: game.v1.CombatDefaultRequest
-	(*TrainSkillRequest)(nil),         // 142: game.v1.TrainSkillRequest
-	(*ActionRequest)(nil),             // 143: game.v1.ActionRequest
-	(*RaiseShieldRequest)(nil),        // 144: game.v1.RaiseShieldRequest
-	(*TakeCoverRequest)(nil),          // 145: game.v1.TakeCoverRequest
-	(*FirstAidRequest)(nil),           // 146: game.v1.FirstAidRequest
-	(*FeintRequest)(nil),              // 147: game.v1.FeintRequest
-	(*DemoralizeRequest)(nil),         // 148: game.v1.DemoralizeRequest
-	(*GrappleRequest)(nil),            // 149: game.v1.GrappleRequest
-	(*TripRequest)(nil),               // 150: game.v1.TripRequest
-	(*DisarmRequest)(nil),             // 151: game.v1.DisarmRequest
-	(*StrideRequest)(nil),             // 152: game.v1.StrideRequest
-	(*ShoveRequest)(nil),              // 153: game.v1.ShoveRequest
-	(*StepRequest)(nil),               // 154: game.v1.StepRequest
-	(*HideRequest)(nil),               // 155: game.v1.HideRequest
-	(*SneakRequest)(nil),              // 156: game.v1.SneakRequest
-	(*DivertRequest)(nil),             // 157: game.v1.DivertRequest
-	(*EscapeRequest)(nil),             // 158: game.v1.EscapeRequest
-	(*TumbleRequest)(nil),             // 159: game.v1.TumbleRequest
-	(*SeekRequest)(nil),               // 160: game.v1.SeekRequest
-	(*ClimbRequest)(nil),              // 161: game.v1.ClimbRequest
-	(*SwimRequest)(nil),               // 162: game.v1.SwimRequest
-	(*CalmRequest)(nil),               // 163: game.v1.CalmRequest
-	(*HeroPointRequest)(nil),          // 164: game.v1.HeroPointRequest
-	(*DelayRequest)(nil),              // 165: game.v1.DelayRequest
-	(*JoinRequest)(nil),               // 166: game.v1.JoinRequest
-	(*DeclineRequest)(nil),            // 167: game.v1.DeclineRequest
-	(*GroupRequest)(nil),              // 168: game.v1.GroupRequest
-	(*InviteRequest)(nil),             // 169: game.v1.InviteRequest
-	(*AcceptGroupRequest)(nil),        // 170: game.v1.AcceptGroupRequest
-	(*DeclineGroupRequest)(nil),       // 171: game.v1.DeclineGroupRequest
-	(*UngroupRequest)(nil),            // 172: game.v1.UngroupRequest
-	(*KickRequest)(nil),               // 173: game.v1.KickRequest
-	(*MotiveRequest)(nil),             // 174: game.v1.MotiveRequest
-	(*GrantRequest)(nil),              // 175: game.v1.GrantRequest
-	(*SpawnNPCRequest)(nil),           // 176: game.v1.SpawnNPCRequest
-	(*KillNPCRequest)(nil),            // 177: game.v1.KillNPCRequest
-	(*AddRoomRequest)(nil),            // 178: game.v1.AddRoomRequest
-	(*AddLinkRequest)(nil),            // 179: game.v1.AddLinkRequest
-	(*RemoveLinkRequest)(nil),         // 180: game.v1.RemoveLinkRequest
-	(*SetRoomRequest)(nil),            // 181: game.v1.SetRoomRequest
-	(*EditorCmdsRequest)(nil),         // 182: game.v1.EditorCmdsRequest
-	(*SpawnCharRequest)(nil),          // 183: game.v1.SpawnCharRequest
-	(*DeleteCharRequest)(nil),         // 184: game.v1.DeleteCharRequest
-	(*FactionRequest)(nil),            // 185: game.v1.FactionRequest
-	(*FactionInfoRequest)(nil),        // 186: game.v1.FactionInfoRequest
-	(*FactionStandingRequest)(nil),    // 187: game.v1.FactionStandingRequest
-	(*ChangeRepRequest)(nil),          // 188: game.v1.ChangeRepRequest
-	(*TabCompleteRequest)(nil),        // 189: game.v1.TabCompleteRequest
-	(*TabCompleteResponse)(nil),       // 190: game.v1.TabCompleteResponse
-	(*MaterialsRequest)(nil),          // 191: game.v1.MaterialsRequest
-	(*CraftListRequest)(nil),          // 192: game.v1.CraftListRequest
-	(*CraftRequest)(nil),              // 193: game.v1.CraftRequest
-	(*CraftConfirmRequest)(nil),       // 194: game.v1.CraftConfirmRequest
-	(*ScavengeRequest)(nil),           // 195: game.v1.ScavengeRequest
-	(*AffixRequest)(nil),              // 196: game.v1.AffixRequest
-	(*ExploreRequest)(nil),            // 197: game.v1.ExploreRequest
-	(*RefocusRequest)(nil),            // 198: game.v1.RefocusRequest
-	(*SeduceRequest)(nil),             // 199: game.v1.SeduceRequest
-	(*HotbarSlot)(nil),                // 200: game.v1.HotbarSlot
-	(*HotbarRequest)(nil),             // 201: game.v1.HotbarRequest
-	(*HotbarUpdateEvent)(nil),         // 202: game.v1.HotbarUpdateEvent
-	(*DowntimeRequest)(nil),           // 203: game.v1.DowntimeRequest
-	(*QuestRequest)(nil),              // 204: game.v1.QuestRequest
-	(*MaterialLoss)(nil),              // 205: game.v1.MaterialLoss
-	(*CraftResultEvent)(nil),          // 206: game.v1.CraftResultEvent
-	(*UncurseRequest)(nil),            // 207: game.v1.UncurseRequest
-	(*WeatherEvent)(nil),              // 208: game.v1.WeatherEvent
-	(*JobGrantsRequest)(nil),          // 209: game.v1.JobGrantsRequest
-	(*JobFeatGrant)(nil),              // 210: game.v1.JobFeatGrant
-	(*JobTechGrant)(nil),              // 211: game.v1.JobTechGrant
-	(*JobGrantsResponse)(nil),         // 212: game.v1.JobGrantsResponse
-	(*AdminSessionInfo)(nil),          // 213: game.v1.AdminSessionInfo
-	(*AdminListSessionsRequest)(nil),  // 214: game.v1.AdminListSessionsRequest
-	(*AdminListSessionsResponse)(nil), // 215: game.v1.AdminListSessionsResponse
-	(*AdminKickRequest)(nil),          // 216: game.v1.AdminKickRequest
-	(*AdminKickResponse)(nil),         // 217: game.v1.AdminKickResponse
-	(*AdminMessageRequest)(nil),       // 218: game.v1.AdminMessageRequest
-	(*AdminMessageResponse)(nil),      // 219: game.v1.AdminMessageResponse
-	(*AdminTeleportRequest)(nil),      // 220: game.v1.AdminTeleportRequest
-	(*AdminTeleportResponse)(nil),     // 221: game.v1.AdminTeleportResponse
-	nil,                               // 222: game.v1.FixerView.BribeCostsEntry
-	nil,                               // 223: game.v1.CharacterSheetView.ArmorEntry
-	nil,                               // 224: game.v1.CharacterSheetView.AccessoriesEntry
-	nil,                               // 225: game.v1.CharacterSheetView.ArmorCategoriesEntry
+	(MessageType)(0),                      // 0: game.v1.MessageType
+	(RoomEventType)(0),                    // 1: game.v1.RoomEventType
+	(CombatStatus)(0),                     // 2: game.v1.CombatStatus
+	(CombatEventType)(0),                  // 3: game.v1.CombatEventType
+	(*ClientMessage)(nil),                 // 4: game.v1.ClientMessage
+	(*UncoverRequest)(nil),                // 5: game.v1.UncoverRequest
+	(*RestRequest)(nil),                   // 6: game.v1.RestRequest
+	(*SelectTechRequest)(nil),             // 7: game.v1.SelectTechRequest
+	(*AidRequest)(nil),                    // 8: game.v1.AidRequest
+	(*DisarmTrapRequest)(nil),             // 9: game.v1.DisarmTrapRequest
+	(*ReadyRequest)(nil),                  // 10: game.v1.ReadyRequest
+	(*BrowseRequest)(nil),                 // 11: game.v1.BrowseRequest
+	(*BuyRequest)(nil),                    // 12: game.v1.BuyRequest
+	(*SellRequest)(nil),                   // 13: game.v1.SellRequest
+	(*NegotiateRequest)(nil),              // 14: game.v1.NegotiateRequest
+	(*StashDepositRequest)(nil),           // 15: game.v1.StashDepositRequest
+	(*StashWithdrawRequest)(nil),          // 16: game.v1.StashWithdrawRequest
+	(*StashBalanceRequest)(nil),           // 17: game.v1.StashBalanceRequest
+	(*HealRequest)(nil),                   // 18: game.v1.HealRequest
+	(*HealAmountRequest)(nil),             // 19: game.v1.HealAmountRequest
+	(*TrainJobRequest)(nil),               // 20: game.v1.TrainJobRequest
+	(*ListJobsRequest)(nil),               // 21: game.v1.ListJobsRequest
+	(*SetJobRequest)(nil),                 // 22: game.v1.SetJobRequest
+	(*HireRequest)(nil),                   // 23: game.v1.HireRequest
+	(*DismissRequest)(nil),                // 24: game.v1.DismissRequest
+	(*TalkRequest)(nil),                   // 25: game.v1.TalkRequest
+	(*BribeRequest)(nil),                  // 26: game.v1.BribeRequest
+	(*BribeConfirmRequest)(nil),           // 27: game.v1.BribeConfirmRequest
+	(*SurrenderRequest)(nil),              // 28: game.v1.SurrenderRequest
+	(*ReleaseRequest)(nil),                // 29: game.v1.ReleaseRequest
+	(*DeployTrapRequest)(nil),             // 30: game.v1.DeployTrapRequest
+	(*TravelRequest)(nil),                 // 31: game.v1.TravelRequest
+	(*ActivateItemRequest)(nil),           // 32: game.v1.ActivateItemRequest
+	(*ServerEvent)(nil),                   // 33: game.v1.ServerEvent
+	(*ShopItem)(nil),                      // 34: game.v1.ShopItem
+	(*ShopView)(nil),                      // 35: game.v1.ShopView
+	(*HpUpdateEvent)(nil),                 // 36: game.v1.HpUpdateEvent
+	(*JoinWorldRequest)(nil),              // 37: game.v1.JoinWorldRequest
+	(*MoveRequest)(nil),                   // 38: game.v1.MoveRequest
+	(*LookRequest)(nil),                   // 39: game.v1.LookRequest
+	(*SayRequest)(nil),                    // 40: game.v1.SayRequest
+	(*EmoteRequest)(nil),                  // 41: game.v1.EmoteRequest
+	(*WhoRequest)(nil),                    // 42: game.v1.WhoRequest
+	(*ExitsRequest)(nil),                  // 43: game.v1.ExitsRequest
+	(*QuitRequest)(nil),                   // 44: game.v1.QuitRequest
+	(*SwitchCharacterRequest)(nil),        // 45: game.v1.SwitchCharacterRequest
+	(*RoomView)(nil),                      // 46: game.v1.RoomView
+	(*ExitInfo)(nil),                      // 47: game.v1.ExitInfo
+	(*MessageEvent)(nil),                  // 48: game.v1.MessageEvent
+	(*RoomEvent)(nil),                     // 49: game.v1.RoomEvent
+	(*PlayerList)(nil),                    // 50: game.v1.PlayerList
+	(*PlayerInfo)(nil),                    // 51: game.v1.PlayerInfo
+	(*ExitList)(nil),                      // 52: game.v1.ExitList
+	(*ErrorEvent)(nil),                    // 53: game.v1.ErrorEvent
+	(*Disconnected)(nil),                  // 54: game.v1.Disconnected
+	(*TimeOfDayEvent)(nil),                // 55: game.v1.TimeOfDayEvent
+	(*CharacterInfo)(nil),                 // 56: game.v1.CharacterInfo
+	(*NpcInfo)(nil),                       // 57: game.v1.NpcInfo
+	(*ExamineRequest)(nil),                // 58: game.v1.ExamineRequest
+	(*NpcView)(nil),                       // 59: game.v1.NpcView
+	(*HealerView)(nil),                    // 60: game.v1.HealerView
+	(*JobOfferEntry)(nil),                 // 61: game.v1.JobOfferEntry
+	(*TrainerView)(nil),                   // 62: game.v1.TrainerView
+	(*FixerView)(nil),                     // 63: game.v1.FixerView
+	(*RestView)(nil),                      // 64: game.v1.RestView
+	(*AttackRequest)(nil),                 // 65: game.v1.AttackRequest
+	(*FleeRequest)(nil),                   // 66: game.v1.FleeRequest
+	(*PassRequest)(nil),                   // 67: game.v1.PassRequest
+	(*StrikeRequest)(nil),                 // 68: game.v1.StrikeRequest
+	(*EquipRequest)(nil),                  // 69: game.v1.EquipRequest
+	(*ReloadRequest)(nil),                 // 70: game.v1.ReloadRequest
+	(*FireBurstRequest)(nil),              // 71: game.v1.FireBurstRequest
+	(*FireAutomaticRequest)(nil),          // 72: game.v1.FireAutomaticRequest
+	(*ThrowRequest)(nil),                  // 73: game.v1.ThrowRequest
+	(*InventoryRequest)(nil),              // 74: game.v1.InventoryRequest
+	(*GetItemRequest)(nil),                // 75: game.v1.GetItemRequest
+	(*DropItemRequest)(nil),               // 76: game.v1.DropItemRequest
+	(*BalanceRequest)(nil),                // 77: game.v1.BalanceRequest
+	(*SetRoleRequest)(nil),                // 78: game.v1.SetRoleRequest
+	(*LoadoutRequest)(nil),                // 79: game.v1.LoadoutRequest
+	(*LoadoutWeaponPreset)(nil),           // 80: game.v1.LoadoutWeaponPreset
+	(*LoadoutView)(nil),                   // 81: game.v1.LoadoutView
+	(*QuestObjectiveView)(nil),            // 82: game.v1.QuestObjectiveView
+	(*QuestEntryView)(nil),                // 83: game.v1.QuestEntryView
+	(*QuestGiverView)(nil),                // 84: game.v1.QuestGiverView
+	(*QuestLogView)(nil),                  // 85: game.v1.QuestLogView
+	(*QuestCompleteEvent)(nil),            // 86: game.v1.QuestCompleteEvent
+	(*QuestLogRequest)(nil),               // 87: game.v1.QuestLogRequest
+	(*UnequipRequest)(nil),                // 88: game.v1.UnequipRequest
+	(*EquipmentRequest)(nil),              // 89: game.v1.EquipmentRequest
+	(*TeleportRequest)(nil),               // 90: game.v1.TeleportRequest
+	(*SummonItemRequest)(nil),             // 91: game.v1.SummonItemRequest
+	(*FloorItem)(nil),                     // 92: game.v1.FloorItem
+	(*RoomEquipmentItem)(nil),             // 93: game.v1.RoomEquipmentItem
+	(*UseEquipmentRequest)(nil),           // 94: game.v1.UseEquipmentRequest
+	(*MapRequest)(nil),                    // 95: game.v1.MapRequest
+	(*PoiWithNpc)(nil),                    // 96: game.v1.PoiWithNpc
+	(*ZoneExitInfo)(nil),                  // 97: game.v1.ZoneExitInfo
+	(*SameZoneExitTarget)(nil),            // 98: game.v1.SameZoneExitTarget
+	(*MapTile)(nil),                       // 99: game.v1.MapTile
+	(*WorldZoneTile)(nil),                 // 100: game.v1.WorldZoneTile
+	(*MapResponse)(nil),                   // 101: game.v1.MapResponse
+	(*SkillsRequest)(nil),                 // 102: game.v1.SkillsRequest
+	(*SkillEntry)(nil),                    // 103: game.v1.SkillEntry
+	(*SkillsResponse)(nil),                // 104: game.v1.SkillsResponse
+	(*RoomEquipRequest)(nil),              // 105: game.v1.RoomEquipRequest
+	(*InventoryItem)(nil),                 // 106: game.v1.InventoryItem
+	(*InventoryView)(nil),                 // 107: game.v1.InventoryView
+	(*CombatantPosition)(nil),             // 108: game.v1.CombatantPosition
+	(*RoundStartEvent)(nil),               // 109: game.v1.RoundStartEvent
+	(*RoundEndEvent)(nil),                 // 110: game.v1.RoundEndEvent
+	(*APUpdateEvent)(nil),                 // 111: game.v1.APUpdateEvent
+	(*CombatEvent)(nil),                   // 112: game.v1.CombatEvent
+	(*StatusRequest)(nil),                 // 113: game.v1.StatusRequest
+	(*ConditionEvent)(nil),                // 114: game.v1.ConditionEvent
+	(*WearRequest)(nil),                   // 115: game.v1.WearRequest
+	(*RemoveArmorRequest)(nil),            // 116: game.v1.RemoveArmorRequest
+	(*ConditionInfo)(nil),                 // 117: game.v1.ConditionInfo
+	(*CharacterSheetRequest)(nil),         // 118: game.v1.CharacterSheetRequest
+	(*ArchetypeSelectionRequest)(nil),     // 119: game.v1.ArchetypeSelectionRequest
+	(*FeatsRequest)(nil),                  // 120: game.v1.FeatsRequest
+	(*FeatEntry)(nil),                     // 121: game.v1.FeatEntry
+	(*FeatsResponse)(nil),                 // 122: game.v1.FeatsResponse
+	(*ClassFeaturesRequest)(nil),          // 123: game.v1.ClassFeaturesRequest
+	(*ClassFeatureEntry)(nil),             // 124: game.v1.ClassFeatureEntry
+	(*ClassFeaturesResponse)(nil),         // 125: game.v1.ClassFeaturesResponse
+	(*InteractRequest)(nil),               // 126: game.v1.InteractRequest
+	(*InteractResponse)(nil),              // 127: game.v1.InteractResponse
+	(*UseRequest)(nil),                    // 128: game.v1.UseRequest
+	(*UseResponse)(nil),                   // 129: game.v1.UseResponse
+	(*PreparedSlotView)(nil),              // 130: game.v1.PreparedSlotView
+	(*HardwiredSlotView)(nil),             // 131: game.v1.HardwiredSlotView
+	(*SpontaneousKnownEntry)(nil),         // 132: game.v1.SpontaneousKnownEntry
+	(*CharacterSheetView)(nil),            // 133: game.v1.CharacterSheetView
+	(*InnateSlotView)(nil),                // 134: game.v1.InnateSlotView
+	(*SpontaneousUsePoolView)(nil),        // 135: game.v1.SpontaneousUsePoolView
+	(*ResistanceEntry)(nil),               // 136: game.v1.ResistanceEntry
+	(*ProficienciesRequest)(nil),          // 137: game.v1.ProficienciesRequest
+	(*ProficiencyEntry)(nil),              // 138: game.v1.ProficiencyEntry
+	(*ProficienciesResponse)(nil),         // 139: game.v1.ProficienciesResponse
+	(*LevelUpRequest)(nil),                // 140: game.v1.LevelUpRequest
+	(*CombatDefaultRequest)(nil),          // 141: game.v1.CombatDefaultRequest
+	(*TrainSkillRequest)(nil),             // 142: game.v1.TrainSkillRequest
+	(*ActionRequest)(nil),                 // 143: game.v1.ActionRequest
+	(*RaiseShieldRequest)(nil),            // 144: game.v1.RaiseShieldRequest
+	(*TakeCoverRequest)(nil),              // 145: game.v1.TakeCoverRequest
+	(*FirstAidRequest)(nil),               // 146: game.v1.FirstAidRequest
+	(*FeintRequest)(nil),                  // 147: game.v1.FeintRequest
+	(*DemoralizeRequest)(nil),             // 148: game.v1.DemoralizeRequest
+	(*GrappleRequest)(nil),                // 149: game.v1.GrappleRequest
+	(*TripRequest)(nil),                   // 150: game.v1.TripRequest
+	(*DisarmRequest)(nil),                 // 151: game.v1.DisarmRequest
+	(*StrideRequest)(nil),                 // 152: game.v1.StrideRequest
+	(*ShoveRequest)(nil),                  // 153: game.v1.ShoveRequest
+	(*StepRequest)(nil),                   // 154: game.v1.StepRequest
+	(*HideRequest)(nil),                   // 155: game.v1.HideRequest
+	(*SneakRequest)(nil),                  // 156: game.v1.SneakRequest
+	(*DivertRequest)(nil),                 // 157: game.v1.DivertRequest
+	(*EscapeRequest)(nil),                 // 158: game.v1.EscapeRequest
+	(*TumbleRequest)(nil),                 // 159: game.v1.TumbleRequest
+	(*SeekRequest)(nil),                   // 160: game.v1.SeekRequest
+	(*ClimbRequest)(nil),                  // 161: game.v1.ClimbRequest
+	(*SwimRequest)(nil),                   // 162: game.v1.SwimRequest
+	(*CalmRequest)(nil),                   // 163: game.v1.CalmRequest
+	(*HeroPointRequest)(nil),              // 164: game.v1.HeroPointRequest
+	(*DelayRequest)(nil),                  // 165: game.v1.DelayRequest
+	(*JoinRequest)(nil),                   // 166: game.v1.JoinRequest
+	(*DeclineRequest)(nil),                // 167: game.v1.DeclineRequest
+	(*GroupRequest)(nil),                  // 168: game.v1.GroupRequest
+	(*InviteRequest)(nil),                 // 169: game.v1.InviteRequest
+	(*AcceptGroupRequest)(nil),            // 170: game.v1.AcceptGroupRequest
+	(*DeclineGroupRequest)(nil),           // 171: game.v1.DeclineGroupRequest
+	(*UngroupRequest)(nil),                // 172: game.v1.UngroupRequest
+	(*KickRequest)(nil),                   // 173: game.v1.KickRequest
+	(*MotiveRequest)(nil),                 // 174: game.v1.MotiveRequest
+	(*GrantRequest)(nil),                  // 175: game.v1.GrantRequest
+	(*SpawnNPCRequest)(nil),               // 176: game.v1.SpawnNPCRequest
+	(*KillNPCRequest)(nil),                // 177: game.v1.KillNPCRequest
+	(*AddRoomRequest)(nil),                // 178: game.v1.AddRoomRequest
+	(*AddLinkRequest)(nil),                // 179: game.v1.AddLinkRequest
+	(*RemoveLinkRequest)(nil),             // 180: game.v1.RemoveLinkRequest
+	(*SetRoomRequest)(nil),                // 181: game.v1.SetRoomRequest
+	(*EditorCmdsRequest)(nil),             // 182: game.v1.EditorCmdsRequest
+	(*SpawnCharRequest)(nil),              // 183: game.v1.SpawnCharRequest
+	(*DeleteCharRequest)(nil),             // 184: game.v1.DeleteCharRequest
+	(*FactionRequest)(nil),                // 185: game.v1.FactionRequest
+	(*FactionInfoRequest)(nil),            // 186: game.v1.FactionInfoRequest
+	(*FactionStandingRequest)(nil),        // 187: game.v1.FactionStandingRequest
+	(*ChangeRepRequest)(nil),              // 188: game.v1.ChangeRepRequest
+	(*TabCompleteRequest)(nil),            // 189: game.v1.TabCompleteRequest
+	(*TabCompleteResponse)(nil),           // 190: game.v1.TabCompleteResponse
+	(*MaterialsRequest)(nil),              // 191: game.v1.MaterialsRequest
+	(*CraftListRequest)(nil),              // 192: game.v1.CraftListRequest
+	(*CraftRequest)(nil),                  // 193: game.v1.CraftRequest
+	(*CraftConfirmRequest)(nil),           // 194: game.v1.CraftConfirmRequest
+	(*ScavengeRequest)(nil),               // 195: game.v1.ScavengeRequest
+	(*AffixRequest)(nil),                  // 196: game.v1.AffixRequest
+	(*ExploreRequest)(nil),                // 197: game.v1.ExploreRequest
+	(*RefocusRequest)(nil),                // 198: game.v1.RefocusRequest
+	(*SeduceRequest)(nil),                 // 199: game.v1.SeduceRequest
+	(*HotbarSlot)(nil),                    // 200: game.v1.HotbarSlot
+	(*HotbarRequest)(nil),                 // 201: game.v1.HotbarRequest
+	(*HotbarUpdateEvent)(nil),             // 202: game.v1.HotbarUpdateEvent
+	(*DowntimeRequest)(nil),               // 203: game.v1.DowntimeRequest
+	(*QuestRequest)(nil),                  // 204: game.v1.QuestRequest
+	(*MaterialLoss)(nil),                  // 205: game.v1.MaterialLoss
+	(*CraftResultEvent)(nil),              // 206: game.v1.CraftResultEvent
+	(*UncurseRequest)(nil),                // 207: game.v1.UncurseRequest
+	(*WeatherEvent)(nil),                  // 208: game.v1.WeatherEvent
+	(*JobGrantsRequest)(nil),              // 209: game.v1.JobGrantsRequest
+	(*JobFeatGrant)(nil),                  // 210: game.v1.JobFeatGrant
+	(*JobTechGrant)(nil),                  // 211: game.v1.JobTechGrant
+	(*JobGrantsResponse)(nil),             // 212: game.v1.JobGrantsResponse
+	(*AdminSessionInfo)(nil),              // 213: game.v1.AdminSessionInfo
+	(*AdminListSessionsRequest)(nil),      // 214: game.v1.AdminListSessionsRequest
+	(*AdminListSessionsResponse)(nil),     // 215: game.v1.AdminListSessionsResponse
+	(*AdminKickRequest)(nil),              // 216: game.v1.AdminKickRequest
+	(*AdminKickResponse)(nil),             // 217: game.v1.AdminKickResponse
+	(*AdminMessageRequest)(nil),           // 218: game.v1.AdminMessageRequest
+	(*AdminMessageResponse)(nil),          // 219: game.v1.AdminMessageResponse
+	(*AdminTeleportRequest)(nil),          // 220: game.v1.AdminTeleportRequest
+	(*AdminTeleportResponse)(nil),         // 221: game.v1.AdminTeleportResponse
+	(*AdminListZonesRequest)(nil),         // 222: game.v1.AdminListZonesRequest
+	(*AdminZoneSummary)(nil),              // 223: game.v1.AdminZoneSummary
+	(*AdminListZonesResponse)(nil),        // 224: game.v1.AdminListZonesResponse
+	(*AdminListRoomsRequest)(nil),         // 225: game.v1.AdminListRoomsRequest
+	(*AdminRoomSummary)(nil),              // 226: game.v1.AdminRoomSummary
+	(*AdminListRoomsResponse)(nil),        // 227: game.v1.AdminListRoomsResponse
+	(*AdminUpdateRoomRequest)(nil),        // 228: game.v1.AdminUpdateRoomRequest
+	(*AdminUpdateRoomResponse)(nil),       // 229: game.v1.AdminUpdateRoomResponse
+	(*AdminListNPCTemplatesRequest)(nil),  // 230: game.v1.AdminListNPCTemplatesRequest
+	(*AdminNPCTemplateSummary)(nil),       // 231: game.v1.AdminNPCTemplateSummary
+	(*AdminListNPCTemplatesResponse)(nil), // 232: game.v1.AdminListNPCTemplatesResponse
+	(*AdminSpawnNPCRequest)(nil),          // 233: game.v1.AdminSpawnNPCRequest
+	(*AdminSpawnNPCResponse)(nil),         // 234: game.v1.AdminSpawnNPCResponse
+	nil,                                   // 235: game.v1.FixerView.BribeCostsEntry
+	nil,                                   // 236: game.v1.CharacterSheetView.ArmorEntry
+	nil,                                   // 237: game.v1.CharacterSheetView.AccessoriesEntry
+	nil,                                   // 238: game.v1.CharacterSheetView.ArmorCategoriesEntry
 }
 var file_game_v1_game_proto_depIdxs = []int32{
 	37,  // 0: game.v1.ClientMessage.join_world:type_name -> game.v1.JoinWorldRequest
@@ -17190,7 +17907,7 @@ var file_game_v1_game_proto_depIdxs = []int32{
 	2,   // 184: game.v1.PlayerInfo.status:type_name -> game.v1.CombatStatus
 	47,  // 185: game.v1.ExitList.exits:type_name -> game.v1.ExitInfo
 	61,  // 186: game.v1.TrainerView.jobs:type_name -> game.v1.JobOfferEntry
-	222, // 187: game.v1.FixerView.bribe_costs:type_name -> game.v1.FixerView.BribeCostsEntry
+	235, // 187: game.v1.FixerView.bribe_costs:type_name -> game.v1.FixerView.BribeCostsEntry
 	80,  // 188: game.v1.LoadoutView.presets:type_name -> game.v1.LoadoutWeaponPreset
 	82,  // 189: game.v1.QuestEntryView.objectives:type_name -> game.v1.QuestObjectiveView
 	83,  // 190: game.v1.QuestGiverView.quests:type_name -> game.v1.QuestEntryView
@@ -17208,8 +17925,8 @@ var file_game_v1_game_proto_depIdxs = []int32{
 	124, // 202: game.v1.ClassFeaturesResponse.archetype_features:type_name -> game.v1.ClassFeatureEntry
 	124, // 203: game.v1.ClassFeaturesResponse.job_features:type_name -> game.v1.ClassFeatureEntry
 	121, // 204: game.v1.UseResponse.choices:type_name -> game.v1.FeatEntry
-	223, // 205: game.v1.CharacterSheetView.armor:type_name -> game.v1.CharacterSheetView.ArmorEntry
-	224, // 206: game.v1.CharacterSheetView.accessories:type_name -> game.v1.CharacterSheetView.AccessoriesEntry
+	236, // 205: game.v1.CharacterSheetView.armor:type_name -> game.v1.CharacterSheetView.ArmorEntry
+	237, // 206: game.v1.CharacterSheetView.accessories:type_name -> game.v1.CharacterSheetView.AccessoriesEntry
 	136, // 207: game.v1.CharacterSheetView.player_resistances:type_name -> game.v1.ResistanceEntry
 	136, // 208: game.v1.CharacterSheetView.player_weaknesses:type_name -> game.v1.ResistanceEntry
 	103, // 209: game.v1.CharacterSheetView.skills:type_name -> game.v1.SkillEntry
@@ -17221,28 +17938,41 @@ var file_game_v1_game_proto_depIdxs = []int32{
 	134, // 215: game.v1.CharacterSheetView.innate_slots:type_name -> game.v1.InnateSlotView
 	131, // 216: game.v1.CharacterSheetView.hardwired_slots:type_name -> game.v1.HardwiredSlotView
 	132, // 217: game.v1.CharacterSheetView.spontaneous_known:type_name -> game.v1.SpontaneousKnownEntry
-	225, // 218: game.v1.CharacterSheetView.armor_categories:type_name -> game.v1.CharacterSheetView.ArmorCategoriesEntry
+	238, // 218: game.v1.CharacterSheetView.armor_categories:type_name -> game.v1.CharacterSheetView.ArmorCategoriesEntry
 	138, // 219: game.v1.ProficienciesResponse.proficiencies:type_name -> game.v1.ProficiencyEntry
 	200, // 220: game.v1.HotbarUpdateEvent.slots:type_name -> game.v1.HotbarSlot
 	205, // 221: game.v1.CraftResultEvent.materials_lost:type_name -> game.v1.MaterialLoss
 	210, // 222: game.v1.JobGrantsResponse.feat_grants:type_name -> game.v1.JobFeatGrant
 	211, // 223: game.v1.JobGrantsResponse.tech_grants:type_name -> game.v1.JobTechGrant
 	213, // 224: game.v1.AdminListSessionsResponse.sessions:type_name -> game.v1.AdminSessionInfo
-	4,   // 225: game.v1.GameService.Session:input_type -> game.v1.ClientMessage
-	214, // 226: game.v1.GameService.AdminListSessions:input_type -> game.v1.AdminListSessionsRequest
-	216, // 227: game.v1.GameService.AdminKickPlayer:input_type -> game.v1.AdminKickRequest
-	218, // 228: game.v1.GameService.AdminMessagePlayer:input_type -> game.v1.AdminMessageRequest
-	220, // 229: game.v1.GameService.AdminTeleportPlayer:input_type -> game.v1.AdminTeleportRequest
-	33,  // 230: game.v1.GameService.Session:output_type -> game.v1.ServerEvent
-	215, // 231: game.v1.GameService.AdminListSessions:output_type -> game.v1.AdminListSessionsResponse
-	217, // 232: game.v1.GameService.AdminKickPlayer:output_type -> game.v1.AdminKickResponse
-	219, // 233: game.v1.GameService.AdminMessagePlayer:output_type -> game.v1.AdminMessageResponse
-	221, // 234: game.v1.GameService.AdminTeleportPlayer:output_type -> game.v1.AdminTeleportResponse
-	230, // [230:235] is the sub-list for method output_type
-	225, // [225:230] is the sub-list for method input_type
-	225, // [225:225] is the sub-list for extension type_name
-	225, // [225:225] is the sub-list for extension extendee
-	0,   // [0:225] is the sub-list for field type_name
+	223, // 225: game.v1.AdminListZonesResponse.zones:type_name -> game.v1.AdminZoneSummary
+	226, // 226: game.v1.AdminListRoomsResponse.rooms:type_name -> game.v1.AdminRoomSummary
+	231, // 227: game.v1.AdminListNPCTemplatesResponse.templates:type_name -> game.v1.AdminNPCTemplateSummary
+	4,   // 228: game.v1.GameService.Session:input_type -> game.v1.ClientMessage
+	214, // 229: game.v1.GameService.AdminListSessions:input_type -> game.v1.AdminListSessionsRequest
+	216, // 230: game.v1.GameService.AdminKickPlayer:input_type -> game.v1.AdminKickRequest
+	218, // 231: game.v1.GameService.AdminMessagePlayer:input_type -> game.v1.AdminMessageRequest
+	220, // 232: game.v1.GameService.AdminTeleportPlayer:input_type -> game.v1.AdminTeleportRequest
+	222, // 233: game.v1.GameService.AdminListZones:input_type -> game.v1.AdminListZonesRequest
+	225, // 234: game.v1.GameService.AdminListRooms:input_type -> game.v1.AdminListRoomsRequest
+	228, // 235: game.v1.GameService.AdminUpdateRoom:input_type -> game.v1.AdminUpdateRoomRequest
+	230, // 236: game.v1.GameService.AdminListNPCTemplates:input_type -> game.v1.AdminListNPCTemplatesRequest
+	233, // 237: game.v1.GameService.AdminSpawnNPC:input_type -> game.v1.AdminSpawnNPCRequest
+	33,  // 238: game.v1.GameService.Session:output_type -> game.v1.ServerEvent
+	215, // 239: game.v1.GameService.AdminListSessions:output_type -> game.v1.AdminListSessionsResponse
+	217, // 240: game.v1.GameService.AdminKickPlayer:output_type -> game.v1.AdminKickResponse
+	219, // 241: game.v1.GameService.AdminMessagePlayer:output_type -> game.v1.AdminMessageResponse
+	221, // 242: game.v1.GameService.AdminTeleportPlayer:output_type -> game.v1.AdminTeleportResponse
+	224, // 243: game.v1.GameService.AdminListZones:output_type -> game.v1.AdminListZonesResponse
+	227, // 244: game.v1.GameService.AdminListRooms:output_type -> game.v1.AdminListRoomsResponse
+	229, // 245: game.v1.GameService.AdminUpdateRoom:output_type -> game.v1.AdminUpdateRoomResponse
+	232, // 246: game.v1.GameService.AdminListNPCTemplates:output_type -> game.v1.AdminListNPCTemplatesResponse
+	234, // 247: game.v1.GameService.AdminSpawnNPC:output_type -> game.v1.AdminSpawnNPCResponse
+	238, // [238:248] is the sub-list for method output_type
+	228, // [228:238] is the sub-list for method input_type
+	228, // [228:228] is the sub-list for extension type_name
+	228, // [228:228] is the sub-list for extension extendee
+	0,   // [0:228] is the sub-list for field type_name
 }
 
 func init() { file_game_v1_game_proto_init() }
@@ -17435,7 +18165,7 @@ func file_game_v1_game_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_game_v1_game_proto_rawDesc), len(file_game_v1_game_proto_rawDesc)),
 			NumEnums:      4,
-			NumMessages:   222,
+			NumMessages:   235,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

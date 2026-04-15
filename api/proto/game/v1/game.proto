@@ -16,6 +16,15 @@ service GameService {
   rpc AdminKickPlayer(AdminKickRequest) returns (AdminKickResponse);
   rpc AdminMessagePlayer(AdminMessageRequest) returns (AdminMessageResponse);
   rpc AdminTeleportPlayer(AdminTeleportRequest) returns (AdminTeleportResponse);
+
+  // World admin RPCs.
+  rpc AdminListZones(AdminListZonesRequest)               returns (AdminListZonesResponse);
+  rpc AdminListRooms(AdminListRoomsRequest)               returns (AdminListRoomsResponse);
+  rpc AdminUpdateRoom(AdminUpdateRoomRequest)             returns (AdminUpdateRoomResponse);
+
+  // NPC admin RPCs.
+  rpc AdminListNPCTemplates(AdminListNPCTemplatesRequest) returns (AdminListNPCTemplatesResponse);
+  rpc AdminSpawnNPC(AdminSpawnNPCRequest)                 returns (AdminSpawnNPCResponse);
 }
 
 // ClientMessage wraps all client-to-server commands.
@@ -1626,3 +1635,65 @@ message AdminMessageResponse {}
 
 message AdminTeleportRequest  { int64 char_id = 1; string room_id = 2; }
 message AdminTeleportResponse {}
+
+// Admin zone/room/NPC messages.
+
+message AdminListZonesRequest {}
+
+message AdminZoneSummary {
+  string id           = 1;
+  string name         = 2;
+  string danger_level = 3;
+  int32  room_count   = 4;
+}
+
+message AdminListZonesResponse {
+  repeated AdminZoneSummary zones = 1;
+}
+
+message AdminListRoomsRequest {
+  string zone_id = 1;
+}
+
+message AdminRoomSummary {
+  string id           = 1;
+  string title        = 2;
+  string description  = 3;
+  string danger_level = 4;
+}
+
+message AdminListRoomsResponse {
+  repeated AdminRoomSummary rooms = 1;
+}
+
+message AdminUpdateRoomRequest {
+  string room_id      = 1;
+  string title        = 2;
+  string description  = 3;
+  string danger_level = 4;
+}
+
+message AdminUpdateRoomResponse {}
+
+message AdminListNPCTemplatesRequest {}
+
+message AdminNPCTemplateSummary {
+  string id    = 1;
+  string name  = 2;
+  int32  level = 3;
+  string type  = 4;
+}
+
+message AdminListNPCTemplatesResponse {
+  repeated AdminNPCTemplateSummary templates = 1;
+}
+
+message AdminSpawnNPCRequest {
+  string template_id = 1;
+  string room_id     = 2;
+  int32  count       = 3;
+}
+
+message AdminSpawnNPCResponse {
+  int32 spawned_count = 1;
+}
