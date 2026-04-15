@@ -434,6 +434,57 @@ func TestCheckJobPrerequisites_RequiredFeat_Present(t *testing.T) {
 	require.NoError(t, err)
 }
 
+// TestTechTrainerConfig_OfferedLevelCheck verifies that a TechTrainerConfig
+// correctly identifies whether a given tech level is offered.
+//
+// Precondition: TechTrainerConfig with OfferedLevels [2, 3].
+// Postcondition: OffersLevel(2) == true; OffersLevel(4) == false.
+func TestTechTrainerConfig_OfferedLevelCheck(t *testing.T) {
+	cfg := &TechTrainerConfig{
+		Tradition:     "neural",
+		OfferedLevels: []int{2, 3},
+		BaseCost:      150,
+	}
+	assert.True(t, cfg.OffersLevel(2), "must offer level 2")
+	assert.True(t, cfg.OffersLevel(3), "must offer level 3")
+	assert.False(t, cfg.OffersLevel(4), "must not offer level 4")
+	assert.False(t, cfg.OffersLevel(1), "must not offer level 1")
+}
+
+// TestTechTrainerPrereqs_EvalOperatorAnd_OneFailing verifies AND operator requires all conditions.
+//
+// Precondition: Two conditions; one met, one unmet.
+// Postcondition: error is non-nil.
+func TestTechTrainerPrereqs_EvalOperatorAnd_OneFailing(t *testing.T) {
+	prereqs := &TechTrainPrereqs{
+		Operator: "and",
+		Conditions: []TechTrainCondition{
+			{Type: "quest_complete", QuestID: "q1"},
+			{Type: "quest_complete", QuestID: "q2"},
+		},
+	}
+	completedQ1 := map[string]bool{"q1": true}
+	err := EvalTechTrainPrereqs(prereqs, completedQ1, nil)
+	assert.Error(t, err, "AND operator must fail when one condition is unmet")
+}
+
+// TestTechTrainerPrereqs_EvalOperatorOr_OnePass verifies OR operator passes when any condition met.
+//
+// Precondition: Two conditions; one met, one unmet.
+// Postcondition: nil error.
+func TestTechTrainerPrereqs_EvalOperatorOr_OnePass(t *testing.T) {
+	prereqs := &TechTrainPrereqs{
+		Operator: "or",
+		Conditions: []TechTrainCondition{
+			{Type: "quest_complete", QuestID: "q1"},
+			{Type: "quest_complete", QuestID: "q2"},
+		},
+	}
+	completedQ1 := map[string]bool{"q1": true}
+	err := EvalTechTrainPrereqs(prereqs, completedQ1, nil)
+	assert.NoError(t, err, "OR operator must pass when at least one condition is met")
+}
+
 // TestMerchantConfig_Validate_AllowsNonCursedItems verifies that tuned and defective items
 // are allowed in merchant stock (only cursed is blocked by REQ-EM-27).
 func TestMerchantConfig_Validate_AllowsNonCursedItems(t *testing.T) {

@@ -433,3 +433,109 @@ func (f FixerConfig) Validate() error {
 	}
 	return nil
 }
+
+// ---- TechTrainer ----
+
+// TechTrainerConfig holds the static configuration for a tech trainer NPC.
+//
+// Precondition: Tradition is a valid technology tradition ID; OfferedLevels is non-empty.
+type TechTrainerConfig struct {
+	Tradition     string            `yaml:"tradition"`
+	OfferedLevels []int             `yaml:"offered_levels"`
+	BaseCost      int               `yaml:"base_cost"`
+	FindQuestID   string            `yaml:"find_quest_id,omitempty"`
+	Prerequisites *TechTrainPrereqs `yaml:"prerequisites,omitempty"`
+}
+
+// OffersLevel returns true if this trainer can teach the given technology level.
+func (c *TechTrainerConfig) OffersLevel(level int) bool {
+	for _, l := range c.OfferedLevels {
+		if l == level {
+			return true
+		}
+	}
+	return false
+}
+
+// TrainingCost computes the cost for one technology at the given level.
+//
+// Precondition: level >= 1.
+// Postcondition: Returns BaseCost * level.
+func (c *TechTrainerConfig) TrainingCost(level int) int {
+	return c.BaseCost * level
+}
+
+// TechTrainPrereqs defines the prerequisite gate for accessing a tech trainer.
+//
+// Precondition: Operator is "and" or "or" (defaults to "and" if empty); Conditions is non-empty.
+type TechTrainPrereqs struct {
+	Operator   string               `yaml:"operator"`
+	Conditions []TechTrainCondition `yaml:"conditions"`
+}
+
+// TechTrainCondition is a single prerequisite condition for tech trainer access.
+//
+// Precondition: Type is "quest_complete" or "faction_rep".
+type TechTrainCondition struct {
+	Type      string `yaml:"type"`
+	QuestID   string `yaml:"quest_id,omitempty"`
+	FactionID string `yaml:"faction_id,omitempty"`
+	MinTier   string `yaml:"min_tier,omitempty"`
+}
+
+// FactionTierChecker is a function that returns true if the player meets the min faction tier.
+type FactionTierChecker func(factionID, minTierID string, factionRep map[string]int) bool
+
+// EvalTechTrainPrereqs returns nil if prerequisites are satisfied, or a descriptive error.
+//
+// Precondition: prereqs non-nil; completedQuestIDs maps quest ID → true for completed quests.
+// Postcondition: Returns nil on pass; non-nil error with denial reason on fail.
+// If prereqs is nil, returns nil (no prerequisites).
+func EvalTechTrainPrereqs(prereqs *TechTrainPrereqs, completedQuestIDs map[string]bool, checkTier FactionTierChecker) error {
+	if prereqs == nil || len(prereqs.Conditions) == 0 {
+		return nil
+	}
+	op := prereqs.Operator
+	if op == "" {
+		op = "and"
+	}
+	type result struct {
+		met bool
+		err error
+	}
+	results := make([]result, len(prereqs.Conditions))
+	for i, cond := range prereqs.Conditions {
+		switch cond.Type {
+		case "quest_complete":
+			if completedQuestIDs[cond.QuestID] {
+				results[i] = result{met: true}
+			} else {
+				results[i] = result{met: false, err: fmt.Errorf("you must complete quest %q first", cond.QuestID)}
+			}
+		case "faction_rep":
+			if checkTier != nil && checkTier(cond.FactionID, cond.MinTier, nil) {
+				results[i] = result{met: true}
+			} else {
+				results[i] = result{met: false, err: fmt.Errorf("you need %q reputation with %q", cond.MinTier, cond.FactionID)}
+			}
+		default:
+			results[i] = result{met: false, err: fmt.Errorf("unknown prerequisite type %q", cond.Type)}
+		}
+	}
+	switch op {
+	case "or":
+		for _, r := range results {
+			if r.met {
+				return nil
+			}
+		}
+		return results[0].err
+	default: // "and"
+		for _, r := range results {
+			if !r.met {
+				return r.err
+			}
+		}
+		return nil
+	}
+}
