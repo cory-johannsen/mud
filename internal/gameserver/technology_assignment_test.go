@@ -735,6 +735,43 @@ func TestPartitionTechGrants_HardwiredAlwaysImmediate(t *testing.T) {
 	require.NotNil(t, deferred)
 }
 
+// TestPartitionTechGrants_L2SpontaneousAlwaysDeferred verifies that spontaneous grants at
+// tech level 2 are always placed in deferred (REQ-TTA-2).
+//
+// Precondition: Grants with 1 L2 spontaneous slot.
+// Postcondition: immediate is nil; deferred contains the L2 spontaneous grants.
+func TestPartitionTechGrants_L2SpontaneousAlwaysDeferred(t *testing.T) {
+	grants := &ruleset.TechnologyGrants{
+		Spontaneous: &ruleset.SpontaneousGrants{
+			KnownByLevel: map[int]int{2: 1},
+			UsesByLevel:  map[int]int{2: 3},
+			Pool:         []ruleset.SpontaneousEntry{{ID: "neural_override", Level: 2}},
+		},
+	}
+	immediate, deferred := gameserver.PartitionTechGrants(grants)
+	assert.Nil(t, immediate, "L2 spontaneous grant must NOT be immediate")
+	assert.NotNil(t, deferred, "L2 spontaneous grant MUST be deferred")
+	require.NotNil(t, deferred.Spontaneous)
+	assert.Equal(t, 1, deferred.Spontaneous.KnownByLevel[2])
+	assert.Equal(t, 3, deferred.Spontaneous.UsesByLevel[2], "UsesByLevel must be preserved")
+}
+
+// TestPartitionTechGrants_L1SpontaneousPreservesUsesByLevel verifies that UsesByLevel
+// is preserved when L1 spontaneous grants are partitioned to immediate.
+func TestPartitionTechGrants_L1SpontaneousPreservesUsesByLevel(t *testing.T) {
+	grants := &ruleset.TechnologyGrants{
+		Spontaneous: &ruleset.SpontaneousGrants{
+			KnownByLevel: map[int]int{1: 1},
+			UsesByLevel:  map[int]int{1: 2},
+			Pool:         []ruleset.SpontaneousEntry{{ID: "hack_basic", Level: 1}},
+		},
+	}
+	immediate, _ := gameserver.PartitionTechGrants(grants)
+	require.NotNil(t, immediate)
+	require.NotNil(t, immediate.Spontaneous)
+	assert.Equal(t, 2, immediate.Spontaneous.UsesByLevel[1], "UsesByLevel must be preserved in immediate")
+}
+
 // REQ-ILT5: ResolvePendingTechGrants prompts for each pending level in ascending order,
 // calls LevelUpTechnologies, and clears each entry.
 func TestResolvePendingTechGrants_ResolvesAndClears(t *testing.T) {

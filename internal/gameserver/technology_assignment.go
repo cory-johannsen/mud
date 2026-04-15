@@ -657,9 +657,15 @@ func PartitionTechGrants(grants *ruleset.TechnologyGrants) (immediate, deferred 
 			// REQ-TTA-2: L2+ always require a trainer — unconditionally deferred.
 			if lvl >= 2 {
 				if def.Spontaneous == nil {
-					def.Spontaneous = &ruleset.SpontaneousGrants{KnownByLevel: make(map[int]int)}
+					def.Spontaneous = &ruleset.SpontaneousGrants{
+						KnownByLevel: make(map[int]int),
+						UsesByLevel:  make(map[int]int),
+					}
 				}
 				def.Spontaneous.KnownByLevel[lvl] = known
+				if grants.Spontaneous.UsesByLevel != nil {
+					def.Spontaneous.UsesByLevel[lvl] = grants.Spontaneous.UsesByLevel[lvl]
+				}
 				for _, e := range grants.Spontaneous.Fixed {
 					if e.Level == lvl {
 						def.Spontaneous.Fixed = append(def.Spontaneous.Fixed, e)
@@ -687,9 +693,15 @@ func PartitionTechGrants(grants *ruleset.TechnologyGrants) (immediate, deferred 
 			open := known - nFixed
 			if nPool <= open {
 				if imm.Spontaneous == nil {
-					imm.Spontaneous = &ruleset.SpontaneousGrants{KnownByLevel: make(map[int]int)}
+					imm.Spontaneous = &ruleset.SpontaneousGrants{
+						KnownByLevel: make(map[int]int),
+						UsesByLevel:  make(map[int]int),
+					}
 				}
 				imm.Spontaneous.KnownByLevel[lvl] = known
+				if grants.Spontaneous.UsesByLevel != nil {
+					imm.Spontaneous.UsesByLevel[lvl] = grants.Spontaneous.UsesByLevel[lvl]
+				}
 				for _, e := range grants.Spontaneous.Fixed {
 					if e.Level == lvl {
 						imm.Spontaneous.Fixed = append(imm.Spontaneous.Fixed, e)
@@ -702,9 +714,15 @@ func PartitionTechGrants(grants *ruleset.TechnologyGrants) (immediate, deferred 
 				}
 			} else {
 				if def.Spontaneous == nil {
-					def.Spontaneous = &ruleset.SpontaneousGrants{KnownByLevel: make(map[int]int)}
+					def.Spontaneous = &ruleset.SpontaneousGrants{
+						KnownByLevel: make(map[int]int),
+						UsesByLevel:  make(map[int]int),
+					}
 				}
 				def.Spontaneous.KnownByLevel[lvl] = known
+				if grants.Spontaneous.UsesByLevel != nil {
+					def.Spontaneous.UsesByLevel[lvl] = grants.Spontaneous.UsesByLevel[lvl]
+				}
 				for _, e := range grants.Spontaneous.Fixed {
 					if e.Level == lvl {
 						def.Spontaneous.Fixed = append(def.Spontaneous.Fixed, e)
