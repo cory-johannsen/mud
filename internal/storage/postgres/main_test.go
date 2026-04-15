@@ -400,6 +400,17 @@ func applyAllMigrations(pool *pgxpool.Pool) error {
 			PRIMARY KEY  (character_id, level)
 		);
 
+		-- Migration 061
+		CREATE TABLE IF NOT EXISTS character_pending_tech_slots (
+			character_id BIGINT  NOT NULL REFERENCES characters(id) ON DELETE CASCADE,
+			char_level   INT     NOT NULL,
+			tech_level   INT     NOT NULL,
+			tradition    TEXT    NOT NULL,
+			usage_type   TEXT    NOT NULL,
+			remaining    INT     NOT NULL DEFAULT 1 CHECK (remaining >= 0),
+			PRIMARY KEY (character_id, char_level, tech_level, tradition, usage_type)
+		);
+
 		-- Migration 002: zones and rooms schema (matches 002_zones_rooms.up.sql)
 		CREATE TABLE IF NOT EXISTS zones (
 			id          TEXT PRIMARY KEY,

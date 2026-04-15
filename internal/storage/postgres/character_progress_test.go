@@ -200,3 +200,96 @@ func TestProperty_SaveProgress_RoundTrip(t *testing.T) {
 		}
 	})
 }
+
+func TestPendingTechSlots_AddAndGet(t *testing.T) {
+	ctx := context.Background()
+	charRepo := pgstore.NewCharacterRepository(sharedPool)
+	repo := pgstore.NewCharacterProgressRepository(sharedPool)
+	ch := createTestCharacter(t, charRepo, ctx)
+
+	// Add a slot.
+	err := repo.AddPendingTechSlot(ctx, ch.ID, 3, 2, "neural", "prepared")
+	require.NoError(t, err)
+
+	// Get slots — should have exactly one.
+	slots, err := repo.GetPendingTechSlots(ctx, ch.ID)
+	require.NoError(t, err)
+	require.Len(t, slots, 1)
+	assert.Equal(t, 3, slots[0].CharLevel)
+	assert.Equal(t, 2, slots[0].TechLevel)
+	assert.Equal(t, "neural", slots[0].Tradition)
+	assert.Equal(t, "prepared", slots[0].UsageType)
+	assert.Equal(t, 1, slots[0].Remaining)
+
+	// Add the same slot again — remaining should become 2.
+	err = repo.AddPendingTechSlot(ctx, ch.ID, 3, 2, "neural", "prepared")
+	require.NoError(t, err)
+
+	slots, err = repo.GetPendingTechSlots(ctx, ch.ID)
+	require.NoError(t, err)
+	require.Len(t, slots, 1)
+	assert.Equal(t, 2, slots[0].Remaining)
+
+	// Decrement once — remaining should become 1.
+	err = repo.DecrementPendingTechSlot(ctx, ch.ID, 3, 2, "neural", "prepared")
+	require.NoError(t, err)
+
+	slots, err = repo.GetPendingTechSlots(ctx, ch.ID)
+	require.NoError(t, err)
+	require.Len(t, slots, 1)
+	assert.Equal(t, 1, slots[0].Remaining)
+
+	// Decrement again — remaining reaches 0 → row deleted.
+	err = repo.DecrementPendingTechSlot(ctx, ch.ID, 3, 2, "neural", "prepared")
+	require.NoError(t, err)
+
+	slots, err = repo.GetPendingTechSlots(ctx, ch.ID)
+	require.NoError(t, err)
+	assert.Empty(t, slots)
+}
+
+func TestPendingTechSlots_DeleteAll(t *testing.T) {
+	ctx := context.Background()
+	charRepo := pgstore.NewCharacterRepository(sharedPool)
+	repo := pgstore.NewCharacterProgressRepository(sharedPool)
+	ch := createTestCharacter(t, charRepo, ctx)
+
+	require.NoError(t, repo.AddPendingTechSlot(ctx, ch.ID, 2, 2, "cyber", "spontaneous"))
+	require.NoError(t, repo.AddPendingTechSlot(ctx, ch.ID, 4, 3, "bio", "prepared"))
+
+	slots, err := repo.GetPendingTechSlots(ctx, ch.ID)
+	require.NoError(t, err)
+	require.Len(t, slots, 2)
+
+	require.NoError(t, repo.DeleteAllPendingTechSlots(ctx, ch.ID))
+
+	slots, err = repo.GetPendingTechSlots(ctx, ch.ID)
+	require.NoError(t, err)
+	assert.Empty(t, slots)
+}
+
+func TestProperty_PendingTechSlots_AddIncrementsRemaining(t *testing.T) {
+	ctx := context.Background()
+	charRepo := pgstore.NewCharacterRepository(sharedPool)
+	repo := pgstore.NewCharacterProgressRepository(sharedPool)
+
+	rapid.Check(t, func(rt *rapid.T) {
+		ch := createTestCharacter(t, charRepo, ctx)
+		n := rapid.IntRange(1, 5).Draw(rt, "n")
+		for i := 0; i < n; i++ {
+			if err := repo.AddPendingTechSlot(ctx, ch.ID, 3, 2, "neural", "prepared"); err != nil {
+				rt.Fatalf("AddPendingTechSlot: %v", err)
+			}
+		}
+		slots, err := repo.GetPendingTechSlots(ctx, ch.ID)
+		if err != nil {
+			rt.Fatalf("GetPendingTechSlots: %v", err)
+		}
+		if len(slots) != 1 {
+			rt.Fatalf("expected 1 slot, got %d", len(slots))
+		}
+		if slots[0].Remaining != n {
+			rt.Fatalf("expected remaining=%d, got %d", n, slots[0].Remaining)
+		}
+	})
+}

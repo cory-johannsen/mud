@@ -100,6 +100,25 @@ type PendingTechLevelsRepo interface {
 	SetPendingTechLevels(ctx context.Context, characterID int64, levels []int) error
 }
 
+// PendingTechSlotsRepo persists L2+ technology slots awaiting trainer resolution.
+//
+// Precondition: characterID > 0; techLevel >= 2; tradition and usageType are non-empty.
+type PendingTechSlotsRepo interface {
+	// AddPendingTechSlot inserts a row with remaining=1, or increments remaining if row exists.
+	// Postcondition: (characterID, charLevel, techLevel, tradition, usageType) row exists with remaining >= 1.
+	AddPendingTechSlot(ctx context.Context, characterID int64, charLevel, techLevel int, tradition, usageType string) error
+
+	// GetPendingTechSlots returns all pending slots for the character with remaining > 0.
+	GetPendingTechSlots(ctx context.Context, characterID int64) ([]session.PendingTechSlot, error)
+
+	// DecrementPendingTechSlot decrements remaining by 1. If remaining reaches 0, deletes the row.
+	// Precondition: row exists and remaining > 0.
+	DecrementPendingTechSlot(ctx context.Context, characterID int64, charLevel, techLevel int, tradition, usageType string) error
+
+	// DeleteAllPendingTechSlots removes all rows for the character.
+	DeleteAllPendingTechSlots(ctx context.Context, characterID int64) error
+}
+
 // AssignTechnologies assigns technologies from job and archetype grants to the session
 // and persists them. Called during character creation.
 //

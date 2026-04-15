@@ -6,6 +6,8 @@ import (
 	"fmt"
 
 	"github.com/jackc/pgx/v5/pgxpool"
+
+	"github.com/cory-johannsen/mud/internal/game/session"
 )
 
 // CharacterProgressRepository persists and retrieves character level, XP, max HP,
@@ -254,6 +256,91 @@ func (r *CharacterProgressRepository) ConsumePendingBoost(ctx context.Context, i
 	}
 	if tag.RowsAffected() == 0 {
 		return errors.New("no pending boosts available for character")
+	}
+	return nil
+}
+
+// AddPendingTechSlot inserts or increments a pending tech slot row.
+//
+// Precondition: characterID > 0; techLevel >= 2.
+// Postcondition: Row exists with remaining incremented by 1.
+func (r *CharacterProgressRepository) AddPendingTechSlot(ctx context.Context, characterID int64, charLevel, techLevel int, tradition, usageType string) error {
+	_, err := r.pool.Exec(ctx,
+		`INSERT INTO character_pending_tech_slots
+			(character_id, char_level, tech_level, tradition, usage_type, remaining)
+		 VALUES ($1, $2, $3, $4, $5, 1)
+		 ON CONFLICT (character_id, char_level, tech_level, tradition, usage_type)
+		 DO UPDATE SET remaining = character_pending_tech_slots.remaining + 1`,
+		characterID, charLevel, techLevel, tradition, usageType,
+	)
+	if err != nil {
+		return fmt.Errorf("AddPendingTechSlot: %w", err)
+	}
+	return nil
+}
+
+// GetPendingTechSlots returns all pending tech slots for the character with remaining > 0.
+func (r *CharacterProgressRepository) GetPendingTechSlots(ctx context.Context, characterID int64) ([]session.PendingTechSlot, error) {
+	rows, err := r.pool.Query(ctx,
+		`SELECT char_level, tech_level, tradition, usage_type, remaining
+		 FROM character_pending_tech_slots
+		 WHERE character_id = $1 AND remaining > 0
+		 ORDER BY char_level, tech_level`,
+		characterID,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("GetPendingTechSlots: %w", err)
+	}
+	defer rows.Close()
+	var slots []session.PendingTechSlot
+	for rows.Next() {
+		var s session.PendingTechSlot
+		if err := rows.Scan(&s.CharLevel, &s.TechLevel, &s.Tradition, &s.UsageType, &s.Remaining); err != nil {
+			return nil, fmt.Errorf("GetPendingTechSlots scan: %w", err)
+		}
+		slots = append(slots, s)
+	}
+	return slots, rows.Err()
+}
+
+// DecrementPendingTechSlot decrements remaining by 1; deletes the row when remaining reaches 0.
+//
+// Precondition: row exists and remaining > 0.
+// Postcondition: remaining decremented by 1; row deleted if remaining reaches 0.
+func (r *CharacterProgressRepository) DecrementPendingTechSlot(ctx context.Context, characterID int64, charLevel, techLevel int, tradition, usageType string) error {
+	_, err := r.pool.Exec(ctx,
+		`UPDATE character_pending_tech_slots
+		 SET remaining = remaining - 1
+		 WHERE character_id = $1 AND char_level = $2 AND tech_level = $3
+		   AND tradition = $4 AND usage_type = $5`,
+		characterID, charLevel, techLevel, tradition, usageType,
+	)
+	if err != nil {
+		return fmt.Errorf("DecrementPendingTechSlot: %w", err)
+	}
+	// Clean up zero-remaining rows.
+	_, err = r.pool.Exec(ctx,
+		`DELETE FROM character_pending_tech_slots
+		 WHERE character_id = $1 AND remaining <= 0`,
+		characterID,
+	)
+	if err != nil {
+		return fmt.Errorf("DecrementPendingTechSlot cleanup: %w", err)
+	}
+	return nil
+}
+
+// DeleteAllPendingTechSlots removes all pending tech slot rows for the character.
+//
+// Precondition: characterID > 0.
+// Postcondition: No character_pending_tech_slots rows exist for characterID.
+func (r *CharacterProgressRepository) DeleteAllPendingTechSlots(ctx context.Context, characterID int64) error {
+	_, err := r.pool.Exec(ctx,
+		`DELETE FROM character_pending_tech_slots WHERE character_id = $1`,
+		characterID,
+	)
+	if err != nil {
+		return fmt.Errorf("DeleteAllPendingTechSlots: %w", err)
 	}
 	return nil
 }
