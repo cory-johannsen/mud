@@ -781,3 +781,126 @@ func TestHandleSession_ServerShutdown(t *testing.T) {
 	// Close the client connection to simulate disconnect
 	c.conn.Close()
 }
+
+// --- ensureClassFeatures whitebox tests ---
+
+// fakeClassFeaturesRepo implements CharacterClassFeaturesSetter for testing.
+type fakeClassFeaturesRepo struct {
+	stored   []string
+	setAllFn func(ids []string) // optional callback to inspect SetAll calls
+}
+
+func (r *fakeClassFeaturesRepo) HasClassFeatures(_ context.Context, _ int64) (bool, error) {
+	return len(r.stored) > 0, nil
+}
+
+func (r *fakeClassFeaturesRepo) GetAll(_ context.Context, _ int64) ([]string, error) {
+	out := make([]string, len(r.stored))
+	copy(out, r.stored)
+	return out, nil
+}
+
+func (r *fakeClassFeaturesRepo) SetAll(_ context.Context, _ int64, featureIDs []string) error {
+	if r.setAllFn != nil {
+		r.setAllFn(featureIDs)
+	}
+	r.stored = make([]string, len(featureIDs))
+	copy(r.stored, featureIDs)
+	return nil
+}
+
+// newEnsureClassFeaturesHandler builds a minimal AuthHandler for ensureClassFeatures tests.
+func newEnsureClassFeaturesHandler(t *testing.T, jobs []*ruleset.Job, features []*ruleset.ClassFeature, repo CharacterClassFeaturesSetter) *AuthHandler {
+	t.Helper()
+	logger := zaptest.NewLogger(t)
+	telnetCfg := config.TelnetConfig{IdleTimeout: 5 * time.Minute, IdleGracePeriod: time.Minute}
+	return NewAuthHandler(
+		newMockAccountStore(), newMockCharacterStore(),
+		nil, nil, jobs, nil,
+		logger, "", telnetCfg,
+		nil, nil, nil, nil, features, repo,
+	)
+}
+
+// newPipeConn returns a telnet.Conn backed by net.Pipe with a drain goroutine
+// so WriteLine never blocks.
+func newPipeConn(t *testing.T) *telnet.Conn {
+	t.Helper()
+	client, server := net.Pipe()
+	t.Cleanup(func() { client.Close(); server.Close() })
+	go func() {
+		buf := make([]byte, 4096)
+		for {
+			if _, err := client.Read(buf); err != nil {
+				return
+			}
+		}
+	}()
+	return telnet.NewConn(server, time.Second, time.Second)
+}
+
+// REQ-ECF-1: ensureClassFeatures assigns all job features when the character has none.
+func TestEnsureClassFeatures_NewCharacter_AssignsAll(t *testing.T) {
+	job := &ruleset.Job{
+		ID: "pirate",
+		ClassFeatureGrants: []string{"street_brawler", "brutal_surge", "boarding_action"},
+	}
+	features := []*ruleset.ClassFeature{
+		{ID: "street_brawler"}, {ID: "brutal_surge"}, {ID: "boarding_action"},
+	}
+	repo := &fakeClassFeaturesRepo{stored: nil}
+	h := newEnsureClassFeaturesHandler(t, []*ruleset.Job{job}, features, repo)
+	conn := newPipeConn(t)
+
+	char := &character.Character{ID: 1, Class: "pirate"}
+	require.NoError(t, h.ensureClassFeatures(context.Background(), conn, char))
+
+	assert.ElementsMatch(t, []string{"street_brawler", "brutal_surge", "boarding_action"}, repo.stored,
+		"all three features must be assigned to a new character")
+}
+
+// REQ-ECF-2: ensureClassFeatures backfills missing features when the character has some but not all.
+func TestEnsureClassFeatures_ExistingWithMissing_BackfillsMissing(t *testing.T) {
+	job := &ruleset.Job{
+		ID: "pirate",
+		ClassFeatureGrants: []string{"street_brawler", "brutal_surge", "boarding_action"},
+	}
+	features := []*ruleset.ClassFeature{
+		{ID: "street_brawler"}, {ID: "brutal_surge"}, {ID: "boarding_action"},
+	}
+	// Character was created before boarding_action was added to the job.
+	repo := &fakeClassFeaturesRepo{stored: []string{"street_brawler", "brutal_surge"}}
+	h := newEnsureClassFeaturesHandler(t, []*ruleset.Job{job}, features, repo)
+	conn := newPipeConn(t)
+
+	char := &character.Character{ID: 1, Class: "pirate"}
+	require.NoError(t, h.ensureClassFeatures(context.Background(), conn, char))
+
+	assert.Contains(t, repo.stored, "boarding_action", "missing feature must be backfilled")
+	assert.Contains(t, repo.stored, "street_brawler", "existing features must be preserved")
+	assert.Contains(t, repo.stored, "brutal_surge", "existing features must be preserved")
+}
+
+// REQ-ECF-3: ensureClassFeatures is a no-op when all expected features are already stored.
+func TestEnsureClassFeatures_AllPresent_NoOp(t *testing.T) {
+	job := &ruleset.Job{
+		ID: "pirate",
+		ClassFeatureGrants: []string{"street_brawler", "brutal_surge", "boarding_action"},
+	}
+	features := []*ruleset.ClassFeature{
+		{ID: "street_brawler"}, {ID: "brutal_surge"}, {ID: "boarding_action"},
+	}
+	initial := []string{"street_brawler", "brutal_surge", "boarding_action"}
+	setAllCalled := false
+	repo := &fakeClassFeaturesRepo{
+		stored:   initial,
+		setAllFn: func(_ []string) { setAllCalled = true },
+	}
+	h := newEnsureClassFeaturesHandler(t, []*ruleset.Job{job}, features, repo)
+	conn := newPipeConn(t)
+
+	char := &character.Character{ID: 1, Class: "pirate"}
+	require.NoError(t, h.ensureClassFeatures(context.Background(), conn, char))
+
+	assert.False(t, setAllCalled, "SetAll must not be called when all features are already present")
+}

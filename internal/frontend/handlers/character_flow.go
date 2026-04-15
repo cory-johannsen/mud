@@ -821,23 +821,18 @@ func (h *AuthHandler) ensureFeats(ctx context.Context, conn *telnet.Conn, char *
 	return nil
 }
 
-// ensureClassFeatures checks whether the character has class features recorded and, if not,
-// assigns all class features from the job (all fixed — no player selection) and persists.
-// Called before gameBridge for both new and existing characters so backfill always runs.
+// ensureClassFeatures compares the character's stored class features against the full
+// set granted by their job and adds any that are missing. This handles both first-time
+// assignment (empty DB) and backfill when new features are added to a job after character
+// creation. Existing features not present in the current job definition are preserved.
+// Called before gameBridge for both new and existing characters.
 // Safe to call in headless mode: no interactive prompts, purely automatic DB assignment.
 //
 // Precondition: char must have a valid ID and Class set.
-// Postcondition: character_class_features rows exist for char; returns non-nil error only on fatal failure.
+// Postcondition: character_class_features rows include all job-granted features; returns
+// non-nil error only on fatal failure.
 func (h *AuthHandler) ensureClassFeatures(ctx context.Context, conn *telnet.Conn, char *character.Character) error {
 	if h.characterClassFeatures == nil || h.classFeatureRegistry == nil {
-		return nil
-	}
-	has, err := h.characterClassFeatures.HasClassFeatures(ctx, char.ID)
-	if err != nil {
-		h.logger.Warn("checking class features for character", zap.Int64("id", char.ID), zap.Error(err))
-		return nil
-	}
-	if has {
 		return nil
 	}
 
@@ -847,18 +842,43 @@ func (h *AuthHandler) ensureClassFeatures(ctx context.Context, conn *telnet.Conn
 		return nil
 	}
 
-	featureIDs := character.BuildClassFeaturesFromJob(job)
-	if len(featureIDs) == 0 {
+	expected := character.BuildClassFeaturesFromJob(job)
+	if len(expected) == 0 {
 		return nil
 	}
 
-	if err := h.characterClassFeatures.SetAll(ctx, char.ID, featureIDs); err != nil {
+	current, err := h.characterClassFeatures.GetAll(ctx, char.ID)
+	if err != nil {
+		h.logger.Warn("fetching current class features for character", zap.Int64("id", char.ID), zap.Error(err))
+		return nil
+	}
+
+	// Build set of already-stored feature IDs.
+	stored := make(map[string]bool, len(current))
+	for _, id := range current {
+		stored[id] = true
+	}
+
+	// Find features granted by the job that are missing from the DB.
+	var missing []string
+	for _, id := range expected {
+		if !stored[id] {
+			missing = append(missing, id)
+		}
+	}
+	if len(missing) == 0 {
+		return nil
+	}
+
+	// Merge missing into current and persist.
+	merged := append(current, missing...)
+	if err := h.characterClassFeatures.SetAll(ctx, char.ID, merged); err != nil {
 		h.logger.Warn("persisting class features", zap.Int64("id", char.ID), zap.Error(err))
 		return nil
 	}
 
 	_ = conn.WriteLine(telnet.Colorf(telnet.BrightGreen,
-		"Class features assigned: %d features from %s.", len(featureIDs), job.Name))
+		"%d class feature(s) added: %s.", len(missing), strings.Join(missing, ", ")))
 	return nil
 }
 

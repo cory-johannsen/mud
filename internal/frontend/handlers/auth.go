@@ -133,6 +133,7 @@ type CharacterFeatsSetter interface {
 // CharacterClassFeaturesSetter defines class feature persistence operations required by AuthHandler.
 type CharacterClassFeaturesSetter interface {
 	HasClassFeatures(ctx context.Context, characterID int64) (bool, error)
+	GetAll(ctx context.Context, characterID int64) ([]string, error)
 	SetAll(ctx context.Context, characterID int64, featureIDs []string) error
 }
 
