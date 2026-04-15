@@ -665,6 +665,58 @@ func TestPartitionTechGrants_DeferredWhenPoolExceedsSlots(t *testing.T) {
 	assert.Equal(t, 1, deferred.Prepared.SlotsByLevel[1])
 }
 
+// TestPartitionTechGrants_L2PreparedAlwaysDeferred verifies that prepared grants at
+// tech level 2 are always placed in deferred, even when pool <= slots (REQ-TTA-2).
+//
+// Precondition: Grants with 1 L2 slot and 1 L2 pool entry (pool == slots, normally immediate).
+// Postcondition: immediate is nil; deferred contains the L2 prepared grants.
+func TestPartitionTechGrants_L2PreparedAlwaysDeferred(t *testing.T) {
+	grants := &ruleset.TechnologyGrants{
+		Prepared: &ruleset.PreparedGrants{
+			SlotsByLevel: map[int]int{2: 1},
+			Pool:         []ruleset.PreparedEntry{{ID: "acid_clamp", Level: 2}},
+		},
+	}
+	immediate, deferred := gameserver.PartitionTechGrants(grants)
+	assert.Nil(t, immediate, "L2 grant must NOT be immediate")
+	assert.NotNil(t, deferred, "L2 grant MUST be deferred")
+	assert.Equal(t, 1, deferred.Prepared.SlotsByLevel[2])
+}
+
+// TestPartitionTechGrants_L1PreparedImmediateWhenPoolFits verifies that prepared grants
+// at tech level 1 with pool <= slots remain immediate (existing behaviour unchanged).
+func TestPartitionTechGrants_L1PreparedImmediateWhenPoolFits(t *testing.T) {
+	grants := &ruleset.TechnologyGrants{
+		Prepared: &ruleset.PreparedGrants{
+			SlotsByLevel: map[int]int{1: 2},
+			Pool:         []ruleset.PreparedEntry{{ID: "tech_a", Level: 1}},
+		},
+	}
+	immediate, deferred := gameserver.PartitionTechGrants(grants)
+	assert.NotNil(t, immediate, "L1 grant with pool <= slots MUST be immediate")
+	_ = deferred
+}
+
+// TestFilterGrantsByMaxTechLevel_ReturnsOnlyL1 verifies that filtering a mixed L1/L2
+// grant returns only L1 entries.
+func TestFilterGrantsByMaxTechLevel_ReturnsOnlyL1(t *testing.T) {
+	grants := &ruleset.TechnologyGrants{
+		Prepared: &ruleset.PreparedGrants{
+			SlotsByLevel: map[int]int{1: 1, 2: 1},
+			Pool: []ruleset.PreparedEntry{
+				{ID: "tech_a", Level: 1},
+				{ID: "tech_b", Level: 2},
+			},
+		},
+	}
+	filtered := gameserver.FilterGrantsByMaxTechLevel(grants, 1)
+	require.NotNil(t, filtered)
+	require.NotNil(t, filtered.Prepared)
+	assert.Equal(t, map[int]int{1: 1}, filtered.Prepared.SlotsByLevel, "only L1 slots")
+	assert.Len(t, filtered.Prepared.Pool, 1, "only L1 pool entries")
+	assert.Equal(t, "tech_a", filtered.Prepared.Pool[0].ID)
+}
+
 // REQ-ILT1: Hardwired entries always go to immediate.
 func TestPartitionTechGrants_HardwiredAlwaysImmediate(t *testing.T) {
 	grants := &ruleset.TechnologyGrants{

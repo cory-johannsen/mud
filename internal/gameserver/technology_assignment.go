@@ -498,12 +498,83 @@ func RearrangePreparedTechs(
 	return nil
 }
 
+// FilterGrantsByMaxTechLevel returns a copy of grants containing only tech entries
+// at or below maxLevel. Hardwired entries are always included.
+// Returns nil if nothing remains after filtering.
+//
+// Precondition: maxLevel >= 1.
+// Postcondition: All returned slots and pool entries have Level <= maxLevel.
+func FilterGrantsByMaxTechLevel(grants *ruleset.TechnologyGrants, maxLevel int) *ruleset.TechnologyGrants {
+	if grants == nil {
+		return nil
+	}
+	var result ruleset.TechnologyGrants
+	result.Hardwired = append(result.Hardwired, grants.Hardwired...)
+
+	if grants.Prepared != nil {
+		for lvl, slots := range grants.Prepared.SlotsByLevel {
+			if lvl > maxLevel {
+				continue
+			}
+			if result.Prepared == nil {
+				result.Prepared = &ruleset.PreparedGrants{SlotsByLevel: make(map[int]int)}
+			}
+			result.Prepared.SlotsByLevel[lvl] = slots
+			for _, e := range grants.Prepared.Fixed {
+				if e.Level == lvl {
+					result.Prepared.Fixed = append(result.Prepared.Fixed, e)
+				}
+			}
+			for _, e := range grants.Prepared.Pool {
+				if e.Level == lvl {
+					result.Prepared.Pool = append(result.Prepared.Pool, e)
+				}
+			}
+		}
+	}
+
+	if grants.Spontaneous != nil {
+		for lvl, known := range grants.Spontaneous.KnownByLevel {
+			if lvl > maxLevel {
+				continue
+			}
+			if result.Spontaneous == nil {
+				result.Spontaneous = &ruleset.SpontaneousGrants{
+					KnownByLevel: make(map[int]int),
+					UsesByLevel:  make(map[int]int),
+				}
+			}
+			result.Spontaneous.KnownByLevel[lvl] = known
+			if grants.Spontaneous.UsesByLevel != nil {
+				result.Spontaneous.UsesByLevel[lvl] = grants.Spontaneous.UsesByLevel[lvl]
+			}
+			for _, e := range grants.Spontaneous.Fixed {
+				if e.Level == lvl {
+					result.Spontaneous.Fixed = append(result.Spontaneous.Fixed, e)
+				}
+			}
+			for _, e := range grants.Spontaneous.Pool {
+				if e.Level == lvl {
+					result.Spontaneous.Pool = append(result.Spontaneous.Pool, e)
+				}
+			}
+		}
+	}
+
+	if len(result.Hardwired) == 0 && result.Prepared == nil && result.Spontaneous == nil {
+		return nil
+	}
+	return &result
+}
+
 // PartitionTechGrants splits grants into immediate (no player choice needed) and
 // deferred (pool > open slots, player must choose) parts.
 //
 // Precondition: grants is non-nil and valid.
 // Postcondition: immediate + deferred together cover all grants in the input.
 // Either return value may be nil if its category is empty.
+// REQ-TTA-2: Prepared and spontaneous grants at tech level >= 2 are unconditionally deferred
+// (require a trainer); level 1 uses the existing pool-vs-slots partitioning logic.
 func PartitionTechGrants(grants *ruleset.TechnologyGrants) (immediate, deferred *ruleset.TechnologyGrants) {
 	var imm, def ruleset.TechnologyGrants
 
@@ -515,6 +586,24 @@ func PartitionTechGrants(grants *ruleset.TechnologyGrants) (immediate, deferred 
 	// Prepared: partition per tech level.
 	if grants.Prepared != nil {
 		for lvl, slots := range grants.Prepared.SlotsByLevel {
+			// REQ-TTA-2: L2+ always require a trainer — unconditionally deferred.
+			if lvl >= 2 {
+				if def.Prepared == nil {
+					def.Prepared = &ruleset.PreparedGrants{SlotsByLevel: make(map[int]int)}
+				}
+				def.Prepared.SlotsByLevel[lvl] = slots
+				for _, e := range grants.Prepared.Fixed {
+					if e.Level == lvl {
+						def.Prepared.Fixed = append(def.Prepared.Fixed, e)
+					}
+				}
+				for _, e := range grants.Prepared.Pool {
+					if e.Level == lvl {
+						def.Prepared.Pool = append(def.Prepared.Pool, e)
+					}
+				}
+				continue
+			}
 			nFixed := 0
 			for _, e := range grants.Prepared.Fixed {
 				if e.Level == lvl {
@@ -565,6 +654,24 @@ func PartitionTechGrants(grants *ruleset.TechnologyGrants) (immediate, deferred 
 	// Spontaneous: partition per tech level.
 	if grants.Spontaneous != nil {
 		for lvl, known := range grants.Spontaneous.KnownByLevel {
+			// REQ-TTA-2: L2+ always require a trainer — unconditionally deferred.
+			if lvl >= 2 {
+				if def.Spontaneous == nil {
+					def.Spontaneous = &ruleset.SpontaneousGrants{KnownByLevel: make(map[int]int)}
+				}
+				def.Spontaneous.KnownByLevel[lvl] = known
+				for _, e := range grants.Spontaneous.Fixed {
+					if e.Level == lvl {
+						def.Spontaneous.Fixed = append(def.Spontaneous.Fixed, e)
+					}
+				}
+				for _, e := range grants.Spontaneous.Pool {
+					if e.Level == lvl {
+						def.Spontaneous.Pool = append(def.Spontaneous.Pool, e)
+					}
+				}
+				continue
+			}
 			nFixed := 0
 			for _, e := range grants.Spontaneous.Fixed {
 				if e.Level == lvl {
