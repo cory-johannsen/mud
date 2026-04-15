@@ -348,6 +348,9 @@ type GameServiceServer struct {
 	// weatherMgr manages active weather events and provides per-tick effect application.
 	// May be nil when weather feature is not configured.
 	weatherMgr *WeatherManager
+	// pendingTechSlotsRepo persists L2+ pending tech slots awaiting trainer resolution (REQ-TTA-12).
+	// May be nil (pending slot persistence is skipped if not set).
+	pendingTechSlotsRepo PendingTechSlotsRepo
 }
 
 // applyArmorTrainingProficiency applies the armor_training feat choice as a real proficiency
@@ -660,6 +663,14 @@ func (s *GameServiceServer) SetNPCIdleTickInterval(interval time.Duration) {
 // Postcondition: PendingBoosts are loaded from the DB on each player login.
 func (s *GameServiceServer) SetProgressRepo(repo ProgressRepository) {
 	s.progressRepo = repo
+}
+
+// SetPendingTechSlotsRepo wires the pending tech slots repository for L2+ trainer slot persistence (REQ-TTA-12).
+//
+// Precondition: repo may be nil (persistence is skipped when nil).
+// Postcondition: s.pendingTechSlotsRepo is set.
+func (s *GameServiceServer) SetPendingTechSlotsRepo(repo PendingTechSlotsRepo) {
+	s.pendingTechSlotsRepo = repo
 }
 
 // World returns the world Manager. Used by startup initialization.
@@ -11249,6 +11260,96 @@ func (s *GameServiceServer) handleEscape(uid string) (*gamev1.ServerEvent, error
 	return messageEvent(detail + " — success! You break free."), nil
 }
 
+// issueTechTrainerQuests auto-grants find-trainer quests for any L2+ tech traditions
+// in the given deferred grants. Called after level-up creates pending trainer slots.
+//
+// Precondition: sess non-nil; charLevel > 0; deferredGrants non-nil.
+// Postcondition: For each tradition in deferredGrants at L2+, if a matching tech_trainer NPC
+// has a FindQuestID and the player does not already hold that quest, the quest is accepted.
+func (s *GameServiceServer) issueTechTrainerQuests(
+	ctx context.Context,
+	sess *session.PlayerSession,
+	charLevel int,
+	deferredGrants *ruleset.TechnologyGrants,
+) {
+	if deferredGrants == nil || s.questSvc == nil || s.npcMgr == nil {
+		return
+	}
+	// Collect all (tradition, techLevel) pairs in the deferred grants.
+	type tradPair struct {
+		tradition string
+		techLevel int
+	}
+	var pairs []tradPair
+	if deferredGrants.Prepared != nil {
+		for lvl := range deferredGrants.Prepared.SlotsByLevel {
+			if lvl >= 2 {
+				for _, e := range deferredGrants.Prepared.Pool {
+					if e.Level == lvl && s.techRegistry != nil {
+						def, ok := s.techRegistry.Get(e.ID)
+						if ok {
+							pairs = append(pairs, tradPair{string(def.Tradition), lvl})
+						}
+					}
+				}
+			}
+		}
+	}
+	if deferredGrants.Spontaneous != nil {
+		for lvl := range deferredGrants.Spontaneous.KnownByLevel {
+			if lvl >= 2 {
+				for _, e := range deferredGrants.Spontaneous.Pool {
+					if e.Level == lvl && s.techRegistry != nil {
+						def, ok := s.techRegistry.Get(e.ID)
+						if ok {
+							pairs = append(pairs, tradPair{string(def.Tradition), lvl})
+						}
+					}
+				}
+			}
+		}
+	}
+
+	// Deduplicate (tradition, techLevel) pairs and issue quests.
+	seen := make(map[string]bool)
+	for _, p := range pairs {
+		key := fmt.Sprintf("%s:%d", p.tradition, p.techLevel)
+		if seen[key] {
+			continue
+		}
+		seen[key] = true
+		for _, tmpl := range s.npcMgr.AllTemplates() {
+			if tmpl.NPCType != "tech_trainer" || tmpl.TechTrainer == nil {
+				continue
+			}
+			if tmpl.TechTrainer.Tradition != p.tradition {
+				continue
+			}
+			if !tmpl.TechTrainer.OffersLevel(p.techLevel) {
+				continue
+			}
+			questID := tmpl.TechTrainer.FindQuestID
+			if questID == "" {
+				continue
+			}
+			// Skip if already active or completed.
+			if _, active := sess.GetActiveQuests()[questID]; active {
+				continue
+			}
+			if _, done := sess.GetCompletedQuests()[questID]; done {
+				continue
+			}
+			// Accept the quest (auto-grant, no NPC giver required).
+			if _, _, err := s.questSvc.Accept(ctx, sess, sess.CharacterID, questID); err != nil {
+				s.logger.Warn("issueTechTrainerQuests: Accept failed",
+					zap.String("quest_id", questID),
+					zap.Error(err),
+				)
+			}
+		}
+	}
+}
+
 // handleGrant awards XP, money, or an item to a named or room-scoped player (editor/admin command).
 //
 // Precondition: uid identifies an active session with role "editor" or "admin"; req is non-nil.
@@ -11421,6 +11522,57 @@ func (s *GameServiceServer) handleGrant(uid string, req *gamev1.GrantRequest) (*
 							}
 							if deferred != nil {
 								target.PendingTechGrants[lvl] = deferred
+								// REQ-TTA-12: persist L2+ pending slots so trainer can resolve on login.
+								if s.pendingTechSlotsRepo != nil && target.CharacterID > 0 {
+									if deferred.Prepared != nil {
+										for techLvl, slots := range deferred.Prepared.SlotsByLevel {
+											if techLvl < 2 {
+												continue
+											}
+											tradition := ""
+											for _, e := range deferred.Prepared.Pool {
+												if e.Level == techLvl && s.techRegistry != nil {
+													if def, ok := s.techRegistry.Get(e.ID); ok {
+														tradition = string(def.Tradition)
+														break
+													}
+												}
+											}
+											for i := 0; i < slots; i++ {
+												if err := s.pendingTechSlotsRepo.AddPendingTechSlot(
+													ctx, target.CharacterID, lvl, techLvl, tradition, "prepared",
+												); err != nil {
+													s.logger.Warn("handleGrant: AddPendingTechSlot failed", zap.Error(err))
+												}
+											}
+										}
+									}
+									if deferred.Spontaneous != nil {
+										for techLvl, slots := range deferred.Spontaneous.KnownByLevel {
+											if techLvl < 2 {
+												continue
+											}
+											tradition := ""
+											for _, e := range deferred.Spontaneous.Pool {
+												if e.Level == techLvl && s.techRegistry != nil {
+													if def, ok := s.techRegistry.Get(e.ID); ok {
+														tradition = string(def.Tradition)
+														break
+													}
+												}
+											}
+											for i := 0; i < slots; i++ {
+												if err := s.pendingTechSlotsRepo.AddPendingTechSlot(
+													ctx, target.CharacterID, lvl, techLvl, tradition, "spontaneous",
+												); err != nil {
+													s.logger.Warn("handleGrant: AddPendingTechSlot failed", zap.Error(err))
+												}
+											}
+										}
+									}
+								}
+								// REQ-TTA-7: auto-issue find-trainer quests for L2+ pending traditions.
+								s.issueTechTrainerQuests(ctx, target, lvl, deferred)
 							}
 						}
 						if len(target.PendingTechGrants) > 0 && s.progressRepo != nil {

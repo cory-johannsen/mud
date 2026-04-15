@@ -346,6 +346,7 @@ func main() {
 		xpSvc := xp.NewService(xpCfg, app.ProgressRepo)
 		xpSvc.SetSkillIncreaseSaver(app.ProgressRepo)
 		app.GRPCService.SetProgressRepo(app.ProgressRepo)
+		app.GRPCService.SetPendingTechSlotsRepo(app.ProgressRepo)
 		app.GRPCService.SetXPService(xpSvc)
 		app.CombatHandler.SetXPService(xpSvc)
 		app.CombatHandler.SetCurrencySaver(app.CharRepo)
