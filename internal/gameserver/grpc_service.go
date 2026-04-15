@@ -7186,6 +7186,7 @@ func (s *GameServiceServer) handleJobGrants(uid string) (*gamev1.ServerEvent, er
 
 	var featGrants []*gamev1.JobFeatGrant
 	var techGrants []*gamev1.JobTechGrant
+	var pendingFeatChoices []*gamev1.PendingFeatChoice
 
 	// Helper to resolve feat name from registry.
 	// For armor_training, appends the chosen armor category so the player can see their selection.
@@ -7268,16 +7269,27 @@ func (s *GameServiceServer) handleJobGrants(uid string) (*gamev1.ServerEvent, er
 					})
 				}
 			} else {
-				// Player has not yet chosen — show the pool label.
-				poolNames := make([]string, 0, len(fg.Choices.Pool))
-				for _, id := range fg.Choices.Pool {
-					poolNames = append(poolNames, featName(id))
-				}
-				label := fmt.Sprintf("Choose %d: %s", fg.Choices.Count, strings.Join(poolNames, ", "))
+				// Player has not yet chosen — emit an empty grant row and a structured PendingFeatChoice.
 				featGrants = append(featGrants, &gamev1.JobFeatGrant{
 					GrantLevel: int32(level),
 					FeatId:     "",
-					FeatName:   label,
+					FeatName:   "",
+				})
+				opts := make([]*gamev1.FeatOption, 0, len(fg.Choices.Pool))
+				for _, id := range fg.Choices.Pool {
+					opt := &gamev1.FeatOption{FeatId: id, Name: featName(id)}
+					if s.featRegistry != nil {
+						if f, ok := s.featRegistry.Feat(id); ok {
+							opt.Description = f.Description
+							opt.Category = f.Category
+						}
+					}
+					opts = append(opts, opt)
+				}
+				pendingFeatChoices = append(pendingFeatChoices, &gamev1.PendingFeatChoice{
+					GrantLevel: int32(level),
+					Count:      int32(fg.Choices.Count),
+					Options:    opts,
 				})
 			}
 		}
@@ -7443,8 +7455,9 @@ func (s *GameServiceServer) handleJobGrants(uid string) (*gamev1.ServerEvent, er
 	return &gamev1.ServerEvent{
 		Payload: &gamev1.ServerEvent_JobGrantsResponse{
 			JobGrantsResponse: &gamev1.JobGrantsResponse{
-				FeatGrants: featGrants,
-				TechGrants: techGrants,
+				FeatGrants:         featGrants,
+				TechGrants:         techGrants,
+				PendingFeatChoices: pendingFeatChoices,
 			},
 		},
 	}, nil

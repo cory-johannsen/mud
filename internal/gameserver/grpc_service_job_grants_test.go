@@ -230,16 +230,31 @@ func TestHandleJobGrants_ArchetypeLevelUpFeatGrants_IncludedInResponse_REQ_BUG30
 	assert.Equal(t, int32(1), gr.FeatGrants[0].GrantLevel)
 	assert.Equal(t, "sucker_punch", gr.FeatGrants[0].FeatId)
 
-	// Level 2 choice.
+	// Level 2 choice — grant row is now a structural placeholder; details live in PendingFeatChoices.
 	assert.Equal(t, int32(2), gr.FeatGrants[1].GrantLevel)
-	assert.Empty(t, gr.FeatGrants[1].FeatId, "choice grant has no fixed feat_id")
-	assert.Contains(t, gr.FeatGrants[1].FeatName, "Choose 1", "level-2 grant should be a choice (REQ-BUG30)")
-	assert.Contains(t, gr.FeatGrants[1].FeatName, "Rage", "level-2 choice should include pool members")
-	assert.Contains(t, gr.FeatGrants[1].FeatName, "Overpower")
+	assert.Empty(t, gr.FeatGrants[1].FeatId, "choice grant has no fixed feat_id (REQ-BUG30)")
+	assert.Empty(t, gr.FeatGrants[1].FeatName, "choice grant row must have empty feat_name (REQ-FCM-2)")
 
-	// Level 4 choice.
+	// Level 4 choice — same structural placeholder.
 	assert.Equal(t, int32(4), gr.FeatGrants[2].GrantLevel)
-	assert.Contains(t, gr.FeatGrants[2].FeatName, "Choose 1", "level-4 grant should be a choice (REQ-BUG30)")
+	assert.Empty(t, gr.FeatGrants[2].FeatId, "choice grant has no fixed feat_id (REQ-BUG30)")
+	assert.Empty(t, gr.FeatGrants[2].FeatName, "choice grant row must have empty feat_name (REQ-FCM-2)")
+
+	// PendingFeatChoices must have entries for levels 2 and 4.
+	require.Len(t, gr.PendingFeatChoices, 2, "REQ-FCM-1: must have 2 PendingFeatChoices for 2 unresolved pools")
+	pfcByLevel := map[int32]struct{ Count int32; OptionIDs []string }{}
+	for _, pfc := range gr.PendingFeatChoices {
+		ids := make([]string, len(pfc.Options))
+		for i, opt := range pfc.Options {
+			ids[i] = opt.FeatId
+		}
+		pfcByLevel[pfc.GrantLevel] = struct{ Count int32; OptionIDs []string }{Count: pfc.Count, OptionIDs: ids}
+	}
+	assert.Contains(t, pfcByLevel, int32(2), "REQ-FCM-1: PendingFeatChoices must include level 2")
+	assert.Equal(t, int32(1), pfcByLevel[int32(2)].Count, "REQ-FCM-1: count must be 1 at level 2")
+	assert.ElementsMatch(t, []string{"rage", "overpower"}, pfcByLevel[int32(2)].OptionIDs, "REQ-FCM-1: level-2 options must be rage and overpower")
+	assert.Contains(t, pfcByLevel, int32(4), "REQ-FCM-1: PendingFeatChoices must include level 4")
+	assert.ElementsMatch(t, []string{"rage", "overpower"}, pfcByLevel[int32(4)].OptionIDs, "REQ-FCM-1: level-4 options must be rage and overpower")
 }
 
 // TestHandleJobGrants_GeneralCount_IncludedAsGrant verifies that a feat grant with
