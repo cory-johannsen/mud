@@ -1613,3 +1613,17 @@ func TestRenderNPCs_CrafterShowsRoleTag(t *testing.T) {
 	assert.Contains(t, stripped, "[crafter]", "crafter NPC must show [crafter] role tag")
 	assert.NotContains(t, stripped, "(unharmed)", "crafter NPC must not show health status")
 }
+
+// TestRenderNPCs_TechTrainerShowsRoleTag verifies that tech_trainer NPCs display
+// the [tech trainer] role tag instead of a health status in parentheses.
+func TestRenderNPCs_TechTrainerShowsRoleTag(t *testing.T) {
+	npcs := []*gamev1.NpcInfo{
+		{Name: "Grinder", HealthDescription: "unharmed", NpcType: "tech_trainer"},
+	}
+	rows := renderNPCs(npcs, 80)
+	combined := strings.Join(rows, "\n")
+	stripped := telnet.StripANSI(combined)
+	assert.Contains(t, stripped, "Grinder", "tech_trainer NPC name must appear in output")
+	assert.Contains(t, stripped, "[tech trainer]", "tech_trainer NPC must show [tech trainer] role tag")
+	assert.NotContains(t, stripped, "(unharmed)", "tech_trainer NPC must not show health status")
+}

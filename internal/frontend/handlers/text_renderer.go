@@ -202,6 +202,8 @@ func npcTypeTag(npcType string) string {
 		return "[brothel]"
 	case "black_market_merchant":
 		return "[black market]"
+	case "tech_trainer":
+		return "[tech trainer]"
 	default:
 		return ""
 	}
