@@ -7340,12 +7340,21 @@ func (s *GameServiceServer) handleJobGrants(uid string) (*gamev1.ServerEvent, er
 				})
 				opts := make([]*gamev1.FeatOption, 0, len(fg.Choices.Pool))
 				for _, id := range fg.Choices.Pool {
-					if playerFeatIDs[id] {
-						continue // player already owns this feat; exclude from choices
-					}
-					opt := &gamev1.FeatOption{FeatId: id, Name: featName(id)}
+					// Resolve legacy PF2E pool IDs to canonical feat IDs before checking
+					// ownership. Pool entries may use legacy PF2E names (e.g. "rage") while
+					// feats are stored under canonical IDs (e.g. "wrath").
+					canonicalID := id
 					if s.featRegistry != nil {
 						if f, ok := s.featRegistry.Feat(id); ok {
+							canonicalID = f.ID
+						}
+					}
+					if playerFeatIDs[canonicalID] {
+						continue // player already owns this feat; exclude from choices
+					}
+					opt := &gamev1.FeatOption{FeatId: canonicalID, Name: featName(canonicalID)}
+					if s.featRegistry != nil {
+						if f, ok := s.featRegistry.Feat(canonicalID); ok {
 							opt.Description = f.Description
 							opt.Category = f.Category
 						}
@@ -8097,6 +8106,16 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string, targetX, 
 				continue
 			}
 			if strings.EqualFold(f.ID, abilityID) || strings.EqualFold(f.Name, abilityID) {
+				// Enforce action point cost when the player is in combat.
+				if f.ActionCost > 0 && s.combatH != nil {
+					if cbt := s.combatH.ActiveCombatForPlayer(uid); cbt != nil {
+						ap := s.combatH.RemainingAP(uid)
+						cost := f.ActionCost
+						if ap < cost {
+							return messageEvent(fmt.Sprintf("Not enough action points to use %s: need %d, have %d.", f.Name, cost, ap)), nil
+						}
+					}
+				}
 				// Enforce prepared-use limit when feat has PreparedUses > 0.
 				if f.PreparedUses > 0 {
 					remaining := sess.ActiveFeatUses[f.ID]

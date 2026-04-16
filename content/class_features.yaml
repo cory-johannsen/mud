@@ -73,6 +73,8 @@ class_features:
     job: ""
     pf2e: inspire_courage
     active: true
+    action_cost: 1
+    aoe_radius: 30
     activate_text: "You raise your voice and all eyes snap to you."
     condition_id: command_attention_active
     description: "Grant allies within earshot +1 attack and damage rolls for the current encounter."
@@ -83,8 +85,14 @@ class_features:
     job: ""
     pf2e: inspire_defense
     active: true
+    action_cost: 1
+    aoe_radius: 30
     activate_text: "You spin a rapid web of distracting chatter."
     description: "Grant allies within earshot +1 AC and saving throws for the current encounter."
+    effect:
+      type: condition
+      target: target
+      condition_id: flat_footed
 
   - id: daily_prep
     name: Daily Prep
@@ -251,6 +259,7 @@ class_features:
     job: ""
     pf2e: flurry_of_blows
     active: true
+    action_cost: 1
     activate_text: "You throw a rapid flurry of blows."
     description: "Make two unarmed strikes as a single action with only a -1 penalty to each."
 
@@ -289,8 +298,14 @@ class_features:
     job: boot_machete
     pf2e: raging_strikes
     active: true
+    action_cost: 1
     activate_text: "You swing with everything you have."
     description: "Once per encounter, deal +1d6 bleed damage on a melee hit."
+    effect:
+      type: damage
+      target: target
+      amount: "1d6"
+      damage_type: bleed
 
   - id: clean_shot
     name: Clean Shot
@@ -352,6 +367,8 @@ class_features:
     job: mercenary
     pf2e: sudden_charge
     active: true
+    action_cost: 1
+    aoe_radius: 30
     activate_text: "You break into a full sprint before anyone can react."
     description: "Once per encounter, before your first turn begins, move up to your speed and make one melee or ranged attack."
 
@@ -397,8 +414,14 @@ class_features:
     job: street_fighter
     pf2e: power_attack
     active: true
+    action_cost: 2
     activate_text: "You wind up for a devastating overhand strike."
     description: "Make one melee strike at -1 to deal double damage dice."
+    effect:
+      type: damage
+      target: target
+      amount: "1d8"
+      damage_type: bludgeoning
 
   - id: pack_mentality
     name: Pack Mentality
@@ -452,6 +475,7 @@ class_features:
     job: gambler
     pf2e: assurance
     active: true
+    action_cost: 1
     activate_text: "You size up the odds and make your move."
     description: "Once per encounter, reroll any d20 roll you make and take the higher result."
 
@@ -552,6 +576,7 @@ class_features:
     job: dealer
     pf2e: connections
     active: true
+    action_cost: 1
     activate_text: "You make a few calls."
     description: "Once per day, locate any common item within your current zone within 1 hour."
 
@@ -570,6 +595,7 @@ class_features:
     job: illusionist
     pf2e: distracting_performance
     active: true
+    action_cost: 1
     activate_text: "You create a perfect distraction at exactly the right moment."
     description: "Once per encounter, force one enemy to waste their next action pursuing a false lead."
 
@@ -615,6 +641,8 @@ class_features:
     job: street_preacher
     pf2e: demoralize
     active: true
+    action_cost: 2
+    aoe_radius: 15
     activate_text: "You invoke fire and damnation against your enemies."
     description: "Once per encounter, make a single Intimidate check against all enemies within 20 ft simultaneously."
 
@@ -661,6 +689,7 @@ class_features:
     job: bureaucrat
     pf2e: connections
     active: true
+    action_cost: 2
     activate_text: "You bury the request in paperwork."
     description: "Once per scene, delay any official or legal action by 24 hours without raising suspicion."
 
@@ -670,6 +699,8 @@ class_features:
     job: entertainer
     pf2e: captivating_performance
     active: true
+    action_cost: 1
+    aoe_radius: 30
     activate_text: "You turn on the charm and command the room."
     description: "Once per encounter, make an opposed Perform check to distract all enemies within 30 ft for 1 round."
 
@@ -679,6 +710,7 @@ class_features:
     job: exotic_dancer
     pf2e: captivating_performance
     active: true
+    action_cost: 2
     activate_text: "You fix them with a look that stops them cold."
     description: "Once per encounter, one humanoid must succeed on a Will save or be fascinated for 1 round."
 
@@ -688,6 +720,8 @@ class_features:
     job: extortionist
     pf2e: coerce
     active: true
+    action_cost: 1
+    aoe_radius: 15
     activate_text: "You make absolutely clear what happens to people who don't comply."
     description: "Intimidate a target; on success they take no hostile action against you for 24 hours."
 
@@ -697,6 +731,7 @@ class_features:
     job: fallen_trustafarian
     pf2e: connections
     active: true
+    action_cost: 1
     activate_text: "You make a single phone call to a family contact."
     description: "Once per session, call in a favor worth up to 500 credits with no questions asked."
 
@@ -724,6 +759,7 @@ class_features:
     job: karen
     pf2e: coerce
     active: true
+    action_cost: 1
     activate_text: "You demand to speak to whoever is in charge."
     description: "Once per scene, force an NPC in a service or official role to comply with a reasonable demand or escalate."
 
@@ -742,6 +778,7 @@ class_features:
     job: politician
     pf2e: deception
     active: true
+    action_cost: 1
     activate_text: "You spin the narrative before it spins you."
     description: "Once per session, negate the social consequences of one failed Deception check made earlier in the same scene."
 
@@ -760,6 +797,7 @@ class_features:
     job: shit_stirrer
     pf2e: demoralize
     active: true
+    action_cost: 1
     activate_text: "You say exactly the wrong thing to exactly the right people."
     description: "Your provocations cause NPCs to redirect their hostility toward each other rather than you for 1 scene."
 
@@ -770,6 +808,8 @@ class_features:
     job: believer
     pf2e: recall_knowledge
     active: true
+    action_cost: 1
+    aoe_radius: 15
     activate_text: "You open yourself to the possibility of something beyond."
     description: "Once per day, ask one yes/no question about a topic and receive a truthful answer at the GM's discretion."
 
@@ -797,6 +837,7 @@ class_features:
     job: engineer
     pf2e: quick_repair
     active: true
+    action_cost: 2
     activate_text: "You improvise a rapid field fix."
     description: "Repair a broken item or restore one disabled function as a single action."
 
@@ -851,6 +892,7 @@ class_features:
     job: narc
     pf2e: connections
     active: true
+    action_cost: 1
     activate_text: "You check in with your handler."
     description: "Once per session, call in your handler for access to restricted information, equipment, or a safe location."
 
@@ -869,8 +911,14 @@ class_features:
     job: pastor
     pf2e: demoralize
     active: true
+    action_cost: 2
+    aoe_radius: 15
     activate_text: "You offer words of comfort and faith."
     description: "Once per day, remove the frightened condition from one demoralized ally as a single action."
+    effect:
+      type: heal
+      target: target
+      amount: "1d6"
 
   # normie jobs
   - id: indoctrinate
@@ -879,6 +927,8 @@ class_features:
     job: cult_leader
     pf2e: coerce
     active: true
+    action_cost: 2
+    aoe_radius: 15
     activate_text: "You speak with absolute conviction and leave no room for doubt."
     description: "Once per day, one NPC who fails a Will save becomes a devoted follower for 24 hours."
 
@@ -924,6 +974,7 @@ class_features:
     job: maker
     pf2e: crafting
     active: true
+    action_cost: 2
     activate_text: "You get to work."
     description: "Create any common item from raw materials in half the normal time with a successful Crafting check."
 
@@ -933,6 +984,7 @@ class_features:
     job: medic
     pf2e: battle_medicine
     active: true
+    action_cost: 2
     activate_text: "You administer emergency trauma care."
     description: "Restore 2d8 + your Medicine modifier HP to a creature as a single action; usable once per target per day."
 
@@ -942,6 +994,7 @@ class_features:
     job: pilot
     pf2e: piloting
     active: true
+    action_cost: 1
     activate_text: "You throw the controls into a hard bank."
     description: "Once per encounter, avoid one attack targeting your vehicle by succeeding on a Piloting check vs. the attack roll."
 

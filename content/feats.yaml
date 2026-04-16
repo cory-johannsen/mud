@@ -49,6 +49,7 @@ feats:
     category: general
     pf2e: shield_block
     active: true
+    action_cost: 1
     activate_text: "You raise your shield and absorb the blow."
     description: "When hit by a physical attack, use your reaction to reduce damage with a raised shield."
     reaction:
@@ -93,6 +94,7 @@ feats:
     category: general
     pf2e: feather_step
     active: true
+    action_cost: 1
     activate_text: "You pick your way through the debris with practiced ease."
     description: "Step into difficult terrain (rubble, debris) as normal movement."
 
@@ -374,6 +376,7 @@ feats:
     category: general
     pf2e: overclock_senses
     active: true
+    action_cost: 1
     activate_text: "You push the implant past its limits. Everything sharpens."
     description: "Temporarily boost Perception and awareness via neural implant overclocking; take 1d4 damage after use."
 
@@ -382,6 +385,7 @@ feats:
     category: general
     pf2e: unstable_gearshift
     active: true
+    action_cost: 1
     activate_text: "You push the modification past the safety threshold."
     description: "Risky but powerful gear modification; gain a significant bonus to one action but risk a critical failure cascade."
 
@@ -390,6 +394,8 @@ feats:
     category: general
     pf2e: irradiate
     active: true
+    action_cost: 2
+    aoe_radius: 10
     activate_text: "You vent the containment and everything nearby gets a dose."
     description: "Emit a burst of radiation affecting nearby targets; deals radiation damage in a small radius."
 
@@ -398,6 +404,8 @@ feats:
     category: general
     pf2e: sonic_dash
     active: true
+    action_cost: 2
+    aoe_radius: 15
     activate_text: "The tech fires and you're gone before they can track you."
     description: "Burst of sonic-tech assisted speed; move up to triple your speed in a straight line."
 
@@ -406,6 +414,7 @@ feats:
     category: general
     pf2e: titan_swing
     active: true
+    action_cost: 2
     activate_text: "You put everything into one massive powered strike."
     description: "Massive powered weapon swing with knockback; deal extra damage and push target back 10 feet."
 
@@ -422,6 +431,7 @@ feats:
     category: general
     pf2e: pain_is_temporary
     active: true
+    action_cost: 1
     activate_text: "You push through it. You've felt worse."
     description: "Ignore pain-based penalties for a brief window; remove one pain-related condition briefly."
 
@@ -462,6 +472,7 @@ feats:
     category: general
     pf2e: propulsive_leap
     active: true
+    action_cost: 2
     activate_text: "The thrusters fire and you clear the gap easily."
     description: "Use tech thrusters to leap much farther than normal; treat as if you rolled 10 higher on jump checks."
 
@@ -514,6 +525,7 @@ feats:
     skill: parkour
     pf2e: quick_squeeze
     active: true
+    action_cost: 1
     activate_text: "You contort and slip through at full speed."
     description: "Move through tight spaces at full speed without slowing."
 
@@ -559,6 +571,7 @@ feats:
     skill: parkour
     pf2e: rapid_mantel
     active: true
+    action_cost: 1
     activate_text: "You grab the ledge and haul yourself up in a single fluid motion."
     description: "Pull yourself up onto ledges and obstacles as a single action instead of two."
 
@@ -577,6 +590,7 @@ feats:
     skill: parkour
     pf2e: kip_up
     active: true
+    action_cost: 1
     activate_text: "You spring to your feet without breaking stride."
     description: "Stand up from prone as a free action once per round without triggering reactions."
 
@@ -595,6 +609,7 @@ feats:
     skill: parkour
     pf2e: wall_jump
     active: true
+    action_cost: 1
     activate_text: "You plant your foot on the wall and launch yourself upward."
     description: "Jump off walls to reach heights inaccessible by normal jumping."
 
@@ -604,6 +619,7 @@ feats:
     skill: parkour
     pf2e: water_sprint
     active: true
+    action_cost: 1
     activate_text: "You hit the surface at full sprint and keep moving."
     description: "Sprint across liquid surfaces for a limited number of squares before sinking."
 
@@ -613,6 +629,7 @@ feats:
     skill: parkour
     pf2e: cloud_jump
     active: true
+    action_cost: 1
     activate_text: "You launch off nothing and somehow make it."
     description: "Jump impossible distances — up to 120 feet horizontally or 60 feet vertically."
 
@@ -686,6 +703,8 @@ feats:
     skill: ghosting
     pf2e: vanish_into_the_land
     active: true
+    action_cost: 1
+    aoe_radius: 15
     activate_text: "You blend into the environment and disappear."
     description: "Disappear into natural terrain — rubble, shadows, crowds — using Ghosting even without cover."
 
@@ -714,6 +733,7 @@ feats:
     skill: grift
     pf2e: pickpocket
     active: true
+    action_cost: 1
     activate_text: "Your hand moves before they even notice."
     description: "Lift items up to light bulk even from alert targets without penalty."
 
@@ -750,6 +770,7 @@ feats:
     skill: grift
     pf2e: shadow_mark
     active: true
+    action_cost: 1
     activate_text: "You tag them without them knowing."
     description: "Mark a target for tracking or later action; you always know their general location for 24 hours."
 
@@ -759,6 +780,7 @@ feats:
     skill: grift
     pf2e: tumbling_theft
     active: true
+    action_cost: 1
     activate_text: "You roll through their space and come up with something of theirs."
     description: "Pick a target's pocket while Tumbling Through their space as part of the same action."
 
@@ -768,6 +790,7 @@ feats:
     skill: grift
     pf2e: quick_unlock
     active: true
+    action_cost: 1
     activate_text: "One twist and it's open."
     description: "Pick a lock with a single action instead of the standard time."
 
@@ -814,6 +837,7 @@ feats:
     skill: muscle
     pf2e: quick_jump
     active: true
+    action_cost: 1
     activate_text: "You launch yourself in one fluid motion."
     description: "High Jump or Long Jump as a single action instead of two."
 
@@ -878,6 +902,8 @@ feats:
     skill: tech_lore
     pf2e: arcane_sense
     active: true
+    action_cost: 1
+    aoe_radius: 30
     activate_text: "You close your eyes and let your training guide you. Nearby electronics flicker at the edge of your awareness."
     description: "Detect active electronics, transmitters, or powered devices nearby at will."
 
@@ -896,6 +922,7 @@ feats:
     skill: tech_lore
     pf2e: recognize_spell
     active: true
+    action_cost: 1
     activate_text: "You clock what they're using and what it's about to do."
     description: "Identify a Technology effect as a reaction the moment it is activated."
 
@@ -905,6 +932,7 @@ feats:
     skill: tech_lore
     pf2e: trick_magic_item
     active: true
+    action_cost: 1
     activate_text: "You hack the interface and force it to respond."
     description: "Activate Technology items you are not normally qualified to use."
 
@@ -987,6 +1015,7 @@ feats:
     skill: rigging
     pf2e: alchemical_crafting
     active: true
+    action_cost: 1
     activate_text: "You mix the compounds from memory, hands moving with practiced efficiency."
     description: "Craft drugs, poisons, and chemical items; start with four common formulas."
 
@@ -996,6 +1025,7 @@ feats:
     skill: rigging
     pf2e: quick_repair
     active: true
+    action_cost: 1
     activate_text: "You jam the components together and hope for the best."
     description: "Repair gear in 1 minute instead of 10; at higher skill in a single action."
 
@@ -1005,6 +1035,7 @@ feats:
     skill: rigging
     pf2e: snare_crafting
     active: true
+    action_cost: 2
     activate_text: "You set the mechanism with careful hands."
     description: "Craft mechanical traps; start with four common trap formulas."
 
@@ -1159,6 +1190,7 @@ feats:
     skill: conspiracy
     pf2e: spirit_speaker
     active: true
+    action_cost: 1
     activate_text: "You slip into the altered state and let the compound guide your thoughts."
     description: "Commune with drug-altered states of consciousness to gain insight and information."
 
@@ -1186,6 +1218,7 @@ feats:
     skill: conspiracy
     pf2e: disturbing_knowledge
     active: true
+    action_cost: 1
     activate_text: "You tell them what you know. Watch their face change."
     description: "Reveal knowledge so disturbing and specific that it frightens the target."
 
@@ -1232,6 +1265,7 @@ feats:
     skill: factions
     pf2e: courtly_graces
     active: true
+    action_cost: 1
     activate_text: "You switch into the correct register for this crowd."
     description: "Use Factions instead of Smooth Talk to make an impression on faction leaders."
 
@@ -1268,6 +1302,7 @@ feats:
     skill: factions
     pf2e: streetwise
     active: true
+    action_cost: 1
     activate_text: "You tap your network and start asking the right questions."
     description: "Use Factions instead of Smooth Talk to gather information in urban areas."
 
@@ -1414,6 +1449,7 @@ feats:
     skill: patch_job
     pf2e: battle_medicine
     active: true
+    action_cost: 1
     activate_text: "You slap a patch on the wound and keep moving."
     description: "Apply first aid as a single action without a kit; target immune for 1 day."
 
@@ -1423,6 +1459,7 @@ feats:
     skill: patch_job
     pf2e: acupuncturist
     active: true
+    action_cost: 1
     activate_text: "You hit the pressure points precisely and feel them respond."
     description: "Stimulation technique using precise pressure points to enhance the target's recovery rate."
 
@@ -1459,6 +1496,7 @@ feats:
     skill: patch_job
     pf2e: stitch_flesh
     active: true
+    action_cost: 1
     activate_text: "You close the wound with whatever you have on hand."
     description: "Basic wound closure without medical supplies; restore a small amount of HP without a kit."
 
@@ -1468,6 +1506,7 @@ feats:
     skill: patch_job
     pf2e: crystal_healing
     active: true
+    action_cost: 1
     activate_text: "You administer the compound and watch the color return to their face."
     description: "Use crystalline drug compounds to enhance healing beyond standard first aid limits."
 
@@ -1531,6 +1570,7 @@ feats:
     skill: patch_job
     pf2e: performer's_treatment
     active: true
+    action_cost: 1
     activate_text: "You talk them through it. Keep them calm. It makes a difference."
     description: "A calm, reassuring presence aids recovery; reduce the frightened condition on patients you treat."
 
@@ -1549,6 +1589,7 @@ feats:
     skill: patch_job
     pf2e: vasodilation
     active: true
+    action_cost: 1
     activate_text: "You administer the compound and feel the rush as blood flow improves."
     description: "Drug-assisted vasodilation rapidly distributes healing compounds for immediate HP recovery."
 
@@ -1558,6 +1599,7 @@ feats:
     skill: patch_job
     pf2e: paragon_battle_medicine
     active: true
+    action_cost: 1
     activate_text: "You work fast under fire and your hands don't shake."
     description: "Enhanced in-combat healing; Combat Patch restores additional HP and removes one additional condition."
 
@@ -1567,6 +1609,7 @@ feats:
     skill: patch_job
     pf2e: advanced_first_aid
     active: true
+    action_cost: 1
     activate_text: "You stabilize them and get them back in the fight."
     description: "Use advanced first aid to reduce the frightened and sickened conditions on a target."
 
@@ -1595,6 +1638,7 @@ feats:
     skill: wasteland
     pf2e: natural_medicine
     active: true
+    action_cost: 1
     activate_text: "You gather what you can from the ruins and get to work."
     description: "Use Wasteland instead of Patch Job to treat wounds with found materials."
 
@@ -1604,6 +1648,7 @@ feats:
     skill: wasteland
     pf2e: train_animal
     active: true
+    action_cost: 1
     activate_text: "You crouch down and make yourself small, earning trust the slow way."
     description: "Teach a non-magical animal up to 2 commands or tricks."
 
@@ -1686,6 +1731,8 @@ feats:
     skill: gang_codes
     pf2e: exhort_the_faithful
     active: true
+    action_cost: 1
+    aoe_radius: 30
     activate_text: "You invoke the code and watch the crew straighten up."
     description: "Motivate faction members by invoking shared codes; allies gain a bonus to their next action."
 
@@ -1704,6 +1751,7 @@ feats:
     skill: gang_codes
     pf2e: battle_prayer
     active: true
+    action_cost: 1
     activate_text: "You call out the battle code and feel the adrenaline hit."
     description: "Invoke faction battle codes for combat bonuses; +1 to attack rolls for 1 round."
 
@@ -1750,6 +1798,7 @@ feats:
     skill: scavenging
     pf2e: forager
     active: true
+    action_cost: 1
     activate_text: "You sweep the area with practiced eyes, pulling together what you need."
     description: "Subsist yourself and allies equal to your Scavenging modifier in the ruins."
 
@@ -1759,6 +1808,8 @@ feats:
     skill: scavenging
     pf2e: survey_wildlife
     active: true
+    action_cost: 1
+    aoe_radius: 30
     activate_text: "You spend ten minutes reading the zone — movement, smells, heat signatures."
     description: "10-minute survey of an area reveals threats, resources, and hazards."
 
@@ -1777,6 +1828,8 @@ feats:
     skill: scavenging
     pf2e: vanish_into_the_land
     active: true
+    action_cost: 1
+    aoe_radius: 15
     activate_text: "You melt into the wasteland and no one can find you."
     description: "Disappear into wasteland environments using Survival; no cover required."
 
@@ -1859,6 +1912,7 @@ feats:
     skill: hustle
     pf2e: lie_to_me
     active: true
+    action_cost: 1
     activate_text: "You watch their face carefully, looking for the tells."
     description: "When someone lies to you, use Hustle instead of Perception to detect it."
 
@@ -1868,6 +1922,7 @@ feats:
     skill: hustle
     pf2e: bon_mot
     active: true
+    action_cost: 1
     activate_text: "One sentence. Perfectly aimed. You watch them wobble."
     description: "A quick verbal jab that unsettles a target; on success, the target is distracted and takes -1 to Perception."
 
@@ -1886,6 +1941,7 @@ feats:
     skill: hustle
     pf2e: vicious_critique
     active: true
+    action_cost: 1
     activate_text: "You tear their performance apart, precisely and without mercy."
     description: "Demoralize a target with scathing criticism of their actions or abilities."
 
@@ -1940,6 +1996,7 @@ feats:
     skill: hustle
     pf2e: tweak_appearances
     active: true
+    action_cost: 1
     activate_text: "A few quick changes and they look completely different."
     description: "Quickly change someone's appearance — hair, clothing, posture — in under a minute."
 
@@ -1949,6 +2006,8 @@ feats:
     skill: hustle
     pf2e: distracting_performance
     active: true
+    action_cost: 1
+    aoe_radius: 15
     activate_text: "You give them something else to look at."
     description: "Use improvised performance to distract observers; affected targets take -2 to Perception briefly."
 
@@ -1995,6 +2054,7 @@ feats:
     skill: smooth_talk
     pf2e: group_impression
     active: true
+    action_cost: 1
     activate_text: "You play to the whole room at once."
     description: "Make an impression on up to 10 people at once with a single check."
 
@@ -2004,6 +2064,8 @@ feats:
     skill: smooth_talk
     pf2e: hobnobber
     active: true
+    action_cost: 1
+    aoe_radius: 30
     activate_text: "You work your contacts and get answers fast."
     description: "Gather information in half the normal time; critical failure still yields partial info."
 
@@ -2013,6 +2075,8 @@ feats:
     skill: smooth_talk
     pf2e: no_cause_for_alarm
     active: true
+    action_cost: 1
+    aoe_radius: 15
     activate_text: "Easy. Easy. Everyone just take a breath."
     description: "Reduce frightened condition values in nearby creatures through calm, authoritative speech."
 
@@ -2031,6 +2095,7 @@ feats:
     skill: smooth_talk
     pf2e: glad-hand
     active: true
+    action_cost: 1
     activate_text: "You extend a hand and they already like you."
     description: "Make a favorable impression on someone you just met in under a minute."
 
@@ -2040,6 +2105,7 @@ feats:
     skill: smooth_talk
     pf2e: encouraging_words
     active: true
+    action_cost: 1
     activate_text: "You tell them exactly what they need to hear right now."
     description: "Boost an ally's spirits with the right words at the right time; reduce their frightened condition."
 
@@ -2085,6 +2151,7 @@ feats:
     skill: smooth_talk
     pf2e: legendary_negotiation
     active: true
+    action_cost: 1
     activate_text: "You walk straight up to them and start talking."
     description: "Quickly enter parley with hostile or neutral parties; buy time with words when violence looms."
 
@@ -2104,6 +2171,10 @@ feats:
     skill: hard_look
     pf2e: group_coercion
     active: true
+    action_cost: 1
+    aoe_radius: 30
+    condition_id: frightened
+    condition_target: foe
     activate_text: "You sweep the room with a look that says you mean business."
     description: "Coerce up to 5 people at once with a single check."
 
@@ -2113,6 +2184,7 @@ feats:
     skill: hard_look
     pf2e: intimidating_glare
     active: true
+    action_cost: 1
     activate_text: "You fix them with a look that says exactly how this ends."
     description: "Demoralize a target with a look alone; no words required."
 
@@ -2122,6 +2194,7 @@ feats:
     skill: hard_look
     pf2e: quick_coercion
     active: true
+    action_cost: 1
     activate_text: "You get your point across in one sentence."
     description: "Coerce someone with only one exchange of words rather than a minute."
 
@@ -2158,6 +2231,7 @@ feats:
     skill: hard_look
     pf2e: "say_that_again!"
     active: true
+    action_cost: 1
     activate_text: "You heard what they said. You want them to hear it too."
     description: "React when a creature calls out or mocks your actions; immediately Demoralize them as a reaction."
     reaction:
@@ -2172,6 +2246,7 @@ feats:
     skill: hard_look
     pf2e: battle_cry
     active: true
+    action_cost: 1
     activate_text: "You open your mouth and let everything out at once."
     description: "Demoralize all visible foes when rolling for initiative; your battle shout precedes the first strike."
 
@@ -2199,6 +2274,10 @@ feats:
     skill: hard_look
     pf2e: scare_to_death
     active: true
+    action_cost: 1
+    aoe_radius: 15
+    condition_id: frightened
+    condition_target: foe
     activate_text: "You fix them with your full attention. Some people just can't take it."
     description: "Frighten a target so severely they may collapse; critically frightened targets can be incapacitated."
 
@@ -2218,6 +2297,8 @@ feats:
     skill: rep
     pf2e: fascinating_performance
     active: true
+    action_cost: 1
+    aoe_radius: 15
     activate_text: "You command the room. Everyone watches."
     description: "Perform to hold up to 4 people's attention; -2 Perception vs. others."
 
@@ -2227,6 +2308,7 @@ feats:
     skill: rep
     pf2e: impressive_performance
     active: true
+    action_cost: 1
     activate_text: "You turn on the presence and let your reputation do the work."
     description: "Use Rep instead of Smooth Talk to make an impression."
 
@@ -2245,6 +2327,7 @@ feats:
     skill: rep
     pf2e: acrobatic_performer
     active: true
+    action_cost: 1
     activate_text: "You flip off the wall and land it perfectly. The crowd loses their minds."
     description: "Use physical stunts and acrobatics to enhance stage performance; Rep check uses Parkour as a bonus."
 
@@ -2254,6 +2337,7 @@ feats:
     skill: rep
     pf2e: vicious_critique
     active: true
+    action_cost: 1
     activate_text: "You call out their performance with surgical precision. The crowd turns on them."
     description: "Demoralize a target through public critique of their performance or reputation via Rep skill."
 
@@ -2263,6 +2347,8 @@ feats:
     skill: rep
     pf2e: distracting_performance
     active: true
+    action_cost: 1
+    aoe_radius: 30
     activate_text: "You take center stage and everyone looks at you."
     description: "Use stage performance to distract observers; affected audience can't notice what your allies are doing."
 
@@ -2272,6 +2358,8 @@ feats:
     skill: rep
     pf2e: triumphant_boast
     active: true
+    action_cost: 1
+    aoe_radius: 30
     activate_text: "You raise your fist and let them hear it."
     description: "Inspire allies with a boast after a victory; allies gain a bonus to their next check."
 
@@ -2281,6 +2369,7 @@ feats:
     skill: rep
     pf2e: juggle
     active: true
+    action_cost: 1
     activate_text: "The objects become a blur between your hands."
     description: "Juggle multiple objects as performance or practical distraction."
 
@@ -2299,6 +2388,7 @@ feats:
     skill: rep
     pf2e: inflame_crowd
     active: true
+    action_cost: 1
     activate_text: "You work the room until they're exactly where you want them."
     description: "Turn audience emotion toward your desired reaction — fear, anger, admiration."
 
@@ -2336,6 +2426,7 @@ feats:
     archetype: aggressor
     pf2e: sudden_charge
     active: true
+    action_cost: 1
     activate_text: "You close the distance before they can react."
     description: "Advance twice and make a melee strike as a single sequence."
 
@@ -2345,6 +2436,7 @@ feats:
     archetype: aggressor
     pf2e: reactive_shield
     active: true
+    action_cost: 1
     activate_text: "You snap your shield up just in time."
     description: "When hit by a physical attack, raise your shield as a reaction to reduce damage."
     reaction:
@@ -2359,6 +2451,7 @@ feats:
     archetype: aggressor
     pf2e: vicious_swing
     active: true
+    action_cost: 1
     activate_text: "You put everything into it."
     condition_id: brutal_surge_active
     requires_combat: true
@@ -2379,6 +2472,7 @@ feats:
     archetype: aggressor
     pf2e: rage
     active: true
+    action_cost: 1
     activate_text: "Fury overtakes you. You stop holding back."
     description: "Channel your battle fury. Gain +2 damage on attacks. Cannot use concentrate actions while Wrath is active. Cannot reactivate for 1 minute after Wrath ends."
 
@@ -2388,6 +2482,7 @@ feats:
     archetype: aggressor
     pf2e: moment_of_clarity
     active: true
+    action_cost: 1
     activate_text: "The adrenaline cuts through the haze and you think clearly for a moment."
     description: "While in Wrath or Enraged, use a focus action that normally can't be used while raging. Requires Wrath or Enraged."
 
@@ -2406,6 +2501,8 @@ feats:
     archetype: aggressor
     pf2e: cover_fire
     active: true
+    action_cost: 1
+    aoe_radius: 15
     activate_text: "You lay down fire to keep their heads down."
     description: "Fire at a target to give an ally +2 AC against that target's next ranged attack."
 
@@ -2415,6 +2512,7 @@ feats:
     archetype: aggressor
     pf2e: dual_weapon_reload
     active: true
+    action_cost: 1
     activate_text: "You reload and draw in one smooth motion."
     description: "Reload a one-handed firearm and simultaneously draw a second weapon."
 
@@ -2424,6 +2522,7 @@ feats:
     archetype: aggressor
     pf2e: combat_assessment
     active: true
+    action_cost: 1
     activate_text: "You study their stance and attack at the same time."
     description: "Strike and simultaneously attempt to read the target's weaknesses on a hit."
 
@@ -2433,6 +2532,7 @@ feats:
     archetype: aggressor
     pf2e: hit_the_dirt
     active: true
+    action_cost: 1
     activate_text: "You drop flat the moment you hear the shot."
     description: "Drop prone as a reaction when targeted by ranged fire; gain +2 AC against that attack."
     reaction:
@@ -2447,6 +2547,7 @@ feats:
     archetype: criminal
     pf2e: nimble_dodge
     active: true
+    action_cost: 1
     activate_text: "You twist out of the way at the last moment."
     description: "When targeted by an attack, use your reaction to gain +2 AC."
     reaction:
@@ -2469,6 +2570,7 @@ feats:
     archetype: criminal
     pf2e: twin_feint
     active: true
+    action_cost: 1
     activate_text: "You feint high and follow through low."
     description: "Two quick strikes with different weapons; the second automatically catches them off-guard."
 
@@ -2478,6 +2580,7 @@ feats:
     archetype: criminal
     pf2e: youre_next
     active: true
+    action_cost: 1
     activate_text: "You look at the next one and let the moment speak for itself."
     description: "When you drop an enemy to 0 HP, immediately demoralize a nearby enemy as a reaction."
     reaction:
@@ -2510,6 +2613,7 @@ feats:
     archetype: criminal
     pf2e: plant_evidence
     active: true
+    action_cost: 1
     activate_text: "Smooth and clean. They'll never know."
     description: "Plant an item on a target without being detected."
 
@@ -2519,6 +2623,7 @@ feats:
     archetype: criminal
     pf2e: dueling_parry
     active: true
+    action_cost: 1
     activate_text: "You settle into your guard and dare them to come at you."
     description: "Use an action to gain +2 AC until next turn when fighting with one melee weapon."
 
@@ -2538,6 +2643,9 @@ feats:
     archetype: drifter
     pf2e: hunt_prey
     active: true
+    action_cost: 1
+    condition_id: mark_active
+    condition_target: foe
     activate_text: "You fix them in your mind and start tracking every detail."
     description: "Designate a target; gain +1 to all checks against that target for 1 day."
 
@@ -2547,6 +2655,7 @@ feats:
     archetype: drifter
     pf2e: hunted_shot
     active: true
+    action_cost: 1
     activate_text: "Two shots, one breath."
     description: "Fire two ranged attacks at your marked target as a single action."
 
@@ -2556,6 +2665,8 @@ feats:
     archetype: drifter
     pf2e: monster_hunter
     active: true
+    action_cost: 1
+    aoe_radius: 30
     activate_text: "You read them as you mark them."
     description: "As part of marking a target, attempt a Recall Knowledge check about them."
 
@@ -2574,6 +2685,9 @@ feats:
     archetype: drifter
     pf2e: clue_them_all_in
     active: true
+    action_cost: 1
+    condition_id: flat_footed
+    condition_target: foe
     activate_text: "You brief the team on what you know."
     description: "Share your Mark Target bonus with up to 5 allies."
 
@@ -2593,6 +2707,7 @@ feats:
     archetype: influencer
     pf2e: bardic_lore
     active: true
+    action_cost: 1
     activate_text: "You dig through memory for what you know about this."
     description: "Use your Rep modifier for any Recall Knowledge check regardless of the skill required."
 
@@ -2602,6 +2717,8 @@ feats:
     archetype: influencer
     pf2e: lingering_composition
     active: true
+    action_cost: 1
+    aoe_radius: 30
     activate_text: "You keep the energy up, feeding it deliberately."
     description: "Extend a performance or social effect by 1 round on a success, 3 on a critical success."
 
@@ -2611,6 +2728,7 @@ feats:
     archetype: influencer
     pf2e: versatile_performance
     active: true
+    action_cost: 1
     activate_text: "You read the crowd and switch registers."
     description: "Use Rep in place of Smooth Talk, Hard Look, or Hustle for certain social actions."
 
@@ -2629,6 +2747,8 @@ feats:
     archetype: influencer
     pf2e: reach_spell
     active: true
+    action_cost: 1
+    aoe_radius: 30
     activate_text: "You project further than they expect."
     description: "Spend 1 extra action to extend the reach or area of a social action."
 
@@ -2639,6 +2759,7 @@ feats:
     archetype: nerd
     pf2e: quick_bomber
     active: true
+    action_cost: 1
     activate_text: "You have it out and armed before the moment is gone."
     description: "Draw an explosive or chemical item and immediately use it as one combined action."
 
@@ -2648,6 +2769,7 @@ feats:
     archetype: nerd
     pf2e: alchemical_savant
     active: true
+    action_cost: 1
     activate_text: "You turn it over in your hands and know exactly what it is."
     description: "Identify a tech or chemical item you're holding in a single action."
 
@@ -2657,6 +2779,7 @@ feats:
     archetype: nerd
     pf2e: tamper
     active: true
+    action_cost: 1
     activate_text: "You make a small, invisible adjustment to their gear."
     condition_id: tamper_debuff
     condition_target: foe
@@ -2668,6 +2791,7 @@ feats:
     archetype: nerd
     pf2e: haphazard_repair
     active: true
+    action_cost: 2
     activate_text: "You slap it together and cross your fingers."
     description: "Attempt an emergency repair in combat with a DC 15 Rigging check."
 
@@ -2696,6 +2820,7 @@ feats:
     archetype: normie
     pf2e: crane_stance
     active: true
+    action_cost: 1
     activate_text: "You drop into a guard that makes you a smaller target."
     description: "Enter a stance granting +1 AC and access to precise, fast unarmed strikes."
 
@@ -2705,6 +2830,7 @@ feats:
     archetype: normie
     pf2e: dragon_stance
     active: true
+    action_cost: 1
     activate_text: "You square up and let your body become the weapon."
     description: "Enter a stance enabling powerful, forceful unarmed strikes (d10 base damage)."
 
@@ -2714,6 +2840,9 @@ feats:
     archetype: normie
     pf2e: stunning_fist
     active: true
+    action_cost: 1
+    condition_id: stunned
+    condition_target: foe
     activate_text: "You follow up with a strike aimed at the nerve cluster."
     description: "After a flurry of strikes, if one lands, force a Fortitude save or stun the target."
 
@@ -2723,6 +2852,7 @@ feats:
     archetype: normie
     pf2e: instructive_strike
     active: true
+    action_cost: 1
     activate_text: "You hit them and read their reaction at the same time."
     description: "Strike and simultaneously learn one weakness or vulnerability on a hit."
 
@@ -2741,6 +2871,7 @@ feats:
     archetype: normie
     pf2e: root_to_life
     active: true
+    action_cost: 1
     activate_text: "You get your hands on them and focus entirely on keeping them alive."
     description: "Stabilize a dying ally in 1 action; 2 actions also clears persistent damage effects."
 

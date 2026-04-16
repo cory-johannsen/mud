@@ -49,6 +49,8 @@ type ClassFeature struct {
 	Contexts     []string        `yaml:"contexts"`    // valid contexts: combat, exploration, downtime
 	Effect            *ActionEffect   `yaml:"effect"`                        // nil for passive features
 	GrantsFocusPoint  bool            `yaml:"grants_focus_point,omitempty"`  // true if this feature grants a Focus Point slot
+	// AoeRadius is the radius in feet for area-of-effect feats. 0 = single target.
+	AoeRadius int `yaml:"aoe_radius,omitempty"`
 }
 
 // classFeaturesFile is the top-level YAML structure for content/class_features.yaml.

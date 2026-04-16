@@ -51,6 +51,9 @@ type Feat struct {
 	// RechargeCondition is a human-readable string describing when limited uses restore.
 	// Empty for unlimited-use feats. Examples: "Recharges on rest", "1 per combat".
 	RechargeCondition string `yaml:"recharge_condition,omitempty"`
+	// ActionCost is the number of action points this active feat costs to use.
+	// 0 means the engine defaults to 1 AP. Only meaningful for Active == true feats.
+	ActionCost int `yaml:"action_cost,omitempty"`
 }
 
 // featsFile is the top-level YAML structure for content/feats.yaml.
