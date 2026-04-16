@@ -1,19 +1,15 @@
 id: system_corruption
 name: System Corruption
-description: 'You afflict the target with a debilitating system corruption that causes
-  increasing nausea and disorientation. The target must attempt a Willpower save.
+description: 'You afflict the target with a debilitating system corruption that causes increasing nausea and disorientation. The target must attempt a Willpower save.
 
 
   Critical Success The target is unaffected.
 
-  Success The target becomes Sickened 1. Reducing its sickened condition to 0 ends
-  the curse.
+  Success The target becomes Sickened 1. Reducing its sickened condition to 0 ends the curse.
 
-  Failure The target becomes sickened 1 and can''t reduce its sickened condition below
-  1 while the curse remains.
+  Failure The target becomes sickened 1 and can''t reduce its sickened condition below 1 while the curse remains.
 
-  Critical Failure The target becomes sickened 2 and can''t reduce its sickened condition
-  below 1 while the curse remains.'
+  Critical Failure The target becomes sickened 2 and can''t reduce its sickened condition below 1 while the curse remains.'
 tradition: neural
 level: 5
 usage_type: prepared
@@ -25,13 +21,10 @@ save_type: cool
 save_dc: 15
 resolution: save
 effects:
-  on_apply:
-  - type: utility
-    dc: 0
-    description: 'You afflict the target with the curse of the roiling, unforgiving
-      sea. The target must attempt a Willpower save.
-
-
-      Critical Success The target is unaffected.
-
-      Success The target becomes Sickened 1. Reducing'
+  on_failure:
+  - &id001
+    type: condition
+    condition_id: nausea
+    value: 1
+  on_crit_failure:
+  - *id001

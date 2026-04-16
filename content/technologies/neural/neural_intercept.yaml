@@ -1,11 +1,9 @@
 id: neural_intercept
 name: Neural Intercept
-description: 'Trigger A creature within range would take damage that reduces it to
-  0 Hit Points Requirements You don''t have the wounded condition.
+description: 'Trigger A creature within range would take damage that reduces it to 0 Hit Points Requirements You don''t have the wounded condition.
 
 
-  You intercept the damage through your neural link, taking all the damage yourself
-  instead. This damage can''t be reduced in any way.'
+  You intercept the damage through your neural link, taking all the damage yourself instead. This damage can''t be reduced in any way.'
 tradition: neural
 level: 3
 usage_type: prepared
@@ -16,12 +14,6 @@ duration: instant
 resolution: none
 effects:
   on_apply:
-  - type: utility
-    dc: 0
-    description: 'Trigger A creature within range would take damage that reduces it
-      to 0 Hit Points
-
-      Requirements You don''t have the wounded condition.
-
-
-      You shield a creature in dire need with your own life force, takin'
+  - type: condition
+    condition_id: wounded
+    value: 1

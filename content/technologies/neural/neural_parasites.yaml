@@ -1,18 +1,15 @@
 id: neural_parasites
 name: Neural Parasites
-description: 'You infest the target''s mind with psychic parasites that consume neural
-  tissue. The target takes 4d6 mental damage and must attempt a Toughness save.
+description: 'You infest the target''s mind with psychic parasites that consume neural tissue. The target takes 4d6 mental damage and must attempt a Toughness save.
 
 
   Critical Success The creature takes no damage.
 
   Success The creature takes half damage.
 
-  Failure The creature takes full damage and is @UUID[Compendium.pf2e.conditionitems.Item.Sickened]
-  1.
+  Failure The creature takes full damage and is Sickened 1.
 
-  Critical Failure The creature takes double damage and is @UUID[Compendium.pf2e.conditionitems.Item.Sickened]
-  2.'
+  Critical Failure The creature takes double damage and is Sickened 2.'
 tradition: neural
 level: 2
 usage_type: prepared

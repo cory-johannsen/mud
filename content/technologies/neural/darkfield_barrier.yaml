@@ -1,8 +1,6 @@
 id: darkfield_barrier
 name: Darkfield Barrier
-description: You project a wall of impenetrable psychic darkness in a straight line
-  up to 60 feet long and 10 feet high. You must create the wall in an unbroken open
-  space. Light cannot pass through, and creatures within the wall are Blinded.
+description: You project a wall of impenetrable psychic darkness in a straight line up to 60 feet long and 10 feet high. You must create the wall in an unbroken open space. Light cannot pass through, and creatures within the wall are Blinded.
 tradition: neural
 level: 3
 usage_type: prepared
@@ -13,8 +11,6 @@ duration: minutes:1
 resolution: none
 effects:
   on_apply:
-  - type: utility
-    dc: 0
-    description: You form a wall of pure darkness in a straight line up to 60 feet
-      long and 10 feet high. You must create the wall in an unbroken open space so
-      its edges don't pass through any creatures or objects, or
+  - type: condition
+    condition_id: blinded
+    value: 1

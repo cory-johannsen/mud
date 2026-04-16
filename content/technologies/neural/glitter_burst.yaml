@@ -1,19 +1,15 @@
 id: glitter_burst
 name: Glitter Burst
-description: 'You create a burst of shimmering psychic particles in the area. Each
-  creature in the area must attempt a Toughness save.
+description: 'You create a burst of shimmering psychic particles in the area. Each creature in the area must attempt a Toughness save.
 
 
   Critical Success The creature is unaffected.
 
-  Success The creature is @UUID[Compendium.pf2e.conditionitems.Item.Dazzled] for 1
-  round.
+  Success The creature is Dazzled for 1 round.
 
-  Failure The creature is @UUID[Compendium.pf2e.conditionitems.Item.Dazzled] for 1
-  minute.
+  Failure The creature is Dazzled for 1 minute.
 
-  Critical Failure The creature is @UUID[Compendium.pf2e.conditionitems.Item.Blinded]
-  for 1 round and @UUID[Compendium.pf2e.conditionitems.Item.Dazzled] for 10 minutes.'
+  Critical Failure The creature is Blinded for 1 round and Dazzled for 10 minutes.'
 tradition: neural
 level: 2
 usage_type: prepared
@@ -24,8 +20,9 @@ duration: minutes:1
 resolution: none
 effects:
   on_apply:
-  - type: utility
-    dc: 0
-    description: You conjure a dense storm of swirling confetti. All creatures within
-      the area of the confetti become @UUID[Compendium.pf2e.conditionitems.Item.Concealed],
-      and all creatures outside the storm become co
+  - type: condition
+    condition_id: dazzled
+    value: 1
+  - type: condition
+    condition_id: blinded
+    value: 1

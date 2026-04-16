@@ -1,9 +1,6 @@
 id: prismatic_shroud
 name: Prismatic Shroud
-description: 'A shroud of shifting holographic light envelops the target. Creatures
-  are Dazzled while adjacent to it, and attacking the target causes a brilliant flash.
-  A creature that hits the target with a melee attack must attempt a Willpower save. The
-  creature is then temporarily immune for 1 minute.
+description: 'A shroud of shifting holographic light envelops the target. Creatures are Dazzled while adjacent to it, and attacking the target causes a brilliant flash. A creature that hits the target with a melee attack must attempt a Willpower save. The creature is then temporarily immune for 1 minute.
 
 
   Success The creature is unaffected.
@@ -22,9 +19,20 @@ save_type: cool
 save_dc: 15
 resolution: save
 effects:
-  on_apply:
-  - type: utility
-    dc: 0
-    description: A cloak of swirling colors shrouds the target. Creatures are @UUID[Compendium.pf2e.conditionitems.Item.Dazzled]
-      while adjacent to it, and attacking the target causes a brilliant flash of light.
-      A crea
+  on_failure:
+  - &id001
+    type: condition
+    condition_id: blinded
+    value: 1
+  - &id002
+    type: condition
+    condition_id: stunned
+    value: 1
+  - &id003
+    type: condition
+    condition_id: dazzled
+    value: 1
+  on_crit_failure:
+  - *id001
+  - *id002
+  - *id003

@@ -1,16 +1,13 @@
 id: death_signal
 name: Death Signal
-description: 'You project a psychic beacon that weakens dying creatures'' hold on
-  life. Each dying creature in the area must attempt a Willpower save.
+description: 'You project a psychic beacon that weakens dying creatures'' hold on life. Each dying creature in the area must attempt a Willpower save.
 
 
   Critical Success The creature is unaffected.
 
-  Success The creature takes a -1 status penalty to death saving throws while in the
-  area.
+  Success The creature takes a -1 status penalty to death saving throws while in the area.
 
-  Failure The creature takes a -2 status penalty to death saving throws while in the
-  area.
+  Failure The creature takes a -2 status penalty to death saving throws while in the area.
 
   Critical Failure The creature''s dying value increases by 1.'
 tradition: neural
@@ -24,9 +21,10 @@ save_type: toughness
 save_dc: 15
 resolution: save
 effects:
-  on_apply:
-  - type: utility
-    dc: 0
-    description: You call forth a ghostly lantern that guides the living toward death
-      and the undead toward true death. It sheds bright light in the spell's area
-      and dim light to twice that area. The lantern is insubs
+  on_failure:
+  - &id001
+    type: condition
+    condition_id: dying
+    value: 1
+  on_crit_failure:
+  - *id001

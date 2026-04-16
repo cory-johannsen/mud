@@ -1,8 +1,6 @@
 id: dazzle_matrix
 name: Dazzle Matrix
-description: You project a cloud of mesmerizing holographic patterns. Creatures are
-  Dazzled while inside the cloud. A creature that enters the area or starts its turn
-  there must attempt a Willpower save or become Fascinated by the swirling patterns.
+description: You project a cloud of mesmerizing holographic patterns. Creatures are Dazzled while inside the cloud. A creature that enters the area or starts its turn there must attempt a Willpower save or become Fascinated by the swirling patterns.
 tradition: neural
 level: 3
 usage_type: prepared
@@ -14,9 +12,10 @@ save_type: cool
 save_dc: 15
 resolution: save
 effects:
-  on_apply:
-  - type: utility
-    dc: 0
-    description: You create a cloud of mesmerizing patterns and colors that hovers
-      in the air. Creatures are @UUID[Compendium.pf2e.conditionitems.Item.Dazzled]
-      while inside the cloud. In addition, a creature must atte
+  on_failure:
+  - &id001
+    type: condition
+    condition_id: dazzled
+    value: 1
+  on_crit_failure:
+  - *id001

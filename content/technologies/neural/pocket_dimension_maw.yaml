@@ -1,8 +1,6 @@
 id: pocket_dimension_maw
 name: Pocket Dimension Maw
-description: You open an extradimensional storage pocket accessible through the target's
-  mouth. The space can hold objects and equipment, up to a total of 10 Bulk. Items
-  can be retrieved with an Interact action. The spell ends if the target falls unconscious.
+description: You open an extradimensional storage pocket accessible through the target's mouth. The space can hold objects and equipment, up to a total of 10 Bulk. Items can be retrieved with an Interact action. The spell ends if the target falls unconscious.
 tradition: neural
 level: 3
 usage_type: prepared
@@ -13,8 +11,6 @@ duration: instant
 resolution: none
 effects:
   on_apply:
-  - type: utility
-    dc: 0
-    description: You create a shimmering extradimensional space accessible from the
-      target's mouth. The space can hold objects and equipment, up to a total of 10
-      Bulk. This extradimensional storage doesn't hamper the
+  - type: condition
+    condition_id: unconscious
+    value: 1

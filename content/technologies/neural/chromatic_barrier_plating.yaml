@@ -1,10 +1,6 @@
 id: chromatic_barrier_plating
 name: Chromatic Barrier Plating
-description: 'You wrap the target in armor made of multicolored hard-light energy.
-  It functions as @UUID[Compendium.pf2e.spells-srd.Item.Chromatic Armor] that is all
-  colors (granting resistance 5 to acid, electricity, fire, force, mental, poison,
-  and sonic). An attacker that critically fails on its saving throw against the tech
-  is @UUID[Compendium.pf2e.conditionitems.Item.Blinded] rather than @UUID[Compendium.pf2e.conditionitems.Item.Dazzled].
+description: 'You wrap the target in armor made of multicolored hard-light energy. It functions as @UUID[Compendium.pf2e.spells-srd.Item.Chromatic Armor] that is all colors (granting resistance 5 to acid, electricity, fire, force, mental, poison, and sonic). An attacker that critically fails on its saving throw against the tech is Blinded rather than Dazzled.
 
   @UUID[Compendium.pf2e.spell-effects.Item.tech Effect: Prismatic Armor]
 
@@ -20,8 +16,9 @@ duration: minutes:1
 resolution: none
 effects:
   on_apply:
-  - type: utility
-    dc: 0
-    description: You wrap the target in armor made of multicolored light. It functions
-      as @UUID[Compendium.pf2e.spells-srd.Item.Chromatic Armor] that is all colors
-      (granting resistance 5 to acid, electricity, fire, fo
+  - type: condition
+    condition_id: blinded
+    value: 1
+  - type: condition
+    condition_id: dazzled
+    value: 1

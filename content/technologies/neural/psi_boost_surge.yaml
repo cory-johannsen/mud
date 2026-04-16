@@ -1,9 +1,10 @@
 id: psi_boost_surge
 name: Psi-Boost Surge
-description: |-
-    Blessings from beyond help your companions strike true. You and your allies gain a +1 status bonus to attack rolls while within the emanation. Once per round on subsequent turns, you can Sustain the spell to increase the emanation's radius by 10 feet.
-    Bless can counteract @UUID[Compendium.pf2e.spells-srd.Item.Bane].
-    @UUID[Compendium.pf2e.spell-effects.Item.Aura: Bless]
+description: 'Blessings from beyond help your companions strike true. You and your allies gain a +1 status bonus to attack rolls while within the emanation. Once per round on subsequent turns, you can Sustain the spell to increase the emanation''s radius by 10 feet.
+
+  Bless can counteract Bane.
+
+  @UUID[Compendium.pf2e.spell-effects.Item.Aura: Bless]'
 tradition: neural
 level: 1
 usage_type: prepared
@@ -13,7 +14,7 @@ targets: zone
 duration: minutes:1
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: Blessings from beyond help your companions strike true. You and your allies gain a +1 status bonus to attack rolls while within the emanation. Once per round on subsequent turns, you can Sustain the s
+  on_apply:
+  - type: utility
+    dc: 0
+    description: Blessings from beyond help your companions strike true. You and your allies gain a +1 status bonus to attack rolls while within the emanation. Once per round on subsequent turns, you can Sustain the s

@@ -2,10 +2,7 @@ id: warped_topology
 name: Warped Topology
 description: 'Area 4 cubes, each 10 feet on a side
 
-  You distort local spatial geometry, bending and folding the area into impossible
-  configurations. The cubes can''t be adjacent to one another. A creature must attempt
-  a Willpower save if it''s in one of the cubes when you activate the tech, or if it enters
-  one during the duration. A creature can attempt a new save each round.
+  You distort local spatial geometry, bending and folding the area into impossible configurations. The cubes can''t be adjacent to one another. A creature must attempt a Willpower save if it''s in one of the cubes when you activate the tech, or if it enters one during the duration. A creature can attempt a new save each round.
 
 
   Success The creature is unaffected.
@@ -24,11 +21,16 @@ save_type: cool
 save_dc: 15
 resolution: save
 effects:
-  on_apply:
-  - type: utility
-    dc: 0
-    description: 'Area 4 cubes, each 10 feet on a side
-
-      You cause the areas to appear to swell, bend, and break, twisting together in
-      a bizarre spatial geometry. The cubes of the spell''s area can''t be adjacent
-      to one an'
+  on_failure:
+  - type: damage
+    dice: 4d6
+    damage_type: mental
+  - &id001
+    type: condition
+    condition_id: immobilized
+    value: 1
+  on_crit_failure:
+  - type: damage
+    dice: 8d6
+    damage_type: mental
+  - *id001

@@ -1,8 +1,6 @@
 id: optic_burnout
 name: Optic Burnout
-description: 'You overload the target''s visual cortex, burning out their optical
-  nerves. The effect is determined by the target''s Toughness save. The target then
-  becomes temporarily immune for 1 minute.
+description: 'You overload the target''s visual cortex, burning out their optical nerves. The effect is determined by the target''s Toughness save. The target then becomes temporarily immune for 1 minute.
 
 
   Critical Success The target is unaffected.
@@ -23,13 +21,15 @@ save_type: toughness
 save_dc: 15
 resolution: save
 effects:
-  on_apply:
-  - type: utility
-    dc: 0
-    description: 'You blind the target. The effect is determined by the target''s
-      Toughness save. The target then becomes temporarily immune for 1 minute.
-
-
-      Critical Success The target is unaffected.
-
-      Success The target i'
+  on_failure:
+  - &id001
+    type: condition
+    condition_id: blinded
+    value: 1
+  - &id002
+    type: condition
+    condition_id: dazzled
+    value: 1
+  on_crit_failure:
+  - *id001
+  - *id002

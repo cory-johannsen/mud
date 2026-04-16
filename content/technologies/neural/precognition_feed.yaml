@@ -1,9 +1,6 @@
 id: precognition_feed
 name: Precognition Feed
-description: 'You hardwire a precognitive data stream into a willing creature''s neural
-  interface, granting a persistent early-warning sense. The target gains a +2 status
-  bonus to initiative and cannot be flat-footed. It gains an outcome one step better
-  than rolled on Perception checks made as initiative. Duration: 1 hour.'
+description: 'You hardwire a precognitive data stream into a willing creature''s neural interface, granting a persistent early-warning sense. The target gains a +2 status bonus to initiative and cannot be flat-footed. It gains an outcome one step better than rolled on Perception checks made as initiative. Duration: 1 hour.'
 tradition: neural
 level: 9
 usage_type: prepared
@@ -14,8 +11,6 @@ duration: instant
 resolution: none
 effects:
   on_apply:
-  - type: utility
-    dc: 0
-    description: You gain a sixth sense that warns you of danger that might befall
-      the target of the spell. If you choose a creature other than yourself as the
-      target, you create a psychic link through which you can i
+  - type: condition
+    condition_id: flat_footed
+    value: 1

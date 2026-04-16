@@ -1,8 +1,6 @@
 id: psychic_firewall
 name: Psychic Firewall
-description: You erect a defensive barrier in your neural architecture that reflects
-  hostile intrusions. When a creature fails to affect you with a mental effect, it
-  takes 3d6 mental damage from the reflected feedback.
+description: You erect a defensive barrier in your neural architecture that reflects hostile intrusions. When a creature fails to affect you with a mental effect, it takes 3d6 mental damage from the reflected feedback.
 tradition: neural
 level: 3
 usage_type: prepared
@@ -14,9 +12,11 @@ save_type: cool
 save_dc: 15
 resolution: save
 effects:
-  on_apply:
-  - type: utility
-    dc: 0
-    description: This spell wards against those who attempt to subvert your mind and
-      turns mental magic back on them. When the spell is complete, you gain the @UUID[Compendium.pf2e.actionspf2e.Item.Fight
-      with Fear] re
+  on_failure:
+  - type: damage
+    dice: 3d6
+    damage_type: mental
+  on_crit_failure:
+  - type: damage
+    dice: 6d6
+    damage_type: mental

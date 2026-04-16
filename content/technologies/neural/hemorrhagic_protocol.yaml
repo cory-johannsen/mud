@@ -1,16 +1,10 @@
 id: hemorrhagic_protocol
 name: Hemorrhagic Protocol
-description: 'You implant a neural virus that disrupts the target''s clotting response,
-  causing any wound to hemorrhage uncontrollably. The target must attempt a Fortitude
-  save.Critical Success The target is unaffected.
+description: 'You implant a neural virus that disrupts the target''s clotting response, causing any wound to hemorrhage uncontrollably. The target must attempt a Fortitude save.Critical Success The target is unaffected.
 
-  Success For 1 minute, the first time each round that the target takes at least 10
-  @Damage[(floor(@item.rank/2))d6[piercing]]{piercing} or @Damage[(floor(@item.rank/2))d6[slashing]]{slashing}
-  damage from a single Strike, it takes 2d6 additional damage of the same type.
+  Success For 1 minute, the first time each round that the target takes at least 10 @Damage[(floor(/2))d6[piercing]]{piercing} or @Damage[(floor(/2))d6[slashing]]{slashing} damage from a single Strike, it takes 2d6 additional damage of the same type.
 
-  Failure As success, but when it takes the additional damage, it also takes @Damage[(floor(@item.rank/2))d6[bleed]].Heightened
-  (+2) The additional damage increases by 1d6 and the persistent bleed damage increases
-  by 1d6.'
+  Failure As success, but when it takes the additional damage, it also takes @Damage[(floor(/2))d6[bleed]].Heightened (+2) The additional damage increases by 1d6 and the persistent bleed damage increases by 1d6.'
 tradition: neural
 level: 4
 usage_type: prepared
@@ -25,8 +19,6 @@ effects:
   on_apply:
   - type: utility
     dc: 0
-    description: 'You inflict a curse upon the target that causes any wound to gush
-      blood. The target must attempt a Toughness save.Critical Success The target
-      is unaffected.
+    description: 'You inflict a curse upon the target that causes any wound to gush blood. The target must attempt a Toughness save.Critical Success The target is unaffected.
 
       Success For 1 minute, the first time each r'

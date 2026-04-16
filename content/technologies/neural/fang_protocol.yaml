@@ -1,10 +1,6 @@
 id: fang_protocol
 name: Fang Protocol
-description: You psychically transform the target's teeth into terrifying fangs. The
-  target gains a jaws unarmed attack that deals 1d8 piercing damage and has the finesse
-  trait. When the target successfully Strikes a creature with its jaws, that creature
-  must attempt a Willpower save or become @UUID[Compendium.pf2e.conditionitems.Item.Frightened]
-  1.
+description: You psychically transform the target's teeth into terrifying fangs. The target gains a jaws unarmed attack that deals 1d8 piercing damage and has the finesse trait. When the target successfully Strikes a creature with its jaws, that creature must attempt a Willpower save or become Frightened 1.
 tradition: neural
 level: 2
 usage_type: prepared

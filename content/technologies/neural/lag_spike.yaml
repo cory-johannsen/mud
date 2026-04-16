@@ -1,7 +1,6 @@
 id: lag_spike
 name: Lag Spike
-description: 'You inject processing lag into the target''s neural architecture, slowing
-  its reactions.
+description: 'You inject processing lag into the target''s neural architecture, slowing its reactions.
 
 
   Critical Success The target is unaffected.
@@ -22,14 +21,10 @@ save_type: toughness
 save_dc: 15
 resolution: save
 effects:
-  on_apply:
-  - type: utility
-    dc: 0
-    description: 'You dilate the flow of time around the target, slowing its actions.
-
-
-      Critical Success The target is unaffected.
-
-      Success The target is Slowed 1 for 1 round.
-
-      Failure The target is Slowed 1 for 1 minute.'
+  on_failure:
+  - &id001
+    type: condition
+    condition_id: slowed
+    value: 1
+  on_crit_failure:
+  - *id001

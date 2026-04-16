@@ -1,8 +1,6 @@
 id: psychic_laceration
 name: Psychic Laceration
-description: 'You deliver a cutting psychic barb that deals mental damage and humiliates
-  the target. You deal 2d6 mental damage to the target, and it must attempt a Will
-  save.
+description: 'You deliver a cutting psychic barb that deals mental damage and humiliates the target. You deal 2d6 mental damage to the target, and it must attempt a Will save.
 
 
   Critical Success The creature is unaffected.
@@ -11,8 +9,7 @@ description: 'You deliver a cutting psychic barb that deals mental damage and hu
 
   Failure The creature takes full damage.
 
-  Critical Failure The creature takes double damage and is @UUID[Compendium.pf2e.conditionitems.Item.Stupefied]
-  1 for 1 round.'
+  Critical Failure The creature takes double damage and is Stupefied 1 for 1 round.'
 tradition: neural
 level: 2
 usage_type: prepared

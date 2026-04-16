@@ -1,8 +1,8 @@
 id: psi_flash_exit
 name: Psi-Flash Exit
-description: |-
-    You create a puff of colorful smoke that quickly disperses while you become temporarily @UUID[Compendium.pf2e.conditionitems.Item.Invisible]. You become @UUID[Compendium.pf2e.conditionitems.Item.Undetected] to all creatures unless they can see invisible creatures. You Stride. At the end of your movement, if you have cover, greater cover, or concealment, attempt a @Check[stealth|traits:action:hide] check to Hide. You gain a +2 status bonus to this Stealth check. The invisibility then ends, and you either become @UUID[Compendium.pf2e.conditionitems.Item.Observed] or @UUID[Compendium.pf2e.conditionitems.Item.Hidden] to creatures as determined by your check to Hide, if you made one.
-    @UUID[Compendium.pf2e.spell-effects.Item.tech Effect: Flashy Disappearance]
+description: 'You create a puff of colorful smoke that quickly disperses while you become temporarily Invisible. You become Undetected to all creatures unless they can see invisible creatures. You Stride. At the end of your movement, if you have cover, greater cover, or concealment, attempt a Stealth save check to Hide. You gain a +2 status bonus to this Stealth check. The invisibility then ends, and you either become Observed or Hidden to creatures as determined by your check to Hide, if you made one.
+
+  @UUID[Compendium.pf2e.spell-effects.Item.tech Effect: Flashy Disappearance]'
 tradition: neural
 level: 1
 usage_type: prepared
@@ -12,7 +12,7 @@ targets: single
 duration: instant
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You create a puff of colorful smoke that quickly disperses while you become temporarily @UUID[Compendium.pf2e.conditionitems.Item.Invisible]. You become @UUID[Compendium.pf2e.conditionitems.Item.Undet
+  on_apply:
+  - type: condition
+    condition_id: hidden
+    value: 1

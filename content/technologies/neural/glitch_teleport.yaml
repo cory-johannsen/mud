@@ -1,8 +1,6 @@
 id: glitch_teleport
 name: Glitch Teleport
-description: Using forbidden neural calculations, you phase through local space. Teleport
-  to an empty square you can see within range. Creatures adjacent to your original
-  position take 2d6 force damage.
+description: Using forbidden neural calculations, you phase through local space. Teleport to an empty square you can see within range. Creatures adjacent to your original position take 2d6 force damage.
 tradition: neural
 level: 3
 usage_type: prepared
@@ -14,9 +12,11 @@ save_type: cool
 save_dc: 15
 resolution: save
 effects:
-  on_apply:
-  - type: utility
-    dc: 0
-    description: Using Venorium Blorm's formulas, you calculate a path through space.
-      Teleport to an empty square you can see within range. Creatures adjacent to
-      your initial location witness an array of overlapping d
+  on_failure:
+  - type: damage
+    dice: 2d6
+    damage_type: force
+  on_crit_failure:
+  - type: damage
+    dice: 4d6
+    damage_type: force

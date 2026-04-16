@@ -1,19 +1,15 @@
 id: cognitive_drain
 name: Cognitive Drain
-description: 'You psychically drain the target''s mental faculties. The target must
-  attempt a Willpower save.
+description: 'You psychically drain the target''s mental faculties. The target must attempt a Willpower save.
 
 
   Critical Success The target is unaffected.
 
-  Success The target is @UUID[Compendium.pf2e.conditionitems.Item.Stupefied] 1 for
-  1 round.
+  Success The target is Stupefied 1 for 1 round.
 
-  Failure The target is @UUID[Compendium.pf2e.conditionitems.Item.Stupefied] 2 for
-  1 minute.
+  Failure The target is Stupefied 2 for 1 minute.
 
-  Critical Failure The target is @UUID[Compendium.pf2e.conditionitems.Item.Stupefied]
-  3 for 1 minute.'
+  Critical Failure The target is Stupefied 3 for 1 minute.'
 tradition: neural
 level: 2
 usage_type: prepared

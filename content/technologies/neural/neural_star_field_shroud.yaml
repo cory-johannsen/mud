@@ -1,23 +1,14 @@
 id: neural_star_field_shroud
 name: Neural Star-Field Shroud
-description: 'A flowing cloak of adaptive holographic camouflage drapes over you,
-  filled with pinpricks of light like distant data nodes. It synchronizes your neural
-  signature with the ambient environment, granting you a +2 status bonus to Stealth
-  checks to @UUID[Compendium.pf2e.actionspf2e.Item.Hide] and @UUID[Compendium.pf2e.actionspf2e.Item.Sneak].
+description: 'A flowing cloak of adaptive holographic camouflage drapes over you, filled with pinpricks of light like distant data nodes. It synchronizes your neural signature with the ambient environment, granting you a +2 status bonus to Stealth checks to Hide and Sneak.
 
-  While outside under low-light conditions, you''re also @UUID[Compendium.pf2e.conditionitems.Item.Invisible]
-  as long as you remain still. When moving under low-light conditions, you''re @UUID[Compendium.pf2e.conditionitems.Item.Concealed]
-  instead.
+  While outside under low-light conditions, you''re also Invisible as long as you remain still. When moving under low-light conditions, you''re Concealed instead.
 
-  Focusing too intently on the holographic patterns is disorienting. Any creature
-  that ends its turn adjacent to you must attempt a Willpower save; this is a mental, visual
-  effect.Success The creature is unaffected.
+  Focusing too intently on the holographic patterns is disorienting. Any creature that ends its turn adjacent to you must attempt a Willpower save; this is a mental, visual effect.Success The creature is unaffected.
 
-  Failure The creature is @UUID[Compendium.pf2e.conditionitems.Item.Dazzled] until
-  the end of its next turn.
+  Failure The creature is Dazzled until the end of its next turn.
 
-  Critical Failure The creature is @UUID[Compendium.pf2e.conditionitems.Item.Confused]
-  and dazzled until the end of its next turn.'
+  Critical Failure The creature is Confused and dazzled until the end of its next turn.'
 tradition: neural
 level: 6
 usage_type: prepared
@@ -29,9 +20,10 @@ save_type: cool
 save_dc: 15
 resolution: save
 effects:
-  on_apply:
-  - type: utility
-    dc: 0
-    description: A flowing cloak of utter darkness drapes over you, filled with pinpricks
-      of light like distant stars. It imparts the stillness of the cosmos to you,
-      granting you a +2 status bonus to Stealth checks to
+  on_failure:
+  - &id001
+    type: condition
+    condition_id: dazzled
+    value: 1
+  on_crit_failure:
+  - *id001

@@ -1,11 +1,6 @@
 id: kinetic_shield_drone
 name: Kinetic Shield Drone
-description: 'A Medium floating drone of psychokinetic force appears in an unoccupied
-  space adjacent to you, following you across the battlefield to shield you against
-  your foes'' attacks. Each time you Sustain the tech, the drone moves to an unoccupied
-  space of your choice adjacent to you. When you Sustain the tech, you can have the
-  drone push one creature within 5 feet, dealing 3d6 force damage on a hit (Fortitude
-  save for half).
+description: 'A Medium floating drone of psychokinetic force appears in an unoccupied space adjacent to you, following you across the battlefield to shield you against your foes'' attacks. Each time you Sustain the tech, the drone moves to an unoccupied space of your choice adjacent to you. When you Sustain the tech, you can have the drone push one creature within 5 feet, dealing 3d6 force damage on a hit (Fortitude save for half).
 
 
   The drone has AC 25, 50 Hit Points, and the same saves as you.'
@@ -20,9 +15,11 @@ save_type: toughness
 save_dc: 15
 resolution: save
 effects:
-  on_apply:
-  - type: utility
-    dc: 0
-    description: A Medium floating, disembodied hand made of magical force appears
-      in an unoccupied space adjacent to you, following you across the battlefield
-      to shield you against your foes' attacks. Each time you S
+  on_failure:
+  - type: damage
+    dice: 3d6
+    damage_type: force
+  on_crit_failure:
+  - type: damage
+    dice: 6d6
+    damage_type: force

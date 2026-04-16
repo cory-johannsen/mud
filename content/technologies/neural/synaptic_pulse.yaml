@@ -1,7 +1,6 @@
 id: synaptic_pulse
 name: Synaptic Pulse
-description: 'You emit a pulsating neural blast that penetrates the minds of all enemies
-  in the area. Each enemy in the area must attempt a Willpower save.
+description: 'You emit a pulsating neural blast that penetrates the minds of all enemies in the area. Each enemy in the area must attempt a Willpower save.
 
 
   Critical Success The creature is unaffected.
@@ -22,13 +21,10 @@ save_type: cool
 save_dc: 15
 resolution: save
 effects:
-  on_apply:
-  - type: utility
-    dc: 0
-    description: 'You emit a pulsating mental blast that penetrates the minds of all
-      enemies in the area. Each enemy in the area must attempt a Willpower save.
-
-
-      Critical Success The creature is unaffected.
-
-      Success The creat'
+  on_failure:
+  - &id001
+    type: condition
+    condition_id: stunned
+    value: 1
+  on_crit_failure:
+  - *id001

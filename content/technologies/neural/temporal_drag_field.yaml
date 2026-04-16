@@ -1,19 +1,12 @@
 id: temporal_drag_field
 name: Temporal Drag Field
-description: 'You surround yourself in temporal distortion eddies that stretch time
-  for those around you, making every step feel like an eternity. A creature in the
-  emanation, or that later enters it, must attempt a Toughness save. The creature
-  attempts this save only once. Each time you Sustain the tech, you can increase
-  the emanation''s radius by 5 feet, to a maximum of 60 feet.Critical Success The
-  creature is unaffected.
+description: 'You surround yourself in temporal distortion eddies that stretch time for those around you, making every step feel like an eternity. A creature in the emanation, or that later enters it, must attempt a Toughness save. The creature attempts this save only once. Each time you Sustain the tech, you can increase the emanation''s radius by 5 feet, to a maximum of 60 feet.Critical Success The creature is unaffected.
 
   Success Squares in the area are difficult terrain for the creature.
 
-  Failure Squares in the area are difficult terrain for the creature, and the creature
-  is Slowed 1 when it starts its turn in the area.
+  Failure Squares in the area are difficult terrain for the creature, and the creature is Slowed 1 when it starts its turn in the area.
 
-  Critical Failure As failure, plus the creature also becomes Restrained. The creature
-  can attempt to Escape against your tech DC to remove the restrained condition.'
+  Critical Failure As failure, plus the creature also becomes Restrained. The creature can attempt to Escape against your tech DC to remove the restrained condition.'
 tradition: neural
 level: 4
 usage_type: prepared
@@ -25,9 +18,15 @@ save_type: toughness
 save_dc: 15
 resolution: save
 effects:
-  on_apply:
-  - type: utility
-    dc: 0
-    description: You surround yourself in temporal eddies that draw out time for those
-      around you, making every step feel like an eternity endured. A creature in the
-      emanation, or that later enters the emanation, must
+  on_failure:
+  - &id001
+    type: condition
+    condition_id: slowed
+    value: 1
+  - &id002
+    type: condition
+    condition_id: immobilized
+    value: 1
+  on_crit_failure:
+  - *id001
+  - *id002

@@ -1,8 +1,6 @@
 id: cognitive_mire
 name: Cognitive Mire
-description: You flood the area with semi-solidified psychic noise, roughly ankle-deep.
-  The area becomes difficult terrain. Any creature that enters or starts its turn
-  in the area must attempt a Willpower save or take 2d6 mental damage.
+description: You flood the area with semi-solidified psychic noise, roughly ankle-deep. The area becomes difficult terrain. Any creature that enters or starts its turn in the area must attempt a Willpower save or take 2d6 mental damage.
 tradition: neural
 level: 3
 usage_type: prepared
@@ -14,9 +12,11 @@ save_type: toughness
 save_dc: 15
 resolution: save
 effects:
-  on_apply:
-  - type: utility
-    dc: 0
-    description: You cover the area in a sloshing torrent of semi-solidified thought,
-      roughly ankle high. The area becomes difficult terrain, similarly to a shallow
-      bog. Each round that a creature starts its turn in t
+  on_failure:
+  - type: damage
+    dice: 2d6
+    damage_type: mental
+  on_crit_failure:
+  - type: damage
+    dice: 4d6
+    damage_type: mental

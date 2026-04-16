@@ -1,11 +1,9 @@
 id: cloaking_signal
 name: Cloaking Signal
-description: 'You psychically bend perception around the target, rendering it @UUID[Compendium.pf2e.conditionitems.Item.Invisible]
-  for the duration. The spell ends if the target uses a hostile action.
+description: 'You psychically bend perception around the target, rendering it Invisible for the duration. The spell ends if the target uses a hostile action.
 
 
-  Heightened (4th) The spell lasts 1 minute and doesn''t end when the target uses
-  hostile actions.'
+  Heightened (4th) The spell lasts 1 minute and doesn''t end when the target uses hostile actions.'
 tradition: neural
 level: 2
 usage_type: prepared
@@ -18,6 +16,4 @@ effects:
   on_apply:
   - type: utility
     dc: 0
-    description: Illusions bend light around the target, rendering it @UUID[Compendium.pf2e.conditionitems.Item.Invisible].
-      This makes it @UUID[Compendium.pf2e.conditionitems.Item.Undetected] to all creatures,
-      though
+    description: Illusions bend light around the target, rendering it @UUID[Compendium.pf2e.conditionitems.Item.Invisible]. This makes it @UUID[Compendium.pf2e.conditionitems.Item.Undetected] to all creatures, though

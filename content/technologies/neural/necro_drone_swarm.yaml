@@ -1,18 +1,10 @@
 id: necro_drone_swarm
 name: Necro-Drone Swarm
-description: 'You activate a swarm of reanimated combat drones assembled from salvaged
-  remains. The undead army occupies the space of a Huge creature and has a Speed of
-  40 feet.
+description: 'You activate a swarm of reanimated combat drones assembled from salvaged remains. The undead army occupies the space of a Huge creature and has a Speed of 40 feet.
 
-  Arrive Bone March The drone swarm rises from the ground, slashing through your enemies
-  with jagged appendages. Enemies within a 20-foot emanation take 4d8 slashing damage
-  (basic Reflex save). On a critical failure, a creature also take @Damage[2d8[persistent,bleed]]
-  damage.
+  Arrive Bone March The drone swarm rises from the ground, slashing through your enemies with jagged appendages. Enemies within a 20-foot emanation take 4d8 slashing damage (basic Reflex save). On a critical failure, a creature also take 2d8 persistent bleed damage.
 
-  Depart Tossed Heads Before collapsing into scrap, the drone swarm launches skull-shaped
-  projectiles at the enemy lines, dealing 6d6 piercing damage to enemies in a 20-foot
-  burst (basic Reflex save) within 30 feet. On a critical failure, a creature is also
-  Frightened 2.'
+  Depart Tossed Heads Before collapsing into scrap, the drone swarm launches skull-shaped projectiles at the enemy lines, dealing 6d6 piercing damage to enemies in a 20-foot burst (basic Reflex save) within 30 feet. On a critical failure, a creature is also Frightened 2.'
 tradition: neural
 level: 6
 usage_type: prepared
@@ -24,9 +16,30 @@ save_type: hustle
 save_dc: 15
 resolution: save
 effects:
-  on_apply:
-  - type: utility
-    dc: 0
-    description: With a fistful of compressed bones, you summon a legion of skeletal
-      hulks to fight in your war, refusing to let them rest until they've given up
-      their last inches of usefulness to your cause. The unde
+  on_failure:
+  - type: damage
+    dice: 2d8
+    damage_type: bleed
+    persistent: true
+  - type: damage
+    dice: 4d8
+    damage_type: slashing
+  - type: damage
+    dice: 6d6
+    damage_type: piercing
+  - &id001
+    type: condition
+    condition_id: frightened
+    value: 2
+  on_crit_failure:
+  - type: damage
+    dice: 2d8
+    damage_type: bleed
+    persistent: true
+  - type: damage
+    dice: 8d8
+    damage_type: slashing
+  - type: damage
+    dice: 12d6
+    damage_type: piercing
+  - *id001

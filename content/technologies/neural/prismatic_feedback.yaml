@@ -1,18 +1,15 @@
 id: prismatic_feedback
 name: Prismatic Feedback
-description: 'You create a dazzling psychic rainbow that damages and demoralizes foes.
-  Each enemy in the area takes 4d6 mental damage and must attempt a Willpower save.
+description: 'You create a dazzling psychic rainbow that damages and demoralizes foes. Each enemy in the area takes 4d6 mental damage and must attempt a Willpower save.
 
 
   Critical Success The creature is unaffected.
 
   Success The creature takes half damage.
 
-  Failure The creature takes full damage and is @UUID[Compendium.pf2e.conditionitems.Item.Dazzled]
-  for 1 round.
+  Failure The creature takes full damage and is Dazzled for 1 round.
 
-  Critical Failure The creature takes double damage and is @UUID[Compendium.pf2e.conditionitems.Item.Dazzled]
-  for 1 minute.'
+  Critical Failure The creature takes double damage and is Dazzled for 1 minute.'
 tradition: neural
 level: 2
 usage_type: prepared
@@ -24,9 +21,16 @@ save_type: toughness
 save_dc: 15
 resolution: save
 effects:
-  on_apply:
-  - type: utility
-    dc: 0
-    description: You tell the story of the Queen of Bees and her retinue trying to
-      pass through a rainbow on their way to visit the King of Spiders. You conjure
-      forth a large, transparent rainbow. Creatures who enter
+  on_failure:
+  - type: damage
+    dice: 4d6
+    damage_type: mental
+  - &id001
+    type: condition
+    condition_id: dazzled
+    value: 1
+  on_crit_failure:
+  - type: damage
+    dice: 8d6
+    damage_type: mental
+  - *id001

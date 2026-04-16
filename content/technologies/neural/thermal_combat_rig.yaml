@@ -1,14 +1,9 @@
 id: thermal_combat_rig
 name: Thermal Combat Rig
-description: 'Superheated plasma encircles the target''s hands and feet, and their
-  optics glow with thermal energy. The target''s unarmed Strikes deal an additional
-  2d6 fire damage. Critical hits with these Strikes also deal 2d4 persistent fire
-  damage. Additionally, when the target attempts to Demoralize, on a success the target
-  of Demoralize also takes 1d4 fire damage.
+description: 'Superheated plasma encircles the target''s hands and feet, and their optics glow with thermal energy. The target''s unarmed Strikes deal an additional 2d6 fire damage. Critical hits with these Strikes also deal 2d4 persistent fire damage. Additionally, when the target attempts to Demoralize, on a success the target of Demoralize also takes 1d4 fire damage.
 
 
-  Heightened (+2) The fire damage on Strikes increases by 1d6 and the Demoralize fire
-  damage increases by 1d4.'
+  Heightened (+2) The fire damage on Strikes increases by 1d6 and the Demoralize fire damage increases by 1d4.'
 tradition: neural
 level: 5
 usage_type: prepared
@@ -19,8 +14,9 @@ duration: minutes:1
 resolution: none
 effects:
   on_apply:
-  - type: utility
-    dc: 0
-    description: Fire encircles the target's hands and feet, and its eyes and hair
-      catch ablaze. The target's unarmed Strikes deal an additional 2d6 fire damage.
-      Critical hits with these Strikes also deal 2d4 persiste
+  - type: damage
+    dice: 2d6
+    damage_type: fire
+  - type: damage
+    dice: 1d4
+    damage_type: fire

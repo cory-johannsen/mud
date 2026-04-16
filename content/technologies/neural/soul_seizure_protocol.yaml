@@ -1,10 +1,6 @@
 id: soul_seizure_protocol
 name: Soul Seizure Protocol
-description: You reach into a creature's neural substrate and attempt to seize its
-  animating intelligence. The target must attempt a Toughness save. On a critical
-  failure it dies instantly, its soul captured in a soulcage crystal you hold. On
-  a failure it becomes stunned 3 and loses 9d6+40 HP. On a success it loses 9d6+40
-  HP. The trapped soul can be used as a power source or released.
+description: You reach into a creature's neural substrate and attempt to seize its animating intelligence. The target must attempt a Toughness save. On a critical failure it dies instantly, its soul captured in a soulcage crystal you hold. On a failure it becomes stunned 3 and loses 9d6+40 HP. On a success it loses 9d6+40 HP. The trapped soul can be used as a power source or released.
 tradition: neural
 level: 9
 usage_type: prepared
@@ -15,8 +11,6 @@ duration: instant
 resolution: none
 effects:
   on_apply:
-  - type: utility
-    dc: 0
-    description: You trap the target's soul in the item before the soul can pass on
-      to the afterlife. The item used to contain the soul can be anything as long
-      as it's of the appropriate value. The item has AC 16 and
+  - type: condition
+    condition_id: stunned
+    value: 3

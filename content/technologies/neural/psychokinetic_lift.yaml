@@ -1,8 +1,6 @@
 id: psychokinetic_lift
 name: Psychokinetic Lift
-description: You defy gravity and levitate the target 5 feet off the ground using
-  telekinetic force. You can Sustain the spell to move the target up or down 10 feet.
-  A creature floating in the air has difficulty moving and is Flat-Footed.
+description: You defy gravity and levitate the target 5 feet off the ground using telekinetic force. You can Sustain the spell to move the target up or down 10 feet. A creature floating in the air has difficulty moving and is Flat-Footed.
 tradition: neural
 level: 3
 usage_type: prepared
@@ -13,8 +11,6 @@ duration: instant
 resolution: none
 effects:
   on_apply:
-  - type: utility
-    dc: 0
-    description: You defy gravity and levitate the target 5 feet off the ground. You
-      can Sustain the spell to move the target up or down 10 feet. A creature floating
-      in the air from levitate takes a –2 circumstance
+  - type: condition
+    condition_id: flat_footed
+    value: 1

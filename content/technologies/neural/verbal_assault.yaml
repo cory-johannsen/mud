@@ -1,23 +1,18 @@
 id: verbal_assault
 name: Verbal Assault
-description: 'A barrage of psychic insults and invectives spew from your mouth-words
-  so devastating your foes burn from the intensity of your neural assault. You deal
-  2d6 fire damage to each enemy in the area and they must attempt Will saves.
+description: 'A barrage of psychic insults and invectives spew from your mouth-words so devastating your foes burn from the intensity of your neural assault. You deal 2d6 fire damage to each enemy in the area and they must attempt Will saves.
 
 
   Critical Success The creature is unaffected.
 
   Success The creature takes half damage.
 
-  Failure The creature takes full damage and gains @UUID[Compendium.pf2e.conditionitems.Item.Frightened]
-  1.
+  Failure The creature takes full damage and gains Frightened 1.
 
-  Critical Failure The creature takes double damage, gains @UUID[Compendium.pf2e.conditionitems.Item.Frightened]
-  2, and takes @Damage[1d6[persistent,fire]] damage.
+  Critical Failure The creature takes double damage, gains Frightened 2, and takes 1d6 persistent fire damage.
 
 
-  Heightened (+2) The initial damage increases by 2d6 and the persistent fire damage
-  increases by 1d6.'
+  Heightened (+2) The initial damage increases by 2d6 and the persistent fire damage increases by 1d6.'
 tradition: neural
 level: 2
 usage_type: prepared

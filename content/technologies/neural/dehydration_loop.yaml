@@ -1,13 +1,10 @@
 id: dehydration_loop
 name: Dehydration Loop
-description: 'You trap the target in a neural feedback loop that makes their body
-  believe it is critically dehydrated. You can Dismiss the spell. The target must
-  attempt a Toughness save.Critical Success The creature is unaffected.
+description: 'You trap the target in a neural feedback loop that makes their body believe it is critically dehydrated. You can Dismiss the spell. The target must attempt a Toughness save.Critical Success The creature is unaffected.
 
   Success The creature is Sickened 1.
 
-  Failure The creature is Sickened 1 and must drink water every 10 minutes or take
-  1d4 damage.
+  Failure The creature is Sickened 1 and must drink water every 10 minutes or take 1d4 damage.
 
   Critical Failure As failure but Sickened 2.'
 tradition: neural
@@ -21,9 +18,10 @@ save_type: toughness
 save_dc: 15
 resolution: save
 effects:
-  on_apply:
-  - type: utility
-    dc: 0
-    description: You curse the target with a thirst no drink can quench. You can Dismiss
-      the spell. The target must attempt a Toughness save.Critical Success The creature
-      is unaffected and is temporarily immune for 1
+  on_failure:
+  - &id001
+    type: condition
+    condition_id: nausea
+    value: 1
+  on_crit_failure:
+  - *id001
