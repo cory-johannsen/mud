@@ -723,6 +723,8 @@ zone:
 
       '
     exits:
+    - direction: west
+      target: flats_enforcer_den
     - direction: south
       target: flats_powell_overpass
     map_x: 0
