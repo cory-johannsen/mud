@@ -1140,6 +1140,7 @@ message PreparedSlotView {
     string description      = 4;
     string effects_summary  = 5;
     string short_name       = 6;
+    int32  tech_level       = 7;
 }
 
 // HardwiredSlotView represents one always-available hardwired technology.
@@ -1149,6 +1150,7 @@ message HardwiredSlotView {
     string description      = 3;
     string effects_summary  = 4;
     string short_name       = 5;
+    int32  tech_level       = 6;
 }
 
 // SpontaneousKnownEntry represents one tech known in the spontaneous pool with its name.
@@ -1246,6 +1248,7 @@ message InnateSlotView {
     string effects_summary  = 7;
     string short_name       = 8;
     bool   passive          = 9;
+    int32  tech_level       = 10;
 }
 
 // SpontaneousUsePoolView delivers the daily use pool for one spontaneous tech level.

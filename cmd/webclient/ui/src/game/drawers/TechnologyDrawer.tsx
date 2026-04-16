@@ -14,6 +14,11 @@ function SectionLabel({ label }: { label: string }) {
   return <div style={styles.sectionLabel}>{label}</div>
 }
 
+function LevelBadge({ level }: { level: number }) {
+  if (!level || level <= 0) return null
+  return <span style={styles.levelBadge}>Lv {level}</span>
+}
+
 function UsePips({ remaining, max }: { remaining: number; max: number }) {
   return (
     <span style={styles.pips} title={`${remaining} / ${max}`}>
@@ -53,6 +58,7 @@ function PreparedItem({
   const [picking, setPicking] = useState(false)
   const techId = slot.techId ?? slot.tech_id ?? ''
   const name = slot.techName ?? slot.tech_name ?? techId
+  const level = slot.techLevel ?? slot.tech_level ?? 0
   const exhausted = remaining === 0
 
   function handlePick(s: number) {
@@ -66,6 +72,7 @@ function PreparedItem({
         <strong style={{ color: exhausted ? '#666' : '#e0c060', textDecoration: exhausted ? 'line-through' : 'none' }}>
           {name}
         </strong>
+        <LevelBadge level={level} />
         <span style={styles.badgeActive}>active</span>
         {total > 1
           ? <UsePips remaining={remaining} max={total} />
@@ -98,6 +105,7 @@ function InnateItem({
   const [picking, setPicking] = useState(false)
   const techId = slot.techId ?? slot.tech_id ?? ''
   const name = slot.techName ?? slot.tech_name ?? techId
+  const level = slot.techLevel ?? slot.tech_level ?? 0
   const remaining = slot.usesRemaining ?? slot.uses_remaining ?? 0
   const max = slot.maxUses ?? slot.max_uses ?? 0
   const exhausted = max > 0 && remaining === 0
@@ -111,6 +119,7 @@ function InnateItem({
     <li style={styles.techItem}>
       <div style={styles.techHeader}>
         <strong style={{ color: exhausted ? '#666' : '#e0c060' }}>{name}</strong>
+        <LevelBadge level={level} />
         {slot.isReaction
           ? <span style={styles.badgeReaction}>reaction</span>
           : <span style={styles.badgeActive}>active</span>}
@@ -145,6 +154,7 @@ function SpontaneousItem({
   const [picking, setPicking] = useState(false)
   const techId = entry.techId ?? entry.tech_id ?? ''
   const name = entry.techName ?? entry.tech_name ?? techId
+  const level = entry.techLevel ?? entry.tech_level ?? 0
   const exhausted = poolRemaining === 0
 
   function handlePick(s: number) {
@@ -156,6 +166,7 @@ function SpontaneousItem({
     <li style={styles.techItem}>
       <div style={styles.techHeader}>
         <strong style={{ color: exhausted ? '#666' : '#e0c060' }}>{name}</strong>
+        <LevelBadge level={level} />
         <span style={styles.badgeActive}>active</span>
       </div>
       {entry.description && <p style={styles.techDesc}>{entry.description}</p>}
@@ -176,10 +187,12 @@ function SpontaneousItem({
 function PassiveInnateItem({ slot }: { slot: InnateSlotView }) {
   const techId = slot.techId ?? slot.tech_id ?? ''
   const name = slot.techName ?? slot.tech_name ?? techId
+  const level = slot.techLevel ?? slot.tech_level ?? 0
   return (
     <li style={styles.techItem}>
       <div style={styles.techHeader}>
         <strong style={{ color: '#aaa' }}>{name}</strong>
+        <LevelBadge level={level} />
         <span style={styles.badgePassive}>passive</span>
       </div>
       {slot.description && <p style={styles.techDesc}>{slot.description}</p>}
@@ -192,10 +205,12 @@ function PassiveInnateItem({ slot }: { slot: InnateSlotView }) {
 function HardwiredItem({ slot }: { slot: HardwiredSlotView }) {
   const techId = slot.techId ?? slot.tech_id ?? ''
   const name = slot.techName ?? slot.tech_name ?? techId
+  const level = slot.techLevel ?? slot.tech_level ?? 0
   return (
     <li style={styles.techItem}>
       <div style={styles.techHeader}>
         <strong style={{ color: '#aaa' }}>{name}</strong>
+        <LevelBadge level={level} />
         <span style={styles.badgePassive}>passive</span>
       </div>
       {slot.description && <p style={styles.techDesc}>{slot.description}</p>}
@@ -434,6 +449,15 @@ const styles: Record<string, React.CSSProperties> = {
     background: '#1a1a2a',
     border: '1px solid #3a3a5a',
     color: '#778',
+    whiteSpace: 'nowrap' as const,
+  },
+  levelBadge: {
+    fontSize: '0.62rem',
+    padding: '0.1rem 0.3rem',
+    borderRadius: '3px',
+    background: '#1a1a1a',
+    border: '1px solid #3a3a3a',
+    color: '#999',
     whiteSpace: 'nowrap' as const,
   },
   hotbarBtn: {

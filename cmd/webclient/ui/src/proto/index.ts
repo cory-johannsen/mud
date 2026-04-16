@@ -131,6 +131,8 @@ export interface PreparedSlotView {
   effectsSummary?: string
   shortName?: string
   short_name?: string
+  techLevel?: number
+  tech_level?: number
 }
 
 export interface InnateSlotView {
@@ -148,6 +150,8 @@ export interface InnateSlotView {
   shortName?: string
   short_name?: string
   passive?: boolean
+  techLevel?: number
+  tech_level?: number
 }
 
 export interface HardwiredSlotView {
@@ -159,6 +163,8 @@ export interface HardwiredSlotView {
   effectsSummary?: string
   shortName?: string
   short_name?: string
+  techLevel?: number
+  tech_level?: number
 }
 
 export interface SpontaneousKnownEntry {
