@@ -1,19 +1,12 @@
 id: atavistic_mutagen
 name: Atavistic Mutagen
-description: 'You inject a retroviral mutagen that triggers rapid devolution, forcing
-  the target into a feral biological state. The effect is based on its Toughness save.
+description: 'You inject a retroviral mutagen that triggers rapid devolution, forcing the target into a feral biological state. The effect is based on its Toughness save.
 
   Critical Success The target is unaffected.
 
-  Success The target''s body gains minor feral mutations. Its biology destabilizes,
-  causing it to be Clumsy 1 for 1 round.
+  Success The target''s body gains minor feral mutations. Its biology destabilizes, causing it to be Clumsy 1 for 1 round.
 
-  Failure The target transforms into a feral mutant form for 1 hour. It becomes clumsy
-  1 and gains weakness 1 to silver. It gains a claw, hoof, horn, or jaws Strike (your
-  choice) that uses the target''s unarmed Strike statistics except that the damage
-  type changes to bludgeoning, piercing, or slashing, as appropriate. Whenever the
-  target attempts any manipulate action, it must succeed at a @Check[flat|dc:5] or
-  the action is lost.
+  Failure The target transforms into a feral mutant form for 1 hour. It becomes clumsy 1 and gains weakness 1 to silver. It gains a claw, hoof, horn, or jaws Strike (your choice) that uses the target''s unarmed Strike statistics except that the damage type changes to bludgeoning, piercing, or slashing, as appropriate. Whenever the target attempts any manipulate action, it must succeed at a Toughness save (DC 5) or the action is lost.
 
   Critical Failure As failure, but the duration is unlimited.'
 tradition: bio_synthetic
@@ -30,8 +23,7 @@ effects:
   on_apply:
   - type: utility
     dc: 0
-    description: 'You tap into the target''s inner being and curse it to become a
-      bestial version of itself. The effect is based on its Toughness save.
+    description: 'You tap into the target''s inner being and curse it to become a bestial version of itself. The effect is based on its Toughness save.
 
       Critical Success The target is unaffected.
 

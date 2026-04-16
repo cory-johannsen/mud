@@ -1,17 +1,24 @@
 id: viral_pathogen_gland
 name: Viral Pathogen Gland
-description: |-
-    Your touch afflicts the target with goblin pox, an irritating allergenic rash. The target must attempt a Toughness save.
+description: 'Your touch afflicts the target with goblin pox, an irritating allergenic rash. The target must attempt a Toughness save.
 
-    Goblin Pox (disease) Level 1; Creatures that have the goblin trait and goblin dogs are immune
-    Stage 1 Sickened 1 (1 round)
-    Stage 2 Sickened 1 and Slowed 1 (1 round)
-    Stage 3 Sickened 1 and the creature can't reduce its Sickened value below 1 (1 day)
 
-    Critical Success The target is unaffected.
-    Success The target is Sickened 1.
-    Failure The target is afflicted with goblin pox at stage 1.
-    Critical Failure The target is afflicted with goblin pox at stage 2.
+  Goblin Pox (disease) Level 1; Creatures that have the goblin trait and goblin dogs are immune
+
+  Stage 1 Sickened 1 (1 round)
+
+  Stage 2 Sickened 1 and Slowed 1 (1 round)
+
+  Stage 3 Sickened 1 and the creature can''t reduce its Sickened value below 1 (1 day)
+
+
+  Critical Success The target is unaffected.
+
+  Success The target is Sickened 1.
+
+  Failure The target is afflicted with goblin pox at stage 1.
+
+  Critical Failure The target is afflicted with goblin pox at stage 2.'
 tradition: bio_synthetic
 level: 1
 usage_type: prepared
@@ -23,10 +30,15 @@ save_type: toughness
 save_dc: 15
 resolution: save
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: |-
-            Your touch afflicts the target with goblin pox, an irritating allergenic rash. The target must attempt a Toughness save.
-
-            Goblin Pox (disease) Level 1; Creatures that have the goblin trait and goblin
+  on_failure:
+  - &id001
+    type: condition
+    condition_id: nausea
+    value: 1
+  - &id002
+    type: condition
+    condition_id: slowed
+    value: 1
+  on_crit_failure:
+  - *id001
+  - *id002

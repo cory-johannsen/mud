@@ -1,8 +1,6 @@
 id: heat_therapy
 name: Heat Therapy
-description: 'You apply bio-synthetic thermal compounds to the target''s injuries.
-  The target regains 2d8 HP. If the target has the @UUID[Compendium.pf2e.conditionitems.Item.Sickened]
-  condition, reduce its value by 1.
+description: 'You apply bio-synthetic thermal compounds to the target''s injuries. The target regains 2d8 HP. If the target has the Sickened condition, reduce its value by 1.
 
 
   Heightened (+1) The healing increases by 1d8.'
@@ -16,8 +14,6 @@ duration: instant
 resolution: none
 effects:
   on_apply:
-  - type: utility
-    dc: 0
-    description: You adjust the delicate levels of bitter ingredients in food and
-      drink to draw out their full restorative and fortifying properties. Choose one
-      of the benefits listed below. Any creature that consumes
+  - type: condition
+    condition_id: nausea
+    value: 1

@@ -1,12 +1,9 @@
 id: napalm_glands
 name: Napalm Glands
-description: 'You spit a glob of bio-synthetic napalm at the target. Make a spell
-  attack. On a hit, the target takes 2d4 fire damage and @Damage[1d4[persistent,fire]]
-  damage.
+description: 'You spit a glob of bio-synthetic napalm at the target. Make a spell attack. On a hit, the target takes 2d4 fire damage and 1d4 persistent fire damage.
 
 
-  Heightened (+1) The initial damage increases by 1d4 and the persistent damage increases
-  by 1d4.'
+  Heightened (+1) The initial damage increases by 1d4 and the persistent damage increases by 1d4.'
 tradition: bio_synthetic
 level: 2
 usage_type: prepared

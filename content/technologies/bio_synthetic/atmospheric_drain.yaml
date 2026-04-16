@@ -1,27 +1,15 @@
 id: atmospheric_drain
 name: Atmospheric Drain
-description: 'You bio-chemically absorb all breathable air in the surrounding area,
-  stealing the breath of nearby creatures. During the tech''s duration, you take a
-  -1 circumstance penalty against inhaled threats, such as inhaled poisons. If you
-  activate the tech in an environment where you can''t breathe, it fails and you immediately
-  begin to suffocate.
+description: 'You bio-chemically absorb all breathable air in the surrounding area, stealing the breath of nearby creatures. During the tech''s duration, you take a -1 circumstance penalty against inhaled threats, such as inhaled poisons. If you activate the tech in an environment where you can''t breathe, it fails and you immediately begin to suffocate.
 
-  Creatures in the area must attempt a Toughness save. A creature that''s holding
-  its breath gets a result one degree of success better than it rolled, and creatures
-  that don''t need to breathe air are immune to the tech. A creature that later enters
-  the area or ceases holding its breath must attempt a save against the effect. On
-  subsequent rounds, the first time each round you Sustain the tech, you can force
-  each creature in the area to save against the effect.
+  Creatures in the area must attempt a Toughness save. A creature that''s holding its breath gets a result one degree of success better than it rolled, and creatures that don''t need to breathe air are immune to the tech. A creature that later enters the area or ceases holding its breath must attempt a save against the effect. On subsequent rounds, the first time each round you Sustain the tech, you can force each creature in the area to save against the effect.
 
 
   Success The creature begins holding its breath.
 
-  Failure The creature wheezes and gasps as its breath is stolen, becoming Stunned
-  1. The creature then begins holding its breath but has only half its normal number
-  of rounds of remaining air.
+  Failure The creature wheezes and gasps as its breath is stolen, becoming Stunned 1. The creature then begins holding its breath but has only half its normal number of rounds of remaining air.
 
-  Critical Failure The creature has all the air sucked out from its lungs and immediately
-  starts to suffocate.'
+  Critical Failure The creature has all the air sucked out from its lungs and immediately starts to suffocate.'
 tradition: bio_synthetic
 level: 7
 usage_type: prepared
@@ -33,9 +21,10 @@ save_type: toughness
 save_dc: 15
 resolution: save
 effects:
-  on_apply:
-  - type: utility
-    dc: 0
-    description: You inhale all air in the surrounding area, stealing the breath of
-      nearby creatures. During vacuum's duration, you take a –1 circumstance penalty
-      against inhaled threats, such as inhaled poisons. If
+  on_failure:
+  - &id001
+    type: condition
+    condition_id: stunned
+    value: 1
+  on_crit_failure:
+  - *id001

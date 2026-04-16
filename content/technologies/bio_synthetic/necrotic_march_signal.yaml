@@ -1,11 +1,8 @@
 id: necrotic_march_signal
 name: Necrotic March Signal
-description: 'You emit a biochemical signal that empowers undead and terrifies the
-  living. Undead creatures within the area gain the Quickened condition for 1 minute,
-  which they can use only to Stride.
+description: 'You emit a biochemical signal that empowers undead and terrifies the living. Undead creatures within the area gain the Quickened condition for 1 minute, which they can use only to Stride.
 
-  Living creatures in the area must attempt a Willpower save. This gains the emotion, fear,
-  and mental traits for living creatures.
+  Living creatures in the area must attempt a Willpower save. This gains the emotion, fear, and mental traits for living creatures.
 
 
   Critical Success The creature is unaffected.
@@ -26,9 +23,10 @@ save_type: cool
 save_dc: 15
 resolution: save
 effects:
-  on_apply:
-  - type: utility
-    dc: 0
-    description: You chant a marching song of Yled to empower the undead and terrify
-      the living. Undead creatures within the area gain the @UUID[Compendium.pf2e.conditionitems.Item.Quickened]
-      condition for 1 minute, w
+  on_failure:
+  - &id001
+    type: condition
+    condition_id: frightened
+    value: 1
+  on_crit_failure:
+  - *id001

@@ -1,8 +1,6 @@
 id: ember_symbiote
 name: Ember Symbiote
-description: You cultivate a small bio-luminescent fire organism that orbits you.
-  You can command the wisp to fly to a creature within 30 feet and detonate, dealing
-  1d6 fire damage. You can produce a new wisp each round when you Sustain the spell.
+description: You cultivate a small bio-luminescent fire organism that orbits you. You can command the wisp to fly to a creature within 30 feet and detonate, dealing 1d6 fire damage. You can produce a new wisp each round when you Sustain the spell.
 tradition: bio_synthetic
 level: 2
 usage_type: prepared
@@ -13,8 +11,6 @@ duration: minutes:1
 resolution: none
 effects:
   on_apply:
-  - type: utility
-    dc: 0
-    description: Three faintly glowing wisps of fire float around your head. Each
-      time you hit a creature with a Strike, one of the wisps goes hurtling towards
-      that creature, dealing 1d4 fire damage. If you Cast a Spe
+  - type: damage
+    dice: 1d6
+    damage_type: fire

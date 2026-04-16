@@ -1,9 +1,6 @@
 id: feral_swarm
 name: Feral Swarm
-description: You release a swarm of gene-hacked primates that fill the area. Because
-  they are bio-engineered, they can't be individually targeted. They harass creatures
-  in the area, imposing a -2 circumstance penalty to skill checks and dealing 2d6
-  slashing damage per round.
+description: You release a swarm of gene-hacked primates that fill the area. Because they are bio-engineered, they can't be individually targeted. They harass creatures in the area, imposing a -2 circumstance penalty to skill checks and dealing 2d6 slashing damage per round.
 tradition: bio_synthetic
 level: 3
 usage_type: prepared
@@ -15,9 +12,11 @@ save_type: toughness
 save_dc: 15
 resolution: save
 effects:
-  on_apply:
-  - type: utility
-    dc: 0
-    description: Magical monkey spirits fill the area as they pile and climb on top
-      of one another. Because the monkeys are magical spirits, they can't be attacked
-      or hurt. Casting @UUID[Compendium.pf2e.spells-srd.Ite
+  on_failure:
+  - type: damage
+    dice: 2d6
+    damage_type: slashing
+  on_crit_failure:
+  - type: damage
+    dice: 4d6
+    damage_type: slashing

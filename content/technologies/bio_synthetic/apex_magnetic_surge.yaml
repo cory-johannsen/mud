@@ -1,9 +1,6 @@
 id: apex_magnetic_surge
 name: Apex Magnetic Surge
-description: You generate a massive magnetic surge that controls all metal and electrically-conductive
-  objects in a 60-foot burst. You can move any metal object up to 10 feet in any direction.
-  Metal-armored or metal-armed creatures in the area are restrained on a failed Fortitude
-  save. Metallic structures take 10d6 force damage.
+description: You generate a massive magnetic surge that controls all metal and electrically-conductive objects in a 60-foot burst. You can move any metal object up to 10 feet in any direction. Metal-armored or metal-armed creatures in the area are restrained on a failed Fortitude save. Metallic structures take 10d6 force damage.
 tradition: bio_synthetic
 level: 9
 usage_type: prepared
@@ -15,9 +12,16 @@ save_type: hustle
 save_dc: 15
 resolution: save
 effects:
-  on_apply:
-  - type: utility
-    dc: 0
-    description: The roiling magnetic fields of the Plane of Metal radiate from you
-      as you channel and reshape them at your merest thought. When you Use this tech,
-      you can relocate each affected target to any other
+  on_failure:
+  - type: damage
+    dice: 10d6
+    damage_type: force
+  - &id001
+    type: condition
+    condition_id: immobilized
+    value: 1
+  on_crit_failure:
+  - type: damage
+    dice: 20d6
+    damage_type: force
+  - *id001

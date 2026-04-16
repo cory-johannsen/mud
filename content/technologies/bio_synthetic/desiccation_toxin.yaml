@@ -1,13 +1,10 @@
 id: desiccation_toxin
 name: Desiccation Toxin
-description: 'You inject the target with a toxin that makes its body unable to retain
-  moisture. You can Dismiss the spell. The target must attempt a Toughness save.Critical
-  Success The creature is unaffected.
+description: 'You inject the target with a toxin that makes its body unable to retain moisture. You can Dismiss the spell. The target must attempt a Toughness save.Critical Success The creature is unaffected.
 
   Success The creature is Sickened 1.
 
-  Failure The creature is Sickened 1 and takes 1d4 damage every 10 minutes unless
-  it drinks water.
+  Failure The creature is Sickened 1 and takes 1d4 damage every 10 minutes unless it drinks water.
 
   Critical Failure As failure but Sickened 2.'
 tradition: bio_synthetic
@@ -21,9 +18,10 @@ save_type: toughness
 save_dc: 15
 resolution: save
 effects:
-  on_apply:
-  - type: utility
-    dc: 0
-    description: You curse the target with a thirst no drink can quench. You can Dismiss
-      the spell. The target must attempt a Toughness save.Critical Success The creature
-      is unaffected and is temporarily immune for 1
+  on_failure:
+  - &id001
+    type: condition
+    condition_id: nausea
+    value: 1
+  on_crit_failure:
+  - *id001

@@ -1,18 +1,11 @@
 id: lightning_rod_implant
 name: Lightning Rod Implant
-description: 'You summon a bolt of bio-electric discharge that strikes through a foe
-  and channels into your weapon or body. You must hold your weapon or an empty hand
-  aloft. A bolt of lightning descends through the target, dealing 3d12 electricity
-  damage with a basic Reflex save. For the rest of the duration, your first Strike
-  each round deals an additional 1d12 electricity damage.
+description: 'You summon a bolt of bio-electric discharge that strikes through a foe and channels into your weapon or body. You must hold your weapon or an empty hand aloft. A bolt of lightning descends through the target, dealing 3d12 electricity damage with a basic Reflex save. For the rest of the duration, your first Strike each round deals an additional 1d12 electricity damage.
 
-  The protocol generates its own discharge source if necessary, so it works anywhere,
-  even underground. If cast outside under stormy conditions, increase the bolt''s
-  damage by @Damage[2d12[electricity]].
+  The protocol generates its own discharge source if necessary, so it works anywhere, even underground. If cast outside under stormy conditions, increase the bolt''s damage by 2d12 electricity.
 
 
-  Heightened (8th) The initial damage increases by 4d12, and the additional Strike
-  damage increases by 1d12.'
+  Heightened (8th) The initial damage increases by 4d12, and the additional Strike damage increases by 1d12.'
 tradition: bio_synthetic
 level: 4
 usage_type: prepared

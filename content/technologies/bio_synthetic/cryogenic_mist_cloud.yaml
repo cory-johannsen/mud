@@ -1,15 +1,8 @@
 id: cryogenic_mist_cloud
 name: Cryogenic Mist Cloud
-description: 'You release a chilling biochemical mist that settles into the bones
-  and inhibits movement. This has the effects of @UUID[Compendium.pf2e.spells-srd.Item.Mist],
-  except that you can Sustain the spell once per round to move the fog up to 10 feet.
-  A creature that starts its turn in the area takes 6d8 cold damage with a basic Fortitude
-  save. A creature that fails its save is also Clumsy 1 for 1 minute (Clumsy 2 on
-  a critical failure) and takes a –10-foot status penalty to Speeds for as long as
-  it''s clumsy.
+description: 'You release a chilling biochemical mist that settles into the bones and inhibits movement. This has the effects of Mist, except that you can Sustain the spell once per round to move the fog up to 10 feet. A creature that starts its turn in the area takes 6d8 cold damage with a basic Fortitude save. A creature that fails its save is also Clumsy 1 for 1 minute (Clumsy 2 on a critical failure) and takes a –10-foot status penalty to Speeds for as long as it''s clumsy.
 
-  @UUID[Compendium.pf2e.spell-effects.Item.tech Effect: Frozen Fog]Heightened (+2)
-  The damage increases by 3d8.'
+  @UUID[Compendium.pf2e.spell-effects.Item.tech Effect: Frozen Fog]Heightened (+2) The damage increases by 3d8.'
 tradition: bio_synthetic
 level: 6
 usage_type: prepared

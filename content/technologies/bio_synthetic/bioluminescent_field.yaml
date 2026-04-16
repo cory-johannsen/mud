@@ -1,19 +1,15 @@
 id: bioluminescent_field
 name: Bioluminescent Field
-description: 'You fill the area with dazzling bio-luminescent organisms. Each creature
-  in the area must attempt a Toughness save.
+description: 'You fill the area with dazzling bio-luminescent organisms. Each creature in the area must attempt a Toughness save.
 
 
   Critical Success The creature is unaffected.
 
-  Success The creature is @UUID[Compendium.pf2e.conditionitems.Item.Dazzled] for 1
-  round.
+  Success The creature is Dazzled for 1 round.
 
-  Failure The creature is @UUID[Compendium.pf2e.conditionitems.Item.Dazzled] for 1
-  minute.
+  Failure The creature is Dazzled for 1 minute.
 
-  Critical Failure The creature is @UUID[Compendium.pf2e.conditionitems.Item.Blinded]
-  for 1 round, then @UUID[Compendium.pf2e.conditionitems.Item.Dazzled] for 1 minute.'
+  Critical Failure The creature is Blinded for 1 round, then Dazzled for 1 minute.'
 tradition: bio_synthetic
 level: 2
 usage_type: prepared
@@ -25,9 +21,15 @@ save_type: toughness
 save_dc: 15
 resolution: save
 effects:
-  on_apply:
-  - type: utility
-    dc: 0
-    description: You create an area of bright light. Creatures with @UUID[Compendium.pf2e.bestiary-ability-glossary-srd.Item.Light
-      Blindness] that are @UUID[Compendium.pf2e.conditionitems.Item.Blinded] by radiant
-      fiel
+  on_failure:
+  - &id001
+    type: condition
+    condition_id: dazzled
+    value: 1
+  - &id002
+    type: condition
+    condition_id: blinded
+    value: 1
+  on_crit_failure:
+  - *id001
+  - *id002

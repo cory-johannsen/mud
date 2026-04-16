@@ -1,15 +1,19 @@
 id: rapid_organic_growth
 name: Rapid Organic Growth
-description: |-
-    Plants rapidly grow up from the ground. All creatures in the target area take 2d4 damage. The type of damage depends on the type of plant you choose to grow. On a critical failure, targets experience additional effects, also depending on what you choose to grow. The type of plant and its effects are chosen when you Use this tech.
-
-    Cacti Piercing damage, and @Damage[(@item.level)[bleed]] damage on a critical failure.
-    Flowers Poison damage, and @UUID[Compendium.pf2e.conditionitems.Item.Dazzled] for 2 rounds on a critical failure.
-    Fruits Bludgeoning damage, and Clumsy 1 for 2 rounds on a critical failure.
-    Roots Bludgeoning damage, and the affected creatures fall @UUID[Compendium.pf2e.conditionitems.Item.Prone] on a critical failure.
+description: 'Plants rapidly grow up from the ground. All creatures in the target area take 2d4 damage. The type of damage depends on the type of plant you choose to grow. On a critical failure, targets experience additional effects, also depending on what you choose to grow. The type of plant and its effects are chosen when you Use this tech.
 
 
-    Heightened (+1) The damage increases by 1d4, and the persistent bleed damage from cacti increases by 1.
+  Cacti Piercing damage, and @Damage[()[bleed]] damage on a critical failure.
+
+  Flowers Poison damage, and Dazzled for 2 rounds on a critical failure.
+
+  Fruits Bludgeoning damage, and Clumsy 1 for 2 rounds on a critical failure.
+
+  Roots Bludgeoning damage, and the affected creatures fall Prone on a critical failure.
+
+
+
+  Heightened (+1) The damage increases by 1d4, and the persistent bleed damage from cacti increases by 1.'
 tradition: bio_synthetic
 level: 1
 usage_type: prepared
@@ -21,7 +25,15 @@ save_type: hustle
 save_dc: 15
 resolution: save
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: Plants rapidly grow up from the ground. All creatures in the target area take 2d4 damage. The type of damage depends on the type of plant you choose to grow. On a critical failure, targets experience
+  on_failure:
+  - &id001
+    type: condition
+    condition_id: dazzled
+    value: 1
+  - &id002
+    type: condition
+    condition_id: prone
+    value: 1
+  on_crit_failure:
+  - *id001
+  - *id002

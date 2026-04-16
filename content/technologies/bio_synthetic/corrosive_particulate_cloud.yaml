@@ -1,18 +1,11 @@
 id: corrosive_particulate_cloud
 name: Corrosive Particulate Cloud
-description: 'Red-brown flecks of bio-synthesized corrosive particles fill the air.
-  All creatures within the cloud become Concealed, and all creatures outside become
-  concealed to those within. The cloud deals 5d10 slashing damage to any creature
-  that starts its turn in the area, with a basic Toughness save.
+description: 'Red-brown flecks of bio-synthesized corrosive particles fill the air. All creatures within the cloud become Concealed, and all creatures outside become concealed to those within. The cloud deals 5d10 slashing damage to any creature that starts its turn in the area, with a basic Toughness save.
 
-  Metal corroded off a creature adds to the cloud. When a metal creature takes damage,
-  the cloud''s area increases by 5 feet (to a maximum 40-foot burst), and the creature
-  takes @Damage[(floor(@item.level/2)-1)d4[persistent,slashing]] damage. You can Dismiss
-  the cloud.
+  Metal corroded off a creature adds to the cloud. When a metal creature takes damage, the cloud''s area increases by 5 feet (to a maximum 40-foot burst), and the creature takes @Damage[(floor(/2)-1)d4[persistent,slashing]] damage. You can Dismiss the cloud.
 
 
-  Heightened (+2) The slashing damage increases by 1d10 and the persistent damage
-  increases by 1d4.'
+  Heightened (+2) The slashing damage increases by 1d10 and the persistent damage increases by 1d4.'
 tradition: bio_synthetic
 level: 4
 usage_type: prepared

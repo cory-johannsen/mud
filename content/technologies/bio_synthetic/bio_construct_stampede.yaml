@@ -1,13 +1,8 @@
 id: bio_construct_stampede
 name: Bio-Construct Stampede
-description: 'You unleash an unstoppable stampede of panicking bio-constructs. Whether
-  gene-spliced beasts or cloned war-cattle, the stampede is a force of nature that
-  leaves nothing in its wake. The stampede occupies the space of a Gargantuan creature
-  and has a Speed of 60 feet.
+description: 'You unleash an unstoppable stampede of panicking bio-constructs. Whether gene-spliced beasts or cloned war-cattle, the stampede is a force of nature that leaves nothing in its wake. The stampede occupies the space of a Gargantuan creature and has a Speed of 60 feet.
 
-  Arrive(emotion, fear, mental) Foreboding Tremors The sheer energy of a stampede
-  can cause even apex predators to panic. Each creature within a @Template[emanation|distance:60]
-  must attempt a Willpower save with the following effects.
+  Arrive(emotion, fear, mental) Foreboding Tremors The sheer energy of a stampede can cause even apex predators to panic. Each creature within a @Template[emanation|distance:60] must attempt a Willpower save with the following effects.
 
 
   Critical Success The creature is unaffected.
@@ -16,15 +11,10 @@ description: 'You unleash an unstoppable stampede of panicking bio-constructs. W
 
   Failure The creature is Frightened 2.
 
-  Critical Failure The creature is Frightened 3 and @UUID[Compendium.pf2e.conditionitems.Item.Fleeing]
-  for 1 round.
+  Critical Failure The creature is Frightened 3 and Fleeing for 1 round.
 
 
-  DepartFlatten the Earth The stampede Strides up to double its Speed, trampling each
-  Large or smaller creature, hazard, and structure whose space it enters, dealing
-  @Damage[(8d8)[bludgeoning]] damage (basic Reflex save). The stampede ignores and
-  attempts to counteract all difficult terrain it enters caused by debris, overgrowth,
-  rubble, or thick ground cover.'
+  DepartFlatten the Earth The stampede Strides up to double its Speed, trampling each Large or smaller creature, hazard, and structure whose space it enters, dealing @Damage[(8d8)[bludgeoning]] damage (basic Reflex save). The stampede ignores and attempts to counteract all difficult terrain it enters caused by debris, overgrowth, rubble, or thick ground cover.'
 tradition: bio_synthetic
 level: 7
 usage_type: prepared
@@ -36,9 +26,15 @@ save_type: cool
 save_dc: 15
 resolution: save
 effects:
-  on_apply:
-  - type: utility
-    dc: 0
-    description: You summon an unstoppable stampede of panicking beasts. Whether you
-      conjure wild beasts or tamed cattle, the stampede is a force of nature that
-      leaves behind nothing in its wake. The stampede occupies
+  on_failure:
+  - &id001
+    type: condition
+    condition_id: fleeing
+    value: 1
+  - &id002
+    type: condition
+    condition_id: frightened
+    value: 1
+  on_crit_failure:
+  - *id001
+  - *id002

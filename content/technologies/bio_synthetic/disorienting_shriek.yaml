@@ -1,7 +1,6 @@
 id: disorienting_shriek
 name: Disorienting Shriek
-description: 'You emit an ultrasonic bio-synthetic shriek that scrambles nearby creatures''
-  neural pathways. Each creature in the area that can hear must attempt a Willpower save.
+description: 'You emit an ultrasonic bio-synthetic shriek that scrambles nearby creatures'' neural pathways. Each creature in the area that can hear must attempt a Willpower save.
 
 
   Critical Success The target is unaffected and immune to this tech for 1 minute.
@@ -22,12 +21,10 @@ save_type: cool
 save_dc: 15
 resolution: save
 effects:
-  on_apply:
-  - type: utility
-    dc: 0
-    description: 'You give an unsettling, warbling cry that causes nearby creatures
-      to lash out without control. Each creature in the area that can hear must attempt
-      a Willpower save.
-
-
-      Critical Success The target is unaffec'
+  on_failure:
+  - &id001
+    type: condition
+    condition_id: stunned
+    value: 1
+  on_crit_failure:
+  - *id001

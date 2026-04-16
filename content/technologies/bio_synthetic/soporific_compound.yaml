@@ -1,9 +1,6 @@
 id: soporific_compound
 name: Soporific Compound
-description: 'You lace a single food item with a bio-synthesized narcotic compound
-  that induces deep catatonia. The first person to consume the food within the spell''s
-  duration is subject to the Curse of Slumber, using your tech DC as the saving throw
-  DC of the curse.
+description: 'You lace a single food item with a bio-synthesized narcotic compound that induces deep catatonia. The first person to consume the food within the spell''s duration is subject to the Curse of Slumber, using your tech DC as the saving throw DC of the curse.
 
 
   Curse of Slumber (curse, incapacitation, necromancy, sleep)
@@ -11,10 +8,7 @@ description: 'You lace a single food item with a bio-synthesized narcotic compou
   Level 11
 
 
-  Effect You fall asleep for 1 round (or permanently on a critical failure) and seem
-  to be dead; a creature must succeed at a @Check[medicine|dc:30] check to realize
-  you''re alive. Noise doesn''t awaken you, but taking damage gives you a new saving
-  throw against the curse.'
+  Effect You fall asleep for 1 round (or permanently on a critical failure) and seem to be dead; a creature must succeed at a Medicine save (DC 30) check to realize you''re alive. Noise doesn''t awaken you, but taking damage gives you a new saving throw against the curse.'
 tradition: bio_synthetic
 level: 6
 usage_type: prepared
@@ -29,6 +23,4 @@ effects:
   on_apply:
   - type: utility
     dc: 0
-    description: You imbue a single piece of fruit with a curse that leaves its victims
-      in a magical sleep. The first person to eat the fruit within the spell's duration
-      is subject to the Curse of Slumber, using your
+    description: You imbue a single piece of fruit with a curse that leaves its victims in a magical sleep. The first person to eat the fruit within the spell's duration is subject to the Curse of Slumber, using your

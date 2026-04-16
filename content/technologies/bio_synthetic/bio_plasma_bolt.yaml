@@ -1,11 +1,9 @@
 id: bio_plasma_bolt
 name: Bio-Plasma Bolt
-description: 'You launch a bolt of bio-generated plasma. Make a spell attack. On a
-  hit, you deal 2d6 fire damage.
+description: 'You launch a bolt of bio-generated plasma. Make a spell attack. On a hit, you deal 2d6 fire damage.
 
 
-  Heightened (+1) You fire one additional bolt, each requiring its own spell attack
-  roll. Each bolt deals 2d6 fire damage.'
+  Heightened (+1) You fire one additional bolt, each requiring its own spell attack roll. Each bolt deals 2d6 fire damage.'
 tradition: bio_synthetic
 level: 2
 usage_type: prepared
@@ -15,11 +13,11 @@ targets: single
 duration: instant
 resolution: attack
 effects:
-  on_apply:
-  - type: utility
-    dc: 0
-    description: 'You fire a ray of heat and flame. Make a tech attack roll against
-      a single creature. On a hit, the target takes 2d6 fire damage, and on a critical
-      hit, the target takes double damage.
-
-      For each additi'
+  on_hit:
+  - type: damage
+    dice: 2d6
+    damage_type: fire
+  on_crit_hit:
+  - type: damage
+    dice: 4d6
+    damage_type: fire

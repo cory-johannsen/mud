@@ -1,6 +1,6 @@
 id: armor_of_thorn_and_claw
 name: Armor of Thorn and Claw
-description: Razor-sharp thorns and claws erupt from your skin or scales. Whenever a creature touches you or hits you with a melee unarmed attack, it takes 1 piercing damage. Additionally, if you become @UUID[Compendium.pf2e.conditionitems.Item.Grabbed], @UUID[Compendium.pf2e.conditionitems.Item.Restrained], or otherwise held @UUID[Compendium.pf2e.conditionitems.Item.Immobilized] in a creature's grasp, such as by being engulfed or swallowed, the creature takes @Damage[(ceil(@item.rank / 2))d4[persistent,bleed]] damage.Heightened (+2) The piercing damage increases by 2, and the persistent bleed damage increases by 1d4.
+description: Razor-sharp thorns and claws erupt from your skin or scales. Whenever a creature touches you or hits you with a melee unarmed attack, it takes 1 piercing damage. Additionally, if you become Grabbed, Restrained, or otherwise held Immobilized in a creature's grasp, such as by being engulfed or swallowed, the creature takes @Damage[(ceil( / 2))d4[persistent,bleed]] damage.Heightened (+2) The piercing damage increases by 2, and the persistent bleed damage increases by 1d4.
 tradition: bio_synthetic
 level: 1
 usage_type: prepared
@@ -10,8 +10,8 @@ targets: single
 duration: minutes:1
 resolution: none
 effects:
-    on_apply:
-        - type: damage
-          dice: "1"
-          damage_type: piercing
-          dc: 0
+  on_apply:
+  - type: damage
+    dice: '1'
+    damage_type: piercing
+    dc: 0

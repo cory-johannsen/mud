@@ -1,16 +1,11 @@
 id: levitating_stone_array
 name: Levitating Stone Array
-description: 'You bio-synthesize up to six 5-foot stone cubes capable of levitation.
-  Each cube appears in any space within range. If conjured in an occupied space, it
-  fails to appear. Each cube can be Climbed with a @Check[athletics|dc:10] check and
-  has AC 10, Hardness 10, and 40 Hit Points. If any cube moves beyond range, it crumbles
-  to dust.
+description: 'You bio-synthesize up to six 5-foot stone cubes capable of levitation. Each cube appears in any space within range. If conjured in an occupied space, it fails to appear. Each cube can be Climbed with a Athletics save (DC 10) check and has AC 10, Hardness 10, and 40 Hit Points. If any cube moves beyond range, it crumbles to dust.
 
   Each time you Sustain, you can move up to two cubes up to 10 feet each in any direction.
 
 
-  Heightened (+2) The cubes have 10 additional Hit Points, and you can move them an
-  additional 5 feet each time you Sustain.'
+  Heightened (+2) The cubes have 10 additional Hit Points, and you can move them an additional 5 feet each time you Sustain.'
 tradition: bio_synthetic
 level: 4
 usage_type: prepared
@@ -23,6 +18,4 @@ effects:
   on_apply:
   - type: utility
     dc: 0
-    description: You conjure up to six 5-foot stone cubes you can gently move with
-      a gesture. Each cube appears in any space within range, and they're capable
-      of levitating. If you conjure a cube in an occupied space
+    description: You conjure up to six 5-foot stone cubes you can gently move with a gesture. Each cube appears in any space within range, and they're capable of levitating. If you conjure a cube in an occupied space

@@ -1,18 +1,14 @@
 id: restorative_dawn_aura
 name: Restorative Dawn Aura
-description: 'Bright bioluminescent energy radiates from your body in a 20-foot radius
-  (and dim light for the next 20 feet). You gain mental resistance 5. Any undead or
-  corrupted creature that begins its turn adjacent to you must attempt a Willpower save.
+description: 'Bright bioluminescent energy radiates from your body in a 20-foot radius (and dim light for the next 20 feet). You gain mental resistance 5. Any undead or corrupted creature that begins its turn adjacent to you must attempt a Willpower save.
 
   Critical Success The creature is unaffected and immune for the remaining duration.
 
   Success The creature is Sickened 1 until the end of its turn.
 
-  Failure The creature is sickened 1 and becomes Slowed 1 until the end of its next
-  turn.
+  Failure The creature is sickened 1 and becomes Slowed 1 until the end of its next turn.
 
-  Critical Failure As failure, but Sickened 2 and remains slowed 1 for the rest of
-  the duration.Heightened (6th) Mental resistance 10.
+  Critical Failure As failure, but Sickened 2 and remains slowed 1 for the rest of the duration.Heightened (6th) Mental resistance 10.
 
   Heightened (8th) Mental resistance 15.'
 tradition: bio_synthetic
@@ -26,9 +22,15 @@ save_type: cool
 save_dc: 15
 resolution: save
 effects:
-  on_apply:
-  - type: utility
-    dc: 0
-    description: The golden light of a new dawn and the promise of life beyond death
-      radiates from your body. You radiate bright light in a 20-foot radius (and dim
-      light for the next 20 feet) and gain mental resistanc
+  on_failure:
+  - &id001
+    type: condition
+    condition_id: nausea
+    value: 1
+  - &id002
+    type: condition
+    condition_id: slowed
+    value: 1
+  on_crit_failure:
+  - *id001
+  - *id002

@@ -1,6 +1,6 @@
 id: bio_prismatic_discharge
 name: Bio-Prismatic Discharge
-description: You reach upward to wrest down a rainbow and harness its power to connect this world to the heavens. Each creature in the area takes 1d4 spirit damage with a basic Toughness save. Any creature that fails this save is additionally @UUID[Compendium.pf2e.conditionitems.Item.Dazzled] for 1 round. For the spell's duration, an ally who's adjacent to you can Interact and be instantly teleported to an unoccupied space in the spell's area, as long as they don't travel more than 60 feet. This effect has the teleportation trait.Heightened (+2) The damage increases by 2d4, the duration of the dazzled condition on a failed save increases by 1 round, and the maximum distance an ally can use the rainbow to teleport increases by 10 feet.
+description: You reach upward to wrest down a rainbow and harness its power to connect this world to the heavens. Each creature in the area takes 1d4 spirit damage with a basic Toughness save. Any creature that fails this save is additionally Dazzled for 1 round. For the spell's duration, an ally who's adjacent to you can Interact and be instantly teleported to an unoccupied space in the spell's area, as long as they don't travel more than 60 feet. This effect has the teleportation trait.Heightened (+2) The damage increases by 2d4, the duration of the dazzled condition on a failed save increases by 1 round, and the maximum distance an ally can use the rainbow to teleport increases by 10 feet.
 tradition: bio_synthetic
 level: 1
 usage_type: prepared
@@ -12,18 +12,18 @@ save_type: toughness
 save_dc: 15
 resolution: save
 effects:
-    on_success:
-        - type: damage
-          dice: "1"
-          damage_type: spirit
-          dc: 0
-    on_failure:
-        - type: damage
-          dice: 1d4
-          damage_type: spirit
-          dc: 0
-    on_crit_failure:
-        - type: damage
-          dice: 2d4
-          damage_type: spirit
-          dc: 0
+  on_success:
+  - type: damage
+    dice: '1'
+    damage_type: spirit
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 1d4
+    damage_type: spirit
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 2d4
+    damage_type: spirit
+    dc: 0

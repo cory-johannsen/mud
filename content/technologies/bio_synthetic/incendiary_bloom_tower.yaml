@@ -3,32 +3,16 @@ name: Incendiary Bloom Tower
 description: 'Area 30-foot radius, 100-foot tall cylinder
 
 
-  A towering bio-synthetic structure erupts from the ground, growing to massive height
-  and radiating intense bioluminescent heat that mesmerizes observers. The base of
-  the structure takes up a single square and grows 100 feet upwards, while its canopy
-  extends outwards 30 feet, forming the tech''s cylindrical area. The structure then
-  blossoms, producing phosphorescent nodules that burn with white-hot intensity. As
-  the canopy gently sways, burning spores drift to the ground in a shower of flame.
-  Any creature that ends its turn under the canopy takes 6d6 fire damage from the
-  burning spores. Any enemy that can see the structure, even if the enemy is outside
-  the tech''s area, must attempt a will save. This is an emotion, mental, and visual
-  effect. Creatures fascinated with the structure must use at least one of their actions
-  on each of their turns to move toward it.
+  A towering bio-synthetic structure erupts from the ground, growing to massive height and radiating intense bioluminescent heat that mesmerizes observers. The base of the structure takes up a single square and grows 100 feet upwards, while its canopy extends outwards 30 feet, forming the tech''s cylindrical area. The structure then blossoms, producing phosphorescent nodules that burn with white-hot intensity. As the canopy gently sways, burning spores drift to the ground in a shower of flame. Any creature that ends its turn under the canopy takes 6d6 fire damage from the burning spores. Any enemy that can see the structure, even if the enemy is outside the tech''s area, must attempt a will save. This is an emotion, mental, and visual effect. Creatures fascinated with the structure must use at least one of their actions on each of their turns to move toward it.
 
 
   Critical Success The creature is unaffected and is temporarily immune for 24 hours.
 
-  Success The creature is unaffected, but it must attempt a new save at the end of
-  its turn if it can still see the structure.
+  Success The creature is unaffected, but it must attempt a new save at the end of its turn if it can still see the structure.
 
-  Failure The creature is @UUID[Compendium.pf2e.conditionitems.Item.Fascinated] with
-  the structure until the end of its next turn. If it can still see it then, it must
-  attempt a save again.
+  Failure The creature is Fascinated with the structure until the end of its next turn. If it can still see it then, it must attempt a save again.
 
-  Critical Failure The creature is fascinated with the structure until the tech ends.
-  The structure''s fire damage doesn''t end the fascination; other hostile actions
-  end it, as normal. If the fascination ends, the creature must attempt a new save
-  at the end of its turn if it can still see the structure.
+  Critical Failure The creature is fascinated with the structure until the tech ends. The structure''s fire damage doesn''t end the fascination; other hostile actions end it, as normal. If the fascination ends, the creature must attempt a new save at the end of its turn if it can still see the structure.
 
 
   Heightened (+1) The damage increases by 1d6'

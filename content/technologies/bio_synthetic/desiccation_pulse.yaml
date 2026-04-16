@@ -1,8 +1,6 @@
 id: desiccation_pulse
 name: Desiccation Pulse
-description: 'You emit a wave of bio-synthetic dehydration that drains moisture from
-  the area. Each creature in the area takes 4d6 fire damage with a basic Fortitude
-  save. Water in the area evaporates, and plants take double damage.
+description: 'You emit a wave of bio-synthetic dehydration that drains moisture from the area. Each creature in the area takes 4d6 fire damage with a basic Fortitude save. Water in the area evaporates, and plants take double damage.
 
 
   Heightened (+1) The damage increases by 2d6.'
@@ -17,9 +15,11 @@ save_type: toughness
 save_dc: 15
 resolution: save
 effects:
-  on_apply:
-  - type: utility
-    dc: 0
-    description: You fill the area with an oppressive, arid swelter that overwhelms
-      creatures with heat exhaustion. Objects are unaffected. Each creature in the
-      area when the spell is cast or that ends its turn in the
+  on_failure:
+  - type: damage
+    dice: 4d6
+    damage_type: fire
+  on_crit_failure:
+  - type: damage
+    dice: 8d6
+    damage_type: fire

@@ -1,9 +1,6 @@
 id: caustic_grip
 name: Caustic Grip
-description: A bio-synthetic claw grips the target, burning it with concentrated acid.
-  The target takes 2d8 acid damage plus @Damage[floor(@item.level/2)d6[persistent,acid]]
-  damage depending on its Reflex save. A creature can attempt to @UUID[Compendium.pf2e.actionspf2e.Item.Escape]
-  the grip.
+description: A bio-synthetic claw grips the target, burning it with concentrated acid. The target takes 2d8 acid damage plus 1d6 persistent acid damage depending on its Reflex save. A creature can attempt to Escape the grip.
 tradition: bio_synthetic
 level: 2
 usage_type: prepared

@@ -1,8 +1,6 @@
 id: ancestral_echoes
 name: Ancestral Echoes
-description: 'You summon bio-synthetic projections of ancestral organisms. The spirits
-  occupy the area and attack creatures that enter. A creature entering the area takes
-  2d6 mental damage with a basic Willpower save.
+description: 'You summon bio-synthetic projections of ancestral organisms. The spirits occupy the area and attack creatures that enter. A creature entering the area takes 2d6 mental damage with a basic Willpower save.
 
 
   Heightened (+1) The damage increases by 1d6.'
@@ -17,9 +15,11 @@ save_type: cool
 save_dc: 15
 resolution: save
 effects:
-  on_apply:
-  - type: utility
-    dc: 0
-    description: You open the target's eyes to the plethora of spirits surrounding
-      it—and it sees all these spirits as menacing and powerful. The target must attempt
-      a Willpower save.Critical Success The target is unaffe
+  on_failure:
+  - type: damage
+    dice: 2d6
+    damage_type: mental
+  on_crit_failure:
+  - type: damage
+    dice: 4d6
+    damage_type: mental

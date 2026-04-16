@@ -1,18 +1,13 @@
 id: radiant_core_protocol
 name: Radiant Core Protocol
-description: 'You activate a bio-luminescent core implant that fills the area with
-  brilliant light. Your chest begins to glow with radiance. The spell has the following
-  effects on creatures in the area, based on alignment:
+description: 'You activate a bio-luminescent core implant that fills the area with brilliant light. Your chest begins to glow with radiance. The spell has the following effects on creatures in the area, based on alignment:
 
 
-  Good Creatures gain a +1 status bonus to attack rolls and Strikes deal an additional
-  1d6 spirit damage.
+  Good Creatures gain a +1 status bonus to attack rolls and Strikes deal an additional 1d6 spirit damage.
 
-  Neutral Creatures that begin their turn in the emanation must succeed at a Will
-  save or be Dazzled for 1 round.
+  Neutral Creatures that begin their turn in the emanation must succeed at a Will save or be Dazzled for 1 round.
 
-  Evil Creatures that begin their turn in the emanation must succeed at a Willpower save
-  or be Blinded for 1 round.
+  Evil Creatures that begin their turn in the emanation must succeed at a Willpower save or be Blinded for 1 round.
 
 
   Heightened (+2) The additional spirit damage increases by 1d6.'
@@ -27,9 +22,21 @@ save_type: cool
 save_dc: 15
 resolution: save
 effects:
-  on_apply:
-  - type: utility
-    dc: 0
-    description: You speak a fervent prayer for the heavens to assist you and your
-      righteous allies. Your heart begins to glow with a radiance that fills the area
-      with bright light. The spell has the following effects
+  on_failure:
+  - type: damage
+    dice: 1d6
+    damage_type: spirit
+  - &id001
+    type: condition
+    condition_id: blinded
+    value: 1
+  - &id002
+    type: condition
+    condition_id: dazzled
+    value: 1
+  on_crit_failure:
+  - type: damage
+    dice: 2d6
+    damage_type: spirit
+  - *id001
+  - *id002

@@ -1,9 +1,6 @@
 id: bone_shard_volley
 name: Bone Shard Volley
-description: 'You generate an immense organic launcher that fires a salvo of razor-sharp
-  bone shards at all nearby enemies. All creatures in the affected area take 8d10
-  piercing damage, with a basic Reflex save. On a critical failure, the target is
-  knocked @UUID[Compendium.pf2e.conditionitems.Item.Prone] from the force of the impact.
+description: 'You generate an immense organic launcher that fires a salvo of razor-sharp bone shards at all nearby enemies. All creatures in the affected area take 8d10 piercing damage, with a basic Reflex save. On a critical failure, the target is knocked Prone from the force of the impact.
 
 
   Heightened (+1) Increase the damage by 1d10.'

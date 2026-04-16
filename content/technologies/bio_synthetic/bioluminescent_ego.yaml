@@ -1,17 +1,13 @@
 id: bioluminescent_ego
 name: Bioluminescent Ego
-description: 'Brilliant bioluminescent patterns ripple across the target''s body,
-  triggering overconfidence through pheromone feedback. The target attempts a Will
-  save.
+description: 'Brilliant bioluminescent patterns ripple across the target''s body, triggering overconfidence through pheromone feedback. The target attempts a Will save.
 
 
   Critical Success The target is unaffected.
 
-  Success The target sheds bright light in a 20-foot emanation (and dim light to the
-  next 40 feet) and becomes Dazzled for 1 round.
+  Success The target sheds bright light in a 20-foot emanation (and dim light to the next 40 feet) and becomes Dazzled for 1 round.
 
-  Failure The target sheds light as on a success, is Dazzled for 1 minute, and takes
-  a -2 status penalty to AC for the duration.
+  Failure The target sheds light as on a success, is Dazzled for 1 minute, and takes a -2 status penalty to AC for the duration.
 
   Critical Failure As failure, and the target is also Fascinated by itself.'
 tradition: bio_synthetic
@@ -25,13 +21,10 @@ save_type: cool
 save_dc: 15
 resolution: save
 effects:
-  on_apply:
-  - type: utility
-    dc: 0
-    description: 'Elegant flames of incredible beauty coruscate across the target''s
-      body, creating overconfidence and carelessness. The target attempts a Willpower save.
-
-
-      Critical Success The target is unaffected.
-
-      Success T'
+  on_failure:
+  - &id001
+    type: condition
+    condition_id: dazzled
+    value: 1
+  on_crit_failure:
+  - *id001

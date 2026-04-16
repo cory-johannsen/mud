@@ -1,18 +1,15 @@
 id: metabolic_transfer
 name: Metabolic Transfer
-description: 'You bio-chemically siphon speed from a foe and redirect it to yourself
-  or an ally. The effects depend on the foe''s Toughness save.
+description: 'You bio-chemically siphon speed from a foe and redirect it to yourself or an ally. The effects depend on the foe''s Toughness save.
 
 
   Critical Success The targets are unaffected.
 
   Success The foe is Slowed 1 for 1 round, and the other target is unaffected.
 
-  Failure The foe is slowed 1 for 3 rounds and the other target is Quickened for 1
-  round. The extra action can be used to Step, Stride, or Strike.
+  Failure The foe is slowed 1 for 3 rounds and the other target is Quickened for 1 round. The extra action can be used to Step, Stride, or Strike.
 
-  Critical Failure The foe is slowed 1 for 3 minutes and the other target is quickened
-  for 1 minute. The extra action can be used to Step, Stride, or Strike.'
+  Critical Failure The foe is slowed 1 for 3 minutes and the other target is quickened for 1 minute. The extra action can be used to Step, Stride, or Strike.'
 tradition: bio_synthetic
 level: 4
 usage_type: prepared
@@ -24,9 +21,10 @@ save_type: toughness
 save_dc: 15
 resolution: save
 effects:
-  on_apply:
-  - type: utility
-    dc: 0
-    description: You prove that slow and steady doesn't always win the race by turning
-      a foe into a proverbial tortoise and yourself or an ally into a hare, siphoning
-      some of the foe's speed and granting it to the oth
+  on_failure:
+  - &id001
+    type: condition
+    condition_id: slowed
+    value: 1
+  on_crit_failure:
+  - *id001

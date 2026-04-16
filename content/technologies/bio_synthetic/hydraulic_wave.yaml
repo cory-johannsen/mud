@@ -1,16 +1,15 @@
 id: hydraulic_wave
 name: Hydraulic Wave
-description: 'You generate a powerful wave of bio-synthesized fluid. Each creature
-  in a @Template[cone|distance:30] must attempt a Toughness save.
+description: 'You generate a powerful wave of bio-synthesized fluid. Each creature in a @Template[cone|distance:30] must attempt a Toughness save.
 
 
   Critical Success The creature is unaffected.
 
   Success The creature is pushed 5 feet.
 
-  Failure The creature is pushed 10 feet and falls @UUID[Compendium.pf2e.conditionitems.Item.Prone].
+  Failure The creature is pushed 10 feet and falls Prone.
 
-  Critical Failure The creature is pushed 20 feet and falls @UUID[Compendium.pf2e.conditionitems.Item.Prone].'
+  Critical Failure The creature is pushed 20 feet and falls Prone.'
 tradition: bio_synthetic
 level: 2
 usage_type: prepared

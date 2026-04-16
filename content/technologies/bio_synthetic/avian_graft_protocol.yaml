@@ -1,11 +1,6 @@
 id: avian_graft_protocol
 name: Avian Graft Protocol
-description: 'You trigger a mutagenic transformation that reshapes your body into
-  a Medium flight-capable bio-synthetic combat form. When you activate this protocol,
-  choose a listed form configuration. You can decide the specific type of organism
-  (such as an owl or eagle for avian), but this has no effect on the form''s Size
-  or statistics. While in this form, you gain the bio-synthetic trait. You can Dismiss
-  the spell.
+description: 'You trigger a mutagenic transformation that reshapes your body into a Medium flight-capable bio-synthetic combat form. When you activate this protocol, choose a listed form configuration. You can decide the specific type of organism (such as an owl or eagle for avian), but this has no effect on the form''s Size or statistics. While in this form, you gain the bio-synthetic trait. You can Dismiss the spell.
 
   You gain the following statistics and abilities regardless of which form you choose:
 
@@ -16,10 +11,7 @@ description: 'You trigger a mutagenic transformation that reshapes your body int
 
   Low-light vision.
 
-  One or more unarmed melee attacks specific to the form you choose, which are the
-  only attacks you can Strike with. You''re trained with them. Your attack modifier
-  is +16, and your damage bonus is +5. These attacks are Dexterity based. If your
-  attack modifier for Dexterity-based unarmed attacks is higher, you can use it instead.
+  One or more unarmed melee attacks specific to the form you choose, which are the only attacks you can Strike with. You''re trained with them. Your attack modifier is +16, and your damage bonus is +5. These attacks are Dexterity based. If your attack modifier for Dexterity-based unarmed attacks is higher, you can use it instead.
 
   Acrobatics modifier of +16, unless your own modifier is higher.
 
@@ -59,15 +51,9 @@ description: 'You trigger a mutagenic transformation that reshapes your body int
   Melee a stinger, Damage 1d8 piercing plus 1d6 persistent poison.
 
 
-  Heightened (5th) Your battle form is Large and your fly Speed gains a +10-foot status
-  bonus. You must have enough space to expand into or the spell is lost. You instead
-  gain 10 temporary HP, attack modifier +18, damage bonus +8, and Acrobatics +20.
+  Heightened (5th) Your battle form is Large and your fly Speed gains a +10-foot status bonus. You must have enough space to expand into or the spell is lost. You instead gain 10 temporary HP, attack modifier +18, damage bonus +8, and Acrobatics +20.
 
-  Heightened (6th) Your battle form is Huge, your fly Speed gains a +15-foot status
-  bonus, and your attacks have 10-foot reach. You must have enough space to expand
-  into or the spell is lost. You instead gain AC = 21 + your level, 15 temporary HP,
-  attack modifier +21, damage bonus +4 and double damage dice (including persistent
-  damage), and Acrobatics +23.'
+  Heightened (6th) Your battle form is Huge, your fly Speed gains a +15-foot status bonus, and your attacks have 10-foot reach. You must have enough space to expand into or the spell is lost. You instead gain AC = 21 + your level, 15 temporary HP, attack modifier +21, damage bonus +4 and double damage dice (including persistent damage), and Acrobatics +23.'
 tradition: bio_synthetic
 level: 4
 usage_type: prepared
@@ -78,8 +64,18 @@ duration: minutes:1
 resolution: none
 effects:
   on_apply:
-  - type: utility
-    dc: 0
-    description: You harness your mastery of primal forces to reshape your body into
-      a Medium flying animal battle form. When you Use this tech, choose a listed
-      battle form. You can decide the specific type of anima
+  - type: damage
+    dice: 2d8
+    damage_type: piercing
+  - type: damage
+    dice: 2d6
+    damage_type: bludgeoning
+  - type: damage
+    dice: 1d10
+    damage_type: slashing
+  - type: damage
+    dice: 3d6
+    damage_type: piercing
+  - type: damage
+    dice: 1d8
+    damage_type: piercing

@@ -1,12 +1,6 @@
 id: bioluminescent_marker
 name: Bioluminescent Marker
-description: You bombard the area with bio-luminescent spores that adhere to creatures.
-  Each creature in the area when you cast the spell must attempt a Reflex save. On
-  a failure, the creature is outlined in bioluminescent glow for the duration, making
-  it @UUID[Compendium.pf2e.conditionitems.Item.Concealed] ineffective (concealment
-  is negated). If the creature was @UUID[Compendium.pf2e.conditionitems.Item.Invisible],
-  instead of negating its concealment, it becomes @UUID[Compendium.pf2e.conditionitems.Item.Concealed]
-  rather than being @UUID[Compendium.pf2e.conditionitems.Item.Undetected] or @UUID[Compendium.pf2e.conditionitems.Item.Hidden].
+description: You bombard the area with bio-luminescent spores that adhere to creatures. Each creature in the area when you cast the spell must attempt a Reflex save. On a failure, the creature is outlined in bioluminescent glow for the duration, making it Concealed ineffective (concealment is negated). If the creature was Invisible, instead of negating its concealment, it becomes Concealed rather than being Undetected or Hidden.
 tradition: bio_synthetic
 level: 2
 usage_type: prepared
@@ -17,8 +11,6 @@ duration: instant
 resolution: none
 effects:
   on_apply:
-  - type: utility
-    dc: 0
-    description: All creatures in the area when you cast the spell are limned in colorful,
-      heatless fire of a color of your choice for the duration. Visible creatures
-      can't be @UUID[Compendium.pf2e.conditionitems.Item
+  - type: condition
+    condition_id: hidden
+    value: 1

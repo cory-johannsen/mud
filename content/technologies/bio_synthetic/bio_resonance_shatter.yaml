@@ -1,6 +1,6 @@
 id: bio_resonance_shatter
 name: Bio-Resonance Shatter
-description: A large gem floats around the target in an erratic pattern. The gem has 5 Hit Points. Each time a creature Strikes the target, the target attempts a @Check[flat|dc:11|showDC:all]. On a success, the gem blocks the attack, so the attack first damages the gem and then applies any remaining damage to the target. If the gem is reduced to 0 Hit Points, it shatters, immediately dealing 1d8 slashing damage (basic Reflex save) to the creature that destroyed it, as long as that creature is within 10 feet of the target.Heightened (+1) The gem has 5 additional Hit Points, and the damage dealt by its detonation increases by 1d8.
+description: A large gem floats around the target in an erratic pattern. The gem has 5 Hit Points. Each time a creature Strikes the target, the target attempts a Toughness save (DC 11). On a success, the gem blocks the attack, so the attack first damages the gem and then applies any remaining damage to the target. If the gem is reduced to 0 Hit Points, it shatters, immediately dealing 1d8 slashing damage (basic Reflex save) to the creature that destroyed it, as long as that creature is within 10 feet of the target.Heightened (+1) The gem has 5 additional Hit Points, and the damage dealt by its detonation increases by 1d8.
 tradition: bio_synthetic
 level: 1
 usage_type: prepared
@@ -12,18 +12,18 @@ save_type: hustle
 save_dc: 15
 resolution: save
 effects:
-    on_success:
-        - type: damage
-          dice: 1d4
-          damage_type: slashing
-          dc: 0
-    on_failure:
-        - type: damage
-          dice: 1d8
-          damage_type: slashing
-          dc: 0
-    on_crit_failure:
-        - type: damage
-          dice: 2d8
-          damage_type: slashing
-          dc: 0
+  on_success:
+  - type: damage
+    dice: 1d4
+    damage_type: slashing
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 1d8
+    damage_type: slashing
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 2d8
+    damage_type: slashing
+    dc: 0

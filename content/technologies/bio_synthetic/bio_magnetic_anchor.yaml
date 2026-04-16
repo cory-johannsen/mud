@@ -1,11 +1,14 @@
 id: bio_magnetic_anchor
 name: Bio-Magnetic Anchor
-description: |-
-    You partially transform a foe's feet into unwieldy slabs of metal, slowing their steps. The target attempts a Fortitude saving throw.Critical Success The target is unaffected.
-    Success The target is @UUID[Compendium.pf2e.conditionitems.Item.Encumbered] and has weakness 2 to electricity until the end of your next turn. The spell can't be sustained.
-    Failure The target is encumbered and has weakness 2 to electricity.
-    Critical Failure The target is encumbered and has weakness 3 to electricity.
-    @UUID[Compendium.pf2e.spell-effects.Item.tech Effect: Leaden Steps]Heightened (+1) The weakness increases by 1.
+description: 'You partially transform a foe''s feet into unwieldy slabs of metal, slowing their steps. The target attempts a Fortitude saving throw.Critical Success The target is unaffected.
+
+  Success The target is Encumbered and has weakness 2 to electricity until the end of your next turn. The spell can''t be sustained.
+
+  Failure The target is encumbered and has weakness 2 to electricity.
+
+  Critical Failure The target is encumbered and has weakness 3 to electricity.
+
+  @UUID[Compendium.pf2e.spell-effects.Item.tech Effect: Leaden Steps]Heightened (+1) The weakness increases by 1.'
 tradition: bio_synthetic
 level: 1
 usage_type: prepared
@@ -17,9 +20,9 @@ save_type: toughness
 save_dc: 15
 resolution: save
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: |-
-            You partially transform a foe's feet into unwieldy slabs of metal, slowing their steps. The target attempts a Fortitude saving throw.Critical Success The target is unaffected.
-            Success The target is @U
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'You partially transform a foe''s feet into unwieldy slabs of metal, slowing their steps. The target attempts a Fortitude saving throw.Critical Success The target is unaffected.
+
+      Success The target is @U'

@@ -105,7 +105,9 @@ type TechEffect struct {
 	Dice       string `yaml:"dice,omitempty"`
 	DamageType string `yaml:"damage_type,omitempty"`
 	Amount     int    `yaml:"amount,omitempty"`
-	Resource   string `yaml:"resource,omitempty"` // drain: "hp" | "ap"
+	Resource   string `yaml:"resource,omitempty"`    // drain: "hp" | "ap"
+	Persistent bool    `yaml:"persistent,omitempty"`  // damage persists each round (PF2E persistent damage)
+	Multiplier float64 `yaml:"multiplier,omitempty"` // damage multiplier (e.g. 0.5 for basic save half-damage)
 
 	// condition
 	ConditionID string `yaml:"condition_id,omitempty"`
