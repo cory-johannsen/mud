@@ -22,12 +22,12 @@ func makeTestSess(level int) *session.PlayerSession {
 	}
 }
 
-// TestBackfill_NoOpWhenAlreadyApplied verifies that a player who already has
-// the correct number of prepared slots receives no additional slots.
-func TestBackfill_NoOpWhenAlreadyApplied(t *testing.T) {
+// TestBackfill_L2SlotsAlreadyPopulated_ClearedAndReturnedAsPending verifies that
+// a player who has L2+ prepared slots that were auto-assigned (without trainer) has
+// those slots cleared and receives them back as pending grants.
+// REQ-TTA-2: L2+ slots always require a trainer — existing auto-assigned slots must be remediated.
+func TestBackfill_L2SlotsAlreadyPopulated_ClearedAndReturnedAsPending(t *testing.T) {
 	t.Parallel()
-	// Character level 3 with archetype level_up_grants giving 2 level-2 spell slots.
-	// The player already has those 2 slots → backfill must be a no-op.
 	archetype := &ruleset.Archetype{
 		TechnologyGrants: &ruleset.TechnologyGrants{
 			Prepared: &ruleset.PreparedGrants{
@@ -47,10 +47,11 @@ func TestBackfill_NoOpWhenAlreadyApplied(t *testing.T) {
 	job := &ruleset.Job{}
 	merged := ruleset.MergeLevelUpGrants(archetype.LevelUpGrants, job.LevelUpGrants)
 
+	// Pre-populate L2 slots simulating the old buggy auto-assign.
 	prepRepo := &lutPreparedRepo{
 		slots: map[int][]*session.PreparedSlot{
 			1: {{TechID: "creation_tech_x"}, {TechID: "creation_tech_y"}}, // 2 creation slots
-			2: {{TechID: "tech_a"}, {TechID: "tech_b"}},                   // already applied
+			2: {{TechID: "tech_a"}, {TechID: "tech_b"}},                   // wrongly auto-assigned
 		},
 	}
 	hwRepo := &lutHardwiredRepo{}
@@ -58,19 +59,26 @@ func TestBackfill_NoOpWhenAlreadyApplied(t *testing.T) {
 	innateRepo := &lutInnateRepo{}
 
 	sess := makeTestSess(3)
-	err := BackfillLevelUpTechnologies(
+	pending, err := BackfillLevelUpTechnologies(
 		context.Background(), sess, 1,
 		job, archetype, merged, nil,
 		hwRepo, prepRepo, spontRepo, innateRepo, nil,
 	)
 	require.NoError(t, err)
-	// Level-2 slots must not have grown beyond 2.
-	assert.Equal(t, 2, len(prepRepo.slots[2]))
+	// L2 slots must have been cleared from the repo.
+	assert.Empty(t, prepRepo.slots[2], "auto-assigned L2 slots should be cleared")
+	// Pending grants must be returned for the 2 cleared slots.
+	require.NotNil(t, pending, "pending grants must be returned for cleared L2 slots")
+	require.NotNil(t, pending.Prepared)
+	assert.Equal(t, 2, pending.Prepared.SlotsByLevel[2], "2 pending L2 slots expected")
+	// L1 creation slots must remain untouched.
+	assert.Len(t, prepRepo.slots[1], 2, "L1 creation slots must be preserved")
 }
 
-// TestBackfill_AppliesMissingPreparedSlots verifies that a player at level 3 who
-// is missing the level-3 archetype grant (2 level-2 slots) receives them.
-func TestBackfill_AppliesMissingPreparedSlots(t *testing.T) {
+// TestBackfill_MissingL2SlotsReturnedAsPending verifies that a player at level 3
+// who is missing L2 prepared slots receives them as pending grants (not auto-assigned).
+// REQ-TTA-2: L2+ prepared slots must go through the trainer system.
+func TestBackfill_MissingL2SlotsReturnedAsPending(t *testing.T) {
 	t.Parallel()
 	archetype := &ruleset.Archetype{
 		TechnologyGrants: &ruleset.TechnologyGrants{
@@ -95,24 +103,25 @@ func TestBackfill_AppliesMissingPreparedSlots(t *testing.T) {
 	prepRepo := &lutPreparedRepo{
 		slots: map[int][]*session.PreparedSlot{
 			1: {{TechID: "creation_x"}, {TechID: "creation_y"}}, // creation slots present
-			// level-2 slots missing
+			// L2 slots missing — expect pending, NOT auto-assign
 		},
 	}
 	hwRepo := &lutHardwiredRepo{}
 
 	sess := makeTestSess(3)
-	err := BackfillLevelUpTechnologies(
+	pending, err := BackfillLevelUpTechnologies(
 		context.Background(), sess, 1,
 		job, archetype, merged, nil,
 		hwRepo, prepRepo, &lutSpontaneousRepo{}, &lutInnateRepo{}, nil,
 	)
 	require.NoError(t, err)
-	// 2 level-2 slots must now exist (auto-filled from pool).
-	require.Len(t, prepRepo.slots[2], 2)
-	// Both should be valid pool entries.
-	for _, slot := range prepRepo.slots[2] {
-		assert.NotEmpty(t, slot.TechID)
-	}
+	// L2 slots must NOT have been auto-assigned.
+	assert.Empty(t, prepRepo.slots[2], "L2 slots must not be auto-assigned")
+	// Pending grants must be returned.
+	require.NotNil(t, pending)
+	require.NotNil(t, pending.Prepared)
+	assert.Equal(t, 2, pending.Prepared.SlotsByLevel[2])
+	assert.Len(t, pending.Prepared.Pool, 3)
 }
 
 // TestBackfill_AppliesMissingHardwiredTechs verifies that hardwired techs from
@@ -134,12 +143,13 @@ func TestBackfill_AppliesMissingHardwiredTechs(t *testing.T) {
 	sess := makeTestSess(4)
 	sess.HardwiredTechs = []string{"creation_tech"}
 
-	err := BackfillLevelUpTechnologies(
+	pending, err := BackfillLevelUpTechnologies(
 		context.Background(), sess, 1,
 		job, archetype, merged, nil,
 		hwRepo, prepRepo, &lutSpontaneousRepo{}, &lutInnateRepo{}, nil,
 	)
 	require.NoError(t, err)
+	assert.Nil(t, pending, "hardwired-only backfill must return nil pending grants")
 	assert.Contains(t, hwRepo.stored, "passive_tech_2")
 	assert.Contains(t, hwRepo.stored, "passive_tech_4")
 	assert.Contains(t, hwRepo.stored, "creation_tech") // must not be removed
@@ -161,7 +171,7 @@ func TestBackfill_SkipsHigherLevels(t *testing.T) {
 	hwRepo := &lutHardwiredRepo{}
 	sess := makeTestSess(3)
 
-	err := BackfillLevelUpTechnologies(
+	_, err := BackfillLevelUpTechnologies(
 		context.Background(), sess, 1,
 		job, archetype, merged, nil,
 		hwRepo, &lutPreparedRepo{}, &lutSpontaneousRepo{}, &lutInnateRepo{}, nil,
@@ -171,14 +181,15 @@ func TestBackfill_SkipsHigherLevels(t *testing.T) {
 	assert.NotContains(t, hwRepo.stored, "tech_lvl5")
 }
 
-// TestProperty_Backfill_IdempotentPreparedSlots verifies that calling
-// BackfillLevelUpTechnologies twice produces the same slot count as calling it once.
-func TestProperty_Backfill_IdempotentPreparedSlots(t *testing.T) {
+// TestProperty_Backfill_L2PlusNeverAutoAssigned verifies that L2+ prepared slots
+// are never auto-assigned by the backfill — they are always returned as pending.
+// REQ-TTA-2: L2+ prepared grants unconditionally require a trainer.
+func TestProperty_Backfill_L2PlusNeverAutoAssigned(t *testing.T) {
 	t.Parallel()
 	rapid.Check(t, func(rt *rapid.T) {
-		level := rapid.IntRange(2, 8).Draw(rt, "level")
+		level := rapid.IntRange(3, 8).Draw(rt, "level")
 		slotsPerLevel := rapid.IntRange(1, 3).Draw(rt, "slots")
-		poolSize := rapid.IntRange(2, 5).Draw(rt, "poolSize")
+		poolSize := rapid.IntRange(slotsPerLevel, 5).Draw(rt, "poolSize")
 
 		pool := make([]ruleset.PreparedEntry, poolSize)
 		for i := range pool {
@@ -187,7 +198,7 @@ func TestProperty_Backfill_IdempotentPreparedSlots(t *testing.T) {
 
 		archetype := &ruleset.Archetype{
 			LevelUpGrants: map[int]*ruleset.TechnologyGrants{
-				2: {Prepared: &ruleset.PreparedGrants{
+				3: {Prepared: &ruleset.PreparedGrants{
 					SlotsByLevel: map[int]int{2: slotsPerLevel},
 					Pool:         pool,
 				}},
@@ -201,21 +212,64 @@ func TestProperty_Backfill_IdempotentPreparedSlots(t *testing.T) {
 
 		ctx := context.Background()
 
-		// First call.
-		err := BackfillLevelUpTechnologies(ctx, sess, 1, job, archetype, merged, nil,
+		pending, err := BackfillLevelUpTechnologies(ctx, sess, 1, job, archetype, merged, nil,
 			&lutHardwiredRepo{}, prepRepo, &lutSpontaneousRepo{}, &lutInnateRepo{}, nil)
 		require.NoError(rt, err)
-		countAfterFirst := len(prepRepo.slots[2])
 
-		// Second call (idempotent).
-		sess2 := makeTestSess(level)
-		sess2.PreparedTechs = sess.PreparedTechs
-		err = BackfillLevelUpTechnologies(ctx, sess2, 1, job, archetype, merged, nil,
-			&lutHardwiredRepo{}, prepRepo, &lutSpontaneousRepo{}, &lutInnateRepo{}, nil)
-		require.NoError(rt, err)
-		countAfterSecond := len(prepRepo.slots[2])
+		// L2 slots must NEVER be auto-assigned.
+		assert.Empty(rt, prepRepo.slots[2], "L2+ slots must never be auto-assigned by backfill")
 
-		assert.Equal(rt, countAfterFirst, countAfterSecond,
-			"second call must not add more slots (idempotent)")
+		// Pending grants must be returned.
+		if slotsPerLevel > 0 {
+			require.NotNil(rt, pending, "pending grants must be returned for L2+ slots")
+			require.NotNil(rt, pending.Prepared)
+			assert.Equal(rt, slotsPerLevel, pending.Prepared.SlotsByLevel[2])
+		}
 	})
+}
+
+// TestBackfill_L1SlotsStillAutoAssigned verifies that L1 prepared slots continue
+// to be auto-assigned as before (trainer gate only applies to L2+).
+func TestBackfill_L1SlotsStillAutoAssigned(t *testing.T) {
+	t.Parallel()
+	// Creation grant: 1 L1 slot. Level-up at charLevel 2: 1 more L1 slot.
+	// Total expected L1: 2. Existing: 1 (creation). Delta: 1 → auto-assign.
+	archetype := &ruleset.Archetype{
+		TechnologyGrants: &ruleset.TechnologyGrants{
+			Prepared: &ruleset.PreparedGrants{
+				SlotsByLevel: map[int]int{1: 1}, // creation: 1 L1 slot
+			},
+		},
+		LevelUpGrants: map[int]*ruleset.TechnologyGrants{
+			2: {Prepared: &ruleset.PreparedGrants{
+				SlotsByLevel: map[int]int{1: 1}, // extra L1 slot at charLevel 2
+				Pool: []ruleset.PreparedEntry{
+					{ID: "extra_l1", Level: 1},
+				},
+			}},
+		},
+	}
+	job := &ruleset.Job{}
+	merged := ruleset.MergeLevelUpGrants(archetype.LevelUpGrants, job.LevelUpGrants)
+
+	prepRepo := &lutPreparedRepo{
+		slots: map[int][]*session.PreparedSlot{
+			1: {{TechID: "creation_l1"}}, // 1 existing L1 slot
+		},
+	}
+	hwRepo := &lutHardwiredRepo{}
+	sess := makeTestSess(2)
+
+	pending, err := BackfillLevelUpTechnologies(
+		context.Background(), sess, 1,
+		job, archetype, merged, nil,
+		hwRepo, prepRepo, &lutSpontaneousRepo{}, &lutInnateRepo{}, nil,
+	)
+	require.NoError(t, err)
+	// L1 slot should be auto-assigned (pool size == open slots).
+	assert.Len(t, prepRepo.slots[1], 2, "L1 missing slot should be auto-assigned")
+	// No pending grants for L1.
+	if pending != nil && pending.Prepared != nil {
+		assert.Equal(t, 0, pending.Prepared.SlotsByLevel[1], "no L1 pending slots expected")
+	}
 }

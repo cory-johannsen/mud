@@ -46,6 +46,12 @@ func (r *lutPreparedRepo) Set(_ context.Context, _ int64, level, index int, tech
 	return nil
 }
 func (r *lutPreparedRepo) DeleteAll(_ context.Context, _ int64) error { r.slots = nil; return nil }
+func (r *lutPreparedRepo) DeleteAtSpellLevel(_ context.Context, _ int64, spellLevel int) error {
+	if r.slots != nil {
+		delete(r.slots, spellLevel)
+	}
+	return nil
+}
 func (r *lutPreparedRepo) SetExpended(_ context.Context, _ int64, level, index int, expended bool) error {
 	if r.slots != nil {
 		if slots, ok := r.slots[level]; ok && index < len(slots) && slots[index] != nil {

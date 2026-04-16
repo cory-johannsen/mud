@@ -106,3 +106,18 @@ func (r *CharacterPreparedTechRepository) DeleteAll(ctx context.Context, charact
 	}
 	return nil
 }
+
+// DeleteAtSpellLevel removes all prepared slot assignments for the character at the given spell level.
+//
+// Precondition: characterID > 0; spellLevel >= 1.
+// Postcondition: No rows with (character_id, slot_level = spellLevel) remain.
+func (r *CharacterPreparedTechRepository) DeleteAtSpellLevel(ctx context.Context, characterID int64, spellLevel int) error {
+	_, err := r.db.Exec(ctx,
+		`DELETE FROM character_prepared_technologies WHERE character_id = $1 AND slot_level = $2`,
+		characterID, spellLevel,
+	)
+	if err != nil {
+		return fmt.Errorf("CharacterPreparedTechRepository.DeleteAtSpellLevel: %w", err)
+	}
+	return nil
+}

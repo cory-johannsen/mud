@@ -1781,14 +1781,60 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 				archetypeLUG = archetype.LevelUpGrants
 			}
 			mergedLUG := ruleset.MergeLevelUpGrants(archetypeLUG, job.LevelUpGrants)
-			if err := BackfillLevelUpTechnologies(stream.Context(), sess, characterID,
+			pendingFromBackfill, backfillErr := BackfillLevelUpTechnologies(stream.Context(), sess, characterID,
 				job, archetype, mergedLUG, s.techRegistry,
 				s.hardwiredTechRepo, s.preparedTechRepo, s.spontaneousTechRepo, s.innateTechRepo, s.spontaneousUsePoolRepo,
-			); err != nil {
+			)
+			if backfillErr != nil {
 				s.logger.Warn("BackfillLevelUpTechnologies failed",
 					zap.Int64("character_id", characterID),
-					zap.Error(err),
+					zap.Error(backfillErr),
 				)
+			}
+			// REQ-TTA-2: Register any cleared/missing L2+ prepared slots as pending trainer grants
+			// and issue the corresponding find-trainer quests.
+			if pendingFromBackfill != nil && characterID > 0 {
+				ctx := stream.Context()
+				if sess.PendingTechGrants == nil {
+					sess.PendingTechGrants = make(map[int]*ruleset.TechnologyGrants)
+				}
+				// Use sess.Level as the key because we don't know the exact character level
+				// at which each tech level was granted. The trainer resolution uses the
+				// grants' SlotsByLevel to determine what to assign, so the key only needs
+				// to be unique and representative.
+				const backfillCharLevel = 0 // sentinel: backfill-recovered pending grants
+				sess.PendingTechGrants[backfillCharLevel] = pendingFromBackfill
+				if s.progressRepo != nil {
+					levels := make([]int, 0, len(sess.PendingTechGrants))
+					for lvl := range sess.PendingTechGrants {
+						levels = append(levels, lvl)
+					}
+					sort.Ints(levels)
+					if err := s.progressRepo.SetPendingTechLevels(ctx, characterID, levels); err != nil {
+						s.logger.Warn("BackfillLevelUpTechnologies: SetPendingTechLevels failed", zap.Error(err))
+					}
+				}
+				if s.pendingTechSlotsRepo != nil && pendingFromBackfill.Prepared != nil {
+					for techLvl, slots := range pendingFromBackfill.Prepared.SlotsByLevel {
+						tradition := ""
+						for _, e := range pendingFromBackfill.Prepared.Pool {
+							if e.Level == techLvl && s.techRegistry != nil {
+								if def, defOK := s.techRegistry.Get(e.ID); defOK {
+									tradition = string(def.Tradition)
+									break
+								}
+							}
+						}
+						for i := 0; i < slots; i++ {
+							if err := s.pendingTechSlotsRepo.AddPendingTechSlot(
+								ctx, characterID, backfillCharLevel, techLvl, tradition, "prepared",
+							); err != nil {
+								s.logger.Warn("BackfillLevelUpTechnologies: AddPendingTechSlot failed", zap.Error(err))
+							}
+						}
+					}
+				}
+				s.issueTechTrainerQuests(ctx, sess, backfillCharLevel, pendingFromBackfill)
 			}
 		}
 	}

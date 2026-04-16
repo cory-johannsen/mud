@@ -30,6 +30,11 @@ type PreparedTechRepo interface {
 	GetAll(ctx context.Context, characterID int64) (map[int][]*session.PreparedSlot, error)
 	Set(ctx context.Context, characterID int64, level, index int, techID string) error
 	DeleteAll(ctx context.Context, characterID int64) error
+	// DeleteAtSpellLevel removes all prepared slots at exactly the given spell level.
+	//
+	// Precondition: characterID > 0; spellLevel >= 1.
+	// Postcondition: No rows with (character_id, slot_level = spellLevel) remain.
+	DeleteAtSpellLevel(ctx context.Context, characterID int64, spellLevel int) error
 	// SetExpended marks or unmarks a single prepared slot as expended.
 	//
 	// Precondition: characterID > 0; level >= 1; index >= 0.
@@ -1257,10 +1262,15 @@ func BackfillLevelUpTechnologies(
 	spontRepo SpontaneousTechRepo,
 	innateRepo InnateTechRepo,
 	usePoolRepo SpontaneousUsePoolRepo,
-) error {
+) (*ruleset.TechnologyGrants, error) {
 	if characterID == 0 || sess.Level < 2 || len(mergedLevelUpGrants) == 0 {
-		return nil
+		return nil, nil
 	}
+
+	// pendingPrepared accumulates L2+ prepared slots that require a trainer visit.
+	// REQ-TTA-2: L2+ prepared slots are NEVER auto-assigned; they must go through the
+	// trainer system. Any existing pool-assigned L2+ slots are removed and returned here.
+	var pendingPrepared *ruleset.PreparedGrants
 
 	// --- Prepared slots backfill ---
 	if prepRepo != nil {
@@ -1314,7 +1324,7 @@ func BackfillLevelUpTechnologies(
 			addPrepGrant(archetype.TechnologyGrants.Prepared, true)
 		}
 
-		// Level-up grants: count slots AND add pool entries for auto-fill.
+		// Level-up grants: count slots AND add pool entries.
 		for lvl := 2; lvl <= sess.Level; lvl++ {
 			g := mergedLevelUpGrants[lvl]
 			if g == nil || g.Prepared == nil {
@@ -1326,7 +1336,7 @@ func BackfillLevelUpTechnologies(
 		// Read actual state.
 		existingPrep, err := prepRepo.GetAll(ctx, characterID)
 		if err != nil {
-			return fmt.Errorf("BackfillLevelUpTechnologies GetAll: %w", err)
+			return nil, fmt.Errorf("BackfillLevelUpTechnologies GetAll: %w", err)
 		}
 
 		// Sort spell levels for deterministic order.
@@ -1338,6 +1348,49 @@ func BackfillLevelUpTechnologies(
 
 		for _, spellLvl := range spellLevels {
 			agg := bySpellLevel[spellLvl]
+
+			// REQ-TTA-2: L2+ prepared slots always require a trainer — never auto-assign.
+			// For any existing pool-assigned slots at L2+ (previously auto-assigned by the
+			// buggy backfill), clear them and return them as pending.
+			if spellLvl >= 2 {
+				actual := len(existingPrep[spellLvl])
+				// Count fixed entries at this spell level — those may stay.
+				fixedCount := 0
+				for _, e := range agg.fixed {
+					if e.Level == spellLvl {
+						fixedCount++
+					}
+				}
+				// Pool-assigned = total assigned minus fixed-assigned.
+				// Any pool slot at L2+ was auto-assigned without trainer — remove it.
+				poolAssigned := actual - fixedCount
+				if poolAssigned > 0 {
+					// Clear all slots at this level; the fixed ones will be re-applied when the
+					// trainer resolves the pending grant.
+					if delErr := prepRepo.DeleteAtSpellLevel(ctx, characterID, spellLvl); delErr != nil {
+						return nil, fmt.Errorf("BackfillLevelUpTechnologies clear auto-assigned spell level %d: %w", spellLvl, delErr)
+					}
+					// Remove from session as well.
+					if sess.PreparedTechs != nil {
+						delete(sess.PreparedTechs, spellLvl)
+					}
+					actual = fixedCount
+					existingPrep[spellLvl] = existingPrep[spellLvl][:fixedCount]
+				}
+				// Compute remaining pending slots (expected − what's actually assigned).
+				pending := agg.expectedSlots - actual
+				if pending > 0 {
+					if pendingPrepared == nil {
+						pendingPrepared = &ruleset.PreparedGrants{SlotsByLevel: make(map[int]int)}
+					}
+					pendingPrepared.SlotsByLevel[spellLvl] = pending
+					pendingPrepared.Pool = append(pendingPrepared.Pool, agg.pool...)
+					pendingPrepared.Fixed = append(pendingPrepared.Fixed, agg.fixed...)
+				}
+				continue
+			}
+
+			// Spell level 1: auto-assign as before.
 			actual := len(existingPrep[spellLvl])
 			delta := agg.expectedSlots - actual
 			if delta <= 0 {
@@ -1353,12 +1406,12 @@ func BackfillLevelUpTechnologies(
 			if applyErr := LevelUpTechnologies(ctx, sess, characterID, deltaGrant, techReg, nil,
 				hwRepo, prepRepo, spontRepo, innateRepo, usePoolRepo,
 			); applyErr != nil {
-				return fmt.Errorf("BackfillLevelUpTechnologies prepared spell level %d: %w", spellLvl, applyErr)
+				return nil, fmt.Errorf("BackfillLevelUpTechnologies prepared spell level %d: %w", spellLvl, applyErr)
 			}
 			// Refresh for next spell level's delta check.
 			existingPrep, err = prepRepo.GetAll(ctx, characterID)
 			if err != nil {
-				return fmt.Errorf("BackfillLevelUpTechnologies refresh GetAll: %w", err)
+				return nil, fmt.Errorf("BackfillLevelUpTechnologies refresh GetAll: %w", err)
 			}
 		}
 	}
@@ -1387,10 +1440,14 @@ func BackfillLevelUpTechnologies(
 			if applyErr := LevelUpTechnologies(ctx, sess, characterID, hwGrant, techReg, nil,
 				hwRepo, prepRepo, spontRepo, innateRepo, usePoolRepo,
 			); applyErr != nil {
-				return fmt.Errorf("BackfillLevelUpTechnologies hardwired: %w", applyErr)
+				return nil, fmt.Errorf("BackfillLevelUpTechnologies hardwired: %w", applyErr)
 			}
 		}
 	}
 
-	return nil
+	// Return any L2+ pending prepared grants so the caller can register them and issue trainer quests.
+	if pendingPrepared != nil {
+		return &ruleset.TechnologyGrants{Prepared: pendingPrepared}, nil
+	}
+	return nil, nil
 }
