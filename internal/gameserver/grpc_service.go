@@ -7482,10 +7482,12 @@ func (s *GameServiceServer) handleJobGrants(uid string) (*gamev1.ServerEvent, er
 	// Archetype grants take the base position; job-specific entries overlay or extend them.
 	var archetypeLevelUpFeatGrants map[int]*ruleset.FeatGrants
 	var archetypeLevelUpGrants map[int]*ruleset.TechnologyGrants
+	var archetypeCreationTechGrants *ruleset.TechnologyGrants
 	if s.archetypes != nil {
 		if arch, ok := s.archetypes[job.Archetype]; ok {
 			archetypeLevelUpFeatGrants = arch.LevelUpFeatGrants
 			archetypeLevelUpGrants = arch.LevelUpGrants
+			archetypeCreationTechGrants = arch.TechnologyGrants
 		}
 	}
 	mergedFeatGrants := ruleset.MergeFeatLevelUpGrants(archetypeLevelUpFeatGrants, job.LevelUpFeatGrants)
@@ -7508,6 +7510,7 @@ func (s *GameServiceServer) handleJobGrants(uid string) (*gamev1.ServerEvent, er
 	// Level 1 (character creation) grants — after choicePoolIDs is fully populated.
 	addFeatGrants(job.FeatGrants, 1)
 	addTechGrants(job.TechnologyGrants, 1)
+	addTechGrants(archetypeCreationTechGrants, 1)
 
 	// Level-up grants — only up to the player's current level.
 	maxLevel := sess.Level

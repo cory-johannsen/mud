@@ -611,6 +611,75 @@ func TestHandleJobGrants_SpontaneousUsesByLevel_EmittedAsSyntheticGrants(t *test
 	assert.Equal(t, int32(1), useGrants[0].GrantLevel)
 }
 
+// TestHandleJobGrants_ArchetypeCreationTechGrants_IncludedAtLevel1 verifies that the archetype's
+// creation-time TechnologyGrants (SlotsByLevel) appear in the JobGrantsResponse at GrantLevel=1.
+// This is the root cause of issue #102: archetype creation grants were omitted from the job panel.
+//
+// Precondition: archetype has TechnologyGrants.Prepared.SlotsByLevel = {1: 1}.
+// Postcondition: response has a prepared_slot grant at GrantLevel=1 from the archetype.
+func TestHandleJobGrants_ArchetypeCreationTechGrants_IncludedAtLevel1(t *testing.T) {
+	const uid = "jg-arch-creation-tech"
+
+	job := &ruleset.Job{
+		ID:        "scout",
+		Name:      "Scout",
+		Archetype: "drifter",
+		TechnologyGrants: &ruleset.TechnologyGrants{
+			Hardwired: []string{"night_vision"},
+		},
+	}
+	arch := &ruleset.Archetype{
+		ID:   "drifter",
+		Name: "Drifter",
+		TechnologyGrants: &ruleset.TechnologyGrants{
+			Prepared: &ruleset.PreparedGrants{
+				SlotsByLevel: map[int]int{1: 1},
+				Pool: []ruleset.PreparedEntry{
+					{ID: "bio_electric_discharge", Level: 1},
+					{ID: "bio_acid_spit", Level: 1},
+				},
+			},
+		},
+	}
+
+	svc, sessMgr := buildJobGrantsServiceWithArchetype(t, job, arch, nil)
+
+	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID: uid, Username: "Scout", CharName: "Scout",
+		RoomID: "room_a", CurrentHP: 20, MaxHP: 20, Role: "player",
+	})
+	require.NoError(t, err)
+	sess.Class = "scout"
+	sess.Level = 1
+
+	resp, err := svc.handleJobGrants(uid)
+	require.NoError(t, err)
+	require.NotNil(t, resp)
+
+	gr := resp.GetJobGrantsResponse()
+	require.NotNil(t, gr)
+
+	// Must have: night_vision (job hardwired) + 1 prepared_slot (archetype creation grant).
+	var hwGrant, slotGrant *gamev1.JobTechGrant
+	for _, tg := range gr.TechGrants {
+		switch tg.TechType {
+		case "hardwired":
+			hwGrant = tg
+		case "prepared_slot":
+			slotGrant = tg
+		}
+	}
+
+	require.NotNil(t, hwGrant, "job hardwired grant must be present")
+	assert.Equal(t, "night_vision", hwGrant.TechId)
+	assert.Equal(t, int32(1), hwGrant.GrantLevel)
+
+	require.NotNil(t, slotGrant, "REQ-102: archetype creation prepared_slot grant must be present at level 1")
+	assert.Equal(t, int32(1), slotGrant.TechLevel, "archetype level-1 slot must have TechLevel=1")
+	assert.Equal(t, int32(1), slotGrant.GrantLevel, "archetype creation grant must be at GrantLevel=1")
+	assert.Equal(t, "prepared_slot", slotGrant.TechType)
+}
+
 // TestHandleJobGrants_LevelUp_SlotAndUseGrantsAtCorrectLevel verifies that slot and use grants
 // from LevelUpGrants carry the correct GrantLevel matching the level-up tier they belong to.
 //
