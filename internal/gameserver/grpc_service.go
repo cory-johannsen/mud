@@ -593,6 +593,8 @@ func NewGameServiceServer(
 		}
 		// REQ-BUG61-1: wire pushCharacterSheet so the web UI Stats tab updates after XP award.
 		s.combatH.SetPushCharacterSheetFn(s.pushCharacterSheet)
+		// Wire pushQuestLogView so the quest drawer auto-refreshes when a kill quest completes.
+		s.combatH.SetPushQuestLogFn(s.pushQuestLogView)
 		// REQ-BUG99-1: wire applyLevelUpTechGrants so organic XP level-ups issue trainer quests.
 		s.combatH.SetOnLevelUpFn(s.applyLevelUpTechGrants)
 		// REQ-BUG92-1: wire pushInventory so the web UI Inventory tab updates after currency award.

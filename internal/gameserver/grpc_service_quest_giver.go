@@ -5,6 +5,9 @@ import (
 	"fmt"
 	"strings"
 
+	"go.uber.org/zap"
+	"google.golang.org/protobuf/proto"
+
 	"github.com/cory-johannsen/mud/internal/game/npc"
 	questpkg "github.com/cory-johannsen/mud/internal/game/quest"
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
@@ -166,10 +169,20 @@ func (s *GameServiceServer) handleTalk(uid string, req *gamev1.TalkRequest) (*ga
 				readyIDs = append(readyIDs, qid)
 			}
 		}
+		anyCompleted := false
 		for _, qid := range readyIDs {
 			def := reg[qid]
 			msgs, err := s.questSvc.Complete(context.Background(), sess, sess.CharacterID, qid)
-			if err != nil || len(msgs) == 0 {
+			if err != nil {
+				s.logger.Warn("handleTalk: quest completion failed",
+					zap.String("uid", uid),
+					zap.String("quest_id", qid),
+					zap.Error(err),
+				)
+				s.pushEventToUID(uid, messageEvent(fmt.Sprintf("Could not complete quest %q: %v", def.Title, err)))
+				continue
+			}
+			if len(msgs) == 0 {
 				continue
 			}
 			itemRewards := make([]string, 0, len(def.Rewards.Items))
@@ -194,6 +207,12 @@ func (s *GameServiceServer) handleTalk(uid string, req *gamev1.TalkRequest) (*ga
 				},
 			})
 			s.pushCharacterSheet(sess)
+			anyCompleted = true
+		}
+		// Push an updated QuestLogView so the frontend quest drawer reflects the
+		// removed quest without requiring the player to close and reopen the drawer.
+		if anyCompleted {
+			s.pushQuestLogView(uid)
 		}
 	}
 
@@ -252,4 +271,29 @@ func (s *GameServiceServer) handleQuestLog(uid string) (*gamev1.ServerEvent, err
 			},
 		},
 	}, nil
+}
+
+// pushQuestLogView builds and pushes a QuestLogView event to the player's event stream.
+// It is called after quest completion events so the frontend quest drawer automatically
+// reflects the updated active-quest list without requiring the player to close and reopen it.
+//
+// Precondition: uid identifies an active player session.
+// Postcondition: A QuestLogView is pushed to the player's stream; errors are logged and swallowed.
+func (s *GameServiceServer) pushQuestLogView(uid string) {
+	evt, err := s.handleQuestLog(uid)
+	if err != nil || evt == nil {
+		return
+	}
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok || sess.Entity == nil {
+		return
+	}
+	data, err := proto.Marshal(evt)
+	if err != nil {
+		s.logger.Warn("pushQuestLogView: marshal failed", zap.String("uid", uid), zap.Error(err))
+		return
+	}
+	if err := sess.Entity.Push(data); err != nil {
+		s.logger.Warn("pushQuestLogView: push failed", zap.String("uid", uid), zap.Error(err))
+	}
 }

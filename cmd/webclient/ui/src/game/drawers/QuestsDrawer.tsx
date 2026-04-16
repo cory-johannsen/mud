@@ -74,9 +74,11 @@ function QuestCard({ quest }: { quest: QuestEntryView }) {
 export function QuestsDrawer({ onClose }: { onClose: () => void }) {
   const { state, sendMessage } = useGame()
 
+  // Refresh quest log on mount and whenever a quest completes (so the completed
+  // quest is removed from the drawer without requiring the player to close/reopen).
   useEffect(() => {
     sendMessage('QuestLogRequest', {})
-  }, [sendMessage])
+  }, [sendMessage, state.questCompleteQueue.length])
 
   const questLogView = state.questLogView
   const quests = questLogView?.quests ?? null

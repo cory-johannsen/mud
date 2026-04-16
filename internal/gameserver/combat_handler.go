@@ -122,6 +122,10 @@ type CombatHandler struct {
 	// an updated CharacterSheetView to the player so the web UI Stats tab refreshes.
 	// May be nil; no-op when nil.
 	pushCharacterSheetFn func(sess *session.PlayerSession)
+	// pushQuestLogFn is an optional callback invoked after quest completion to push
+	// an updated QuestLogView to the player so the web UI quest drawer auto-refreshes.
+	// May be nil; no-op when nil.
+	pushQuestLogFn func(uid string)
 	// pushInventoryFn is an optional callback invoked after currency loot is awarded to push
 	// an updated InventoryView to the player so the web UI Inventory tab refreshes.
 	// May be nil; no-op when nil.
@@ -272,6 +276,15 @@ func (h *CombatHandler) SetQuestService(svc *quest.Service) {
 // Postcondition: fn is called once per XP award with the receiving session.
 func (h *CombatHandler) SetPushCharacterSheetFn(fn func(sess *session.PlayerSession)) {
 	h.pushCharacterSheetFn = fn
+}
+
+// SetPushQuestLogFn registers a callback invoked after kill-based quest completion
+// to push an updated QuestLogView to the player so the web UI quest drawer refreshes.
+//
+// Precondition: fn may be nil (no-op when nil).
+// Postcondition: fn is called with the player UID after any quest completes via kill.
+func (h *CombatHandler) SetPushQuestLogFn(fn func(uid string)) {
+	h.pushQuestLogFn = fn
 }
 
 // SetPushInventoryFn registers a callback called after currency loot is distributed
@@ -4263,6 +4276,11 @@ func (h *CombatHandler) removeDeadNPCsLocked(cbt *combat.Combat) {
 				// Stats tab shows pending boosts without requiring a relog.
 				if len(completions) > 0 && h.pushCharacterSheetFn != nil {
 					h.pushCharacterSheetFn(p)
+				}
+				// Push updated QuestLogView so the quest drawer removes the completed
+				// quest automatically without requiring the player to close/reopen it.
+				if len(completions) > 0 && h.pushQuestLogFn != nil {
+					h.pushQuestLogFn(p.UID)
 				}
 			}
 		}
