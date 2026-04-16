@@ -547,6 +547,8 @@ func (m *Manager) AddPlayer(opts AddPlayerOptions) (*PlayerSession, error) {
 	sess.Currency = 0
 	sess.LoadoutSet = inventory.NewLoadoutSet()
 	sess.Equipment = inventory.NewEquipment()
+	sess.ActiveQuests = make(map[string]*questpkg.ActiveQuest)
+	sess.CompletedQuests = make(map[string]*time.Time)
 
 	m.players[uid] = sess
 	if m.roomSets[roomID] == nil {

@@ -144,6 +144,59 @@ func (s *GameServiceServer) handleTalk(uid string, req *gamev1.TalkRequest) (*ga
 		}
 	}
 
+	// Complete quests for this giver where all objectives are satisfied.
+	// This handles kill/fetch/explore quests whose auto-completion at event time failed,
+	// as well as quest designs that require turn-in at the NPC giver.
+	if s.questSvc != nil {
+		reg := s.questSvc.Registry()
+		var readyIDs []string
+		for qid, aq := range sess.ActiveQuests {
+			def, ok := reg[qid]
+			if !ok || def.GiverNPCID != inst.TemplateID {
+				continue
+			}
+			allDone := len(def.Objectives) > 0
+			for _, obj := range def.Objectives {
+				if aq.ObjectiveProgress[obj.ID] < obj.Quantity {
+					allDone = false
+					break
+				}
+			}
+			if allDone {
+				readyIDs = append(readyIDs, qid)
+			}
+		}
+		for _, qid := range readyIDs {
+			def := reg[qid]
+			msgs, err := s.questSvc.Complete(context.Background(), sess, sess.CharacterID, qid)
+			if err != nil || len(msgs) == 0 {
+				continue
+			}
+			itemRewards := make([]string, 0, len(def.Rewards.Items))
+			for _, ri := range def.Rewards.Items {
+				name := ri.ItemID
+				if s.invRegistry != nil {
+					if itemDef, ok := s.invRegistry.Item(ri.ItemID); ok {
+						name = itemDef.Name
+					}
+				}
+				itemRewards = append(itemRewards, fmt.Sprintf("%s x%d", name, ri.Quantity))
+			}
+			s.pushEventToUID(uid, &gamev1.ServerEvent{
+				Payload: &gamev1.ServerEvent_QuestComplete{
+					QuestComplete: &gamev1.QuestCompleteEvent{
+						QuestId:       def.ID,
+						Title:         def.Title,
+						XpReward:      int32(def.Rewards.XP),
+						CreditsReward: int32(def.Rewards.Credits),
+						ItemRewards:   itemRewards,
+					},
+				},
+			})
+			s.pushCharacterSheet(sess)
+		}
+	}
+
 	// Return structured QuestGiverView so the frontend can display the quest modal.
 	return s.buildQuestGiverView(uid, inst)
 }
