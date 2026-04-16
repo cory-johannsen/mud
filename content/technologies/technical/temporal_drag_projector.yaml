@@ -1,9 +1,6 @@
 id: temporal_drag_projector
 name: Temporal Drag Projector
-description: You deploy a device that generates temporal distortion eddies, stretching
-  time for those around you. Each creature in the emanation must attempt a Fortitude
-  save. All mechanical effects (difficult terrain, slowed, restrained, expanding radius)
-  remain identical to the base protocol.
+description: You deploy a device that generates temporal distortion eddies, stretching time for those around you. Each creature in the emanation must attempt a Fortitude save. All mechanical effects (difficult terrain, slowed, restrained, expanding radius) remain identical to the base protocol.
 tradition: technical
 level: 4
 usage_type: prepared
@@ -15,9 +12,15 @@ save_type: toughness
 save_dc: 15
 resolution: save
 effects:
-  on_apply:
-  - type: utility
-    dc: 0
-    description: You surround yourself in temporal eddies that draw out time for those
-      around you, making every step feel like an eternity endured. A creature in the
-      emanation, or that later enters the emanation, must
+  on_failure:
+  - &id001
+    type: condition
+    condition_id: slowed
+    value: 1
+  - &id002
+    type: condition
+    condition_id: immobilized
+    value: 1
+  on_crit_failure:
+  - *id001
+  - *id002

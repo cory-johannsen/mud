@@ -1,8 +1,6 @@
 id: moisture_extractor
 name: Moisture Extractor
-description: 'You deploy a device that extracts all moisture from the target''s immediate
-  environment. The target must attempt a Toughness save.Critical Success The creature
-  is unaffected.
+description: 'You deploy a device that extracts all moisture from the target''s immediate environment. The target must attempt a Toughness save.Critical Success The creature is unaffected.
 
   Success The creature is Sickened 1.
 
@@ -20,9 +18,10 @@ save_type: toughness
 save_dc: 15
 resolution: save
 effects:
-  on_apply:
-  - type: utility
-    dc: 0
-    description: You curse the target with a thirst no drink can quench. You can Dismiss
-      the spell. The target must attempt a Toughness save.Critical Success The creature
-      is unaffected and is temporarily immune for 1
+  on_failure:
+  - &id001
+    type: condition
+    condition_id: nausea
+    value: 1
+  on_crit_failure:
+  - *id001

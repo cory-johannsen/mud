@@ -1,23 +1,12 @@
 id: soporific_gas_emitter
 name: Soporific Gas Emitter
-description: 'A faint chemical haze and subsonic sedation waves fill the area, urging
-  creatures to shut down and submit. Creatures in the area when you activate the tech
-  must attempt a Willpower save. Creatures who end their turn in the area must also attempt
-  the save. You can Dismiss the effect.Critical Success The creature is unaffected.
+description: 'A faint chemical haze and subsonic sedation waves fill the area, urging creatures to shut down and submit. Creatures in the area when you activate the tech must attempt a Willpower save. Creatures who end their turn in the area must also attempt the save. You can Dismiss the effect.Critical Success The creature is unaffected.
 
-  Success The creature lies down, becoming @UUID[Compendium.pf2e.conditionitems.Item.Prone].
-  If they were already prone, they instead drift off, becoming @UUID[Compendium.pf2e.conditionitems.Item.Unconscious].
+  Success The creature lies down, becoming Prone. If they were already prone, they instead drift off, becoming Unconscious.
 
-  Failure As success, except that the creature is so sedated lying down that they
-  cannot attempt to Stand or otherwise maneuver themself off of the ground on their
-  next turn, though they can @UUID[Compendium.pf2e.actionspf2e.Item.Crawl] (potentially
-  to escape the area).
+  Failure As success, except that the creature is so sedated lying down that they cannot attempt to Stand or otherwise maneuver themself off of the ground on their next turn, though they can Crawl (potentially to escape the area).
 
-  Critical Failure The creature immediately lies down and drifts off, becoming prone
-  and unconscious. Any creature in the area who is already unconscious when you activate
-  the tech (or whose turn ends in the area while they are unconscious) takes 6d4 spirit
-  damage as their life force is siphoned away. This damage does not automatically
-  wake them.Heightened (+1) The spirit damage increases by 2d4.'
+  Critical Failure The creature immediately lies down and drifts off, becoming prone and unconscious. Any creature in the area who is already unconscious when you activate the tech (or whose turn ends in the area while they are unconscious) takes 6d4 spirit damage as their life force is siphoned away. This damage does not automatically wake them.Heightened (+1) The spirit damage increases by 2d4.'
 tradition: technical
 level: 7
 usage_type: prepared

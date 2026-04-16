@@ -1,7 +1,6 @@
 id: gyro_scrambler
 name: Gyro Scrambler
-description: 'You deploy a device that corrupts the target''s balance and orientation
-  systems. The target must attempt a Willpower save.
+description: 'You deploy a device that corrupts the target''s balance and orientation systems. The target must attempt a Willpower save.
 
 
   Critical Success Unaffected.
@@ -22,13 +21,10 @@ save_type: cool
 save_dc: 15
 resolution: save
 effects:
-  on_apply:
-  - type: utility
-    dc: 0
-    description: 'You afflict the target with the curse of the roiling, unforgiving
-      sea. The target must attempt a Willpower save.
-
-
-      Critical Success The target is unaffected.
-
-      Success The target becomes Sickened 1. Reducing'
+  on_failure:
+  - &id001
+    type: condition
+    condition_id: nausea
+    value: 1
+  on_crit_failure:
+  - *id001

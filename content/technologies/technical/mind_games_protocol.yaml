@@ -1,19 +1,15 @@
 id: mind_games_protocol
 name: Mind Games Protocol
-description: 'You deploy a cognitive disruption device that floods the target with
-  paradoxical data. The target must attempt a Willpower save.
+description: 'You deploy a cognitive disruption device that floods the target with paradoxical data. The target must attempt a Willpower save.
 
 
   Critical Success The target is unaffected.
 
-  Success The target is @UUID[Compendium.pf2e.conditionitems.Item.Stupefied] 1 for
-  1 round.
+  Success The target is Stupefied 1 for 1 round.
 
-  Failure The target is @UUID[Compendium.pf2e.conditionitems.Item.Stupefied] 2 for
-  1 minute.
+  Failure The target is Stupefied 2 for 1 minute.
 
-  Critical Failure The target is @UUID[Compendium.pf2e.conditionitems.Item.Stupefied]
-  3 for 1 minute.'
+  Critical Failure The target is Stupefied 3 for 1 minute.'
 tradition: technical
 level: 2
 usage_type: prepared
@@ -28,9 +24,7 @@ effects:
   on_apply:
   - type: utility
     dc: 0
-    description: 'You lock minds with the target, trying to mentally subdue them.
-      The target must attempt a Willpower save. Each time you Sustain this tech, the target
-      attempts another Willpower save.
+    description: 'You lock minds with the target, trying to mentally subdue them. The target must attempt a Willpower save. Each time you Sustain this tech, the target attempts another Willpower save.
 
 
       Critical Success You are'

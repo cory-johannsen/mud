@@ -1,34 +1,24 @@
 id: chrono_lock_security
 name: Chrono-Lock Security
-description: 'You install a temporal security lock on a target doorway or container
-  that rewinds the personal timeline of unauthorized users. A creature attempting
-  to open the warded entry must attempt a Willpower save.
+description: 'You install a temporal security lock on a target doorway or container that rewinds the personal timeline of unauthorized users. A creature attempting to open the warded entry must attempt a Willpower save.
 
-  You can set a password. Any creature that attempts to open without speaking the
-  password must attempt a save.
+  You can set a password. Any creature that attempts to open without speaking the password must attempt a save.
 
-  The lock vanishes when the spell''s duration ends, but can be removed as if it were
-  a trap, using your tech DC for both the Perception check and Thievery check to
-  disable it. Both checks require expert proficiency.
+  The lock vanishes when the spell''s duration ends, but can be removed as if it were a trap, using your tech DC for both the Perception check and Thievery check to disable it. Both checks require expert proficiency.
 
-  You can @UUID[Compendium.pf2e.actionspf2e.Item.Dismiss] the lock. The maximum number
-  of active locks equals your spellcasting ability modifier.
+  You can Dismiss the lock. The maximum number of active locks equals your spellcasting ability modifier.
 
 
   Critical Success The creature is unaffected and opens normally.
 
-  Success The creature must use an additional action to open. If it can''t or doesn''t
-  want to, the action is wasted.
+  Success The creature must use an additional action to open. If it can''t or doesn''t want to, the action is wasted.
 
-  Failure The creature is thrown backwards in time—their action is wasted and they''re
-  returned to their start-of-turn position. Their turn ends.
+  Failure The creature is thrown backwards in time—their action is wasted and they''re returned to their start-of-turn position. Their turn ends.
 
-  Critical Failure As failure, but the creature is also @UUID[Compendium.pf2e.conditionitems.Item.Confused]
-  for 1 minute.
+  Critical Failure As failure, but the creature is also Confused for 1 minute.
 
 
-  Heightened (10th) The lock has an unlimited duration, until counteracted, Dismissed,
-  or Disarmed.'
+  Heightened (10th) The lock has an unlimited duration, until counteracted, Dismissed, or Disarmed.'
 tradition: technical
 level: 6
 usage_type: prepared
@@ -43,6 +33,4 @@ effects:
   on_apply:
   - type: utility
     dc: 0
-    description: You ward a target doorway or container with a temporal trap that
-      rewinds the personal timeline of creatures trying to open it. A creature attempting
-      to open a warded doorway or container must attempt
+    description: You ward a target doorway or container with a temporal trap that rewinds the personal timeline of creatures trying to open it. A creature attempting to open a warded doorway or container must attempt

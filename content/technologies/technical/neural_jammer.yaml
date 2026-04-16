@@ -1,19 +1,15 @@
 id: neural_jammer
 name: Neural Jammer
-description: 'You deploy a cognitive disruption field on the target. The target must
-  attempt a Willpower save.
+description: 'You deploy a cognitive disruption field on the target. The target must attempt a Willpower save.
 
 
   Critical Success The target is unaffected.
 
-  Success The target is @UUID[Compendium.pf2e.conditionitems.Item.Stupefied] 1 for
-  1 round.
+  Success The target is Stupefied 1 for 1 round.
 
-  Failure The target is @UUID[Compendium.pf2e.conditionitems.Item.Stupefied] 2 for
-  1 minute.
+  Failure The target is Stupefied 2 for 1 minute.
 
-  Critical Failure The target is @UUID[Compendium.pf2e.conditionitems.Item.Stupefied]
-  3 for 1 minute.'
+  Critical Failure The target is Stupefied 3 for 1 minute.'
 tradition: technical
 level: 2
 usage_type: prepared

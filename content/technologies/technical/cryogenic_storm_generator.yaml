@@ -1,11 +1,6 @@
 id: cryogenic_storm_generator
 name: Cryogenic Storm Generator
-description: You deploy a device that generates a freezing storm cloud, pelting creatures
-  with cryo-projectiles. When activated, a burst deals 2d8 bludgeoning and 2d8 cold
-  damage (basic Reflex save). Frozen precipitation continues as difficult terrain.
-  Creatures ending turns in the storm take @Damage[(floor(@item.level/2))[cold]] damage.
-  Outdoors, deploy two nonoverlapping clouds.Heightened (+2) Initial damage +1d8 each,
-  end-of-turn cold +1.
+description: You deploy a device that generates a freezing storm cloud, pelting creatures with cryo-projectiles. When activated, a burst deals 2d8 bludgeoning and 2d8 cold damage (basic Reflex save). Frozen precipitation continues as difficult terrain. Creatures ending turns in the storm take @Damage[(floor(/2))[cold]] damage. Outdoors, deploy two nonoverlapping clouds.Heightened (+2) Initial damage +1d8 each, end-of-turn cold +1.
 tradition: technical
 level: 4
 usage_type: prepared

@@ -1,7 +1,6 @@
 id: temporal_dampener
 name: Temporal Dampener
-description: 'You activate a temporal dampening field that slows the flow of time
-  in the area. Any creature that begins its turn in the area must attempt a Willpower save.
+description: 'You activate a temporal dampening field that slows the flow of time in the area. Any creature that begins its turn in the area must attempt a Willpower save.
 
   Success Unaffected.
 
@@ -19,9 +18,10 @@ save_type: cool
 save_dc: 15
 resolution: save
 effects:
-  on_apply:
-  - type: utility
-    dc: 0
-    description: You examine the time stream in a particular area, then proceed to
-      stick a few metaphorical pins into it, thickening and slowing down the flow
-      of time until it rumbles along like a river of molasses. A
+  on_failure:
+  - &id001
+    type: condition
+    condition_id: slowed
+    value: 1
+  on_crit_failure:
+  - *id001

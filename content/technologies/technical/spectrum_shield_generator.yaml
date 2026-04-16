@@ -1,8 +1,6 @@
 id: spectrum_shield_generator
 name: Spectrum Shield Generator
-description: 'You deploy a hardlight armor system that wraps the target in reactive
-  photonic plating. The armor sheds bright light for 20 feet. All mechanical effects
-  (dazzled, resistance, color table) remain identical to the base protocol.
+description: 'You deploy a hardlight armor system that wraps the target in reactive photonic plating. The armor sheds bright light for 20 feet. All mechanical effects (dazzled, resistance, color table) remain identical to the base protocol.
 
 
   Heightened (+3) The resistance is increased by 5.'
@@ -17,9 +15,10 @@ save_type: cool
 save_dc: 15
 resolution: save
 effects:
-  on_apply:
-  - type: utility
-    dc: 0
-    description: You wrap the target in armor made of sheets of colored light. The
-      armor sheds bright light for 20 feet (and dim light for the next 20 feet). Whenever
-      a creature attacks the target and is adjacent to i
+  on_failure:
+  - &id001
+    type: condition
+    condition_id: dazzled
+    value: 1
+  on_crit_failure:
+  - *id001

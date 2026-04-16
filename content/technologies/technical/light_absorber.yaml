@@ -1,20 +1,15 @@
 id: light_absorber
 name: Light Absorber
-description: 'You deploy light-absorbing nanomaterial in the area, creating dim light
-  in a @Template[burst|distance:20]. Creatures in the area when you cast the spell
-  must attempt a Toughness save.
+description: 'You deploy light-absorbing nanomaterial in the area, creating dim light in a @Template[burst|distance:20]. Creatures in the area when you cast the spell must attempt a Toughness save.
 
 
   Critical Success The creature is unaffected.
 
-  Success The creature is @UUID[Compendium.pf2e.conditionitems.Item.Dazzled] for 1
-  round.
+  Success The creature is Dazzled for 1 round.
 
-  Failure The creature is @UUID[Compendium.pf2e.conditionitems.Item.Dazzled] for 1
-  minute.
+  Failure The creature is Dazzled for 1 minute.
 
-  Critical Failure The creature is @UUID[Compendium.pf2e.conditionitems.Item.Blinded]
-  for 1 round, then @UUID[Compendium.pf2e.conditionitems.Item.Dazzled] for 1 minute.'
+  Critical Failure The creature is Blinded for 1 round, then Dazzled for 1 minute.'
 tradition: technical
 level: 2
 usage_type: prepared

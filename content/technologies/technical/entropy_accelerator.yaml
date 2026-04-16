@@ -1,17 +1,8 @@
 id: entropy_accelerator
 name: Entropy Accelerator
-description: 'You activate a device that accelerates molecular decay in an area—materials
-  corrode, electronics fail, and structures begin to crumble. Any creature that enters
-  or begins its turn in the area takes 8d6 void damage with a basic Toughness save,
-  or 8d6 force damage if the creature normally doesn''t take void damage, such as
-  if the creature is a construct or undead.
+description: 'You activate a device that accelerates molecular decay in an area—materials corrode, electronics fail, and structures begin to crumble. Any creature that enters or begins its turn in the area takes 8d6 void damage with a basic Toughness save, or 8d6 force damage if the creature normally doesn''t take void damage, such as if the creature is a construct or undead.
 
-  The first time you Sustain the tech on each subsequent turn, the entropic zone
-  grows stronger in addition to having its duration increased. The radius of the burst
-  increases by 10 feet (to a maximum of 40 feet), and the size of the damage dice
-  increases by one step (from d6 to @Damage[(2+@item.rank)d8[void]|shortLabel], then
-  to @Damage[(2+@item.rank)d10[void]|shortLabel], and finally to @Damage[(2+@item.rank)d12[void]|shortLabel]).Heightened
-  (+1) The damage increases by 1d6.'
+  The first time you Sustain the tech on each subsequent turn, the entropic zone grows stronger in addition to having its duration increased. The radius of the burst increases by 10 feet (to a maximum of 40 feet), and the size of the damage dice increases by one step (from d6 to @Damage[(2+)d8[void]|shortLabel], then to @Damage[(2+)d10[void]|shortLabel], and finally to @Damage[(2+)d12[void]|shortLabel]).Heightened (+1) The damage increases by 1d6.'
 tradition: technical
 level: 6
 usage_type: prepared

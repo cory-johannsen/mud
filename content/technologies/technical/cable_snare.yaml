@@ -1,20 +1,15 @@
 id: cable_snare
 name: Cable Snare
-description: 'You deploy grappling cables that erupt from the ground, entangling creatures.
-  Each creature in the area must attempt a Reflex save.
+description: 'You deploy grappling cables that erupt from the ground, entangling creatures. Each creature in the area must attempt a Reflex save.
 
 
   Critical Success The creature is unaffected.
 
   Success The creature takes a -5-foot circumstance penalty to its Speeds for 1 round.
 
-  Failure The creature is @UUID[Compendium.pf2e.conditionitems.Item.Immobilized] for
-  1 round. It can attempt to @UUID[Compendium.pf2e.actionspf2e.Item.Escape] against
-  your tech DC.
+  Failure The creature is Immobilized for 1 round. It can attempt to Escape against your tech DC.
 
-  Critical Failure The creature is @UUID[Compendium.pf2e.conditionitems.Item.Immobilized]
-  for 1 minute. It can attempt to @UUID[Compendium.pf2e.actionspf2e.Item.Escape] against
-  your tech DC.'
+  Critical Failure The creature is Immobilized for 1 minute. It can attempt to Escape against your tech DC.'
 tradition: technical
 level: 2
 usage_type: prepared
@@ -26,9 +21,10 @@ save_type: hustle
 save_dc: 15
 resolution: save
 effects:
-  on_apply:
-  - type: utility
-    dc: 0
-    description: Plants and fungi burst out or quickly grow, entangling creatures.
-      All surfaces in the area are difficult terrain. Each round that a creature starts
-      its turn in the area, it must attempt a Reflex save.
+  on_failure:
+  - &id001
+    type: condition
+    condition_id: immobilized
+    value: 1
+  on_crit_failure:
+  - *id001

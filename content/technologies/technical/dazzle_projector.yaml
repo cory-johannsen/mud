@@ -1,8 +1,6 @@
 id: dazzle_projector
 name: Dazzle Projector
-description: You project mesmerizing holographic patterns. Creatures are Dazzled while
-  inside the field. A creature that enters or starts its turn there must attempt a
-  Willpower save or become Fascinated.
+description: You project mesmerizing holographic patterns. Creatures are Dazzled while inside the field. A creature that enters or starts its turn there must attempt a Willpower save or become Fascinated.
 tradition: technical
 level: 3
 usage_type: prepared
@@ -14,9 +12,10 @@ save_type: cool
 save_dc: 15
 resolution: save
 effects:
-  on_apply:
-  - type: utility
-    dc: 0
-    description: You create a cloud of mesmerizing patterns and colors that hovers
-      in the air. Creatures are @UUID[Compendium.pf2e.conditionitems.Item.Dazzled]
-      while inside the cloud. In addition, a creature must atte
+  on_failure:
+  - &id001
+    type: condition
+    condition_id: dazzled
+    value: 1
+  on_crit_failure:
+  - *id001

@@ -1,8 +1,6 @@
 id: sonar_mapper
 name: Sonar Mapper
-description: You deploy a sonar mapping device that scans the surrounding area. You
-  gain a detailed image of all rooms, corridors, and passages within 60 feet, including
-  hidden doors (though not how to open them). This doesn't reveal creatures or hazards.
+description: You deploy a sonar mapping device that scans the surrounding area. You gain a detailed image of all rooms, corridors, and passages within 60 feet, including hidden doors (though not how to open them). This doesn't reveal creatures or hazards.
 tradition: technical
 level: 2
 usage_type: prepared
@@ -14,9 +12,10 @@ save_type: cool
 save_dc: 15
 resolution: save
 effects:
-  on_apply:
-  - type: utility
-    dc: 0
-    description: You glean detailed information about a specific place visited by
-      a creature directly from its mind, unless it fends you off with a Willpower save.
-      The target can choose to fail the save.Success The target
+  on_failure:
+  - &id001
+    type: condition
+    condition_id: hidden
+    value: 1
+  on_crit_failure:
+  - *id001

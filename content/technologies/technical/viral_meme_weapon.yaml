@@ -1,8 +1,6 @@
 id: viral_meme_weapon
 name: Viral Meme Weapon
-description: 'You broadcast a psycho-active data meme that infects a target with uncontrollable
-  laughter, spreading to those nearby. The first time you Sustain each round, you
-  can target another creature within 30 feet of an affected target.
+description: 'You broadcast a psycho-active data meme that infects a target with uncontrollable laughter, spreading to those nearby. The first time you Sustain each round, you can target another creature within 30 feet of an affected target.
 
 
   Each target must attempt a Willpower save.
@@ -26,9 +24,15 @@ save_type: cool
 save_dc: 15
 resolution: save
 effects:
-  on_apply:
-  - type: utility
-    dc: 0
-    description: You tell a magical joke and infect a target with laughter that spreads
-      to those nearby. The first time you Sustain the tech each round, you can target
-      another creature you can see that is within 30 f
+  on_failure:
+  - &id001
+    type: condition
+    condition_id: slowed
+    value: 1
+  - &id002
+    type: condition
+    condition_id: prone
+    value: 1
+  on_crit_failure:
+  - *id001
+  - *id002

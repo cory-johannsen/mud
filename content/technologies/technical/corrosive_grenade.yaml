@@ -1,7 +1,6 @@
 id: corrosive_grenade
 name: Corrosive Grenade
-description: You launch a grenade loaded with fast-acting chemical agents. All creatures
-  in a 15-foot burst take 4d6 poison damage and must attempt a Reflex save.
+description: You launch a grenade loaded with fast-acting chemical agents. All creatures in a 15-foot burst take 4d6 poison damage and must attempt a Reflex save.
 tradition: technical
 level: 3
 usage_type: prepared
@@ -13,9 +12,11 @@ save_type: toughness
 save_dc: 15
 resolution: save
 effects:
-  on_apply:
-  - type: utility
-    dc: 0
-    description: You launch a small bomb enchanted with a fast-acting skin disease
-      at your foes, causing their skin to break out in horrible bleeding sores. All
-      creatures in the area of the burst must attempt a Fortit
+  on_failure:
+  - type: damage
+    dice: 4d6
+    damage_type: poison
+  on_crit_failure:
+  - type: damage
+    dice: 8d6
+    damage_type: poison

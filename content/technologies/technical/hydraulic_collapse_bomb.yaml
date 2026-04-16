@@ -1,20 +1,11 @@
 id: hydraulic_collapse_bomb
 name: Hydraulic Collapse Bomb
-description: 'You detonate a hydraulic collapse device that unleashes a catastrophic
-  downpour in the area that vanishes an instant later. All flying creatures in the
-  area descend 50 feet or until blocked by the ground or firm surface. Each creature
-  whose descent was blocked by the ground or firm surface takes bludgeoning damage
-  equal to the number of feet it fell (the creature does not also take falling damage)
-  and is knocked @UUID[Compendium.pf2e.conditionitems.Item.Prone]. Creatures on the
-  ground, including flying creatures forced to the ground by the tech, must succeed
-  at a Reflex save or be pushed 50 feet away from the center of the area.
+description: 'You detonate a hydraulic collapse device that unleashes a catastrophic downpour in the area that vanishes an instant later. All flying creatures in the area descend 50 feet or until blocked by the ground or firm surface. Each creature whose descent was blocked by the ground or firm surface takes bludgeoning damage equal to the number of feet it fell (the creature does not also take falling damage) and is knocked Prone. Creatures on the ground, including flying creatures forced to the ground by the tech, must succeed at a Reflex save or be pushed 50 feet away from the center of the area.
 
-  Flimsy structures in the area collapse. The GM can determine other large-scale effects
-  that result from the deluge.
+  Flimsy structures in the area collapse. The GM can determine other large-scale effects that result from the deluge.
 
 
-  Heightened (+1) The area increases by 10 feet, and flying creatures fall an additional
-  10 feet.'
+  Heightened (+1) The area increases by 10 feet, and flying creatures fall an additional 10 feet.'
 tradition: technical
 level: 8
 usage_type: prepared
@@ -26,9 +17,10 @@ save_type: hustle
 save_dc: 15
 resolution: save
 effects:
-  on_apply:
-  - type: utility
-    dc: 0
-    description: You unleash a catastrophic downpour in the area that vanishes an
-      instant later. All flying creatures in the area descend 50 feet or until blocked
-      by the ground or firm surface. Each creature whose des
+  on_failure:
+  - &id001
+    type: condition
+    condition_id: prone
+    value: 1
+  on_crit_failure:
+  - *id001

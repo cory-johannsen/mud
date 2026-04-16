@@ -1,8 +1,6 @@
 id: acid_spray_nozzle
 name: Acid Spray Nozzle
-description: 'You fire a stream of concentrated acid from a pressurized nozzle. Make
-  a spell attack. On a hit, you deal 3d6 acid damage. On a critical hit, the target
-  is also @UUID[Compendium.pf2e.conditionitems.Item.Sickened] 1.
+description: 'You fire a stream of concentrated acid from a pressurized nozzle. Make a spell attack. On a hit, you deal 3d6 acid damage. On a critical hit, the target is also Sickened 1.
 
 
   Heightened (+1) The damage increases by 1d6.'

@@ -1,18 +1,15 @@
 id: toxic_waste_zone
 name: Toxic Waste Zone
-description: 'You deploy industrial contaminants that poison the area. Creatures in
-  the area when you cast the spell and creatures that enter the area must attempt
-  Toughness saves.
+description: 'You deploy industrial contaminants that poison the area. Creatures in the area when you cast the spell and creatures that enter the area must attempt Toughness saves.
 
 
   Critical Success The creature is unaffected.
 
-  Success The creature is @UUID[Compendium.pf2e.conditionitems.Item.Sickened] 1.
+  Success The creature is Sickened 1.
 
-  Failure The creature is @UUID[Compendium.pf2e.conditionitems.Item.Sickened] 2.
+  Failure The creature is Sickened 2.
 
-  Critical Failure The creature is @UUID[Compendium.pf2e.conditionitems.Item.Sickened]
-  2 and @UUID[Compendium.pf2e.conditionitems.Item.Slowed] 1 for 1 round.'
+  Critical Failure The creature is Sickened 2 and Slowed 1 for 1 round.'
 tradition: technical
 level: 2
 usage_type: prepared
@@ -24,9 +21,15 @@ save_type: hustle
 save_dc: 15
 resolution: save
 effects:
-  on_apply:
-  - type: utility
-    dc: 0
-    description: The ground opens into a seemingly endless mass of corpse limbs, grasping
-      at all creatures within the area to drag them down. Creatures in the area when
-      the spell is cast or beginning their turn in the
+  on_failure:
+  - &id001
+    type: condition
+    condition_id: nausea
+    value: 1
+  - &id002
+    type: condition
+    condition_id: slowed
+    value: 1
+  on_crit_failure:
+  - *id001
+  - *id002

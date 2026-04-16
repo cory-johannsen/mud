@@ -1,8 +1,6 @@
 id: anti_grav_module
 name: Anti-Grav Module
-description: You activate an anti-gravity module that lifts the target 5 feet off
-  the ground. Sustain to move the target up or down 10 feet. A floating creature is
-  Flat-Footed.
+description: You activate an anti-gravity module that lifts the target 5 feet off the ground. Sustain to move the target up or down 10 feet. A floating creature is Flat-Footed.
 tradition: technical
 level: 3
 usage_type: prepared
@@ -13,8 +11,6 @@ duration: instant
 resolution: none
 effects:
   on_apply:
-  - type: utility
-    dc: 0
-    description: You defy gravity and levitate the target 5 feet off the ground. You
-      can Sustain the spell to move the target up or down 10 feet. A creature floating
-      in the air from levitate takes a –2 circumstance
+  - type: condition
+    condition_id: flat_footed
+    value: 1

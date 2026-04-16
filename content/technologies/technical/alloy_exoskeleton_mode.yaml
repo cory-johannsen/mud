@@ -1,22 +1,10 @@
 id: alloy_exoskeleton_mode
 name: Alloy Exoskeleton Mode
-description: 'Your body is encased in a flexible iron alloy exoskeleton deployed from
-  an internal fabricator. You gain resistance 10 to physical damage, except adamantine.
-  You''re immune to death effects, disease, drained, @UUID[Compendium.pf2e.conditionitems.Item.Fatigued],
-  healing, nonlethal attacks, @UUID[Compendium.pf2e.conditionitems.Item.Paralyzed],
-  poison, sickened, vitality, and void; any of those conditions you had when the tech
-  is activated are suspended until the tech ends, then return with their remaining
-  duration when the tech ends. While made of iron, you''re subject to rusting effects
-  like the @UUID[Compendium.pf2e.spells-srd.Item.Rust Cloud] spell.
+description: 'Your body is encased in a flexible iron alloy exoskeleton deployed from an internal fabricator. You gain resistance 10 to physical damage, except adamantine. You''re immune to death effects, disease, drained, Fatigued, healing, nonlethal attacks, Paralyzed, poison, sickened, vitality, and void; any of those conditions you had when the tech is activated are suspended until the tech ends, then return with their remaining duration when the tech ends. While made of iron, you''re subject to rusting effects like the @UUID[Compendium.pf2e.spells-srd.Item.Rust Cloud] spell.
 
-  Your fist Strikes have a 1d10 damage die, and your metal tech deals one additional
-  die of damage (of the same damage die and damage type the tech uses). You can cast
-  @UUID[Compendium.pf2e.spells-srd.Item.Needle Darts] as an innate spell; the casting
-  is reduced from 2 actions to 1.
+  Your fist Strikes have a 1d10 damage die, and your metal tech deals one additional die of damage (of the same damage die and damage type the tech uses). You can cast @UUID[Compendium.pf2e.spells-srd.Item.Needle Darts] as an innate spell; the casting is reduced from 2 actions to 1.
 
-  In this form, you don''t need to breathe. Your Bulk doubles (to 6 if you''re Small
-  or 12 if you''re Medium), and you become too dense to Swim in water, automatically
-  sinking to the bottom. You can Dismiss the tech.
+  In this form, you don''t need to breathe. Your Bulk doubles (to 6 if you''re Small or 12 if you''re Medium), and you become too dense to Swim in water, automatically sinking to the bottom. You can Dismiss the tech.
 
   @UUID[Compendium.pf2e.spell-effects.Item.tech Effect: Ferrous Form]
 
@@ -32,8 +20,6 @@ duration: instant
 resolution: none
 effects:
   on_apply:
-  - type: utility
-    dc: 0
-    description: Your body transforms entirely into flexible iron. You gain resistance
-      10 to physical damage, except adamantine. You're immune to death effects, disease,
-      drained, @UUID[Compendium.pf2e.conditionitems.I
+  - type: condition
+    condition_id: nausea
+    value: 1

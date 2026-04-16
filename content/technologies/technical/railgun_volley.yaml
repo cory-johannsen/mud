@@ -1,9 +1,6 @@
 id: railgun_volley
 name: Railgun Volley
-description: 'You deploy an automated railgun platform that fires a salvo of ferromagnetic
-  projectiles at all nearby enemies. All creatures in the affected area take 8d10
-  piercing damage, with a basic Reflex save. On a critical failure, the target is
-  knocked @UUID[Compendium.pf2e.conditionitems.Item.Prone] from the force of the impact.
+description: 'You deploy an automated railgun platform that fires a salvo of ferromagnetic projectiles at all nearby enemies. All creatures in the affected area take 8d10 piercing damage, with a basic Reflex save. On a critical failure, the target is knocked Prone from the force of the impact.
 
 
   Heightened (+1) Increase the damage by 1d10.'

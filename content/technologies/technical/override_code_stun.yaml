@@ -1,13 +1,11 @@
 id: override_code_stun
 name: 'Override Code: Stun'
-description: 'You broadcast a hardcoded override command that stuns the target''s
-  neural implant. Once targeted, the target is then temporarily immune for 10 minutes.
+description: 'You broadcast a hardcoded override command that stuns the target''s neural implant. Once targeted, the target is then temporarily immune for 10 minutes.
 
   The effect of the tech depends on the target''s level.
 
 
-  13th or Lower The target is @UUID[Compendium.pf2e.conditionitems.Item.Stunned] for
-  [[/r 1d6 #rounds]]{1d6 rounds}.
+  13th or Lower The target is Stunned for [[/r 1d6 #rounds]]{1d6 rounds}.
 
   14th-15th The target is Stunned for 1 round.
 
@@ -26,12 +24,6 @@ duration: instant
 resolution: none
 effects:
   on_apply:
-  - type: utility
-    dc: 0
-    description: 'You stun the target with an arcane word of power. Once targeted,
-      the target is then temporarily immune for 10 minutes.
-
-      The effect of the spell depends on the target''s level.
-
-
-      13th or Lower The target'
+  - type: condition
+    condition_id: stunned
+    value: 1

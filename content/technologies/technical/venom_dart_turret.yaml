@@ -1,9 +1,6 @@
 id: venom_dart_turret
 name: Venom Dart Turret
-description: You deploy a device that launches swarms of envenomed micro-projectiles
-  into the area. Creatures take @Damage[1d6[piercing]] damage. Each creature that
-  takes piercing damage must attempt a Toughness save. All mechanical effects (poison
-  stages) remain identical to the base protocol.
+description: You deploy a device that launches swarms of envenomed micro-projectiles into the area. Creatures take 1d6 piercing damage. Each creature that takes piercing damage must attempt a Toughness save. All mechanical effects (poison stages) remain identical to the base protocol.
 tradition: technical
 level: 4
 usage_type: prepared

@@ -1,7 +1,6 @@
 id: paralysis_stasis_field
 name: Paralysis Stasis Field
-description: 'You project a localized stasis field that freezes the target''s motor
-  functions. The target must attempt a Willpower save.
+description: 'You project a localized stasis field that freezes the target''s motor functions. The target must attempt a Willpower save.
 
 
   Critical Success The target is unaffected.
@@ -22,14 +21,10 @@ save_type: cool
 save_dc: 15
 resolution: save
 effects:
-  on_apply:
-  - type: utility
-    dc: 0
-    description: 'You block the target''s motor impulses before they can leave its
-      mind, threatening to freeze the target in place. The target must attempt a Will
-      save.
-
-
-      Critical Success The target is unaffected.
-
-      Succes'
+  on_failure:
+  - &id001
+    type: condition
+    condition_id: stunned
+    value: 1
+  on_crit_failure:
+  - *id001

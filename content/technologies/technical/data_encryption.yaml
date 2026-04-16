@@ -1,7 +1,6 @@
 id: data_encryption
 name: Data Encryption
-description: You encrypt the target document with false data. The true contents are
-  hidden behind the overlay and can only be revealed by dispelling this tech.
+description: You encrypt the target document with false data. The true contents are hidden behind the overlay and can only be revealed by dispelling this tech.
 tradition: technical
 level: 3
 usage_type: prepared
@@ -12,8 +11,6 @@ duration: instant
 resolution: none
 effects:
   on_apply:
-  - type: utility
-    dc: 0
-    description: You change the target's text to different text entirely. If the text
-      is a spellbook or a scroll, you can change it to show a spell you know of secret
-      page's level or lower. The replacement spell canno
+  - type: condition
+    condition_id: hidden
+    value: 1

@@ -1,9 +1,6 @@
 id: warp_strike
 name: Warp Strike
-description: 'You propel yourself through a spatial fold to deliver a devastating
-  strike. You teleport to an empty space adjacent to a creature you can see within
-  range, then make a Strike with a weapon you''re wielding. The Strike deals damage,
-  plus an extra 2d8 force damage on a hit.
+description: 'You propel yourself through a spatial fold to deliver a devastating strike. You teleport to an empty space adjacent to a creature you can see within range, then make a Strike with a weapon you''re wielding. The Strike deals damage, plus an extra 2d8 force damage on a hit.
 
 
   Heightened (+1) The extra force damage increases by 1d8.'
@@ -17,8 +14,6 @@ duration: instant
 resolution: none
 effects:
   on_apply:
-  - type: utility
-    dc: 0
-    description: You propel yourself through the fabric of space to deal a blow carrying
-      the momentum of your teleportation. You teleport to an empty space adjacent
-      to a creature you can see within range, then make a
+  - type: damage
+    dice: 2d8
+    damage_type: force

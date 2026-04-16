@@ -1,12 +1,6 @@
 id: neural_firewall_suite
 name: Neural Firewall Suite
-description: 'A powerful neural firewall suite hides a creature from tech that would
-  spy on it or affect its mind. The target gains a +4 status bonus to saves against
-  mental effects. Neural firewall suite attempts to counteract any detection, revelation,
-  and scrying effects as if its tech rank were 1 higher than its actual rank. On a
-  success, the effect functions normally except that it detects nothing about the
-  target and its possessions. For instance, detect magic would still detect other
-  tech in the area, but not any tech on the target.
+description: 'A powerful neural firewall suite hides a creature from tech that would spy on it or affect its mind. The target gains a +4 status bonus to saves against mental effects. Neural firewall suite attempts to counteract any detection, revelation, and scrying effects as if its tech rank were 1 higher than its actual rank. On a success, the effect functions normally except that it detects nothing about the target and its possessions. For instance, detect magic would still detect other tech in the area, but not any tech on the target.
 
   @UUID[Compendium.pf2e.spell-effects.Item.tech Effect: Hidden Mind]'
 tradition: technical
@@ -19,8 +13,6 @@ duration: instant
 resolution: none
 effects:
   on_apply:
-  - type: utility
-    dc: 0
-    description: Powerful wards hide a creature from magic that would spy on it or
-      affect its mind. The target gains a +4 status bonus to saves against mental
-      effects. Hidden mind attempts to counteract any detection,
+  - type: condition
+    condition_id: hidden
+    value: 1

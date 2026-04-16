@@ -1,10 +1,6 @@
 id: sympathetic_damage_relay
 name: Sympathetic Damage Relay
-description: You activate a device that links your body to a target, causing self-inflicted
-  cuts to manifest as devastating wounds on the target. Self-damage is 1d4 slashing;
-  target takes 5d8 slashing damage. Critical failure also causes @Damage[(1d8 + @item.level
-  -4)[bleed]]. Three-action version affects a 5-foot burst.Heightened (+1) Target
-  damage +1d8, persistent bleed +1.
+description: You activate a device that links your body to a target, causing self-inflicted cuts to manifest as devastating wounds on the target. Self-damage is 1d4 slashing; target takes 5d8 slashing damage. Critical failure also causes @Damage[(1d8 + -4)[bleed]]. Three-action version affects a 5-foot burst.Heightened (+1) Target damage +1d8, persistent bleed +1.
 tradition: technical
 level: 4
 usage_type: prepared

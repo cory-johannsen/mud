@@ -1,20 +1,15 @@
 id: photon_allergy
 name: Photon Allergy
-description: 'You deploy a device that induces photosensitivity in the target. The
-  target must attempt a Willpower save.
+description: 'You deploy a device that induces photosensitivity in the target. The target must attempt a Willpower save.
 
 
   Critical Success The creature is unaffected.
 
-  Success The creature is @UUID[Compendium.pf2e.conditionitems.Item.Frightened] 1.
+  Success The creature is Frightened 1.
 
-  Failure The creature is @UUID[Compendium.pf2e.conditionitems.Item.Frightened] 2
-  and must spend at least 1 action on its next turn moving away from the nearest source
-  of bright light.
+  Failure The creature is Frightened 2 and must spend at least 1 action on its next turn moving away from the nearest source of bright light.
 
-  Critical Failure The creature is @UUID[Compendium.pf2e.conditionitems.Item.Frightened]
-  3 and is @UUID[Compendium.pf2e.conditionitems.Item.Fleeing] from all bright light
-  sources for 1 round.'
+  Critical Failure The creature is Frightened 3 and is Fleeing from all bright light sources for 1 round.'
 tradition: technical
 level: 2
 usage_type: prepared
@@ -26,9 +21,15 @@ save_type: toughness
 save_dc: 15
 resolution: save
 effects:
-  on_apply:
-  - type: utility
-    dc: 0
-    description: You cause the creature's vision to become particularly sensitive.
-      The creature must attempt a Toughness save. The creature is then temporarily
-      immune for 1 minute.Critical Success The creature is unaf
+  on_failure:
+  - &id001
+    type: condition
+    condition_id: frightened
+    value: 1
+  - &id002
+    type: condition
+    condition_id: fleeing
+    value: 1
+  on_crit_failure:
+  - *id001
+  - *id002

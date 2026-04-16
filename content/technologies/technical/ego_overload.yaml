@@ -1,14 +1,11 @@
 id: ego_overload
 name: Ego Overload
-description: 'Elegant holographic flames of incredible beauty coruscate across the
-  target''s body, overloading their threat-assessment systems with overconfidence.
-  The target attempts a Willpower save.
+description: 'Elegant holographic flames of incredible beauty coruscate across the target''s body, overloading their threat-assessment systems with overconfidence. The target attempts a Willpower save.
 
 
   Critical Success The target is unaffected.
 
-  Success The target sheds bright light in a 20-foot emanation and becomes Dazzled
-  for 1 round.
+  Success The target sheds bright light in a 20-foot emanation and becomes Dazzled for 1 round.
 
   Failure Sheds light, is Dazzled for 1 minute, and takes a -2 status penalty to AC.
 
@@ -24,13 +21,10 @@ save_type: cool
 save_dc: 15
 resolution: save
 effects:
-  on_apply:
-  - type: utility
-    dc: 0
-    description: 'Elegant flames of incredible beauty coruscate across the target''s
-      body, creating overconfidence and carelessness. The target attempts a Willpower save.
-
-
-      Critical Success The target is unaffected.
-
-      Success T'
+  on_failure:
+  - &id001
+    type: condition
+    condition_id: dazzled
+    value: 1
+  on_crit_failure:
+  - *id001

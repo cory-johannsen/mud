@@ -1,19 +1,15 @@
 id: acoustic_jammer
 name: Acoustic Jammer
-description: 'You deploy an acoustic jammer that destroys the target''s hearing. The
-  target must attempt a Toughness save.
+description: 'You deploy an acoustic jammer that destroys the target''s hearing. The target must attempt a Toughness save.
 
 
   Critical Success The target is unaffected.
 
-  Success The target is @UUID[Compendium.pf2e.conditionitems.Item.Deafened] for 1
-  round.
+  Success The target is Deafened for 1 round.
 
-  Failure The target is @UUID[Compendium.pf2e.conditionitems.Item.Deafened] for 10
-  minutes.
+  Failure The target is Deafened for 10 minutes.
 
-  Critical Failure The target is @UUID[Compendium.pf2e.conditionitems.Item.Deafened]
-  permanently.'
+  Critical Failure The target is Deafened permanently.'
 tradition: technical
 level: 2
 usage_type: prepared
@@ -28,8 +24,7 @@ effects:
   on_apply:
   - type: utility
     dc: 0
-    description: 'The target loses hearing; it must attempt a Toughness save. The
-      target is then temporarily immune for 1 minute.
+    description: 'The target loses hearing; it must attempt a Toughness save. The target is then temporarily immune for 1 minute.
 
 
       Critical Success The target is unaffected.

@@ -1,19 +1,11 @@
 id: seismic_charge_detonation
 name: Seismic Charge Detonation
-description: 'You detonate a seismic charge, unleashing a shockwave that travels through
-  the ground to the target. The effect ends as soon as it can''t travel through a
-  solid surface. Each creature in a line between you and the target is shaken by tremors
-  and must attempt a Reflex saving throw against your tech DC. A creature that fails
-  this save is pushed 10 feet away from you.
+description: 'You detonate a seismic charge, unleashing a shockwave that travels through the ground to the target. The effect ends as soon as it can''t travel through a solid surface. Each creature in a line between you and the target is shaken by tremors and must attempt a Reflex saving throw against your tech DC. A creature that fails this save is pushed 10 feet away from you.
 
-  The wave explodes once it reaches the target, showering the target with debris and
-  dealing @Damage[12d10[bludgeoning]] damage with a basic Reflex save. A target that
-  fails its save against this explosion is also pushed back 10 feet and knocked @UUID[Compendium.pf2e.conditionitems.Item.Prone].
-  A creature subject to the explosion doesn''t need to save against the tremors.
+  The wave explodes once it reaches the target, showering the target with debris and dealing 12d10 bludgeoning damage with a basic Reflex save. A target that fails its save against this explosion is also pushed back 10 feet and knocked Prone. A creature subject to the explosion doesn''t need to save against the tremors.
 
 
-  Heightened (9th) The wave explodes on one additional target of your choice in the
-  line to the final target.'
+  Heightened (9th) The wave explodes on one additional target of your choice in the line to the final target.'
 tradition: technical
 level: 7
 usage_type: prepared

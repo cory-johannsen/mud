@@ -1,15 +1,12 @@
 id: chemical_weapon_spray
 name: Chemical Weapon Spray
-description: 'You activate a chemical dispersal unit and spray the target with a weaponized
-  compound. The effects are determined by the creature''s Toughness save.Critical
-  Success The target is unaffected.
+description: 'You activate a chemical dispersal unit and spray the target with a weaponized compound. The effects are determined by the creature''s Toughness save.Critical Success The target is unaffected.
 
   Success The target takes 8d6 poison damage.
 
   Failure The target is afflicted with the chemical agent at stage 1.
 
-  Critical Failure The target is afflicted with the chemical agent at stage 2.Breath
-  of the Mantis GodSaving Throw @Check[fortitude|dc:29]
+  Critical Failure The target is afflicted with the chemical agent at stage 2.Breath of the Mantis GodSaving Throw Toughness save (DC 29)
 
   Maximum Duration 6 minutes
 

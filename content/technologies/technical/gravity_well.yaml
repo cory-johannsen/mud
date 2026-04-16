@@ -1,7 +1,6 @@
 id: gravity_well
 name: Gravity Well
-description: 'You deploy a localized gravity distortion that pulls the target toward
-  you. The target must attempt a Toughness save.
+description: 'You deploy a localized gravity distortion that pulls the target toward you. The target must attempt a Toughness save.
 
 
   Critical Success The creature is unaffected.
@@ -10,7 +9,7 @@ description: 'You deploy a localized gravity distortion that pulls the target to
 
   Failure The creature is pulled 10 feet toward you.
 
-  Critical Failure The creature is pulled 15 feet toward you and falls @UUID[Compendium.pf2e.conditionitems.Item.Prone].'
+  Critical Failure The creature is pulled 15 feet toward you and falls Prone.'
 tradition: technical
 level: 2
 usage_type: prepared
@@ -21,8 +20,6 @@ duration: instant
 resolution: none
 effects:
   on_apply:
-  - type: utility
-    dc: 0
-    description: Trigger An effect would deal damage to an ally within range.You get
-      an ally out of danger with a teleporting pull. You teleport the target to an
-      unoccupied square up to 10 feet closer to you. The targ
+  - type: condition
+    condition_id: prone
+    value: 1

@@ -1,16 +1,6 @@
 id: recursive_security_maze
 name: Recursive Security Maze
-description: 'The target is pulled into a recursive virtual security system—a long,
-  twisting, extradimensional hallway blocked at 30-foot intervals with high-grade
-  reinforced doors (Hardness 20, HP 80, BT 40, @Check[athletics|dc:30|name:Force Open
-  Security Door|traits:action:force-open] to Force Open) secured with @UUID[Compendium.pf2e.equipment-srd.Item.Lock
-  (Average)] (@Check[thievery|dc:25|name:Hack Security Lock|traits:action:pick-a-lock],
-  4 successful checks required). A creature trapped within this system can escape
-  only when the tech expires, or when they successfully pass through the number of
-  doors determined by their save, either by breaking through the doors or hacking
-  the locks. Teleportation effects of 6th level or lower are automatically suppressed
-  within the virtual space; higher-level effects require a counteract check against
-  your tech DC or they fail.
+description: 'The target is pulled into a recursive virtual security system—a long, twisting, extradimensional hallway blocked at 30-foot intervals with high-grade reinforced doors (Hardness 20, HP 80, BT 40, Athletics save (DC 30) to Force Open) secured with @UUID[Compendium.pf2e.equipment-srd.Item.Lock (Average)] (Thievery save (DC 25), 4 successful checks required). A creature trapped within this system can escape only when the tech expires, or when they successfully pass through the number of doors determined by their save, either by breaking through the doors or hacking the locks. Teleportation effects of 6th level or lower are automatically suppressed within the virtual space; higher-level effects require a counteract check against your tech DC or they fail.
 
 
   Critical Success The target is unaffected.
@@ -34,6 +24,4 @@ effects:
   on_apply:
   - type: utility
     dc: 0
-    description: The target of your spell is drawn into a long, twisting, extradimensional
-      hallway blocked at 30-foot intervals with high-grade duskwood doors (Hardness
-      20, HP 80, BT 40, @Check[athletics|dc:30|name:Fo
+    description: The target of your spell is drawn into a long, twisting, extradimensional hallway blocked at 30-foot intervals with high-grade duskwood doors (Hardness 20, HP 80, BT 40, @Check[athletics|dc:30|name:Fo

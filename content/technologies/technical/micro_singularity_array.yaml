@@ -1,11 +1,6 @@
 id: micro_singularity_array
 name: Micro-Singularity Array
-description: Countless micro-singularities appear in the area, like hungry rifts in
-  spacetime. When the tech is activated and the first time each round it's sustained,
-  living creatures in its area take 7d8 void damage (basic Toughness save). A living
-  creature using a move action to leave the area must succeed at a @Check[reflex]
-  save or their action is disrupted at the edge of the area.Heightened (+1) The void
-  damage increases by 1d8.
+description: Countless micro-singularities appear in the area, like hungry rifts in spacetime. When the tech is activated and the first time each round it's sustained, living creatures in its area take 7d8 void damage (basic Toughness save). A living creature using a move action to leave the area must succeed at a Reflex save save or their action is disrupted at the edge of the area.Heightened (+1) The void damage increases by 1d8.
 tradition: technical
 level: 7
 usage_type: prepared

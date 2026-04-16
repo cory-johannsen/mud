@@ -1,13 +1,11 @@
 id: aberrant_toxin_injector
 name: Aberrant Toxin Injector
-description: 'You fire a needle loaded with a synthesized alien neurotoxin. You deal
-  @Damage[2d6[piercing]] damage to the touched creature and afflict it with aberrant
-  neurotoxin. If the target takes piercing damage, they must attempt a Toughness save.
+description: 'You fire a needle loaded with a synthesized alien neurotoxin. You deal 2d6 piercing damage to the touched creature and afflict it with aberrant neurotoxin. If the target takes piercing damage, they must attempt a Toughness save.
 
 
   Critical Success The target is unaffected.
 
-  Success The target takes @Damage[2d6[poison]] damage.
+  Success The target takes 2d6 poison damage.
 
   Failure The target is afflicted with Aberrant Neurotoxin at stage 1.
 
@@ -18,12 +16,11 @@ description: 'You fire a needle loaded with a synthesized alien neurotoxin. You 
 
   Maximum Duration 6 rounds
 
-  Stage 1 @Damage[2d6[poison]] damage and Drained 1 (1 round)
+  Stage 1 2d6 poison damage and Drained 1 (1 round)
 
-  Stage 2 @Damage[3d6[poison]] damage and Drained 2 (1 round)
+  Stage 2 3d6 poison damage and Drained 2 (1 round)
 
-  Stage 3 @Damage[4d6[poison]] damage, Drained 2, and @UUID[Compendium.pf2e.conditionitems.Item.Confused]
-  (1 round)'
+  Stage 3 4d6 poison damage, Drained 2, and Confused (1 round)'
 tradition: technical
 level: 7
 usage_type: prepared
