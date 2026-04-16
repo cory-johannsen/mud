@@ -109,11 +109,11 @@ func TestQuestRegistry_CrossValidate_Valid(t *testing.T) {
 	}
 }
 
-// TestLoadFromDir_AllZoneQuests verifies that all 8 zone quests load successfully
-// from content/quests (REQ-1b, REQ-2, REQ-6).
+// TestLoadFromDir_AllZoneQuests verifies that all zone quests and find-trainer quests
+// load successfully from content/quests.
 //
-// Precondition: 8 zone quest YAML files exist in ../../../content/quests.
-// Postcondition: registry contains all 8 quest IDs.
+// Precondition: quest YAML files exist in ../../../content/quests.
+// Postcondition: registry contains all expected quest IDs.
 func TestLoadFromDir_AllZoneQuests(t *testing.T) {
 	reg, err := quest.LoadFromDir("../../../content/quests")
 	if err != nil {
@@ -128,6 +128,10 @@ func TestLoadFromDir_AllZoneQuests(t *testing.T) {
 		"vtq_scavenger_drive",
 		"vtq_bandit_bounty",
 		"vtq_gang_enforcer_takedown",
+		"find_technical_trainer_vantucky",
+		"find_neural_trainer_vantucky",
+		"find_biosynthetic_trainer_vantucky",
+		"find_fanatic_trainer_vantucky",
 	}
 	for _, id := range want {
 		if reg[id] == nil {

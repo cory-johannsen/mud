@@ -1751,6 +1751,12 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 							}
 						}
 					}
+					// REQ-TTA-7: Re-issue find-trainer quests for any pending grants loaded
+					// from DB, in case the quest was never issued (e.g. first login after
+					// NPC was placed in zone) or the player abandoned it.
+					for _, deferred := range sess.PendingTechGrants {
+						s.issueTechTrainerQuests(stream.Context(), sess, 0, deferred)
+					}
 				}
 			}
 		} else {
