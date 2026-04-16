@@ -1,15 +1,12 @@
 id: blood_doctrine_exhalation
 name: Blood Doctrine Exhalation
-description: 'You turn a creature toward you and exhale a blast of crimson doctrinal
-  mist, exposing the target to a sacred hemotoxin. The effects are determined by the
-  creature''s Toughness save.Critical Success The target is unaffected.
+description: 'You turn a creature toward you and exhale a blast of crimson doctrinal mist, exposing the target to a sacred hemotoxin. The effects are determined by the creature''s Toughness save.Critical Success The target is unaffected.
 
   Success The target takes 8d6 poison damage.
 
   Failure The target is afflicted with blood doctrine poison at stage 1.
 
-  Critical Failure The target is afflicted with blood doctrine poison at stage 2.Breath
-  of the Mantis GodSaving Throw @Check[fortitude|dc:29]
+  Critical Failure The target is afflicted with blood doctrine poison at stage 2.Breath of the Mantis GodSaving Throw Toughness save (DC 29)
 
   Maximum Duration 6 minutes
 

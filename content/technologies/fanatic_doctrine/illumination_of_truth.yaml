@@ -1,8 +1,6 @@
 id: illumination_of_truth
 name: Illumination of Truth
-description: The object emits a golden radiance that reveals deception, exposes hidden
-  objects, and disrupts hostile conditioning. All mechanical effects (bonuses, light
-  radius, suppression) remain identical to the base protocol.
+description: The object emits a golden radiance that reveals deception, exposes hidden objects, and disrupts hostile conditioning. All mechanical effects (bonuses, light radius, suppression) remain identical to the base protocol.
 tradition: fanatic_doctrine
 level: 4
 usage_type: prepared
@@ -14,9 +12,10 @@ save_type: cool
 save_dc: 15
 resolution: save
 effects:
-  on_apply:
-  - type: utility
-    dc: 0
-    description: The object glows with soft golden light that lays bare the truth,
-      reveals hidden objects, and shines supernatural light on false orders. The object
-      casts bright light in a 60-foot radius (and dim ligh
+  on_failure:
+  - &id001
+    type: condition
+    condition_id: hidden
+    value: 1
+  on_crit_failure:
+  - *id001

@@ -1,8 +1,6 @@
 id: wasting_judgment
 name: Wasting Judgment
-description: 'Your touch delivers the doctrine''s judgment of wasting affliction.
-  The symptoms include fatigue, joint degradation, tissue breakdown, and internal
-  hemorrhaging. The target must attempt a Toughness save.
+description: 'Your touch delivers the doctrine''s judgment of wasting affliction. The symptoms include fatigue, joint degradation, tissue breakdown, and internal hemorrhaging. The target must attempt a Toughness save.
 
 
   Critical Success The creature is unaffected.
@@ -23,9 +21,11 @@ save_type: toughness
 save_dc: 15
 resolution: save
 effects:
-  on_apply:
-  - type: utility
-    dc: 0
-    description: Your touch afflicts the target with an advanced form of scurvy, a
-      mariner's disease stemming from improper nutrition. The symptoms of scurvy include
-      fatigue, joint pain, loose teeth, and internal hemo
+  on_failure:
+  - type: damage
+    dice: 2d6
+    damage_type: poison
+  on_crit_failure:
+  - type: damage
+    dice: 4d6
+    damage_type: poison

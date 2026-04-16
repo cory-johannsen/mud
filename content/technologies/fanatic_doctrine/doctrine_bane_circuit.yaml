@@ -1,9 +1,10 @@
 id: doctrine_bane_circuit
 name: Doctrine Bane Circuit
-description: |-
-    You fill the minds of your enemies with doubt. Enemies in the area must succeed at a Willpower save or take a –1 status penalty to attack rolls as long as they are in the area. Once per round on subsequent turns, you can Sustain the spell to increase the emanation's radius by 10 feet and force enemies in the area that weren't yet affected to attempt another saving throw.
-    Bane can counteract @UUID[Compendium.pf2e.spells-srd.Item.Bless].
-    @UUID[Compendium.pf2e.spell-effects.Item.tech Effect: Bane]
+description: 'You fill the minds of your enemies with doubt. Enemies in the area must succeed at a Willpower save or take a –1 status penalty to attack rolls as long as they are in the area. Once per round on subsequent turns, you can Sustain the spell to increase the emanation''s radius by 10 feet and force enemies in the area that weren''t yet affected to attempt another saving throw.
+
+  Bane can counteract Bless.
+
+  @UUID[Compendium.pf2e.spell-effects.Item.tech Effect: Bane]'
 tradition: fanatic_doctrine
 level: 1
 usage_type: prepared
@@ -15,7 +16,7 @@ save_type: cool
 save_dc: 15
 resolution: save
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You fill the minds of your enemies with doubt. Enemies in the area must succeed at a Willpower save or take a –1 status penalty to attack rolls as long as they are in the area. Once per round on subseque
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You fill the minds of your enemies with doubt. Enemies in the area must succeed at a Willpower save or take a –1 status penalty to attack rolls as long as they are in the area. Once per round on subseque

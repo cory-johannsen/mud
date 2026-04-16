@@ -1,12 +1,9 @@
 id: vow_of_silence
 name: Vow of Silence
-description: 'You invoke a sacred silence upon the target. The target becomes @UUID[Compendium.pf2e.conditionitems.Item.Deafened]
-  and can''t produce sound for the duration. This prevents verbal spellcasting within
-  the silence.
+description: 'You invoke a sacred silence upon the target. The target becomes Deafened and can''t produce sound for the duration. This prevents verbal spellcasting within the silence.
 
 
-  Heightened (4th) You can target a @Template[burst|distance:10] instead of a single
-  creature. All sound is suppressed in the area.'
+  Heightened (4th) You can target a @Template[burst|distance:10] instead of a single creature. All sound is suppressed in the area.'
 tradition: fanatic_doctrine
 level: 2
 usage_type: prepared
@@ -19,6 +16,4 @@ effects:
   on_apply:
   - type: utility
     dc: 0
-    description: The target makes no sound, preventing creatures from noticing it
-      using hearing alone. The target can't use sonic attacks, nor can it use actions
-      with the auditory trait. This prevents it from casting
+    description: The target makes no sound, preventing creatures from noticing it using hearing alone. The target can't use sonic attacks, nor can it use actions with the auditory trait. This prevents it from casting

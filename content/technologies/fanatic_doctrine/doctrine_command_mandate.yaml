@@ -1,13 +1,16 @@
 id: doctrine_command_mandate
 name: Doctrine Command Mandate
-description: |-
-    You shout a command that's hard to ignore. You can command the target to approach you, run away (as if it had the @UUID[Compendium.pf2e.conditionitems.Item.Fleeing] condition), release what it's holding, drop @UUID[Compendium.pf2e.conditionitems.Item.Prone], or stand in place. It can't @UUID[Compendium.pf2e.actionspf2e.Item.Delay] or take any reactions until it has obeyed your command. The effects depend on the target's Willpower save.
+description: 'You shout a command that''s hard to ignore. You can command the target to approach you, run away (as if it had the Fleeing condition), release what it''s holding, drop Prone, or stand in place. It can''t Delay or take any reactions until it has obeyed your command. The effects depend on the target''s Willpower save.
 
-    Success The creature is unaffected.
-    Failure For the first action on its next turn, the creature must use a single action to do as you command.
-    Critical Failure The target must use all its actions on its next turn to obey your command.
 
-    Heightened (5th) You can target up to 10 creatures.
+  Success The creature is unaffected.
+
+  Failure For the first action on its next turn, the creature must use a single action to do as you command.
+
+  Critical Failure The target must use all its actions on its next turn to obey your command.
+
+
+  Heightened (5th) You can target up to 10 creatures.'
 tradition: fanatic_doctrine
 level: 1
 usage_type: prepared
@@ -19,7 +22,15 @@ save_type: cool
 save_dc: 15
 resolution: save
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You shout a command that's hard to ignore. You can command the target to approach you, run away (as if it had the @UUID[Compendium.pf2e.conditionitems.Item.Fleeing] condition), release what it's holdi
+  on_failure:
+  - &id001
+    type: condition
+    condition_id: fleeing
+    value: 1
+  - &id002
+    type: condition
+    condition_id: prone
+    value: 1
+  on_crit_failure:
+  - *id001
+  - *id002

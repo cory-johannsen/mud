@@ -1,10 +1,6 @@
 id: heresy_sight
 name: Heresy Sight
-description: You gain sacred sight that reveals the invisible and ethereal. You can
-  see @UUID[Compendium.pf2e.conditionitems.Item.Invisible] creatures and objects as
-  translucent shapes, making them @UUID[Compendium.pf2e.conditionitems.Item.Concealed]
-  to you instead of @UUID[Compendium.pf2e.conditionitems.Item.Undetected]. You can
-  also see ethereal creatures and objects.
+description: You gain sacred sight that reveals the invisible and ethereal. You can see Invisible creatures and objects as translucent shapes, making them Concealed to you instead of Undetected. You can also see ethereal creatures and objects.
 tradition: fanatic_doctrine
 level: 2
 usage_type: prepared
@@ -17,6 +13,4 @@ effects:
   on_apply:
   - type: utility
     dc: 0
-    description: Your gaze pierces through illusions and finds @UUID[Compendium.pf2e.conditionitems.Item.Invisible]
-      creatures and spirits. You can see invisible creatures as though they weren't
-      invisible, although the
+    description: Your gaze pierces through illusions and finds @UUID[Compendium.pf2e.conditionitems.Item.Invisible] creatures and spirits. You can see invisible creatures as though they weren't invisible, although the

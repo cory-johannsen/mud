@@ -1,8 +1,6 @@
 id: hallowed_sheen
 name: Hallowed Sheen
-description: You coat the target in a layer of shimmering doctrinal compound. The
-  target gains a +2 status bonus on Deception checks to Feint and a +1 circumstance
-  bonus to AC against Dazzled attackers.
+description: You coat the target in a layer of shimmering doctrinal compound. The target gains a +2 status bonus on Deception checks to Feint and a +1 circumstance bonus to AC against Dazzled attackers.
 tradition: fanatic_doctrine
 level: 3
 usage_type: prepared
@@ -14,9 +12,10 @@ save_type: toughness
 save_dc: 15
 resolution: save
 effects:
-  on_apply:
-  - type: utility
-    dc: 0
-    description: You coat a creature's body in a layer of brilliantly sparkling glitter.
-      The target gains a +2 status bonus on Deception checks to @UUID[Compendium.pf2e.actionspf2e.Item.Create
-      a Diversion] and to @UUI
+  on_failure:
+  - &id001
+    type: condition
+    condition_id: dazzled
+    value: 1
+  on_crit_failure:
+  - *id001

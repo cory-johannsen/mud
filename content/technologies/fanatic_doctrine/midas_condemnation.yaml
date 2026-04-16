@@ -1,27 +1,14 @@
 id: midas_condemnation
 name: Midas Condemnation
-description: 'You curse the target with the doctrine''s judgment, granting them the
-  power to transmute anything they touch to gold. The target must attempt a Willpower save.Critical
-  Success The target is unaffected.
+description: 'You curse the target with the doctrine''s judgment, granting them the power to transmute anything they touch to gold. The target must attempt a Willpower save.Critical Success The target is unaffected.
 
-  Success The target''s skin turns their armor and clothing partially to gold. If
-  the target is wearing any armor or clothing, they become @UUID[Compendium.pf2e.conditionitems.Item.Encumbered].
+  Success The target''s skin turns their armor and clothing partially to gold. If the target is wearing any armor or clothing, they become Encumbered.
 
-  Failure As success, but the curse extends to the target''s held weapons and other
-  gear. If the target is holding any weapons or other objects, they become Clumsy
-  3, and the objects'' Hardness is reduced by 5.
+  Failure As success, but the curse extends to the target''s held weapons and other gear. If the target is holding any weapons or other objects, they become Clumsy 3, and the objects'' Hardness is reduced by 5.
 
-  Critical Failure The curse becomes even stronger, extending to the surrounding terrain.
-  As failure, and if the creature is standing on a solid surface, the ground in their
-  space transmutes itself into a quagmire of liquid gold. The gold is greater difficult
-  terrain. If the creature leaves its square (or when the curse ends), any affected
-  terrain returns to its original shape and substance and the terrain in the new square
-  transmutes to gold.
+  Critical Failure The curse becomes even stronger, extending to the surrounding terrain. As failure, and if the creature is standing on a solid surface, the ground in their space transmutes itself into a quagmire of liquid gold. The gold is greater difficult terrain. If the creature leaves its square (or when the curse ends), any affected terrain returns to its original shape and substance and the terrain in the new square transmutes to gold.
 
-  Any objects that were turned to gold return to their previous form and original
-  shape when they leave the target''s possession or the tech ends. As long as the
-  target did not critically succeed on their saving throw, 2d6 gp worth of gold flakes
-  and dust are left behind as the curse recedes.'
+  Any objects that were turned to gold return to their previous form and original shape when they leave the target''s possession or the tech ends. As long as the target did not critically succeed on their saving throw, 2d6 gp worth of gold flakes and dust are left behind as the curse recedes.'
 tradition: fanatic_doctrine
 level: 7
 usage_type: prepared
@@ -36,8 +23,6 @@ effects:
   on_apply:
   - type: utility
     dc: 0
-    description: 'You grant the target the gift of riches, giving them the power to
-      turn anything they touch to gold. The target must attempt a Willpower save.Critical
-      Success The target is unaffected.
+    description: 'You grant the target the gift of riches, giving them the power to turn anything they touch to gold. The target must attempt a Willpower save.Critical Success The target is unaffected.
 
       Success The target''s'

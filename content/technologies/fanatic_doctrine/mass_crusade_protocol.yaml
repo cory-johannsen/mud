@@ -1,9 +1,6 @@
 id: mass_crusade_protocol
 name: Mass Crusade Protocol
-description: You broadcast a crusade signal to all allied combatants within 500 feet.
-  All allies gain a +2 status bonus to attack rolls, damage rolls, and saving throws
-  for 1 minute. They also gain 30 temporary HP. Enemies in the area must succeed at
-  a Willpower save or become frightened 2 for the duration.
+description: You broadcast a crusade signal to all allied combatants within 500 feet. All allies gain a +2 status bonus to attack rolls, damage rolls, and saving throws for 1 minute. They also gain 30 temporary HP. Enemies in the area must succeed at a Willpower save or become frightened 2 for the duration.
 tradition: fanatic_doctrine
 level: 9
 usage_type: prepared
@@ -15,9 +12,10 @@ save_type: cool
 save_dc: 15
 resolution: save
 effects:
-  on_apply:
-  - type: utility
-    dc: 0
-    description: You issue a divine mandate or proclaim a cause to the targets. It
-      can be to attain an item, claim a patch of land, slay a creature, war with a
-      group, or be entirely peaceful. Your cause can't force th
+  on_failure:
+  - &id001
+    type: condition
+    condition_id: frightened
+    value: 2
+  on_crit_failure:
+  - *id001

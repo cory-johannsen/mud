@@ -1,9 +1,6 @@
 id: soul_harvest_protocol
 name: Soul Harvest Protocol
-description: You attempt to seize a target's soul in the name of your doctrine. The
-  target must attempt a Toughness save. On a critical failure it dies instantly. On
-  a failure it is stunned 3 and takes 9d6+40 damage. On a success it takes 9d6+40.
-  The captured soul can be used as a power source or released.
+description: You attempt to seize a target's soul in the name of your doctrine. The target must attempt a Toughness save. On a critical failure it dies instantly. On a failure it is stunned 3 and takes 9d6+40 damage. On a success it takes 9d6+40. The captured soul can be used as a power source or released.
 tradition: fanatic_doctrine
 level: 9
 usage_type: prepared
@@ -14,8 +11,6 @@ duration: instant
 resolution: none
 effects:
   on_apply:
-  - type: utility
-    dc: 0
-    description: You trap the target's soul in the item before the soul can pass on
-      to the afterlife. The item used to contain the soul can be anything as long
-      as it's of the appropriate value. The item has AC 16 and
+  - type: condition
+    condition_id: stunned
+    value: 3

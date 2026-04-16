@@ -1,14 +1,8 @@
 id: blood_tithe_cloud
 name: Blood Tithe Cloud
-description: 'You unleash a cloud of doctrinal nanoscale harvesters that drain vitality
-  from the living. Each living creature in the area (aside from you) takes 6d6 void
-  damage with a basic Toughness save. Creatures in the area are Concealed, and all
-  creatures outside become concealed to those within.
+description: 'You unleash a cloud of doctrinal nanoscale harvesters that drain vitality from the living. Each living creature in the area (aside from you) takes 6d6 void damage with a basic Toughness save. Creatures in the area are Concealed, and all creatures outside become concealed to those within.
 
-  The first time each round you Sustain, living creatures in the area take additional
-  @Damage[(@item.rank -2)d6[void]] damage. You gain temporary Hit Points equal to
-  half the highest damage dealt. Temporary Hit Points last 1 minute.Heightened (+1)
-  Initial damage increases by 2d6, secondary damage increases by 1d6.'
+  The first time each round you Sustain, living creatures in the area take additional 1d6 void damage. You gain temporary Hit Points equal to half the highest damage dealt. Temporary Hit Points last 1 minute.Heightened (+1) Initial damage increases by 2d6, secondary damage increases by 1d6.'
 tradition: fanatic_doctrine
 level: 4
 usage_type: prepared

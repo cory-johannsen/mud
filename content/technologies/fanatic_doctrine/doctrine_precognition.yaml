@@ -1,8 +1,6 @@
 id: doctrine_precognition
 name: Doctrine Precognition
-description: 'Doctrinal clarity hardens into precognitive awareness. The target gains
-  a +2 status bonus to initiative, cannot be flat-footed, and gains one better outcome
-  on Perception initiative checks. Duration: 1 hour.'
+description: 'Doctrinal clarity hardens into precognitive awareness. The target gains a +2 status bonus to initiative, cannot be flat-footed, and gains one better outcome on Perception initiative checks. Duration: 1 hour.'
 tradition: fanatic_doctrine
 level: 9
 usage_type: prepared
@@ -13,8 +11,6 @@ duration: instant
 resolution: none
 effects:
   on_apply:
-  - type: utility
-    dc: 0
-    description: You gain a sixth sense that warns you of danger that might befall
-      the target of the spell. If you choose a creature other than yourself as the
-      target, you create a psychic link through which you can i
+  - type: condition
+    condition_id: flat_footed
+    value: 1

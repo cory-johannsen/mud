@@ -1,18 +1,15 @@
 id: doctrinal_thunder
 name: Doctrinal Thunder
-description: 'You invoke a blast of sacred sound in the area. Each creature in the
-  area takes 2d10 sonic damage and must attempt a Toughness save.
+description: 'You invoke a blast of sacred sound in the area. Each creature in the area takes 2d10 sonic damage and must attempt a Toughness save.
 
 
   Critical Success The creature is unaffected.
 
   Success The creature takes half damage.
 
-  Failure The creature takes full damage and is @UUID[Compendium.pf2e.conditionitems.Item.Deafened]
-  for 1 round.
+  Failure The creature takes full damage and is Deafened for 1 round.
 
-  Critical Failure The creature takes double damage and is @UUID[Compendium.pf2e.conditionitems.Item.Deafened]
-  for 1 minute.
+  Critical Failure The creature takes double damage and is Deafened for 1 minute.
 
 
   Heightened (+1) The damage increases by 1d10.'

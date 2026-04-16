@@ -1,16 +1,13 @@
 id: doctrinal_exile
 name: Doctrinal Exile
-description: 'You invoke sacred protocols to banish the target from this place. The
-  target must attempt a Willpower save. You can spend an extra action while activating
-  this tech and add a cost to give the creature a -2 circumstance penalty to its save.
+description: 'You invoke sacred protocols to banish the target from this place. The target must attempt a Willpower save. You can spend an extra action while activating this tech and add a cost to give the creature a -2 circumstance penalty to its save.
 
 
   Critical Success The target is unaffected.
 
   Success The target takes 2d6 mental damage.
 
-  Failure The target is returned to its home plane. If already there, it''s stunned
-  and takes 4d6 mental damage.
+  Failure The target is returned to its home plane. If already there, it''s stunned and takes 4d6 mental damage.
 
   Critical Failure As failure, and the target can''t return for 1 week.'
 tradition: fanatic_doctrine
@@ -24,9 +21,22 @@ save_type: cool
 save_dc: 15
 resolution: save
 effects:
-  on_apply:
-  - type: utility
-    dc: 0
-    description: You send the target back to its home plane. The target must attempt
-      a Willpower save. You can spend an extra action while Casting this tech and add
-      a cost to the spell to give the creature a –2 circumst
+  on_failure:
+  - type: damage
+    dice: 2d6
+    damage_type: mental
+  - type: damage
+    dice: 4d6
+    damage_type: mental
+  - &id001
+    type: condition
+    condition_id: stunned
+    value: 1
+  on_crit_failure:
+  - type: damage
+    dice: 4d6
+    damage_type: mental
+  - type: damage
+    dice: 8d6
+    damage_type: mental
+  - *id001

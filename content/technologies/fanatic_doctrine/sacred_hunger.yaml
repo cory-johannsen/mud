@@ -1,13 +1,9 @@
 id: sacred_hunger
 name: Sacred Hunger
-description: 'You curse the target with a doctrinal compulsion to consume the fallen.
-  The target can restore its vitality by feasting on the flesh of the dead. On its
-  turn, the target can use 2 actions (these actions have the manipulate trait) to
-  cannibalize an adjacent dead or dying creature, regaining 6d8 Hit Points.
+description: 'You curse the target with a doctrinal compulsion to consume the fallen. The target can restore its vitality by feasting on the flesh of the dead. On its turn, the target can use 2 actions (these actions have the manipulate trait) to cannibalize an adjacent dead or dying creature, regaining 6d8 Hit Points.
 
 
-  The target must attempt a Willpower save each round or spend its actions attempting to
-  feed.'
+  The target must attempt a Willpower save each round or spend its actions attempting to feed.'
 tradition: fanatic_doctrine
 level: 5
 usage_type: prepared
@@ -19,9 +15,10 @@ save_type: cool
 save_dc: 15
 resolution: save
 effects:
-  on_apply:
-  - type: utility
-    dc: 0
-    description: You evoke Zevgavizeb's unceasing hunger and inflict it upon your
-      target. The target becomes overwhelmed with cannibalistic hunger and can restore
-      its vitality by feasting on the flesh of the fallen. O
+  on_failure:
+  - &id001
+    type: condition
+    condition_id: dying
+    value: 1
+  on_crit_failure:
+  - *id001

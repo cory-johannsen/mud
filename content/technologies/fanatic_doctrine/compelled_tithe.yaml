@@ -1,18 +1,15 @@
 id: compelled_tithe
 name: Compelled Tithe
-description: 'You invoke a doctrinal compulsion that makes the target feel an overwhelming
-  urge to give away its possessions. The target must attempt a Willpower save.
+description: 'You invoke a doctrinal compulsion that makes the target feel an overwhelming urge to give away its possessions. The target must attempt a Willpower save.
 
 
   Critical Success The creature is unaffected.
 
-  Success The creature must spend its first action on its next turn presenting one
-  of its possessions to the nearest creature. It can choose which possession.
+  Success The creature must spend its first action on its next turn presenting one of its possessions to the nearest creature. It can choose which possession.
 
   Failure As success, but the creature must present its most valuable accessible possession.
 
-  Critical Failure As failure, and the creature also becomes @UUID[Compendium.pf2e.conditionitems.Item.Stupefied]
-  1 for 1 round.'
+  Critical Failure As failure, and the creature also becomes Stupefied 1 for 1 round.'
 tradition: fanatic_doctrine
 level: 2
 usage_type: prepared
@@ -27,6 +24,4 @@ effects:
   on_apply:
   - type: utility
     dc: 0
-    description: You speak on the virtue of charity, compelling the target to give
-      away its possessions. The target must attempt a Willpower save. If the target has
-      no items on its person, the spell fails.Critical Success
+    description: You speak on the virtue of charity, compelling the target to give away its possessions. The target must attempt a Willpower save. If the target has no items on its person, the spell fails.Critical Success

@@ -100,10 +100,11 @@ def process_file(path: Path, apply: bool) -> dict:
 
                 if apply:
                     data["effects"] = result.effects
-                    if result.save_type and not data.get("save_type"):
-                        data["save_type"] = result.save_type
-                    if result.save_dc and not data.get("save_dc"):
-                        data["save_dc"] = result.save_dc
+                    if resolution == "save":
+                        if result.save_type and not data.get("save_type"):
+                            data["save_type"] = result.save_type
+                        if result.save_dc and not data.get("save_dc"):
+                            data["save_dc"] = result.save_dc
             elif result.needs_review:
                 report["needs_review"] = True
                 report["notes"].extend(result.notes)

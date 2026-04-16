@@ -11,7 +11,6 @@ duration: instant
 resolution: none
 effects:
   on_apply:
-  - type: utility
-    dc: 0
-    description: Life energy shuts death's door. The target loses the @UUID[Compendium.pf2e.conditionitems.Item.Dying] condition,
-      though it remains @UUID[Compendium.pf2e.conditionitems.Item.Unconscious] at 0 Hit Point
+  - type: condition
+    condition_id: dying
+    value: 1

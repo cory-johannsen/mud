@@ -1,21 +1,15 @@
 id: heresy_feedback_curse
 name: Heresy Feedback Curse
-description: 'You mark the target with a doctrinal curse that causes any active enhancements
-  to hemorrhage destructive energy. The target must attempt a Willpower save.
+description: 'You mark the target with a doctrinal curse that causes any active enhancements to hemorrhage destructive energy. The target must attempt a Willpower save.
 
 
   Critical Success The target is unaffected.
 
-  Success Whenever the target becomes affected by a spell with a duration, the target
-  takes @Damage[2d12[persistent,force]] damage. Each time it takes persistent force
-  damage from the heresy feedback, it reduces the remaining duration of spells affecting
-  it by 1 round. Only a successful @Check[arcana] check against your tech DC can
-  help the target recover from the persistent damage; the curse and the persistent
-  damage end after 1 minute.
+  Success Whenever the target becomes affected by a spell with a duration, the target takes 2d12 persistent force damage. Each time it takes persistent force damage from the heresy feedback, it reduces the remaining duration of spells affecting it by 1 round. Only a successful Arcana save check against your tech DC can help the target recover from the persistent damage; the curse and the persistent damage end after 1 minute.
 
   Failure As success, but the curse and persistent damage do not end on their own.
 
-  Critical Failure As failure, but the persistent force damage is @Damage[4d12[persistent,force]].'
+  Critical Failure As failure, but the persistent force damage is 4d12 persistent force.'
 tradition: fanatic_doctrine
 level: 6
 usage_type: prepared
@@ -27,13 +21,21 @@ save_type: cool
 save_dc: 15
 resolution: save
 effects:
-  on_apply:
-  - type: utility
-    dc: 0
-    description: 'You cause any spells cast on the target to spill out their energy
-      in harmful surges. The target must attempt a Willpower save.
-
-
-      Critical Success The target is unaffected.
-
-      Success Whenever the target become'
+  on_failure:
+  - type: damage
+    dice: 2d12
+    damage_type: force
+    persistent: true
+  - type: damage
+    dice: 4d12
+    damage_type: force
+    persistent: true
+  on_crit_failure:
+  - type: damage
+    dice: 2d12
+    damage_type: force
+    persistent: true
+  - type: damage
+    dice: 4d12
+    damage_type: force
+    persistent: true

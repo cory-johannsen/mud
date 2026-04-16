@@ -1,9 +1,6 @@
 id: consecrated_arsenal
 name: Consecrated Arsenal
-description: You conjure weapons of devotional fire, sanctified by doctrine. You create
-  a weapon made of sacred flame. The weapon deals 1d8 fire damage and has the traits
-  of the weapon it resembles. When you Sustain the spell, you can make a Strike with
-  the weapon.
+description: You conjure weapons of devotional fire, sanctified by doctrine. You create a weapon made of sacred flame. The weapon deals 1d8 fire damage and has the traits of the weapon it resembles. When you Sustain the spell, you can make a Strike with the weapon.
 tradition: fanatic_doctrine
 level: 2
 usage_type: prepared
@@ -14,8 +11,6 @@ duration: instant
 resolution: none
 effects:
   on_apply:
-  - type: utility
-    dc: 0
-    description: As long as you have magic, you're never unarmed. You materialize
-      a flaming simulacrum of any common simple or martial weapon into the target's
-      grasp. The target must have a free hand to hold the weapo
+  - type: damage
+    dice: 1d8
+    damage_type: fire

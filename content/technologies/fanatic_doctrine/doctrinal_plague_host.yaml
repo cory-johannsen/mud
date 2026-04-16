@@ -1,26 +1,14 @@
 id: doctrinal_plague_host
 name: Doctrinal Plague Host
-description: 'You conjure a massive manifestation of your doctrine''s wrath—a towering
-  effigy of righteous pestilence riddled with swarming agents of judgment. The effigy
-  occupies the space of a Gargantuan creature, animated by millions of swarming creatures
-  whose collective movement grants it a Speed of 60 feet and a fly Speed of 60 feet.
+description: 'You conjure a massive manifestation of your doctrine''s wrath—a towering effigy of righteous pestilence riddled with swarming agents of judgment. The effigy occupies the space of a Gargantuan creature, animated by millions of swarming creatures whose collective movement grants it a Speed of 60 feet and a fly Speed of 60 feet.
 
-  Arrive Behold the Plague Effigy The manifestation is horrifically potent, emitting
-  noxious judgment, and constantly shifts as millions of organisms swarm within it.
-  A loud, persistent buzzing fills the area. Each living enemy creature within a @Template[type:emanation|distance:60]
-  must attempt a Toughness save with the following effects.Critical Success The creature
-  is unaffected.
+  Arrive Behold the Plague Effigy The manifestation is horrifically potent, emitting noxious judgment, and constantly shifts as millions of organisms swarm within it. A loud, persistent buzzing fills the area. Each living enemy creature within a @Template[type:emanation|distance:60] must attempt a Toughness save with the following effects.Critical Success The creature is unaffected.
 
   Success The creature is Sickened 2.
 
-  Failure The creature is Sickened 3 and @UUID[Compendium.pf2e.conditionitems.Item.Deafened]
-  for the duration.
+  Failure The creature is Sickened 3 and Deafened for the duration.
 
-  Critical Failure The creature is Sickened 4, Stunned 1, and deafened for the duration.Depart
-  (poison) Plague Dispersal The millions of agents pour out and surge across the battlefield,
-  consuming your enemies. This swarm deals 5d8 piercing damage and 5d8 poison damage
-  to enemy creatures in a @Template[type:emanation|distance:60] with a basic Reflex
-  save. A creature that critically fails is additionally Drained 2.'
+  Critical Failure The creature is Sickened 4, Stunned 1, and deafened for the duration.Depart (poison) Plague Dispersal The millions of agents pour out and surge across the battlefield, consuming your enemies. This swarm deals 5d8 piercing damage and 5d8 poison damage to enemy creatures in a @Template[type:emanation|distance:60] with a basic Reflex save. A creature that critically fails is additionally Drained 2.'
 tradition: fanatic_doctrine
 level: 7
 usage_type: prepared

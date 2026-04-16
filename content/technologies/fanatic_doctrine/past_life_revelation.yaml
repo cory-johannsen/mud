@@ -1,9 +1,6 @@
 id: past_life_revelation
 name: Past-Life Revelation
-description: 'Overwhelming memories of a past existence flood the target''s consciousness.
-  This is especially disorienting for undead and creatures that have lived previous
-  lives; if such creatures roll a critical success, they get a success instead, and
-  if they roll a failure, they get a critical failure instead.
+description: 'Overwhelming memories of a past existence flood the target''s consciousness. This is especially disorienting for undead and creatures that have lived previous lives; if such creatures roll a critical success, they get a success instead, and if they roll a failure, they get a critical failure instead.
 
 
   Critical Success The creature is unaffected.
@@ -24,9 +21,15 @@ save_type: cool
 save_dc: 15
 resolution: save
 effects:
-  on_apply:
-  - type: utility
-    dc: 0
-    description: Memories of a past life that seem incredibly real (and may even be)
-      overwhelm the target's mind. This is especially disorienting for undead and
-      creatures that have lived a previous life (such as celes
+  on_failure:
+  - &id001
+    type: condition
+    condition_id: slowed
+    value: 1
+  - &id002
+    type: condition
+    condition_id: stunned
+    value: 3
+  on_crit_failure:
+  - *id001
+  - *id002

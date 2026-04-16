@@ -1,8 +1,6 @@
 id: divine_thread_reading
 name: Divine Thread Reading
-description: You open your mind to the grand doctrinal design, perceiving the threads
-  of causality. You attempt Perception checks to detect hidden creatures and objects
-  within 60 feet, gaining a +2 status bonus.
+description: You open your mind to the grand doctrinal design, perceiving the threads of causality. You attempt Perception checks to detect hidden creatures and objects within 60 feet, gaining a +2 status bonus.
 tradition: fanatic_doctrine
 level: 3
 usage_type: prepared
@@ -13,8 +11,6 @@ duration: minutes:1
 resolution: none
 effects:
   on_apply:
-  - type: utility
-    dc: 0
-    description: You open your mind to the grand design of existence, enabling you
-      to view the threads of fate in all their complex, tangled glory. You attempt
-      Perception checks and Reflex saving throws at mythic prof
+  - type: condition
+    condition_id: hidden
+    value: 1
