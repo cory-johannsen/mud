@@ -11,9 +11,9 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/technology"
 )
 
-// TechPromptFn presents a list of technology options to the player and returns
+// TechPromptFn presents a prompt header and list of technology options to the player and returns
 // the selected option string.
-type TechPromptFn func(options []string) (string, error)
+type TechPromptFn func(prompt string, options []string) (string, error)
 
 // keepSentinel is the option prefix used to offer "keep current" in pool slot prompts.
 // Callers that see this prefix in the chosen string use the existing tech rather than parsing a new ID.
@@ -329,7 +329,7 @@ func LevelUpTechnologies(
 	}
 	// Use first-option fallback when no promptFn is provided (e.g., admin grant path).
 	if promptFn == nil {
-		promptFn = func(options []string) (string, error) {
+		promptFn = func(_ string, options []string) (string, error) {
 			if len(options) == 0 {
 				return "", nil
 			}
@@ -985,7 +985,8 @@ func fillFromPreparedPoolWithSend(
 			options = append([]string{keepSentinel + "Keep current: " + keepName}, options...)
 		}
 
-		chosen, err := promptFn(options)
+		slotPrompt := fmt.Sprintf("Choose a Level %d technology to prepare (%s %d):", lvl, flavor.SlotNoun, slotNum)
+		chosen, err := promptFn(slotPrompt, options)
 		if err != nil {
 			return nil, err
 		}
@@ -1068,7 +1069,7 @@ func fillFromPreparedPool(
 	copy(remaining, pool)
 	for open > 0 {
 		options := buildPreparedOptions(remaining, techReg)
-		chosen, err := promptFn(options)
+		chosen, err := promptFn(fmt.Sprintf("Choose a Level %d technology to prepare:", lvl), options)
 		if err != nil {
 			return nil, err
 		}
@@ -1136,7 +1137,7 @@ func fillFromSpontaneousPool(
 	copy(remaining, pool)
 	for open > 0 {
 		options := buildSpontaneousOptions(remaining, techReg)
-		chosen, err := promptFn(options)
+		chosen, err := promptFn(fmt.Sprintf("Choose a Level %d technology to learn:", lvl), options)
 		if err != nil {
 			return nil, err
 		}
@@ -1157,14 +1158,23 @@ func fillFromSpontaneousPool(
 func buildOptions(ids []string, levels []int, reg *technology.Registry) []string {
 	opts := make([]string, 0, len(ids))
 	for i, id := range ids {
-		_ = levels[i]
+		lvl := 0
+		if i < len(levels) {
+			lvl = levels[i]
+		}
 		if reg != nil {
 			if def, ok := reg.Get(id); ok {
 				desc := def.Description
 				if desc == "" {
 					desc = def.Name
 				}
-				opts = append(opts, fmt.Sprintf("[%s] %s \u2014 %s", id, def.Name, desc))
+				var nameWithLevel string
+				if lvl > 0 {
+					nameWithLevel = fmt.Sprintf("%s (Lv %d)", def.Name, lvl)
+				} else {
+					nameWithLevel = def.Name
+				}
+				opts = append(opts, fmt.Sprintf("[%s] %s \u2014 %s", id, nameWithLevel, desc))
 				continue
 			}
 		}
