@@ -1,0 +1,8 @@
+id: find_technical_trainer_ne_portland
+title: "Advanced Technical Training Available"
+description: >
+  Your technical augmentation has reached level 3. A trainer called Hex operates
+  out of the neutral garage in Northeast Portland — seek them out for advanced
+  technical techniques.
+type: find_trainer
+auto_complete: true

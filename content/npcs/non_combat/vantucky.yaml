@@ -255,6 +255,23 @@
   personality: neutral
   tech_trainer:
     tradition: neural
-    offered_levels: [2, 3]
+    offered_levels: [2]
     base_cost: 150
     find_quest_id: find_neural_trainer_vantucky
+
+- id: vantucky_fanatic_tech_trainer
+  name: "Brother Caleb"
+  npc_type: tech_trainer
+  type: human
+  description: "A doctrine instructor who serves the compound's spiritual needs alongside its tactical ones. His sessions blend ideological fervor with practical augmentation techniques. He believes deeply in what he teaches."
+  level: 5
+  max_hp: 30
+  ac: 12
+  awareness: 8
+  disposition: neutral
+  personality: neutral
+  tech_trainer:
+    tradition: fanatic_doctrine
+    offered_levels: [2]
+    base_cost: 150
+    find_quest_id: find_fanatic_trainer_vantucky

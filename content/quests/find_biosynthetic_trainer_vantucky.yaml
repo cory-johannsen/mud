@@ -1,7 +1,7 @@
 id: find_biosynthetic_trainer_vantucky
 title: "Bio-Synthetic Training Available"
 description: >
-  Your bio-synthetic modifications are ready for level 2 advancement. A trainer
-  in Vantucky knows the techniques — seek them out.
+  Your bio-synthetic knowledge has grown to level 2. A trainer named Doc Moss at
+  Rustbucket Ridge can teach you the next tier — find them at the Scrap Office.
 type: find_trainer
 auto_complete: true

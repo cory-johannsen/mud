@@ -110,8 +110,19 @@ func TestNonCombatNPCTemplateIDs(t *testing.T) {
 		require.NoError(t, yaml.Unmarshal(data, &templates))
 		for _, tmpl := range templates {
 			expected := zoneID + "_" + tmpl.NPCType
-			require.Equal(t, expected, tmpl.ID,
-				"zone %q template ID must be %q (REQ-NCNAZ-7)", zoneID, expected)
+			// tech_trainer allows tradition-prefixed IDs (e.g. {zone}_{tradition}_tech_trainer)
+			// to support multiple trainers per zone across different tech traditions.
+			if tmpl.NPCType == "tech_trainer" {
+				prefix := zoneID + "_"
+				suffix := "_" + tmpl.NPCType
+				validExact := tmpl.ID == expected
+				validPrefixed := strings.HasPrefix(tmpl.ID, prefix) && strings.HasSuffix(tmpl.ID, suffix)
+				require.True(t, validExact || validPrefixed,
+					"zone %q tech_trainer ID %q must be %q or match %q*%q (REQ-NCNAZ-7)", zoneID, tmpl.ID, expected, prefix, suffix)
+			} else {
+				require.Equal(t, expected, tmpl.ID,
+					"zone %q template ID must be %q (REQ-NCNAZ-7)", zoneID, expected)
+			}
 		}
 	}
 }

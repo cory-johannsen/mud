@@ -201,3 +201,71 @@
     currency:
       min: 10
       max: 50
+
+- id: ne_portland_technical_tech_trainer
+  name: "Hex"
+  npc_type: tech_trainer
+  type: human
+  description: "A circuit-burned engineer who drifted into Northeast Portland after the bridges fell. Works from the neutral garage's back bay, surrounded by salvaged oscilloscopes and partially disassembled augmentation rigs. Teaches advanced technical augmentation to anyone who can afford the parts."
+  level: 6
+  max_hp: 35
+  ac: 12
+  awareness: 9
+  disposition: neutral
+  personality: neutral
+  tech_trainer:
+    tradition: technical
+    offered_levels: [3]
+    base_cost: 250
+    find_quest_id: find_technical_trainer_ne_portland
+
+- id: ne_portland_neural_tech_trainer
+  name: "The Architect"
+  npc_type: tech_trainer
+  type: human
+  description: "Nobody knows their real name. They operate from the neutral bunker's deepest room, accessible only to those who've proven themselves worth the descent. Neural augmentation at the third tier requires a mind willing to be rebuilt."
+  level: 6
+  max_hp: 35
+  ac: 12
+  awareness: 10
+  disposition: neutral
+  personality: neutral
+  tech_trainer:
+    tradition: neural
+    offered_levels: [3]
+    base_cost: 250
+    find_quest_id: find_neural_trainer_ne_portland
+
+- id: ne_portland_biosynthetic_tech_trainer
+  name: "Myra"
+  npc_type: tech_trainer
+  type: human
+  description: "Runs her practice from an old parking lot, teaching bio-synthetic augmentation techniques under open sky. She believes augmentation should work with the body's natural systems, not override them. Her methods are slower and more effective than most."
+  level: 6
+  max_hp: 35
+  ac: 12
+  awareness: 8
+  disposition: neutral
+  personality: neutral
+  tech_trainer:
+    tradition: bio_synthetic
+    offered_levels: [3]
+    base_cost: 250
+    find_quest_id: find_biosynthetic_trainer_ne_portland
+
+- id: ne_portland_fanatic_tech_trainer
+  name: "The Lector"
+  npc_type: tech_trainer
+  type: human
+  description: "A traveling doctrine instructor who stops at the corner store between circuits of the neutral zones. The Lector teaches third-tier fanatic doctrine augmentation with the calm certainty of someone who has never doubted a word they've said."
+  level: 6
+  max_hp: 35
+  ac: 12
+  awareness: 9
+  disposition: neutral
+  personality: neutral
+  tech_trainer:
+    tradition: fanatic_doctrine
+    offered_levels: [3]
+    base_cost: 250
+    find_quest_id: find_fanatic_trainer_ne_portland

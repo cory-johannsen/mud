@@ -1,0 +1,8 @@
+id: find_fanatic_trainer_ne_portland
+title: "Advanced Fanatic Doctrine Training Available"
+description: >
+  Your doctrine has deepened to level 3. A traveling instructor known as The
+  Lector passes through the corner store in Northeast Portland — find them
+  while they are there.
+type: find_trainer
+auto_complete: true

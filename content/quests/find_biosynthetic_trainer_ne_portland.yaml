@@ -1,0 +1,8 @@
+id: find_biosynthetic_trainer_ne_portland
+title: "Advanced Bio-Synthetic Training Available"
+description: >
+  Your bio-synthetic augmentation has reached level 3. A trainer named Myra
+  works in the neutral lot of Northeast Portland — seek her out for advanced
+  bio-synthetic techniques.
+type: find_trainer
+auto_complete: true

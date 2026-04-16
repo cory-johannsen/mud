@@ -263,6 +263,23 @@
   personality: neutral
   tech_trainer:
     tradition: technical
-    offered_levels: [2, 3]
+    offered_levels: [2]
     base_cost: 120
     find_quest_id: find_technical_trainer_vantucky
+
+- id: rustbucket_ridge_biosynthetic_tech_trainer
+  name: "Doc Moss"
+  npc_type: tech_trainer
+  type: human
+  description: "A former field medic who traded battlefield triage for body modification. Works out of a converted trailer that smells of antiseptic and damp earth. Takes pride in making organic systems work better than they were designed to."
+  level: 4
+  max_hp: 25
+  ac: 11
+  awareness: 7
+  disposition: neutral
+  personality: neutral
+  tech_trainer:
+    tradition: bio_synthetic
+    offered_levels: [2]
+    base_cost: 120
+    find_quest_id: find_biosynthetic_trainer_vantucky

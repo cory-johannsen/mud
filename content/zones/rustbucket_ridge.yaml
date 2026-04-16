@@ -1226,6 +1226,9 @@ zone:
     - template: rustbucket_ridge_tech_trainer
       count: 1
       respawn_after: 0s
+    - template: rustbucket_ridge_biosynthetic_tech_trainer
+      count: 1
+      respawn_after: 0s
     properties:
       lighting: fluorescent
       atmosphere: industrial
