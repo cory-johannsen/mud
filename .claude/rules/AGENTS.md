@@ -25,6 +25,7 @@
 - AGENT-12: Background subagents (launched with `run_in_background: true`) do NOT have access to task tools. The controller agent MUST periodically poll background agent output files and manually update task subjects with current progress percentages using TaskUpdate.
 - AGENT-13: Agents MUST launch all Agent tool calls with `run_in_background: true` by default, unless the result is immediately required to proceed.
 - AGENT-14: Agents MUST maximize concurrency by launching all independent Agent tool calls in a single message, running them in parallel.
+- AGENT-15: Agents MUST prefer JetBrains MCP tools over direct file operations for all supported operations (file reads, searches, symbol lookup, navigation, refactoring, diagnostics, terminal commands). Direct shell tools (grep, sed, find, cat, bash file I/O) MUST NOT be used when an equivalent JetBrains MCP tool is available. The JetBrains IDE maintains an indexed knowledge base that makes these operations faster and more accurate.
 
 ## 3. Software Engineering Best Practices
 

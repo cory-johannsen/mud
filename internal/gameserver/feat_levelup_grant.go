@@ -67,10 +67,18 @@ func applyFeatGrantWithBaseline(
 	// Choice feats: count how many pool entries appear in preExisting (the snapshot
 	// loaded from DB at backfill start). This ensures feats granted earlier in the
 	// same backfill run do not prematurely satisfy this level's pool count.
+	// Pool entries may use legacy PF2E IDs (e.g. "rage"); resolve to canonical IDs
+	// (e.g. "wrath") before ownership checks so stored feats are not double-granted.
 	if grants.Choices != nil && grants.Choices.Count > 0 {
 		alreadyOwned := 0
 		for _, id := range grants.Choices.Pool {
-			if preExisting[id] {
+			canonicalID := id
+			if featReg != nil {
+				if f, ok := featReg.Feat(id); ok {
+					canonicalID = f.ID
+				}
+			}
+			if preExisting[canonicalID] {
 				alreadyOwned++
 			}
 		}
@@ -79,19 +87,22 @@ func applyFeatGrantWithBaseline(
 			if remaining <= 0 {
 				break
 			}
-			if existing[id] {
-				continue // dedup: skip if already granted (even in this run)
-			}
+			canonicalID := id
 			if featReg != nil {
-				if _, ok := featReg.Feat(id); !ok {
-					continue
+				if f, ok := featReg.Feat(id); ok {
+					canonicalID = f.ID
+				} else {
+					continue // feat not found in registry; skip
 				}
 			}
-			if err := featsRepo.Add(ctx, characterID, id); err != nil {
+			if existing[canonicalID] {
+				continue // dedup: skip if already granted (even in this run)
+			}
+			if err := featsRepo.Add(ctx, characterID, canonicalID); err != nil {
 				return granted, err
 			}
-			existing[id] = true
-			granted = append(granted, id)
+			existing[canonicalID] = true
+			granted = append(granted, canonicalID)
 			remaining--
 		}
 	}
