@@ -97,11 +97,22 @@ func ResolveTechEffects(
 		}
 
 		effectMsgs := applyEffects(sess, tier, target, cbt, condRegistry, src, querier)
-		for _, m := range effectMsgs {
-			if label != "" {
-				msgs = append(msgs, label+m)
-			} else {
-				msgs = append(msgs, m)
+		if len(effectMsgs) == 0 && label != "" {
+			// No effects to prefix — emit the label as a standalone message.
+			// Strip trailing ": " (used as a prefix when effects follow) and
+			// ensure the message ends with a period.
+			standalone := strings.TrimSuffix(label, ": ")
+			if !strings.HasSuffix(standalone, ".") {
+				standalone += "."
+			}
+			msgs = append(msgs, standalone)
+		} else {
+			for _, m := range effectMsgs {
+				if label != "" {
+					msgs = append(msgs, label+m)
+				} else {
+					msgs = append(msgs, m)
+				}
 			}
 		}
 	}

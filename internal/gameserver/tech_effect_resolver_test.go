@@ -383,6 +383,50 @@ func TestResolveTechEffects_TremorsenseWithQuerier_ReturnsCreatureList(t *testin
 	assert.Equal(t, "[Seismic Sense] Creatures detected in this room: Guard, you", msgs[0])
 }
 
+// REQ-TER-MISS: When an attack tech misses and has no on_miss effects, ResolveTechEffects
+// must still return a non-empty message (e.g. "Missed <target>.") so the player receives
+// feedback. Regression test for issue #108 (Hydro Pressure Organ produces no output).
+func TestResolveTechEffects_AttackMiss_EmitsStandaloneLabel(t *testing.T) {
+	sess := &session.PlayerSession{UID: "p1", Level: 1}
+	sess.Abilities.Savvy = 10
+	// Target with AC=30 so any roll misses.
+	target := makeTarget("enemy", 20, 20, 30)
+	tech := makeAttackTech(
+		[]technology.TechEffect{{Type: technology.EffectDamage, Dice: "3d6", DamageType: "bludgeoning"}},
+		[]technology.TechEffect{{Type: technology.EffectDamage, Dice: "6d6", DamageType: "bludgeoning"}},
+		// No on_miss effects — simulates hydro_pressure_organ.
+	)
+	// src.Intn(20) returns 0 → roll=1; total=1 vs AC=30 → CritFailure (miss).
+	src := &deterministicSrc{val: 0}
+	msgs := ResolveTechEffects(sess, tech, []*combat.Combatant{target}, nil, nil, src, nil)
+	require.Len(t, msgs, 1, "should emit exactly one message on miss")
+	assert.Contains(t, msgs[0], "enemy", "miss message must name the target")
+	assert.True(t, strings.HasSuffix(msgs[0], "."), "miss message must end with a period, got: %q", msgs[0])
+	// HP must be unchanged on a miss.
+	assert.Equal(t, 20, target.CurrentHP, "HP must not change on a miss")
+}
+
+// REQ-TER-HIT-NOFX: When an attack tech hits but its hit tier has no effects,
+// ResolveTechEffects must emit a standalone label so the player gets feedback.
+func TestResolveTechEffects_AttackHit_NoEffects_EmitsStandaloneLabel(t *testing.T) {
+	sess := &session.PlayerSession{UID: "p1", Level: 1}
+	sess.Abilities.Savvy = 10
+	// Target with AC=1 so any roll hits.
+	target := makeTarget("enemy", 20, 20, 1)
+	// Tech with no on_hit effects.
+	tech := &technology.TechnologyDef{
+		ID:         "test-no-fx",
+		Resolution: "attack",
+		Tradition:  technology.TraditionNeural,
+		Effects:    technology.TieredEffects{},
+	}
+	// src.Intn(20) returns 10 → roll=11; total=11 vs AC=1 → Success (hit).
+	src := &deterministicSrc{val: 10}
+	msgs := ResolveTechEffects(sess, tech, []*combat.Combatant{target}, nil, nil, src, nil)
+	require.Len(t, msgs, 1, "should emit exactly one message on hit with no effects")
+	assert.Contains(t, msgs[0], "enemy", "hit message must name the target")
+}
+
 func genCreatureInfo(t *rapid.T) CreatureInfo {
 	return CreatureInfo{
 		Name:   rapid.StringN(1, 20, -1).Draw(t, "name"),
