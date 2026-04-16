@@ -216,6 +216,59 @@ func TestBackfillLevelUpFeats_CreationFeatPoolOverlap(t *testing.T) {
 	assert.True(t, lgr.granted[2], "expected level 2 to be marked as granted")
 }
 
+// TestApplyFeatGrant_PF2EIDResolved is the regression test for the bug where a
+// pool entry using a legacy PF2E ID (e.g. "rage") would not match a canonically-
+// stored feat (e.g. "wrath"), causing the player to be offered a feat they already own.
+func TestApplyFeatGrant_PF2EIDResolved(t *testing.T) {
+	t.Parallel()
+	// Build a registry with "wrath" (canonical) + pf2e alias "rage".
+	wrathFeat := &ruleset.Feat{ID: "wrath", Name: "Wrath", Category: "job", PF2E: "rage"}
+	reg := ruleset.NewFeatRegistry([]*ruleset.Feat{wrathFeat})
+
+	// Player already has "wrath" stored under its canonical ID.
+	repo := &fakeFeatsRepo{feats: map[string]bool{"wrath": true}}
+	existing := map[string]bool{"wrath": true}
+
+	// Pool uses the legacy PF2E ID "rage".
+	grants := &ruleset.FeatGrants{
+		Choices: &ruleset.FeatChoices{
+			Pool:  []string{"rage"},
+			Count: 1,
+		},
+	}
+
+	granted, err := ApplyFeatGrant(context.Background(), 1, existing, grants, reg, repo)
+	require.NoError(t, err)
+	// Player already owns "wrath" (canonical of "rage") — nothing should be granted.
+	assert.Empty(t, granted, "should not re-grant a feat the player already owns via PF2E alias")
+}
+
+// TestApplyFeatGrant_PF2EIDGrantsCanonical verifies that when a pool uses a legacy
+// PF2E ID and the player does NOT yet own the feat, it is stored under the canonical ID.
+func TestApplyFeatGrant_PF2EIDGrantsCanonical(t *testing.T) {
+	t.Parallel()
+	wrathFeat := &ruleset.Feat{ID: "wrath", Name: "Wrath", Category: "job", PF2E: "rage"}
+	reg := ruleset.NewFeatRegistry([]*ruleset.Feat{wrathFeat})
+
+	repo := &fakeFeatsRepo{}
+	existing := map[string]bool{}
+
+	grants := &ruleset.FeatGrants{
+		Choices: &ruleset.FeatChoices{
+			Pool:  []string{"rage"},
+			Count: 1,
+		},
+	}
+
+	granted, err := ApplyFeatGrant(context.Background(), 1, existing, grants, reg, repo)
+	require.NoError(t, err)
+	// Should be granted and stored as the canonical ID "wrath", not "rage".
+	require.Len(t, granted, 1)
+	assert.Equal(t, "wrath", granted[0])
+	assert.True(t, repo.feats["wrath"])
+	assert.False(t, repo.feats["rage"], "should not store feat under legacy PF2E ID")
+}
+
 func TestProperty_BackfillLevelUpFeats_Idempotent(t *testing.T) {
 	t.Parallel()
 	rapid.Check(t, func(rt *rapid.T) {
