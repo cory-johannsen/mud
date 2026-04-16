@@ -435,6 +435,8 @@ zone:
 
       '
     exits:
+    - direction: east
+      target: flats_motel_row
     - direction: south
       target: flats_motel_courtyard
     map_x: -4
