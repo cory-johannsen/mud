@@ -1,0 +1,56 @@
+id: ne_gulch_raider
+name: Gulch Raider
+description: A hardened squatter who has claimed the old Sullivan's Gulch rail corridor as home. Moves between rusted freight cars with ease, striking from shadow and retreating into the maze of wrecked rolling stock.
+level: 4
+max_hp: 44
+ac: 14
+awareness: 10
+ai_domain: ganger_combat
+respawn_delay: "5m"
+abilities:
+  brutality: 14
+  quickness: 14
+  grit: 13
+  reasoning: 9
+  savvy: 11
+  flair: 10
+loot:
+  currency:
+    min: 30
+    max: 100
+  items:
+    - item: scrap_metal
+      chance: 0.4
+      min_qty: 1
+      max_qty: 3
+    - item: medkit
+      chance: 0.25
+      min_qty: 1
+      max_qty: 1
+weapon:
+  - id: assault_rifle
+    weight: 3
+  - id: cheap_blade
+    weight: 2
+  - id: steel_pipe
+    weight: 1
+armor:
+  - id: tactical_vest
+    weight: 3
+  - id: leather_jacket
+    weight: 2
+taunts:
+  - "Sullivan's Gulch is mine. The freight cars, the sidings, all of it."
+  - "Nobody moves through the gulch without knowing we're watching."
+  - "Rail corridor territory doesn't have borders — it has consequences."
+  - "I've been living in these freight cars since the first year. I know every shadow."
+  - "You followed the wrong tracks in here."
+  - "The gulch swallows people. I've helped it do that more than once."
+  - "Freight car to freight car — you'll never catch me in this maze."
+  - "The campfire smoke you smelled? That was the warning."
+  - "Gulch raiders don't fight clean. We fight effective."
+  - "I was born in these ruins. You're just visiting badly."
+  - "This switching yard is our fortress. Learn that before you bleed."
+  - "The sound of metal on metal you heard? That was us moving into position."
+  - "Four years in the gulch and I've never lost a challenge on my home ground."
+  - "You stepped over the rail into our camp. That's the last polite decision you make."

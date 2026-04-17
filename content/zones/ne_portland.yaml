@@ -160,16 +160,16 @@ zone:
       of metal scraping on metal echoes from the switching yard.
 
       '
-    danger_level: sketchy
+    danger_level: dangerous
     exits:
     - direction: north
       target: ne_rose_quarter
     map_x: -4
     map_y: 4
     spawns:
-    - template: alberta_drifter
+    - template: ne_gulch_raider
       count: 1
-      respawn_after: 3m
+      respawn_after: 5m
     properties:
       lighting: firelight
       atmosphere: smoke
@@ -308,7 +308,7 @@ zone:
       still serves as the main artery connecting the district to the bridges.
 
       '
-    danger_level: sketchy
+    danger_level: dangerous
     exits:
     - direction: south
       target: ne_rose_quarter
@@ -317,9 +317,9 @@ zone:
     map_x: -4
     map_y: 0
     spawns:
-    - template: ne_gang_enforcer
+    - template: ne_gang_lieutenant
       count: 1
-      respawn_after: 4m
+      respawn_after: 6m
     properties:
       lighting: dim
       atmosphere: rain
@@ -442,7 +442,7 @@ zone:
       Memorial Coliseum stands hollow and echoing.
 
       '
-    danger_level: sketchy
+    danger_level: dangerous
     exits:
     - direction: north
       target: ne_interstate_ave
@@ -453,9 +453,9 @@ zone:
     map_x: -4
     map_y: 2
     spawns:
-    - template: ne_gang_enforcer
+    - template: ne_gang_lieutenant
       count: 1
-      respawn_after: 4m
+      respawn_after: 6m
     properties:
       lighting: dim
       atmosphere: desolate
@@ -808,7 +808,7 @@ zone:
       Gang tags mark every surface, claiming territory that keeps changing hands.
 
       '
-    danger_level: sketchy
+    danger_level: dangerous
     exits:
     - direction: south
       target: ne_rose_quarter
@@ -817,9 +817,9 @@ zone:
     map_x: -6
     map_y: 2
     spawns:
-    - template: ne_gang_enforcer
-      count: 2
-      respawn_after: 4m
+    - template: ne_bridge_warden
+      count: 1
+      respawn_after: 15m
     properties:
       lighting: exposed
       atmosphere: wind

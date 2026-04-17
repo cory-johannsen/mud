@@ -1,0 +1,54 @@
+id: ne_bridge_warden
+name: Bridge Warden Cross
+description: A towering enforcer in military plate, Warden Cross controls the Fremont Bridge eastern approach through force of personality and a modified battle rifle. She has held the bridge ramp for six years, turning the tangle of collapsed overpasses into an impregnable chokepoint. The gangs answer to her here. Nobody crosses without her permission.
+level: 8
+max_hp: 96
+ac: 19
+rob_multiplier: 2.0
+awareness: 13
+ai_domain: ne_bridge_warden_combat
+respawn_delay: "15m"
+abilities:
+  brutality: 18
+  quickness: 13
+  grit: 17
+  reasoning: 12
+  savvy: 13
+  flair: 12
+loot:
+  currency:
+    min: 120
+    max: 320
+  items:
+    - item: scrap_metal
+      chance: 0.5
+      min_qty: 2
+      max_qty: 4
+    - item: medkit
+      chance: 0.6
+      min_qty: 1
+      max_qty: 2
+weapon:
+  - id: battle_rifle
+    weight: 4
+  - id: vibroblade
+    weight: 2
+armor:
+  - id: military_plate
+    weight: 5
+taunts:
+  - "Six years on this bridge approach. Nobody's taken it from me."
+  - "You want to cross? You pay the price. Right now the price is your life."
+  - "I built this chokepoint myself. I know every angle, every shadow, every line of fire."
+  - "The gangs answer to me here. So do you."
+  - "Military plate, battle rifle, six years of kills. Pick a problem with that."
+  - "The bridge belongs to me because I was willing to hold it when no one else was."
+  - "Cross means I've put down everyone who wanted what I have. Add yourself to the list."
+  - "You're standing in the most controlled corridor in NE Portland. I control it."
+  - "I held this ramp through four winters, three gang wars, and more fools like you than I can count."
+  - "The overpasses collapsed and I turned them into walls. That's what a warden does."
+  - "Nobody gets to the bridge without going through me. You're going through me the hard way."
+  - "My permission is the only thing that opens this road. You didn't get it."
+  - "They call me warden because I make the rules of passage. Your rule today is to bleed."
+  - "Every gang crew in NE knows this is my stretch. Apparently you missed the briefing."
+  - "Six years. Not a single unauthorized crossing. You're not breaking my record."

@@ -1,0 +1,64 @@
+domain:
+  id: ne_bridge_warden_combat
+  description: Combat behavior for ne_bridge_warden. Presses the attack with heavy strikes and demoralizes weakened enemies.
+
+  tasks:
+    - id: behave
+      description: Root task — fight or idle
+    - id: fight
+      description: Engage enemy with overwhelming force
+
+  methods:
+    - task: behave
+      id: combat_mode
+      precondition: ne_bridge_warden_has_enemy
+      subtasks: [fight]
+
+    - task: behave
+      id: idle_mode
+      precondition: ""
+      subtasks: [do_pass]
+
+    - task: fight
+      id: press_wounded_enemy
+      precondition: ne_bridge_warden_enemy_below_half
+      subtasks: [strike_enemy, warden_demoralize, warden_suppress]
+
+    - task: fight
+      id: press_attack
+      precondition: ne_bridge_warden_has_enemy
+      subtasks: [attack_enemy, warden_demoralize]
+
+    - task: fight
+      id: attack_only
+      precondition: ""
+      subtasks: [attack_enemy]
+
+  operators:
+    - id: attack_enemy
+      action: attack
+      target: nearest_enemy
+
+    - id: strike_enemy
+      action: strike
+      target: weakest_enemy
+
+    - id: do_pass
+      action: pass
+      target: ""
+
+    - id: warden_demoralize
+      action: apply_mental_state
+      track: despair
+      severity: moderate
+      target: lowest_hp_enemy
+      cooldown_rounds: 3
+      ap_cost: 2
+
+    - id: warden_suppress
+      action: apply_mental_state
+      track: fear
+      severity: heavy
+      target: random_enemy
+      cooldown_rounds: 5
+      ap_cost: 3

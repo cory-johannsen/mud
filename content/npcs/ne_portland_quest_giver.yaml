@@ -1,0 +1,26 @@
+id: ne_portland_quest_giver
+name: "Neighborhood Watch Captain"
+npc_type: quest_giver
+npc_role: quest_giver
+type: human
+description: "Runs the corner store's community board. Keeps a running list of jobs the neighborhood needs done and people who can pay to have them handled."
+level: 3
+max_hp: 22
+ac: 10
+awareness: 5
+disposition: neutral
+personality: neutral
+quest_giver:
+  placeholder_dialog:
+    - "Board's full. Pick something and get it done."
+    - "Neighborhood doesn't run itself. You working or browsing?"
+  quest_ids:
+    - nep_gang_enforcer_clearance
+    - nep_scavenger_sweep
+    - nep_drifter_roundup
+    - nep_brew_warlord_bounty
+    - nep_bridge_warden_takedown
+loot:
+  currency:
+    min: 0
+    max: 0

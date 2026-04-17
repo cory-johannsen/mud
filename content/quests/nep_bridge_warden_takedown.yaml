@@ -1,0 +1,17 @@
+id: nep_bridge_warden_takedown
+title: Bridge Warden Takedown
+description: >
+  Warden Cross has controlled the Fremont Bridge eastern approach for six years,
+  turning it into an impassable chokepoint. Take her out and open the western
+  corridor before the gang tightens its grip on the whole district.
+giver_npc_id: ne_portland_quest_giver
+repeatable: false
+objectives:
+  - id: kill_bridge_warden
+    type: kill
+    description: Kill Bridge Warden Cross
+    target_id: ne_bridge_warden
+    quantity: 1
+rewards:
+  xp: 500
+  credits: 300
