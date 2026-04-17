@@ -92,7 +92,10 @@ func (s *GameServiceServer) handleTrainTech(uid, npcName, techID string) (*gamev
 	if techID == "" {
 		return s.listTechTrainerOfferings(inst, cfg, sess), nil
 	}
-	return s.doTrainTech(context.Background(), sess, inst, cfg, techID), nil
+	evt := s.doTrainTech(context.Background(), sess, inst, cfg, techID)
+	// Push updated character sheet so the client reflects the newly trained tech.
+	s.pushCharacterSheet(sess)
+	return evt, nil
 }
 
 // listTechTrainerOfferings returns a formatted menu of the trainer's tradition and levels.
