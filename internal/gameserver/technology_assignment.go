@@ -423,7 +423,9 @@ func LevelUpTechnologies(
 // Precondition: sess, job, prepRepo are non-nil. promptFn must be non-nil.
 // archetype may be nil (skips archetype pool entries).
 // Postcondition: sess.PreparedTechs and prepRepo reflect the re-selected slots.
-// If sess.PreparedTechs is empty or all level slot counts are zero, returns nil (no-op).
+// If sess.PreparedTechs is empty (no slots in DB yet), returns nil (no-op).
+// Otherwise all slot levels from grants are offered, including L2+ deferred levels
+// not yet DB-filled (pending trainer), so every earned slot is re-selectable at rest.
 func RearrangePreparedTechs(
 	ctx context.Context,
 	sess *session.PlayerSession,
@@ -436,15 +438,73 @@ func RearrangePreparedTechs(
 	sendFn func(string),
 	flavor technology.TraditionFlavor,
 ) error {
-	// Build SlotsByLevel from session (source of truth for slot counts).
-	slotsByLevel := make(map[int]int)
-	for lvl, slots := range sess.PreparedTechs {
-		if len(slots) > 0 {
-			slotsByLevel[lvl] = len(slots)
+	// Aggregate Fixed and Pool from all applicable grants (job + archetype, creation + level-up).
+	// Also derive grant-based slot counts so that deferred L2+ slots (stored in PendingTechGrants
+	// until trainer-resolved) are included. The final slotsByLevel is the per-level max of
+	// grant-derived and session-derived counts, so existing session slots are never silently dropped.
+	grantSlots := make(map[int]int)
+	var allFixed []ruleset.PreparedEntry
+	var allPool []ruleset.PreparedEntry
+	if job.TechnologyGrants != nil && job.TechnologyGrants.Prepared != nil {
+		for techLvl, cnt := range job.TechnologyGrants.Prepared.SlotsByLevel {
+			grantSlots[techLvl] += cnt
+		}
+		allFixed = append(allFixed, job.TechnologyGrants.Prepared.Fixed...)
+		allPool = append(allPool, job.TechnologyGrants.Prepared.Pool...)
+	}
+	if archetype != nil && archetype.TechnologyGrants != nil && archetype.TechnologyGrants.Prepared != nil {
+		for techLvl, cnt := range archetype.TechnologyGrants.Prepared.SlotsByLevel {
+			grantSlots[techLvl] += cnt
+		}
+		allFixed = append(allFixed, archetype.TechnologyGrants.Prepared.Fixed...)
+		allPool = append(allPool, archetype.TechnologyGrants.Prepared.Pool...)
+	}
+	for grantLvl, grants := range job.LevelUpGrants {
+		if grantLvl > sess.Level {
+			continue
+		}
+		if grants != nil && grants.Prepared != nil {
+			for techLvl, cnt := range grants.Prepared.SlotsByLevel {
+				grantSlots[techLvl] += cnt
+			}
+			allFixed = append(allFixed, grants.Prepared.Fixed...)
+			allPool = append(allPool, grants.Prepared.Pool...)
 		}
 	}
-	// No-op guard must run before any mutation.
-	if len(slotsByLevel) == 0 {
+	if archetype != nil {
+		for grantLvl, grants := range archetype.LevelUpGrants {
+			if grantLvl > sess.Level {
+				continue
+			}
+			if grants != nil && grants.Prepared != nil {
+				for techLvl, cnt := range grants.Prepared.SlotsByLevel {
+					grantSlots[techLvl] += cnt
+				}
+				allFixed = append(allFixed, grants.Prepared.Fixed...)
+				allPool = append(allPool, grants.Prepared.Pool...)
+			}
+		}
+	}
+
+	// Build final slotsByLevel as per-level max(grantSlots, sessionSlots).
+	// Grant count is authoritative for deferred levels not yet in the DB;
+	// session count ensures existing slots are not dropped if grants change.
+	slotsByLevel := make(map[int]int)
+	for lvl, cnt := range grantSlots {
+		slotsByLevel[lvl] = cnt
+	}
+	for lvl, slots := range sess.PreparedTechs {
+		if cnt := len(slots); cnt > slotsByLevel[lvl] {
+			slotsByLevel[lvl] = cnt
+		}
+	}
+
+	// No-op guard: skip rearrangement if the player has no prepared slots at all.
+	// A player with no slots in the DB hasn't resolved their initial grants via trainer yet;
+	// rest is not the mechanism for first-time assignment.
+	// Note: slotsByLevel may include grant-derived levels not in sess.PreparedTechs, so we
+	// use sess.PreparedTechs as the guard rather than slotsByLevel.
+	if len(sess.PreparedTechs) == 0 {
 		return nil
 	}
 
@@ -455,38 +515,6 @@ func RearrangePreparedTechs(
 	}
 
 	send(fmt.Sprintf("%s %s...", flavor.PrepGerund, flavor.LoadoutTitle))
-
-	// Aggregate Fixed and Pool from all applicable grants (job + archetype, creation + level-up).
-	var allFixed []ruleset.PreparedEntry
-	var allPool []ruleset.PreparedEntry
-	if job.TechnologyGrants != nil && job.TechnologyGrants.Prepared != nil {
-		allFixed = append(allFixed, job.TechnologyGrants.Prepared.Fixed...)
-		allPool = append(allPool, job.TechnologyGrants.Prepared.Pool...)
-	}
-	if archetype != nil && archetype.TechnologyGrants != nil && archetype.TechnologyGrants.Prepared != nil {
-		allFixed = append(allFixed, archetype.TechnologyGrants.Prepared.Fixed...)
-		allPool = append(allPool, archetype.TechnologyGrants.Prepared.Pool...)
-	}
-	for lvl, grants := range job.LevelUpGrants {
-		if lvl > sess.Level {
-			continue
-		}
-		if grants != nil && grants.Prepared != nil {
-			allFixed = append(allFixed, grants.Prepared.Fixed...)
-			allPool = append(allPool, grants.Prepared.Pool...)
-		}
-	}
-	if archetype != nil {
-		for lvl, grants := range archetype.LevelUpGrants {
-			if lvl > sess.Level {
-				continue
-			}
-			if grants != nil && grants.Prepared != nil {
-				allFixed = append(allFixed, grants.Prepared.Fixed...)
-				allPool = append(allPool, grants.Prepared.Pool...)
-			}
-		}
-	}
 
 	merged := &ruleset.PreparedGrants{
 		SlotsByLevel: slotsByLevel,

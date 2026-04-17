@@ -1547,6 +1547,101 @@ func TestRearrangePreparedTechs_ArchetypePoolIncluded(t *testing.T) {
 	assert.Equal(t, 4, promptCallCount, "prompt must fire once per open slot")
 }
 
+// REQ-RAR-BUG126: RearrangePreparedTechs MUST offer all slot levels defined by grants,
+// including L2+ deferred levels that haven't been DB-filled yet (pending trainer resolution).
+// Regression test for issue #126: level-6 Engineer only saw level-1 slots at rest.
+func TestRearrangePreparedTechs_DeferredL2SlotsOfferedAtRest(t *testing.T) {
+	// Simulate a level-6 Engineer/nerd who has:
+	//   Level 1: 4 slots (1 job base + 2 archetype base + 1 from archetype level-2 grant) — all in DB
+	//   Level 2: 2 slots (from archetype level-3 grant) — DEFERRED, NOT in DB (pending trainer)
+	// Rest must offer both levels even though level-2 has no session slots yet.
+
+	job := &ruleset.Job{
+		ID: "engineer",
+		TechnologyGrants: &ruleset.TechnologyGrants{
+			Prepared: &ruleset.PreparedGrants{
+				SlotsByLevel: map[int]int{1: 1},
+				Pool: []ruleset.PreparedEntry{
+					{ID: "rapid_forge", Level: 1},
+					{ID: "servo_cable", Level: 1},
+					{ID: "electro_coat", Level: 1},
+				},
+			},
+		},
+	}
+	archetype := &ruleset.Archetype{
+		ID: "nerd",
+		TechnologyGrants: &ruleset.TechnologyGrants{
+			Prepared: &ruleset.PreparedGrants{
+				SlotsByLevel: map[int]int{1: 2},
+				Pool: []ruleset.PreparedEntry{
+					{ID: "nerd_1", Level: 1},
+					{ID: "nerd_2", Level: 1},
+					{ID: "nerd_3", Level: 1},
+					{ID: "nerd_4", Level: 1},
+					{ID: "nerd_5", Level: 1},
+				},
+			},
+		},
+		LevelUpGrants: map[int]*ruleset.TechnologyGrants{
+			2: {Prepared: &ruleset.PreparedGrants{SlotsByLevel: map[int]int{1: 1}}},
+			3: {Prepared: &ruleset.PreparedGrants{
+				SlotsByLevel: map[int]int{2: 2},
+				Pool: []ruleset.PreparedEntry{
+					{ID: "level2_tech_a", Level: 2},
+					{ID: "level2_tech_b", Level: 2},
+					{ID: "level2_tech_c", Level: 2},
+				},
+			}},
+		},
+	}
+
+	// Session only has level-1 slots (the 4 assigned via login/trainer); level-2 slots are pending.
+	sess := &session.PlayerSession{
+		Level: 3,
+		PreparedTechs: map[int][]*session.PreparedSlot{
+			1: {
+				{TechID: "rapid_forge"},
+				{TechID: "nerd_1"},
+				{TechID: "nerd_2"},
+				{TechID: "old_lv1"},
+			},
+		},
+	}
+	prep := &fakePreparedRepo{slots: map[int][]*session.PreparedSlot{
+		1: {
+			{TechID: "rapid_forge"},
+			{TechID: "nerd_1"},
+			{TechID: "nerd_2"},
+			{TechID: "old_lv1"},
+		},
+	}}
+
+	promptedLevels := make(map[int]int)
+	promptFn := func(prompt string, options []string) (string, error) {
+		// Parse level from prompt to track which levels are prompted.
+		for lvl := 1; lvl <= 5; lvl++ {
+			if fmt.Sprintf("Level %d", lvl) == prompt[:len(fmt.Sprintf("Level %d", lvl))] {
+				promptedLevels[lvl]++
+				break
+			}
+		}
+		if len(options) == 0 {
+			return "", fmt.Errorf("empty options")
+		}
+		return options[0], nil
+	}
+
+	err := gameserver.RearrangePreparedTechs(context.Background(), sess, 1, job, archetype, nil, promptFn, prep, nil, technology.TraditionFlavor{})
+	require.NoError(t, err, "RearrangePreparedTechs must not error with deferred L2 slots")
+
+	// Level-1: 4 slots must still be offered and filled.
+	assert.Equal(t, 4, len(sess.PreparedTechs[1]), "level-1: all 4 slots must be filled")
+
+	// Level-2: 2 deferred slots (from level-3 grant) must also be offered and filled.
+	assert.Equal(t, 2, len(sess.PreparedTechs[2]), "level-2: deferred slots must be offered at rest (bug #126)")
+}
+
 // REQ-ITC-1: non-tech archetypes (aggressor, criminal) receive no innate tech from region.
 func TestAssignTechnologies_NonTechArchetype_NoInnate(t *testing.T) {
 	ctx := context.Background()
