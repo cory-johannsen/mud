@@ -10145,10 +10145,15 @@ func (s *GameServiceServer) handleMoveTo(uid string, req *gamev1.MoveToRequest) 
 		return errorEvent(fmt.Sprintf("Target is too far to reach (distance %d, max %d).", dist, 2*strideCells)), nil
 	}
 
-	// Deduct movement AP for each action required.
+	// Check movement AP sufficiency upfront before any deduction.
+	if err := s.combatH.CheckMovementAPAvailable(uid, moveCost); err != nil {
+		return errorEvent(err.Error()), nil
+	}
+
+	// Deduct movement AP atomically now that sufficiency is confirmed.
 	for i := 0; i < moveCost; i++ {
 		if err := s.combatH.SpendMovementAP(uid, 1); err != nil {
-			return errorEvent(err.Error()), nil
+			return errorEvent(err.Error()), nil // should never happen after check
 		}
 	}
 

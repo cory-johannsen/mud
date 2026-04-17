@@ -208,3 +208,41 @@ func TestHandleMoveTo_DiagonalPath_LandsOnTarget(t *testing.T) {
 	require.True(t, qOK)
 	assert.Equal(t, 1, q.MovementAPSpent(), "exactly 1 movement AP should have been spent for diagonal movement within stride")
 }
+
+// TestHandleMoveTo_InsufficientMovementAP_NoPartialDeduction verifies that when a player
+// has only 1 movement AP remaining but requests a 2-stride move, an error event is returned
+// and no AP is deducted (no partial deduction occurs).
+//
+// Precondition: player at (0,0); 1 movement AP already spent; target at (0,8); dist=8 > strideCells=5 → moveCost=2.
+// Postcondition: error event returned; movementAPSpent still equals 1 (unchanged); player position unchanged.
+func TestHandleMoveTo_InsufficientMovementAP_NoPartialDeduction(t *testing.T) {
+	const roomID = "room_mt_partial"
+	const uid = "u_mt_partial"
+
+	svc, sessMgr, npcMgr, combatHandler := newMoveToSvcWithCombat(t)
+	_, cbt := startCombatForMoveTo(t, sessMgr, npcMgr, combatHandler, roomID, uid, 0, 0)
+
+	// Spend 1 movement AP so only 1 remains (MaxMovementAP=2, 1 spent → 1 allowed left).
+	require.NoError(t, combatHandler.SpendMovementAP(uid, 1))
+
+	q, qOK := cbt.ActionQueues[uid]
+	require.True(t, qOK)
+	require.Equal(t, 1, q.MovementAPSpent(), "setup: 1 movement AP should be spent before the test move")
+
+	// Attempt a 2-stride move (dist=8 > strideCells=5 → moveCost=2), but only 1 movement AP allowed remains.
+	event, err := svc.handleMoveTo(uid, &gamev1.MoveToRequest{TargetX: 0, TargetY: 8})
+	require.NoError(t, err)
+	require.NotNil(t, event)
+
+	errEvt := event.GetError()
+	require.NotNil(t, errEvt, "expected an error event when movement AP is insufficient")
+
+	// Verify no partial deduction occurred — movementAPSpent must remain at 1.
+	assert.Equal(t, 1, q.MovementAPSpent(), "movementAPSpent must not change on insufficient AP check failure")
+
+	// Verify player position is unchanged.
+	playerCbt := cbt.GetCombatant(uid)
+	require.NotNil(t, playerCbt)
+	assert.Equal(t, 0, playerCbt.GridX, "GridX must remain 0 on error")
+	assert.Equal(t, 0, playerCbt.GridY, "GridY must remain 0 on error")
+}

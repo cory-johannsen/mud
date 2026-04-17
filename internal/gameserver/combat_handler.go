@@ -911,6 +911,35 @@ func (h *CombatHandler) SpendMovementAP(uid string, cost int) error {
 	return nil
 }
 
+// CheckMovementAPAvailable returns nil if uid has at least cost movement AP remaining,
+// or an error describing the shortfall.
+//
+// Precondition: uid non-empty; cost > 0.
+// Postcondition: returns nil if movementAPSpent+cost <= MaxMovementAP and remaining >= cost; error otherwise.
+func (h *CombatHandler) CheckMovementAPAvailable(uid string, cost int) error {
+	sess, ok := h.sessions.GetPlayer(uid)
+	if !ok {
+		return fmt.Errorf("player %q not found", uid)
+	}
+	h.combatMu.Lock()
+	defer h.combatMu.Unlock()
+	cbt, ok := h.engine.GetCombat(sess.RoomID)
+	if !ok {
+		return fmt.Errorf("player %q is not in active combat", uid)
+	}
+	q, ok := cbt.ActionQueues[uid]
+	if !ok {
+		return fmt.Errorf("no action queue for player %q", uid)
+	}
+	if q.MovementAPSpent()+cost > combat.MaxMovementAP {
+		return fmt.Errorf("not enough movement AP: need %d more, movement limit already reached (%d/%d spent)", cost, q.MovementAPSpent(), combat.MaxMovementAP)
+	}
+	if q.RemainingPoints() < cost {
+		return fmt.Errorf("not enough AP: have %d, need %d", q.RemainingPoints(), cost)
+	}
+	return nil
+}
+
 // SpendAllAP drains all remaining AP from uid's action queue in their active combat.
 // If the player is not in combat or has no action queue, SpendAllAP is a no-op.
 //
