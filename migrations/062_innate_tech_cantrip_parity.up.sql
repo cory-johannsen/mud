@@ -16,5 +16,7 @@ WHERE character_id IN (
 
 -- REQ-ITC-2: Set all remaining innate tech rows to unlimited.
 -- MaxUses = 0 means unlimited per session.InnateSlot convention.
+-- No WHERE clause is intentional: all remaining rows belong to tech-capable characters
+-- and must all become unlimited. This is correct by design.
 UPDATE character_innate_technologies
 SET max_uses = 0, uses_remaining = 0;
