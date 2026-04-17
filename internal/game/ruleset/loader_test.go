@@ -150,3 +150,32 @@ func TestLoadRegions_AllHaveInnateGrant(t *testing.T) {
 		assert.Len(t, r.InnateTechnologies, 1, "region %q: expected exactly 1 innate grant", r.ID)
 	}
 }
+
+// TestLoadArchetypes_TechCapable_AllHaveInnate verifies that all 6 tech-capable archetypes
+// have at least one innate technology populated after the tradition cantrip content is added.
+//
+// Precondition: content/archetypes/{nerd,naturalist,drifter,schemer,influencer,zealot}.yaml
+//   each have an innate_technologies block with uses_per_day: 0 entries.
+// Postcondition: each tech-capable archetype has len(InnateTechnologies) >= 1;
+//   every grant has UsesPerDay == 0.
+func TestLoadArchetypes_TechCapable_AllHaveInnate(t *testing.T) {
+	archetypes, err := ruleset.LoadArchetypes("../../../content/archetypes")
+	require.NoError(t, err)
+
+	techCapable := []string{"nerd", "naturalist", "drifter", "schemer", "influencer", "zealot"}
+	byID := make(map[string]*ruleset.Archetype, len(archetypes))
+	for _, arch := range archetypes {
+		byID[arch.ID] = arch
+	}
+
+	for _, id := range techCapable {
+		arch, ok := byID[id]
+		require.True(t, ok, "archetype %q not found in loaded archetypes", id)
+		assert.NotEmpty(t, arch.InnateTechnologies,
+			"archetype %q must have innate_technologies populated", id)
+		for _, grant := range arch.InnateTechnologies {
+			assert.Equal(t, 0, grant.UsesPerDay,
+				"archetype %q innate tech %q must have uses_per_day: 0 (unlimited)", id, grant.ID)
+		}
+	}
+}
