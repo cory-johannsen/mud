@@ -1609,3 +1609,154 @@ func TestProperty_AssignTechnologies_InnateGatedByTechTradition(t *testing.T) {
 		}
 	})
 }
+
+// REQ-TIT-1 (unit): AssignTechnologies grants all 5 technical innate techs for a nerd archetype
+// with all techs at uses_per_day: 0 (unlimited).
+//
+// Precondition: archetype.InnateTechnologies has 5 technical innate grants with UsesPerDay=0.
+// Postcondition: sess.InnateTechs has exactly 5 entries, each with MaxUses=0 and UsesRemaining=0.
+func TestAssignTechnologies_TraditionInnate_NerdGetsAllTechnicalTechs(t *testing.T) {
+	ctx := context.Background()
+	sess := &session.PlayerSession{}
+
+	archetype := &ruleset.Archetype{
+		ID: "nerd",
+		InnateTechnologies: []ruleset.InnateGrant{
+			{ID: "atmospheric_surge", UsesPerDay: 0},
+			{ID: "blackout_pulse", UsesPerDay: 0},
+			{ID: "seismic_sense", UsesPerDay: 0},
+			{ID: "arc_lights", UsesPerDay: 0},
+			{ID: "pressure_burst", UsesPerDay: 0},
+		},
+	}
+
+	hw := &fakeHardwiredRepo{}
+	prep := &fakePreparedRepo{}
+	spont := &fakeSpontaneousRepo{}
+	inn := &fakeInnateRepo{}
+
+	err := gameserver.AssignTechnologies(ctx, sess, 1, nil, archetype, nil, noPrompt, hw, prep, spont, inn, nil, nil)
+	require.NoError(t, err)
+
+	require.Len(t, sess.InnateTechs, 5, "nerd must receive all 5 technical innate techs")
+	for _, id := range []string{"atmospheric_surge", "blackout_pulse", "seismic_sense", "arc_lights", "pressure_burst"} {
+		slot, ok := sess.InnateTechs[id]
+		require.True(t, ok, "expected innate tech %q in session", id)
+		assert.Equal(t, 0, slot.MaxUses, "innate tech %q must have MaxUses=0 (unlimited)", id)
+		assert.Equal(t, 0, slot.UsesRemaining, "innate tech %q must have UsesRemaining=0 (unlimited)", id)
+	}
+}
+
+// REQ-TIT-1 (unit): AssignTechnologies grants all 5 fanatic_doctrine innate techs for a zealot archetype.
+//
+// Precondition: archetype.InnateTechnologies has 5 fanatic_doctrine grants with UsesPerDay=0.
+// Postcondition: sess.InnateTechs has exactly 5 entries, each with MaxUses=0 and UsesRemaining=0.
+func TestAssignTechnologies_TraditionInnate_ZealotGetsAllDoctrineInnate(t *testing.T) {
+	ctx := context.Background()
+	sess := &session.PlayerSession{}
+
+	archetype := &ruleset.Archetype{
+		ID: "zealot",
+		InnateTechnologies: []ruleset.InnateGrant{
+			{ID: "doctrine_ward", UsesPerDay: 0},
+			{ID: "martyrs_resolve", UsesPerDay: 0},
+			{ID: "righteous_condemnation", UsesPerDay: 0},
+			{ID: "fervor_pulse", UsesPerDay: 0},
+			{ID: "litany_of_iron", UsesPerDay: 0},
+		},
+	}
+
+	hw := &fakeHardwiredRepo{}
+	prep := &fakePreparedRepo{}
+	spont := &fakeSpontaneousRepo{}
+	inn := &fakeInnateRepo{}
+
+	err := gameserver.AssignTechnologies(ctx, sess, 1, nil, archetype, nil, noPrompt, hw, prep, spont, inn, nil, nil)
+	require.NoError(t, err)
+
+	require.Len(t, sess.InnateTechs, 5, "zealot must receive all 5 fanatic_doctrine innate techs")
+	for _, id := range []string{"doctrine_ward", "martyrs_resolve", "righteous_condemnation", "fervor_pulse", "litany_of_iron"} {
+		slot, ok := sess.InnateTechs[id]
+		require.True(t, ok, "expected innate tech %q in session", id)
+		assert.Equal(t, 0, slot.MaxUses, "innate tech %q must have MaxUses=0 (unlimited)", id)
+		assert.Equal(t, 0, slot.UsesRemaining, "innate tech %q must have UsesRemaining=0 (unlimited)", id)
+	}
+}
+
+// REQ-TIT-5 (unit): Region innate tech is granted IN ADDITION to archetype tradition innate techs.
+//
+// Precondition: archetype has 2 innate techs; region has 1 distinct innate tech.
+// Postcondition: sess.InnateTechs has 3 entries (2 archetype + 1 region).
+func TestAssignTechnologies_RegionInnateAdditiveToTraditionInnate(t *testing.T) {
+	ctx := context.Background()
+	sess := &session.PlayerSession{}
+
+	archetype := &ruleset.Archetype{
+		ID: "naturalist",
+		InnateTechnologies: []ruleset.InnateGrant{
+			{ID: "moisture_reclaim", UsesPerDay: 0},
+			{ID: "acid_spit", UsesPerDay: 0},
+		},
+	}
+	region := &ruleset.Region{
+		ID: "southeast_portland",
+		InnateTechnologies: []ruleset.InnateGrant{
+			{ID: "nanite_infusion", UsesPerDay: 0},
+		},
+	}
+
+	hw := &fakeHardwiredRepo{}
+	prep := &fakePreparedRepo{}
+	spont := &fakeSpontaneousRepo{}
+	inn := &fakeInnateRepo{}
+
+	err := gameserver.AssignTechnologies(ctx, sess, 1, nil, archetype, nil, noPrompt, hw, prep, spont, inn, nil, region)
+	require.NoError(t, err)
+
+	require.Len(t, sess.InnateTechs, 3,
+		"region innate must be additive: 2 archetype techs + 1 region tech = 3 total")
+	assert.NotNil(t, sess.InnateTechs["moisture_reclaim"], "archetype innate must be present")
+	assert.NotNil(t, sess.InnateTechs["acid_spit"], "archetype innate must be present")
+	assert.NotNil(t, sess.InnateTechs["nanite_infusion"], "region innate must be present")
+}
+
+// REQ-TIT-1 (property): For any set of N distinct innate grants with UsesPerDay=0 on a
+// tech-capable archetype, AssignTechnologies grants exactly N slots all with MaxUses=0.
+//
+// Precondition: archetype.ID = "nerd" (tech-capable); InnateTechnologies has N grants, UsesPerDay=0.
+// Postcondition: len(sess.InnateTechs) == N; every slot has MaxUses=0.
+func TestProperty_AssignTechnologies_TraditionGrantsAllUnlimited(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		n := rapid.IntRange(1, 8).Draw(rt, "n")
+		grants := make([]ruleset.InnateGrant, n)
+		for i := 0; i < n; i++ {
+			grants[i] = ruleset.InnateGrant{
+				ID:         fmt.Sprintf("tradition_tech_%d", i),
+				UsesPerDay: 0,
+			}
+		}
+
+		archetype := &ruleset.Archetype{
+			ID:                 "nerd",
+			InnateTechnologies: grants,
+		}
+
+		sess := &session.PlayerSession{}
+		inn := &fakeInnateRepo{}
+
+		err := gameserver.AssignTechnologies(context.Background(), sess, 1, nil, archetype, nil,
+			noPrompt, &fakeHardwiredRepo{}, &fakePreparedRepo{}, &fakeSpontaneousRepo{}, inn, nil, nil)
+		if err != nil {
+			rt.Fatalf("AssignTechnologies: %v", err)
+		}
+
+		if len(sess.InnateTechs) != n {
+			rt.Fatalf("expected %d innate slots, got %d", n, len(sess.InnateTechs))
+		}
+		for id, slot := range sess.InnateTechs {
+			if slot.MaxUses != 0 {
+				rt.Fatalf("innate tech %q: MaxUses=%d, want 0 (unlimited)", id, slot.MaxUses)
+			}
+		}
+	})
+}
