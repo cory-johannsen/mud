@@ -187,16 +187,20 @@ func AssignTechnologies(
 		}
 	}
 
+	// isTechCapable is true when the archetype has a technology tradition.
+	// Only tech-capable characters receive innate technology grants (cantrip parity).
+	isTechCapable := archetype != nil && technology.DominantTradition(archetype.ID) != ""
+
 	// Innate: initialize map once before both archetype and region blocks
-	if sess.InnateTechs == nil {
-		if (archetype != nil && len(archetype.InnateTechnologies) > 0) ||
+	if sess.InnateTechs == nil && isTechCapable {
+		if len(archetype.InnateTechnologies) > 0 ||
 			(region != nil && len(region.InnateTechnologies) > 0) {
 			sess.InnateTechs = make(map[string]*session.InnateSlot)
 		}
 	}
 
 	// Innate (from archetype)
-	if archetype != nil {
+	if isTechCapable {
 		for _, grant := range archetype.InnateTechnologies {
 			sess.InnateTechs[grant.ID] = &session.InnateSlot{
 				MaxUses:       grant.UsesPerDay,
@@ -209,7 +213,7 @@ func AssignTechnologies(
 	}
 
 	// Innate (from region)
-	if region != nil {
+	if region != nil && isTechCapable {
 		for _, grant := range region.InnateTechnologies {
 			sess.InnateTechs[grant.ID] = &session.InnateSlot{
 				MaxUses:       grant.UsesPerDay,

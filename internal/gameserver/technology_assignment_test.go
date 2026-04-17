@@ -126,6 +126,7 @@ func TestAssignTechnologies_FullJob(t *testing.T) {
 		},
 	}
 	archetype := &ruleset.Archetype{
+		ID: "nerd",
 		InnateTechnologies: []ruleset.InnateGrant{
 			{ID: "acid_spray", UsesPerDay: 2},
 		},
@@ -1170,7 +1171,8 @@ func TestAssignTechnologies_RegionInnateGrant(t *testing.T) {
 	spont := &fakeSpontaneousRepo{}
 	inn := &fakeInnateRepo{}
 
-	err := gameserver.AssignTechnologies(ctx, sess, 1, nil, nil, nil, noPrompt, hw, prep, spont, inn, nil, region)
+	arch := &ruleset.Archetype{ID: "nerd"}
+	err := gameserver.AssignTechnologies(ctx, sess, 1, nil, arch, nil, noPrompt, hw, prep, spont, inn, nil, region)
 	require.NoError(t, err)
 
 	slot, ok := sess.InnateTechs["acid_spit"]
@@ -1188,7 +1190,7 @@ func TestAssignTechnologies_ArchetypeInnateGrant_NoJobNoRegion(t *testing.T) {
 	sess := &session.PlayerSession{}
 
 	archetype := &ruleset.Archetype{
-		ID: "test_archetype",
+		ID: "nerd",
 		InnateTechnologies: []ruleset.InnateGrant{
 			{ID: "blackout_pulse", UsesPerDay: 0},
 		},
@@ -1543,4 +1545,67 @@ func TestRearrangePreparedTechs_ArchetypePoolIncluded(t *testing.T) {
 	require.NoError(t, err, "RearrangePreparedTechs must not fail when archetype pool entries are available")
 	assert.Equal(t, 4, len(sess.PreparedTechs[1]), "all 4 slots must be filled")
 	assert.Equal(t, 4, promptCallCount, "prompt must fire once per open slot")
+}
+
+// REQ-ITC-1: non-tech archetypes (aggressor, criminal) receive no innate tech from region.
+func TestAssignTechnologies_NonTechArchetype_NoInnate(t *testing.T) {
+	ctx := context.Background()
+	sess := &session.PlayerSession{}
+	arch := &ruleset.Archetype{ID: "aggressor"}
+	region := &ruleset.Region{
+		InnateTechnologies: []ruleset.InnateGrant{{ID: "blackout_pulse", UsesPerDay: 0}},
+	}
+	inn := &fakeInnateRepo{}
+	err := gameserver.AssignTechnologies(ctx, sess, 1, nil, arch, nil, noPrompt,
+		&fakeHardwiredRepo{}, &fakePreparedRepo{}, &fakeSpontaneousRepo{}, inn, nil, region)
+	require.NoError(t, err)
+	assert.Empty(t, sess.InnateTechs, "aggressor archetype must receive no innate tech from region")
+}
+
+// REQ-ITC-2: tech-capable archetypes receive unlimited innate tech from region.
+func TestAssignTechnologies_TechArchetype_GetsUnlimitedInnate(t *testing.T) {
+	ctx := context.Background()
+	sess := &session.PlayerSession{}
+	arch := &ruleset.Archetype{ID: "nerd"}
+	region := &ruleset.Region{
+		InnateTechnologies: []ruleset.InnateGrant{{ID: "blackout_pulse", UsesPerDay: 0}},
+	}
+	inn := &fakeInnateRepo{}
+	err := gameserver.AssignTechnologies(ctx, sess, 1, nil, arch, nil, noPrompt,
+		&fakeHardwiredRepo{}, &fakePreparedRepo{}, &fakeSpontaneousRepo{}, inn, nil, region)
+	require.NoError(t, err)
+	require.Len(t, sess.InnateTechs, 1, "nerd archetype must receive innate tech from region")
+	slot := sess.InnateTechs["blackout_pulse"]
+	require.NotNil(t, slot)
+	assert.Equal(t, 0, slot.MaxUses, "innate tech must be unlimited (MaxUses == 0)")
+	assert.Equal(t, 0, slot.UsesRemaining, "innate tech must start with UsesRemaining == 0 (unlimited)")
+}
+
+// REQ-ITC-3: property — innate tech is granted iff DominantTradition(archetype.ID) != "".
+func TestProperty_AssignTechnologies_InnateGatedByTechTradition(t *testing.T) {
+	allArchetypes := []string{
+		"nerd", "naturalist", "drifter", "schemer", "influencer", "zealot", // tech-capable
+		"aggressor", "criminal", // non-tech
+	}
+	rapid.Check(t, func(rt *rapid.T) {
+		archetypeID := rapid.SampledFrom(allArchetypes).Draw(rt, "archetypeID")
+		sess := &session.PlayerSession{}
+		arch := &ruleset.Archetype{ID: archetypeID}
+		region := &ruleset.Region{
+			InnateTechnologies: []ruleset.InnateGrant{{ID: "blackout_pulse", UsesPerDay: 0}},
+		}
+		inn := &fakeInnateRepo{}
+		err := gameserver.AssignTechnologies(context.Background(), sess, 1, nil, arch, nil, noPrompt,
+			&fakeHardwiredRepo{}, &fakePreparedRepo{}, &fakeSpontaneousRepo{}, inn, nil, region)
+		require.NoError(rt, err)
+
+		hasTradition := technology.DominantTradition(archetypeID) != ""
+		if hasTradition {
+			assert.NotEmpty(rt, sess.InnateTechs,
+				"tech archetype %q must receive innate tech from region", archetypeID)
+		} else {
+			assert.Empty(rt, sess.InnateTechs,
+				"non-tech archetype %q must receive no innate tech from region", archetypeID)
+		}
+	})
 }
