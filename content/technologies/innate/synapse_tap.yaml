@@ -1,0 +1,18 @@
+id: synapse_tap
+name: Synapse Tap
+description: A passive subdermal antenna reads surface emotional resonance from nearby creatures, giving you an edge in manipulation and intimidation.
+tradition: neural
+level: 1
+usage_type: innate
+action_cost: 0
+passive: true
+range: zone
+targets: all_enemies
+duration: passive
+resolution: none
+effects:
+  on_apply:
+    - type: utility
+      description: "Your synapse tap reads emotional tells, giving you a +1 circumstance bonus on Deception checks against creatures in the zone."
+    - type: utility
+      description: "Your synapse tap reads fear responses, giving you a +1 circumstance bonus on Intimidation checks against creatures in the zone."

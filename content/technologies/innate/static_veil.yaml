@@ -1,0 +1,17 @@
+id: static_veil
+name: Static Veil
+description: Emits a burst of local mesh interference that scrambles targeting optics and visual feeds, rendering you harder to perceive.
+tradition: neural
+level: 1
+usage_type: innate
+action_cost: 1
+range: self
+targets: single
+duration: rounds:1
+resolution: none
+effects:
+  on_apply:
+    - type: condition
+      condition_id: concealed
+      value: 1
+      duration: rounds:1

@@ -1,0 +1,31 @@
+id: neural_flare
+name: Neural Flare
+description: A sharp directed neural frequency that overloads a target's pain receptors, causing momentary agony.
+tradition: neural
+level: 1
+usage_type: innate
+action_cost: 2
+range: ranged
+targets: single
+duration: rounds:1
+resolution: save
+save_type: cool
+save_dc: 15
+effects:
+  on_success:
+    - type: utility
+      description: "The neural frequency grazes you — a spike of pain, then nothing."
+  on_failure:
+    - type: condition
+      condition_id: sickened
+      value: 1
+      duration: rounds:1
+  on_crit_failure:
+    - type: condition
+      condition_id: sickened
+      value: 1
+      duration: rounds:1
+    - type: condition
+      condition_id: slowed
+      value: 1
+      duration: rounds:1
