@@ -11306,6 +11306,7 @@ type CharacterSheetView struct {
 	OffHandProfBonus     int32  `protobuf:"varint,59,opt,name=off_hand_prof_bonus,json=offHandProfBonus,proto3" json:"off_hand_prof_bonus,omitempty"`             // proficiency bonus component of off-hand to-hit
 	OffHandProfRank      string `protobuf:"bytes,60,opt,name=off_hand_prof_rank,json=offHandProfRank,proto3" json:"off_hand_prof_rank,omitempty"`                 // proficiency rank string for off-hand weapon
 	ExploreMode          string `protobuf:"bytes,61,opt,name=explore_mode,json=exploreMode,proto3" json:"explore_mode,omitempty"`                                 // active exploration mode ID (empty string means no active mode)
+	TechTradition        string `protobuf:"bytes,62,opt,name=tech_tradition,json=techTradition,proto3" json:"tech_tradition,omitempty"`                           // player's technology tradition (e.g. "neural", "technical")
 	unknownFields        protoimpl.UnknownFields
 	sizeCache            protoimpl.SizeCache
 }
@@ -11763,6 +11764,13 @@ func (x *CharacterSheetView) GetOffHandProfRank() string {
 func (x *CharacterSheetView) GetExploreMode() string {
 	if x != nil {
 		return x.ExploreMode
+	}
+	return ""
+}
+
+func (x *CharacterSheetView) GetTechTradition() string {
+	if x != nil {
+		return x.TechTradition
 	}
 	return ""
 }
@@ -17749,7 +17757,7 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\vdescription\x18\x04 \x01(\tR\vdescription\x12'\n" +
 	"\x0feffects_summary\x18\x05 \x01(\tR\x0eeffectsSummary\x12\x1d\n" +
 	"\n" +
-	"short_name\x18\x06 \x01(\tR\tshortName\"\x9c\x16\n" +
+	"short_name\x18\x06 \x01(\tR\tshortName\"\xc3\x16\n" +
 	"\x12CharacterSheetView\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x10\n" +
 	"\x03job\x18\x02 \x01(\tR\x03job\x12\x1c\n" +
@@ -17818,7 +17826,8 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\x16off_hand_ability_bonus\x18: \x01(\x05R\x13offHandAbilityBonus\x12-\n" +
 	"\x13off_hand_prof_bonus\x18; \x01(\x05R\x10offHandProfBonus\x12+\n" +
 	"\x12off_hand_prof_rank\x18< \x01(\tR\x0foffHandProfRank\x12!\n" +
-	"\fexplore_mode\x18= \x01(\tR\vexploreMode\x1a8\n" +
+	"\fexplore_mode\x18= \x01(\tR\vexploreMode\x12%\n" +
+	"\x0etech_tradition\x18> \x01(\tR\rtechTradition\x1a8\n" +
 	"\n" +
 	"ArmorEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +

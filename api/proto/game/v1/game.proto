@@ -1247,6 +1247,7 @@ message CharacterSheetView {
     int32  off_hand_prof_bonus     = 59; // proficiency bonus component of off-hand to-hit
     string off_hand_prof_rank      = 60; // proficiency rank string for off-hand weapon
     string explore_mode            = 61; // active exploration mode ID (empty string means no active mode)
+    string tech_tradition          = 62; // player's technology tradition (e.g. "neural", "technical")
 }
 
 // InnateSlotView delivers the per-tech innate use slot state for the character sheet.

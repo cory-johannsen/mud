@@ -1,6 +1,13 @@
 import { useEffect } from 'react'
 import { useGame } from '../GameContext'
 
+const TRADITION_LABELS: Record<string, string> = {
+  technical:        'Technical',
+  bio_synthetic:    'Bio-Synthetic',
+  neural:           'Neural',
+  fanatic_doctrine: 'Fanatic Doctrine',
+}
+
 export function JobDrawer({ onClose }: { onClose: () => void }) {
   const { state, sendMessage } = useGame()
 
@@ -50,8 +57,15 @@ export function JobDrawer({ onClose }: { onClose: () => void }) {
                 </div>
               )}
               {sheet.team && (
-                <div style={{ display: 'inline-block', background: 'rgba(120,180,255,0.15)', border: '1px solid rgba(120,180,255,0.4)', borderRadius: '10px', padding: '1px 10px', fontSize: '0.8rem', color: '#7bb8ff' }}>
+                <div style={{ display: 'inline-block', background: 'rgba(120,180,255,0.15)', border: '1px solid rgba(120,180,255,0.4)', borderRadius: '10px', padding: '1px 10px', fontSize: '0.8rem', color: '#7bb8ff', marginBottom: '0.4rem' }}>
                   {sheet.team}
+                </div>
+              )}
+              {(sheet.techTradition ?? sheet.tech_tradition) && (
+                <div style={{ color: '#aaa', fontSize: '0.9rem' }}>
+                  Tech Tradition: <span style={{ color: '#88ddaa', fontWeight: 'bold' }}>
+                    {TRADITION_LABELS[sheet.techTradition ?? sheet.tech_tradition ?? ''] ?? (sheet.techTradition ?? sheet.tech_tradition)}
+                  </span>
                 </div>
               )}
             </section>

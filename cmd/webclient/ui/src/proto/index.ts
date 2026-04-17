@@ -279,6 +279,8 @@ export interface CharacterSheetView {
   off_hand_prof_rank?: string
   exploreMode?: string
   explore_mode?: string
+  techTradition?: string
+  tech_tradition?: string
 }
 
 export interface QuestObjectiveView {

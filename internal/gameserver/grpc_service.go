@@ -6312,6 +6312,8 @@ func (s *GameServiceServer) handleChar(uid string) (*gamev1.ServerEvent, error) 
 	view.PendingTechSelections = int32(len(sess.PendingTechGrants))
 	// Active exploration mode (empty string when no mode is active).
 	view.ExploreMode = sess.ExploreMode
+	// Tech tradition derived from job class.
+	view.TechTradition = technology.DominantTradition(sess.Class)
 	// Prepared technology slots with expended state.
 	if len(sess.PreparedTechs) > 0 {
 		levels := make([]int, 0, len(sess.PreparedTechs))
