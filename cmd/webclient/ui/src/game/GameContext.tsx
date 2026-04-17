@@ -72,6 +72,7 @@ export interface ChoicePrompt {
 export interface CombatantAP {
   remaining: number
   total: number
+  movementRemaining: number  // how many movement actions (Stride/Step) remain this round; max 2
 }
 
 export interface GameState {
@@ -121,7 +122,7 @@ type Action =
   | { type: 'CLEAR_COMBAT_POSITIONS' }
   | { type: 'UPDATE_COMBATANT_HP'; name: string; current: number; max: number }
   | { type: 'CLEAR_COMBATANT_HP' }
-  | { type: 'UPDATE_COMBATANT_AP'; name: string; remaining: number; total: number }
+  | { type: 'UPDATE_COMBATANT_AP'; name: string; remaining: number; total: number; movementRemaining?: number }
   | { type: 'CLEAR_COMBATANT_AP' }
   | { type: 'SET_HOTBAR'; slots: HotbarSlot[] }
   | { type: 'SET_TIME_OF_DAY'; tod: TimeOfDayEvent }
@@ -181,7 +182,7 @@ export function reducer(state: GameState, action: Action): GameState {
     case 'CLEAR_COMBATANT_HP':
       return { ...state, combatantHp: {} }
     case 'UPDATE_COMBATANT_AP':
-      return { ...state, combatantAP: { ...state.combatantAP, [action.name]: { remaining: action.remaining, total: action.total } } }
+      return { ...state, combatantAP: { ...state.combatantAP, [action.name]: { remaining: action.remaining, total: action.total, movementRemaining: action.movementRemaining ?? 2 } } }
     case 'CLEAR_COMBATANT_AP':
       return { ...state, combatantAP: {} }
     case 'SET_HOTBAR':
@@ -475,11 +476,13 @@ export function GameProvider({ children }: { children: ReactNode }) {
               })
               const apTotal = pos.apTotal ?? pos.ap_total ?? actionsPerTurn
               const apRemaining = pos.apRemaining ?? pos.ap_remaining ?? apTotal
+              // Reset movement AP to 2 (MaxMovementAP) at round start for all combatants
               dispatch({
                 type: 'UPDATE_COMBATANT_AP',
                 name: pos.name,
                 remaining: apRemaining,
                 total: apTotal,
+                movementRemaining: 2,
               })
               const hpMax = pos.hpMax ?? pos.hp_max ?? 0
               const hpCurrent = pos.hpCurrent ?? pos.hp_current ?? 0
@@ -511,11 +514,12 @@ export function GameProvider({ children }: { children: ReactNode }) {
           break
         }
         case 'APUpdateEvent': {
-          const au = payload as APUpdateEvent
+          const au = payload as APUpdateEvent & { movement_ap_remaining?: number; movementApRemaining?: number }
           if (au.name) {
             const remaining = au.apRemaining ?? au.ap_remaining ?? 0
             const total = au.apTotal ?? au.ap_total ?? 0
-            dispatch({ type: 'UPDATE_COMBATANT_AP', name: au.name, remaining, total })
+            const movementRemaining = au.movementApRemaining ?? au.movement_ap_remaining ?? 2
+            dispatch({ type: 'UPDATE_COMBATANT_AP', name: au.name, remaining, total, movementRemaining })
           }
           break
         }
