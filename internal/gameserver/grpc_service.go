@@ -8569,18 +8569,38 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string, targetX, 
 		}
 		return s.activateTechWithEffects(sess, uid, abilityID, targetID, fmt.Sprintf("You activate %s. (%d uses remaining at level %d.)", abilityID, pool.Remaining, foundLevel), nil, targetX, targetY)
 	}
-	// Innate tech activation — innate techs cost 0 AP and fire immediately,
-	// bypassing the combat resolution phase. This is by design (PF2E cantrip parity).
+	// Innate tech activation. Innate techs with action_cost 0 fire immediately (cantrip parity);
+	// innate techs with action_cost > 0 queue for round resolution in combat, same as other techs.
 	if s.innateTechRepo != nil {
 		if slot, ok := sess.InnateTechs[abilityID]; ok {
-			// REQ-CRX6: block manual use for techs that fire as reactions.
+			// Look up tech def once — used for reaction check, action cost, and display name.
+			var innateTechDef *technology.TechnologyDef
 			if s.techRegistry != nil {
-				if techDef, ok := s.techRegistry.Get(abilityID); ok && techDef.Reaction != nil {
-					return messageEvent(fmt.Sprintf("%s fires automatically as a reaction and cannot be activated manually.", techDef.Name)), nil
+				if def, ok2 := s.techRegistry.Get(abilityID); ok2 {
+					innateTechDef = def
 				}
+			}
+			// REQ-CRX6: block manual use for techs that fire as reactions.
+			if innateTechDef != nil && innateTechDef.Reaction != nil {
+				return messageEvent(fmt.Sprintf("%s fires automatically as a reaction and cannot be activated manually.", innateTechDef.Name)), nil
+			}
+			// In combat with action_cost > 0: queue for round resolution at player's initiative.
+			if innateTechDef != nil && innateTechDef.ActionCost > 0 && s.combatH != nil && s.combatH.ActiveCombatForPlayer(uid) != nil {
+				ap := s.combatH.RemainingAP(uid)
+				if ap < innateTechDef.ActionCost {
+					return messageEvent(fmt.Sprintf("Not enough AP to use %s (need %d, have %d).", innateTechDef.Name, innateTechDef.ActionCost, ap)), nil
+				}
+				if err := s.combatH.QueueTechUse(uid, abilityID, targetID, innateTechDef.ActionCost, targetX, targetY); err != nil {
+					return messageEvent(fmt.Sprintf("Could not queue tech: %s", err.Error())), nil
+				}
+				return nil, nil
 			}
 			if slot.MaxUses != 0 && slot.UsesRemaining <= 0 {
 				return messageEvent(fmt.Sprintf("No uses of %s remaining.", abilityID)), nil
+			}
+			name := abilityID
+			if innateTechDef != nil {
+				name = innateTechDef.Name
 			}
 			if slot.MaxUses != 0 {
 				if err := s.innateTechRepo.Decrement(ctx, sess.CharacterID, abilityID); err != nil {
@@ -8589,9 +8609,9 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string, targetX, 
 				slot.UsesRemaining--
 				sess.InnateTechs[abilityID] = slot
 				s.pushEventToUID(uid, s.hotbarUpdateEvent(sess))
-				return s.activateTechWithEffects(sess, uid, abilityID, targetID, fmt.Sprintf("You activate %s. (%d uses remaining.)", abilityID, slot.UsesRemaining), nil, targetX, targetY)
+				return s.activateTechWithEffects(sess, uid, abilityID, targetID, fmt.Sprintf("You activate %s. (%d uses remaining.)", name, slot.UsesRemaining), nil, targetX, targetY)
 			}
-			return s.activateTechWithEffects(sess, uid, abilityID, targetID, fmt.Sprintf("You activate %s.", abilityID), nil, targetX, targetY)
+			return s.activateTechWithEffects(sess, uid, abilityID, targetID, fmt.Sprintf("You activate %s.", name), nil, targetX, targetY)
 		}
 		// REQ-USE-1: fall through to room equipment before reporting no match.
 		if evt, err := s.tryRoomEquipFallback(uid, sess.RoomID, abilityID); evt != nil || err != nil {
