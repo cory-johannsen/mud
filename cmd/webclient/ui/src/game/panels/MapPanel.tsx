@@ -193,6 +193,9 @@ export function MapPanel() {
   // REQ-MAP-TRAVEL-1: Auto-switch back to zone map when travel completes.
   // When the room ID changes while the world map is showing, the player has
   // fast-travelled to a new zone — switch back to zone view automatically.
+  // showWorld is included in deps so the closure always sees the current value;
+  // omitting it causes a stale closure where showWorld reads as false even after
+  // the user has switched to world view.
   const currentRoomId = state.roomView?.roomId ?? null
   useEffect(() => {
     if (showWorld && currentRoomId !== null && currentRoomId !== prevRoomIdRef.current) {
@@ -200,7 +203,8 @@ export function MapPanel() {
       sendMessage('MapRequest', { view: 'zone' })
     }
     prevRoomIdRef.current = currentRoomId
-  }, [currentRoomId])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentRoomId, showWorld])
 
   const handleRoomEnter = useCallback((tile: MapTile, e: React.MouseEvent) => {
     const rect = (e.currentTarget as Element).getBoundingClientRect()
