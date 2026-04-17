@@ -30,6 +30,10 @@ function UsePips({ remaining, max }: { remaining: number; max: number }) {
   )
 }
 
+function InfiniteUses() {
+  return <span style={styles.infiniteUses} title="Unlimited uses">∞</span>
+}
+
 function EffectsSummary({ text }: { text: string }) {
   const lines = text.split('\n')
   return (
@@ -120,10 +124,9 @@ function InnateItem({
       <div style={styles.techHeader}>
         <strong style={{ color: exhausted ? '#666' : '#e0c060' }}>{name}</strong>
         <LevelBadge level={level} />
-        {slot.isReaction
-          ? <span style={styles.badgeReaction}>reaction</span>
-          : <span style={styles.badgeActive}>active</span>}
-        {max > 0 && <UsePips remaining={remaining} max={max} />}
+        <span style={styles.badgeInnate}>innate</span>
+        {slot.isReaction && <span style={styles.badgeReaction}>reaction</span>}
+        {max === 0 ? <InfiniteUses /> : <UsePips remaining={remaining} max={max} />}
       </div>
       {slot.description && <p style={styles.techDesc}>{slot.description}</p>}
       {slot.effectsSummary && <EffectsSummary text={slot.effectsSummary} />}
@@ -432,6 +435,20 @@ const styles: Record<string, React.CSSProperties> = {
     border: '1px solid #4a6a2a',
     color: '#8d4',
     whiteSpace: 'nowrap' as const,
+  },
+  badgeInnate: {
+    fontSize: '0.65rem',
+    padding: '0.1rem 0.4rem',
+    borderRadius: '3px',
+    background: '#1a2a3a',
+    border: '1px solid #2a5a8a',
+    color: '#6af',
+    whiteSpace: 'nowrap' as const,
+  },
+  infiniteUses: {
+    fontSize: '1rem',
+    color: '#7bc',
+    lineHeight: 1,
   },
   badgeReaction: {
     fontSize: '0.65rem',
