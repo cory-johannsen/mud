@@ -141,8 +141,37 @@ type techOption struct {
 	charLevel int // character level at which this grant was earned
 }
 
+// isTechKnown returns true if the player already has techID in any of their
+// trained tech collections (prepared, spontaneous, or hardwired).
+//
+// Precondition: sess must not be nil.
+// Postcondition: Returns true iff techID appears in at least one trained collection.
+func isTechKnown(sess *session.PlayerSession, techID string) bool {
+	for _, id := range sess.HardwiredTechs {
+		if id == techID {
+			return true
+		}
+	}
+	for _, slots := range sess.PreparedTechs {
+		for _, slot := range slots {
+			if slot != nil && slot.TechID == techID {
+				return true
+			}
+		}
+	}
+	for _, ids := range sess.SpontaneousTechs {
+		for _, id := range ids {
+			if id == techID {
+				return true
+			}
+		}
+	}
+	return false
+}
+
 // computeTrainableOptions returns all (techID, level, usageType) tuples from the player's
-// pending grants that match the trainer's tradition and offered levels.
+// pending grants that match the trainer's tradition and offered levels, excluding any
+// techs the player already knows.
 //
 // Precondition: sess and cfg must not be nil.
 // Postcondition: Returns a non-nil slice (may be empty).
@@ -163,6 +192,9 @@ func (s *GameServiceServer) computeTrainableOptions(sess *session.PlayerSession,
 				}
 				for _, e := range grants.Prepared.Pool {
 					if e.Level != techLvl {
+						continue
+					}
+					if isTechKnown(sess, e.ID) {
 						continue
 					}
 					if s.techRegistry != nil {
@@ -191,6 +223,9 @@ func (s *GameServiceServer) computeTrainableOptions(sess *session.PlayerSession,
 				}
 				for _, e := range grants.Spontaneous.Pool {
 					if e.Level != techLvl {
+						continue
+					}
+					if isTechKnown(sess, e.ID) {
 						continue
 					}
 					if s.techRegistry != nil {
