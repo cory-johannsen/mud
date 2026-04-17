@@ -1,0 +1,2 @@
+-- Original limited-use values are not recoverable after this migration.
+-- No-op.
