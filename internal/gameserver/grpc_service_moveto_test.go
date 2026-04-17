@@ -86,7 +86,7 @@ func TestHandleMoveTo_WithinOneStride_Costs1AP(t *testing.T) {
 
 	msgEvt := event.GetMessage()
 	require.NotNil(t, msgEvt, "expected a message event, not an error")
-	assert.Contains(t, msgEvt.Content, "0, 3")
+	assert.Contains(t, msgEvt.Content, "(0, 3)")
 
 	playerCbt := cbt.GetCombatant(uid)
 	require.NotNil(t, playerCbt)
@@ -116,7 +116,7 @@ func TestHandleMoveTo_WithinTwoStrides_Costs2AP(t *testing.T) {
 
 	msgEvt := event.GetMessage()
 	require.NotNil(t, msgEvt, "expected a message event, not an error")
-	assert.Contains(t, msgEvt.Content, "0, 8")
+	assert.Contains(t, msgEvt.Content, "(0, 8)")
 
 	playerCbt := cbt.GetCombatant(uid)
 	require.NotNil(t, playerCbt)
@@ -177,4 +177,34 @@ func TestHandleMoveTo_AlreadyAtTarget_ReturnsMessage(t *testing.T) {
 	q, qOK := cbt.ActionQueues[uid]
 	require.True(t, qOK)
 	assert.Equal(t, 0, q.MovementAPSpent(), "no movement AP should be spent when already at target")
+}
+
+// TestHandleMoveTo_DiagonalPath_LandsOnTarget verifies that moving diagonally to a target
+// within strideCells distance (using Chebyshev distance) works correctly.
+//
+// Precondition: player at (0,0); target at (3,3); Chebyshev dist = 3, within strideCells=5.
+// Postcondition: player at (3,3); diagonal-first path taken; movement AP spent = 1.
+func TestHandleMoveTo_DiagonalPath_LandsOnTarget(t *testing.T) {
+	const roomID = "room_mt_diag"
+	const uid = "u_mt_diag"
+
+	svc, sessMgr, npcMgr, combatHandler := newMoveToSvcWithCombat(t)
+	_, cbt := startCombatForMoveTo(t, sessMgr, npcMgr, combatHandler, roomID, uid, 0, 0)
+
+	event, err := svc.handleMoveTo(uid, &gamev1.MoveToRequest{TargetX: 3, TargetY: 3})
+	require.NoError(t, err)
+	require.NotNil(t, event)
+
+	msgEvt := event.GetMessage()
+	require.NotNil(t, msgEvt, "expected a message event, not an error")
+	assert.Contains(t, msgEvt.Content, "(3, 3)")
+
+	playerCbt := cbt.GetCombatant(uid)
+	require.NotNil(t, playerCbt)
+	assert.Equal(t, 3, playerCbt.GridX, "GridX should be 3")
+	assert.Equal(t, 3, playerCbt.GridY, "GridY should be 3")
+
+	q, qOK := cbt.ActionQueues[uid]
+	require.True(t, qOK)
+	assert.Equal(t, 1, q.MovementAPSpent(), "exactly 1 movement AP should have been spent for diagonal movement within stride")
 }
