@@ -3042,6 +3042,14 @@ func (h *CombatHandler) startCombatLocked(sess *session.PlayerSession, inst *npc
 				HpMax:       int32(c.MaxHP),
 			})
 		}
+		// Collect cover objects from room equipment to populate the combat map.
+		var coverObjects []*gamev1.CoverObjectPosition
+		if h.worldMgr != nil {
+			if room, ok := h.worldMgr.GetRoom(sess.RoomID); ok {
+				coverObjects = coverObjectsForRoom(room)
+			}
+		}
+
 		h.roundStartBroadcastFn(sess.RoomID, &gamev1.RoundStartEvent{
 			Round:            int32(cbt.Round),
 			ActionsPerTurn:   3,
@@ -3050,6 +3058,7 @@ func (h *CombatHandler) startCombatLocked(sess *session.PlayerSession, inst *npc
 			InitialPositions: initialPositions,
 			GridWidth:        int32(cbt.GridWidth),
 			GridHeight:       int32(cbt.GridHeight),
+			CoverObjects:     coverObjects,
 		})
 	}
 
@@ -3951,6 +3960,49 @@ func bestCoverInRoom(room *world.Room) (world.RoomEquipmentConfig, string) {
 		}
 	}
 	return bestEquip, bestTier
+}
+
+// coverObjectsForRoom returns all cover-bearing equipment in the room as
+// CoverObjectPosition protos, with assigned 20×20 grid positions.
+//
+// Cover objects are placed in the centre columns (x=8–11) of the 20×20 grid,
+// spread vertically so they don't overlap each other or the default combatant
+// positions (player at y=10, NPC at y=10).
+//
+// Precondition: room must not be nil.
+// Postcondition: Returns one CoverObjectPosition per room equipment item with a
+// non-empty CoverTier. Returns nil if no cover items are present.
+func coverObjectsForRoom(room *world.Room) []*gamev1.CoverObjectPosition {
+	// Collect all items that carry cover.
+	var items []world.RoomEquipmentConfig
+	for _, eq := range room.Equipment {
+		if eq.CoverTier != "" {
+			items = append(items, eq)
+		}
+	}
+	if len(items) == 0 {
+		return nil
+	}
+
+	// Fixed midfield X positions, alternating two columns.
+	xPositions := []int{9, 10}
+	// Spread y positions: start at row 4, step 4 rows, so up to 5 objects fit
+	// without overlapping the default combatant row (y=10 is avoided by starting at 4
+	// and stepping to 8, 12, 16 — row 12 is the closest to 10 but still distinct).
+	yStart := []int{4, 16, 8, 12, 2, 18, 6, 14}
+
+	positions := make([]*gamev1.CoverObjectPosition, 0, len(items))
+	for i, eq := range items {
+		x := xPositions[i%len(xPositions)]
+		y := yStart[i%len(yStart)]
+		positions = append(positions, &gamev1.CoverObjectPosition{
+			ItemId:    eq.ItemID,
+			CoverTier: eq.CoverTier,
+			X:         int32(x),
+			Y:         int32(y),
+		})
+	}
+	return positions
 }
 
 // zoneIDForRoom looks up the zone ID for a room via the world manager.

@@ -970,6 +970,15 @@ message CombatantPosition {
   int32  hp_max       = 7; // maximum hit points
 }
 
+// CoverObjectPosition describes a cover object placed on the combat grid.
+message CoverObjectPosition {
+  string item_id    = 1; // equipment item ID
+  string name       = 2; // display name (may be empty)
+  int32  x          = 3; // grid column (0-based)
+  int32  y          = 4; // grid row (0-based)
+  string cover_tier = 5; // "lesser", "standard", or "greater"
+}
+
 // RoundStartEvent is broadcast to all combatants when a new round begins.
 message RoundStartEvent {
   int32                      round             = 1;
@@ -979,6 +988,7 @@ message RoundStartEvent {
   repeated CombatantPosition initial_positions = 5;
   int32                      grid_width        = 6;
   int32                      grid_height       = 7;
+  repeated CoverObjectPosition cover_objects   = 8;
 }
 
 // RoundEndEvent is broadcast when a round's actions have resolved.
