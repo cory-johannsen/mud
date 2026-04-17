@@ -20,6 +20,7 @@ const (
 	ActionCoverHit                        // informational: attack absorbed by cover
 	ActionCoverDestroy                    // informational: cover object destroyed
 	ActionAid                             // costs 2 AP; aid an ally
+	ActionUseTech                         // costs AbilityCost AP; activate a technology during round resolution
 )
 
 // Cost returns the action point cost for the ActionType.
@@ -48,6 +49,8 @@ func (a ActionType) Cost() int {
 		return 1
 	case ActionAid:
 		return 2
+	case ActionUseTech:
+		return 0 // cost comes from QueuedAction.AbilityCost
 	default:
 		// ActionUnknown and any unrecognized values have cost 0.
 		return 0
@@ -79,6 +82,8 @@ func (a ActionType) String() string {
 		return "stride"
 	case ActionAid:
 		return "aid"
+	case ActionUseTech:
+		return "use_tech"
 	default:
 		return "unknown"
 	}
@@ -91,8 +96,10 @@ type QueuedAction struct {
 	Direction   string // used by ActionStride: "toward" or "away"
 	WeaponID    string // for firearm actions; empty = unarmed
 	ExplosiveID string // for ActionThrow
-	AbilityID   string // for ActionUseAbility; the ClassFeature ID
-	AbilityCost int    // for ActionUseAbility; AP cost from ClassFeature.ActionCost
+	AbilityID   string // for ActionUseAbility and ActionUseTech; the ClassFeature or Technology ID
+	AbilityCost int    // for ActionUseAbility and ActionUseTech; AP cost
+	TargetX     int32  // for ActionUseTech AoE burst center; -1 means unset
+	TargetY     int32  // for ActionUseTech AoE burst center; -1 means unset
 }
 
 // MaxMovementAP is the maximum action points a combatant may spend on movement
@@ -103,11 +110,11 @@ const MaxMovementAP = 2
 // Invariant: remaining >= 0 at all times.
 // Invariant: movementAPSpent <= MaxMovementAP at all times.
 type ActionQueue struct {
-	UID              string
-	MaxPoints        int
-	remaining        int
-	movementAPSpent  int
-	actions          []QueuedAction
+	UID             string
+	MaxPoints       int
+	remaining       int
+	movementAPSpent int
+	actions         []QueuedAction
 }
 
 // RemainingPoints returns the number of action points still available this round.
@@ -194,7 +201,7 @@ func (q *ActionQueue) Enqueue(a QueuedAction) error {
 		return fmt.Errorf("invalid action type: ActionUnknown is not a valid action")
 	}
 	cost := a.Type.Cost()
-	if a.Type == ActionUseAbility {
+	if a.Type == ActionUseAbility || a.Type == ActionUseTech {
 		cost = a.AbilityCost
 	}
 	if a.Type == ActionPass {

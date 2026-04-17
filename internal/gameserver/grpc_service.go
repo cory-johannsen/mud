@@ -601,6 +601,19 @@ func NewGameServiceServer(
 		s.combatH.SetPushInventoryFn(s.pushInventory)
 		// REQ-BUG96-1: wire saveInventory so looted items are persisted immediately.
 		s.combatH.SetSaveInventoryFn(s.saveInventory)
+		// Wire tech use resolver so ActionUseTech round events apply effects post-round.
+		s.combatH.SetTechUseResolverFn(func(uid, techID, targetID string, targetX, targetY int32) {
+			sess, ok := s.sessions.GetPlayer(uid)
+			if !ok {
+				return
+			}
+			evt, err := s.activateTechWithEffects(sess, uid, techID, targetID,
+				fmt.Sprintf("You use %s.", techID), nil, targetX, targetY)
+			if err != nil || evt == nil {
+				return
+			}
+			s.pushEventToUID(uid, evt)
+		})
 	}
 	s.merchantRuntimeStates = make(map[string]*npc.MerchantRuntimeState)
 	s.bankerRuntimeStates = make(map[string]*npc.BankerRuntimeState)
@@ -8457,12 +8470,8 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string, targetX, 
 				if slot.Expended {
 					continue
 				}
-				// Found a non-expended slot — deduct AP (if in combat) then expend.
-				if cost := techAPCost(preparedTechDef); cost > 0 {
-					if err := s.combatH.SpendAP(uid, cost); err != nil {
-						return messageEvent(fmt.Sprintf("Could not spend AP: %s", err.Error())), nil
-					}
-				}
+				// Found a non-expended slot — expend it then queue for round resolution (in combat)
+				// or fire immediately (out of combat).
 				if err := s.preparedTechRepo.SetExpended(ctx, sess.CharacterID, lvl, idx, true); err != nil {
 					s.logger.Warn("handleUse: SetExpended failed",
 						zap.String("uid", uid),
@@ -8471,6 +8480,13 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string, targetX, 
 				}
 				sess.PreparedTechs[lvl][idx].Expended = true
 				s.pushEventToUID(uid, s.hotbarUpdateEvent(sess))
+				if cost := techAPCost(preparedTechDef); cost > 0 && s.combatH.ActiveCombatForPlayer(uid) != nil {
+					// In combat: queue for round resolution at player's initiative.
+					if err := s.combatH.QueueTechUse(uid, abilityID, targetID, cost, targetX, targetY); err != nil {
+						return messageEvent(fmt.Sprintf("Could not queue tech: %s", err.Error())), nil
+					}
+					return nil, nil
+				}
 				return s.activateTechWithEffects(sess, uid, abilityID, targetID, fmt.Sprintf("You activate %s.", abilityID), nil, targetX, targetY)
 			}
 		}
@@ -8521,7 +8537,8 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string, targetX, 
 				spontTechDef = def
 			}
 		}
-		if cost := techAPCost(spontTechDef); cost > 0 {
+		cost := techAPCost(spontTechDef)
+		if cost > 0 {
 			ap := s.combatH.RemainingAP(uid)
 			if ap < cost {
 				name := abilityID
@@ -8530,10 +8547,8 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string, targetX, 
 				}
 				return messageEvent(fmt.Sprintf("Not enough AP to use %s (need %d, have %d).", name, cost, ap)), nil
 			}
-			if err := s.combatH.SpendAP(uid, cost); err != nil {
-				return messageEvent(fmt.Sprintf("Could not spend AP: %s", err.Error())), nil
-			}
 		}
+		// Decrement the spontaneous pool before activating/queueing.
 		if s.spontaneousUsePoolRepo != nil {
 			if err := s.spontaneousUsePoolRepo.Decrement(ctx, sess.CharacterID, foundLevel); err != nil {
 				s.logger.Warn("handleUse: Decrement spontaneous pool failed",
@@ -8545,6 +8560,13 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string, targetX, 
 		pool.Remaining--
 		sess.SpontaneousUsePools[foundLevel] = pool
 		s.pushEventToUID(uid, s.hotbarUpdateEvent(sess))
+		if cost > 0 && s.combatH.ActiveCombatForPlayer(uid) != nil {
+			// In combat: queue for round resolution at player's initiative.
+			if err := s.combatH.QueueTechUse(uid, abilityID, targetID, cost, targetX, targetY); err != nil {
+				return messageEvent(fmt.Sprintf("Could not queue tech: %s", err.Error())), nil
+			}
+			return nil, nil
+		}
 		return s.activateTechWithEffects(sess, uid, abilityID, targetID, fmt.Sprintf("You activate %s. (%d uses remaining at level %d.)", abilityID, pool.Remaining, foundLevel), nil, targetX, targetY)
 	}
 	// Innate tech activation — innate techs cost 0 AP and fire immediately,

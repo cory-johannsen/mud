@@ -166,6 +166,78 @@ func TestPropertyActionUseAbility_RemainingNeverNegative(t *testing.T) {
 	}
 }
 
+// REQ-USTECH-1: ActionUseTech.Cost() always returns 0 (cost carried in AbilityCost).
+func TestActionUseTech_Cost(t *testing.T) {
+	if combat.ActionUseTech.Cost() != 0 {
+		t.Errorf("ActionUseTech.Cost(): got %d, want 0", combat.ActionUseTech.Cost())
+	}
+}
+
+// REQ-USTECH-2: ActionUseTech.String() returns "use_tech".
+func TestActionUseTech_String(t *testing.T) {
+	if combat.ActionUseTech.String() != "use_tech" {
+		t.Errorf("String(): got %q, want %q", combat.ActionUseTech.String(), "use_tech")
+	}
+}
+
+// REQ-USTECH-3: Enqueueing ActionUseTech deducts AbilityCost AP, not Cost().
+func TestActionUseTech_EnqueueDeductsAbilityCost(t *testing.T) {
+	tests := []struct {
+		startAP int
+		cost    int
+		wantErr bool
+	}{
+		{3, 1, false},
+		{3, 2, false},
+		{1, 2, true}, // insufficient AP
+		{3, 0, false}, // 0-cost (free action)
+	}
+	for _, tt := range tests {
+		q := combat.NewActionQueue("p1", tt.startAP)
+		qa := combat.QueuedAction{
+			Type:        combat.ActionUseTech,
+			AbilityID:   "shock_grenade",
+			AbilityCost: tt.cost,
+		}
+		err := q.Enqueue(qa)
+		if tt.wantErr {
+			if err == nil {
+				t.Errorf("start=%d cost=%d: expected error, got nil", tt.startAP, tt.cost)
+			}
+			if q.RemainingPoints() != tt.startAP {
+				t.Errorf("start=%d cost=%d: remaining changed on error: got %d", tt.startAP, tt.cost, q.RemainingPoints())
+			}
+			continue
+		}
+		if err != nil {
+			t.Errorf("start=%d cost=%d: unexpected error: %v", tt.startAP, tt.cost, err)
+			continue
+		}
+		want := tt.startAP - tt.cost
+		if q.RemainingPoints() != want {
+			t.Errorf("start=%d cost=%d: remaining=%d, want %d", tt.startAP, tt.cost, q.RemainingPoints(), want)
+		}
+	}
+}
+
+// REQ-USTECH-4 (property): Enqueueing ActionUseTech never produces negative remaining AP.
+func TestPropertyActionUseTech_RemainingNeverNegative(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		startAP := rapid.IntRange(1, 5).Draw(rt, "startAP")
+		cost := rapid.IntRange(0, startAP+2).Draw(rt, "cost")
+		q := combat.NewActionQueue("p1", startAP)
+		qa := combat.QueuedAction{
+			Type:        combat.ActionUseTech,
+			AbilityID:   "tech",
+			AbilityCost: cost,
+		}
+		_ = q.Enqueue(qa)
+		if q.RemainingPoints() < 0 {
+			rt.Fatalf("remaining went negative: %d (startAP=%d cost=%d)", q.RemainingPoints(), startAP, cost)
+		}
+	})
+}
+
 func TestActionQueue_DeductAP_Success(t *testing.T) {
 	q := combat.NewActionQueue("u1", 3)
 	err := q.DeductAP(1)

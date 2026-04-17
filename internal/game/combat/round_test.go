@@ -1086,3 +1086,93 @@ func stringContains(s, sub string) bool {
 	}
 	return false
 }
+
+// REQ-USTECH-5: ActionUseTech in ResolveRound produces a RoundEvent with correct fields.
+func TestResolveRound_ActionUseTech_ProducesEvent(t *testing.T) {
+	cbt := makeRoundCombat(t)
+	src := fixedSrc{val: 10}
+
+	if err := cbt.QueueAction("p1", combat.QueuedAction{
+		Type:        combat.ActionUseTech,
+		AbilityID:   "shock_grenade",
+		Target:      "n1",
+		AbilityCost: 0,
+		TargetX:     -1,
+		TargetY:     -1,
+	}); err != nil {
+		t.Fatalf("QueueAction p1 ActionUseTech: %v", err)
+	}
+	if err := cbt.QueueAction("n1", combat.QueuedAction{Type: combat.ActionPass}); err != nil {
+		t.Fatalf("QueueAction n1: %v", err)
+	}
+
+	events := combat.ResolveRound(cbt, src, noopUpdater, nil)
+
+	var techEvent *combat.RoundEvent
+	for i := range events {
+		if events[i].ActionType == combat.ActionUseTech {
+			techEvent = &events[i]
+			break
+		}
+	}
+	if techEvent == nil {
+		t.Fatalf("expected ActionUseTech event, got none; events: %+v", events)
+	}
+	if techEvent.ActorID != "p1" {
+		t.Errorf("ActorID: got %q, want %q", techEvent.ActorID, "p1")
+	}
+	if techEvent.ActorName != "Alice" {
+		t.Errorf("ActorName: got %q, want %q", techEvent.ActorName, "Alice")
+	}
+	if techEvent.AbilityID != "shock_grenade" {
+		t.Errorf("AbilityID: got %q, want %q", techEvent.AbilityID, "shock_grenade")
+	}
+	if techEvent.TargetID != "n1" {
+		t.Errorf("TargetID: got %q, want %q", techEvent.TargetID, "n1")
+	}
+	if techEvent.TargetX != -1 || techEvent.TargetY != -1 {
+		t.Errorf("TargetX/Y: got (%d,%d), want (-1,-1)", techEvent.TargetX, techEvent.TargetY)
+	}
+	if techEvent.AttackResult != nil {
+		t.Error("expected nil AttackResult for ActionUseTech event")
+	}
+	if !containsStr(techEvent.Narrative, "shock_grenade") {
+		t.Errorf("Narrative %q does not contain tech ID", techEvent.Narrative)
+	}
+}
+
+// REQ-USTECH-6 (property): ActionUseTech events in ResolveRound always carry ActorID, ActorName, and AbilityID.
+func TestProperty_ActionUseTech_EventFieldsAlwaysPopulated(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		techID := rapid.StringMatching(`[a-z_]{3,10}`).Draw(rt, "techID")
+		targetID := rapid.StringMatching(`[a-z0-9]{2,6}`).Draw(rt, "targetID")
+
+		cbt := makeRoundCombat(t)
+		if err := cbt.QueueAction("p1", combat.QueuedAction{
+			Type:        combat.ActionUseTech,
+			AbilityID:   techID,
+			Target:      targetID,
+			AbilityCost: 0,
+		}); err != nil {
+			rt.Skip()
+		}
+		if err := cbt.QueueAction("n1", combat.QueuedAction{Type: combat.ActionPass}); err != nil {
+			rt.Skip()
+		}
+		events := combat.ResolveRound(cbt, fixedSrc{val: 10}, noopUpdater, nil)
+		for _, ev := range events {
+			if ev.ActionType != combat.ActionUseTech {
+				continue
+			}
+			if ev.ActorID == "" {
+				rt.Fatal("ActionUseTech event: ActorID is empty")
+			}
+			if ev.ActorName == "" {
+				rt.Fatal("ActionUseTech event: ActorName is empty")
+			}
+			if ev.AbilityID != techID {
+				rt.Fatalf("ActionUseTech event: AbilityID got %q, want %q", ev.AbilityID, techID)
+			}
+		}
+	})
+}

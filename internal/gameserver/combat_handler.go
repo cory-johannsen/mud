@@ -137,6 +137,10 @@ type CombatHandler struct {
 	// fromLevel is the level before the award; toLevel is the level after.
 	// May be nil; no-op when nil.
 	onLevelUpFn func(ctx context.Context, sess *session.PlayerSession, fromLevel, toLevel int)
+	// techUseResolverFn is an optional callback invoked after round resolution for each
+	// ActionUseTech event. It applies tech effects and pushes the result to the player.
+	// May be nil; tech effects are skipped when nil.
+	techUseResolverFn func(uid, techID, targetID string, targetX, targetY int32)
 }
 
 // NewCombatHandler creates a CombatHandler with a round timer and broadcast function.
@@ -787,6 +791,58 @@ func (h *CombatHandler) Aid(uid, allyName string) ([]*gamev1.CombatEvent, error)
 	}
 
 	return []*gamev1.CombatEvent{confirmEvent}, nil
+}
+
+// SetTechUseResolverFn registers the callback that applies technology effects during
+// post-round processing. Called once for each ActionUseTech event after ResolveRound.
+//
+// Precondition: fn may be nil (tech effects are skipped when nil).
+// Postcondition: h.techUseResolverFn is set to fn.
+func (h *CombatHandler) SetTechUseResolverFn(fn func(uid, techID, targetID string, targetX, targetY int32)) {
+	h.techUseResolverFn = fn
+}
+
+// QueueTechUse queues an ActionUseTech for the player in active combat, deducting
+// cost AP from their action queue. The tech's effects are applied after round
+// resolution via techUseResolverFn.
+//
+// Precondition: uid must be a valid connected player in active combat; techID must be non-empty;
+// cost >= 0.
+// Postcondition: Returns nil on success; the player receives a "queued" confirmation message.
+// Returns an error if the player is not in combat or has insufficient AP.
+func (h *CombatHandler) QueueTechUse(uid, techID, targetID string, cost int, targetX, targetY int32) error {
+	sess, ok := h.sessions.GetPlayer(uid)
+	if !ok {
+		return fmt.Errorf("player %q not found", uid)
+	}
+
+	h.combatMu.Lock()
+	defer h.combatMu.Unlock()
+
+	cbt, ok := h.engine.GetCombat(sess.RoomID)
+	if !ok {
+		return fmt.Errorf("not in combat")
+	}
+
+	qa := combat.QueuedAction{
+		Type:        combat.ActionUseTech,
+		AbilityID:   techID,
+		Target:      targetID,
+		AbilityCost: cost,
+		TargetX:     targetX,
+		TargetY:     targetY,
+	}
+	if err := cbt.QueueAction(uid, qa); err != nil {
+		return err
+	}
+
+	h.pushMessageToUID(uid, fmt.Sprintf("%s queued for round resolution.%s", techID, h.formatAPRemaining(uid, cbt)))
+
+	if cbt.AllActionsSubmitted() {
+		h.stopTimerLocked(sess.RoomID)
+		h.resolveAndAdvanceLocked(sess.RoomID, cbt)
+	}
+	return nil
 }
 
 // ActivateAbility queues an ActionUseAbility for the combatant identified by uid.
@@ -2435,6 +2491,16 @@ func (h *CombatHandler) resolveAndAdvanceLocked(roomID string, cbt *combat.Comba
 						Narrative: msg,
 					})
 				}
+			}
+		}
+	}
+
+	// Apply tech effects for ActionUseTech events before building the broadcast list.
+	// techUseResolverFn pushes the result directly to the player's stream.
+	if h.techUseResolverFn != nil {
+		for _, re := range roundEvents {
+			if re.ActionType == combat.ActionUseTech {
+				h.techUseResolverFn(re.ActorID, re.AbilityID, re.TargetID, re.TargetX, re.TargetY)
 			}
 		}
 	}

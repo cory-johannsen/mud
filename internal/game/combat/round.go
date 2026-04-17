@@ -218,9 +218,15 @@ type RoundEvent struct {
 	// CoverEquipmentID is the item ID of the cover equipment hit in an ActionCoverHit event.
 	// Empty for all other event types.
 	CoverEquipmentID string
-	Narrative string
+	Narrative        string
 	// Flanking is true when the attacker benefits from the flanking +2 bonus on this attack.
 	Flanking bool
+	// AbilityID is the technology ID for ActionUseTech events; empty for all other event types.
+	AbilityID string
+	// TargetX and TargetY are the AoE burst center grid coordinates for ActionUseTech events.
+	// -1 means unset (no AoE targeting).
+	TargetX int32
+	TargetY int32
 }
 
 // findCombatantByName returns the first Combatant in cbt whose Name matches name, or nil.
@@ -1095,6 +1101,19 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 					ActorName:  actor.Name,
 					TargetID:   target.ID,
 					Narrative:  narrative,
+				})
+			case ActionUseTech:
+				// Record the tech use for post-round effect resolution.
+				// Effects are applied by the server after round resolution via techUseResolverFn.
+				events = append(events, RoundEvent{
+					ActionType: ActionUseTech,
+					ActorID:    actor.ID,
+					ActorName:  actor.Name,
+					TargetID:   action.Target,
+					AbilityID:  action.AbilityID,
+					TargetX:    action.TargetX,
+					TargetY:    action.TargetY,
+					Narrative:  fmt.Sprintf("%s uses %s.", actor.Name, action.AbilityID),
 				})
 			}
 		}
