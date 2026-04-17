@@ -20,5 +20,5 @@ effects:
     description: 'Trigger A creature within range is hit by an attack from an enemy.
 
 
-      The target appears to fall down dead, though it actually turns @UUID[Compendium.pf2e.conditionitems.Item.Invisible].
+      The target appears to fall down dead, though it actually turns Invisible.
       Its illusory co'

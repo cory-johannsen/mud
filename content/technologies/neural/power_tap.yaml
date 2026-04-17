@@ -20,4 +20,3 @@ effects:
     dc: 0
     description: You disrupt the connection between a divine caster or deific servitor
       and their deity, blocking their use of divine power. If the target fails its
-      save, it is @UUID[Compendium.pf2e.conditionitems.Item

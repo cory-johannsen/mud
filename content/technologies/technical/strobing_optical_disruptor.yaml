@@ -18,6 +18,4 @@ effects:
     description: 'You unleash a swirling multitude of colors that overwhelms creatures based on their Reasoning checks.
 
 
-      Critical Success The creature is unaffected.
-
-      Success The creature is @UUID[Compendium.pf2e.conditionite'
+      Critical Success The creature is unaffected.'

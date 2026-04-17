@@ -16,4 +16,4 @@ effects:
   on_apply:
   - type: utility
     dc: 0
-    description: Illusions bend light around the target, rendering it @UUID[Compendium.pf2e.conditionitems.Item.Invisible]. This makes it @UUID[Compendium.pf2e.conditionitems.Item.Undetected] to all creatures, though
+    description: Illusions bend light around the target, rendering it Invisible. This makes it Undetected to all creatures, though

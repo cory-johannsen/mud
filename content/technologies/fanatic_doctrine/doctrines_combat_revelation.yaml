@@ -15,4 +15,4 @@ effects:
   - type: utility
     dc: 0
     description: You pull a large handful of guts from your midsection. Removing these guts doesn't harm you. You can use
-      the guts as 50 feet of rope to help you @UUID[Compendium.pf2e.actionspf2e.Item.Climb], and they
+      the guts as 50 feet of rope to help you Climb, and they

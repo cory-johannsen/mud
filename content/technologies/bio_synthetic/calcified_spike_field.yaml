@@ -2,7 +2,7 @@ id: calcified_spike_field
 name: Calcified Spike Field
 description: 'Area two 10-foot bursts that don''t overlap
 
-  Razor-sharp calcified growths erupt from the ground, transforming the area into a hazardous mineral field. You can create a third nonoverlapping burst if the centers of all three are underwater. Creatures in the area take 6d6 piercing damage and must attempt a basic Quickness check. A creature that critically fails also takes 1d6 bleed. The area becomes difficult terrain and hazardous terrain. A creature that moves through takes @Damage[(floor(/2)+1)[piercing]] damage for every square of that area it moves into.Upgraded (+2) The initial piercing damage increases by 3d6, and the hazardous terrain damage increases by 1.'
+  Razor-sharp calcified growths erupt from the ground, transforming the area into a hazardous mineral field. You can create a third nonoverlapping burst if the centers of all three are underwater. Creatures in the area take 6d6 piercing damage and must attempt a basic Quickness check. A creature that critically fails also takes 1d6 bleed. The area becomes difficult terrain and hazardous terrain. A creature that moves through takes (floor(/2)+1)[piercing] damage for every square of that area it moves into.Upgraded (+2) The initial piercing damage increases by 3d6, and the hazardous terrain damage increases by 1.'
 tradition: bio_synthetic
 level: 4
 usage_type: prepared

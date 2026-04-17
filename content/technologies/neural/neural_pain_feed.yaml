@@ -2,7 +2,7 @@ id: neural_pain_feed
 name: Neural Pain Feed
 description: 'Trigger You critically fail a saving throw against a foe''s effect.You distract your enemy with their feeling of smug pleasure when you fail catastrophically. They must attempt a Willpower save.Critical Success The creature is unaffected.
 
-  Success The creature is distracted by its amusement and takes a -1 status penalty on Awareness checks and Reasoning checks for 1 round. @UUID[Compendium.pf2e.spell-effects.Item.tech Effect: Schadenfreude (Success)]
+  Success The creature is distracted by its amusement and takes a -1 status penalty on Awareness checks and Reasoning checks for 1 round. Schadenfreude (Success)
 
   Failure The creature is overcome by its amusement and is Stupefied 1 for 1 round.
 

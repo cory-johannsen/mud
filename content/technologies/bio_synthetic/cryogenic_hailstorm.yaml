@@ -1,6 +1,6 @@
 id: cryogenic_hailstorm
 name: Cryogenic Hailstorm
-description: You synthesize a freezing cloud that pelts creatures with an icy deluge. When you activate this protocol, a burst of cryo-projectiles deals 2d8 bludgeoning damage and 2d8 cold damage to each creature in the area below the cloud (basic Quickness check). Frozen precipitation continues for the remaining duration, making the area difficult terrain. Any creature that ends its turn in the storm takes @Damage[(floor(/2))[cold]] damage. If activated outdoors, you can create two nonoverlapping clouds instead of one.Upgraded (+2) The initial bludgeoning and cold damage increase by 1d8 each, and the cold damage at end of turn increases by 1.
+description: You synthesize a freezing cloud that pelts creatures with an icy deluge. When you activate this protocol, a burst of cryo-projectiles deals 2d8 bludgeoning damage and 2d8 cold damage to each creature in the area below the cloud (basic Quickness check). Frozen precipitation continues for the remaining duration, making the area difficult terrain. Any creature that ends its turn in the storm takes (floor(/2))[cold] damage. If activated outdoors, you can create two nonoverlapping clouds instead of one.Upgraded (+2) The initial bludgeoning and cold damage increase by 1d8 each, and the cold damage at end of turn increases by 1.
 tradition: bio_synthetic
 level: 4
 usage_type: prepared

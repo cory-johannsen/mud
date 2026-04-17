@@ -14,4 +14,4 @@ effects:
   - type: utility
     dc: 0
     description: You reinforce the target's musculoskeletal system to bear more weight. The target can carry 3 more Bulk than
-      normal before becoming @UUID[Compendium.pf2e.conditionitems.Item.Encumbered] and up to a ma
+      normal before becoming Encumbered and up to a ma

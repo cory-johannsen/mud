@@ -4,7 +4,7 @@ description: 'You protect the target with a powerful, long-lasting energy barrie
   projected from a neural implant. The target gains resistance 5 to acid, cold, electricity,
   fire, force, sonic, vitality, and void damage.
 
-  @UUID[Compendium.pf2e.spell-effects.Item.tech Effect: Energy Aegis]
+  Energy Aegis
 
 
   Upgraded (9th) The resistances increase to 10.'
@@ -22,6 +22,4 @@ effects:
     dc: 0
     description: 'You protect the target with a powerful, long-lasting energy barrier.
       The target gains resistance 5 to acid, cold, electricity, fire, force, sonic,
-      vitality, and void damage.
-
-      @UUID[Compendium.pf2e.spel'
+      vitality, and void damage.'

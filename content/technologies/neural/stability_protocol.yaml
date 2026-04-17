@@ -16,5 +16,4 @@ effects:
   - type: utility
     dc: 0
     description: 'You free the target''s limbs from ailments that impede mobility.
-      Attempt to counteract an effect of your choice imposing one of these conditions
-      on the target: @UUID[Compendium.pf2e.conditionitems.Item'
+      Attempt to counteract an effect of your choice imposing one of these conditions'

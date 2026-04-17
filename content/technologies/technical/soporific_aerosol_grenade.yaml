@@ -15,5 +15,4 @@ effects:
   on_apply:
   - type: utility
     dc: 0
-    description: Each creature in the area becomes drowsy, possibly nodding off. A creature that falls @UUID[Compendium.pf2e.conditionitems.Item.Unconscious]
-      from this tech doesn't fall @UUID[Compendium.pf2e.conditio
+    description: Each creature in the area becomes drowsy, possibly nodding off. A creature that falls Unconscious

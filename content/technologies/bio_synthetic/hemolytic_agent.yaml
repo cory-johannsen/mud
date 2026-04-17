@@ -2,9 +2,9 @@ id: hemolytic_agent
 name: Hemolytic Agent
 description: 'You inject a chemical agent that disrupts the target''s coagulation factors, causing any wound to hemorrhage. The target must attempt a Grit check.Critical Success The target is unaffected.
 
-  Success For 1 minute, the first time each round that the target takes at least 10 @Damage[(floor(/2))d6[piercing]]{piercing} or @Damage[(floor(/2))d6[slashing]]{slashing} damage from a single Strike, it takes 2d6 additional damage of the same type.
+  Success For 1 minute, the first time each round that the target takes at least 10 (floor(/2))d6[piercing]{piercing} or (floor(/2))d6[slashing]{slashing} damage from a single Strike, it takes 2d6 additional damage of the same type.
 
-  Failure As success, but when it takes the additional damage, it also takes @Damage[(floor(/2))d6[bleed]].Upgraded (+2) The additional damage increases by 1d6 and the persistent bleed damage increases by 1d6.'
+  Failure As success, but when it takes the additional damage, it also takes (floor(/2))d6[bleed].Upgraded (+2) The additional damage increases by 1d6 and the persistent bleed damage increases by 1d6.'
 tradition: bio_synthetic
 level: 4
 usage_type: prepared

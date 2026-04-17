@@ -3,8 +3,8 @@ name: Tech Suppression Field
 description: 'You project a wide-spectrum nullification field that blankets the target
   area, rendering all technology inert. Tech devices can''t penetrate the area, augmented
   implants cease to function within it, and no one inside can activate tech abilities,
-  including yourself. Likewise, countermeasures - such as @UUID[Compendium.pf2e.spells-srd.Item.Dispel
-  Magic] - can''t affect the field itself unless they are of a higher level. Tech
+  including yourself. Likewise, countermeasures - such as Compendium.pf2e.spells-srd.Item.Dispel
+  Magic - can''t affect the field itself unless they are of a higher level. Tech
   effects resume the moment they pass outside the field. For example, a beam fired
   from one side of the field could target a creature on the other side (as long as
   caster and target are both outside the field). A summoned construct winks out of

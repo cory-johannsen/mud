@@ -17,5 +17,5 @@ effects:
   - type: utility
     dc: 0
     description: One object held by a creature becomes fused to that creature's hand
-      and can't be put down. To @UUID[Compendium.pf2e.actionspf2e.Item.Disarm] or
-      @UUID[Compendium.pf2e.actionspf2e.Item.Steal] the item,
+      and can't be put down. To Disarm or
+      Steal the item,

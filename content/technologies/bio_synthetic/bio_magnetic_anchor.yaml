@@ -8,7 +8,7 @@ description: 'You partially transform a foe''s feet into unwieldy slabs of metal
 
   Critical Failure The target is encumbered and has weakness 3 to electricity.
 
-  @UUID[Compendium.pf2e.spell-effects.Item.tech Effect: Leaden Steps]Upgraded (+1) The weakness increases by 1.'
+  Leaden StepsUpgraded (+1) The weakness increases by 1.'
 tradition: bio_synthetic
 level: 1
 usage_type: prepared

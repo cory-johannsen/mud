@@ -14,6 +14,6 @@ effects:
   on_apply:
   - type: utility
     dc: 0
-    description: You implant an @UUID[Compendium.pf2e.conditionitems.Item.Invisible],
+    description: You implant an Invisible,
       magical eye sensor on the target's body. The eye has sight and vision, but no
       other special senses. The eye is highly contagious-th

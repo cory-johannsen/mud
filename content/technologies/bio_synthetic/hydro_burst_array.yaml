@@ -10,7 +10,7 @@ description: 'Area 30-foot burst centered on you
 
   Flashing Spray Diffuse bio-mist fills the area. All creatures within the array become Concealed, and all creatures outside the array become concealed to creatures within it. The spray persists until the beginning of your next turn.
 
-  Power Rings The array blasts a series of pressurized water rings into the air that land with a crash in a @Template[burst|distance:10] centered on a location of your choice within the array. The falling torrent deals 10d6 bludgeoning damage to all creatures within the burst (basic Reflex).'
+  Power Rings The array blasts a series of pressurized water rings into the air that land with a crash in a 10-foot burst centered on a location of your choice within the array. The falling torrent deals 10d6 bludgeoning damage to all creatures within the burst (basic Reflex).'
 tradition: bio_synthetic
 level: 7
 usage_type: prepared

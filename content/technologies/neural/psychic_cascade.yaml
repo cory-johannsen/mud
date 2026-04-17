@@ -1,6 +1,6 @@
 id: psychic_cascade
 name: Psychic Cascade
-description: 'You unleash a torrent of psychic energy in a @Template[line|distance:60].
+description: 'You unleash a torrent of psychic energy in a 60-foot line.
   Each creature in the line must attempt a basic Quickness check. You deal 2d4 fire damage
   plus 2d4 spirit damage.
 

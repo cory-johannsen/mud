@@ -13,4 +13,4 @@ effects:
   on_apply:
   - type: utility
     dc: 0
-    description: You form an @UUID[Compendium.pf2e.conditionitems.Item.Invisible] wall of pure magical force up to 50 feet long and up to 20 feet high. The wall has no discernible thickness. You must create the wall i
+    description: You form an Invisible wall of pure magical force up to 50 feet long and up to 20 feet high. The wall has no discernible thickness. You must create the wall i

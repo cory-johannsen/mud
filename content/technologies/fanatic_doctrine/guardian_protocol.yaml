@@ -20,5 +20,5 @@ effects:
   - type: utility
     dc: 0
     description: You summon an invisible divine draconic spirit to watch over your
-      target. When the spell is complete, you gain the @UUID[Compendium.pf2e.actionspf2e.Item.Dragon's
-      Protection] reaction; once you use th
+      target. When the spell is complete, you gain the Compendium.pf2e.actionspf2e.Item.Dragon's
+      Protection reaction; once you use th

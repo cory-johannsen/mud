@@ -4,8 +4,8 @@ description: 'You trap the target in a psychic puzzle-prison constructed from th
   own subconscious, locking them inside. Once each turn as a single action, the target
   can attempt an Occultism check, Awareness check, or Thievery check against your
   tech DC to solve the puzzle. Teleportation effects can''t carry the target outside
-  the puzzle room unless they can also traverse the planes, such as @UUID[Compendium.pf2e.spells-srd.Item.Interplanar
-  Teleport]. When the tech ends, the target returns to the space it occupied when
+  the puzzle room unless they can also traverse the planes, such as Compendium.pf2e.spells-srd.Item.Interplanar
+  Teleport. When the tech ends, the target returns to the space it occupied when
   it was banished, or to the nearest space if the original is now filled.
 
 

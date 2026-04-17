@@ -4,7 +4,7 @@ description: 'You invoke a sacred blight upon the target, cursing them with para
   fungal growth. The target must attempt a Willpower save.Critical Success The target is
   unaffected.
 
-  Success A fungal bloom springs up from the ground in a @Template[type:emanation|distance:5]
+  Success A fungal bloom springs up from the ground in a 5-foot emanation
   around the target. This area is difficult terrain for creatures that enter the area.
   The target treats all terrain as difficult terrain since this swath of fungus moves
   with them as they do, transforming into a tangle of spores and floating tendrils

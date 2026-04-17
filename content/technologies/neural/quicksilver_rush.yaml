@@ -9,7 +9,7 @@ description: 'Your body destabilizes into liquid-metal form as you surge forward
 
   Failure The target becomes Sickened 2 and takes 1d6 poison damage.
 
-  Critical Failure The target becomes Sickened 2 and takes @Damage[((+2)*2)d6[poison]] damage.
+  Critical Failure The target becomes Sickened 2 and takes ((+2)*2)d6[poison] damage.
 
 
   Upgraded (+1) The damage increases by 1d6 on a failure and 2d6 on a critical failure.'

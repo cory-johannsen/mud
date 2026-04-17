@@ -27,6 +27,4 @@ effects:
     description: 'The target loses hearing; it must attempt a Grit check. The target is then temporarily immune for 1 minute.
 
 
-      Critical Success The target is unaffected.
-
-      Success The target is @UUID[Compendium.pf2e.'
+      Critical Success The target is unaffected.'

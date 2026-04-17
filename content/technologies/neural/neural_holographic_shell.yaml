@@ -11,7 +11,7 @@ description: 'You create an illusion that causes the target to appear as another
 
   Upgraded (7th) As 4th, but you can choose disguises that impersonate specific individuals. You must have seen an individual to replicate its appearance, and must have heard its voice to replicate its voice.
 
-  @UUID[Compendium.pf2e.spell-effects.Item.tech Effect: Illusory Disguise]'
+  Illusory Disguise'
 tradition: neural
 level: 1
 usage_type: prepared

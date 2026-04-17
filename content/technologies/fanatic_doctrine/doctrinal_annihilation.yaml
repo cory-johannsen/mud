@@ -8,14 +8,14 @@ description: 'You call forth a catastrophic manifestation of your doctrine''s ul
   Upgraded (+1) The damage increases by 1d6 void damage, 1d6 alignment damage, and 1d6 additional void and vitality damage for a true neutral deity.
 
 
-  @Damage[(+2)d6[void],(+2)d6[spirit]|traits:spirit]{Leveled Void + Spirit Damage}
+  (+2)d6[void,(+2)d6[spirit]|traits:spirit]{Leveled Void + Spirit Damage}
 
-  @Damage[(+2)d6[vitality],(+2)d6[spirit]|traits:spirit]{Leveled Vitality + Spirit Damage}
+  (+2)d6[vitality,(+2)d6[spirit]|traits:spirit]{Leveled Vitality + Spirit Damage}
 
 
-  @Damage[((*2)-2)d6[void]]{Leveled Void Damage}
+  ((*2)-2)d6[void]{Leveled Void Damage}
 
-  @Damage[((*2)-2)d6[vitality]]{Leveled Vitality Damage}'
+  ((*2)-2)d6[vitality]{Leveled Vitality Damage}'
 tradition: fanatic_doctrine
 level: 8
 usage_type: prepared

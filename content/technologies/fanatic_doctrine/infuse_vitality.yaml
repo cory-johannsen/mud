@@ -7,7 +7,7 @@ description: 'You empower attacks with vital energy. The number of targets is eq
 
   Upgraded (5th) The damage increases to 3d4 damage.
 
-  @UUID[Compendium.pf2e.spell-effects.Item.tech Effect: Infuse Vitality]'
+  Infuse Vitality'
 tradition: fanatic_doctrine
 level: 1
 usage_type: prepared

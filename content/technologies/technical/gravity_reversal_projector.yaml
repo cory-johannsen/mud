@@ -4,8 +4,8 @@ description: 'Area 20-foot radius, 40-foot tall cylinder
 
   You reverse the gravitational field in the area using a specialized projector. Creatures
   and objects that aren''t secured to the ground immediately fall upward to the top
-  of the area. A creature might be able to @UUID[Compendium.pf2e.actionspf2e.Item.Grab
-  an Edge] to arrest its fall if it falls past an appropriate surface. If a creature
+  of the area. A creature might be able to Compendium.pf2e.actionspf2e.Item.Grab
+  an Edge to arrest its fall if it falls past an appropriate surface. If a creature
   falls against a solid object (such as a ceiling), it takes the appropriate amount
   of falling damage and lands on the surface. Once an object or creature reaches the
   top of the area, it floats, caught between the normal and reversed gravity. The

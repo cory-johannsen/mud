@@ -21,5 +21,5 @@ effects:
   - type: utility
     dc: 0
     description: You grant the target properties of dull, transparent glass. The target
-      becomes @UUID[Compendium.pf2e.conditionitems.Item.Concealed], has no scent,
+      becomes Concealed, has no scent,
       and can't bleed. They gain resistance 5 to acid, cold

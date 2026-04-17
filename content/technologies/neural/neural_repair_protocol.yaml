@@ -18,4 +18,4 @@ effects:
   on_apply:
   - type: utility
     dc: 0
-    description: You repair the target item. You restore 5 Hit Points per spell rank to the target, potentially removing the @UUID[Compendium.pf2e.conditionitems.Item.Broken] condition if this repairs it past the item
+    description: You repair the target item. You restore 5 Hit Points per spell rank to the target, potentially removing the Broken condition if this repairs it past the item

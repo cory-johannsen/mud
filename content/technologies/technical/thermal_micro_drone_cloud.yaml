@@ -1,7 +1,7 @@
 id: thermal_micro_drone_cloud
 name: Thermal Micro-Drone Cloud
 description: You deploy a mass of miniaturized thermal drones that swarm the target
-  in a @Template[emanation|distance:5]. All mechanical effects (fire ants/fireflies
+  in a 5-foot emanation. All mechanical effects (fire ants/fireflies
   variants, damage, saves) remain identical to the base protocol.
 tradition: technical
 level: 4
@@ -18,5 +18,5 @@ effects:
   - type: utility
     dc: 0
     description: You breathe life into a mass of fiery critters. They swarm the target
-      and create an aura around it in a @Template[emanation|distance:5]. The target
+      and create an aura around it in a 5-foot emanation. The target
       and enemies in the aura are subject to an effect dep

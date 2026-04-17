@@ -7,7 +7,7 @@ description: 'You inject the target with a compound that triggers cellular compr
   is reduced.
 
 
-  @UUID[Compendium.pf2e.spell-effects.Item.tech Effect: Shrink]'
+  Shrink'
 tradition: bio_synthetic
 level: 2
 usage_type: prepared

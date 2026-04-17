@@ -2,7 +2,7 @@ id: doctrinal_smite
 name: Doctrinal Smite
 description: 'A manifested weapon of your doctrine''s favored ideology appears in the air above and strikes the target, using your tech attack roll. On a hit, the weapon deals 7d12 force damage, or double damage on a critical hit.
 
-  After the attack, whether it succeeds or fails, ideological energy bursts from the weapon in a shock wave. It emits in a @Template[line|distance:30|width:10]{10-foot-wide, 30-foot-long line} starting from the target and continuing in a direction you choose. Choose an alignment your doctrine has (chaotic, evil, good, or lawful). Your target and any other creatures within the area take @Damage[(ternary(gte(,9),6,5))d6[spirit]|shortLabel] damage of the chosen alignment type, with a basic Quickness check. The tech gains the trait of the alignment you choose. If your doctrine is true neutral, the weapon doesn''t create a shock wave.Upgraded (9th) The force damage increases by 1d12 and the alignment damage increases by 1d6.'
+  After the attack, whether it succeeds or fails, ideological energy bursts from the weapon in a shock wave. It emits in a 10-foot-wide, 30-foot-long line starting from the target and continuing in a direction you choose. Choose an alignment your doctrine has (chaotic, evil, good, or lawful). Your target and any other creatures within the area take (ternary(gte(,9),6,5))d6[spirit|shortLabel] damage of the chosen alignment type, with a basic Quickness check. The tech gains the trait of the alignment you choose. If your doctrine is true neutral, the weapon doesn''t create a shock wave.Upgraded (9th) The force damage increases by 1d12 and the alignment damage increases by 1d6.'
 tradition: fanatic_doctrine
 level: 7
 usage_type: prepared

@@ -1,7 +1,7 @@
 id: relic_shrapnel
 name: Relic Shrapnel
 description: 'You launch a spray of consecrated bone fragments from a sacred relic.
-  Each creature in a @Template[cone|distance:30] takes 4d6 piercing damage with a
+  Each creature in a 30-foot cone takes 4d6 piercing damage with a
   basic Quickness check.
 
 

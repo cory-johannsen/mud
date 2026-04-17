@@ -20,6 +20,4 @@ effects:
   - type: utility
     dc: 0
     description: 'You pray for swift and painful death to your enemies and find your
-      and your allies'' weapons blessed to deliver just that.
-
-      The target weapons are coated with @UUID[Compendium.pf2e.equipment-srd.Item.Gi'
+      and your allies'' weapons blessed to deliver just that.'

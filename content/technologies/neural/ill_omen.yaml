@@ -5,7 +5,7 @@ description: |-
     Success The target is unaffected.
     Failure The first time during the duration that the target attempts an attack roll or skill check, it must roll twice and use the worse result.
     Critical Failure Every time during the duration that the target attempts an attack roll or skill check, it must roll twice and use the worse result.
-    @UUID[Compendium.pf2e.spell-effects.Item.tech Effect: Ill Omen]
+    Ill Omen
 tradition: neural
 level: 1
 usage_type: prepared

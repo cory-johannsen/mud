@@ -16,4 +16,4 @@ effects:
   - type: utility
     dc: 0
     description: You use magical chains, vines, or other tethers to bind your target to you. The creature can still try to
-      @UUID[Compendium.pf2e.actionspf2e.Item.Escape], and it or others can break the tethers by atta
+      Escape, and it or others can break the tethers by atta

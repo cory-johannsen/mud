@@ -1,6 +1,6 @@
 id: thermal_vent
 name: Thermal Vent
-description: 'You vent superheated gas from a portable thermal unit. You deal 4d6 fire damage in a @Template[cone|distance:30]. Each creature in the area must attempt a basic Quickness check.
+description: 'You vent superheated gas from a portable thermal unit. You deal 4d6 fire damage in a 30-foot cone. Each creature in the area must attempt a basic Quickness check.
 
 
   Upgraded (+1) The damage increases by 2d6.'

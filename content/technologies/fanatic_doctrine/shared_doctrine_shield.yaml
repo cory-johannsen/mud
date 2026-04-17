@@ -14,4 +14,3 @@ effects:
   - type: utility
     dc: 0
     description: You extend your aura, as a magical shield that protects your eidolon or minion. The target gains a +1 circumstance
-      bonus to AC until the start of your next turn. You gain the @UUID[Compendium.pf2e.act

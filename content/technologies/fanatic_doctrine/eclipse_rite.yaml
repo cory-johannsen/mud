@@ -1,6 +1,6 @@
 id: eclipse_rite
 name: Eclipse Rite
-description: 'You invoke a sacred rite that devours light in the area, creating dim light in a @Template[burst|distance:20]. Creatures in the area when you cast the spell must attempt a Grit check.
+description: 'You invoke a sacred rite that devours light in the area, creating dim light in a 20-foot burst. Creatures in the area when you cast the spell must attempt a Grit check.
 
 
   Critical Success The creature is unaffected.

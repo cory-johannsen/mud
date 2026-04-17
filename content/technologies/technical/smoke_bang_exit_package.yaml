@@ -13,5 +13,4 @@ effects:
   on_apply:
   - type: utility
     dc: 0
-    description: You create a puff of colorful smoke that quickly disperses while you become temporarily @UUID[Compendium.pf2e.conditionitems.Item.Invisible].
-      You become @UUID[Compendium.pf2e.conditionitems.Item.Undet
+    description: You create a puff of colorful smoke that quickly disperses while you become temporarily Invisible.

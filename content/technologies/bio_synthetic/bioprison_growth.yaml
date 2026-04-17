@@ -17,4 +17,4 @@ effects:
   on_apply:
   - type: utility
     dc: 0
-    description: You create an immobile, @UUID[Compendium.pf2e.conditionitems.Item.Invisible] prison of hardened wood suffused with vital energy from the Forge of Creation. The cage is a 20-foot cube made of wooden br
+    description: You create an immobile, Invisible prison of hardened wood suffused with vital energy from the Forge of Creation. The cage is a 20-foot cube made of wooden br

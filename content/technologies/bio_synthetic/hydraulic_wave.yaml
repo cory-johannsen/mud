@@ -1,6 +1,6 @@
 id: hydraulic_wave
 name: Hydraulic Wave
-description: 'You generate a powerful wave of bio-synthesized fluid. Each creature in a @Template[cone|distance:30] must attempt a Grit check.
+description: 'You generate a powerful wave of bio-synthesized fluid. Each creature in a 30-foot cone must attempt a Grit check.
 
 
   Critical Success The creature is unaffected.

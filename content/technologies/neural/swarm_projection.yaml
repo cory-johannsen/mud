@@ -2,7 +2,7 @@ id: swarm_projection
 name: Swarm Projection
 description: 'You psychically project a swarm of illusory vermin from your body. The
   swarm moves to a space within 30 feet and deals 2d8 piercing damage to each creature
-  in a @Template[burst|distance:10]. Affected creatures must attempt a basic Reflex
+  in a 10-foot burst. Affected creatures must attempt a basic Reflex
   save.
 
 

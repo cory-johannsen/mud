@@ -17,5 +17,5 @@ effects:
   - type: utility
     dc: 0
     description: You pluck the time stream like a bow—pull one string back, release,
-      and watch a creature fly. All affected targets are @UUID[Compendium.pf2e.conditionitems.Item.Quickened].
+      and watch a creature fly. All affected targets are Quickened.
       They can use the extra ac

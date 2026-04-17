@@ -20,12 +20,12 @@ description: 'You accept the overwhelming power of your doctrine into your body;
   One or more unarmed melee attacks. If you chose good or lawful, your fist attacks deal 2d8 damage. If you chose chaotic, you gain a bite unarmed attack that deals 2d10 piercing damage. If you chose evil, you gain a claws unarmed attack that deals 2d8 slashing damage and has the agile and finesse traits.
 
 
-  @UUID[Compendium.pf2e.spell-effects.Item.tech Effect: Divine Vessel]
+  Divine Vessel
 
 
   Upgraded (9th) The temporary Hit Points increase to 60, the weakness increases to 15, and the duration increases to 10 minutes.
 
-  @UUID[Compendium.pf2e.spell-effects.Item.tech Effect: Divine Vessel (9th level)]'
+  Divine Vessel (9th level)'
 tradition: fanatic_doctrine
 level: 7
 usage_type: prepared

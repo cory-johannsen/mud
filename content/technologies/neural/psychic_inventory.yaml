@@ -18,5 +18,4 @@ effects:
   on_apply:
   - type: utility
     dc: 0
-    description: You render every item inside the container you touch @UUID[Compendium.pf2e.conditionitems.Item.Invisible],
-      although the container itself remains visible. The items within are @UUID[Compendium.pf2e.con
+    description: You render every item inside the container you touch Invisible,

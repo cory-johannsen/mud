@@ -8,7 +8,7 @@ description: 'Trigger An effect would deal physical or energy damage to you or a
   not against any persistent damage or other lingering effects.Upgraded (+1) The
   resistance increases by 1.
 
-  @UUID[Compendium.pf2e.spell-effects.Item.tech Effect: Scintillating Safeguard]'
+  Scintillating Safeguard'
 tradition: bio_synthetic
 level: 6
 usage_type: prepared

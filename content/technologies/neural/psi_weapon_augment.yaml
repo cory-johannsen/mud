@@ -5,7 +5,7 @@ description: |-
 
     Upgraded (6th) The weapon is +2 greater striking.
     Upgraded (9th) The weapon is +3 major striking.
-    @UUID[Compendium.pf2e.spell-effects.Item.tech Effect: Runic Weapon]
+    Runic Weapon
 tradition: neural
 level: 1
 usage_type: prepared

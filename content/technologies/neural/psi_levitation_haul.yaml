@@ -13,4 +13,4 @@ effects:
   on_apply:
   - type: utility
     dc: 0
-    description: A small platform of magical force materializes adjacent to you to carry cargo. It is @UUID[Compendium.pf2e.conditionitems.Item.Invisible] or has a ghostly appearance, is 2 feet in diameter, and follow
+    description: A small platform of magical force materializes adjacent to you to carry cargo. It is Invisible or has a ghostly appearance, is 2 feet in diameter, and follow

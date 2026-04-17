@@ -26,4 +26,4 @@ effects:
   on_apply:
   - type: utility
     dc: 0
-    description: You magically spy on a creature of your choice. Scrying works like @UUID[Compendium.pf2e.spells-srd.Item.Clairvoyance], except that the image you receive is less precise, insufficient for teleport and
+    description: You magically spy on a creature of your choice. Scrying works like Clairvoyance, except that the image you receive is less precise, insufficient for teleport and

@@ -4,9 +4,9 @@ description: 'You inject a personalized terror construct directly into the targe
 
   Success The target takes 4d6 mental damage and is Frightened 1.
 
-  Failure The target takes @Damage[(max(8,*2))d6[mental]] damage and is Frightened 2.
+  Failure The target takes (max(8,*2))d6[mental] damage and is Frightened 2.
 
-  Critical Failure The target is so terrified it might flatline. It must attempt a Grit check; if the target fails, it dies. On a successful Grit check, the target takes @Damage[(max(12,*3))d6[mental]] damage, is Fleeing until the end of its next turn, and is Frightened 4. This effect has the incapacitation trait.Upgraded (+1) The damage increases by 2d6 on a failure and by 3d6 on a critical failure.'
+  Critical Failure The target is so terrified it might flatline. It must attempt a Grit check; if the target fails, it dies. On a successful Grit check, the target takes (max(12,*3))d6[mental] damage, is Fleeing until the end of its next turn, and is Frightened 4. This effect has the incapacitation trait.Upgraded (+1) The damage increases by 2d6 on a failure and by 3d6 on a critical failure.'
 tradition: neural
 level: 4
 usage_type: prepared

@@ -17,5 +17,5 @@ effects:
   - type: utility
     dc: 0
     description: You create a seven-layered sphere to protect an area. This multicolored
-      sphere functions like a @UUID[Compendium.pf2e.spells-srd.Item.Prismatic Wall]
+      sphere functions like a Prismatic Wall
       but is shaped in a 10-foot burst centered on a cor

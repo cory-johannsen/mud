@@ -1,6 +1,6 @@
 id: fireworks_launch_module
 name: Fireworks Launch Module
-description: 'You fire pyrotechnic flares that explode in a brilliant display. Each creature in a @Template[burst|distance:10] takes 1d8 fire damage and 1d8 sonic damage with a basic Quickness check. On a failure, a creature is also Dazzled for 1 round.
+description: 'You fire pyrotechnic flares that explode in a brilliant display. Each creature in a 10-foot burst takes 1d8 fire damage and 1d8 sonic damage with a basic Quickness check. On a failure, a creature is also Dazzled for 1 round.
 
 
   Upgraded (+1) The fire and sonic damage each increase by 1d8.'

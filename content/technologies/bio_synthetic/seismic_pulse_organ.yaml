@@ -2,7 +2,7 @@ id: seismic_pulse_organ
 name: Seismic Pulse Organ
 description: 'You create a wave of energy that ripples through the earth. Terrestrial creatures in the affected area must attempt a Quickness check to avoid stumbling as the shockwave shakes the ground.Critical Success The creature is unaffected.
 
-  Success The creature is @UUID[Compendium.pf2e.conditionitems.Item.Off-Guard] until the start of its next turn.
+  Success The creature is Off-Guard until the start of its next turn.
 
   Failure The creature falls Prone.
 

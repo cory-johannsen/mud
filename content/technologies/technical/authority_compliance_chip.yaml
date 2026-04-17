@@ -16,4 +16,4 @@ effects:
   - type: utility
     dc: 0
     description: You shout a command that's hard to ignore. You can command the target to approach you, run away (as if it
-      had the @UUID[Compendium.pf2e.conditionitems.Item.Fleeing] condition), release what it's holdi
+      had the Fleeing condition), release what it's holdi

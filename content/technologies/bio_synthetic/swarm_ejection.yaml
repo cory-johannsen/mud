@@ -2,7 +2,7 @@ id: swarm_ejection
 name: Swarm Ejection
 description: 'You eject a swarm of bio-synthetic insects from your body. The swarm
   moves to a space within 30 feet and deals 2d8 piercing damage to each creature in
-  a @Template[burst|distance:10]. Affected creatures must attempt a basic Quickness check.
+  a 10-foot burst. Affected creatures must attempt a basic Quickness check.
 
 
   Upgraded (+1) The damage increases by 1d8.'

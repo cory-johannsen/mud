@@ -22,6 +22,5 @@ effects:
     dc: 0
     description: 'Area varies
 
-      Defense @Check[reflex|basic|options:area-effect] or @Check[will|basic|options:area-effect]
-      (target''s choice)You shape the shadow substance of the Netherworld into a blast.
-      Choose @Damage[('
+      Defense basic Reflex check or basic Will check
+      (target''s choice)You shape the shadow substance of the Netherworld into a blast.'

@@ -2,7 +2,7 @@ id: entropic_decay_field
 name: Entropic Decay Field
 description: 'You project a psychic resonance that accelerates molecular decay in an area—flesh withers, implants corrode, and even reinforced materials begin to crumble. Any creature that enters or begins its turn in the area takes 8d6 void damage with a basic Grit check, or 8d6 force damage if the creature normally doesn''t take void damage, such as if the creature is a construct or undead. Even synthetic beings with unlimited operational lifespans can be worn away by entropy.
 
-  The first time you Sustain the tech on each subsequent turn, the entropic zone grows stronger in addition to having its duration increased. The radius of the burst increases by 10 feet (to a maximum of 40 feet), and the size of the damage dice increases by one step (from d6 to @Damage[(2+)d8[void]|shortLabel], then to @Damage[(2+)d10[void]|shortLabel], and finally to @Damage[(2+)d12[void]|shortLabel]).Upgraded (+1) The damage increases by 1d6.'
+  The first time you Sustain the tech on each subsequent turn, the entropic zone grows stronger in addition to having its duration increased. The radius of the burst increases by 10 feet (to a maximum of 40 feet), and the size of the damage dice increases by one step (from d6 to (2+)d8[void|shortLabel], then to (2+)d10[void|shortLabel], and finally to (2+)d12[void|shortLabel]).Upgraded (+1) The damage increases by 1d6.'
 tradition: neural
 level: 6
 usage_type: prepared

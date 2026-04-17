@@ -4,7 +4,7 @@ description: 'An infusion of bio-synthetic growth factors grants a creature cont
 
   Each time the creature regains Hit Points from regeneration, it also regrows one damaged or ruined organ (if any). During the tech''s duration, the creature can also reattach severed body parts by spending an Interact action to hold the body part to the area it was severed from.
 
-  @UUID[Compendium.pf2e.spell-effects.Item.tech Effect: Regenerate]
+  Regenerate
 
 
   Upgraded (9th) The regeneration increases to 20.'

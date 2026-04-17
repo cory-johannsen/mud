@@ -17,5 +17,4 @@ effects:
   - type: utility
     dc: 0
     description: You shroud the target in subtle illusions that make it difficult
-      to detect. The target gains a +1 status bonus to Stealth checks to @UUID[Compendium.pf2e.actionspf2e.Item.Hide]
-      or @UUID[Compendium.pf2
+      to detect. The target gains a +1 status bonus to Stealth checks to Hide

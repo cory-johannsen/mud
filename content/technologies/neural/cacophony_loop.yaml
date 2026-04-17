@@ -24,4 +24,4 @@ effects:
   on_apply:
   - type: utility
     dc: 0
-    description: You summon an @UUID[Compendium.pf2e.conditionitems.Item.Invisible], insubstantial group of extraplanar musicians who follow the target and play distracting music to hinder its actions. The music the m
+    description: You summon an Invisible, insubstantial group of extraplanar musicians who follow the target and play distracting music to hinder its actions. The music the m

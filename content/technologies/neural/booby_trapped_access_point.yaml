@@ -25,4 +25,3 @@ effects:
     dc: 0
     description: You place a ward upon the door that triggers when a creature attempts
       to open, unlock, or destroy the door. When that happens, the door transforms
-      into a @UUID[Compendium.pf2e.pathfinder-monster-core-

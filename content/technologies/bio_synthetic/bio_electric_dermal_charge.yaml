@@ -2,7 +2,7 @@ id: bio_electric_dermal_charge
 name: Bio-Electric Dermal Charge
 description: |-
     You channel powerful electric current through the metal of a weapon, zapping anyone the item hits. The target becomes a +1 shock weapon. If any target of an attack with the weapon is wearing metal armor or is primarily made of metal, the electricity damage die from the shock rune is 1d12.
-    @UUID[Compendium.pf2e.spell-effects.Item.tech Effect: Conductive Weapon]
+    Conductive Weapon
 tradition: bio_synthetic
 level: 1
 usage_type: prepared

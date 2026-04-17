@@ -17,4 +17,4 @@ effects:
     dc: 0
     description: The target weapon becomes translucent and ghostly, and it can affect
       material and incorporeal creatures and objects. It gains the effects of the
-      @UUID[Compendium.pf2e.equipment-srd.Item.Ghost Touch] p
+      Ghost Touch p

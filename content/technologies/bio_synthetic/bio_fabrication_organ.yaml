@@ -9,7 +9,7 @@ description: |-
     Critical Failure The target takes double damage, and if it's a metal creature, it gains weakness 2 to physical damage until the end of your next turn.
 
     Upgraded (+1) The damage increases by 2d6, and the weakness on a critical failure increases by 2.
-    @UUID[Compendium.pf2e.spell-effects.Item.tech Effect: Forge (Critical Failure)]
+    Forge (Critical Failure)
 tradition: bio_synthetic
 level: 1
 usage_type: prepared

@@ -13,4 +13,4 @@ effects:
   on_apply:
   - type: utility
     dc: 0
-    description: The target's form appears blurry. It becomes @UUID[Compendium.pf2e.conditionitems.Item.Concealed]. As the nature of this effect still leaves the target's location obvious, the target can't use this co
+    description: The target's form appears blurry. It becomes Concealed. As the nature of this effect still leaves the target's location obvious, the target can't use this co

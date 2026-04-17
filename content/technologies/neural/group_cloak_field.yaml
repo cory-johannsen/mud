@@ -15,6 +15,6 @@ effects:
   on_apply:
   - type: utility
     dc: 0
-    description: You and all targets are @UUID[Compendium.pf2e.conditionitems.Item.Invisible]
+    description: You and all targets are Invisible
       except to each other as long as the targets remain within the emanation. If
       a creature made invisible by this tech leaves

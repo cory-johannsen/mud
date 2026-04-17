@@ -2,7 +2,7 @@ id: target_acquisition_suite
 name: Target Acquisition Suite
 description: 'You compute the possible evasion patterns of the next few seconds to understand all the ways your foe might dodge, then broadcast that targeting data to your squad. Designate a creature. The first time each target makes an attack roll against that creature during the tech''s duration, the attacker rolls twice and uses the better result. The attacker also ignores circumstance penalties to the attack roll and any flat check required due to the designated creature being Concealed or Hidden.
 
-  @UUID[Compendium.pf2e.spell-effects.Item.tech Effect: True Target]'
+  True Target'
 tradition: technical
 level: 7
 usage_type: prepared

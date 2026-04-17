@@ -19,4 +19,3 @@ effects:
     dc: 0
     description: You speed up the time stream in an area, stretching and pulling it
       until time flows swift and wild. Any creature that begins its turn in the area
-      is @UUID[Compendium.pf2e.conditionitems.Item.Quickened

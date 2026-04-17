@@ -17,4 +17,3 @@ effects:
     dc: 0
     description: You create an immobile globe around yourself that attempts to counteract
       any spell from outside the globe whose area or targets enter into the globe,
-      as if the globe were a @UUID[Compendium.pf2e.spell

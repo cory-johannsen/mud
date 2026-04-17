@@ -15,4 +15,4 @@ effects:
   on_apply:
   - type: utility
     dc: 0
-    description: You turn yourself @UUID[Compendium.pf2e.conditionitems.Item.Invisible] and create an illusory duplicate of yourself. When you Sustain the spell, you can mentally dictate a course of action for your du
+    description: You turn yourself Invisible and create an illusory duplicate of yourself. When you Sustain the spell, you can mentally dictate a course of action for your du

@@ -18,6 +18,4 @@ effects:
     dc: 0
     description: 'You levitate the touched shield and send it to orbit around a creature.
       When you Use this tech and Sustain it, the shield uses the Raise a Shield action
-      to protect the target creature.
-
-      @UUID[Compendi'
+      to protect the target creature.'

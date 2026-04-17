@@ -12,8 +12,8 @@ description: 'You fire a beam that accelerates molecular decay in part of a crea
   1.
 
   Legs The target''s locomotion systems degrade, making it harder to move. The target
-  takes a –10-foot status penalty to its Speeds. @UUID[Compendium.pf2e.spell-effects.Item.tech
-  Effect: Necrotize (Legs)]
+  takes a –10-foot status penalty to its Speeds. Compendium.pf2e.spell-effects.Item.tech
+  Effect: Necrotize (Legs)
 
   Muscles The target''s muscles deteriorate. The target becomes Enfeebled 1.
 

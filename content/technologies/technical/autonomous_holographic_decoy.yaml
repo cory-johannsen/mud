@@ -13,5 +13,4 @@ effects:
   on_apply:
   - type: utility
     dc: 0
-    description: You summon a @UUID[Compendium.pf2e.pathfinder-bestiary.Actor.Phantasmal Minion]. The minion is roughly the
-      shape of a humanoid. You can choose to have it be @UUID[Compendium.pf2e.conditionitems.Item.I
+    description: You summon a Phantasmal Minion. The minion is roughly the

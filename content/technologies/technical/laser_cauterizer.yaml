@@ -19,5 +19,5 @@ effects:
   - type: utility
     dc: 0
     description: You seal bleeding wounds with fire. Any target that has persistent
-      bleed damage can choose to take @Damage[1[fire]|immutable:true] damage. If it
+      bleed damage can choose to take 1[fire|immutable:true] damage. If it
       does, it can attempt to recover from its persistent ble

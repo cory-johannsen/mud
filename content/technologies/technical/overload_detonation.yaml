@@ -1,7 +1,7 @@
 id: overload_detonation
 name: Overload Detonation
 description: 'You trigger a catastrophic overload in a willing ally or minion''s systems,
-  dealing 6d6 fire damage in a @Template[burst|distance:20] centered on it. Each creature
+  dealing 6d6 fire damage in a 20-foot burst centered on it. Each creature
   in the area must attempt a basic Quickness check. The target is destroyed.
 
 

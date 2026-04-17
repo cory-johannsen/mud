@@ -16,5 +16,5 @@ effects:
   - type: utility
     dc: 0
     description: You whisper a secret message or sound into the wind, which carries
-      it to a designated spot. The message travels to a specific @Template[burst|distance:10]
+      it to a designated spot. The message travels to a specific 10-foot burst
       within range that's familiar to you, provided

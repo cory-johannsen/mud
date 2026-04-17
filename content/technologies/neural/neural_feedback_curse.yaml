@@ -2,11 +2,11 @@ id: neural_feedback_curse
 name: Neural Feedback Curse
 description: |-
     Trigger An enemy you can see is about to make a ranged attack.You curse an enemy to suffer a kickback as they make a ranged attack, potentially causing them to miss. The triggering enemy attempts a Willpower save.Critical Success The target is unaffected.
-    Success The recoil from their ranged attack causes the target to be @UUID[Compendium.pf2e.conditionitems.Item.Off-Guard] until the beginning of their next turn.
+    Success The recoil from their ranged attack causes the target to be Off-Guard until the beginning of their next turn.
     Failure The recoil imposes a –1 status penalty to the ranged attack and renders the target off-guard until the beginning of their next turn.
-    @UUID[Compendium.pf2e.spell-effects.Item.tech Effect: Curse of Recoil (Failure)]
+    Curse of Recoil (Failure)
     Critical Failure The recoil imposes a –2 status penalty to the ranged attack and renders the target off-guard until the beginning of their next turn. Until the start of their next turn, any additional ranged attacks made with the same weapon, spell, or ability take the same penalty.
-    @UUID[Compendium.pf2e.spell-effects.Item.tech Effect: Curse of Recoil (Critical Failure)]
+    Curse of Recoil (Critical Failure)
 tradition: neural
 level: 1
 usage_type: prepared

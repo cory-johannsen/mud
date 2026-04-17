@@ -2,13 +2,13 @@ id: drone_swarm_apocalypse
 name: Drone Swarm Apocalypse
 description: 'You deploy a massive autonomous drone swarm onto the battlefield—a churning cloud of weaponized micro-drones that function as a single horrific entity. The swarm occupies the space of a Gargantuan creature, bristling with cutting implements and toxic payloads whose collective movement grants it a Speed of 60 feet and a fly Speed of 60 feet.
 
-  Arrive Behold the Swarm The drone cloud is deafeningly loud and horrifically dangerous, emitting acrid electrical smoke and constantly shifting as millions of drones operate within it. Each living enemy creature within a @Template[type:emanation|distance:60] must attempt a Grit check with the following effects.Critical Success The creature is unaffected.
+  Arrive Behold the Swarm The drone cloud is deafeningly loud and horrifically dangerous, emitting acrid electrical smoke and constantly shifting as millions of drones operate within it. Each living enemy creature within a 60-foot emanation must attempt a Grit check with the following effects.Critical Success The creature is unaffected.
 
   Success The creature is Sickened 2.
 
   Failure The creature is Sickened 3 and Deafened for the duration.
 
-  Critical Failure The creature is Sickened 4, Stunned 1, and deafened for the duration.Depart (poison) Swarm Dispersal The millions of drones pour out and surge across the battlefield, shredding your enemies. This swarm deals 5d8 piercing damage and 5d8 poison damage to enemy creatures in a @Template[type:emanation|distance:60] with a basic Quickness check. A creature that critically fails is additionally Drained 2.'
+  Critical Failure The creature is Sickened 4, Stunned 1, and deafened for the duration.Depart (poison) Swarm Dispersal The millions of drones pour out and surge across the battlefield, shredding your enemies. This swarm deals 5d8 piercing damage and 5d8 poison damage to enemy creatures in a 60-foot emanation with a basic Quickness check. A creature that critically fails is additionally Drained 2.'
 tradition: technical
 level: 7
 usage_type: prepared

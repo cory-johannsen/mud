@@ -7,7 +7,7 @@ description: 'You invoke your doctrine to condemn the target, dredging up guilt 
   results.Critical Success The creature is unaffected.
 
   Success The creature takes 4d6 mental damage, and then an aura of shimmering static
-  with a @Template[emanation|distance:10] surrounds the creature. This static isn''t
+  with a 10-foot emanation surrounds the creature. This static isn''t
   dense enough to affect sight, but it does cause the creature and any of its allies
   in the aura to take a –1 status penalty to all skill checks.
 
@@ -16,7 +16,7 @@ description: 'You invoke your doctrine to condemn the target, dredging up guilt 
 
   Critical Failure As success, but the creature takes an initial 16d6 mental damage,
   then is slowed 1 for the duration of the effect. Any of the target''s allies who
-  begin their turn in the @Template[emanation|distance:10] is slowed 1 for 1 round.'
+  begin their turn in the 10-foot emanation is slowed 1 for 1 round.'
 tradition: fanatic_doctrine
 level: 6
 usage_type: prepared

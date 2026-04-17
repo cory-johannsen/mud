@@ -15,7 +15,7 @@ effects:
   on_apply:
   - type: utility
     dc: 0
-    description: 'Magic empowers the target to act faster. It gains the @UUID[Compendium.pf2e.conditionitems.Item.Quickened]
+    description: 'Magic empowers the target to act faster. It gains the Quickened
       condition and can use the extra action each round only for Strike and Stride
       actions.
 

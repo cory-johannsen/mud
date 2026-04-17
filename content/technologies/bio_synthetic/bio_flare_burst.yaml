@@ -1,6 +1,6 @@
 id: bio_flare_burst
 name: Bio-Flare Burst
-description: 'You launch bio-luminescent organisms that explode in a brilliant display. Each creature in a @Template[burst|distance:10] takes 1d8 fire damage and 1d8 sonic damage with a basic Quickness check. On a failure, a creature is also Dazzled for 1 round.
+description: 'You launch bio-luminescent organisms that explode in a brilliant display. Each creature in a 10-foot burst takes 1d8 fire damage and 1d8 sonic damage with a basic Quickness check. On a failure, a creature is also Dazzled for 1 round.
 
 
   Upgraded (+1) The fire and sonic damage each increase by 1d8.'

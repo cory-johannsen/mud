@@ -13,5 +13,5 @@ effects:
   on_apply:
   - type: utility
     dc: 0
-    description: You make the object @UUID[Compendium.pf2e.conditionitems.Item.Invisible]. This makes it @UUID[Compendium.pf2e.conditionitems.Item.Undetected]
+    description: You make the object Invisible. This makes it Undetected
       to all creatures, though the creatures can attempt to find

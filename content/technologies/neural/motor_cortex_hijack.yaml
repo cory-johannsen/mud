@@ -1,7 +1,7 @@
 id: motor_cortex_hijack
 name: Motor Cortex Hijack
 description: 'The target''s motor cortex is overridden by a psychic signal that forces
-  involuntary rhythmic movement. For the duration of the tech, the target is @UUID[Compendium.pf2e.conditionitems.Item.Off-Guard]
+  involuntary rhythmic movement. For the duration of the tech, the target is Off-Guard
   and can''t use reactions. While affected, the creature can''t use move actions except
   to dance, using the Stride action to move up to half its Speed.
 
@@ -31,5 +31,5 @@ effects:
   - type: utility
     dc: 0
     description: The target is overcome with an all-consuming urge to dance. For the
-      duration of the spell, the target is @UUID[Compendium.pf2e.conditionitems.Item.Off-Guard]
+      duration of the spell, the target is Off-Guard
       and can't use reactions. While affected, t

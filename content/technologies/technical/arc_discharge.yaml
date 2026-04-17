@@ -1,8 +1,7 @@
 id: arc_discharge
 name: Arc Discharge
 description: 'You discharge a bolt of electricity from a wrist-mounted emitter. The
-  bolt deals 4d12 electricity damage in a @Template[line|distance:60] with a basic
-  Quickness check.
+  bolt deals 4d12 electricity damage in a 60-foot line with a basic Quickness check.
 
 
   Upgraded (+1) The damage increases by 1d12.'

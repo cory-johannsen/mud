@@ -5,7 +5,7 @@ description: 'You magnetically control a swarm of ferrofluid particles around yo
   Choose one of the following additional effects when you activate this tech. On subsequent rounds, you can switch to a different effect once per round as a free action triggered by sustaining the tech.
 
 
-  Ferro Shield You create a magnetic shield of dense ferrofluid. The ferrofluid shield provides no benefit to AC, but it does allow you to use the @UUID[Compendium.pf2e.feats-srd.Item.Shield Block] reaction and acts as a shield for this purpose. The shield has Hardness 14, 21 Hit Points, and no Broken Threshold; when the shield''s HP are reduced to 0, you can''t use its Shield Block reaction again until the next time you Sustain the tech and choose the ferrofluid shield effect.
+  Ferro Shield You create a magnetic shield of dense ferrofluid. The ferrofluid shield provides no benefit to AC, but it does allow you to use the Shield Block reaction and acts as a shield for this purpose. The shield has Hardness 14, 21 Hit Points, and no Broken Threshold; when the shield''s HP are reduced to 0, you can''t use its Shield Block reaction again until the next time you Sustain the tech and choose the ferrofluid shield effect.
 
   Ferro Blast You direct a concentrated jet of ferrofluid at a single target. One creature of your choice within 30 feet takes 8d6 slashing damage (basic Quickness check). On a critical failure, the creature is also Dazzled for 1 minute.
 

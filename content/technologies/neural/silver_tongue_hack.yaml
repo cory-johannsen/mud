@@ -18,5 +18,5 @@ effects:
   - type: utility
     dc: 0
     description: Falsehoods pass your lips as smoothly as silk. You gain a +4 status
-      bonus to Deception checks to @UUID[Compendium.pf2e.actionspf2e.Item.Lie] and
+      bonus to Deception checks to Lie and
       against Awareness checks to discern if you are telling

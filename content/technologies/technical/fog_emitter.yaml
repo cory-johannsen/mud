@@ -13,4 +13,4 @@ effects:
   on_apply:
   - type: utility
     dc: 0
-    description: You call forth a cloud of mist. All creatures within the mist become @UUID[Compendium.pf2e.conditionitems.Item.Concealed], and all creatures outside the mist become concealed to creatures within it. Y
+    description: You call forth a cloud of mist. All creatures within the mist become Concealed, and all creatures outside the mist become concealed to creatures within it. Y

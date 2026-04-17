@@ -1,7 +1,7 @@
 id: incendiary_insect_swarm
 name: Incendiary Insect Swarm
 description: You deploy a mass of bio-engineered thermal insects. They swarm the target
-  and create an aura in a @Template[emanation|distance:5]. The target and enemies
+  and create an aura in a 5-foot emanation. The target and enemies
   in the aura are subject to an effect depending on the insect variant you choose.
   On subsequent rounds, the first time you Sustain each round, you repeat the effect.
   All mechanical effects remain identical to the base protocol.
@@ -20,5 +20,5 @@ effects:
   - type: utility
     dc: 0
     description: You breathe life into a mass of fiery critters. They swarm the target
-      and create an aura around it in a @Template[emanation|distance:5]. The target
+      and create an aura around it in a 5-foot emanation. The target
       and enemies in the aura are subject to an effect dep

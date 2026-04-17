@@ -9,7 +9,7 @@ description: 'Trigger A creature damages you.
 
   Success The creature is thrown off by your display. The creature becomes Dazzled until the start of your turn.
 
-  Failure The creature fully believes your performance, leaving itself open. The creature becomes dazzled and @UUID[Compendium.pf2e.conditionitems.Item.Off-Guard] until the start of your turn.
+  Failure The creature fully believes your performance, leaving itself open. The creature becomes dazzled and Off-Guard until the start of your turn.
 
   Critical Failure The creature is enraptured by the display. The creature uses its remaining actions to watch you in awe. It then remains dazzled and off-guard until the start of your turn.'
 tradition: neural

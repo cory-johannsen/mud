@@ -15,6 +15,6 @@ effects:
   on_apply:
   - type: utility
     dc: 0
-    description: You place an @UUID[Compendium.pf2e.conditionitems.Item.Invisible]
+    description: You place an Invisible
       scrying sensor on each target just above their eyes. Each sensor looks where
       that target looks, and all the targets can link their vis

@@ -17,4 +17,4 @@ effects:
     dc: 0
     description: 'You drive mental contamination from the target''s mind. Attempt
       to counteract an effect of your choice imposing one of these conditions on the
-      target: @UUID[Compendium.pf2e.conditionitems.Item.Fleeing]'
+      target: Fleeing'

@@ -15,4 +15,4 @@ effects:
   - type: utility
     dc: 0
     description: You speak the true name of a creature to more surely affect it with your magic. Until the end of the current
-      turn, the target is @UUID[Compendium.pf2e.conditionitems.Item.Off-Guard] against your spell
+      turn, the target is Off-Guard against your spell

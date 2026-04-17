@@ -13,4 +13,4 @@ effects:
   on_apply:
   - type: utility
     dc: 0
-    description: You shroud a creature from others' senses. The target becomes @UUID[Compendium.pf2e.conditionitems.Item.Invisible], but not merely to vision. The invisibility granted by disappearance applies to all p
+    description: You shroud a creature from others' senses. The target becomes Invisible, but not merely to vision. The invisibility granted by disappearance applies to all p

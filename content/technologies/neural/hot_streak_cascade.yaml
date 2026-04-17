@@ -20,5 +20,5 @@ effects:
   - type: utility
     dc: 0
     description: The target is energized by its good fortune as it spreads to others-as
-      long as they keep winning. It gains the @UUID[Compendium.pf2e.conditionitems.Item.Quickened]
+      long as they keep winning. It gains the Quickened
       condition for 1 round. If the target

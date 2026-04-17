@@ -4,7 +4,7 @@ description: |-
     You grant the target brief foresight. The target gains a +1 status bonus to its next initiative roll, after which the spell ends.
 
     Upgraded (+2) The status bonus increases by 1, to a maximum of +4 at 7th rank.
-    @UUID[Compendium.pf2e.spell-effects.Item.tech Effect: Anticipate Peril]
+    Anticipate Peril
 tradition: neural
 level: 1
 usage_type: prepared
