@@ -418,7 +418,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
           const msg = payload as { sender?: string; content?: string }
           dispatch({
             type: 'APPEND_FEED',
-            entry: makeFeedEntry('message', `${msg.sender ?? ''}: ${msg.content ?? ''}`),
+            entry: makeFeedEntry('message', msg.sender ? `${msg.sender}: ${msg.content ?? ''}` : (msg.content ?? '')),
           })
           break
         }
