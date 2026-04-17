@@ -22,4 +22,4 @@ ability_boosts:
 
 innate_technologies:
   - id: atmospheric_surge
-    uses_per_day: 1
+    uses_per_day: 0

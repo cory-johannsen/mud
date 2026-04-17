@@ -21,4 +21,4 @@ ability_boosts:
 
 innate_technologies:
   - id: chrome_reflex
-    uses_per_day: 1
+    uses_per_day: 0

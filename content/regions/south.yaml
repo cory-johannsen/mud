@@ -21,4 +21,4 @@ ability_boosts:
 
 innate_technologies:
   - id: viscous_spray
-    uses_per_day: 1
+    uses_per_day: 0

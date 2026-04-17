@@ -19,4 +19,4 @@ ability_boosts:
 
 innate_technologies:
   - id: pressure_burst
-    uses_per_day: 1
+    uses_per_day: 0
