@@ -100,16 +100,16 @@ function renderBattleGrid(
       } else if (isEnemy) {
         bg = '#6b1a1a'
       } else if (moveCost === 1) {
-        bg = '#1a3a1a'
+        bg = '#0d3b0d'
       } else if (moveCost === 2) {
-        bg = '#2a2a0a'
+        bg = '#2e2600'
       } else {
         bg = '#1a1a2e'
       }
 
       const isHovered = hoveredCell?.x === x && hoveredCell?.y === y
       const border = isHovered && moveCost > 0
-        ? `2px solid ${moveCost === 1 ? '#4a8a4a' : '#8a8a2a'}`
+        ? `2px solid ${moveCost === 1 ? '#4a8a4a' : '#8a7a00'}`
         : '1px solid #333'
 
       const cursor = moveCost > 0 ? 'pointer' : 'default'
@@ -257,7 +257,7 @@ export function MapPanel() {
       if (playerPos.x === gridWidth - 1)   { disabledDirs.add('e'); disabledDirs.add('ne'); disabledDirs.add('se') }
     }
 
-    const speedPenalty = state.characterSheet?.speedPenalty ?? 0
+    const speedPenalty = (state.characterSheet?.speedPenalty ?? (state.characterSheet as any)?.speed_penalty) ?? 0
     const effectiveSpeedFt = Math.max(5, 25 - speedPenalty)
     const strideCells = Math.floor(effectiveSpeedFt / 5)
     const movementRemaining = state.combatantAP[playerName]?.movementRemaining ?? 2

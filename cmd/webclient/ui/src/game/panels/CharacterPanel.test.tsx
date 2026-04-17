@@ -34,6 +34,18 @@ function makeState(characterSheet: Record<string, unknown> | null) {
       combatGridHeight: 20,
     },
     dispatch: vi.fn(),
+    sendMessage: vi.fn(),
+    sendCommand: vi.fn(),
+    clearShop: vi.fn(),
+    clearHealer: vi.fn(),
+    clearTrainer: vi.fn(),
+    clearFixer: vi.fn(),
+    clearRestView: vi.fn(),
+    clearNpcView: vi.fn(),
+    clearQuestGiverView: vi.fn(),
+    dismissQuestComplete: vi.fn(),
+    clearLoadout: vi.fn(),
+    clearChoicePrompt: vi.fn(),
   }
 }
 
