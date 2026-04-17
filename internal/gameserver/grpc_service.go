@@ -8410,8 +8410,38 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string, targetX, 
 			}
 		}
 	}
+	// techAPCost returns the AP cost for a tech in combat, or 0 if not in combat or no cost.
+	// Prepared and spontaneous techs spend AP equal to their action_cost field.
+	// Innate techs are explicitly exempt (they fire free and immediately).
+	techAPCost := func(techDef *technology.TechnologyDef) int {
+		if techDef == nil || techDef.ActionCost <= 0 || s.combatH == nil {
+			return 0
+		}
+		if s.combatH.ActiveCombatForPlayer(uid) == nil {
+			return 0
+		}
+		return techDef.ActionCost
+	}
+
 	// Attempt prepared tech activation if no feat/class-feature matched.
 	if s.preparedTechRepo != nil && len(sess.PreparedTechs) > 0 {
+		// Check AP cost before searching slots so we fail fast without expending anything.
+		var preparedTechDef *technology.TechnologyDef
+		if s.techRegistry != nil {
+			if def, ok := s.techRegistry.Get(abilityID); ok {
+				preparedTechDef = def
+			}
+		}
+		if cost := techAPCost(preparedTechDef); cost > 0 {
+			ap := s.combatH.RemainingAP(uid)
+			if ap < cost {
+				name := abilityID
+				if preparedTechDef != nil {
+					name = preparedTechDef.Name
+				}
+				return messageEvent(fmt.Sprintf("Not enough AP to use %s (need %d, have %d).", name, cost, ap)), nil
+			}
+		}
 		levels := make([]int, 0, len(sess.PreparedTechs))
 		for lvl := range sess.PreparedTechs {
 			levels = append(levels, lvl)
@@ -8427,7 +8457,12 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string, targetX, 
 				if slot.Expended {
 					continue
 				}
-				// Found a non-expended slot — expend it.
+				// Found a non-expended slot — deduct AP (if in combat) then expend.
+				if cost := techAPCost(preparedTechDef); cost > 0 {
+					if err := s.combatH.SpendAP(uid, cost); err != nil {
+						return messageEvent(fmt.Sprintf("Could not spend AP: %s", err.Error())), nil
+					}
+				}
 				if err := s.preparedTechRepo.SetExpended(ctx, sess.CharacterID, lvl, idx, true); err != nil {
 					s.logger.Warn("handleUse: SetExpended failed",
 						zap.String("uid", uid),
@@ -8479,6 +8514,26 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string, targetX, 
 		if pool.Remaining <= 0 {
 			return messageEvent(fmt.Sprintf("No level %d uses remaining.", foundLevel)), nil
 		}
+		// Check AP cost before decrementing the pool.
+		var spontTechDef *technology.TechnologyDef
+		if s.techRegistry != nil {
+			if def, ok := s.techRegistry.Get(abilityID); ok {
+				spontTechDef = def
+			}
+		}
+		if cost := techAPCost(spontTechDef); cost > 0 {
+			ap := s.combatH.RemainingAP(uid)
+			if ap < cost {
+				name := abilityID
+				if spontTechDef != nil {
+					name = spontTechDef.Name
+				}
+				return messageEvent(fmt.Sprintf("Not enough AP to use %s (need %d, have %d).", name, cost, ap)), nil
+			}
+			if err := s.combatH.SpendAP(uid, cost); err != nil {
+				return messageEvent(fmt.Sprintf("Could not spend AP: %s", err.Error())), nil
+			}
+		}
 		if s.spontaneousUsePoolRepo != nil {
 			if err := s.spontaneousUsePoolRepo.Decrement(ctx, sess.CharacterID, foundLevel); err != nil {
 				s.logger.Warn("handleUse: Decrement spontaneous pool failed",
@@ -8492,7 +8547,8 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string, targetX, 
 		s.pushEventToUID(uid, s.hotbarUpdateEvent(sess))
 		return s.activateTechWithEffects(sess, uid, abilityID, targetID, fmt.Sprintf("You activate %s. (%d uses remaining at level %d.)", abilityID, pool.Remaining, foundLevel), nil, targetX, targetY)
 	}
-	// Innate tech activation
+	// Innate tech activation — innate techs cost 0 AP and fire immediately,
+	// bypassing the combat resolution phase. This is by design (PF2E cantrip parity).
 	if s.innateTechRepo != nil {
 		if slot, ok := sess.InnateTechs[abilityID]; ok {
 			// REQ-CRX6: block manual use for techs that fire as reactions.
