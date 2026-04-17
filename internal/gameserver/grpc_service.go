@@ -6092,7 +6092,13 @@ func (s *GameServiceServer) handleChar(uid string) (*gamev1.ServerEvent, error) 
 	if s.jobRegistry != nil {
 		if job, ok := s.jobRegistry.Job(sess.Class); ok {
 			view.Job = job.Name
+			// Resolve archetype display name from archetype registry.
 			view.Archetype = job.Archetype
+			if s.archetypes != nil {
+				if arch, ok := s.archetypes[job.Archetype]; ok {
+					view.Archetype = arch.Name
+				}
+			}
 		} else {
 			view.Job = sess.Class
 		}
