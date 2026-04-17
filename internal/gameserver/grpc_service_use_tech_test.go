@@ -113,10 +113,36 @@ func TestHandleUse_PreparedTech_AllExpended_ReturnsNoRemaining(t *testing.T) {
 }
 
 // REQ-UC3: use <tech> with no slot for that tech returns "No prepared uses remaining".
-func TestHandleUse_PreparedTech_NoSlotForTech_ReturnsNoRemaining(t *testing.T) {
+// TestHandleUse_PreparedTech_NoSlotForTech_FallsThrough verifies that when a tech is
+// not present in any prepared slot, the lookup falls through (does not short-circuit)
+// so that spontaneous and innate tech paths can still match. The final "not found"
+// message is only reached when all lookup paths are exhausted.
+func TestHandleUse_PreparedTech_NoSlotForTech_FallsThrough(t *testing.T) {
 	prepRepo := &fakePrepRepoUse{
 		slots: map[int][]*session.PreparedSlot{
 			1: {{TechID: "other_tech", Expended: false}},
+		},
+	}
+	svc, _, uid := setupUseTechPlayer(t, prepRepo)
+
+	evt, err := svc.handleUse(uid, "shock_grenade", "", 0, 0)
+	require.NoError(t, err)
+	require.NotNil(t, evt)
+
+	msg := evt.GetMessage()
+	require.NotNil(t, msg)
+	// Tech not in prepared slots and not in innate — falls through to "not found" message.
+	assert.NotContains(t, msg.Content, "No prepared uses",
+		"tech absent from prepared slots must not short-circuit to 'no prepared uses' error")
+}
+
+// TestHandleUse_PreparedTech_AllExpired_ReturnsNoRemaining verifies that when a tech IS
+// present in prepared slots but all copies are expended, the "no prepared uses" message
+// is returned (not a fall-through to innate).
+func TestHandleUse_PreparedTech_AllExpired_ReturnsNoRemaining(t *testing.T) {
+	prepRepo := &fakePrepRepoUse{
+		slots: map[int][]*session.PreparedSlot{
+			1: {{TechID: "shock_grenade", Expended: true}},
 		},
 	}
 	svc, _, uid := setupUseTechPlayer(t, prepRepo)

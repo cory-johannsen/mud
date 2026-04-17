@@ -8417,9 +8417,14 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string, targetX, 
 			levels = append(levels, lvl)
 		}
 		sort.Ints(levels)
+		foundInPrepared := false
 		for _, lvl := range levels {
 			for idx, slot := range sess.PreparedTechs[lvl] {
-				if slot == nil || slot.TechID != abilityID || slot.Expended {
+				if slot == nil || slot.TechID != abilityID {
+					continue
+				}
+				foundInPrepared = true
+				if slot.Expended {
 					continue
 				}
 				// Found a non-expended slot — expend it.
@@ -8434,12 +8439,15 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string, targetX, 
 				return s.activateTechWithEffects(sess, uid, abilityID, targetID, fmt.Sprintf("You activate %s.", abilityID), nil, targetX, targetY)
 			}
 		}
-		// No non-expended slot found for this tech ID.
-		// REQ-USE-1: fall through to room equipment before reporting no match.
-		if evt, err := s.tryRoomEquipFallback(uid, sess.RoomID, abilityID); evt != nil || err != nil {
-			return evt, err
+		if foundInPrepared {
+			// All prepared copies are expended — fall through to room equip, not innate.
+			// REQ-USE-1: fall through to room equipment before reporting no match.
+			if evt, err := s.tryRoomEquipFallback(uid, sess.RoomID, abilityID); evt != nil || err != nil {
+				return evt, err
+			}
+			return messageEvent(fmt.Sprintf("No prepared uses of %s remaining.", abilityID)), nil
 		}
-		return messageEvent(fmt.Sprintf("No prepared uses of %s remaining.", abilityID)), nil
+		// Tech not in prepared slots at all — fall through to spontaneous/innate lookup.
 	}
 	// Spontaneous tech lookup — only if no feat/class-feature/prepared-tech matched.
 	if len(sess.SpontaneousTechs) > 0 {
