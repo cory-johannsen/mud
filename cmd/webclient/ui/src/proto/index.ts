@@ -21,6 +21,7 @@ export interface NpcInfo {
   conditions?: string[]
   npcType?: string
   npc_type?: string
+  tradition?: string
 }
 
 export interface FloorItem {

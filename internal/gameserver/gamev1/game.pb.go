@@ -6161,6 +6161,7 @@ type NpcInfo struct {
 	FightingTarget    string                 `protobuf:"bytes,4,opt,name=fighting_target,json=fightingTarget,proto3" json:"fighting_target,omitempty"` // name of the player this NPC is currently fighting; empty if not in combat
 	Conditions        []string               `protobuf:"bytes,5,rep,name=conditions,proto3" json:"conditions,omitempty"`                               // display names of active conditions (empty when not in combat or no conditions)
 	NpcType           string                 `protobuf:"bytes,6,opt,name=npc_type,json=npcType,proto3" json:"npc_type,omitempty"`                      // NPC type for non-combat NPCs (merchant, healer, etc.); empty for combat NPCs
+	Tradition         string                 `protobuf:"bytes,7,opt,name=tradition,proto3" json:"tradition,omitempty"`                                 // tech tradition for tech_trainer NPCs; empty for all other NPC types
 	unknownFields     protoimpl.UnknownFields
 	sizeCache         protoimpl.SizeCache
 }
@@ -6233,6 +6234,13 @@ func (x *NpcInfo) GetConditions() []string {
 func (x *NpcInfo) GetNpcType() string {
 	if x != nil {
 		return x.NpcType
+	}
+	return ""
+}
+
+func (x *NpcInfo) GetTradition() string {
+	if x != nil {
+		return x.Tradition
 	}
 	return ""
 }
@@ -17350,7 +17358,7 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\x04grit\x18\v \x01(\x05R\x04grit\x12\x1c\n" +
 	"\treasoning\x18\f \x01(\x05R\treasoning\x12\x14\n" +
 	"\x05savvy\x18\r \x01(\x05R\x05savvy\x12\x14\n" +
-	"\x05flair\x18\x0e \x01(\x05R\x05flair\"\xd1\x01\n" +
+	"\x05flair\x18\x0e \x01(\x05R\x05flair\"\xef\x01\n" +
 	"\aNpcInfo\x12\x1f\n" +
 	"\vinstance_id\x18\x01 \x01(\tR\n" +
 	"instanceId\x12\x12\n" +
@@ -17360,7 +17368,8 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\n" +
 	"conditions\x18\x05 \x03(\tR\n" +
 	"conditions\x12\x19\n" +
-	"\bnpc_type\x18\x06 \x01(\tR\anpcType\"(\n" +
+	"\bnpc_type\x18\x06 \x01(\tR\anpcType\x12\x1c\n" +
+	"\ttradition\x18\a \x01(\tR\ttradition\"(\n" +
 	"\x0eExamineRequest\x12\x16\n" +
 	"\x06target\x18\x01 \x01(\tR\x06target\"\xc0\x01\n" +
 	"\aNpcView\x12\x1f\n" +

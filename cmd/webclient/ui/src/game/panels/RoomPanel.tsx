@@ -3,13 +3,23 @@ import { useGame } from '../GameContext'
 import { RoomTooltip } from '../RoomTooltip'
 import type { ExitInfo, MapTile } from '../../proto'
 
-function npcTypeTag(npcType: string): string {
+const TRADITION_TAG_LABELS: Record<string, string> = {
+  technical:        'Technical',
+  bio_synthetic:    'Biosynthetic',
+  neural:           'Neural',
+  fanatic_doctrine: 'Fanatic Doctrine',
+}
+
+function npcTypeTag(npcType: string, tradition?: string): string {
   switch (npcType) {
     case 'merchant':   return '[shop]'
     case 'healer':     return '[healer]'
     case 'banker':     return '[bank]'
     case 'job_trainer':  return '[trainer]'
-    case 'tech_trainer': return '[trainer]'
+    case 'tech_trainer': {
+      const label = tradition ? TRADITION_TAG_LABELS[tradition] : undefined
+      return label ? `[${label} tech trainer]` : '[tech trainer]'
+    }
     case 'quest_giver':  return '[quest]'
     case 'guard':      return '[guard]'
     case 'fixer':      return '[fixer]'
@@ -245,7 +255,7 @@ export function RoomPanel() {
           <ul className="room-npcs">
             {npcs.map((npc) => {
               const npcType = npc.npcType ?? npc.npc_type ?? ''
-              const tag = npcTypeTag(npcType)
+              const tag = npcTypeTag(npcType, npc.tradition)
               const fightingTarget = npc.fightingTarget ?? npc.fighting_target ?? ''
               const health = npc.healthDescription ?? npc.health_description ?? ''
               if (tag !== '') {

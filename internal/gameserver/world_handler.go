@@ -200,6 +200,12 @@ func (h *WorldHandler) buildRoomView(uid string, room *world.Room) *gamev1.RoomV
 					}
 				}
 			}
+			tradition := ""
+			if inst.NPCType == "tech_trainer" {
+				if tmpl := h.npcMgr.TemplateByID(inst.TemplateID); tmpl != nil && tmpl.TechTrainer != nil {
+					tradition = tmpl.TechTrainer.Tradition
+				}
+			}
 			npcInfos = append(npcInfos, &gamev1.NpcInfo{
 				InstanceId:        inst.ID,
 				Name:              inst.Name(),
@@ -207,6 +213,7 @@ func (h *WorldHandler) buildRoomView(uid string, room *world.Room) *gamev1.RoomV
 				FightingTarget:    fightingTarget,
 				Conditions:        condNames,
 				NpcType:           inst.NPCType,
+				Tradition:         tradition,
 			})
 		}
 	}
