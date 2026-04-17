@@ -43,6 +43,18 @@ func TestDispatchWSMessage_DirectProto_MoveRequest(t *testing.T) {
 	assert.Equal(t, "south", msg.GetMove().GetDirection())
 }
 
+func TestDispatchWSMessage_DirectProto_MoveToRequest(t *testing.T) {
+	env := handlers.WSMessageForTest("MoveToRequest", map[string]interface{}{"target_x": 3, "target_y": 7})
+	registry := command.DefaultRegistry()
+	msg, err := handlers.DispatchWSMessageForTest(env, "req-mt", registry)
+	require.NoError(t, err)
+	require.NotNil(t, msg)
+	mt := msg.GetMoveTo()
+	require.NotNil(t, mt)
+	assert.Equal(t, int32(3), mt.GetTargetX())
+	assert.Equal(t, int32(7), mt.GetTargetY())
+}
+
 func TestDispatchWSMessage_UnknownType_ReturnsError(t *testing.T) {
 	env := handlers.WSMessageForTest("BogusRequest", map[string]string{})
 	registry := command.DefaultRegistry()

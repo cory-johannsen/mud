@@ -846,6 +846,7 @@ func protoMessageByName(name string) (proto.Message, error) {
 		"JobGrantsRequest":       func() proto.Message { return &gamev1.JobGrantsRequest{} },
 		"ChooseFeatRequest":      func() proto.Message { return &gamev1.ChooseFeatRequest{} },
 		"QuestLogRequest":        func() proto.Message { return &gamev1.QuestLogRequest{} },
+		"MoveToRequest":          func() proto.Message { return &gamev1.MoveToRequest{} },
 	}
 	factory, ok := typeMap[name]
 	if !ok {
@@ -947,6 +948,8 @@ func wrapProtoAsClientMessage(reqID, typeName string, msg proto.Message) (*gamev
 		cm.Payload = &gamev1.ClientMessage_ChooseFeat{ChooseFeat: m}
 	case *gamev1.QuestLogRequest:
 		cm.Payload = &gamev1.ClientMessage_QuestLogRequest{QuestLogRequest: m}
+	case *gamev1.MoveToRequest:
+		cm.Payload = &gamev1.ClientMessage_MoveTo{MoveTo: m}
 	default:
 		return nil, fmt.Errorf("no ClientMessage oneof for type %q", typeName)
 	}
