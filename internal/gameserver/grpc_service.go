@@ -6089,13 +6089,15 @@ func (s *GameServiceServer) handleChar(uid string) (*gamev1.ServerEvent, error) 
 	}
 
 	// Job info from registry.
+	archetypeID := ""
 	if s.jobRegistry != nil {
 		if job, ok := s.jobRegistry.Job(sess.Class); ok {
 			view.Job = job.Name
+			archetypeID = job.Archetype
 			// Resolve archetype display name from archetype registry.
-			view.Archetype = job.Archetype
+			view.Archetype = archetypeID
 			if s.archetypes != nil {
-				if arch, ok := s.archetypes[job.Archetype]; ok {
+				if arch, ok := s.archetypes[archetypeID]; ok {
 					view.Archetype = arch.Name
 				}
 			}
@@ -6318,8 +6320,8 @@ func (s *GameServiceServer) handleChar(uid string) (*gamev1.ServerEvent, error) 
 	view.PendingTechSelections = int32(len(sess.PendingTechGrants))
 	// Active exploration mode (empty string when no mode is active).
 	view.ExploreMode = sess.ExploreMode
-	// Tech tradition derived from job class.
-	view.TechTradition = technology.DominantTradition(sess.Class)
+	// Tech tradition derived from the job's archetype ID.
+	view.TechTradition = technology.DominantTradition(archetypeID)
 	// Prepared technology slots with expended state.
 	if len(sess.PreparedTechs) > 0 {
 		levels := make([]int, 0, len(sess.PreparedTechs))
