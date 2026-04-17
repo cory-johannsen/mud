@@ -97,6 +97,7 @@ export interface GameState {
   shopView: ShopView | null
   healerView: import('../proto').HealerView | null
   trainerView: import('../proto').TrainerView | null
+  techTrainerView: import('../proto').TechTrainerView | null
   fixerView: import('../proto').FixerView | null
   restView: import('../proto').RestView | null
   npcView: { name: string; description: string; npcType: string; level: number; health: string } | null
@@ -132,6 +133,7 @@ type Action =
   | { type: 'SET_SHOP_VIEW'; shop: ShopView | null }
   | { type: 'SET_HEALER_VIEW'; view: import('../proto').HealerView | null }
   | { type: 'SET_TRAINER_VIEW'; view: import('../proto').TrainerView | null }
+  | { type: 'SET_TECH_TRAINER_VIEW'; view: import('../proto').TechTrainerView | null }
   | { type: 'SET_FIXER_VIEW'; view: import('../proto').FixerView | null }
   | { type: 'SET_REST_VIEW'; view: import('../proto').RestView | null }
   | { type: 'SET_NPC_VIEW'; view: { name: string; description: string; npcType: string; level: number; health: string } | null }
@@ -204,6 +206,8 @@ export function reducer(state: GameState, action: Action): GameState {
       return { ...state, healerView: action.view }
     case 'SET_TRAINER_VIEW':
       return { ...state, trainerView: action.view }
+    case 'SET_TECH_TRAINER_VIEW':
+      return { ...state, techTrainerView: action.view }
     case 'SET_FIXER_VIEW':
       return { ...state, fixerView: action.view }
     case 'SET_REST_VIEW':
@@ -262,6 +266,7 @@ export const initialState: GameState = {
   shopView: null,
   healerView: null,
   trainerView: null,
+  techTrainerView: null,
   fixerView: null,
   restView: null,
   npcView: null,
@@ -280,6 +285,7 @@ interface GameContextValue {
   clearShop: () => void
   clearHealer: () => void
   clearTrainer: () => void
+  clearTechTrainer: () => void
   clearFixer: () => void
   clearRestView: () => void
   clearNpcView: () => void
@@ -605,6 +611,10 @@ export function GameProvider({ children }: { children: ReactNode }) {
           dispatch({ type: 'SET_TRAINER_VIEW', view: payload as import('../proto').TrainerView })
           break
         }
+        case 'TechTrainerView': {
+          dispatch({ type: 'SET_TECH_TRAINER_VIEW', view: payload as import('../proto').TechTrainerView })
+          break
+        }
         case 'FixerView': {
           dispatch({ type: 'SET_FIXER_VIEW', view: payload as import('../proto').FixerView })
           break
@@ -710,6 +720,10 @@ export function GameProvider({ children }: { children: ReactNode }) {
     dispatch({ type: 'SET_TRAINER_VIEW', view: null })
   }, [])
 
+  const clearTechTrainer = useCallback(() => {
+    dispatch({ type: 'SET_TECH_TRAINER_VIEW', view: null })
+  }, [])
+
   const clearFixer = useCallback(() => {
     dispatch({ type: 'SET_FIXER_VIEW', view: null })
   }, [])
@@ -738,7 +752,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   }, [])
 
   return (
-    <GameContext.Provider value={{ state, sendMessage, sendCommand, clearShop, clearHealer, clearTrainer, clearFixer, clearRestView, clearNpcView, clearQuestGiverView, dismissQuestComplete, clearLoadout, clearChoicePrompt }}>
+    <GameContext.Provider value={{ state, sendMessage, sendCommand, clearShop, clearHealer, clearTrainer, clearTechTrainer, clearFixer, clearRestView, clearNpcView, clearQuestGiverView, dismissQuestComplete, clearLoadout, clearChoicePrompt }}>
       {children}
     </GameContext.Provider>
   )

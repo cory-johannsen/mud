@@ -1,8 +1,8 @@
 // NpcInteractModal renders modals for non-combat NPC interactions:
-// HealerModal, TrainerModal, FixerModal, BankerModal, and GenericNpcModal.
+// HealerModal, TrainerModal, TechTrainerModal, FixerModal, BankerModal, and GenericNpcModal.
 import { useState } from 'react'
 import { useGame } from './GameContext'
-import type { HealerView, TrainerView, FixerView, JobOfferEntry } from '../proto'
+import type { HealerView, TrainerView, TechTrainerView, TechOfferEntry, FixerView, JobOfferEntry } from '../proto'
 
 // ---------- Healer Modal ----------
 
@@ -165,6 +165,98 @@ function TrainerModal({ view, onClose }: { view: TrainerView; onClose: () => voi
                     job={job}
                     playerCurrency={playerCurrency}
 
+                    onTrain={handleTrain}
+                  />
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ---------- Tech Trainer Modal ----------
+
+function TechOfferRow({ offer, playerCurrency, onTrain }: {
+  offer: TechOfferEntry
+  playerCurrency: number
+  onTrain: (techId: string) => void
+}) {
+  const techId = offer.techId ?? offer.tech_id ?? ''
+  const techName = offer.techName ?? offer.tech_name ?? techId
+  const techLevel = offer.techLevel ?? offer.tech_level ?? 0
+  const cost = offer.cost ?? 0
+  const canAfford = playerCurrency >= cost
+
+  return (
+    <tr style={styles.tableRow}>
+      <td style={styles.tdName}>
+        <div style={styles.jobNameCell}>{techName}</div>
+        {offer.description && <div style={styles.reason}>{offer.description}</div>}
+      </td>
+      <td style={{ ...styles.tdNum, color: '#aaa' }}>L{techLevel}</td>
+      <td style={{ ...styles.tdNum, color: canAfford ? '#aaa' : '#665' }}>{cost} Crypto</td>
+      <td style={styles.tdAction}>
+        <button
+          style={{ ...styles.trainBtn, ...(canAfford ? {} : styles.trainBtnDisabled) }}
+          onClick={() => onTrain(techId)}
+          disabled={!canAfford}
+          type="button"
+          title={canAfford ? `Train ${techName}` : `Need ${cost} Crypto`}
+        >
+          Train
+        </button>
+      </td>
+    </tr>
+  )
+}
+
+function TechTrainerModal({ view, onClose }: { view: TechTrainerView; onClose: () => void }) {
+  const { sendMessage } = useGame()
+  const npcName = view.npcName ?? view.npc_name ?? 'Trainer'
+  const tradition = view.tradition ?? ''
+  const offers = view.offers ?? []
+  const playerCurrency = view.playerCurrency ?? view.player_currency ?? 0
+
+  function handleTrain(techId: string) {
+    sendMessage('TrainTechRequest', { npc_name: npcName, tech_id: techId })
+    onClose()
+  }
+
+  return (
+    <div style={styles.overlay} onClick={onClose}>
+      <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
+        <div style={styles.header}>
+          <div style={styles.headerLeft}>
+            <h3 style={styles.title}>{npcName}</h3>
+            {tradition && <span style={styles.npcTypeBadge}>{tradition}</span>}
+            <span style={styles.currency}>{playerCurrency} Crypto</span>
+          </div>
+          <button style={styles.closeBtn} onClick={onClose} type="button">✕</button>
+        </div>
+        <div style={styles.body}>
+          {offers.length === 0 ? (
+            <p style={{ color: '#666', fontFamily: 'monospace', fontSize: '0.85rem' }}>
+              You have no pending technology slots for this tradition.
+            </p>
+          ) : (
+            <table style={styles.table}>
+              <thead>
+                <tr>
+                  <th style={{ ...styles.th, textAlign: 'left' }}>Technology</th>
+                  <th style={styles.th}>Lvl</th>
+                  <th style={styles.th}>Cost</th>
+                  <th style={styles.th}></th>
+                </tr>
+              </thead>
+              <tbody>
+                {offers.map((offer, i) => (
+                  <TechOfferRow
+                    key={offer.techId ?? offer.tech_id ?? i}
+                    offer={offer}
+                    playerCurrency={playerCurrency}
                     onTrain={handleTrain}
                   />
                 ))}
@@ -462,13 +554,16 @@ function RestModal({ view, onClose }: { view: import('../proto').RestView; onClo
 // ---------- Root export ----------
 
 export function NpcInteractModal() {
-  const { state, clearHealer, clearTrainer, clearFixer, clearRestView, clearNpcView } = useGame()
+  const { state, clearHealer, clearTrainer, clearTechTrainer, clearFixer, clearRestView, clearNpcView } = useGame()
 
   if (state.healerView) {
     return <HealerModal view={state.healerView} onClose={clearHealer} />
   }
   if (state.trainerView) {
     return <TrainerModal view={state.trainerView} onClose={clearTrainer} />
+  }
+  if (state.techTrainerView) {
+    return <TechTrainerModal view={state.techTrainerView} onClose={clearTechTrainer} />
   }
   if (state.fixerView) {
     return <FixerModal view={state.fixerView} onClose={clearFixer} />

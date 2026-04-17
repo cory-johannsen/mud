@@ -487,6 +487,26 @@ export interface FixerView {
   bribe_costs?: Record<number, number>
 }
 
+export interface TechOfferEntry {
+  techId?: string
+  tech_id?: string
+  techName?: string
+  tech_name?: string
+  description?: string
+  cost?: number
+  techLevel?: number
+  tech_level?: number
+}
+
+export interface TechTrainerView {
+  npcName?: string
+  npc_name?: string
+  tradition?: string
+  offers?: TechOfferEntry[]
+  playerCurrency?: number
+  player_currency?: number
+}
+
 export interface ShopItem {
   name?: string
   itemId?: string

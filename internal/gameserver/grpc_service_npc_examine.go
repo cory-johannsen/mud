@@ -9,6 +9,61 @@ import (
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 )
 
+// buildTechTrainerView constructs a TechTrainerView ServerEvent for a tech_trainer NPC examine.
+//
+// Precondition: uid identifies an active player session; inst is a tech_trainer NPC.
+// Postcondition: Returns a non-nil ServerEvent wrapping TechTrainerView; error is always nil.
+func (s *GameServiceServer) buildTechTrainerView(uid string, inst *npc.Instance) (*gamev1.ServerEvent, error) {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return messageEvent("player not found"), nil
+	}
+	tmpl := s.npcMgr.TemplateByID(inst.TemplateID)
+	if tmpl == nil || tmpl.TechTrainer == nil {
+		return messageEvent("This trainer has no configuration."), nil
+	}
+	cfg := tmpl.TechTrainer
+	options := s.computeTrainableOptions(sess, cfg)
+
+	sort.Slice(options, func(i, j int) bool {
+		if options[i].techLevel != options[j].techLevel {
+			return options[i].techLevel < options[j].techLevel
+		}
+		return options[i].techID < options[j].techID
+	})
+
+	var offers []*gamev1.TechOfferEntry
+	for _, opt := range options {
+		name := opt.techID
+		description := ""
+		if s.techRegistry != nil {
+			if def, defOK := s.techRegistry.Get(opt.techID); defOK {
+				name = def.Name
+				description = def.Description
+			}
+		}
+		cost := cfg.TrainingCost(opt.techLevel)
+		offers = append(offers, &gamev1.TechOfferEntry{
+			TechId:      opt.techID,
+			TechName:    name,
+			Description: description,
+			Cost:        int32(cost),
+			TechLevel:   int32(opt.techLevel),
+		})
+	}
+
+	return &gamev1.ServerEvent{
+		Payload: &gamev1.ServerEvent_TechTrainerView{
+			TechTrainerView: &gamev1.TechTrainerView{
+				NpcName:        inst.Name(),
+				Tradition:      cfg.Tradition,
+				Offers:         offers,
+				PlayerCurrency: int32(sess.Currency),
+			},
+		},
+	}, nil
+}
+
 // buildHealerView constructs a HealerView ServerEvent for a healer NPC examine.
 //
 // Precondition: uid identifies an active player session; inst is a healer NPC.

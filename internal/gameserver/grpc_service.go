@@ -3381,6 +3381,8 @@ func (s *GameServiceServer) handleExamine(uid string, req *gamev1.ExamineRequest
 				return s.buildHealerView(uid, inst)
 			case "job_trainer":
 				return s.buildTrainerView(uid, inst)
+			case "tech_trainer":
+				return s.buildTechTrainerView(uid, inst)
 			case "fixer":
 				return s.buildFixerView(uid, inst)
 			case "motel_keeper", "brothel_keeper":
