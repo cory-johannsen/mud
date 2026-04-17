@@ -4,7 +4,8 @@ description: When you reach zero hit points, a surge of doctrinal conviction sta
 tradition: fanatic_doctrine
 level: 1
 usage_type: innate
-action_cost: 1
+action_cost: 0
+passive: true
 range: self
 targets: single
 duration: instant
@@ -12,4 +13,4 @@ resolution: none
 effects:
   on_apply:
     - type: utility
-      description: "Martyr's Resolve: when reduced to 0 HP, stabilize at 1 HP (once per scene)."
+      description: "Martyr's Resolve: when reduced to 0 HP, stabilize at 1 HP. Once per scene. (Pending reaction system support for on_reduced_to_zero_hp trigger.)"
