@@ -141,9 +141,15 @@ func (s *GameServiceServer) resolveHotbarSlotUseState(sess *session.PlayerSessio
 			}
 		}
 		// Innate tech: look up by tech ID.
-		if innate, ok := sess.InnateTechs[slot.Ref]; ok && innate.MaxUses > 0 {
-			maxUses = int32(innate.MaxUses)
-			usesRemaining = int32(innate.UsesRemaining)
+		// MaxUses == 0 means unlimited; sentinel -1 signals the client to show ∞.
+		if innate, ok := sess.InnateTechs[slot.Ref]; ok {
+			if innate.MaxUses == 0 {
+				maxUses = -1
+				usesRemaining = -1
+			} else {
+				maxUses = int32(innate.MaxUses)
+				usesRemaining = int32(innate.UsesRemaining)
+			}
 		} else if sess.PreparedTechs != nil {
 			// Prepared tech: count non-expended slots for this tech ID.
 			var total, remaining int32

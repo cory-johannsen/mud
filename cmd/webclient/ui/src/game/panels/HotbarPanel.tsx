@@ -139,6 +139,9 @@ function HotbarTooltip({ slot, pos }: HotbarTooltipProps) {
       {!isCommand && desc && (
         <div style={{ color: '#ccc', marginBottom: '0.15rem' }}>{desc}</div>
       )}
+      {maxUses < 0 && (
+        <div style={{ color: '#7bc', marginBottom: '0.1rem' }}>∞ unlimited uses</div>
+      )}
       {maxUses > 0 && (
         <div style={{ color: '#e0c060', marginBottom: '0.1rem' }}>
           {usesRemaining} / {maxUses} uses remaining
@@ -288,6 +291,7 @@ export function HotbarPanel() {
           const isEmpty = !slot.ref
           const maxUses = slot.maxUses ?? slot.max_uses ?? 0
           const usesRemaining = slot.usesRemaining ?? slot.uses_remaining ?? 0
+          const isInfinite = maxUses < 0
           const isExpended = maxUses > 0 && usesRemaining === 0
           let cls = 'hotbar-slot'
           if (isEmpty) cls += ' hotbar-slot-empty'
@@ -308,7 +312,10 @@ export function HotbarPanel() {
             >
               <span className="hotbar-key">{key}</span>
               <span className="hotbar-label">{label || '—'}</span>
-              {maxUses > 0 && (
+              {isInfinite && (
+                <span className="hotbar-use-badge hotbar-use-infinite">∞</span>
+              )}
+              {!isInfinite && maxUses > 0 && (
                 <span className="hotbar-use-badge">{usesRemaining}/{maxUses}</span>
               )}
             </button>

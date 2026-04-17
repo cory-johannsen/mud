@@ -289,6 +289,10 @@ html, body, #root { margin: 0; padding: 0; height: 100%; overflow: hidden; }
   line-height: 1;
   pointer-events: none;
 }
+.hotbar-use-infinite {
+  color: #7bc;
+  font-size: 0.8rem;
+}
 .hotbar-slot-expended { opacity: 0.45; }
 
 /* Input panel */
