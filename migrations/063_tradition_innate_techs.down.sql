@@ -1,0 +1,3 @@
+-- Inserted rows represent correct game state.
+-- Reversing this migration would remove valid innate techs from characters.
+-- No-op.
