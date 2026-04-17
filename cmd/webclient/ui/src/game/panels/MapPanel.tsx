@@ -43,6 +43,22 @@ function ApPips({ remaining, total }: { remaining: number; total: number }): JSX
   )
 }
 
+// Returns 0 (not reachable), 1 (1-move range), or 2 (2-move range)
+export function cellMoveCost(
+  playerX: number, playerY: number,
+  targetX: number, targetY: number,
+  strideCells: number,
+  movementRemaining: number,
+): 0 | 1 | 2 {
+  const dx = Math.abs(targetX - playerX)
+  const dy = Math.abs(targetY - playerY)
+  const dist = Math.max(dx, dy) // Chebyshev distance
+  if (dist === 0) return 0 // can't move to own cell
+  if (dist <= strideCells && movementRemaining >= 1) return 1
+  if (dist <= 2 * strideCells && movementRemaining >= 2) return 2
+  return 0
+}
+
 function renderBattleGrid(
   combatPositions: Record<string, { x: number; y: number }>,
   playerName: string,
@@ -50,6 +66,14 @@ function renderBattleGrid(
   gridHeight: number,
   onHover: (name: string, pos: { x: number; y: number }, e: React.MouseEvent) => void,
   onHoverEnd: () => void,
+  hoveredCell: { x: number; y: number } | null,
+  onCellHover: (x: number, y: number) => void,
+  onCellHoverEnd: () => void,
+  onCellClick: (x: number, y: number) => void,
+  playerX: number,
+  playerY: number,
+  strideCells: number,
+  movementRemaining: number,
 ): JSX.Element {
   const rawCell = Math.floor(320 / Math.max(gridWidth, gridHeight))
   const CELL_PX = Math.max(12, Math.min(32, rawCell))
@@ -65,7 +89,31 @@ function renderBattleGrid(
       const name = occupants[`${x},${y}`] ?? ''
       const isPlayer = name === playerName
       const isEnemy = name !== '' && !isPlayer
-      const bg = isPlayer ? '#1a3a6b' : isEnemy ? '#6b1a1a' : '#1a1a2e'
+
+      const moveCost = (name === '' && playerX >= 0)
+        ? cellMoveCost(playerX, playerY, x, y, strideCells, movementRemaining)
+        : 0
+
+      let bg: string
+      if (isPlayer) {
+        bg = '#1a3a6b'
+      } else if (isEnemy) {
+        bg = '#6b1a1a'
+      } else if (moveCost === 1) {
+        bg = '#1a3a1a'
+      } else if (moveCost === 2) {
+        bg = '#2a2a0a'
+      } else {
+        bg = '#1a1a2e'
+      }
+
+      const isHovered = hoveredCell?.x === x && hoveredCell?.y === y
+      const border = isHovered && moveCost > 0
+        ? `2px solid ${moveCost === 1 ? '#4a8a4a' : '#8a8a2a'}`
+        : '1px solid #333'
+
+      const cursor = moveCost > 0 ? 'pointer' : 'default'
+
       const token = name ? name[0].toUpperCase() : ''
       cells.push(
         <div
@@ -74,18 +122,29 @@ function renderBattleGrid(
             width: CELL_PX,
             height: CELL_PX,
             background: bg,
-            border: '1px solid #333',
+            border,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             fontSize: '0.75rem',
             color: isPlayer ? '#7bb8ff' : isEnemy ? '#ff7b7b' : '#555',
             fontWeight: 'bold',
-            cursor: 'default',
+            cursor,
             flexShrink: 0,
           }}
-          onMouseEnter={name !== '' ? e => onHover(name, { x, y }, e) : undefined}
-          onMouseLeave={name !== '' ? onHoverEnd : undefined}
+          onMouseEnter={e => {
+            onCellHover(x, y)
+            if (name !== '') {
+              onHover(name, { x, y }, e)
+            }
+          }}
+          onMouseLeave={() => {
+            onCellHoverEnd()
+            if (name !== '') {
+              onHoverEnd()
+            }
+          }}
+          onClick={() => { if (moveCost > 0) onCellClick(x, y) }}
         >
           {token}
         </div>
@@ -115,6 +174,7 @@ export function MapPanel() {
   const [stepMode, setStepMode] = useState(false)
   const [combatHoverName, setCombatHoverName] = useState<string | null>(null)
   const [combatHoverPos, setCombatHoverPos] = useState({ x: 0, y: 0 })
+  const [hoveredCell, setHoveredCell] = useState<{ x: number; y: number } | null>(null)
   const mapContainerRef = useRef<HTMLDivElement>(null)
   const [mapContainerW, setMapContainerW] = useState(REFERENCE_W)
   const prevRoomIdRef = useRef<string | null>(null)
@@ -197,6 +257,15 @@ export function MapPanel() {
       if (playerPos.x === gridWidth - 1)   { disabledDirs.add('e'); disabledDirs.add('ne'); disabledDirs.add('se') }
     }
 
+    const speedPenalty = state.characterSheet?.speedPenalty ?? 0
+    const effectiveSpeedFt = Math.max(5, 25 - speedPenalty)
+    const strideCells = Math.floor(effectiveSpeedFt / 5)
+    const movementRemaining = state.combatantAP[playerName]?.movementRemaining ?? 2
+
+    function handleCellClick(x: number, y: number) {
+      sendMessage('MoveToRequest', { target_x: x, target_y: y })
+    }
+
     return (
       <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
         <div className="map-header">
@@ -211,13 +280,25 @@ export function MapPanel() {
         </div>
         <div style={{ display: 'flex', gap: '0.75rem', padding: '0.5rem', overflow: 'auto', flex: 1 }}>
           <div style={{ overflow: 'auto', flexShrink: 0, position: 'relative' }}>
-            {renderBattleGrid(state.combatPositions, playerName, gridWidth, gridHeight,
+            {renderBattleGrid(
+              state.combatPositions,
+              playerName,
+              gridWidth,
+              gridHeight,
               (name, _pos, e) => {
                 const rect = (e.currentTarget as Element).getBoundingClientRect()
                 setCombatHoverPos({ x: rect.left, y: rect.bottom })
                 setCombatHoverName(name)
               },
-              () => setCombatHoverName(null)
+              () => setCombatHoverName(null),
+              hoveredCell,
+              (x, y) => setHoveredCell({ x, y }),
+              () => setHoveredCell(null),
+              handleCellClick,
+              playerPos?.x ?? -1,
+              playerPos?.y ?? -1,
+              strideCells,
+              movementRemaining,
             )}
             {combatHoverName && (
               <RoomTooltip
