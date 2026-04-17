@@ -169,6 +169,7 @@ message ClientMessage {
     QuestLogRequest      quest_log_request     = 137;
     TrainTechRequest     train_tech            = 138;
     ChooseFeatRequest    choose_feat           = 139;
+    MoveToRequest        move_to               = 140;
   }
 }
 
@@ -999,9 +1000,10 @@ message RoundEndEvent {
 // APUpdateEvent is broadcast to all room combatants when a combatant's
 // action points change mid-round.
 message APUpdateEvent {
-  string name         = 1; // combatant display name
-  int32  ap_remaining = 2; // updated remaining action points
-  int32  ap_total     = 3; // total action points for this round
+  string name                  = 1; // combatant display name
+  int32  ap_remaining          = 2; // updated remaining action points
+  int32  ap_total              = 3; // total action points for this round
+  int32  movement_ap_remaining = 4; // how many movement actions (Stride/Step) remain this round; max 2
 }
 
 // CombatEvent delivers combat narration to all players in the room.
@@ -1350,6 +1352,14 @@ message DisarmRequest {
 // StrideRequest asks the server to stride toward or away from the current target.
 message StrideRequest {
     string direction = 1; // "toward" or "away"
+}
+
+// MoveToRequest asks the server to move the player to a specific grid cell.
+// The server deducts 1 or 2 movement AP based on distance and fires Reactive Strikes per cell crossed.
+// Cells within one stride (speedFt/5) cost 1 AP; cells within two strides cost 2 AP.
+message MoveToRequest {
+    int32 target_x = 1;
+    int32 target_y = 2;
 }
 
 // ShoveRequest asks the server to shove a target NPC, pushing them back 5ft (10ft on critical success).
