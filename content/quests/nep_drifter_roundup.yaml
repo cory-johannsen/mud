@@ -1,0 +1,18 @@
+id: nep_drifter_roundup
+title: Alberta Street Drifter Roundup
+description: >
+  Alberta Street drifters have been making the arts district impassable —
+  harassing traders, blocking access, and trashing whatever's left standing.
+  Put down three of them before the whole corridor is lost.
+giver_npc_id: ne_portland_quest_giver
+repeatable: true
+cooldown: 24h
+objectives:
+  - id: kill_drifters
+    type: kill
+    description: Kill 3 Alberta Street Drifters
+    target_id: alberta_drifter
+    quantity: 3
+rewards:
+  xp: 200
+  credits: 105

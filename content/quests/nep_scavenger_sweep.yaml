@@ -1,0 +1,17 @@
+id: nep_scavenger_sweep
+title: Scavenger Sweep
+description: >
+  Independent scavengers are stripping the neighborhood faster than residents
+  can recover. Run off three of them and buy the block some breathing room.
+giver_npc_id: ne_portland_quest_giver
+repeatable: true
+cooldown: 24h
+objectives:
+  - id: kill_scavengers
+    type: kill
+    description: Kill 3 NE Scavengers
+    target_id: ne_scavenger
+    quantity: 3
+rewards:
+  xp: 175
+  credits: 95

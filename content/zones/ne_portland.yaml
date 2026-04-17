@@ -650,6 +650,9 @@ zone:
     - template: ne_portland_fanatic_tech_trainer
       count: 1
       respawn_after: 0s
+    - template: ne_portland_quest_giver
+      count: 1
+      respawn_after: 0s
     properties:
       lighting: fluorescent
       atmosphere: commerce

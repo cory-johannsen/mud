@@ -1,0 +1,16 @@
+id: nep_brew_warlord_bounty
+title: Brew Warlord Bounty
+description: >
+  The Brew Warlords have been pushing their territory into Northeast Portland.
+  Take out two of them and send a message back to the distilleries.
+giver_npc_id: ne_portland_quest_giver
+repeatable: false
+objectives:
+  - id: kill_brew_warlords
+    type: kill
+    description: Kill 2 Brew Warlords
+    target_id: brew_warlord
+    quantity: 2
+rewards:
+  xp: 300
+  credits: 175

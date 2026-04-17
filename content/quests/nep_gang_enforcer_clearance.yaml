@@ -1,0 +1,17 @@
+id: nep_gang_enforcer_clearance
+title: Gang Enforcer Clearance
+description: >
+  The gang enforcers working NE Portland's streets are shaking down residents
+  and blocking supply runs. Clear out three of them and free up the routes.
+giver_npc_id: ne_portland_quest_giver
+repeatable: true
+cooldown: 24h
+objectives:
+  - id: kill_gang_enforcers
+    type: kill
+    description: Kill 3 NE Gang Enforcers
+    target_id: ne_gang_enforcer
+    quantity: 3
+rewards:
+  xp: 200
+  credits: 110
