@@ -75,7 +75,7 @@ A SQL migration runs at deploy time with two statements, in order:
 Aggressor and criminal archetype jobs must be identified by job ID. The aggressor jobs are: beat_down_artist, boot_gun, boot_machete, gangster, goon, grunt, mercenary, muscle, roid_rager, soldier, street_fighter, thug. The criminal jobs are: beggar, car_jacker, contract_killer, gambler, hanger_on, hooker, smuggler, thief, tomb_raider.
 
 ```sql
-DELETE FROM character_innate_techs
+DELETE FROM character_innate_technologies
 WHERE character_id IN (
     SELECT id FROM characters
     WHERE class IN (
@@ -90,7 +90,7 @@ WHERE character_id IN (
 **Step 2 — Set all remaining innate tech rows to unlimited.**
 
 ```sql
-UPDATE character_innate_techs SET max_uses = 0, uses_remaining = 0;
+UPDATE character_innate_technologies SET max_uses = 0, uses_remaining = 0;
 ```
 
 The migration is embedded as a Go migration file in the existing migration system and runs automatically on server startup before any player sessions load.

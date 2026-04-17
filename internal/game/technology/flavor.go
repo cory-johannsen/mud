@@ -74,10 +74,10 @@ func FlavorFor(tradition string) TraditionFlavor {
 	return fallbackFlavor
 }
 
-// DominantTradition returns the primary technology tradition for a job ID.
-// Returns "" for unknown job IDs.
-func DominantTradition(jobID string) string {
-	return jobTradition[jobID]
+// DominantTradition returns the primary technology tradition for an archetype ID.
+// Returns "" for unknown or non-tech archetype IDs (e.g. "aggressor", "criminal").
+func DominantTradition(archetypeID string) string {
+	return jobTradition[archetypeID]
 }
 
 // FormatPreparedTechs formats the prepared tech slots grouped by level in
