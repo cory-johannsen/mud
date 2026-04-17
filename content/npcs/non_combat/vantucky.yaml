@@ -275,3 +275,37 @@
     offered_levels: [2]
     base_cost: 150
     find_quest_id: find_fanatic_trainer_vantucky
+
+- id: vantucky_technical_tech_trainer
+  name: "Sapper"
+  npc_type: tech_trainer
+  type: human
+  description: "A former demolitions specialist who pivoted to augmentation after losing two fingers to his own work. Runs technical training sessions with the same methodical precision he applies to disarming charges. Efficient, blunt, results-oriented."
+  level: 5
+  max_hp: 30
+  ac: 12
+  awareness: 8
+  disposition: neutral
+  personality: neutral
+  tech_trainer:
+    tradition: technical
+    offered_levels: [2]
+    base_cost: 150
+    find_quest_id: find_technical_trainer_vantucky
+
+- id: vantucky_biosynthetic_tech_trainer
+  name: "Lena Voss"
+  npc_type: tech_trainer
+  type: human
+  description: "A compact woman with visible subcutaneous implants running along her forearms. She speaks in measured tones and calibrates bio-synthetic systems with the confidence of someone who has lived in augmented flesh her whole adult life."
+  level: 5
+  max_hp: 30
+  ac: 12
+  awareness: 8
+  disposition: neutral
+  personality: neutral
+  tech_trainer:
+    tradition: bio_synthetic
+    offered_levels: [2]
+    base_cost: 150
+    find_quest_id: find_biosynthetic_trainer_vantucky

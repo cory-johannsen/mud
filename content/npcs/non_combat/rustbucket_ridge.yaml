@@ -283,3 +283,37 @@
     offered_levels: [2]
     base_cost: 120
     find_quest_id: find_biosynthetic_trainer_vantucky
+
+- id: rustbucket_ridge_neural_tech_trainer
+  name: "Drift"
+  npc_type: tech_trainer
+  type: human
+  description: "A quiet figure who operates out of a dim back corner of the scrap office. Neural conditioning is his specialty — he claims he can reroute pathways that most trainers don't even know exist. His clients come back calmer, sharper, and a little harder to read."
+  level: 4
+  max_hp: 25
+  ac: 11
+  awareness: 7
+  disposition: neutral
+  personality: neutral
+  tech_trainer:
+    tradition: neural
+    offered_levels: [2]
+    base_cost: 120
+    find_quest_id: find_neural_trainer_vantucky
+
+- id: rustbucket_ridge_fanatic_tech_trainer
+  name: "Sister Mira"
+  npc_type: tech_trainer
+  type: human
+  description: "A doctrine specialist who came to Rustbucket Ridge after a schism in her order. She still carries the order's conviction — just aimed at whoever's paying. Her training sessions are intense and short. She expects results."
+  level: 4
+  max_hp: 25
+  ac: 11
+  awareness: 7
+  disposition: neutral
+  personality: neutral
+  tech_trainer:
+    tradition: fanatic_doctrine
+    offered_levels: [2]
+    base_cost: 120
+    find_quest_id: find_fanatic_trainer_vantucky
