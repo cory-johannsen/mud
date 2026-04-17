@@ -9,6 +9,17 @@ ability_boosts:
   - flair
   - savvy
   free: 2
+innate_technologies:
+  - id: terror_broadcast
+    uses_per_day: 0
+  - id: chrome_reflex
+    uses_per_day: 0
+  - id: neural_flare
+    uses_per_day: 0
+  - id: static_veil
+    uses_per_day: 0
+  - id: synapse_tap
+    uses_per_day: 0
 technology_grants:
   spontaneous:
     known_by_level:

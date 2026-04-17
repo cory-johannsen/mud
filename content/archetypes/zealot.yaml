@@ -10,6 +10,17 @@ ability_boosts:
   - grit
   - flair
   free: 2
+innate_technologies:
+  - id: doctrine_ward
+    uses_per_day: 0
+  - id: martyrs_resolve
+    uses_per_day: 0
+  - id: righteous_condemnation
+    uses_per_day: 0
+  - id: fervor_pulse
+    uses_per_day: 0
+  - id: litany_of_iron
+    uses_per_day: 0
 technology_grants:
   prepared:
     slots_by_level:

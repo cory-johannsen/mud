@@ -9,6 +9,17 @@ ability_boosts:
   - reasoning
   - savvy
   free: 2
+innate_technologies:
+  - id: atmospheric_surge
+    uses_per_day: 0
+  - id: blackout_pulse
+    uses_per_day: 0
+  - id: seismic_sense
+    uses_per_day: 0
+  - id: arc_lights
+    uses_per_day: 0
+  - id: pressure_burst
+    uses_per_day: 0
 technology_grants:
   prepared:
     slots_by_level:

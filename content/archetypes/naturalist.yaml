@@ -10,6 +10,15 @@ ability_boosts:
   - grit
   - reasoning
   free: 2
+innate_technologies:
+  - id: moisture_reclaim
+    uses_per_day: 0
+  - id: viscous_spray
+    uses_per_day: 0
+  - id: nanite_infusion
+    uses_per_day: 0
+  - id: acid_spit
+    uses_per_day: 0
 technology_grants:
   prepared:
     slots_by_level:
