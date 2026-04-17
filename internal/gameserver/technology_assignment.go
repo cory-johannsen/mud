@@ -995,7 +995,7 @@ func fillFromPreparedPoolWithSend(
 	poolSlotI := 0
 	for open > 0 {
 		slotNum := idx - startIdx + 1
-		send(fmt.Sprintf("Level %d, %s %d: choose from pool", lvl, flavor.SlotNoun, slotNum))
+		send(fmt.Sprintf("Level %d, %s %d of %d: choose from pool", lvl, flavor.SlotNoun, slotNum, slots))
 
 		// Build option list; prepend a "keep" option when the current tech is still available.
 		options := buildPreparedOptions(remaining, techReg)
@@ -1022,7 +1022,7 @@ func fillFromPreparedPoolWithSend(
 			options = append([]string{keepSentinel + "Keep current: " + keepName}, options...)
 		}
 
-		slotPrompt := fmt.Sprintf("Choose a Level %d technology to prepare (%s %d):", lvl, flavor.SlotNoun, slotNum)
+		slotPrompt := fmt.Sprintf("Choose a Level %d technology to prepare (%s %d of %d):", lvl, flavor.SlotNoun, slotNum, slots)
 		chosen, err := promptFn(slotPrompt, options)
 		if err != nil {
 			return nil, err

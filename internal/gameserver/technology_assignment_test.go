@@ -1290,7 +1290,7 @@ func TestRearrangePreparedTechs_SendFn_SlotMessages(t *testing.T) {
 	// Check fixed-slot message appears
 	assert.Contains(t, messages, "Level 1, dose 1 (fixed): fixed_tech", "fixed slot message must be emitted")
 	// Check open-pool message appears
-	assert.Contains(t, messages, "Level 1, dose 2: choose from pool", "open pool message must be emitted")
+	assert.Contains(t, messages, "Level 1, dose 2 of 2: choose from pool", "open pool message must be emitted")
 }
 
 // REQ-SSL4 (property): LevelUpTechnologies calls promptFn exactly N times when pool > open slots.
