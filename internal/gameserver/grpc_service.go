@@ -2325,6 +2325,8 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 		return s.handleDisarm(uid, p.Disarm)
 	case *gamev1.ClientMessage_Stride:
 		return s.handleStride(uid, p.Stride)
+	case *gamev1.ClientMessage_MoveTo:
+		return s.handleMoveTo(uid, p.MoveTo)
 	case *gamev1.ClientMessage_Step:
 		return s.handleStep(uid, p.Step)
 	case *gamev1.ClientMessage_Hide:
@@ -10060,6 +10062,168 @@ func (s *GameServiceServer) handleStride(uid string, req *gamev1.StrideRequest) 
 	}
 	s.combatH.FireCombatantMoved(sess.RoomID, uid)
 	s.combatH.BroadcastAllPositions(sess.RoomID)
+	return messageEvent(msg), nil
+}
+
+// handleMoveTo moves the player to a specific grid cell, deducting 1 or 2 movement AP based on distance.
+// Cells within one stride (speedFt/5) cost 1 AP; cells within two strides cost 2 AP.
+// Reactive Strikes fire per threatened-square exit, identical to handleStride.
+//
+// Precondition: uid must be in active combat; target cell must be within 2*strideCells of player.
+// Postcondition: Player combatant's GridX/GridY updated; appropriate AP deducted; message event returned.
+func (s *GameServiceServer) handleMoveTo(uid string, req *gamev1.MoveToRequest) (*gamev1.ServerEvent, error) {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return nil, fmt.Errorf("player %q not found", uid)
+	}
+	if sess.Status != statusInCombat {
+		return errorEvent("Move-to is only available in combat."), nil
+	}
+	if s.combatH == nil {
+		return errorEvent("Combat handler unavailable."), nil
+	}
+
+	cbt, ok := s.combatH.GetCombatForRoom(sess.RoomID)
+	if !ok {
+		return errorEvent("No active combat found."), nil
+	}
+	combatant := cbt.GetCombatant(uid)
+	if combatant == nil {
+		return errorEvent("You are not a combatant in this fight."), nil
+	}
+
+	targetX := int(req.GetTargetX())
+	targetY := int(req.GetTargetY())
+
+	// Validate target is within grid bounds.
+	width, height := cbt.GridWidth, cbt.GridHeight
+	if width == 0 {
+		width = 20
+	}
+	if height == 0 {
+		height = 20
+	}
+	if targetX < 0 || targetX >= width || targetY < 0 || targetY >= height {
+		return errorEvent("Target cell is outside the combat grid."), nil
+	}
+
+	// Compute stride distance (cells per movement action).
+	speedFt := s.playerEffectiveSpeedFt(sess)
+	strideCells := speedFt / 5
+	if strideCells < 1 {
+		strideCells = 1
+	}
+
+	// Chebyshev distance from current position to target.
+	dx := targetX - combatant.GridX
+	dy := targetY - combatant.GridY
+	absDx := dx
+	if absDx < 0 {
+		absDx = -absDx
+	}
+	absDy := dy
+	if absDy < 0 {
+		absDy = -absDy
+	}
+	dist := absDx
+	if absDy > dist {
+		dist = absDy
+	}
+
+	if dist == 0 {
+		return messageEvent("You are already at that location."), nil
+	}
+
+	// Determine number of movement actions required.
+	var moveCost int
+	switch {
+	case dist <= strideCells:
+		moveCost = 1
+	case dist <= 2*strideCells:
+		moveCost = 2
+	default:
+		return errorEvent(fmt.Sprintf("Target is too far to reach (distance %d, max %d).", dist, 2*strideCells)), nil
+	}
+
+	// Deduct movement AP for each action required.
+	for i := 0; i < moveCost; i++ {
+		if err := s.combatH.SpendMovementAP(uid, 1); err != nil {
+			return errorEvent(err.Error()), nil
+		}
+	}
+
+	// Move the player cell by cell toward the target using diagonal-first path.
+	// Re-read combatant after AP deduction (SpendMovementAP may lock/unlock).
+	combatant = cbt.GetCombatant(uid)
+	if combatant == nil {
+		return errorEvent("Combatant lost during move."), nil
+	}
+
+	rsUpdater := func(id string, hp int) {
+		if target, ok := s.sessions.GetPlayer(id); ok {
+			target.CurrentHP = hp
+		}
+	}
+
+	var allRSEvents []combat.RoundEvent
+	maxCells := moveCost * strideCells
+	for step := 0; step < maxCells; step++ {
+		if combatant.GridX == targetX && combatant.GridY == targetY {
+			break
+		}
+		// Diagonal-first step toward target.
+		stepDx := 0
+		stepDy := 0
+		if combatant.GridX < targetX {
+			stepDx = 1
+		} else if combatant.GridX > targetX {
+			stepDx = -1
+		}
+		if combatant.GridY < targetY {
+			stepDy = 1
+		} else if combatant.GridY > targetY {
+			stepDy = -1
+		}
+
+		oldX, oldY := combatant.GridX, combatant.GridY
+		newX := oldX + stepDx
+		newY := oldY + stepDy
+
+		// Clamp to grid bounds.
+		if newX < 0 {
+			newX = 0
+		}
+		if newX >= width {
+			newX = width - 1
+		}
+		if newY < 0 {
+			newY = 0
+		}
+		if newY >= height {
+			newY = height - 1
+		}
+
+		combatant.GridX = newX
+		combatant.GridY = newY
+
+		// Fire Reactive Strikes when exiting a threatened square.
+		rsEvents := combat.CheckReactiveStrikes(cbt, uid, oldX, oldY, globalRandSrc{}, rsUpdater)
+		allRSEvents = append(allRSEvents, rsEvents...)
+
+		// Stop moving if the player was killed by a Reactive Strike.
+		if combatant.IsDead() {
+			break
+		}
+	}
+
+	s.combatH.FireCombatantMoved(sess.RoomID, uid)
+	s.combatH.BroadcastAllPositions(sess.RoomID)
+
+	msg := fmt.Sprintf("You move to (%d, %d) (%d ft).", targetX, targetY, dist*5)
+	for _, ev := range allRSEvents {
+		msg += "\n" + ev.Narrative
+	}
+
 	return messageEvent(msg), nil
 }
 
