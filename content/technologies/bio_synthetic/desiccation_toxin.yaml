@@ -1,6 +1,6 @@
 id: desiccation_toxin
 name: Desiccation Toxin
-description: 'You inject the target with a toxin that makes its body unable to retain moisture. You can Dismiss the spell. The target must attempt a Toughness save.Critical Success The creature is unaffected.
+description: 'You inject the target with a toxin that makes its body unable to retain moisture. You can Dismiss the spell. The target must attempt a Grit check.Critical Success The creature is unaffected.
 
   Success The creature is Sickened 1.
 

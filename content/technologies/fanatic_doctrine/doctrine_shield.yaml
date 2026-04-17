@@ -1,7 +1,7 @@
 id: doctrine_shield
 name: Doctrine Shield
 description: You invoke sacred protocols that fortify the target's mind against intrusion.
-  The target gains a +2 status bonus to Will saves against mental effects for the
+  The target gains a +2 status bonus to Reasoning checks against mental effects for the
   duration.
 tradition: fanatic_doctrine
 level: 2

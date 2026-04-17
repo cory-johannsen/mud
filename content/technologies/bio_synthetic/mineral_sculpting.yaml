@@ -1,6 +1,6 @@
 id: mineral_sculpting
 name: Mineral Sculpting
-description: 'You reshape stone or mineral matter into a rough shape of your choice. The process is too crude for intricate parts or fine details. Any creatures standing atop the stone when you reshape it must each attempt a Reflex save or Acrobatics check.
+description: 'You reshape stone or mineral matter into a rough shape of your choice. The process is too crude for intricate parts or fine details. Any creatures standing atop the stone when you reshape it must each attempt a Quickness check or Acrobatics check.
 
 
   Success The creature is unaffected.

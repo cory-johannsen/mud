@@ -2,7 +2,7 @@ id: tear_gas_canister
 name: Tear Gas Canister
 description: You deploy a canister that fills the area with choking tear gas. The
   cloud functions as fog but also sickens creatures that end their turn inside it
-  on a failed Toughness save.
+  on a failed Grit check.
 tradition: technical
 level: 3
 usage_type: prepared

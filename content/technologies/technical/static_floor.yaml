@@ -1,6 +1,6 @@
 id: static_floor
 name: Static Floor
-description: You electrify the floor with a low-level current. The area becomes difficult terrain. Creatures entering or starting their turn there take 2d6 electricity damage with a basic Reflex save.
+description: You electrify the floor with a low-level current. The area becomes difficult terrain. Creatures entering or starting their turn there take 2d6 electricity damage with a basic Quickness check.
 tradition: technical
 level: 3
 usage_type: prepared

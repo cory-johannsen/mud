@@ -4,11 +4,11 @@ description: 'Area (continued) two 30-foot cones
 
   You project a neural siphon field that drains life force with one pulse and redistributes
   it with another. All living creatures in the first cone take 5d6 void damage with
-  a basic Toughness save. You and all living creatures in the second cone regain Hit
+  a basic Grit check. You and all living creatures in the second cone regain Hit
   Points equal to the greatest damage a single creature took from the first cone.
 
 
-  Heightened (+1) The damage increases by 1d6.'
+  Upgraded (+1) The damage increases by 1d6.'
 tradition: neural
 level: 5
 usage_type: prepared

@@ -2,7 +2,7 @@ id: bio_massacre_protocol
 name: Bio-Massacre Protocol
 description: You detonate a concentrated bioagent in a 30-foot cone. Each creature
   in the area takes 10d12 slashing damage as biological blades erupt from the ground
-  (Reflex save for half). On a failure, they also take 4d12 persistent bleed damage.
+  (Quickness check for half). On a failure, they also take 4d12 persistent bleed damage.
   Creatures reduced to 0 HP are consumed entirely.
 tradition: bio_synthetic
 level: 9

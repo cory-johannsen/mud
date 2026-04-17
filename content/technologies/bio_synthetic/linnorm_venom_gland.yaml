@@ -1,7 +1,7 @@
 id: linnorm_venom_gland
 name: Linnorm Venom Gland
 description: You inject an apex biological venom derived from a linnorm's biology.
-  The target must attempt a Toughness save. On a failure it takes 6d6 poison damage
+  The target must attempt a Grit check. On a failure it takes 6d6 poison damage
   per round for 6 rounds and is paralyzed for 1 round. On a critical failure it takes
   8d6 per round and is paralyzed for 1 minute. On a success it takes 6d6 once and
   is sickened 2.

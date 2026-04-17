@@ -4,7 +4,7 @@ description: 'You ward a target doorway or container with a temporal trap that r
 
   You can set a password for the ward. Any creature that attempts to open the target container, or to open or pass through the target doorway without speaking the password must attempt a save as normal.
 
-  The ward vanishes automatically once the spell''s duration ends, but can be removed before then as if it were a magical trap, using your tech DC for both the Perception check to notice it and Thievery check to disable it. Both checks require the creature attempting them to have expert proficiency in order to succeed.
+  The ward vanishes automatically once the spell''s duration ends, but can be removed before then as if it were a magical trap, using your tech DC for both the Awareness check to notice it and Thievery check to disable it. Both checks require the creature attempting them to have expert proficiency in order to succeed.
 
   You can Dismiss the chrono-lock. The maximum number of chrono-locks you can have active at a time is equal to your spellcasting ability modifier.
 
@@ -18,7 +18,7 @@ description: 'You ward a target doorway or container with a temporal trap that r
   Critical Failure As failure, but the temporal displacement also causes the creature to lose their bearings, making them Confused for 1 minute.
 
 
-  Heightened (10th) The chrono-lock has an unlimited duration, until it is counteracted, Dismissed, or Disarmed.'
+  Upgraded (10th) The chrono-lock has an unlimited duration, until it is counteracted, Dismissed, or Disarmed.'
 tradition: neural
 level: 6
 usage_type: prepared

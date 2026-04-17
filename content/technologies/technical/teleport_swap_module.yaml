@@ -1,7 +1,7 @@
 id: teleport_swap_module
 name: Teleport Swap Module
 description: You activate a matter transporter that swaps an item you're holding for
-  one held by another creature. An unwilling target can attempt a Reflex save to resist.
+  one held by another creature. An unwilling target can attempt a Quickness check to resist.
 tradition: technical
 level: 3
 usage_type: prepared

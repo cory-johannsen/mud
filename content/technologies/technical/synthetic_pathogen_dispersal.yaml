@@ -16,7 +16,7 @@ effects:
   - type: utility
     dc: 0
     description: 'Your touch afflicts the target with goblin pox, an irritating allergenic rash. The target must attempt a
-      Toughness save.
+      Grit check.
 
 
       Goblin Pox (disease) Level 1; Creatures that have the goblin trait and goblin'

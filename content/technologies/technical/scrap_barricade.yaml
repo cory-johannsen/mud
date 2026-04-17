@@ -2,7 +2,7 @@ id: scrap_barricade
 name: Scrap Barricade
 description: You rapidly fabricate a barricade from nearby debris and metal scrap.
   The bulwark is 10 feet high and 20 feet long. Any creature that crosses through
-  it takes 2d10 slashing damage and must succeed at a Reflex save or become Immobilized
+  it takes 2d10 slashing damage and must succeed at a Quickness check or become Immobilized
   for 1 round.
 tradition: technical
 level: 3

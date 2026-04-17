@@ -2,7 +2,7 @@ id: parasitic_eruption
 name: Parasitic Eruption
 description: 'You trigger a parasitic organism to erupt from the target''s chest,
   wrapping it in barbed organic tendrils. The target takes 6d6 piercing damage and
-  1d6 persistent bleed damage and must attempt a Toughness save. When the target is
+  1d6 persistent bleed damage and must attempt a Grit check. When the target is
   no longer taking persistent bleed damage and is no longer encumbered, the parasite
   dissolves.
 
@@ -18,7 +18,7 @@ description: 'You trigger a parasitic organism to erupt from the target''s chest
   for 1 minute.
 
 
-  Heightened (+2) The initial damage increases by 3d6, and the persistent bleed damage
+  Upgraded (+2) The initial damage increases by 3d6, and the persistent bleed damage
   increases by 1d6.'
 tradition: bio_synthetic
 level: 4

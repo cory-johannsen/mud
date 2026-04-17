@@ -2,9 +2,9 @@ id: undead_zealot_legion
 name: Undead Zealot Legion
 description: 'You raise a legion of fanatical undead warriors to fight in your holy war. The undead army occupies the space of a Huge creature and has a Speed of 40 feet.
 
-  Arrive Bone March The zealot legion rises from the ground, slashing through your enemies with fervent fury. Enemies within a 20-foot emanation take 4d8 slashing damage (basic Reflex save). On a critical failure, a creature also take 2d8 persistent bleed damage.
+  Arrive Bone March The zealot legion rises from the ground, slashing through your enemies with fervent fury. Enemies within a 20-foot emanation take 4d8 slashing damage (basic Quickness check). On a critical failure, a creature also take 2d8 persistent bleed damage.
 
-  Depart Tossed Heads Before collapsing, the zealot legion launches skull projectiles at the enemy lines, dealing 6d6 piercing damage to enemies in a 20-foot burst (basic Reflex save) within 30 feet. On a critical failure, a creature is also Frightened 2.'
+  Depart Tossed Heads Before collapsing, the zealot legion launches skull projectiles at the enemy lines, dealing 6d6 piercing damage to enemies in a 20-foot burst (basic Quickness check) within 30 feet. On a critical failure, a creature is also Frightened 2.'
 tradition: fanatic_doctrine
 level: 6
 usage_type: prepared

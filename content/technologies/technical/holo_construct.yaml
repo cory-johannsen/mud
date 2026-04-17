@@ -3,7 +3,7 @@ name: Holo-Construct
 description: 'You deploy a holographic projector that creates an illusory creature.
   The illusion appears in an unoccupied space within range and can move up to 25 feet
   when you Sustain the spell. If a creature Seeks or interacts with it, it can attempt
-  a Perception check against your tech DC to disbelieve.
+  a Awareness check against your tech DC to disbelieve.
 
 
   The illusion can make illusory melee Strikes, dealing 1d4+4 mental damage on a hit

@@ -3,7 +3,7 @@ name: Reactive Root Plating
 description: 'You deploy nano-fiber reactive armor on yourself and allies, forming flexible protection. Each affected creature gains resistance 5 to bludgeoning and piercing damage. Whenever a protected creature is targeted by a ranged weapon attack but takes no damage, the plating fires a retaliatory shard at the attacker, dealing 2d6 piercing damage.
 
 
-  Heightened (+2) The resistance increases by 2.'
+  Upgraded (+2) The resistance increases by 2.'
 tradition: technical
 level: 5
 usage_type: prepared

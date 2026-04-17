@@ -4,10 +4,10 @@ description: 'Area 10-foot radius, 50-foot-tall cylinder
 
   A powerful pressurized vent erupts from the ground. The bottom of the area must
   be on solid ground. Each creature takes 3d6 bludgeoning damage and 4d6 fire damage,
-  with a Reflex save. A creature that fails is pushed to the top of the vent.
+  with a Quickness check. A creature that fails is pushed to the top of the vent.
 
 
-  Heightened (+2) The fire damage increases by 2d6.'
+  Upgraded (+2) The fire damage increases by 2d6.'
 tradition: technical
 level: 5
 usage_type: prepared

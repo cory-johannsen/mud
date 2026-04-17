@@ -1,7 +1,7 @@
 id: energy_siphon
 name: Energy Siphon
 description: Your device drains bio-electric energy from the target. You deal 6d6
-  void damage. You gain temporary Hit Points equal to half the damage dealt. Heightened
+  void damage. You gain temporary Hit Points equal to half the damage dealt. Upgraded
   (+1) Damage increases by 2d6.
 tradition: technical
 level: 3

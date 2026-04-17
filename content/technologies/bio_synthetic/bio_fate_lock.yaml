@@ -1,7 +1,7 @@
 id: bio_fate_lock
 name: Bio Fate Lock
 description: You lock two targets in a biological destiny confrontation. Both must
-  attempt Will saves. On a failure, each can only target the other for 1 minute. Damage
+  attempt Reasoning checks. On a failure, each can only target the other for 1 minute. Damage
   dealt to one is reflected to the other at half value.
 tradition: bio_synthetic
 level: 10

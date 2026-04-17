@@ -5,7 +5,7 @@ description: |-
     Success The target takes half damage and the penalty. The spell ends at the end of the target's next turn. @UUID[Compendium.pf2e.spell-effects.Item.tech Effect: Draw Ire (Success)]
     Failure The target takes full damage and the penalty.
     Critical Failure The target takes double damage, and the status penalty is -2.
-    @UUID[Compendium.pf2e.spell-effects.Item.tech Effect: Draw Ire]Heightened (+1) The damage increases by 1d10.
+    @UUID[Compendium.pf2e.spell-effects.Item.tech Effect: Draw Ire]Upgraded (+1) The damage increases by 1d10.
 tradition: neural
 level: 1
 usage_type: prepared

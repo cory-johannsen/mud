@@ -2,7 +2,7 @@ id: flash_canister
 name: Flash Canister
 description: 'You launch an exploding canister filled with a blinding chemical agent.
   Upon impact, the canister bursts and exposes all creatures in the area to the compound.
-  Each creature must attempt a Toughness save.
+  Each creature must attempt a Grit check.
 
   Critical Success The creature is unaffected.
 
@@ -13,7 +13,7 @@ description: 'You launch an exploding canister filled with a blinding chemical a
   Critical Failure The creature is Blinded for 1 minute and Dazzled for 10 minutes.
 
 
-  Heightened (+2) The initial damage increases by 1d6.'
+  Upgraded (+2) The initial damage increases by 1d6.'
 tradition: technical
 level: 5
 usage_type: prepared

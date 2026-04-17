@@ -1,7 +1,7 @@
 id: synaptic_muscle_inhibitor
 name: Synaptic Muscle Inhibitor
 description: |-
-    You sap the target's strength, depending on its Toughness save.
+    You sap the target's strength, depending on its Grit check.
 
     Critical Success The target is unaffected.
     Success The target is Enfeebled 1 until the start of your next turn.
@@ -22,7 +22,7 @@ effects:
         - type: utility
           dc: 0
           description: |-
-            You sap the target's strength, depending on its Toughness save.
+            You sap the target's strength, depending on its Grit check.
 
             Critical Success The target is unaffected.
             Success The target is Enfeebled 1 until the start of your next turn.

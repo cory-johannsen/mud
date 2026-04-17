@@ -1,6 +1,6 @@
 id: detection_pulse
 name: Detection Pulse
-description: You psychically illuminate a target creature, making it easier to see. The target must attempt a Reflex save. On a failure, the target glows with revealing light for the duration, negating its Concealed condition and making it Concealed instead of Hidden or Undetected if it's Invisible.
+description: You psychically illuminate a target creature, making it easier to see. The target must attempt a Quickness check. On a failure, the target glows with revealing light for the duration, negating its Concealed condition and making it Concealed instead of Hidden or Undetected if it's Invisible.
 tradition: neural
 level: 2
 usage_type: prepared

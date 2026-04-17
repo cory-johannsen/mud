@@ -1,9 +1,9 @@
 id: plasma_bolt
 name: Plasma Bolt
-description: 'You fire a bolt of contained plasma from a wrist-mounted emitter. Make a spell attack. On a hit, you deal 2d6 fire damage.
+description: 'You fire a bolt of contained plasma from a wrist-mounted emitter. Make a tech attack. On a hit, you deal 2d6 fire damage.
 
 
-  Heightened (+1) You fire one additional bolt, each requiring its own spell attack roll. Each bolt deals 2d6 fire damage.'
+  Upgraded (+1) You fire one additional bolt, each requiring its own tech attack roll. Each bolt deals 2d6 fire damage.'
 tradition: technical
 level: 2
 usage_type: prepared

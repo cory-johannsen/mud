@@ -2,7 +2,7 @@ id: sanctified_uv_blast
 name: Sanctified UV Blast
 description: 'A powerful globe of chilling doctrine-blessed energy explodes in the area, dealing 8d10 cold damage to all creatures in the area, plus an additional 1d10 vitality damage to undead creatures.
 
-  The blast''s cold damage is silver damage for the purposes of weaknesses, resistances, and the like. Each creature and object in the area must attempt a Reflex save.Critical Success The creature is unaffected.
+  The blast''s cold damage is silver damage for the purposes of weaknesses, resistances, and the like. Each creature and object in the area must attempt a Quickness check.Critical Success The creature is unaffected.
 
   Success The creature takes half damage.
 
@@ -10,7 +10,7 @@ description: 'A powerful globe of chilling doctrine-blessed energy explodes in t
 
   Critical Failure The creature takes full damage and becomes Blinded permanently.
 
-  If the globe overlaps with an area of darkness-based tech, the sanctified UV blast attempts to counteract the darkness effect.Heightened (+1) The cold damage increases by 1d10, and the vitality damage against undead increases by 1d10.'
+  If the globe overlaps with an area of darkness-based tech, the sanctified UV blast attempts to counteract the darkness effect.Upgraded (+1) The cold damage increases by 1d10, and the vitality damage against undead increases by 1d10.'
 tradition: fanatic_doctrine
 level: 7
 usage_type: prepared

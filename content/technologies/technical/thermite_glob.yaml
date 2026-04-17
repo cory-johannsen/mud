@@ -1,9 +1,9 @@
 id: thermite_glob
 name: Thermite Glob
-description: 'You launch a glob of thermite compound at the target. Make a spell attack. On a hit, the target takes 2d4 fire damage and 1d4 persistent fire damage.
+description: 'You launch a glob of thermite compound at the target. Make a tech attack. On a hit, the target takes 2d4 fire damage and 1d4 persistent fire damage.
 
 
-  Heightened (+1) The initial damage increases by 1d4 and the persistent damage increases by 1d4.'
+  Upgraded (+1) The initial damage increases by 1d4 and the persistent damage increases by 1d4.'
 tradition: technical
 level: 2
 usage_type: prepared

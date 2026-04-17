@@ -2,7 +2,7 @@ id: dermal_thickening
 name: Dermal Thickening
 description: You trigger a mutation that thickens the target's skin to leather-like
   toughness. The target gains a +1 item bonus to AC but takes a -2 status penalty
-  to Reflex saves for the duration.
+  to Quickness checks for the duration.
 tradition: bio_synthetic
 level: 2
 usage_type: prepared

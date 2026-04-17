@@ -2,10 +2,10 @@ id: hazard_zone
 name: Hazard Zone
 description: 'You deploy elemental emitters that fill the area with damaging energy.
   Choose acid, cold, electricity, or fire. Creatures that enter or start their turn
-  in the area take 2d6 damage of the chosen type with a basic Reflex save.
+  in the area take 2d6 damage of the chosen type with a basic Quickness check.
 
 
-  Heightened (+1) The damage increases by 1d6.'
+  Upgraded (+1) The damage increases by 1d6.'
 tradition: technical
 level: 2
 usage_type: prepared

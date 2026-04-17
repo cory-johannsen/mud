@@ -4,12 +4,12 @@ description: 'You infuse mutagenic compounds into your target, unlocking dormant
   and granting them the ability to channel biological energy.
 
   Choose a 1st-rank spell you prepared today or that''s in your repertoire, of the
-  same tradition you used to cast mutagenic awakening. The spell must be one that
+  same tradition you used to activate mutagenic awakening. The spell must be one that
   has a listed range. If the target is at least 3rd level, you can choose a 2nd-rank
   spell instead of a 1st-rank spell; and if the target is at least 5th level, you
   can choose a 3rd-rank spell. The target can Use this tech once per day as an innate
-  spell of the tradition you used to cast mutagenic awakening. If they are untrained
-  in the appropriate magical tradition, their spell attack bonus is 2 + their level
+  spell of the tradition you used to activate mutagenic awakening. If they are untrained
+  in the appropriate magical tradition, their tech attack bonus is 2 + their level
   + their highest mental ability modifier, and their tech DC is 12 + their level
   + their highest mental ability modifier.
 
@@ -20,10 +20,10 @@ description: 'You infuse mutagenic compounds into your target, unlocking dormant
   slot (if you''re a spontaneous spellcaster).
 
 
-  Heightened (8th) If the target is at least 7th level, you can choose a 4th-rank
+  Upgraded (8th) If the target is at least 7th level, you can choose a 4th-rank
   spell.
 
-  Heightened (10th) As 8th, and if the target is at least 9th level, you can choose
+  Upgraded (10th) As 8th, and if the target is at least 9th level, you can choose
   a 5th-rank spell.'
 tradition: bio_synthetic
 level: 6

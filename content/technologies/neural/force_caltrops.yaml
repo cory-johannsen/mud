@@ -3,11 +3,11 @@ name: Force Caltrops
 description: 'You scatter glittering splinters of psychokinetic force throughout the
   area, creating invisible caltrops of hardened willpower. The area is difficult terrain,
   even to flying or incorporeal creatures. Any creature that moves through the area
-  takes 1d4 piercing damage per square traversed, with a basic Reflex save. A creature
+  takes 1d4 piercing damage per square traversed, with a basic Quickness check. A creature
   that takes damage from the caltrops also takes 1d4 persistent bleed damage.
 
 
-  Heightened (+2) The piercing damage per square increases by 1d4.'
+  Upgraded (+2) The piercing damage per square increases by 1d4.'
 tradition: neural
 level: 5
 usage_type: prepared

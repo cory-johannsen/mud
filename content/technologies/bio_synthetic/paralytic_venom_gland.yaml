@@ -1,6 +1,6 @@
 id: paralytic_venom_gland
 name: Paralytic Venom Gland
-description: 'You magically duplicate a spider''s venomous sting. You deal 1d4 piercing damage to the touched creature and afflict it with spider venom. The target must attempt a Toughness save.
+description: 'You magically duplicate a spider''s venomous sting. You deal 1d4 piercing damage to the touched creature and afflict it with spider venom. The target must attempt a Grit check.
 
 
   Critical Success The target is unaffected.

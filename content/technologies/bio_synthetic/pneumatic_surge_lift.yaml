@@ -7,11 +7,11 @@ description: 'A massive bio-generated pressure wave lifts you and everything aro
   relative position to each other. If there wouldn''t be enough room at the destination,
   the protocol fails.
 
-  Any unwilling participant can attempt a Reflex save to avoid being carried along.
+  Any unwilling participant can attempt a Quickness check to avoid being carried along.
   The airlift doesn''t carry items that are secured in place.
 
 
-  Heightened (6th) The distance you Fly increases to 120 feet, and the Bulk limit
+  Upgraded (6th) The distance you Fly increases to 120 feet, and the Bulk limit
   increases to 20.'
 tradition: bio_synthetic
 level: 4

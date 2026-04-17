@@ -1,7 +1,7 @@
 id: void_condemnation
 name: Void Condemnation
 description: You fire a ray of absolute cold infused with nihilistic doctrine. Make
-  a ranged spell attack. The ray deals 5d6 cold damage. If the target has the holy
+  a ranged tech attack. The ray deals 5d6 cold damage. If the target has the holy
   trait, you deal 5d6 unholy damage instead.
 tradition: fanatic_doctrine
 level: 3

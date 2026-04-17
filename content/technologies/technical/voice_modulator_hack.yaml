@@ -1,7 +1,7 @@
 id: voice_modulator_hack
 name: Voice Modulator Hack
 description: 'You hack the target''s vocal processing hardware, distorting their speech.
-  The target must attempt a Toughness save.
+  The target must attempt a Grit check.
 
 
   Critical Success The target is unaffected.

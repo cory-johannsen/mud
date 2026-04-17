@@ -6,7 +6,7 @@ description: |-
     Living Creature Make a tech attack roll. On a hit, the target takes 2d6 slashing damage. On a critical hit, double the damage, and the target also takes 1d4 persistent bleed damage. If this tech's damage kills the target, the corpse is only bones.
     Undead Creature Make a tech attack roll. On a hit, the target takes 2d6 slashing damage. On a critical hit, double the damage, and the target also becomes Enfeebled 1 for 1 minute. If this tech's damage destroys the target, only its bare bones remain behind.
 
-    Heightened (+1) The slashing damage to living and undead creatures increases by 2d6, and the persistent bleed damage to living creatures increases by 1d4.
+    Upgraded (+1) The slashing damage to living and undead creatures increases by 2d6, and the persistent bleed damage to living creatures increases by 1d4.
 tradition: fanatic_doctrine
 level: 1
 usage_type: prepared

@@ -1,11 +1,11 @@
 id: ground_charge
 name: Ground Charge
 description: 'You detonate subsurface charges that erupt from the ground. Each creature
-  in the area takes 3d6 bludgeoning damage with a basic Reflex save. The area becomes
+  in the area takes 3d6 bludgeoning damage with a basic Quickness check. The area becomes
   difficult terrain.
 
 
-  Heightened (+1) The damage increases by 1d6.'
+  Upgraded (+1) The damage increases by 1d6.'
 tradition: technical
 level: 2
 usage_type: prepared

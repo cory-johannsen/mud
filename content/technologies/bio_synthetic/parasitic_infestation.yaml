@@ -1,6 +1,6 @@
 id: parasitic_infestation
 name: Parasitic Infestation
-description: 'You infest the target with bio-synthetic parasites that devour tissue. The target takes 4d6 poison damage and must attempt a Toughness save.
+description: 'You infest the target with bio-synthetic parasites that devour tissue. The target takes 4d6 poison damage and must attempt a Grit check.
 
 
   Critical Success The creature takes no damage.

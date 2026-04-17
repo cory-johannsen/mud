@@ -3,11 +3,11 @@ name: Telekinetic Storm
 description: Your psychic fury erupts in a telekinetic storm of devastating proportions.
   Any loose, unattended objects of 1 Bulk or less within range are picked up and begin
   to orbit you at lethal speeds. All creatures in the area take 6d4 piercing damage
-  with a basic Reflex save. Each time you Sustain the spell, you can increase the
+  with a basic Quickness check. Each time you Sustain the spell, you can increase the
   radius of the storm by 10 feet, to a maximum of 100 feet. The storm moves with you
   and provides you with lesser cover, though you can't use this cover to hide or sneak.
-  Allies within the storm who roll a success on their Reflex save against your telekinetic
-  storm get a critical success instead, as you attempt to avoid hitting them.Heightened
+  Allies within the storm who roll a success on their Quickness check against your telekinetic
+  storm get a critical success instead, as you attempt to avoid hitting them.Upgraded
   (+1) The damage increases by 1d4.
 tradition: neural
 level: 6

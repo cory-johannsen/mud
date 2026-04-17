@@ -1,10 +1,10 @@
 id: necrotic_bloom
 name: Necrotic Bloom
 description: 'You release a wave of bio-synthetic decay that withers living tissue.
-  Each creature in the area takes 3d10 void damage with a basic Toughness save.
+  Each creature in the area takes 3d10 void damage with a basic Grit check.
 
 
-  Heightened (+1) The damage increases by 1d10.'
+  Upgraded (+1) The damage increases by 1d10.'
 tradition: bio_synthetic
 level: 2
 usage_type: prepared

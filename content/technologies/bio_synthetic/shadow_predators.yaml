@@ -1,7 +1,7 @@
 id: shadow_predators
 name: Shadow Predators
 description: You grow bio-synthetic predators from ambient shadows. The shades attack
-  creatures you designate, making Strikes using your spell attack modifier and dealing
+  creatures you designate, making Strikes using your tech attack modifier and dealing
   2d6 slashing damage on a hit. You can command them when you Sustain the spell.
 tradition: bio_synthetic
 level: 2

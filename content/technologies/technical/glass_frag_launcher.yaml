@@ -12,7 +12,7 @@ description: 'You launch a cone of hyper-velocity glass fragments that embed in 
 
   Failure The target takes full damage, is Slowed 1, and gains weakness to sonic and
   bludgeoning damage. The weakness is equal to 3 × the slowed value from this tech.
-  The target must attempt a Toughness save at the end of each of its turns; this ongoing
+  The target must attempt a Grit check at the end of each of its turns; this ongoing
   save has the incapacitation trait. On a failed save, the slowed value increases
   by 1 (or by 2 on a critical failure), to a maximum of Slowed 3. A successful save
   reduces the slowed value by 1 (or by 2 on a critical success). If the creature ends
@@ -23,7 +23,7 @@ description: 'You launch a cone of hyper-velocity glass fragments that embed in 
   @UUID[Compendium.pf2e.spell-effects.Item.tech Effect: Vitrifying Blast]
 
 
-  Heightened (+1) The damage increases by 1d6.'
+  Upgraded (+1) The damage increases by 1d6.'
 tradition: technical
 level: 6
 usage_type: prepared

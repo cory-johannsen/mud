@@ -7,7 +7,7 @@ description: 'Area 10-foot radius, 60-foot-tall cylinder
   save. Creatures that fail also take persistent vitality damage equal to their level.
 
 
-  Heightened (+1) The damage increases by 1d8.'
+  Upgraded (+1) The damage increases by 1d8.'
 tradition: fanatic_doctrine
 level: 5
 usage_type: prepared

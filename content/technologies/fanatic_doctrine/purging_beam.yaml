@@ -1,6 +1,6 @@
 id: purging_beam
 name: Purging Beam
-description: You channel a blazing beam of doctrinal energy. Make a ranged spell attack.
+description: You channel a blazing beam of doctrinal energy. Make a ranged tech attack.
   The beam deals 5d6 fire damage. If the target has the unholy trait, you deal 5d6
   holy damage instead.
 tradition: fanatic_doctrine

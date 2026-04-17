@@ -2,9 +2,9 @@ id: combat_drone_swarm
 name: Combat Drone Swarm
 description: 'You deploy a swarm of automated combat drones assembled from salvaged components. The drone army occupies the space of a Huge creature and has a Speed of 40 feet.
 
-  Arrive Assault Protocol The drone swarm deploys, slashing through enemies with cutting appendages. Enemies within a 20-foot emanation take 4d8 slashing damage (basic Reflex save). On a critical failure, a creature also take 2d8 persistent bleed damage.
+  Arrive Assault Protocol The drone swarm deploys, slashing through enemies with cutting appendages. Enemies within a 20-foot emanation take 4d8 slashing damage (basic Quickness check). On a critical failure, a creature also take 2d8 persistent bleed damage.
 
-  Depart Final Barrage Before deactivating, the swarm launches projectiles at enemy positions, dealing 6d6 piercing damage to enemies in a 20-foot burst (basic Reflex save) within 30 feet. On a critical failure, a creature is also Frightened 2.'
+  Depart Final Barrage Before deactivating, the swarm launches projectiles at enemy positions, dealing 6d6 piercing damage to enemies in a 20-foot burst (basic Quickness check) within 30 feet. On a critical failure, a creature is also Frightened 2.'
 tradition: technical
 level: 6
 usage_type: prepared

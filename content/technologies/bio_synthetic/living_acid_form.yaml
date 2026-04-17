@@ -8,11 +8,11 @@ description: 'You exhale corrosive gas, and acidic secretions coat your skin as 
   gain 3d6 Temporary Hit Points temporary Hit Points as your body digests the eroded
   material and transforms it into protective acid. When the tech ends, any remaining
   temporary HP expires as well. Your acid tech deals one additional die of acid damage
-  (of the same damage die the tech uses). You can cast @UUID[Compendium.pf2e.spells-srd.Item.Acid
+  (of the same damage die the tech uses). You can activate @UUID[Compendium.pf2e.spells-srd.Item.Acid
   Splash] as an innate tech; the splash damage affects all creatures within 15 feet
   instead of the normal 5 feet.
 
-  @UUID[Compendium.pf2e.spell-effects.Item.tech Effect: Corrosive Body]Heightened
+  @UUID[Compendium.pf2e.spell-effects.Item.tech Effect: Corrosive Body]Upgraded
   (9th) Creatures touching you take 4d6 acid damage instead of 3d6, your unarmed attacks
   deal 2d4 additional acid damage, and you gain 5d6 Temporary Hit Points temporary
   Hit Points.'

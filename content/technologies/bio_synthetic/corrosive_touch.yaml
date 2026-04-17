@@ -5,13 +5,13 @@ description: 'You cause the target to rapidly corrode via bio-synthesized oxidiz
   All damage ignores Hardness. If the spell causes persistent damage, a creature can scrape off the corrosion (reducing the DC of the flat check to end persistent damage to 10 and granting an immediate flat check).
 
 
-  Creature or Hazard Must be mostly metal. Deals 8d6 damage (basic Toughness save), plus 2d6 persistent on a failed save.
+  Creature or Hazard Must be mostly metal. Deals 8d6 damage (basic Grit check), plus 2d6 persistent on a failed save.
 
 
-  Item Deals [[/r {2d6}]]{2d6 damage}, subject to a basic Reflex save by the creature wearing or holding the item; unattended items automatically critically fail. On a failed save, also 1d6 persistent.
+  Item Deals [[/r {2d6}]]{2d6 damage}, subject to a basic Quickness check by the creature wearing or holding the item; unattended items automatically critically fail. On a failed save, also 1d6 persistent.
 
 
-  Heightened (+1) Increase creature/hazard damage by 2d6, and increase max Bulk of targetable items by 1.'
+  Upgraded (+1) Increase creature/hazard damage by 2d6, and increase max Bulk of targetable items by 1.'
 tradition: bio_synthetic
 level: 4
 usage_type: prepared

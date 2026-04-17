@@ -1,7 +1,7 @@
 id: deception_filter
 name: Deception Filter
 description: Your neural processors flag micro-expressions and vocal stress patterns
-  in real time. You gain a +4 status bonus to Perception checks when someone Lies.
+  in real time. You gain a +4 status bonus to Awareness checks when someone Lies.
 tradition: neural
 level: 4
 usage_type: prepared
@@ -15,4 +15,4 @@ effects:
   - type: utility
     dc: 0
     description: Falsehoods ring in your ears like discordant notes. You gain a +4
-      status bonus to Perception checks when someone Lies.
+      status bonus to Awareness checks when someone Lies.

@@ -1,11 +1,11 @@
 id: heightened_awareness_rite
-name: Heightened Awareness Rite
+name: Upgraded Awareness Rite
 description: 'You perform a doctrinal rite that sharpens the target''s senses. The
   target gains low-light vision, and all of the target''s imprecise senses have their
   distances doubled. If the target already has low-light vision, they gain darkvision.
 
 
-  Heightened (+2) The number of targets increases by 1.'
+  Upgraded (+2) The number of targets increases by 1.'
 tradition: fanatic_doctrine
 level: 4
 usage_type: prepared

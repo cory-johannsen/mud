@@ -1,13 +1,13 @@
 id: truth_spectrum_beacon
 name: Truth Spectrum Beacon
-description: 'The object emits a broad-spectrum analytical light that exposes deception, reveals hidden objects, and disrupts hostile cognitive programming. The object casts bright light in a 60-foot radius (and dim light for the next 60 feet). Within the area of bright light, Perception checks to locate hidden objects (including secret doors but not traps), Will saves to resist visual illusions, and Will saves to resist effects placed by hostile entities that inflict the controlled condition all gain a +2 status bonus. This light suppresses interference fields of this protocol''s rank or lower.
+description: 'The object emits a broad-spectrum analytical light that exposes deception, reveals hidden objects, and disrupts hostile cognitive programming. The object casts bright light in a 60-foot radius (and dim light for the next 60 feet). Within the area of bright light, Awareness checks to locate hidden objects (including secret doors but not traps), Reasoning checks to resist visual illusions, and Reasoning checks to resist effects placed by hostile entities that inflict the controlled condition all gain a +2 status bonus. This light suppresses interference fields of this protocol''s rank or lower.
 
   Finally, the analytical light is painful to creatures sensitive to such frequencies; they suffer a -2 status penalty to saves versus fear effects while in the area of bright light.
 
 
-  Heightened (7th) The status bonus increases to +3.
+  Upgraded (7th) The status bonus increases to +3.
 
-  Heightened (9th) The status bonus increases to +4.'
+  Upgraded (9th) The status bonus increases to +4.'
 tradition: neural
 level: 4
 usage_type: prepared

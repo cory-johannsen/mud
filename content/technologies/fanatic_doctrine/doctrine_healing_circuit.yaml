@@ -1,9 +1,9 @@
 id: doctrine_healing_circuit
 name: Doctrine Healing Circuit
 description: |-
-    You channel vital energy to heal the living or damage the undead. If the target is a willing living creature, you restore 1d8 Hit Points. If the target is undead, you deal that amount of vitality damage to it, and it gets a basic Toughness save.
+    You channel vital energy to heal the living or damage the undead. If the target is a willing living creature, you restore 1d8 Hit Points. If the target is undead, you deal that amount of vitality damage to it, and it gets a basic Grit check.
 
-    Heightened (+1) The amount of healing or damage increases by 1d8, and the extra healing for the 2-action version increases by 8.
+    Upgraded (+1) The amount of healing or damage increases by 1d8, and the extra healing for the 2-action version increases by 8.
 tradition: fanatic_doctrine
 level: 1
 usage_type: prepared

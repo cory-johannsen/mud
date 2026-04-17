@@ -1,6 +1,6 @@
 id: retinal_burn_reflex
 name: Retinal Burn Reflex
-description: 'Trigger A creature damages you. You unleash a psychic backlash that sears the attacker''s visual cortex. The effect is determined by the target''s Will save.Critical Success The target is unaffected.
+description: 'Trigger A creature damages you. You unleash a psychic backlash that sears the attacker''s visual cortex. The effect is determined by the target''s Reasoning check.Critical Success The target is unaffected.
 
   Success The target can''t Observe you until the end of its turn, and if you''re currently observed by it, you become Hidden to it.
 

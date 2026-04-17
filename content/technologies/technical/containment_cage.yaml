@@ -1,6 +1,6 @@
 id: containment_cage
 name: Containment Cage
-description: 'You deploy a rapid-assembly containment cage around the target. The target must attempt a Reflex save.
+description: 'You deploy a rapid-assembly containment cage around the target. The target must attempt a Quickness check.
 
 
   Critical Success The creature is unaffected.

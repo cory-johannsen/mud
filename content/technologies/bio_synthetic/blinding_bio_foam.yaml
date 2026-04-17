@@ -6,7 +6,7 @@ description: 'You spray a caustic bio-synthetic foam into the target''s eyes, wh
   foam can be removed with 3 Interact actions.
 
 
-  Heightened (+1) The initial damage increases by 2d10, and the persistent damage
+  Upgraded (+1) The initial damage increases by 2d10, and the persistent damage
   increases by 1d6.'
 tradition: bio_synthetic
 level: 5

@@ -1,6 +1,6 @@
 id: ghost_signal_projection
 name: Ghost Signal Projection
-description: You project a holographic phantom from a fallen target's residual neural data, parading it across the combat zone as a psychological weapon. Whenever you Use this tech or Sustain this tech, you move the projection up to 30 feet and cause each enemy in a 30-foot emanation of the phantom to attempt a Willpower save against your tech DC. Enemies who fail become Frightened 1 (or Frightened 2 on a critical failure).Heightened (6th) You can target a corpse of any size that has died within the past 8 hours.
+description: You project a holographic phantom from a fallen target's residual neural data, parading it across the combat zone as a psychological weapon. Whenever you Use this tech or Sustain this tech, you move the projection up to 30 feet and cause each enemy in a 30-foot emanation of the phantom to attempt a Willpower save against your tech DC. Enemies who fail become Frightened 1 (or Frightened 2 on a critical failure).Upgraded (6th) You can target a corpse of any size that has died within the past 8 hours.
 tradition: neural
 level: 4
 usage_type: prepared

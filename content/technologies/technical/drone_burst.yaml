@@ -2,10 +2,10 @@ id: drone_burst
 name: Drone Burst
 description: 'You launch a swarm of micro-drones from a canister. The swarm moves
   to a space within 30 feet and deals 2d8 piercing damage to each creature in a @Template[burst|distance:10].
-  Affected creatures must attempt a basic Reflex save.
+  Affected creatures must attempt a basic Quickness check.
 
 
-  Heightened (+1) The damage increases by 1d8.'
+  Upgraded (+1) The damage increases by 1d8.'
 tradition: technical
 level: 2
 usage_type: prepared

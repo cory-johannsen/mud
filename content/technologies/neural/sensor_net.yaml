@@ -2,7 +2,7 @@ id: sensor_net
 name: Sensor Net
 description: You place an invisible neural sensor on each target just above their
   eyes. Each sensor relays visual data to you, allowing you to see what each target
-  sees. You gain a +1 status bonus to Perception checks while any sensor remains active.
+  sees. You gain a +1 status bonus to Awareness checks while any sensor remains active.
 tradition: neural
 level: 3
 usage_type: prepared

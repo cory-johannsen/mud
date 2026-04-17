@@ -3,11 +3,11 @@ name: EM Purge Beam
 description: 'Area 10-foot radius, 60-foot-tall cylinder
 
   You fire a concentrated energy beam that scours the area with vitality energy. Each
-  creature takes 6d8 vitality damage and must attempt a basic Reflex save. Creatures
+  creature takes 6d8 vitality damage and must attempt a basic Quickness check. Creatures
   that fail also take persistent vitality damage equal to their level.
 
 
-  Heightened (+1) The damage increases by 1d8.'
+  Upgraded (+1) The damage increases by 1d8.'
 tradition: technical
 level: 5
 usage_type: prepared

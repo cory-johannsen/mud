@@ -1,6 +1,6 @@
 id: smoke_screen
 name: Smoke Screen
-description: 'You deploy a canister that fills the area with dense smoke. The cloud is difficult terrain and creatures in it are Concealed. A creature that breathes in the smoke must attempt a Toughness save.
+description: 'You deploy a canister that fills the area with dense smoke. The cloud is difficult terrain and creatures in it are Concealed. A creature that breathes in the smoke must attempt a Grit check.
 
 
   Critical Success The creature is unaffected.

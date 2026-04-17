@@ -2,7 +2,7 @@ id: pressure_blast
 name: Pressure Blast
 description: You expel a blast of compressed bio-gas from your lungs. The blast extinguishes
   small fires, disperses gas clouds, and pushes creatures away. Each creature in the
-  area must attempt a Reflex save or be pushed 10 feet.
+  area must attempt a Quickness check or be pushed 10 feet.
 tradition: bio_synthetic
 level: 3
 usage_type: prepared

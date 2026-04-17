@@ -1,6 +1,6 @@
 id: probability_matrix_scan
 name: Probability Matrix Scan
-description: You open your mind to the vast network of causal data streams, perceiving probability threads in their tangled complexity. You attempt Perception checks to detect hidden creatures and objects within 60 feet, gaining a +2 status bonus.
+description: You open your mind to the vast network of causal data streams, perceiving probability threads in their tangled complexity. You attempt Awareness checks to detect hidden creatures and objects within 60 feet, gaining a +2 status bonus.
 tradition: neural
 level: 3
 usage_type: prepared

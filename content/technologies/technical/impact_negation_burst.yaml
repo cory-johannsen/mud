@@ -5,7 +5,7 @@ description: 'Trigger You fall more than 10 feet.
 
   Your armor''s inertial dampeners convert fall energy into a shockwave. You take
   no fall damage. Creatures within 10 feet take 3d6 bludgeoning damage with a basic
-  Reflex save.'
+  Quickness check.'
 tradition: technical
 level: 3
 usage_type: prepared

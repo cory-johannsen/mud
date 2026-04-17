@@ -1,6 +1,6 @@
 id: seismic_destabilizer
 name: Seismic Destabilizer
-description: You activate a seismic device that causes the ground to heave. The area becomes difficult terrain. Creatures standing in it must attempt a Reflex save or fall Prone.
+description: You activate a seismic device that causes the ground to heave. The area becomes difficult terrain. Creatures standing in it must attempt a Quickness check or fall Prone.
 tradition: technical
 level: 3
 usage_type: prepared

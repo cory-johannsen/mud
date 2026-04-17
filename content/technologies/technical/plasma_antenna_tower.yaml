@@ -15,7 +15,7 @@ description: 'Area 30-foot radius, 100-foot tall cylinder
   Critical Failure The creature is fascinated with the antenna until the tech ends. The antenna''s fire damage doesn''t end the fascination; other hostile actions end it, as normal. If the fascination ends, the creature must attempt a new save at the end of its turn if it can still see the antenna.
 
 
-  Heightened (+1) The damage increases by 1d6'
+  Upgraded (+1) The damage increases by 1d6'
 tradition: technical
 level: 8
 usage_type: prepared

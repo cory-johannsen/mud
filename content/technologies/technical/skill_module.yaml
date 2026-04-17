@@ -5,7 +5,7 @@ description: 'You upload a temporary skill module into the target''s neural inte
   is already trained, it instead gains a +1 status bonus to that skill.
 
 
-  Heightened (4th) The target becomes expert in the chosen skill for the duration
+  Upgraded (4th) The target becomes expert in the chosen skill for the duration
   if it was already trained.'
 tradition: technical
 level: 2

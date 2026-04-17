@@ -1,6 +1,6 @@
 id: aberrant_toxin_injector
 name: Aberrant Toxin Injector
-description: 'You fire a needle loaded with a synthesized alien neurotoxin. You deal 2d6 piercing damage to the touched creature and afflict it with aberrant neurotoxin. If the target takes piercing damage, they must attempt a Toughness save.
+description: 'You fire a needle loaded with a synthesized alien neurotoxin. You deal 2d6 piercing damage to the touched creature and afflict it with aberrant neurotoxin. If the target takes piercing damage, they must attempt a Grit check.
 
 
   Critical Success The target is unaffected.

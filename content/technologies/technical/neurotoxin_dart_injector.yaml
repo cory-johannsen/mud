@@ -1,6 +1,6 @@
 id: neurotoxin_dart_injector
 name: Neurotoxin Dart Injector
-description: 'You fire a precision dart loaded with synthesized neurotoxin. You deal 3d6 piercing damage to the target and afflict it with the neurotoxin. The target must attempt a Toughness save.
+description: 'You fire a precision dart loaded with synthesized neurotoxin. You deal 3d6 piercing damage to the target and afflict it with the neurotoxin. The target must attempt a Grit check.
 
 
   Critical Success The target is unaffected.

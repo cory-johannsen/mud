@@ -2,7 +2,7 @@ id: tunneling_charge
 name: Tunneling Charge
 description: You bore briefly through the ground using a micro-tunneling device. You
   Leap 10 feet, and the ground erupts at your landing point in a 10-foot burst dealing
-  2d6 bludgeoning damage with a basic Reflex save.
+  2d6 bludgeoning damage with a basic Quickness check.
 tradition: technical
 level: 3
 usage_type: prepared

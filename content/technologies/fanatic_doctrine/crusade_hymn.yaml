@@ -2,12 +2,12 @@ id: crusade_hymn
 name: Crusade Hymn
 description: 'You broadcast a doctrinal war chant that bolsters allies who receive
   it. Allied creatures who can hear and understand you gain a +1 status bonus to attack
-  rolls, Toughness saves, and Will saves against mental effects.
+  rolls, Grit checks, and Reasoning checks against mental effects.
 
 
-  Heightened (7th) The status bonus increases to +2.
+  Upgraded (7th) The status bonus increases to +2.
 
-  Heightened (10th) The status bonus increases to +3.'
+  Upgraded (10th) The status bonus increases to +3.'
 tradition: fanatic_doctrine
 level: 4
 usage_type: prepared
@@ -24,4 +24,4 @@ effects:
     dc: 0
     description: You sing a prayer for war, inspiring valor in allies who hear your
       song. Allied creatures who can hear and understand you gain a +1 status bonus
-      to attack rolls, Toughness saves, and Will saves agains
+      to attack rolls, Grit checks, and Reasoning checks agains

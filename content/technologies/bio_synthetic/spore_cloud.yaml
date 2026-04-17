@@ -1,6 +1,6 @@
 id: spore_cloud
 name: Spore Cloud
-description: 'You release a cloud of toxic biological spores that fills the area. The cloud is difficult terrain and creatures in it are Concealed. A creature that breathes in the spores must attempt a Toughness save.
+description: 'You release a cloud of toxic biological spores that fills the area. The cloud is difficult terrain and creatures in it are Concealed. A creature that breathes in the spores must attempt a Grit check.
 
 
   Critical Success The creature is unaffected.

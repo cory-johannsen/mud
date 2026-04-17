@@ -1,6 +1,6 @@
 id: chaff_dispersal
 name: Chaff Dispersal
-description: 'You fire a chaff canister that fills the area with reflective particles. Each creature in the area must attempt a Toughness save.
+description: 'You fire a chaff canister that fills the area with reflective particles. Each creature in the area must attempt a Grit check.
 
 
   Critical Success The creature is unaffected.

@@ -2,7 +2,7 @@ id: digital_doppelganger
 name: Digital Doppelganger
 description: 'You create a hard-light double that physically resembles and mimics
   the target. This double is limited to moving, Interacting, speaking short sentences,
-  and other basic tasks. It is unable to cast spells, attack, or use any complex skills.
+  and other basic tasks. It is unable to activate spells, attack, or use any complex skills.
 
   The double is your minion. You can issue new commands as part of Sustaining the
   tech. You can command it telepathically within 1 mile. You can switch between your
@@ -12,7 +12,7 @@ description: 'You create a hard-light double that physically resembles and mimic
   the double''s Hit Points reach 0, the spell ends.
 
 
-  Heightened (+1) The maximum level of the target increases by 2.'
+  Upgraded (+1) The maximum level of the target increases by 2.'
 tradition: neural
 level: 4
 usage_type: prepared

@@ -1,6 +1,6 @@
 id: venomed_psyche
 name: Venomed Psyche
-description: You deliver a psychic toxin through neural contact. Make a melee spell attack. On a hit, you deal 1d4 piercing damage plus 1d4 poison damage, and the target must attempt a Toughness save or become Sickened 1.
+description: You deliver a psychic toxin through neural contact. Make a melee tech attack. On a hit, you deal 1d4 piercing damage plus 1d4 poison damage, and the target must attempt a Grit check or become Sickened 1.
 tradition: neural
 level: 2
 usage_type: prepared

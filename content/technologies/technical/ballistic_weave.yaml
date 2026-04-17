@@ -1,7 +1,7 @@
 id: ballistic_weave
 name: Ballistic Weave
 description: You deploy a ballistic fiber weave that hardens the target's outer layer.
-  The target gains a +1 item bonus to AC but takes a -2 status penalty to Reflex saves
+  The target gains a +1 item bonus to AC but takes a -2 status penalty to Quickness checks
   for the duration.
 tradition: technical
 level: 2

@@ -1,7 +1,7 @@
 id: flechette_burst
 name: Flechette Burst
 description: You deploy a flechette charge that shreds targets in the area. Creatures
-  take 4d6 slashing damage and must attempt a Reflex save.
+  take 4d6 slashing damage and must attempt a Quickness check.
 tradition: technical
 level: 3
 usage_type: prepared

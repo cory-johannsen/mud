@@ -2,13 +2,13 @@ id: blessed_awareness
 name: Blessed Awareness
 description: 'You anoint the target animal with a doctrinal blessing that sharpens
   its awareness without fully awakening it. The target gains a +2 status bonus to
-  Perception checks and Will saves, and Nature checks to Command the target gain a
+  Awareness checks and Reasoning checks, and Nature checks to Command the target gain a
   +1 status bonus. Additionally, if the target has the minion trait, it can take one
   action each turn even without a Command. All other effects remain identical to the
   base protocol.
 
 
-  Heightened (8th) You can target up to 5 animals.'
+  Upgraded (8th) You can target up to 5 animals.'
 tradition: fanatic_doctrine
 level: 4
 usage_type: prepared
@@ -25,4 +25,4 @@ effects:
     dc: 0
     description: You give the target animal a glimmer of awareness, not truly awakening
       it but allowing it to better understand its surroundings. The target gains a
-      +2 status bonus to Perception checks and Will saves,
+      +2 status bonus to Awareness checks and Reasoning checks,

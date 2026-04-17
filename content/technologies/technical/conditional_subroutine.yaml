@@ -13,11 +13,11 @@ description: 'You prepare a tech effect that will trigger later. While programmi
   subroutine, the newer one supersedes the older.
 
 
-  Heightened (8th) You can choose a tech of 5th rank or lower.
+  Upgraded (8th) You can choose a tech of 5th rank or lower.
 
-  Heightened (9th) You can choose a tech of 6th rank or lower.
+  Upgraded (9th) You can choose a tech of 6th rank or lower.
 
-  Heightened (10th) You can choose a tech of 7th rank or lower.'
+  Upgraded (10th) You can choose a tech of 7th rank or lower.'
 tradition: technical
 level: 7
 usage_type: prepared

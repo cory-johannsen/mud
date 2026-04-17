@@ -9,7 +9,7 @@ description: 'You grow a set of bio-synthetic scales that store energy before re
   prevented. As a 2-action activity (concentrate and manipulate traits), you can explode
   your scales in a 20-foot emanation, dealing 1d6 damage of the chosen type per 10
   damage prevented, to a maximum of 10d6 (after preventing 100 damage). Each creature
-  in the area attempts a basic Reflex save. The spell then ends.Heightened (+2) The
+  in the area attempts a basic Quickness check. The spell then ends.Upgraded (+2) The
   resistance increases by 5, and the maximum explosion damage increases by 5d6.'
 tradition: bio_synthetic
 level: 4

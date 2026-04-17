@@ -3,7 +3,7 @@ name: Cryogenic Storm
 description: 'A blast of cryogenic compound extends from your delivery system. If
   you activate this tech with 2 actions, it has an area of a 60-foot cone; if you
   use 3 actions, it has a range of 500 feet and an area of a 30-foot burst. Each creature
-  in the area takes 10d6 cold damage with a Reflex save.
+  in the area takes 10d6 cold damage with a Quickness check.
 
 
   Critical Success The creature is unaffected.

@@ -3,7 +3,7 @@ name: Doctrine Protection Ward
 description: |-
     You ward a creature against harm. The target gains a +1 status bonus to Armor Class and saving throws.
 
-    Heightened (3rd) You can choose to have the benefits also affect all your allies in a @Template[emanation|distance:10] around the target.
+    Upgraded (3rd) You can choose to have the benefits also affect all your allies in a @Template[emanation|distance:10] around the target.
     @UUID[Compendium.pf2e.spell-effects.Item.tech Effect: Protection]
 tradition: fanatic_doctrine
 level: 1
@@ -20,4 +20,4 @@ effects:
           description: |-
             You ward a creature against harm. The target gains a +1 status bonus to Armor Class and saving throws.
 
-            Heightened (3rd) You can choose to have the benefits also affect all your allies in a @Template[
+            Upgraded (3rd) You can choose to have the benefits also affect all your allies in a @Template[

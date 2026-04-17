@@ -1,9 +1,9 @@
 id: bio_plasma_bolt
 name: Bio-Plasma Bolt
-description: 'You launch a bolt of bio-generated plasma. Make a spell attack. On a hit, you deal 2d6 fire damage.
+description: 'You launch a bolt of bio-generated plasma. Make a tech attack. On a hit, you deal 2d6 fire damage.
 
 
-  Heightened (+1) You fire one additional bolt, each requiring its own spell attack roll. Each bolt deals 2d6 fire damage.'
+  Upgraded (+1) You fire one additional bolt, each requiring its own tech attack roll. Each bolt deals 2d6 fire damage.'
 tradition: bio_synthetic
 level: 2
 usage_type: prepared

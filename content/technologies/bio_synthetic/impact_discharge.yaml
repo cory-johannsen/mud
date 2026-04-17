@@ -5,7 +5,7 @@ description: 'Trigger You fall more than 10 feet.
 
   You convert the kinetic energy of your fall into a bio-electric shockwave. You take
   no damage from the fall. Creatures within 10 feet take 3d6 bludgeoning damage with
-  a basic Reflex save.'
+  a basic Quickness check.'
 tradition: bio_synthetic
 level: 3
 usage_type: prepared

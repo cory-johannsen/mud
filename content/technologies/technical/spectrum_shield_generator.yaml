@@ -3,7 +3,7 @@ name: Spectrum Shield Generator
 description: 'You deploy a hardlight armor system that wraps the target in reactive photonic plating. The armor sheds bright light for 20 feet. All mechanical effects (dazzled, resistance, color table) remain identical to the base protocol.
 
 
-  Heightened (+3) The resistance is increased by 5.'
+  Upgraded (+3) The resistance is increased by 5.'
 tradition: technical
 level: 4
 usage_type: prepared

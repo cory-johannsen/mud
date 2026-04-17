@@ -2,7 +2,7 @@ id: corrosion_coating
 name: Corrosion Coating
 description: You deploy a corrosive nanite solution that colonizes the target's equipment
   joints. The target takes 2d6 persistent piercing damage and a -10-foot status penalty
-  to Speed on a failed Toughness save.
+  to Speed on a failed Grit check.
 tradition: technical
 level: 3
 usage_type: prepared

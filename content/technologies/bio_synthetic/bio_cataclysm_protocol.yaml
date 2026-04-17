@@ -2,7 +2,7 @@ id: bio_cataclysm_protocol
 name: Bio-Cataclysm Protocol
 description: 'You trigger a full-scale biological cataclysm. All creatures in a 60-foot
   burst take 10d10 damage of each of the following types: acid, cold, electricity,
-  fire, sonic (Reflex save for half of each). Structures in the area are destroyed.
+  fire, sonic (Quickness check for half of each). Structures in the area are destroyed.
   The area becomes a toxic dead zone for 1 hour.'
 tradition: bio_synthetic
 level: 10

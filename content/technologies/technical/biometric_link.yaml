@@ -2,7 +2,7 @@ id: biometric_link
 name: Biometric Link
 description: You establish a biometric monitoring link between yourself and the target.
   For the duration, each time the target takes damage, you can feel it (though you
-  take no damage). You gain a +2 status bonus to Perception checks to Sense Motive
+  take no damage). You gain a +2 status bonus to Awareness checks to Sense Motive
   against the target. You can Dismiss the spell.
 tradition: technical
 level: 2

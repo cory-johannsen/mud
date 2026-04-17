@@ -2,7 +2,7 @@ id: cryogenic_shrapnel_burst
 name: Cryogenic Shrapnel Burst
 description: 'You exhale a cryo-breath, whipping up a gust of supercooled wind that
   flash-freezes ambient moisture into a flurry of jagged ice shards. The flurry deals
-  9d6 cold damage and 9d6 slashing damage to all foes, with a basic Reflex save, but
+  9d6 cold damage and 9d6 slashing damage to all foes, with a basic Quickness check, but
   the gust flows harmlessly around your allies. The wind then picks you up and carries
   you to the other end of the area; though your movement within the gust can still
   trigger reactions, the storm of ice crystals prevents you from being affected by
@@ -10,7 +10,7 @@ description: 'You exhale a cryo-breath, whipping up a gust of supercooled wind t
   would affect snow.
 
 
-  Heightened (+1) The cold and slashing damage each increase by 1d6.'
+  Upgraded (+1) The cold and slashing damage each increase by 1d6.'
 tradition: bio_synthetic
 level: 7
 usage_type: prepared

@@ -1,6 +1,6 @@
 id: metabolic_transfer
 name: Metabolic Transfer
-description: 'You bio-chemically siphon speed from a foe and redirect it to yourself or an ally. The effects depend on the foe''s Toughness save.
+description: 'You bio-chemically siphon speed from a foe and redirect it to yourself or an ally. The effects depend on the foe''s Grit check.
 
 
   Critical Success The targets are unaffected.

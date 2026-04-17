@@ -3,7 +3,7 @@ name: Neural Tendrils
 description: 'Area 20-foot burst adjacent to a flat surface
 
   Writhing tendrils of psychic energy rise up and attempt to ensnare creatures in
-  the area. Make spell attack rolls against the Fortitude DC of each creature in the
+  the area. Make tech attack rolls against the Fortitude DC of each creature in the
   area. Any creature you succeed against is Grabbed and takes 3d6 bludgeoning damage.
   On a critical success, it is also Restrained. A creature can attempt to Escape against
   your tech DC.
@@ -13,7 +13,7 @@ description: 'Area 20-foot burst adjacent to a flat surface
   takes 1d6 bludgeoning damage.
 
 
-  Heightened (+2) The initial damage increases by 1d6, and the ongoing damage increases
+  Upgraded (+2) The initial damage increases by 1d6, and the ongoing damage increases
   by 1d6.'
 tradition: neural
 level: 5

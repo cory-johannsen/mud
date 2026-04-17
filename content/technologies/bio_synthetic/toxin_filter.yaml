@@ -1,7 +1,7 @@
 id: toxin_filter
 name: Toxin Filter
 description: You enhance the target's digestive system with bio-synthetic filtration
-  organs. The target gains a +2 status bonus to Toughness saves against ingested poisons
+  organs. The target gains a +2 status bonus to Grit checks against ingested poisons
   and can eat spoiled or rotten food without ill effect for the duration.
 tradition: bio_synthetic
 level: 2

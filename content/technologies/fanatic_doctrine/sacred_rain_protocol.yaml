@@ -3,7 +3,7 @@ name: Sacred Rain Protocol
 description: You invoke a small floating cloud that rains down warm sanctified liquid.
   The rain deals 5d6 spirit damage to hostile undead and corrupted creatures at the
   end of your turn. When you Sustain, you can move the cloud at a fly speed of 15
-  feet. The liquid dissipates on contact.Heightened (+1) The damage increases by 1d6.
+  feet. The liquid dissipates on contact.Upgraded (+1) The damage increases by 1d6.
 tradition: fanatic_doctrine
 level: 4
 usage_type: prepared

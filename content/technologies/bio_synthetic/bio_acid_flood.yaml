@@ -2,7 +2,7 @@ id: bio_acid_flood
 name: Bio-Acid Flood
 description: You rupture a gland that expels a torrent of corrosive fluid sweeping
   away from you. You deal 6d6 bludgeoning damage to creatures in the area with a basic
-  Reflex save. The flood also dissolves non-structural organic material it passes
+  Quickness check. The flood also dissolves non-structural organic material it passes
   through.
 tradition: bio_synthetic
 level: 3

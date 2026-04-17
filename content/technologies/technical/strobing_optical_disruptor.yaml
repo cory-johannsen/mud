@@ -15,7 +15,7 @@ effects:
   on_apply:
   - type: utility
     dc: 0
-    description: 'You unleash a swirling multitude of colors that overwhelms creatures based on their Will saves.
+    description: 'You unleash a swirling multitude of colors that overwhelms creatures based on their Reasoning checks.
 
 
       Critical Success The creature is unaffected.

@@ -1,9 +1,9 @@
 id: bio_thermal_flamethrower
 name: Bio-Thermal Flamethrower
 description: |-
-    A gout of flame sprays from your mouth. You deal 2d6 fire damage to creatures in the area with a basic Reflex save.
+    A gout of flame sprays from your mouth. You deal 2d6 fire damage to creatures in the area with a basic Quickness check.
 
-    Heightened (+1) The damage increases by 2d6.
+    Upgraded (+1) The damage increases by 2d6.
 tradition: bio_synthetic
 level: 1
 usage_type: prepared

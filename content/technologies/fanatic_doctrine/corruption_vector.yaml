@@ -2,13 +2,13 @@ id: corruption_vector
 name: Corruption Vector
 description: 'Your touch infects the target with a doctrinal corruption virus that
   siphons their willpower to feed the collective. The effect is based on the target''s
-  Toughness save.
+  Grit check.
 
 
   Critical Success The target is unaffected.
 
   Success The target takes 2 spirit damage per spell rank, and takes a -2 status penalty
-  to Toughness saves for 1 round.
+  to Grit checks for 1 round.
 
   Failure The target is afflicted with doctrinal corruption (a disease). Stage 1 Drained
   1 (1 day); Stage 2 Drained increases by 1 (1 day).
@@ -30,7 +30,7 @@ effects:
     dc: 0
     description: 'Your touch afflicts the target with Abyssal plague, which siphons
       fragments of their soul away to empower the Abyss. The effect is based on the
-      target''s Toughness save.
+      target''s Grit check.
 
 
       Critical Success The target is'

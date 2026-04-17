@@ -2,7 +2,7 @@ id: holo_decoys
 name: Holo-Decoys
 description: You deploy three holographic decoys of yourself. Each time a creature
   targets you with an attack, one of the decoys is hit instead and destroyed. When
-  all decoys are destroyed, the spell ends. A creature can attempt a Perception check
+  all decoys are destroyed, the spell ends. A creature can attempt a Awareness check
   against your tech DC to discern the real you.
 tradition: technical
 level: 2

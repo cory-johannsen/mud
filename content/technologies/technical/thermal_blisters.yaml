@@ -1,7 +1,7 @@
 id: thermal_blisters
 name: Thermal Blisters
 description: 'You target a creature in range with a focused thermal beam that causes
-  searing blisters. The target must attempt a Toughness save.
+  searing blisters. The target must attempt a Grit check.
 
 
   Critical Success The target is unaffected.
@@ -14,7 +14,7 @@ description: 'You target a creature in range with a focused thermal beam that ca
   Critical Failure The target grows three blisters.
 
 
-  Heightened (+2) The damage per blister increases by 1d6.'
+  Upgraded (+2) The damage per blister increases by 1d6.'
 tradition: technical
 level: 5
 usage_type: prepared

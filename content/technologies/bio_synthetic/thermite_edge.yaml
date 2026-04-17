@@ -3,7 +3,7 @@ name: Thermite Edge
 description: 'You coat the target weapon in a bio-synthesized thermite compound. The weapon deals an additional 1d6 fire damage on a successful Strike. On a critical hit, the target also takes 1d10 persistent fire damage.
 
 
-  Heightened (+2) The fire damage increases by 1d6.'
+  Upgraded (+2) The fire damage increases by 1d6.'
 tradition: bio_synthetic
 level: 2
 usage_type: prepared

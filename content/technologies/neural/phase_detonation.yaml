@@ -2,7 +2,7 @@ id: phase_detonation
 name: Phase Detonation
 description: You teleport to an unoccupied space within range, leaving behind a psychic
   afterimage that detonates. Each creature within a 10-foot burst of your original
-  position takes 3d6 force damage with a basic Reflex save.
+  position takes 3d6 force damage with a basic Quickness check.
 tradition: neural
 level: 3
 usage_type: prepared

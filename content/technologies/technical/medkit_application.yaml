@@ -3,7 +3,7 @@ name: Medkit Application
 description: 'You apply a medical thermal treatment to the target''s injuries. The target regains 2d8 HP. If the target has the Sickened condition, reduce its value by 1.
 
 
-  Heightened (+1) The healing increases by 1d8.'
+  Upgraded (+1) The healing increases by 1d8.'
 tradition: technical
 level: 2
 usage_type: prepared

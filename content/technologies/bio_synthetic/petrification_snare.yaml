@@ -1,6 +1,6 @@
 id: petrification_snare
 name: Petrification Snare
-description: 'You inject a calcification compound into the ground around a target, causing mineral deposits to rapidly encrust the foe while organic growth erupts around them. Every square adjacent to the target becomes difficult terrain from sudden plant growth for 1 minute. The target also attempts a Toughness save.Critical Success The target is unaffected.
+description: 'You inject a calcification compound into the ground around a target, causing mineral deposits to rapidly encrust the foe while organic growth erupts around them. Every square adjacent to the target becomes difficult terrain from sudden plant growth for 1 minute. The target also attempts a Grit check.Critical Success The target is unaffected.
 
   Success The target is Clumsy 1 as their feet are bound in mineral crust. This lasts until they move from their current position.
 

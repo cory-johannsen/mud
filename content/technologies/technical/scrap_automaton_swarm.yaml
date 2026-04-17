@@ -2,7 +2,7 @@ id: scrap_automaton_swarm
 name: Scrap Automaton Swarm
 description: Misshapen mechanical forms assemble from nearby debris. The area becomes
   difficult terrain. Grasping actuators deal 2d6 slashing damage to any creature entering
-  or ending its turn there, with a basic Reflex save.
+  or ending its turn there, with a basic Quickness check.
 tradition: technical
 level: 3
 usage_type: prepared

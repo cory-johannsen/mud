@@ -2,7 +2,7 @@ id: acid_sphere
 name: Acid Sphere
 description: 'A sphere of corrosive bio-fluid 10 feet in diameter coalesces in an unoccupied space in range. When you activate this tech and each time you Sustain it, you can roll the sphere, moving it up to 10 feet along the ground.
 
-  The sphere can engulf Large or smaller creatures it moves through. Any Large or smaller creature whose space the orb tries to move through can attempt a Reflex save.
+  The sphere can engulf Large or smaller creatures it moves through. Any Large or smaller creature whose space the orb tries to move through can attempt a Quickness check.
 
 
   Success The creature avoids the sphere.

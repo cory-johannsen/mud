@@ -1,6 +1,6 @@
 id: light_absorber
 name: Light Absorber
-description: 'You deploy light-absorbing nanomaterial in the area, creating dim light in a @Template[burst|distance:20]. Creatures in the area when you cast the spell must attempt a Toughness save.
+description: 'You deploy light-absorbing nanomaterial in the area, creating dim light in a @Template[burst|distance:20]. Creatures in the area when you cast the spell must attempt a Grit check.
 
 
   Critical Success The creature is unaffected.

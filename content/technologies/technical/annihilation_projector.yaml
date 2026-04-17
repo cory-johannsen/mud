@@ -2,7 +2,7 @@ id: annihilation_projector
 name: Annihilation Projector
 description: You overload your weapon systems and unleash a devastating wave of raw
   energy. All creatures in a 30-foot cone take 6d6 damage of a chosen type (acid,
-  cold, electricity, fire, or sonic) with a basic Reflex save.
+  cold, electricity, fire, or sonic) with a basic Quickness check.
 tradition: technical
 level: 3
 usage_type: prepared

@@ -4,10 +4,10 @@ description: 'Area 50 feet long by 50 feet wide
 
   Using bio-synthetic osmotic manipulation, you raise or lower the level of water
   in the chosen area by 10 feet. Creatures that have the water trait in the area must
-  attempt a Toughness save.
+  attempt a Grit check.
 
 
-  Heightened (+2) You can raise or lower the water by an additional 10 feet.'
+  Upgraded (+2) You can raise or lower the water by an additional 10 feet.'
 tradition: bio_synthetic
 level: 5
 usage_type: prepared

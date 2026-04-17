@@ -2,13 +2,13 @@ id: apex_bioweapon_swarm
 name: Apex Bioweapon Swarm
 description: 'You unleash a massive bio-engineered swarm weapon onto the battlefield—a writhing mass of gene-spliced organisms that function as a single horrific entity. The swarm occupies the space of a Gargantuan creature, riddled with parasites and micro-organisms whose collective movement grants it a Speed of 60 feet and a fly Speed of 60 feet.
 
-  Arrive Behold the Apex Swarm The bioweapon is unspeakably foul, emitting putrid chemical signals, and constantly shifts as millions of organisms consume and replicate within it. A loud, persistent buzzing fills the area. Each living enemy creature within a @Template[type:emanation|distance:60] must attempt a Toughness save with the following effects.Critical Success The creature is unaffected.
+  Arrive Behold the Apex Swarm The bioweapon is unspeakably foul, emitting putrid chemical signals, and constantly shifts as millions of organisms consume and replicate within it. A loud, persistent buzzing fills the area. Each living enemy creature within a @Template[type:emanation|distance:60] must attempt a Grit check with the following effects.Critical Success The creature is unaffected.
 
   Success The creature is Sickened 2.
 
   Failure The creature is Sickened 3 and Deafened for the duration.
 
-  Critical Failure The creature is Sickened 4, Stunned 1, and deafened for the duration.Depart (poison) Swarm Dispersal The millions of organisms pour out and surge across the battlefield, consuming your enemies. This swarm deals 5d8 piercing damage and 5d8 poison damage to enemy creatures in a @Template[type:emanation|distance:60] with a basic Reflex save. A creature that critically fails is additionally Drained 2.'
+  Critical Failure The creature is Sickened 4, Stunned 1, and deafened for the duration.Depart (poison) Swarm Dispersal The millions of organisms pour out and surge across the battlefield, consuming your enemies. This swarm deals 5d8 piercing damage and 5d8 poison damage to enemy creatures in a @Template[type:emanation|distance:60] with a basic Quickness check. A creature that critically fails is additionally Drained 2.'
 tradition: bio_synthetic
 level: 7
 usage_type: prepared

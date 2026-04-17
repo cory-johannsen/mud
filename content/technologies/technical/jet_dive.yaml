@@ -2,7 +2,7 @@ id: jet_dive
 name: Jet Dive
 description: Your jet thrusters fire, launching you 15 feet straight up before you
   dive back down at a designated point within 60 feet, dealing 3d6 fire damage in
-  a 10-foot burst with a basic Reflex save.
+  a 10-foot burst with a basic Quickness check.
 tradition: technical
 level: 3
 usage_type: prepared

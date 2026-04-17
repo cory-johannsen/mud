@@ -4,7 +4,7 @@ description: 'You summon a creature that has the aberration trait and whose leve
   is 5 or lower to fight for you.
 
 
-  Heightened As listed in the summon trait.'
+  Upgraded As listed in the summon trait.'
 tradition: neural
 level: 5
 usage_type: prepared
@@ -21,4 +21,4 @@ effects:
       is 5 or lower to fight for you.
 
 
-      Heightened As listed in the summon trait.'
+      Upgraded As listed in the summon trait.'

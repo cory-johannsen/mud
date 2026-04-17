@@ -1,7 +1,7 @@
 id: orbital_kinetic_barrage
 name: Orbital Kinetic Barrage
 description: Kinetic impactors fall in a 60-foot burst. Each creature takes 10d10
-  bludgeoning and 2d10 fire damage (Reflex save for half). On a failure, they are
+  bludgeoning and 2d10 fire damage (Quickness check for half). On a failure, they are
   knocked prone. Impact craters create difficult terrain for 1 minute.
 tradition: technical
 level: 9

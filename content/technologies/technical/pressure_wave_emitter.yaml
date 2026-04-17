@@ -2,7 +2,7 @@ id: pressure_wave_emitter
 name: Pressure Wave Emitter
 description: You fire a directional pressure wave from your armor. The blast extinguishes
   small fires, disperses gases, and pushes creatures. Each creature must attempt a
-  Reflex save or be pushed 10 feet.
+  Quickness check or be pushed 10 feet.
 tradition: technical
 level: 3
 usage_type: prepared

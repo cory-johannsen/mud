@@ -1,7 +1,7 @@
 id: holographic_doppelganger
 name: Holographic Doppelganger
 description: 'You create a temporary hard-light duplicate of an enemy to fight on
-  your behalf. The target can attempt a Toughness save to disrupt the projection.
+  your behalf. The target can attempt a Grit check to disrupt the projection.
   The duplicate appears in an unoccupied space adjacent to the target and has the
   target''s attack modifier, AC, saving throw modifiers, Perception, and skill modifiers,
   but it has only 70 Hit Points and lacks the target''s special abilities, including
@@ -30,7 +30,7 @@ description: 'You create a temporary hard-light duplicate of an enemy to fight o
   Failure The duplicate works as described.
 
 
-  Heightened (+1) The level of creature you can target increases by 2. The duplicate
+  Upgraded (+1) The level of creature you can target increases by 2. The duplicate
   has 10 more HP.'
 tradition: neural
 level: 7
@@ -47,5 +47,5 @@ effects:
   - type: utility
     dc: 0
     description: You create a temporary duplicate of an enemy to fight on your behalf.
-      The target can attempt a Toughness save to disrupt the spell. The duplicate
+      The target can attempt a Grit check to disrupt the spell. The duplicate
       appears in an unoccupied space adjacent to the target

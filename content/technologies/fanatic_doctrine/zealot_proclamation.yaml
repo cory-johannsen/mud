@@ -2,12 +2,12 @@ id: zealot_proclamation
 name: Zealot Proclamation
 description: 'You proclaim the superiority of your doctrine, bolstering your own conviction
   and undermining your opponents''. Select one of the following to proclaim about:
-  melee attack rolls, ranged attack rolls, spell attack rolls, or a single skill.
+  melee attack rolls, ranged attack rolls, tech attack rolls, or a single skill.
   Attempt an Intimidation check to Demoralize a creature within 30 feet. Whether or
   not you succeed, you gain a +1 status bonus to the selected rolls for 1 minute.
 
 
-  Heightened (9th) The status bonus increases to +2, or +3 if you''re a master.'
+  Upgraded (9th) The status bonus increases to +2, or +3 if you''re a master.'
 tradition: fanatic_doctrine
 level: 5
 usage_type: prepared

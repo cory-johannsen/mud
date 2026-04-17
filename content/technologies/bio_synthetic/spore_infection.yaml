@@ -1,6 +1,6 @@
 id: spore_infection
 name: Spore Infection
-description: 'You launch a cluster of mutagenic spores at the target. The target must attempt a Toughness save.
+description: 'You launch a cluster of mutagenic spores at the target. The target must attempt a Grit check.
 
 
   Critical Success The creature is unaffected.

@@ -11,7 +11,7 @@ description: 'You drive a lance of doctrinal judgment deep into the target''s ps
   Failure The target takes full damage and is Frightened 2.
 
   Critical Failure The target takes double damage and is frightened 2 and @UUID[Compendium.pf2e.conditionitems.Item.Off-Guard]
-  for 1 round.Heightened (+1) The damage increases by 2d8.'
+  for 1 round.Upgraded (+1) The damage increases by 2d8.'
 tradition: fanatic_doctrine
 level: 7
 usage_type: prepared

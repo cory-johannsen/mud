@@ -1,10 +1,10 @@
 id: doctrinal_spirit_blast
 name: Doctrinal Spirit Blast
 description: 'You concentrate doctrinal energy and detonate it against a creature''s
-  essence, dealing 16d6 spirit damage with a basic Toughness save.
+  essence, dealing 16d6 spirit damage with a basic Grit check.
 
 
-  Heightened (+1) The damage increases by 2d6.'
+  Upgraded (+1) The damage increases by 2d6.'
 tradition: fanatic_doctrine
 level: 6
 usage_type: prepared

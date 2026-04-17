@@ -2,7 +2,7 @@ id: venom_injector
 name: Venom Injector
 description: 'You deploy a pneumatic venom delivery system. You deal 3d4 piercing
   damage to the touched creature and afflict it with synthetic wyvern-class toxin.
-  If the target takes piercing damage, they must attempt a Toughness save.
+  If the target takes piercing damage, they must attempt a Grit check.
 
   Critical Success Unaffected.
 

@@ -6,10 +6,10 @@ description: 'A sudden downpour of cryogenic fluid drenches the area. The drivin
 
   On subsequent rounds, the first time you Sustain the tech each round, you can shift
   the rain to freezing sleet, coating surfaces in ice. Creatures in the area must
-  attempt a Reflex save or fall Prone.
+  attempt a Quickness check or fall Prone.
 
 
-  Heightened (+2) The area increases by 10 feet in each dimension.'
+  Upgraded (+2) The area increases by 10 feet in each dimension.'
 tradition: bio_synthetic
 level: 5
 usage_type: prepared

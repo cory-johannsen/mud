@@ -1,6 +1,6 @@
 id: forced_devolution
 name: Forced Devolution
-description: 'You overwrite the target creature''s genetic expression, regressing it into a harmless organism appropriate to the area, with effects based on its Fortitude save.Critical Success The target is unaffected.
+description: 'You overwrite the target creature''s genetic expression, regressing it into a harmless organism appropriate to the area, with effects based on its Grit check.Critical Success The target is unaffected.
 
   Success The target''s body gains minor features of the harmless organism. Its insides churn as they partially transform, causing it to be Sickened 1. When it recovers from the sickened condition, its features revert to normal.
 

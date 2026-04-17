@@ -1,6 +1,6 @@
 id: predictive_analytics
 name: Predictive Analytics
-description: You run advanced predictive algorithms, scanning for hidden threats and opportunities. You attempt Perception checks to detect hidden creatures and objects within 60 feet, gaining a +2 status bonus.
+description: You run advanced predictive algorithms, scanning for hidden threats and opportunities. You attempt Awareness checks to detect hidden creatures and objects within 60 feet, gaining a +2 status bonus.
 tradition: technical
 level: 3
 usage_type: prepared

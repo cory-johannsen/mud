@@ -3,10 +3,10 @@ name: Razor Chitin Field
 description: 'You cause razor-sharp chitin blades to sprout from the ground, slashing
   at and obstructing creatures in the area. The area is difficult terrain. Each creature
   in the area when the tech is activated and who end their turn within the area take
-  3d6 slashing damage and bleed damage, with a basic Reflex save.
+  3d6 slashing damage and bleed damage, with a basic Quickness check.
 
 
-  Heightened (+2) The slashing damage increases by 1d6.'
+  Upgraded (+2) The slashing damage increases by 1d6.'
 tradition: bio_synthetic
 level: 5
 usage_type: prepared

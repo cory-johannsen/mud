@@ -1,7 +1,7 @@
 id: silencing_edict
 name: Silencing Edict
 description: 'You invoke a doctrinal decree that strips a creature''s ability to speak,
-  rendering them mute. The effect is determined by the target''s Toughness save. The
+  rendering them mute. The effect is determined by the target''s Grit check. The
   target becomes temporarily immune for 1 minute. Creatures without voices are immune.
 
 
@@ -28,5 +28,5 @@ effects:
   - type: utility
     dc: 0
     description: You steal a creature's voice, rendering them mute. The effect is
-      determined by the target's Toughness save. The target then becomes temporarily
+      determined by the target's Grit check. The target then becomes temporarily
       immune for 1 minute. A creature that has no voice or can

@@ -1,6 +1,6 @@
 id: acid_clamp
 name: Acid Clamp
-description: A mechanical claw grips the target, burning it with industrial acid. The target takes 2d8 acid damage plus 1d6 persistent acid damage depending on its Reflex save. A creature can attempt to Escape the grip.
+description: A mechanical claw grips the target, burning it with industrial acid. The target takes 2d8 acid damage plus 1d6 persistent acid damage depending on its Quickness check. A creature can attempt to Escape the grip.
 tradition: technical
 level: 2
 usage_type: prepared

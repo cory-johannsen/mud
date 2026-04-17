@@ -7,7 +7,7 @@ description: 'An infusion of bio-synthetic growth factors grants a creature cont
   @UUID[Compendium.pf2e.spell-effects.Item.tech Effect: Regenerate]
 
 
-  Heightened (9th) The regeneration increases to 20.'
+  Upgraded (9th) The regeneration increases to 20.'
 tradition: bio_synthetic
 level: 7
 usage_type: prepared

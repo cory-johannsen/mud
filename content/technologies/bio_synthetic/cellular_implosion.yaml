@@ -1,7 +1,7 @@
 id: cellular_implosion
 name: Cellular Implosion
 description: You collapse the cellular structure of a target from within. Choose a
-  creature within 30 feet. It must attempt a Toughness save. On a failure, it takes
+  creature within 30 feet. It must attempt a Grit check. On a failure, it takes
   75 force damage as its body tries to implode. If this reduces it to 0 HP, it is
   annihilated. On a success, it takes half damage. On a critical success, it is unaffected.
   You can use this once per round for the duration (1 minute).

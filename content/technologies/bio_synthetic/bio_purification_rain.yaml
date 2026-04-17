@@ -3,7 +3,7 @@ name: Bio-Purification Rain
 description: You synthesize a small floating cloud that rains down warm purifying
   liquid. The rain deals 5d6 spirit damage to hostile undead and corrupted creatures
   in the area at the end of your turn. When you Sustain, you can move the cloud at
-  a fly speed of 15 feet to anywhere in range. The liquid dissipates on contact.Heightened
+  a fly speed of 15 feet to anywhere in range. The liquid dissipates on contact.Upgraded
   (+1) The damage increases by 1d6.
 tradition: bio_synthetic
 level: 4

@@ -2,7 +2,7 @@ id: nanite_swarm_feast
 name: Nanite Swarm Feast
 description: You exhale a cloud of ravenous nanites that flutter briefly before descending
   on nearby targets. The nanites consume organic material, dealing 4d6 piercing damage
-  to creatures in a 30-foot cone with a basic Reflex save.
+  to creatures in a 30-foot cone with a basic Quickness check.
 tradition: neural
 level: 3
 usage_type: prepared

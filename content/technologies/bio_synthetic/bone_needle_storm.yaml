@@ -1,10 +1,10 @@
 id: bone_needle_storm
 name: Bone Needle Storm
 description: 'You launch a volley of bio-synthetic bone needles. Each creature in
-  the area takes 3d6 piercing damage with a basic Reflex save.
+  the area takes 3d6 piercing damage with a basic Quickness check.
 
 
-  Heightened (+1) The damage increases by 1d6.'
+  Upgraded (+1) The damage increases by 1d6.'
 tradition: bio_synthetic
 level: 2
 usage_type: prepared

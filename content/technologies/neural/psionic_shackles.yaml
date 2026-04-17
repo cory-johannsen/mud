@@ -1,6 +1,6 @@
 id: psionic_shackles
 name: Psionic Shackles
-description: Translucent psychic restraints launch from your outstretched hand and clasp around the target's limbs, impeding its movements. The target must attempt a Reflex save or become Immobilized. It can attempt to Escape against your spell DC.
+description: Translucent psychic restraints launch from your outstretched hand and clasp around the target's limbs, impeding its movements. The target must attempt a Quickness check or become Immobilized. It can attempt to Escape against your spell DC.
 tradition: neural
 level: 3
 usage_type: prepared

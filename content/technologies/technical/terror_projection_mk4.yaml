@@ -1,6 +1,6 @@
 id: terror_projection_mk4
 name: Terror Projection Mk4
-description: You deploy a device that projects a personalized terror construct into the target's visual cortex. Only the target perceives it. The effect is based on the target's Willpower save. All mechanical effects (damage, frightened, death, fleeing) remain identical to the base protocol.Heightened (+1) Damage +2d6 on failure, +3d6 on critical failure.
+description: You deploy a device that projects a personalized terror construct into the target's visual cortex. Only the target perceives it. The effect is based on the target's Willpower save. All mechanical effects (damage, frightened, death, fleeing) remain identical to the base protocol.Upgraded (+1) Damage +2d6 on failure, +3d6 on critical failure.
 tradition: technical
 level: 4
 usage_type: prepared

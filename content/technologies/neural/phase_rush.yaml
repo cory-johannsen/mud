@@ -3,7 +3,7 @@ name: Phase Rush
 description: 'You propel yourself through a dimensional shortcut to deliver a devastating strike. You teleport to an empty space adjacent to a creature you can see within range, then make a Strike against the creature with a weapon you''re wielding. The Strike deals damage, plus an extra 2d8 force damage on a hit.
 
 
-  Heightened (+1) The extra force damage increases by 1d8.'
+  Upgraded (+1) The extra force damage increases by 1d8.'
 tradition: neural
 level: 5
 usage_type: prepared

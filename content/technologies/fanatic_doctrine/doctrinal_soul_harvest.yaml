@@ -1,7 +1,7 @@
 id: doctrinal_soul_harvest
 name: Doctrinal Soul Harvest
 description: You channel the doctrine's hunger to utterly consume the target's life
-  force. The target takes 60 void damage with a basic Toughness save. If this damage
+  force. The target takes 60 void damage with a basic Grit check. If this damage
   reduces the target to 0 Hit Points, it dies immediately. You regain Hit Points equal
   to half the void damage the target takes (after applying resistance and the like).
   Any excess healing is gained as temporary Hit Points, which you lose after 1 minute.

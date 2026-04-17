@@ -16,7 +16,7 @@ effects:
   - type: utility
     dc: 0
     description: 'A blast of wind wildly pushes everything nearby. Unattended objects of 1 Bulk or less are pushed 5 feet
-      away from you. Large or smaller creatures must attempt a Toughness save.
+      away from you. Large or smaller creatures must attempt a Grit check.
 
 
       Critical Success The c'

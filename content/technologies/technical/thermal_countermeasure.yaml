@@ -5,7 +5,7 @@ description: 'When a creature damages you with fire, you can deploy a retaliator
   save.
 
 
-  Heightened (+1) The damage increases by 2d6.'
+  Upgraded (+1) The damage increases by 2d6.'
 tradition: technical
 level: 2
 usage_type: prepared

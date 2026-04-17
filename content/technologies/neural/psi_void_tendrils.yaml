@@ -1,6 +1,6 @@
 id: psi_void_tendrils
 name: Psi-Void Tendrils
-description: 'Tendrils of darkness curl out from your fingertips and race through the air. You deal 2d4 void damage and @Damage[()[bleed]] damage to living creatures in the line. Each living creature in the line must attempt a Toughness save.
+description: 'Tendrils of darkness curl out from your fingertips and race through the air. You deal 2d4 void damage and @Damage[()[bleed]] damage to living creatures in the line. Each living creature in the line must attempt a Grit check.
 
 
   Critical Success The creature is unaffected.
@@ -12,7 +12,7 @@ description: 'Tendrils of darkness curl out from your fingertips and race throug
   Critical Failure The creature takes double void damage and double persistent bleed damage.
 
 
-  Heightened (+1) The void damage increases by 2d4, and the persistent bleed damage increases by 1.'
+  Upgraded (+1) The void damage increases by 2d4, and the persistent bleed damage increases by 1.'
 tradition: neural
 level: 1
 usage_type: prepared

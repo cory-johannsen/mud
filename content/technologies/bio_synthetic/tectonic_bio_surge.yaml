@@ -1,6 +1,6 @@
 id: tectonic_bio_surge
 name: Tectonic Bio-Surge
-description: You trigger a massive seismic and biological upheaval. All creatures in a 60-foot burst take 10d10 bludgeoning damage and are knocked prone (Reflex save for half and negates prone). Structures in the area take 200 damage. The terrain in the area becomes difficult terrain permanently as biological growth and rock shards fill the area.
+description: You trigger a massive seismic and biological upheaval. All creatures in a 60-foot burst take 10d10 bludgeoning damage and are knocked prone (Quickness check for half and negates prone). Structures in the area take 200 damage. The terrain in the area becomes difficult terrain permanently as biological growth and rock shards fill the area.
 tradition: bio_synthetic
 level: 9
 usage_type: prepared

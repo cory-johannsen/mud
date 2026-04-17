@@ -1,8 +1,8 @@
 id: rejection_response
 name: Rejection Response
 description: 'Your touch triggers a violent biological rejection response that launches
-  the target away. Make a melee spell attack at mythic proficiency. The target must
-  attempt a Toughness save.
+  the target away. Make a melee tech attack at mythic proficiency. The target must
+  attempt a Grit check.
 
 
   Critical Success The target is unaffected.

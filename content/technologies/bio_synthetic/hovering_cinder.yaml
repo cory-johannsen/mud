@@ -3,7 +3,7 @@ name: Hovering Cinder
 description: You grow a bio-luminescent flame organism that floats in the air and
   sheds light. When you Sustain the spell, you can move the flame up to 30 feet. If
   you move it into a creature's space, that creature takes 1d6 fire damage with a
-  basic Reflex save.
+  basic Quickness check.
 tradition: bio_synthetic
 level: 2
 usage_type: prepared

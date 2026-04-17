@@ -2,7 +2,7 @@ id: ferrous_repulsion
 name: Ferrous Repulsion
 description: You generate a bio-electric field that repels metallic objects. Metal
   objects and creatures wearing metal armor within 15 feet are pushed 10 feet away.
-  A creature can attempt a Toughness save to resist.
+  A creature can attempt a Grit check to resist.
 tradition: bio_synthetic
 level: 2
 usage_type: prepared

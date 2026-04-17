@@ -4,9 +4,9 @@ description: 'The ground around you blooms with consecrated growth that emits re
   compounds. Each living creature that starts its turn standing on the ground in the
   area recovers 1d6 Hit Points and gains a +5-foot status bonus to its Speed. Undead
   that start their turn in the area become Sickened 1 unless they succeed at a Fortitude
-  save.Heightened (7th) Healing increases to 1d8, Sickened 2.
+  save.Upgraded (7th) Healing increases to 1d8, Sickened 2.
 
-  Heightened (10th) Healing increases to 1d10, Sickened 3.'
+  Upgraded (10th) Healing increases to 1d10, Sickened 3.'
 tradition: fanatic_doctrine
 level: 4
 usage_type: prepared

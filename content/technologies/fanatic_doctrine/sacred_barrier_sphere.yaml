@@ -9,7 +9,7 @@ description: 'Manifestations of doctrinal force appear in the hundreds, swirling
   each creature who intersects with the shell when the sphere''s created, or who attempts
   to move through the shell. The creature also takes the damage at the end of its
   turn, but only if it didn''t already take damage from the shell that turn. The effects
-  are determined by a creature''s Reflex save.
+  are determined by a creature''s Quickness check.
 
 
   Critical Success The creature is unaffected.
@@ -23,7 +23,7 @@ description: 'Manifestations of doctrinal force appear in the hundreds, swirling
   direction of your choice, and ends its movement.
 
 
-  Heightened (+1) The damage increases by 1d8.'
+  Upgraded (+1) The damage increases by 1d8.'
 tradition: fanatic_doctrine
 level: 6
 usage_type: prepared

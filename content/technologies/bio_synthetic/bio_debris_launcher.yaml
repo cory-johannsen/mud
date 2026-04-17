@@ -1,14 +1,14 @@
 id: bio_debris_launcher
 name: Bio-Debris Launcher
 description: |-
-    A spray of heavy rocks flies through the air in front of you. The rubble deals 2d4 bludgeoning damage to each creature in the area. Each creature must attempt a Reflex save.
+    A spray of heavy rocks flies through the air in front of you. The rubble deals 2d4 bludgeoning damage to each creature in the area. Each creature must attempt a Quickness check.
 
     Critical Success The creature is unaffected.
     Success The creature takes half damage.
     Failure The creature takes full damage and is pushed 5 feet away from you.
     Critical Failure The creature takes double damage and is pushed 10 feet away from you.
 
-    Heightened (+1) Increase the damage by 2d4.
+    Upgraded (+1) Increase the damage by 2d4.
 tradition: bio_synthetic
 level: 1
 usage_type: prepared

@@ -3,7 +3,7 @@ name: Temporal Displacement Beam
 description: 'You fire a beam of temporal energy that sends creatures violently tumbling
   through fractured timelines. Although the journey can feel like minutes or days,
   the targets reappear instantly. The chaotic temporal displacement deals 5d8 mental
-  damage and 5d6 bludgeoning damage, with a Toughness save. A creature that falls
+  damage and 5d6 bludgeoning damage, with a Grit check. A creature that falls
   into time disappears until the end of your turn. It then reappears in the same space
   it left; if that space is occupied, it appears in the nearest empty space, chosen
   by the GM.
@@ -20,7 +20,7 @@ description: 'You fire a beam of temporal energy that sends creatures violently 
   damage and is Sickened 2.
 
 
-  Heightened (+1) The bludgeoning damage increase by 2d6.'
+  Upgraded (+1) The bludgeoning damage increase by 2d6.'
 tradition: technical
 level: 6
 usage_type: prepared

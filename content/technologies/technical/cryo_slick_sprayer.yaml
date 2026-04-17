@@ -1,6 +1,6 @@
 id: cryo_slick_sprayer
 name: Cryo-Slick Sprayer
-description: You deploy cryogenic compounds that coat the ground in ice. The area becomes difficult terrain. Each creature in the area when you cast the spell must attempt a Reflex save or fall Prone. The ice has AC 10 and 15 HP and is destroyed by any fire damage.
+description: You deploy cryogenic compounds that coat the ground in ice. The area becomes difficult terrain. Each creature in the area when you cast the spell must attempt a Quickness check or fall Prone. The ice has AC 10 and 15 HP and is destroyed by any fire damage.
 tradition: technical
 level: 2
 usage_type: prepared

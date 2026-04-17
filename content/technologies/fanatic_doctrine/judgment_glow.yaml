@@ -1,6 +1,6 @@
 id: judgment_glow
 name: Judgment Glow
-description: You mark enemies with the light of doctrinal judgment. Each creature in the area when you cast the spell must attempt a Reflex save. On a failure, the creature is outlined in sacred light for the duration, making it Concealed ineffective (concealment is negated). If the creature was Invisible, instead of negating its concealment, it becomes Concealed rather than being Undetected or Hidden.
+description: You mark enemies with the light of doctrinal judgment. Each creature in the area when you cast the spell must attempt a Quickness check. On a failure, the creature is outlined in sacred light for the duration, making it Concealed ineffective (concealment is negated). If the creature was Invisible, instead of negating its concealment, it becomes Concealed rather than being Undetected or Hidden.
 tradition: fanatic_doctrine
 level: 2
 usage_type: prepared

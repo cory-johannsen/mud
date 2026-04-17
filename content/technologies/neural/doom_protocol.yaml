@@ -17,10 +17,10 @@ description: 'All operatives dance one step from the precipice, one heartbeat fr
 
   The target uses a specific ability you name. If the target takes the triggering
   action, the doom protocol activates and the target takes 70 mental damage with a
-  basic Reflex save. The target instinctively knows which action will trigger the
+  basic Quickness check. The target instinctively knows which action will trigger the
   protocol and can ward off the effect by spending a total of 3 actions, which have
   the concentrate trait, to perform counter-intrusion routines. These actions need
-  not be consecutive. After the creature spends the actions, the spell ends.Heightened
+  not be consecutive. After the creature spends the actions, the spell ends.Upgraded
   (+1) The damage increases by 10.'
 tradition: neural
 level: 6

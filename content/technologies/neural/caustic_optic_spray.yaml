@@ -6,7 +6,7 @@ description: 'You spray a caustic neurochemical foam into the target''s eyes, wh
   foam can be removed with 3 Interact actions, ending the blinded condition.
 
 
-  Heightened (+1) The initial damage increases by 2d10, and the persistent damage
+  Upgraded (+1) The initial damage increases by 2d10, and the persistent damage
   increases by 1d6.'
 tradition: neural
 level: 5

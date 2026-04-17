@@ -1,11 +1,11 @@
 id: devotional_blast
 name: Devotional Blast
 description: 'You channel concentrated doctrinal force in a burst. Each creature in
-  the area takes 3d6 bludgeoning damage with a basic Reflex save and is pushed 5 feet
+  the area takes 3d6 bludgeoning damage with a basic Quickness check and is pushed 5 feet
   on a failure (10 feet on a critical failure).
 
 
-  Heightened (+1) The damage increases by 1d6.'
+  Upgraded (+1) The damage increases by 1d6.'
 tradition: fanatic_doctrine
 level: 2
 usage_type: prepared

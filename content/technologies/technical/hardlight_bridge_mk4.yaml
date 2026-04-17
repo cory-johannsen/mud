@@ -6,8 +6,8 @@ description: 'A hardlight projector beneath your feet extends a solid energy bri
   and precision damage.
 
   You and allies use it normally. Other creatures that attempt to cross face defensive
-  countermeasures. They must attempt a Reflex save. All mechanical effects (trip,
-  grab) remain identical to the base protocol.Heightened (+1) Hit Points increase
+  countermeasures. They must attempt a Quickness check. All mechanical effects (trip,
+  grab) remain identical to the base protocol.Upgraded (+1) Hit Points increase
   by 10.'
 tradition: technical
 level: 4

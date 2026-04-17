@@ -11,7 +11,7 @@ description: |-
     Acrobatics and Stealth modifiers of +10, unless your own modifier is higher; Athletics modifier -4.
 
 
-    Heightened (4th) You can turn into a flying creature, such as a bird, which grants you a fly Speed of 20 feet.
+    Upgraded (4th) You can turn into a flying creature, such as a bird, which grants you a fly Speed of 20 feet.
     @UUID[Compendium.pf2e.spell-effects.Item.tech Effect: Pest Form]
 tradition: bio_synthetic
 level: 1

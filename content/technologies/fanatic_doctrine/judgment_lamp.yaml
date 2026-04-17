@@ -1,6 +1,6 @@
 id: judgment_lamp
 name: Judgment Lamp
-description: You illuminate the target with doctrinal revealing light. The target must attempt a Reflex save. On a failure, the target glows for the duration, negating its Concealed condition and making it Concealed instead of Hidden or Undetected if it's Invisible.
+description: You illuminate the target with doctrinal revealing light. The target must attempt a Quickness check. On a failure, the target glows for the duration, negating its Concealed condition and making it Concealed instead of Hidden or Undetected if it's Invisible.
 tradition: fanatic_doctrine
 level: 2
 usage_type: prepared

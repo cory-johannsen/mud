@@ -1,7 +1,7 @@
 id: toxic_precipitate
 name: Toxic Precipitate
 description: This device forces toxic metallic compounds to precipitate on all living
-  creatures in the area, dealing 4d6 poison damage with a basic Toughness save.
+  creatures in the area, dealing 4d6 poison damage with a basic Grit check.
 tradition: technical
 level: 3
 usage_type: prepared

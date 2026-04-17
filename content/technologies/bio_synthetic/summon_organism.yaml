@@ -5,9 +5,9 @@ description: 'You grow a bio-synthetic elemental organism from raw materials. Th
   or lower elemental creature.
 
 
-  Heightened (3rd) The maximum level of the summoned creature is 3.
+  Upgraded (3rd) The maximum level of the summoned creature is 3.
 
-  Heightened (4th) The maximum level is 5.'
+  Upgraded (4th) The maximum level is 5.'
 tradition: bio_synthetic
 level: 2
 usage_type: prepared
@@ -24,4 +24,4 @@ effects:
       is 1 or lower to fight for you.
 
 
-      Heightened As listed in the summon trait.'
+      Upgraded As listed in the summon trait.'

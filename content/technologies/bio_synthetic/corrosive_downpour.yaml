@@ -2,10 +2,10 @@ id: corrosive_downpour
 name: Corrosive Downpour
 description: 'You trigger a localized storm of corrosive chemical rain that pelts
   the area for the tech''s duration. A creature that begins its turn in the area takes
-  3d8 acid damage (basic Reflex save).
+  3d8 acid damage (basic Quickness check).
 
 
-  Heightened (+2) The damage increases by 1d8.'
+  Upgraded (+2) The damage increases by 1d8.'
 tradition: bio_synthetic
 level: 5
 usage_type: prepared

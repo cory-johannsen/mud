@@ -3,7 +3,7 @@ name: Flashbang Grenade
 description: 'You conjure an exploding canister filled with a sight-destroying chemical
   agent and hurl it across enemy lines. Upon impact, the canister bursts and exposes
   all creatures in the area to the compound within. Each creature in the area must
-  attempt a Toughness save.
+  attempt a Grit check.
 
   Critical Success The creature is unaffected.
 
@@ -14,7 +14,7 @@ description: 'You conjure an exploding canister filled with a sight-destroying c
   Critical Failure The creature is Blinded for 1 minute and Dazzled for 10 minutes.
 
 
-  Heightened (+2) The initial damage increases by 1d6.'
+  Upgraded (+2) The initial damage increases by 1d6.'
 tradition: neural
 level: 5
 usage_type: prepared

@@ -1,6 +1,6 @@
 id: gravity_well
 name: Gravity Well
-description: 'You deploy a localized gravity distortion that pulls the target toward you. The target must attempt a Toughness save.
+description: 'You deploy a localized gravity distortion that pulls the target toward you. The target must attempt a Grit check.
 
 
   Critical Success The creature is unaffected.

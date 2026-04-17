@@ -2,7 +2,7 @@ id: aura_scanner
 name: Aura Scanner
 description: You gain psychic sensitivity to spirits and incorporeal entities. You
   can sense any incorporeal creature within 30 feet, even if you can't see it. You
-  gain a +2 status bonus to Perception checks against incorporeal creatures.
+  gain a +2 status bonus to Awareness checks against incorporeal creatures.
 tradition: neural
 level: 2
 usage_type: prepared

@@ -2,7 +2,7 @@ id: noxious_spore_cloud
 name: Noxious Spore Cloud
 description: You release a cloud of putrid bio-reactive spores in the area. The cloud
   functions as fog except it sickens creatures that end their turn inside it on a
-  failed Toughness save.
+  failed Grit check.
 tradition: bio_synthetic
 level: 3
 usage_type: prepared

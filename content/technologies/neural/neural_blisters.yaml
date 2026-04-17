@@ -15,7 +15,7 @@ description: 'You target a creature in range, causing agonizing neural feedback 
   Critical Failure The target grows three blisters.
 
 
-  Heightened (+2) The damage per blister increases by 1d6.'
+  Upgraded (+2) The damage per blister increases by 1d6.'
 tradition: neural
 level: 5
 usage_type: prepared

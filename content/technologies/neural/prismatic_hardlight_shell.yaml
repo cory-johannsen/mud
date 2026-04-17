@@ -22,7 +22,7 @@ description: 'You encase the target in reactive hardlight armor that shifts thro
   Matching Color The armor shifts to match the type of damage the target took most recently in the past minute. If it didn''t take any of those seven types of damage or the armor is already that color, roll again, rerolling results of 8.
 
 
-  Heightened (+3) The resistance is increased by 5.'
+  Upgraded (+3) The resistance is increased by 5.'
 tradition: neural
 level: 4
 usage_type: prepared

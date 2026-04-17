@@ -1,6 +1,6 @@
 id: tracer_spores
 name: Tracer Spores
-description: You launch bio-luminescent tracer spores at the target. The target must attempt a Reflex save. On a failure, the target glows with revealing light for the duration, negating its Concealed condition and making it Concealed instead of Hidden or Undetected if it's Invisible.
+description: You launch bio-luminescent tracer spores at the target. The target must attempt a Quickness check. On a failure, the target glows with revealing light for the duration, negating its Concealed condition and making it Concealed instead of Hidden or Undetected if it's Invisible.
 tradition: bio_synthetic
 level: 2
 usage_type: prepared

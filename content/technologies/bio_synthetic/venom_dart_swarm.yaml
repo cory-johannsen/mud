@@ -1,6 +1,6 @@
 id: venom_dart_swarm
 name: Venom Dart Swarm
-description: 'You deploy a swarm of bio-synthetic stinger drones that stab creatures in the area, possibly envenoming them. Creatures take 1d6 piercing damage. Each creature that takes piercing damage must attempt a Toughness save.
+description: 'You deploy a swarm of bio-synthetic stinger drones that stab creatures in the area, possibly envenoming them. Creatures take 1d6 piercing damage. Each creature that takes piercing damage must attempt a Grit check.
 
 
   Critical Success The target is unaffected.
@@ -14,7 +14,7 @@ description: 'You deploy a swarm of bio-synthetic stinger drones that stab creat
 
   Swarming Wasp Venom (poison)
 
-  Saving Throw Toughness save (DC 24)
+  Saving Throw Grit check (DC 24)
 
   Maximum Duration 6 rounds
 

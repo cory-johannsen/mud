@@ -13,22 +13,22 @@ description: 'You project a hardlight barrier in a single vibrant frequency. The
 
 
   Red The wall destroys ranged weapon ammunition that would pass through, and it deals
-  20 fire damage to anyone passing through, with a basic Reflex save.
+  20 fire damage to anyone passing through, with a basic Quickness check.
 
   Orange The wall destroys thrown weapons that would pass through, and it deals 25
-  acid damage to anyone passing through, with a basic Reflex save.
+  acid damage to anyone passing through, with a basic Quickness check.
 
   Yellow The wall stops acid, cold, electricity, fire, force, sonic, vitality, and
   void effects from passing through, and it deals 30 electricity damage to anyone
-  passing through, with a basic Reflex save.
+  passing through, with a basic Quickness check.
 
   Green The wall stops toxins, gases, and breath weapons from passing through. It
   deals 10 poison damage to anyone passing through and makes them Enfeebled 1 for
-  1 minute. A basic Toughness save reduces the damage and negates the Enfeebled condition
+  1 minute. A basic Grit check reduces the damage and negates the Enfeebled condition
   on a success.
 
 
-  Heightened (7th) The tech''s duration increases to 1 hour. Roll [[/r 1d8]] to determine
+  Upgraded (7th) The tech''s duration increases to 1 hour. Roll [[/r 1d8]] to determine
   the wall''s frequency; results for 5-8 are additional options. Red, orange, yellow,
   or green walls deal an extra 10 damage.'
 tradition: neural

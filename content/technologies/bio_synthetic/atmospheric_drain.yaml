@@ -2,7 +2,7 @@ id: atmospheric_drain
 name: Atmospheric Drain
 description: 'You bio-chemically absorb all breathable air in the surrounding area, stealing the breath of nearby creatures. During the tech''s duration, you take a -1 circumstance penalty against inhaled threats, such as inhaled poisons. If you activate the tech in an environment where you can''t breathe, it fails and you immediately begin to suffocate.
 
-  Creatures in the area must attempt a Toughness save. A creature that''s holding its breath gets a result one degree of success better than it rolled, and creatures that don''t need to breathe air are immune to the tech. A creature that later enters the area or ceases holding its breath must attempt a save against the effect. On subsequent rounds, the first time each round you Sustain the tech, you can force each creature in the area to save against the effect.
+  Creatures in the area must attempt a Grit check. A creature that''s holding its breath gets a result one degree of success better than it rolled, and creatures that don''t need to breathe air are immune to the tech. A creature that later enters the area or ceases holding its breath must attempt a save against the effect. On subsequent rounds, the first time each round you Sustain the tech, you can force each creature in the area to save against the effect.
 
 
   Success The creature begins holding its breath.

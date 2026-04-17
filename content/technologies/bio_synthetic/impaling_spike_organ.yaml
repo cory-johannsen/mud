@@ -2,7 +2,7 @@ id: impaling_spike_organ
 name: Impaling Spike Organ
 description: 'You trigger a massive bio-synthetic bone spike to erupt from the ground
   beneath a target creature. The spike deals 8d6 piercing damage. The target must
-  attempt a Reflex save.
+  attempt a Quickness check.
 
 
   Critical Success The target dodges the spike and is unaffected.

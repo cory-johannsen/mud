@@ -2,7 +2,7 @@ id: mutagenic_overgrowth
 name: Mutagenic Overgrowth
 description: 'This gruesome bio-tech causes the target to sprout excess bio-synthetic
   tissue -- fingers multiplying, eyes opening in bizarre places, limbs sprouting from
-  the torso. The target takes 10d6 piercing damage (basic Toughness save) as the growths
+  the torso. The target takes 10d6 piercing damage (basic Grit check) as the growths
   erupt.
 
 
@@ -10,7 +10,7 @@ description: 'This gruesome bio-tech causes the target to sprout excess bio-synt
   with movement.
 
 
-  Heightened (+1) The damage increases by 2d6.'
+  Upgraded (+1) The damage increases by 2d6.'
 tradition: bio_synthetic
 level: 5
 usage_type: prepared

@@ -2,11 +2,11 @@ id: induction_heater
 name: Induction Heater
 description: 'You activate an electromagnetic induction field that rapidly heats a
   metal object. The target metal object deals 4d6 fire damage to any creature holding
-  or wearing it with a basic Reflex save. A creature that continues to hold or wear
+  or wearing it with a basic Quickness check. A creature that continues to hold or wear
   the item takes the damage again at the start of each of its turns.
 
 
-  Heightened (+1) The damage increases by 2d6.'
+  Upgraded (+1) The damage increases by 2d6.'
 tradition: technical
 level: 2
 usage_type: prepared

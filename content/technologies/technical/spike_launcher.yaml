@@ -2,7 +2,7 @@ id: spike_launcher
 name: Spike Launcher
 description: 'You deploy a concealed spike launcher that fires a massive projectile
   from the ground beneath a target. The spike deals 8d6 piercing damage. The target
-  must attempt a Reflex save.
+  must attempt a Quickness check.
 
 
   Critical Success Unaffected.

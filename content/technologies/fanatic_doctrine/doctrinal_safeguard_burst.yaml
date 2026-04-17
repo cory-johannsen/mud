@@ -5,7 +5,7 @@ description: 'Trigger An effect would deal physical or energy damage to you or a
   the triggering effect. Choose one type of physical or energy damage the triggering
   effect deals. Each target gains resistance 10 against that damage type for the triggering
   effect. The resistance applies only against the initial damage, not against any
-  persistent damage or other lingering effects.Heightened (+1) The resistance increases
+  persistent damage or other lingering effects.Upgraded (+1) The resistance increases
   by 1.
 
   @UUID[Compendium.pf2e.spell-effects.Item.tech Effect: Scintillating Safeguard]'

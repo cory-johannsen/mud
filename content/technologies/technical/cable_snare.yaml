@@ -1,6 +1,6 @@
 id: cable_snare
 name: Cable Snare
-description: 'You deploy grappling cables that erupt from the ground, entangling creatures. Each creature in the area must attempt a Reflex save.
+description: 'You deploy grappling cables that erupt from the ground, entangling creatures. Each creature in the area must attempt a Quickness check.
 
 
   Critical Success The creature is unaffected.

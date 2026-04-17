@@ -16,10 +16,10 @@ description: 'You invoke doctrinal judgment, placing a suspended sentence upon t
 
   The target uses a specific ability you name. If the target takes the triggering
   action, the judgment activates and the target takes 70 mental damage with a basic
-  Reflex save. The target instinctively knows which action will trigger the judgment
+  Quickness check. The target instinctively knows which action will trigger the judgment
   and can ward off the sentence by spending a total of 3 actions, which have the concentrate
   trait, to perform penitential gestures. These actions need not be consecutive. After
-  the creature spends the actions, the spell ends.Heightened (+1) The damage increases
+  the creature spends the actions, the spell ends.Upgraded (+1) The damage increases
   by 10.'
 tradition: fanatic_doctrine
 level: 6

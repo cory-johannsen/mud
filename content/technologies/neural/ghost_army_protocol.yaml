@@ -2,7 +2,7 @@ id: ghost_army_protocol
 name: Ghost Army Protocol
 description: 'You project mass-scale holographic soldiers, creating the illusion of a much larger force. Your illusion can create up to three illusory Gargantuan duplicates of troops within range. You can give the illusion a basic task to perform, such as standing in formation, marching, mimicking guard movements, or unloading illusory crates; however, the illusion can''t perform any actual tasks and can''t create intelligible sounds, such as music or clear speech. If you and any of the illusory troops are ever farther than 500 feet apart, the spell ends.
 
-  An illusory troop''s AC is equal to your tech DC. Its saving throws modifiers are equal to your tech DC – 10. If an illusory troop is hit by an attack or fails a save, you must attempt a Toughness save (DC 11). On success, the illusion of that troop is destroyed. On failure, the entire illusion shatters, and all illusory troops are destroyed.Heightened (8th) The DC of the is lowered to 8 (Toughness save (DC 8)), and you can create up to five illusory troops.'
+  An illusory troop''s AC is equal to your tech DC. Its saving throws modifiers are equal to your tech DC – 10. If an illusory troop is hit by an attack or fails a save, you must attempt a Grit check (DC 11). On success, the illusion of that troop is destroyed. On failure, the entire illusion shatters, and all illusory troops are destroyed.Upgraded (8th) The DC of the is lowered to 8 (Grit check (DC 8)), and you can create up to five illusory troops.'
 tradition: neural
 level: 6
 usage_type: prepared

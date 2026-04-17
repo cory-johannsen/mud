@@ -2,7 +2,7 @@ id: air_purifier
 name: Air Purifier
 description: You deploy an atmospheric scrubber that purifies the air in the area.
   The area is cleared of inhaled poisons, toxic gases, and airborne diseases for the
-  duration. Creatures in the area gain a +2 status bonus to Toughness saves against
+  duration. Creatures in the area gain a +2 status bonus to Grit checks against
   inhaled effects.
 tradition: technical
 level: 2

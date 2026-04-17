@@ -2,7 +2,7 @@ id: venom_strike
 name: Venom Strike
 description: 'You replicate a concentrated bio-synthetic venom delivery. You deal
   3d4 piercing damage to the touched creature and afflict it with wyvern-class toxin.
-  If the target takes piercing damage, they must attempt a Toughness save.
+  If the target takes piercing damage, they must attempt a Grit check.
 
   Critical Success The target is unaffected.
 

@@ -1,13 +1,13 @@
 id: polymer_encasement
 name: Polymer Encasement
-description: 'You activate a device that rapidly coats the target in hardening polymer resin. The target must attempt a Toughness save. Creatures with the plant trait have a +2 circumstance bonus to saves against this tech.
+description: 'You activate a device that rapidly coats the target in hardening polymer resin. The target must attempt a Grit check. Creatures with the plant trait have a +2 circumstance bonus to saves against this tech.
 
 
   Critical Success The target is unaffected.
 
   Success The target is Slowed 1 for 1 round.
 
-  Failure The target is slowed 1 and must attempt a Toughness save at the end of each of its turns; this ongoing save has the incapacitation trait. On a failed save, the slowed condition increases by 1 (or 2 on a critical failure). A successful save reduces the slowed condition by 1. When a creature is unable to act due to the slowed condition, the creature is permanently non-magically petrified as the polymer hardens completely. The spell ends if the creature is magically petrified or the slowed condition is removed.
+  Failure The target is slowed 1 and must attempt a Grit check at the end of each of its turns; this ongoing save has the incapacitation trait. On a failed save, the slowed condition increases by 1 (or 2 on a critical failure). A successful save reduces the slowed condition by 1. When a creature is unable to act due to the slowed condition, the creature is permanently non-magically petrified as the polymer hardens completely. The spell ends if the creature is magically petrified or the slowed condition is removed.
 
   Critical Failure As failure, but the target is initially Slowed 2.'
 tradition: technical

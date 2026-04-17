@@ -1,6 +1,6 @@
 id: psi_gravity_spike
 name: Psi-Gravity Spike
-description: 'By suddenly altering gravity, you pull the target toward you. The target is pulled 10 feet closer to you unless it succeeds at a Toughness save. On a critical failure, it''s also knocked Prone. The effects of this tech change depending on the number of actions you spend when you Use this tech.
+description: 'By suddenly altering gravity, you pull the target toward you. The target is pulled 10 feet closer to you unless it succeeds at a Grit check. On a critical failure, it''s also knocked Prone. The effects of this tech change depending on the number of actions you spend when you Use this tech.
 
   1 (somatic) The spell targets one creature.
 

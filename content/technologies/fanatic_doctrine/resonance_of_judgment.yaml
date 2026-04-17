@@ -2,7 +2,7 @@ id: resonance_of_judgment
 name: Resonance of Judgment
 description: 'You channel doctrinal power as devastating sonic vibrations through
   a target''s body, rattling bones and organs. The creature takes 8d6 sonic damage
-  and must attempt a Toughness save.
+  and must attempt a Grit check.
 
 
   Critical Success The target is unaffected.
@@ -15,7 +15,7 @@ description: 'You channel doctrinal power as devastating sonic vibrations throug
   for 1 minute.
 
 
-  Heightened (+1) The damage increases by 2d6.'
+  Upgraded (+1) The damage increases by 2d6.'
 tradition: fanatic_doctrine
 level: 4
 usage_type: prepared

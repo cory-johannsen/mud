@@ -1,7 +1,7 @@
 id: spore_cyclone
 name: Spore Cyclone
 description: You release a burst of bio-engineered spores that create a whirling vortex.
-  When the cyclone appears, each creature in its area must attempt a Reflex save or
+  When the cyclone appears, each creature in its area must attempt a Quickness check or
   take 3d6 bludgeoning damage and be pushed 10 feet.
 tradition: bio_synthetic
 level: 3

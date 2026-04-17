@@ -2,9 +2,9 @@ id: iron_penance
 name: Iron Penance
 description: A spectral punishment device materializes around the target and drains
   its vitality for your gain. This deals 4d4 piercing damage and 4d4 void damage,
-  and the target must attempt a Toughness save. You gain temporary Hit Points equal
+  and the target must attempt a Grit check. You gain temporary Hit Points equal
   to the void damage taken. All mechanical effects (immobilization, escape) remain
-  identical to the base protocol.Heightened (+1) The piercing and void damage increase
+  identical to the base protocol.Upgraded (+1) The piercing and void damage increase
   by 1d4 each.
 tradition: fanatic_doctrine
 level: 4

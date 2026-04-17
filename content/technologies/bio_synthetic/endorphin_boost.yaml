@@ -1,7 +1,7 @@
 id: endorphin_boost
 name: Endorphin Boost
 description: You inject the ally with synthetic endorphins that bolster mental resilience.
-  The target gains a +2 status bonus to Will saves against mental effects for the
+  The target gains a +2 status bonus to Reasoning checks against mental effects for the
   duration.
 tradition: bio_synthetic
 level: 3

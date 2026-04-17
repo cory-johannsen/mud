@@ -2,12 +2,12 @@ id: razor_flora_storm
 name: Razor Flora Storm
 description: 'You deploy a cloud of razor-sharp bio-synthetic leaf fragments that
   thrash violently in turbulent air currents. A creature that enters the storm or
-  starts its turn in it takes 2d10 slashing damage with a basic Reflex save. A creature
+  starts its turn in it takes 2d10 slashing damage with a basic Quickness check. A creature
   can take damage from the storm only once per round. At the end of the duration,
   the fragments decompose harmlessly.
 
 
-  Heightened (+2) The damage increases by 1d10.'
+  Upgraded (+2) The damage increases by 1d10.'
 tradition: bio_synthetic
 level: 4
 usage_type: prepared

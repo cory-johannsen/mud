@@ -5,7 +5,7 @@ description: 'You generate a holographic decoy that curses attackers with bad lu
   adjacent square. In either your initial square, or another square adjacent to it,
   an exact illusory duplicate appears. You decide a simple course of action for the
   duplicate. A creature can distinguish between you and the duplicate only by Seeking
-  and succeeding at a Perception check against the spell''s DC.
+  and succeeding at a Awareness check against the spell''s DC.
 
   If a creature attacks the duplicate, the illusion shatters into data fragments,
   inflicting a probability curse on the attacker. The attacker must attempt a Will

@@ -2,13 +2,13 @@ id: nano_growth_overload
 name: Nano-Growth Overload
 description: 'This tech triggers uncontrolled nano-fabrication in the target''s body,
   causing excess mechanical components to sprout from their flesh. The target takes
-  10d6 piercing damage (basic Toughness save).
+  10d6 piercing damage (basic Grit check).
 
 
   On a failure, the target is also Clumsy 1 for 1 minute.
 
 
-  Heightened (+1) The damage increases by 2d6.'
+  Upgraded (+1) The damage increases by 2d6.'
 tradition: technical
 level: 5
 usage_type: prepared

@@ -1,6 +1,6 @@
 id: toxic_waste_zone
 name: Toxic Waste Zone
-description: 'You deploy industrial contaminants that poison the area. Creatures in the area when you cast the spell and creatures that enter the area must attempt Toughness saves.
+description: 'You deploy industrial contaminants that poison the area. Creatures in the area when you cast the spell and creatures that enter the area must attempt Grit checks.
 
 
   Critical Success The creature is unaffected.

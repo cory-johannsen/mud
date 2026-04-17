@@ -2,7 +2,7 @@ id: sinkhole_gland
 name: Sinkhole Gland
 description: You secrete a chemical compound that liquefies the ground into a conical
   pit trap of loose substrate. The area becomes difficult terrain for the duration.
-  A creature that enters the area must attempt a Reflex save or fall to the bottom.
+  A creature that enters the area must attempt a Quickness check or fall to the bottom.
 tradition: bio_synthetic
 level: 3
 usage_type: prepared

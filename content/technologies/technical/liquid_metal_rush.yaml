@@ -2,11 +2,11 @@ id: liquid_metal_rush
 name: Liquid Metal Rush
 description: 'You activate a device that partially converts your body to liquid metal
   form. You Stride up to twice your speed and can pass through one creature''s space,
-  exposing it to heavy metal toxicity (Toughness save). All mechanical effects (sickened,
+  exposing it to heavy metal toxicity (Grit check). All mechanical effects (sickened,
   poison damage) remain identical to the base protocol.
 
 
-  Heightened (+1) Damage increases by 1d6 on failure and 2d6 on critical failure.'
+  Upgraded (+1) Damage increases by 1d6 on failure and 2d6 on critical failure.'
 tradition: technical
 level: 4
 usage_type: prepared

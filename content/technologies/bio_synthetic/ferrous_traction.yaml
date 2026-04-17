@@ -2,7 +2,7 @@ id: ferrous_traction
 name: Ferrous Traction
 description: You generate a bio-electric field that attracts metallic objects. You
   pull an unattended metal object of up to 1 Bulk toward you from within 60 feet.
-  If targeting a creature wearing metal armor, it must attempt a Toughness save or
+  If targeting a creature wearing metal armor, it must attempt a Grit check or
   be pulled 10 feet toward you.
 tradition: bio_synthetic
 level: 2

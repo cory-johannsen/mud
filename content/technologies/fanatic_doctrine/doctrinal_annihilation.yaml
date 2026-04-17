@@ -5,7 +5,7 @@ description: 'You call forth a catastrophic manifestation of your doctrine''s ul
   You can''t activate this tech if you don''t have a deity. This tech gains the trait corresponding to the alignment damage dealt.
 
 
-  Heightened (+1) The damage increases by 1d6 void damage, 1d6 alignment damage, and 1d6 additional void and vitality damage for a true neutral deity.
+  Upgraded (+1) The damage increases by 1d6 void damage, 1d6 alignment damage, and 1d6 additional void and vitality damage for a true neutral deity.
 
 
   @Damage[(+2)d6[void],(+2)d6[spirit]|traits:spirit]{Leveled Void + Spirit Damage}

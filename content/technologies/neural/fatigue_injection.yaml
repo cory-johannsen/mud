@@ -1,7 +1,7 @@
 id: fatigue_injection
 name: Fatigue Injection
 description: You accelerate the target's perception of exhaustion, burdening it with
-  the fatigue of an entire day. The creature must attempt a Toughness save or become
+  the fatigue of an entire day. The creature must attempt a Grit check or become
   Fatigued and Clumsy 1 for the duration.
 tradition: neural
 level: 3
@@ -19,7 +19,7 @@ effects:
     dc: 0
     description: 'You fast-forward time for a single creature, burdening it with the
       aches and pain of an entire day and making it temporarily tired and weak. The
-      creature must attempt a Toughness save.
+      creature must attempt a Grit check.
 
 
       Critical Succe'

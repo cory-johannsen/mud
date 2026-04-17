@@ -10,7 +10,7 @@ description: 'You create a pool of bio-synthetic regenerative fluid that you and
   The pool can be tapped a total of 3 times before it is exhausted.
 
 
-  Heightened (+1) The healing increases by 1d8.'
+  Upgraded (+1) The healing increases by 1d8.'
 tradition: bio_synthetic
 level: 5
 usage_type: prepared

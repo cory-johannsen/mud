@@ -2,7 +2,7 @@ id: drone_swarm_strike
 name: Drone Swarm Strike
 description: 'You deploy automated micro-drones that attack targets in the area. The
   drones hover and strike nearby creatures. This deals 2d10 bludgeoning damage to
-  each creature in the area. Creatures in the area must attempt a Reflex save.
+  each creature in the area. Creatures in the area must attempt a Quickness check.
 
 
   Critical Success The creature is unaffected.

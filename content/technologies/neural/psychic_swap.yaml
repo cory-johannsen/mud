@@ -2,7 +2,7 @@ id: psychic_swap
 name: Psychic Swap
 description: You telekinetically swap an item you're holding for another that someone
   else has. The second item appears in your hand (or falls to the ground if too heavy).
-  An unwilling target can attempt a Reflex save to hold onto its item.
+  An unwilling target can attempt a Quickness check to hold onto its item.
 tradition: neural
 level: 3
 usage_type: prepared

@@ -3,7 +3,7 @@ name: Poltergeist Protocol
 description: 'You use your mind to manipulate unattended objects in the area, temporarily
   animating them to attack. The objects hover in the air and strike nearby creatures.
   This deals 2d10 bludgeoning damage to each creature in the area. Creatures in the
-  area must attempt a Reflex save.
+  area must attempt a Quickness check.
 
 
   Critical Success The creature is unaffected.

@@ -2,10 +2,10 @@ id: overload_detonation
 name: Overload Detonation
 description: 'You trigger a catastrophic overload in a willing ally or minion''s systems,
   dealing 6d6 fire damage in a @Template[burst|distance:20] centered on it. Each creature
-  in the area must attempt a basic Reflex save. The target is destroyed.
+  in the area must attempt a basic Quickness check. The target is destroyed.
 
 
-  Heightened (+1) The damage increases by 2d6.'
+  Upgraded (+1) The damage increases by 2d6.'
 tradition: technical
 level: 2
 usage_type: prepared

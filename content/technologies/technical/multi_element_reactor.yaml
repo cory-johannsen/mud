@@ -3,15 +3,15 @@ name: Multi-Element Reactor
 description: 'You activate a multi-element reactor that combines volatile energy types into a chaotic storm. The confluence has AC 28 and 120 Hit Points, weakness 10 to area effects, and immunity to bleed and poison. Creatures can move through the confluence; creatures within are concealed, and all creatures outside are concealed to those within. When you Cast or Sustain this tech, you choose up to two elements to activate.
 
 
-  Air (air, electricity) The reactor releases an electrical bolt, dealing 4d4 electricity damage to creatures within 20 feet, with a basic Reflex save. This doesn''t affect creatures completely inside.
+  Air (air, electricity) The reactor releases an electrical bolt, dealing 4d4 electricity damage to creatures within 20 feet, with a basic Quickness check. This doesn''t affect creatures completely inside.
 
   Earth (earth) The confluence gains a +2 circumstance bonus to AC and resistance 10 to all physical damage (except adamantine) for 1 round.
 
   Fire (fire) Thermal reactions roar through the confluence, dealing 1d6 persistent fire damage to those partially or entirely inside.
 
-  Metal (metal) The reactor flings shrapnel, dealing 2d6 slashing damage to those partially or entirely inside with a basic Reflex save. A creature that critically fails also takes 1d6 persistent bleed damage.
+  Metal (metal) The reactor flings shrapnel, dealing 2d6 slashing damage to those partially or entirely inside with a basic Quickness check. A creature that critically fails also takes 1d6 persistent bleed damage.
 
-  Water (attack, water) The reactor expels a high-pressure jet. Attempt a ranged spell attack against a target within 60 feet. This attack ignores concealment granted by the confluence, and gets a +2 circumstance bonus against targets inside. The water deals 4d6 bludgeoning damage on a hit (doubled on a critical hit). This doesn''t count toward your multiple attack penalty.
+  Water (attack, water) The reactor expels a high-pressure jet. Attempt a ranged tech attack against a target within 60 feet. This attack ignores concealment granted by the confluence, and gets a +2 circumstance bonus against targets inside. The water deals 4d6 bludgeoning damage on a hit (doubled on a critical hit). This doesn''t count toward your multiple attack penalty.
 
   Wood (wood) Structural supports grow, making ground in the area difficult terrain.'
 tradition: technical

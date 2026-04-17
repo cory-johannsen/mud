@@ -1,11 +1,11 @@
 id: psychic_cascade
 name: Psychic Cascade
 description: 'You unleash a torrent of psychic energy in a @Template[line|distance:60].
-  Each creature in the line must attempt a basic Reflex save. You deal 2d4 fire damage
+  Each creature in the line must attempt a basic Quickness check. You deal 2d4 fire damage
   plus 2d4 spirit damage.
 
 
-  Heightened (+1) The fire damage and spirit damage each increase by 1d4.'
+  Upgraded (+1) The fire damage and spirit damage each increase by 1d4.'
 tradition: neural
 level: 2
 usage_type: prepared

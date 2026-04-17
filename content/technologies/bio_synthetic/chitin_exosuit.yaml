@@ -15,6 +15,6 @@ effects:
   on_apply:
   - type: utility
     dc: 0
-    description: Upon casting this tech, the armor you're wearing is whisked away
+    description: Upon activating this tech, the armor you're wearing is whisked away
       into an extradimensional space that's linked to you. If the armor is magical
       and invested by you, it remains invested while in this sp

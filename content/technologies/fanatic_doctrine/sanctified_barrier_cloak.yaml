@@ -3,7 +3,7 @@ name: Sanctified Barrier Cloak
 description: 'You wrap yourself in doctrinal protective energy, gaining resistance 5 to spirit damage and a +1 status bonus to saving throws against effects with the unholy trait. Creatures that hit you with melee attacks take 2d6 spirit damage.
 
 
-  Heightened (8th) The resistance increases to 10, and the spirit damage increases to 3d6 spirit.'
+  Upgraded (8th) The resistance increases to 10, and the spirit damage increases to 3d6 spirit.'
 tradition: fanatic_doctrine
 level: 6
 usage_type: prepared

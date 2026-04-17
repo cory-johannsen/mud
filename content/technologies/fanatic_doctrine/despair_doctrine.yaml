@@ -8,7 +8,7 @@ description: 'You invoke the doctrine of existential dread, flooding the target'
 
   Failure The target takes full damage and becomes Frightened 2.
 
-  Critical Failure The target takes double damage and becomes Frightened 3.Heightened
+  Critical Failure The target takes double damage and becomes Frightened 3.Upgraded
   (+1) Increase the damage by 2d6.'
 tradition: fanatic_doctrine
 level: 3

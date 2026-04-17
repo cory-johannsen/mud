@@ -1,7 +1,7 @@
 id: gravity_gland
 name: Gravity Gland
 description: You secrete a compound that massively increases the target's effective
-  weight, hamper its flight. Effects are based on its Toughness save. If the creature
+  weight, hamper its flight. Effects are based on its Grit check. If the creature
   reaches the ground safely, it doesn't take falling damage.
 tradition: bio_synthetic
 level: 3
@@ -18,7 +18,7 @@ effects:
   - type: utility
     dc: 0
     description: 'Using the weight of earth, you hamper a target''s flight, with effects
-      based on its Toughness save. If the creature reaches the ground safely, it doesn''t
+      based on its Grit check. If the creature reaches the ground safely, it doesn''t
       take falling damage.
 
 

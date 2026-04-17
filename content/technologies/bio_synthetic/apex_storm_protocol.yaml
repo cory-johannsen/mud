@@ -1,6 +1,6 @@
 id: apex_storm_protocol
 name: Apex Storm Protocol
-description: You unleash a devastating storm of pure bio-electric fury. All creatures in a 120-foot emanation take 10d6 electricity and 10d6 bludgeoning damage each round for 1 minute (Reflex save for half). On a failure, they are also knocked prone. The storm generates intense winds that make flight difficult (DC 30 Acrobatics check to maintain flight).
+description: You unleash a devastating storm of pure bio-electric fury. All creatures in a 120-foot emanation take 10d6 electricity and 10d6 bludgeoning damage each round for 1 minute (Quickness check for half). On a failure, they are also knocked prone. The storm generates intense winds that make flight difficult (DC 30 Acrobatics check to maintain flight).
 tradition: bio_synthetic
 level: 9
 usage_type: prepared

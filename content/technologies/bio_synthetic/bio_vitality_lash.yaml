@@ -1,9 +1,9 @@
 id: bio_vitality_lash
 name: Bio-Vitality Lash
 description: |-
-    You demolish the target's corrupted essence with energy from Creation's Forge. You deal 2d6 vitality damage with a basic Toughness save. If the creature critically fails the save, it is also Enfeebled 1 until the start of your next turn.
+    You demolish the target's corrupted essence with energy from Creation's Forge. You deal 2d6 vitality damage with a basic Grit check. If the creature critically fails the save, it is also Enfeebled 1 until the start of your next turn.
 
-    Heightened (+1) The damage increases by 1d6.
+    Upgraded (+1) The damage increases by 1d6.
 tradition: bio_synthetic
 level: 1
 usage_type: prepared

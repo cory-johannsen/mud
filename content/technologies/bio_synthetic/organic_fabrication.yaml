@@ -7,7 +7,7 @@ description: 'You bio-synthesize a temporary object from organic raw materials. 
   materials with a rarity of uncommon or higher. It is obviously temporarily synthesized.
 
 
-  Heightened (5th) The item is metal and can include common minerals.'
+  Upgraded (5th) The item is metal and can include common minerals.'
 tradition: bio_synthetic
 level: 4
 usage_type: prepared

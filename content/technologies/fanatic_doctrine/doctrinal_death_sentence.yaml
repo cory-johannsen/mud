@@ -2,7 +2,7 @@ id: doctrinal_death_sentence
 name: Doctrinal Death Sentence
 description: 'You pronounce a doctrinal curse tying a creature to a specific type
   of death. Choose a damage type: acid, bludgeoning, cold, electricity, fire, piercing,
-  slashing, sonic, or void. The effect is based on the target''s Toughness save.Critical
+  slashing, sonic, or void. The effect is based on the target''s Grit check.Critical
   Success The target is unaffected.
 
   Success The target gains weakness 2 to the chosen damage type until the end of your
@@ -11,7 +11,7 @@ description: 'You pronounce a doctrinal curse tying a creature to a specific typ
   Failure As success, but duration is 1 minute. If reduced to 0 HP by the chosen damage
   and level is 7 or less, it dies.
 
-  Critical Failure As failure, but duration is unlimited.Heightened (+2) Weakness
+  Critical Failure As failure, but duration is unlimited.Upgraded (+2) Weakness
   increases by 1, and the max level for auto-kill increases by 4.'
 tradition: fanatic_doctrine
 level: 4

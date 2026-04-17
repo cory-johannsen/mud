@@ -1,6 +1,6 @@
 id: neural_parasites
 name: Neural Parasites
-description: 'You infest the target''s mind with psychic parasites that consume neural tissue. The target takes 4d6 mental damage and must attempt a Toughness save.
+description: 'You infest the target''s mind with psychic parasites that consume neural tissue. The target takes 4d6 mental damage and must attempt a Grit check.
 
 
   Critical Success The creature takes no damage.

@@ -1,6 +1,6 @@
 id: abrasive_grit_gland
 name: Abrasive Grit Gland
-description: 'You blast the area with grit that scours away soil and gets into creatures'' eyes. For the duration of the spell, any plant-based difficult terrain smaller than a tree becomes loose, allowing each 5-foot square of it to be cleared with a single Interact action. In addition, scouring sand attempts to counteract @UUID[Compendium.pf2e.spells-srd.Item.Entangling Flora] and other effects that create or manipulate plant-based terrain in its area. Successfully counteracting an effect removes only the portion of its area that overlaps with scouring sand''s area. After one such attempt, the effect is temporarily immune to scouring sand''s counteract for 24 hours. Each creature in the area when you Use this tech or that ends its turn in the area must attempt a Reflex save.
+description: 'You blast the area with grit that scours away soil and gets into creatures'' eyes. For the duration of the spell, any plant-based difficult terrain smaller than a tree becomes loose, allowing each 5-foot square of it to be cleared with a single Interact action. In addition, scouring sand attempts to counteract @UUID[Compendium.pf2e.spells-srd.Item.Entangling Flora] and other effects that create or manipulate plant-based terrain in its area. Successfully counteracting an effect removes only the portion of its area that overlaps with scouring sand''s area. After one such attempt, the effect is temporarily immune to scouring sand''s counteract for 24 hours. Each creature in the area when you Use this tech or that ends its turn in the area must attempt a Quickness check.
 
 
   Success The creature is unaffected.
@@ -10,9 +10,9 @@ description: 'You blast the area with grit that scours away soil and gets into c
   Critical Failure As failure, but the creature is also Blinded for its next action.
 
 
-  Heightened (3rd) Once per round when you Sustain the tech, you can move the center of the burst to a spot within range.
+  Upgraded (3rd) Once per round when you Sustain the tech, you can move the center of the burst to a spot within range.
 
-  Heightened (6th) As the 3rd-rank version, except the range is 120 feet and the area is a 20-foot burst.'
+  Upgraded (6th) As the 3rd-rank version, except the range is 120 feet and the area is a 20-foot burst.'
 tradition: bio_synthetic
 level: 1
 usage_type: prepared

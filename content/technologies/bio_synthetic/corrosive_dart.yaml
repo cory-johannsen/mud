@@ -1,12 +1,12 @@
 id: corrosive_dart
 name: Corrosive Dart
 description: 'You synthesize a dart of concentrated acid that keeps corroding the
-  target after it hits. Make a spell attack against the target. On a hit, you deal
+  target after it hits. Make a tech attack against the target. On a hit, you deal
   3d8 acid damage plus 1d6 persistent acid damage. On a critical hit, double the
   initial damage, but not the persistent damage.
 
 
-  Heightened (+2) The initial damage increases by 2d8, and the persistent acid damage
+  Upgraded (+2) The initial damage increases by 2d8, and the persistent acid damage
   increases by 1d6.'
 tradition: bio_synthetic
 level: 2

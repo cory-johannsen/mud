@@ -1,6 +1,6 @@
 id: pressure_drop_field
 name: Pressure Drop Field
-description: 'Air pressure drops precipitously in the area, causing pain in creatures'' ears and joints. Each living creature must attempt a Toughness save.
+description: 'Air pressure drops precipitously in the area, causing pain in creatures'' ears and joints. Each living creature must attempt a Grit check.
 
 
   Critical Success Unaffected.

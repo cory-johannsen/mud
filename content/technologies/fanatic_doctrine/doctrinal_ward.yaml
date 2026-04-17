@@ -1,7 +1,7 @@
 id: doctrinal_ward
 name: Doctrinal Ward
 description: You inscribe a doctrinal exclusion zone around the target. Creatures
-  of the designated category take a -1 status penalty to attack rolls, spell attack
+  of the designated category take a -1 status penalty to attack rolls, tech attack
   rolls, and DCs against the warded creature and allies within 10 feet.
 tradition: fanatic_doctrine
 level: 3

@@ -1,12 +1,12 @@
 id: poison_spore_exhale
 name: Poison Spore Exhale
-description: 'You exhale a shimmering cloud of toxic breath at an enemy''s face. The target takes 1d4 poison damage and @Damage[(ceil(/2))d4[persistent,poison]], depending on its Toughness save.Critical Success The creature is unaffected.
+description: 'You exhale a shimmering cloud of toxic breath at an enemy''s face. The target takes 1d4 poison damage and @Damage[(ceil(/2))d4[persistent,poison]], depending on its Grit check.Critical Success The creature is unaffected.
 
   Success The target takes half initial damage and no persistent damage.
 
   Failure The target takes full initial and persistent damage.
 
-  Critical Failure The target takes double initial and persistent damage.Heightened (+2) The initial poison damage increases by 1d4, and the persistent poison damage increases by 1d4.'
+  Critical Failure The target takes double initial and persistent damage.Upgraded (+2) The initial poison damage increases by 1d4, and the persistent poison damage increases by 1d4.'
 tradition: bio_synthetic
 level: 1
 usage_type: prepared

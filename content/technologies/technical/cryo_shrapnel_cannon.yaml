@@ -2,14 +2,14 @@ id: cryo_shrapnel_cannon
 name: Cryo-Shrapnel Cannon
 description: 'You fire a cryo-round that flash-freezes ambient moisture into a flurry
   of jagged ice shards. The flurry deals 9d6 cold damage and 9d6 slashing damage to
-  all foes, with a basic Reflex save, but the blast pattern flows harmlessly around
+  all foes, with a basic Quickness check, but the blast pattern flows harmlessly around
   your allies. The recoil carries you to the other end of the area; though your movement
   can still trigger reactions, the storm of ice crystals prevents you from being affected
   by any effects, except for those that would counteract the tech or that the GM decides
   would affect frozen material.
 
 
-  Heightened (+1) The cold and slashing damage each increase by 1d6.'
+  Upgraded (+1) The cold and slashing damage each increase by 1d6.'
 tradition: technical
 level: 7
 usage_type: prepared

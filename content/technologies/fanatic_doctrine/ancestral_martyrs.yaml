@@ -3,7 +3,7 @@ name: Ancestral Martyrs
 description: 'You summon the spirits of doctrinal martyrs to occupy the area. A creature entering the area takes 2d6 mental damage with a basic Willpower save.
 
 
-  Heightened (+1) The damage increases by 1d6.'
+  Upgraded (+1) The damage increases by 1d6.'
 tradition: fanatic_doctrine
 level: 2
 usage_type: prepared

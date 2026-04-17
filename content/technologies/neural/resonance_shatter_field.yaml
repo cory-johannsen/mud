@@ -6,7 +6,7 @@ description: 'You emit a perfectly calibrated psychic vibration. When activating
 
   Failure As success, but if the creature leaves the area, or if you move far enough from the creature that they''re no longer in the area, the creature hears a shattering sound and takes 5d10 sonic damage and is Stunned 1. The creature is then Deafened for the rest of the tech''s duration.
 
-  Critical Failure As failure, but the creature takes double the sonic damage and is Stunned 3.Heightened (+1) The damage on a failed save increases by 1d10.'
+  Critical Failure As failure, but the creature takes double the sonic damage and is Stunned 3.Upgraded (+1) The damage on a failed save increases by 1d10.'
 tradition: neural
 level: 7
 usage_type: prepared

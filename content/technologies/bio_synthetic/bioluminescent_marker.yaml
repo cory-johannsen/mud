@@ -1,6 +1,6 @@
 id: bioluminescent_marker
 name: Bioluminescent Marker
-description: You bombard the area with bio-luminescent spores that adhere to creatures. Each creature in the area when you cast the spell must attempt a Reflex save. On a failure, the creature is outlined in bioluminescent glow for the duration, making it Concealed ineffective (concealment is negated). If the creature was Invisible, instead of negating its concealment, it becomes Concealed rather than being Undetected or Hidden.
+description: You bombard the area with bio-luminescent spores that adhere to creatures. Each creature in the area when you cast the spell must attempt a Quickness check. On a failure, the creature is outlined in bioluminescent glow for the duration, making it Concealed ineffective (concealment is negated). If the creature was Invisible, instead of negating its concealment, it becomes Concealed rather than being Undetected or Hidden.
 tradition: bio_synthetic
 level: 2
 usage_type: prepared

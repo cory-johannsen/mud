@@ -8,9 +8,9 @@ description: 'Bright bioluminescent energy radiates from your body in a 20-foot 
 
   Failure The creature is sickened 1 and becomes Slowed 1 until the end of its next turn.
 
-  Critical Failure As failure, but Sickened 2 and remains slowed 1 for the rest of the duration.Heightened (6th) Mental resistance 10.
+  Critical Failure As failure, but Sickened 2 and remains slowed 1 for the rest of the duration.Upgraded (6th) Mental resistance 10.
 
-  Heightened (8th) Mental resistance 15.'
+  Upgraded (8th) Mental resistance 15.'
 tradition: bio_synthetic
 level: 4
 usage_type: prepared

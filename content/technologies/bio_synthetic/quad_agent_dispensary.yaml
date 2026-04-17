@@ -1,6 +1,6 @@
 id: quad_agent_dispensary
 name: Quad-Agent Dispensary
-description: 'You cause a Small bio-organic dispensary to instantly sprout in an unoccupied space on the ground. Four compound pods grow from the dispensary, each filled with a different reactive agent. A creature can Interact to pluck one of the pods, and can then either throw it up to 30 feet as part of the same action or do so with a separate Interact action later. When thrown, a pod explodes in a @Template[burst|distance:5], dealing 6d6 damage with a basic Reflex save against your tech DC. The damage type depends on the compound: electricity for the ionized agent, fire for the thermal agent, poison for the toxic agent, or cold for the cryogenic agent. When the spell ends, the dispensary withers away and any remaining pods decompose.
+description: 'You cause a Small bio-organic dispensary to instantly sprout in an unoccupied space on the ground. Four compound pods grow from the dispensary, each filled with a different reactive agent. A creature can Interact to pluck one of the pods, and can then either throw it up to 30 feet as part of the same action or do so with a separate Interact action later. When thrown, a pod explodes in a @Template[burst|distance:5], dealing 6d6 damage with a basic Quickness check against your tech DC. The damage type depends on the compound: electricity for the ionized agent, fire for the thermal agent, poison for the toxic agent, or cold for the cryogenic agent. When the spell ends, the dispensary withers away and any remaining pods decompose.
 
   1d6 cold
 
@@ -8,7 +8,7 @@ description: 'You cause a Small bio-organic dispensary to instantly sprout in an
 
   1d6 fire
 
-  1d6 poisonHeightened (+1) The burst''s damage increases by 1d6.'
+  1d6 poisonUpgraded (+1) The burst''s damage increases by 1d6.'
 tradition: bio_synthetic
 level: 6
 usage_type: prepared

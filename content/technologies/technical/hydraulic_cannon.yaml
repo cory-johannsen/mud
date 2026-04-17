@@ -1,6 +1,6 @@
 id: hydraulic_cannon
 name: Hydraulic Cannon
-description: 'You fire a pressurized water cannon in a wide arc. Each creature in a @Template[cone|distance:30] must attempt a Toughness save.
+description: 'You fire a pressurized water cannon in a wide arc. Each creature in a @Template[cone|distance:30] must attempt a Grit check.
 
 
   Critical Success The creature is unaffected.

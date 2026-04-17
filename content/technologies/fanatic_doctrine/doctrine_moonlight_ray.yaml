@@ -1,6 +1,6 @@
 id: doctrine_moonlight_ray
 name: Doctrine Moonlight Ray
-description: You fire a beam of cold doctrinal light. Make a ranged spell attack.
+description: You fire a beam of cold doctrinal light. Make a ranged tech attack.
   The beam deals 5d6 cold damage; if the target has the unholy trait, you deal 5d6
   holy damage instead.
 tradition: fanatic_doctrine

@@ -3,7 +3,7 @@ name: Optical Camouflage
 description: 'You activate an optical camouflage system that renders the target Invisible for the duration. The spell ends if the target uses a hostile action.
 
 
-  Heightened (4th) The spell lasts 1 minute and doesn''t end when the target uses hostile actions.'
+  Upgraded (4th) The spell lasts 1 minute and doesn''t end when the target uses hostile actions.'
 tradition: technical
 level: 2
 usage_type: prepared

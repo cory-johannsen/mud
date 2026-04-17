@@ -2,7 +2,7 @@ id: magma_fissure
 name: Magma Fissure
 description: 'A crack rips through the ground, erupting with superheated chemical
   compound, then swiftly seals. Each creature along the line and on solid ground takes
-  4d6 bludgeoning damage and 6d6 fire damage with a Reflex save.
+  4d6 bludgeoning damage and 6d6 fire damage with a Quickness check.
 
 
   Critical Success The creature is unaffected.

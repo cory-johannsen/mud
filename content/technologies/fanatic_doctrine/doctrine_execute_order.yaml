@@ -1,13 +1,13 @@
 id: doctrine_execute_order
 name: Doctrine Execute Order
 description: 'You point at a creature and invoke the ultimate verdict of your doctrine.
-  The target takes 70 void damage with a basic Toughness save. If the target is undead
+  The target takes 70 void damage with a basic Grit check. If the target is undead
   or otherwise has void healing, the tech loses the death and void traits and gains
   the vitality trait, and the target takes 70 vitality damage with a basic Fortitude
   save.
 
 
-  Heightened (+1) The damage increases by 10.'
+  Upgraded (+1) The damage increases by 10.'
 tradition: fanatic_doctrine
 level: 7
 usage_type: prepared

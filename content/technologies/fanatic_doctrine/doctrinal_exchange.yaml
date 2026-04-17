@@ -1,7 +1,7 @@
 id: doctrinal_exchange
 name: Doctrinal Exchange
 description: You invoke a sacred exchange protocol, teleporting an item from your
-  hand to the target's and vice versa. An unwilling target can attempt a Reflex save
+  hand to the target's and vice versa. An unwilling target can attempt a Quickness check
   to resist.
 tradition: fanatic_doctrine
 level: 3

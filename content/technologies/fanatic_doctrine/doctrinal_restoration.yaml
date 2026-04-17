@@ -7,7 +7,7 @@ description: 'An infusion of doctrinal vital energy grants a creature continuous
   @UUID[Compendium.pf2e.spell-effects.Item.tech Effect: Regenerate]
 
 
-  Heightened (9th) The regeneration increases to 20.'
+  Upgraded (9th) The regeneration increases to 20.'
 tradition: fanatic_doctrine
 level: 7
 usage_type: prepared

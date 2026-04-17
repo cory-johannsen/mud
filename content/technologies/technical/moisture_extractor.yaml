@@ -1,6 +1,6 @@
 id: moisture_extractor
 name: Moisture Extractor
-description: 'You deploy a device that extracts all moisture from the target''s immediate environment. The target must attempt a Toughness save.Critical Success The creature is unaffected.
+description: 'You deploy a device that extracts all moisture from the target''s immediate environment. The target must attempt a Grit check.Critical Success The creature is unaffected.
 
   Success The creature is Sickened 1.
 

@@ -1,9 +1,9 @@
 id: animal_allies
 name: Animal Allies
 description: |-
-    You summon tiny, ordinary animals from the environment, such as insects, birds, or fish, to quickly lash out at nearby foes. The animals swarm around the creatures in the area, dealing each of them 3d4 piercing damage with a basic Reflex save.
+    You summon tiny, ordinary animals from the environment, such as insects, birds, or fish, to quickly lash out at nearby foes. The animals swarm around the creatures in the area, dealing each of them 3d4 piercing damage with a basic Quickness check.
 
-    Heightened (+1) The damage increases by 3d4
+    Upgraded (+1) The damage increases by 3d4
 tradition: bio_synthetic
 level: 1
 usage_type: prepared

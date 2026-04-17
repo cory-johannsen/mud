@@ -2,7 +2,7 @@ id: soul_tithe
 name: Soul Tithe
 description: Your touch drains life force as a doctrinal tithe. You deal 6d6 void
   damage to the target. You gain temporary Hit Points equal to half the damage dealt.
-  Heightened (+1) The damage increases by 2d6.
+  Upgraded (+1) The damage increases by 2d6.
 tradition: fanatic_doctrine
 level: 3
 usage_type: prepared

@@ -3,7 +3,7 @@ name: Containment Grid Mk4
 description: You deploy an immobile force field around a creature. The field blocks
   attacks, effects, and creatures. Hardness 10, 40 Hit Points, immune to critical
   hits and precision damage. If the target is unwilling, effects depend on Reflex
-  save. All mechanical effects remain identical to the base protocol.Heightened (+1)
+  save. All mechanical effects remain identical to the base protocol.Upgraded (+1)
   Hit Points are 5 higher on success or 15 higher on failure.
 tradition: technical
 level: 4

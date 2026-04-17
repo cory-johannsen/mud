@@ -6,7 +6,7 @@ description: 'You deploy several concealed smart mines throughout the area. Choo
 
 
   When a creature enters a mined square, the mine detonates, dealing 2d10 force damage
-  with a basic Reflex save. Mines can be detected by Searching against your spell
+  with a basic Quickness check. Mines can be detected by Searching against your spell
   DC.'
 tradition: technical
 level: 5

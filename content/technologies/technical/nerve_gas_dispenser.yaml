@@ -1,7 +1,7 @@
 id: nerve_gas_dispenser
 name: Nerve Gas Dispenser
 description: You deploy a canister that releases invisible nerve agent into the area.
-  When you Sustain, each breathing creature must attempt a Toughness save or become
+  When you Sustain, each breathing creature must attempt a Grit check or become
   Sickened.
 tradition: technical
 level: 3

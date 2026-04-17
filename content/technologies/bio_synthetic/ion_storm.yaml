@@ -3,11 +3,11 @@ name: Ion Storm
 description: 'You deploy an atmospheric ionization device that calls down a lightning
   bolt within the tech''s area. The bolt is a vertical line from the top of the storm
   to the ground below, dealing 4d12 electricity damage to creatures in the line (basic
-  Reflex save). On subsequent rounds, the first time you Sustain the tech each round,
+  Quickness check). On subsequent rounds, the first time you Sustain the tech each round,
   you call down another bolt.
 
 
-  Heightened (+1) The damage of each bolt increases by 1d12.'
+  Upgraded (+1) The damage of each bolt increases by 1d12.'
 tradition: bio_synthetic
 level: 5
 usage_type: prepared

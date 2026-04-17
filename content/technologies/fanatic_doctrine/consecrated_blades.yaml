@@ -3,10 +3,10 @@ name: Consecrated Blades
 description: 'You cause razor-sharp blades inscribed with doctrinal scripture to erupt
   from the ground, slashing at and obstructing creatures in the area. The area is
   difficult terrain. Each creature in the area at activation and who end their turn
-  there take 3d6 slashing damage and bleed damage, with a basic Reflex save.
+  there take 3d6 slashing damage and bleed damage, with a basic Quickness check.
 
 
-  Heightened (+2) The slashing damage increases by 1d6.'
+  Upgraded (+2) The slashing damage increases by 1d6.'
 tradition: fanatic_doctrine
 level: 5
 usage_type: prepared

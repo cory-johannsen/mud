@@ -1,6 +1,6 @@
 id: sacred_fate_lock
 name: Sacred Fate Lock
-description: You lock two targets in doctrinal judgment. Both must attempt Will saves.
+description: You lock two targets in doctrinal judgment. Both must attempt Reasoning checks.
   On a failure, each can only target the other for 1 minute. Damage to one is reflected
   to the other at half value.
 tradition: fanatic_doctrine

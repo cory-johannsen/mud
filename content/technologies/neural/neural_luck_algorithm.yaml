@@ -7,7 +7,7 @@ description: 'You bestow yourself supernaturally good luck at cards, dice, and o
   @UUID[Compendium.pf2e.spell-effects.Item.tech Effect: Nudge the Odds]
 
 
-  Heightened (5th) The status bonus increases to +2, and the duration increases to last until the next time you make your daily preparations. If you continue spending your spell slot to keep the duration active, this allows you to apply the effect to a downtime check to Earn Income.'
+  Upgraded (5th) The status bonus increases to +2, and the duration increases to last until the next time you make your daily preparations. If you continue spending your spell slot to keep the duration active, this allows you to apply the effect to a downtime check to Earn Income.'
 tradition: neural
 level: 1
 usage_type: prepared

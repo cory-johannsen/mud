@@ -1,7 +1,7 @@
 id: system_drain
 name: System Drain
 description: 'Your device deploys a blood-extraction module that feasts upon the target''s
-  circulatory system, dealing 12d6 piercing damage, depending on your spell attack
+  circulatory system, dealing 12d6 piercing damage, depending on your tech attack
   roll. You gain temporary Hit Points for 1 minute equal to half the piercing damage
   the target took.
 

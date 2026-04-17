@@ -8,7 +8,7 @@ description: 'Area 5-foot square
   or have an area. Any creature that enters the mined square triggers the stored tech.
 
 
-  Heightened (+1) The maximum rank of the stored tech increases by 1.'
+  Upgraded (+1) The maximum rank of the stored tech increases by 1.'
 tradition: bio_synthetic
 level: 5
 usage_type: prepared

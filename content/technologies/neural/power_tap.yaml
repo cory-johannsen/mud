@@ -1,7 +1,7 @@
 id: power_tap
 name: Power Tap
 description: You establish a neural tap into a divine or otherwise empowered target,
-  draining its potency. The target must succeed at a Toughness save or lose a spell
+  draining its potency. The target must succeed at a Grit check or lose a spell
   slot of the highest level available to it; you gain that spell slot, which you can
   use as if it were one of your own prepared spells.
 tradition: neural

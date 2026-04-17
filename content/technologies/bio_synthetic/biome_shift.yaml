@@ -2,10 +2,10 @@ id: biome_shift
 name: Biome Shift
 description: 'You suffuse the area with bio-synthetic elemental energy. Choose acid,
   cold, electricity, or fire. Creatures that enter or start their turn in the area
-  take 2d6 damage of the chosen type with a basic Reflex save.
+  take 2d6 damage of the chosen type with a basic Quickness check.
 
 
-  Heightened (+1) The damage increases by 1d6.'
+  Upgraded (+1) The damage increases by 1d6.'
 tradition: bio_synthetic
 level: 2
 usage_type: prepared

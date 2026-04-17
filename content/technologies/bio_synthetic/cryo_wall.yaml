@@ -7,10 +7,10 @@ description: 'You construct a barrier of bio-synthetic cryogenic compound that b
 
 
   When a section is destroyed, it releases a blast of cryogenic compound dealing 3d6
-  cold damage to creatures within 10 feet (basic Reflex save).
+  cold damage to creatures within 10 feet (basic Quickness check).
 
 
-  Heightened (+2) The Hit Points of each section increase by 10, and the cold damage
+  Upgraded (+2) The Hit Points of each section increase by 10, and the cold damage
   increases by 1d6.'
 tradition: bio_synthetic
 level: 5

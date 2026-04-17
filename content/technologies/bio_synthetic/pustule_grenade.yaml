@@ -1,6 +1,6 @@
 id: pustule_grenade
 name: Pustule Grenade
-description: You hurl a bio-engineered capsule that bursts on contact, spraying fast-acting mutagenic compounds. All creatures in a 15-foot burst take 4d6 poison damage and must attempt a Reflex save.
+description: You hurl a bio-engineered capsule that bursts on contact, spraying fast-acting mutagenic compounds. All creatures in a 15-foot burst take 4d6 poison damage and must attempt a Quickness check.
 tradition: bio_synthetic
 level: 3
 usage_type: prepared

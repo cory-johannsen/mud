@@ -2,7 +2,7 @@ id: psychic_labyrinth_trap
 name: Psychic Labyrinth Trap
 description: 'You trap the target in a psychic puzzle-prison constructed from their
   own subconscious, locking them inside. Once each turn as a single action, the target
-  can attempt an Occultism check, Perception check, or Thievery check against your
+  can attempt an Occultism check, Awareness check, or Thievery check against your
   tech DC to solve the puzzle. Teleportation effects can''t carry the target outside
   the puzzle room unless they can also traverse the planes, such as @UUID[Compendium.pf2e.spells-srd.Item.Interplanar
   Teleport]. When the tech ends, the target returns to the space it occupied when
@@ -32,4 +32,4 @@ effects:
     dc: 0
     description: You transport the target into an extraplanar puzzle room of mysterious
       origin, locking them there. Once each turn as a single action, the target can
-      attempt an Occultism check, Perception check, or Th
+      attempt an Occultism check, Awareness check, or Th

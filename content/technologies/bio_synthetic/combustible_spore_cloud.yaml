@@ -2,11 +2,11 @@ id: combustible_spore_cloud
 name: Combustible Spore Cloud
 description: 'You release a cloud of combustible bio-synthetic spores. The cloud functions
   as Mist. If any open flame or fire effect contacts the cloud, it ignites. Creatures
-  in the cloud take 10d6 fire damage with a basic Reflex save. After igniting, the
+  in the cloud take 10d6 fire damage with a basic Quickness check. After igniting, the
   cloud disperses.
 
 
-  Heightened (+1) The fire damage increases by 2d6.'
+  Upgraded (+1) The fire damage increases by 2d6.'
 tradition: bio_synthetic
 level: 5
 usage_type: prepared

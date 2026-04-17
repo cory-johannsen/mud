@@ -1,6 +1,6 @@
 id: lithic_tendrils
 name: Lithic Tendrils
-description: 'Stone and soil protrusions grab and bury creatures. Each creature in the area when you cast the spell, and each creature that ends its turn in the area, must attempt a Toughness save. The first time each round you Sustain, each creature still Grabbed takes 1d6 bludgeoning damage, and each creature Restrained takes 2d6 bludgeoning damage. A creature can attempt to Escape against your tech DC.
+description: 'Stone and soil protrusions grab and bury creatures. Each creature in the area when you cast the spell, and each creature that ends its turn in the area, must attempt a Grit check. The first time each round you Sustain, each creature still Grabbed takes 1d6 bludgeoning damage, and each creature Restrained takes 2d6 bludgeoning damage. A creature can attempt to Escape against your tech DC.
 
 
   Success The creature is unaffected.
@@ -10,7 +10,7 @@ description: 'Stone and soil protrusions grab and bury creatures. Each creature 
   Critical Failure The creature is restrained.
 
 
-  Heightened (+2) The bludgeoning damage increases by 1d6 for grabbed creatures and 2d6 for restrained creatures.'
+  Upgraded (+2) The bludgeoning damage increases by 1d6 for grabbed creatures and 2d6 for restrained creatures.'
 tradition: bio_synthetic
 level: 4
 usage_type: prepared

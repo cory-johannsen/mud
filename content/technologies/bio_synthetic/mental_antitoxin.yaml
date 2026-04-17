@@ -1,7 +1,7 @@
 id: mental_antitoxin
 name: Mental Antitoxin
 description: You synthesize neural antibodies that protect the target's mind. The
-  target gains a +2 status bonus to Will saves against mental effects for the duration.
+  target gains a +2 status bonus to Reasoning checks against mental effects for the duration.
 tradition: bio_synthetic
 level: 2
 usage_type: prepared

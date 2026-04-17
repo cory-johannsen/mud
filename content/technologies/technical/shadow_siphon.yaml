@@ -1,6 +1,6 @@
 id: shadow_siphon
 name: Shadow Siphon
-description: 'You deploy a shadow-extraction device that tears at the target''s vitality. The target takes 4d4 void damage and must attempt a Toughness save.
+description: 'You deploy a shadow-extraction device that tears at the target''s vitality. The target takes 4d4 void damage and must attempt a Grit check.
 
 
   Critical Success The target is unaffected.

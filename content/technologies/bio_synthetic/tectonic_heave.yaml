@@ -1,6 +1,6 @@
 id: tectonic_heave
 name: Tectonic Heave
-description: You cause the ground to shift and buckle using subterranean root manipulation. The area becomes difficult terrain, and any creature standing in the area when it activates must attempt a Reflex save or fall Prone.
+description: You cause the ground to shift and buckle using subterranean root manipulation. The area becomes difficult terrain, and any creature standing in the area when it activates must attempt a Quickness check or fall Prone.
 tradition: bio_synthetic
 level: 3
 usage_type: prepared

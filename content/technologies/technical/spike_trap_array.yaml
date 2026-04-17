@@ -1,7 +1,7 @@
 id: spike_trap_array
 name: Spike Trap Array
 description: Mechanized spike arrays deploy from the floor and ceiling, dealing 6d6
-  piercing damage to creatures in the area with a basic Reflex save. Dense arrays
+  piercing damage to creatures in the area with a basic Quickness check. Dense arrays
   make the area difficult terrain.
 tradition: technical
 level: 3

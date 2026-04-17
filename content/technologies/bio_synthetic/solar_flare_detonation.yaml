@@ -1,6 +1,6 @@
 id: solar_flare_detonation
 name: Solar Flare Detonation
-description: 'A powerful globe of concentrated solar energy explodes in the area, dealing 8d10 fire damage to all creatures in the area, plus an additional 1d10 vitality damage to undead creatures. Each creature in the area must attempt a Reflex save.
+description: 'A powerful globe of concentrated solar energy explodes in the area, dealing 8d10 fire damage to all creatures in the area, plus an additional 1d10 vitality damage to undead creatures. Each creature in the area must attempt a Quickness check.
 
 
   Critical Success The creature is unaffected.
@@ -14,7 +14,7 @@ description: 'A powerful globe of concentrated solar energy explodes in the area
   If the globe overlaps with an area of darkness-based tech, the solar flare attempts to counteract the darkness effect.
 
 
-  Heightened (+1) The fire damage increases by 1d10, and the vitality damage against undead increases by 1d10.'
+  Upgraded (+1) The fire damage increases by 1d10, and the vitality damage against undead increases by 1d10.'
 tradition: bio_synthetic
 level: 7
 usage_type: prepared

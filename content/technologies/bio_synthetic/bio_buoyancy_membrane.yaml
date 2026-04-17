@@ -1,9 +1,9 @@
 id: bio_buoyancy_membrane
 name: Bio-Buoyancy Membrane
 description: |-
-    You create a thin layer of foamy bubbles that adhere to the target, causing it to float in water and similar liquids. The target doesn't sink, even if it hasn't succeeded at a Swim check this round; an already-sinking target resurfaces with the bubbles' help over the course of 1 round. If on a plane where the water or liquid has a surface, the bubbles also prevent the target from diving beneath that surface unless it succeeds at a Toughness save against your tech DC.
+    You create a thin layer of foamy bubbles that adhere to the target, causing it to float in water and similar liquids. The target doesn't sink, even if it hasn't succeeded at a Swim check this round; an already-sinking target resurfaces with the bubbles' help over the course of 1 round. If on a plane where the water or liquid has a surface, the bubbles also prevent the target from diving beneath that surface unless it succeeds at a Grit check against your tech DC.
 
-    Heightened (4th) You can target up to 5 creatures.
+    Upgraded (4th) You can target up to 5 creatures.
 tradition: bio_synthetic
 level: 1
 usage_type: prepared

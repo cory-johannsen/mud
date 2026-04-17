@@ -1,10 +1,10 @@
 id: withering_decree
 name: Withering Decree
 description: 'You invoke a doctrinal decree of decay. Each creature in the area takes
-  3d10 void damage with a basic Toughness save.
+  3d10 void damage with a basic Grit check.
 
 
-  Heightened (+1) The damage increases by 1d10.'
+  Upgraded (+1) The damage increases by 1d10.'
 tradition: fanatic_doctrine
 level: 2
 usage_type: prepared

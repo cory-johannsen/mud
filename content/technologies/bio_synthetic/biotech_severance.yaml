@@ -1,7 +1,7 @@
 id: biotech_severance
 name: Biotech Severance
 description: You sever the bio-synthetic bonds holding a target creature's augmentations
-  together. The target must succeed at a Toughness save or have all active biological
+  together. The target must succeed at a Grit check or have all active biological
   effects and augmentations suppressed for 1 minute. On a critical failure, the suppression
   is permanent until restored by a full medical overhaul. You can also target objects,
   permanently destroying up to a 10th-level item.

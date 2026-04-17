@@ -1,7 +1,7 @@
 id: microwave_blood_heater
 name: Microwave Blood Heater
 description: 'You activate a directed microwave emitter that superheats the target''s
-  blood within its veins. The target takes 10d10 fire damage, with a Toughness save.
+  blood within its veins. The target takes 10d10 fire damage, with a Grit check.
   A nonliving creature with blood in its body (such as a vampire) can be affected,
   but a creature with no blood is immune.
 
@@ -15,7 +15,7 @@ description: 'You activate a directed microwave emitter that superheats the targ
   Critical Failure The target takes double damage and is Drained 3.
 
 
-  Heightened (+1) The damage increases by 1d10.'
+  Upgraded (+1) The damage increases by 1d10.'
 tradition: technical
 level: 8
 usage_type: prepared

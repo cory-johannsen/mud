@@ -6,9 +6,9 @@ description: 'You broadcast an overwhelming psychic superiority complex into a c
 
   Success The target takes half damage and is Fascinated with you for 1 round.
 
-  Failure The target takes full damage and is fascinated with you for 1 round. While fascinated with you, the target must succeed at a Toughness save (DC 5) when attempting to Cast a tech or use an action with the auditory trait. On a failure, the action is disrupted as the target blurts praise for you instead of saying what it intended.
+  Failure The target takes full damage and is fascinated with you for 1 round. While fascinated with you, the target must succeed at a Grit check (DC 5) when attempting to Cast a tech or use an action with the auditory trait. On a failure, the action is disrupted as the target blurts praise for you instead of saying what it intended.
 
-  Critical Failure As failure, but double damage and the effect lasts for 1 minute.Heightened (+1) The damage increases by 1d10.'
+  Critical Failure As failure, but double damage and the effect lasts for 1 minute.Upgraded (+1) The damage increases by 1d10.'
 tradition: neural
 level: 4
 usage_type: prepared

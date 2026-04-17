@@ -4,10 +4,10 @@ description: 'You activate a multi-element projector that releases a powerful el
   blast. Roll 1d6 to determine the element. If you used 3 actions, you can choose
   the element. This tech gains the matching element trait.
 
-  Each creature in the area takes damage with a basic Reflex save.
+  Each creature in the area takes damage with a basic Quickness check.
 
 
-  Heightened (+1) The damage increases by 2d6.'
+  Upgraded (+1) The damage increases by 2d6.'
 tradition: technical
 level: 5
 usage_type: prepared

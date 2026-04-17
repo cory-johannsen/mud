@@ -4,13 +4,13 @@ description: 'Blades of doctrinal force form a churning barrier wall. The wall i
   a straight line 20 feet high, 120 feet long, and 2 inches thick, and it provides
   cover. The wall deals 7d8 force damage to each creature that''s in the wall''s space
   when it is created, that attempts to pass through the wall, or that ends its turn
-  inside the wall. A basic Reflex save reduces the damage. A creature that succeeds
+  inside the wall. A basic Quickness check reduces the damage. A creature that succeeds
   at this save when the wall is created is pushed to the nearest space on the side
   of its choice. Creatures trying to move through the wall fail to do so if they critically
   fail the save, ending their movement adjacent to the wall.
 
 
-  Heightened (+1) The damage increases by 1d8.'
+  Upgraded (+1) The damage increases by 1d8.'
 tradition: fanatic_doctrine
 level: 6
 usage_type: prepared

@@ -1,6 +1,6 @@
 id: shield_drone
 name: Shield Drone
-description: 'A Medium floating shield drone made of force fields appears adjacent to you, following you to block attacks. Each time you Sustain the tech, the drone moves to an adjacent space of your choice. When you Sustain, you can have the drone push one creature within 5 feet, dealing 3d6 force damage (Toughness save for half).
+description: 'A Medium floating shield drone made of force fields appears adjacent to you, following you to block attacks. Each time you Sustain the tech, the drone moves to an adjacent space of your choice. When you Sustain, you can have the drone push one creature within 5 feet, dealing 3d6 force damage (Grit check for half).
 
 
   The drone has AC 25, 50 Hit Points, and your saves.'

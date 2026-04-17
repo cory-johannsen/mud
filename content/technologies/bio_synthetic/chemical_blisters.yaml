@@ -2,7 +2,7 @@ id: chemical_blisters
 name: Chemical Blisters
 description: 'You point at a target in range, triggering a chemical reaction beneath
   their skin that produces searing blisters filled with caustic fluid. The target
-  must attempt a Toughness save.
+  must attempt a Grit check.
 
 
   Critical Success The target is unaffected.
@@ -15,7 +15,7 @@ description: 'You point at a target in range, triggering a chemical reaction ben
   Critical Failure The target grows three blisters.
 
 
-  Heightened (+2) The damage per blister increases by 1d6.'
+  Upgraded (+2) The damage per blister increases by 1d6.'
 tradition: bio_synthetic
 level: 5
 usage_type: prepared

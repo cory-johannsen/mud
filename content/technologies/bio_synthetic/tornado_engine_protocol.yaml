@@ -6,9 +6,9 @@ description: 'Area (continued) 15-foot radius, 80-foot-tall cylinderA devastatin
   in the tornado are difficult terrain.
 
   All creatures in the area take 5d10 bludgeoning damage as powerful winds and debris
-  buffet them, with a Reflex save. Each time you Sustain the tech, you can move the
+  buffet them, with a Quickness check. Each time you Sustain the tech, you can move the
   tornado up to 30 feet in a straight line. Each creature the tornado moves through
-  takes the damage, also with a Reflex save. A creature can be affected by a tornado
+  takes the damage, also with a Quickness check. A creature can be affected by a tornado
   only once per round.Critical Success The creature is unaffected.
 
   Success The creature takes half damage.
@@ -19,7 +19,7 @@ description: 'Area (continued) 15-foot radius, 80-foot-tall cylinderA devastatin
   tech ends or when it leaves the area.
 
   Critical Failure As failure, except the creature takes double damage and rises 20
-  feet into the air.Heightened (+1) Increase the bludgeoning damage by 1d10.'
+  feet into the air.Upgraded (+1) Increase the bludgeoning damage by 1d10.'
 tradition: bio_synthetic
 level: 8
 usage_type: prepared

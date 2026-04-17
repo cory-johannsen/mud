@@ -1,7 +1,7 @@
 id: holy_massacre_protocol
 name: Holy Massacre Protocol
 description: A cone of sacred slicing force cuts through heretics in a 30-foot cone.
-  Each creature takes 10d12 slashing damage (Reflex save for half). On a failure,
+  Each creature takes 10d12 slashing damage (Quickness check for half). On a failure,
   they also take 4d12 persistent bleed. Heretics (creatures of opposed alignment)
   take double damage.
 tradition: fanatic_doctrine

@@ -1,7 +1,7 @@
 id: seismic_restraint_array
 name: Seismic Restraint Array
 description: Mechanical protrusions of stone and soil grab and bury creatures. Each
-  creature in the area must attempt a Toughness save. All mechanical effects (grabbed,
+  creature in the area must attempt a Grit check. All mechanical effects (grabbed,
   restrained, bludgeoning damage) remain identical to the base protocol.
 tradition: technical
 level: 4

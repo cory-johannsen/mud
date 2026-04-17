@@ -1,7 +1,7 @@
 id: void_sermon
 name: Void Sermon
 description: You whisper entropic doctrinal secrets that carry to your foes' ears.
-  The words weaken their life force. Each target must attempt a Toughness save. All
+  The words weaken their life force. Each target must attempt a Grit check. All
   mechanical effects (damage, conditions) remain identical to the base protocol.
 tradition: fanatic_doctrine
 level: 4

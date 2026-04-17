@@ -5,7 +5,7 @@ description: 'You flood the target''s neural pathways with false signals of well
   by false vitality can''t benefit from it again for 24 hours.
 
 
-  Heightened (+1) The temporary HP increase by 5.'
+  Upgraded (+1) The temporary HP increase by 5.'
 tradition: neural
 level: 2
 usage_type: prepared
@@ -22,6 +22,6 @@ effects:
       the undead. You gain 10 temporary Hit Points.
 
 
-      Heightened (+1) The temporary Hit Points increase by 3.
+      Upgraded (+1) The temporary Hit Points increase by 3.
 
       @UUID[Compendium.pf2e.spell'

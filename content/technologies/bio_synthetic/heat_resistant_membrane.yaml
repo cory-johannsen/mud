@@ -4,7 +4,7 @@ description: 'You coat the target in a bio-synthetic fire-resistant membrane. Th
   target gains fire resistance 5 for the duration.
 
 
-  Heightened (+2) The resistance increases by 5.'
+  Upgraded (+2) The resistance increases by 5.'
 tradition: bio_synthetic
 level: 2
 usage_type: prepared

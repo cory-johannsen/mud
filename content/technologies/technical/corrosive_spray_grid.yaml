@@ -2,10 +2,10 @@ id: corrosive_spray_grid
 name: Corrosive Spray Grid
 description: 'You activate a chemical dispersal system that rains corrosive compound
   across the area for the tech''s duration. A creature that begins its turn in the
-  area takes 3d8 acid damage (basic Reflex save).
+  area takes 3d8 acid damage (basic Quickness check).
 
 
-  Heightened (+2) The damage increases by 1d8.'
+  Upgraded (+2) The damage increases by 1d8.'
 tradition: technical
 level: 5
 usage_type: prepared

@@ -3,10 +3,10 @@ name: Razor Wire Grid
 description: 'You deploy razor wire and serrated barriers throughout the area, slashing
   at and obstructing creatures. The area is difficult terrain. Each creature in the
   area at activation and who end their turn there take 3d6 slashing damage and bleed
-  damage, with a basic Reflex save.
+  damage, with a basic Quickness check.
 
 
-  Heightened (+2) The slashing damage increases by 1d6.'
+  Upgraded (+2) The slashing damage increases by 1d6.'
 tradition: technical
 level: 5
 usage_type: prepared

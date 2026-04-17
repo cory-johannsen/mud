@@ -4,7 +4,7 @@ description: 'The target sprouts temporary bio-synthetic flight membranes, gaini
   a fly Speed equal to its Speed or 20 feet, whichever is greater.
 
 
-  Heightened (7th) The duration increases to 1 hour.'
+  Upgraded (7th) The duration increases to 1 hour.'
 tradition: bio_synthetic
 level: 4
 usage_type: prepared
@@ -23,4 +23,4 @@ effects:
       @UUID[Compendium.pf2e.spell-effects.Item.tech Effect: Fly]
 
 
-      Heightened (7th) The duration'
+      Upgraded (7th) The duration'

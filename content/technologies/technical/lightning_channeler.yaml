@@ -1,11 +1,11 @@
 id: lightning_channeler
 name: Lightning Channeler
-description: 'You deploy a lightning-attraction device that summons a bolt of electricity through a foe and into your weapon or body. A bolt descends through the target dealing 3d12 electricity damage (basic Reflex save). For the remaining duration, your first Strike each round deals an additional 1d12 electricity damage.
+description: 'You deploy a lightning-attraction device that summons a bolt of electricity through a foe and into your weapon or body. A bolt descends through the target dealing 3d12 electricity damage (basic Quickness check). For the remaining duration, your first Strike each round deals an additional 1d12 electricity damage.
 
   The device generates its own discharge source, working even underground. Under stormy conditions, increase damage by 2d12 electricity.
 
 
-  Heightened (8th) Initial damage +4d12, additional Strike damage +1d12.'
+  Upgraded (8th) Initial damage +4d12, additional Strike damage +1d12.'
 tradition: technical
 level: 4
 usage_type: prepared

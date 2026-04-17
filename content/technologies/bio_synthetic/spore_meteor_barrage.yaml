@@ -1,7 +1,7 @@
 id: spore_meteor_barrage
 name: Spore Meteor Barrage
 description: Spore-laden meteorite fragments fall in a 60-foot burst. Each creature
-  in the area takes 10d10 bludgeoning and 2d10 poison damage (Reflex save for half).
+  in the area takes 10d10 bludgeoning and 2d10 poison damage (Quickness check for half).
   On a failure, they also become sickened 2 from spore contamination. The impact craters
   count as difficult terrain for 1 minute.
 tradition: bio_synthetic

@@ -2,7 +2,7 @@ id: constrictor_tendril
 name: Constrictor Tendril
 description: 'You deploy a slithering bio-synthetic tendril that attempts to crush a foe against a surface. Make a tech attack roll against the target''s Fortitude DC. On a success, the creature is grabbed and takes 3d6 bludgeoning damage and 2d8 piercing damage. At the end of that creature''s turn, if still grabbed, it takes @Damage[(floor(/2))d6[bludgeoning]] damage.
 
-  The tendril''s Escape DC equals your tech DC. A creature can attack the tendril to break its grip. The tendril''s AC equals your tech DC, and it is destroyed at 20 or more damage. Destroying or escaping the tendril ends the spell. You can Dismiss the spell.Heightened (+2) The initial bludgeoning increases by 1d6, the initial piercing increases by 1d8, and the grab damage increases by 1d6.'
+  The tendril''s Escape DC equals your tech DC. A creature can attack the tendril to break its grip. The tendril''s AC equals your tech DC, and it is destroyed at 20 or more damage. Destroying or escaping the tendril ends the spell. You can Dismiss the spell.Upgraded (+2) The initial bludgeoning increases by 1d6, the initial piercing increases by 1d8, and the grab damage increases by 1d6.'
 tradition: bio_synthetic
 level: 4
 usage_type: prepared

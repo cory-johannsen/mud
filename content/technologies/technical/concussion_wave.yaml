@@ -2,7 +2,7 @@ id: concussion_wave
 name: Concussion Wave
 description: You fire a concussion projector that sends a shockwave sweeping away
   from you. You deal 6d6 bludgeoning damage to creatures in the area with a basic
-  Reflex save.
+  Quickness check.
 tradition: technical
 level: 3
 usage_type: prepared

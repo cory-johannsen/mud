@@ -1,12 +1,12 @@
 id: seismic_pulse_organ
 name: Seismic Pulse Organ
-description: 'You create a wave of energy that ripples through the earth. Terrestrial creatures in the affected area must attempt a Reflex save to avoid stumbling as the shockwave shakes the ground.Critical Success The creature is unaffected.
+description: 'You create a wave of energy that ripples through the earth. Terrestrial creatures in the affected area must attempt a Quickness check to avoid stumbling as the shockwave shakes the ground.Critical Success The creature is unaffected.
 
   Success The creature is @UUID[Compendium.pf2e.conditionitems.Item.Off-Guard] until the start of its next turn.
 
   Failure The creature falls Prone.
 
-  Critical Failure As failure, plus the creature takes 1d6 bludgeoning damage.Heightened (+1) The area increases by 5 feet (to a 20-foot cone at 2nd rank, and so on).'
+  Critical Failure As failure, plus the creature takes 1d6 bludgeoning damage.Upgraded (+1) The area increases by 5 feet (to a 20-foot cone at 2nd rank, and so on).'
 tradition: bio_synthetic
 level: 1
 usage_type: prepared

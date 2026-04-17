@@ -1,7 +1,7 @@
 id: appetite_suppressor
 name: Appetite Suppressor
 description: 'You psychically suppress the target''s ability to gain nourishment.
-  The target must attempt a Toughness save.
+  The target must attempt a Grit check.
 
 
   Critical Success The creature is unaffected.
@@ -9,7 +9,7 @@ description: 'You psychically suppress the target''s ability to gain nourishment
   Success The creature requires twice as much food as normal for 1 day.
 
   Failure The creature gains no nourishment from eating for 1 week and must attempt
-  Toughness saves against starvation.
+  Grit checks against starvation.
 
   Critical Failure As failure, but the duration is 1 month.'
 tradition: neural

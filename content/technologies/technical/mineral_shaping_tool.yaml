@@ -2,7 +2,7 @@ id: mineral_shaping_tool
 name: Mineral Shaping Tool
 description: You deploy a device that reshapes stone or mineral matter into a rough
   shape of your choice. Too crude for fine details. Creatures standing atop must attempt
-  a Reflex save or Acrobatics check. All mechanical effects remain identical.
+  a Quickness check or Acrobatics check. All mechanical effects remain identical.
 tradition: technical
 level: 4
 usage_type: prepared

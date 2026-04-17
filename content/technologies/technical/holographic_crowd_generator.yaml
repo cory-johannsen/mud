@@ -2,7 +2,7 @@ id: holographic_crowd_generator
 name: Holographic Crowd Generator
 description: You deploy holographic projectors that create an illusory crowd in the
   area. The figures move, talk, and act like normal people. Creatures can attempt
-  a Perception check against your tech DC to disbelieve. The crowd is difficult terrain
+  a Awareness check against your tech DC to disbelieve. The crowd is difficult terrain
   for creatures that believe it's real.
 tradition: technical
 level: 2

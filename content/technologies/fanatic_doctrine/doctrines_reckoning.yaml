@@ -1,7 +1,7 @@
 id: doctrines_reckoning
 name: Doctrine's Reckoning
 description: You exhale a cloud of void-charged particulate — the Doctrine's judgment made tangible. Each creature in the
-  area takes void damage equal to your doctrine modifier and 1 persistent void damage depending on their Toughness save.
+  area takes void damage equal to your doctrine modifier and 1 persistent void damage depending on their Grit check.
 tradition: fanatic_doctrine
 level: 1
 usage_type: prepared

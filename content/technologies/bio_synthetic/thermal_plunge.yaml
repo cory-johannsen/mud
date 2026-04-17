@@ -3,7 +3,7 @@ name: Thermal Plunge
 description: Superheated chemical reactions propel you upward before you crash back
   down in a burst of incendiary compounds. You Fly 15 feet straight up, then dive
   to a point within 60 feet, dealing 3d6 fire damage in a 10-foot burst with a basic
-  Reflex save.
+  Quickness check.
 tradition: bio_synthetic
 level: 3
 usage_type: prepared

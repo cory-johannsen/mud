@@ -3,7 +3,7 @@ name: Flesh Rot Doctrine
 description: 'You invoke the doctrine of corporeal punishment, causing part of a creature''s
   body to putrefy and wither. The target takes 12d6 void damage and one of the following
   debilitations; roll [[/r 1d4]] to randomly determine which. The effects depend on
-  its Toughness save.
+  its Grit check.
 
 
   Bones The target''s bones necrotize and become spongy and weak, giving it weakness
@@ -34,7 +34,7 @@ description: 'You invoke the doctrine of corporeal punishment, causing part of a
   1 minute.
 
 
-  Heightened (+1) The damage increases by 2d6.'
+  Upgraded (+1) The damage increases by 2d6.'
 tradition: fanatic_doctrine
 level: 6
 usage_type: prepared

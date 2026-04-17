@@ -6,7 +6,7 @@ description: 'You invoke your doctrine to manifest delivery drones that drop res
 
   The character reduces the stage of one poison or disease they suffer from by one stage. This can''t reduce the stage below 1 or cure the affliction.
 
-  The character reduces the value of their Clumsy, Drained, Enfeebled, or Stupefied condition by 2, or reduces two of the listed conditions by 1 each.Heightened (+2) The amount of Hit Points a character regains from consuming a gift increases by 2d6.'
+  The character reduces the value of their Clumsy, Drained, Enfeebled, or Stupefied condition by 2, or reduces two of the listed conditions by 1 each.Upgraded (+2) The amount of Hit Points a character regains from consuming a gift increases by 2d6.'
 tradition: fanatic_doctrine
 level: 6
 usage_type: prepared

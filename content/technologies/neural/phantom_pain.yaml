@@ -6,7 +6,7 @@ description: 'Illusory pain wracks the target, dealing 2d4 mental damage and 1d4
 
   Failure The target takes full initial and persistent damage, and the target is Sickened 1. If the target recovers from being Sickened, the persistent damage ends and the spell ends.
 
-  Critical Failure As failure, but the target is Sickened 2.Heightened (+1) The damage increases by 2d4 and the persistent damage by 1d4.'
+  Critical Failure As failure, but the target is Sickened 2.Upgraded (+1) The damage increases by 2d4 and the persistent damage by 1d4.'
 tradition: neural
 level: 1
 usage_type: prepared

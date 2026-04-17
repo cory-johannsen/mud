@@ -9,11 +9,11 @@ description: 'You orchestrate an array of psychic sound constructs, projecting d
   and create another explosion of sound.
 
   Each explosion from the psychoacoustic barrage deals 8d6 sonic damage to all creatures
-  in a 10-foot burst (basic Toughness save). The barrage doesn''t take up space, grant
+  in a 10-foot burst (basic Grit check). The barrage doesn''t take up space, grant
   flanking, or have any other attributes a creature would.
 
 
-  Heightened (+1) The damage increases by 1d6.'
+  Upgraded (+1) The damage increases by 1d6.'
 tradition: neural
 level: 6
 usage_type: prepared

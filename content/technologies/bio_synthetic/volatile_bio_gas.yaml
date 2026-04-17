@@ -1,14 +1,14 @@
 id: volatile_bio_gas
 name: Volatile Bio-Gas
 description: 'You release a cloud of volatile bio-synthetic gases from underground
-  reservoirs. The gases are invisible, requiring a successful Perception check against
+  reservoirs. The gases are invisible, requiring a successful Awareness check against
   your tech DC to detect visually, though their acrid smell and toxic effects are
   clear once a creature has entered the cloud. Each creature that enters the cloud
-  or starts its turn there takes 2d6 poison damage with a basic Toughness save.
+  or starts its turn there takes 2d6 poison damage with a basic Grit check.
 
 
   If any open flame or fire effect contacts the cloud, it ignites, dealing 10d6 fire
-  damage to all creatures in the area (basic Reflex save). The cloud then disperses.'
+  damage to all creatures in the area (basic Quickness check). The cloud then disperses.'
 tradition: bio_synthetic
 level: 5
 usage_type: prepared

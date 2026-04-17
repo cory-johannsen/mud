@@ -4,13 +4,13 @@ description: 'Trigger A creature performs an act that violates your doctrine.
 
 
   You punish a creature that transgresses against your sacred ideology, channeling
-  righteous fury upon witnessing a doctrinal violation. You can cast this only when
+  righteous fury upon witnessing a doctrinal violation. You can activate this only when
   a creature actively commits a unique violation. You deal 4d6 mental damage to the
   target, but a basic Willpower save can reduce this damage. If it fails, it is also Stupefied
   1 for 1 round. The creature is then temporarily immune for 1 minute.
 
 
-  Heightened (+1) The damage increases by 1d6.'
+  Upgraded (+1) The damage increases by 1d6.'
 tradition: fanatic_doctrine
 level: 4
 usage_type: prepared

@@ -14,9 +14,9 @@ description: 'To the target, your words are honey and your visage seems bathed i
   Critical Failure The target''s attitude becomes Helpful toward you, and it can''t use hostile actions against you.
 
 
-  Heightened (4th) The duration lasts until the next time you make your daily preparations.
+  Upgraded (4th) The duration lasts until the next time you make your daily preparations.
 
-  Heightened (8th) The duration lasts until the next time you make your daily preparations, and you can target up to 10 creatures.'
+  Upgraded (8th) The duration lasts until the next time you make your daily preparations, and you can target up to 10 creatures.'
 tradition: bio_synthetic
 level: 1
 usage_type: prepared

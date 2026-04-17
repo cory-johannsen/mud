@@ -1,7 +1,7 @@
 id: sonic_screech
 name: Sonic Screech
 description: You emit a piercing bio-amplified shriek that ruptures eardrums. This
-  cry deals 4d8 sonic damage. Each creature in the area must attempt a Toughness save.
+  cry deals 4d8 sonic damage. Each creature in the area must attempt a Grit check.
 tradition: bio_synthetic
 level: 3
 usage_type: prepared

@@ -14,4 +14,4 @@ effects:
   - type: utility
     dc: 0
     description: The target loses its odor, preventing creatures from passively noticing its presence via smell alone, even
-      if the creatures have precise or imprecise scent. A creature attempting a Perception check to
+      if the creatures have precise or imprecise scent. A creature attempting a Awareness check to

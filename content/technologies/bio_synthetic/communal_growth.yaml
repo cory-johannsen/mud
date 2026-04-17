@@ -2,7 +2,7 @@ id: communal_growth
 name: Communal Growth
 description: You stimulate rapid organic growth in the area, causing nutritious fruits
   and healing fungi to sprout. Allies in the area regain 2d8 Hit Points and gain a
-  +1 status bonus to Toughness saves for 1 minute.
+  +1 status bonus to Grit checks for 1 minute.
 tradition: bio_synthetic
 level: 3
 usage_type: prepared

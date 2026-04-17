@@ -1,11 +1,11 @@
 id: tectonic_rupture
 name: Tectonic Rupture
 description: 'You cause the ground to erupt with bio-seismic force. Each creature
-  in the area takes 3d6 bludgeoning damage with a basic Reflex save. The area becomes
+  in the area takes 3d6 bludgeoning damage with a basic Quickness check. The area becomes
   difficult terrain.
 
 
-  Heightened (+1) The damage increases by 1d6.'
+  Upgraded (+1) The damage increases by 1d6.'
 tradition: bio_synthetic
 level: 2
 usage_type: prepared

@@ -1,6 +1,6 @@
 id: forced_reconfiguration
 name: Forced Reconfiguration
-description: 'You activate a device that forcibly reconfigures the target creature into a harmless form, with effects based on its Toughness save.Critical Success The target is unaffected.
+description: 'You activate a device that forcibly reconfigures the target creature into a harmless form, with effects based on its Grit check.Critical Success The target is unaffected.
 
   Success The target''s body gains minor features of the harmless form. Its systems churn as they partially reconfigure, causing it to be Sickened 1. When it recovers from the sickened condition, its features revert to normal.
 

@@ -2,10 +2,10 @@ id: bone_shard_burst
 name: Bone Shard Burst
 description: 'You eject a spray of razor-sharp bone fragments from your body. Each
   creature in a @Template[cone|distance:30] takes 4d6 piercing damage with a basic
-  Reflex save.
+  Quickness check.
 
 
-  Heightened (+1) The damage increases by 2d6.'
+  Upgraded (+1) The damage increases by 2d6.'
 tradition: bio_synthetic
 level: 2
 usage_type: prepared

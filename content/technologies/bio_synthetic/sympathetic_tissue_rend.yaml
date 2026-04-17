@@ -1,6 +1,6 @@
 id: sympathetic_tissue_rend
 name: Sympathetic Tissue Rend
-description: You lacerate your own flesh in a ritual pattern, bio-chemically mirroring catastrophic wounds onto a target. These cuts are superficial, causing 1d4 slashing damage to you; however, the wounds on the target are devastating. The targeted creature takes 5d8 slashing damage; a creature that critically fails also takes @Damage[(1d8 + -4)[bleed]] damage. If cast as a three-action spell, it affects a 5-foot burst.Heightened (+1) Increase target damage by 1d8, and increase persistent bleed by 1.
+description: You lacerate your own flesh in a ritual pattern, bio-chemically mirroring catastrophic wounds onto a target. These cuts are superficial, causing 1d4 slashing damage to you; however, the wounds on the target are devastating. The targeted creature takes 5d8 slashing damage; a creature that critically fails also takes @Damage[(1d8 + -4)[bleed]] damage. If cast as a three-action spell, it affects a 5-foot burst.Upgraded (+1) Increase target damage by 1d8, and increase persistent bleed by 1.
 tradition: bio_synthetic
 level: 4
 usage_type: prepared

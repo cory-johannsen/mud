@@ -3,7 +3,7 @@ name: Doctrine Standard
 description: You project a massive holographic banner representing your doctrine.
   This banner is 30 feet tall, 30 feet wide, and hovers 20 feet above the target.
   Allies within 30 feet gain a +1 status bonus to attack rolls, saving throws, and
-  skill checks. Enemies within 30 feet take a -1 status penalty to Will saves.
+  skill checks. Enemies within 30 feet take a -1 status penalty to Reasoning checks.
 tradition: fanatic_doctrine
 level: 5
 usage_type: prepared

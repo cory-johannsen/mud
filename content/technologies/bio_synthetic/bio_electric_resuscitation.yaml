@@ -7,7 +7,7 @@ description: 'A dense bioelectric field descends to fill the target''s space, th
   The field that covered the creature remains until the end of the target''s next turn. Any creature in the field is Hidden, and anything outside the field is hidden to any creature inside the field.
 
 
-  Heightened (+1) The healing increases by 2d8, and the thunderstrike rank increases by 1.'
+  Upgraded (+1) The healing increases by 2d8, and the thunderstrike rank increases by 1.'
 tradition: bio_synthetic
 level: 7
 usage_type: prepared

@@ -1,7 +1,7 @@
 id: blinding_judgment
 name: Blinding Judgment
 description: You invoke doctrinal judgment upon the target's sight, punishing their
-  defiance. The effect is determined by the target's Toughness save. The target becomes
+  defiance. The effect is determined by the target's Grit check. The target becomes
   temporarily immune for 1 minute.
 tradition: fanatic_doctrine
 level: 3
@@ -18,7 +18,7 @@ effects:
   - type: utility
     dc: 0
     description: 'You blind the target. The effect is determined by the target''s
-      Toughness save. The target then becomes temporarily immune for 1 minute.
+      Grit check. The target then becomes temporarily immune for 1 minute.
 
 
       Critical Success The target is unaffected.

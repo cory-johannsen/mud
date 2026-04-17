@@ -1,6 +1,6 @@
 id: target_painter
 name: Target Painter
-description: You paint the target with a high-intensity targeting laser. The target must attempt a Reflex save. On a failure, the target glows for the duration, negating its Concealed condition and making it Concealed instead of Hidden or Undetected if it's Invisible.
+description: You paint the target with a high-intensity targeting laser. The target must attempt a Quickness check. On a failure, the target glows for the duration, negating its Concealed condition and making it Concealed instead of Hidden or Undetected if it's Invisible.
 tradition: technical
 level: 2
 usage_type: prepared

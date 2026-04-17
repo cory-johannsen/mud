@@ -1,6 +1,6 @@
 id: sonic_overload
 name: Sonic Overload
-description: 'You unleash a blast of psychically amplified sound in the area. Each creature in the area takes 2d10 sonic damage and must attempt a Toughness save.
+description: 'You unleash a blast of psychically amplified sound in the area. Each creature in the area takes 2d10 sonic damage and must attempt a Grit check.
 
 
   Critical Success The creature is unaffected.
@@ -12,7 +12,7 @@ description: 'You unleash a blast of psychically amplified sound in the area. Ea
   Critical Failure The creature takes double damage and is Deafened for 1 minute.
 
 
-  Heightened (+1) The damage increases by 1d10.'
+  Upgraded (+1) The damage increases by 1d10.'
 tradition: neural
 level: 2
 usage_type: prepared

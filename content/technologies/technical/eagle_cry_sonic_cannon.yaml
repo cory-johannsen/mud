@@ -1,7 +1,7 @@
 id: eagle_cry_sonic_cannon
 name: Eagle Cry Sonic Cannon
 description: You fire a concentrated sonic blast from a directional emitter. The blast
-  deals 4d8 sonic damage. Each creature in the area must attempt a Toughness save.
+  deals 4d8 sonic damage. Each creature in the area must attempt a Grit check.
 tradition: technical
 level: 3
 usage_type: prepared

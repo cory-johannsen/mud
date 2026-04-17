@@ -2,7 +2,7 @@ id: earworm_virus
 name: Earworm Virus
 description: 'You broadcast a cognitive audio loop so compelling that enemies can''t help but vocalize along, disrupting their communications. Each target must attempt a Willpower save.Critical Success The creature is unaffected.
 
-  Success For 1 round, the creature can communicate only by repeating the melody. It can speak only on its turn, and it must take the Perform action when it does. A single Perform check is sufficient for any amount of speaking on the creature''s turn. This effect might interfere with verbal components or other linguistic abilities; in order to use such an ability successfully, the creature must succeed at a Toughness save (DC 5).
+  Success For 1 round, the creature can communicate only by repeating the melody. It can speak only on its turn, and it must take the Perform action when it does. A single Perform check is sufficient for any amount of speaking on the creature''s turn. This effect might interfere with verbal components or other linguistic abilities; in order to use such an ability successfully, the creature must succeed at a Grit check (DC 5).
 
   In addition, the creature takes a -2 status penalty on linguistic Intimidation checks. The creature''s constant humming also makes it nearly impossible to remain Undetected.
 

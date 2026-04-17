@@ -2,7 +2,7 @@ id: hemothermic_overload
 name: Hemothermic Overload
 description: 'You activate bio-synthetic microbes in the target''s bloodstream that
   generate extreme heat, boiling it from within. The target takes 10d10 fire damage,
-  with a Toughness save. A nonliving creature with blood in its body (such as a vampire)
+  with a Grit check. A nonliving creature with blood in its body (such as a vampire)
   can be affected, but a creature with no blood is immune.
 
 
@@ -15,7 +15,7 @@ description: 'You activate bio-synthetic microbes in the target''s bloodstream t
   Critical Failure The target takes double damage and is Drained 3.
 
 
-  Heightened (+1) The damage increases by 1d10.'
+  Upgraded (+1) The damage increases by 1d10.'
 tradition: bio_synthetic
 level: 8
 usage_type: prepared

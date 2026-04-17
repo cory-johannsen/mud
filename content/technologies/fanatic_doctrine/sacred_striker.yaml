@@ -2,11 +2,11 @@ id: sacred_striker
 name: Sacred Striker
 description: 'You conjure a floating weapon of devotional energy that attacks on its
   own. When you Sustain the tech, the weapon can make a Strike against a creature
-  within 120 feet. It uses your spell attack modifier and deals 2d8 force damage on
+  within 120 feet. It uses your tech attack modifier and deals 2d8 force damage on
   a hit.
 
 
-  Heightened (+2) The damage increases by 1d8.'
+  Upgraded (+2) The damage increases by 1d8.'
 tradition: fanatic_doctrine
 level: 2
 usage_type: prepared

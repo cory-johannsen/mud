@@ -8,9 +8,9 @@ description: 'Restorative energy radiates from your body, filling the area with 
 
   Failure The creature is sickened 1 and becomes Slowed 1 until the end of its next turn.
 
-  Critical Failure As failure, but Sickened 2 and the creature remains slowed 1 for the rest of the spell''s duration.Heightened (6th) You gain mental resistance 10.
+  Critical Failure As failure, but Sickened 2 and the creature remains slowed 1 for the rest of the spell''s duration.Upgraded (6th) You gain mental resistance 10.
 
-  Heightened (8th) You gain mental resistance 15.'
+  Upgraded (8th) You gain mental resistance 15.'
 tradition: neural
 level: 4
 usage_type: prepared

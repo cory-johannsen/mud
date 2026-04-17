@@ -4,10 +4,10 @@ description: 'A sudden downpour of cryogenic coolant drenches the area. The pool
   liquid makes the area difficult terrain and extinguishes non-magical fires.
 
   On subsequent rounds when you Sustain, you can shift to freezing mode, coating surfaces
-  in ice. Creatures in the area must attempt a Reflex save or fall Prone.
+  in ice. Creatures in the area must attempt a Quickness check or fall Prone.
 
 
-  Heightened (+2) The area increases by 10 feet in each dimension.'
+  Upgraded (+2) The area increases by 10 feet in each dimension.'
 tradition: technical
 level: 5
 usage_type: prepared

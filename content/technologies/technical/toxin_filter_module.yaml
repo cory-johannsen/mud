@@ -1,7 +1,7 @@
 id: toxin_filter_module
 name: Toxin Filter Module
 description: You install a temporary toxin filtration module in the target's digestive
-  system. The target gains a +2 status bonus to Toughness saves against ingested poisons
+  system. The target gains a +2 status bonus to Grit checks against ingested poisons
   and can eat spoiled or rotten food without ill effect for the duration.
 tradition: technical
 level: 2

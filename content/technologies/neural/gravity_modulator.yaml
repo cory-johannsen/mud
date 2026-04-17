@@ -4,7 +4,7 @@ description: 'You manipulate your personal gravity field, switching between low 
 
   Low Gravity You can jump double the normal distance when you Long Jump or Leap, though still to a maximum of your Speed. When you High Jump, you can use the calculation for a Long Jump but don''t double the distance. When you fall, you take no damage for the first 10 feet and then take bludgeoning damage equal to a quarter of the remaining distance.
 
-  High Gravity You become Encumbered. You gain a +2 status bonus to your saving throws and DCs to resist forced movement and attempts to knock you Prone. You reduce forced movement distance by half or 10 feet, whichever is more. You can only jump half as high and far. Falling damage equals the distance you fall.Heightened (6th) The duration increases to 1 hour.'
+  High Gravity You become Encumbered. You gain a +2 status bonus to your saving throws and DCs to resist forced movement and attempts to knock you Prone. You reduce forced movement distance by half or 10 feet, whichever is more. You can only jump half as high and far. Falling damage equals the distance you fall.Upgraded (6th) The duration increases to 1 hour.'
 tradition: neural
 level: 4
 usage_type: prepared

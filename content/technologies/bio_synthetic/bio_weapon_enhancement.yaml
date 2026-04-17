@@ -3,8 +3,8 @@ name: Bio-Weapon Enhancement
 description: |-
     The weapon glimmers with magic as temporary runes carve down its length. The target becomes a +1 striking weapon, gaining a +1 item bonus to attack rolls and increasing the number of weapon damage dice to two.
 
-    Heightened (6th) The weapon is +2 greater striking.
-    Heightened (9th) The weapon is +3 major striking.
+    Upgraded (6th) The weapon is +2 greater striking.
+    Upgraded (9th) The weapon is +3 major striking.
     @UUID[Compendium.pf2e.spell-effects.Item.tech Effect: Runic Weapon]
 tradition: bio_synthetic
 level: 1

@@ -1,6 +1,6 @@
 id: apex_magnetic_dominion
 name: Apex Magnetic Dominion
-description: You generate a massive magnetic field in a 60-foot burst. Move any metal object up to 10 feet. Metal-armored or armed creatures are restrained on a failed Toughness save. Metallic structures take 10d6 force damage.
+description: You generate a massive magnetic field in a 60-foot burst. Move any metal object up to 10 feet. Metal-armored or armed creatures are restrained on a failed Grit check. Metallic structures take 10d6 force damage.
 tradition: technical
 level: 9
 usage_type: prepared

@@ -1,6 +1,6 @@
 id: mass_hallucination_bomb
 name: Mass Hallucination Bomb
-description: A vision of catastrophic system failure floods the mind of each creature in the area. The vision deals 11d6 mental damage (basic Willpower save). On a critical failure, the creature must also succeed at a Reflex save save or believe it's trapped. If it fails the second save, it's also Stunned for 1 minute. It can attempt a new Willpower save at the end of each of its turns, and on a success, it disbelieves the illusion and recovers from the stunned condition.Heightened (+1) The damage increases by 2d6.
+description: A vision of catastrophic system failure floods the mind of each creature in the area. The vision deals 11d6 mental damage (basic Willpower save). On a critical failure, the creature must also succeed at a Quickness check save or believe it's trapped. If it fails the second save, it's also Stunned for 1 minute. It can attempt a new Willpower save at the end of each of its turns, and on a success, it disbelieves the illusion and recovers from the stunned condition.Upgraded (+1) The damage increases by 2d6.
 tradition: technical
 level: 6
 usage_type: prepared

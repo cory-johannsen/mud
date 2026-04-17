@@ -2,7 +2,7 @@ id: miasma_vent
 name: Miasma Vent
 description: You release a cloud of invisible toxic gas that smothers creatures in
   the area. When you Sustain the tech, each breathing creature in the area must attempt
-  a Toughness save or become Sickened.
+  a Grit check or become Sickened.
 tradition: bio_synthetic
 level: 3
 usage_type: prepared

@@ -15,9 +15,9 @@ description: 'You inject a rapid-acting mutagenic compound that transforms you i
   Grabbing Trunk A creature up to two sizes smaller hit by your trunk is Grabbed. If you succeed at your Grapple check against a creature grabbed by your trunk, you can reposition it to another space within your trunk''s reach.
 
 
-  Heightened (5th) Your form is Huge; trunk and tusk attacks have 15-foot reach, foot attack has 10-foot reach. 20 temporary HP, attack modifier +18, damage bonus +6, double damage dice, Athletics +21.
+  Upgraded (5th) Your form is Huge; trunk and tusk attacks have 15-foot reach, foot attack has 10-foot reach. 20 temporary HP, attack modifier +18, damage bonus +6, double damage dice, Athletics +21.
 
-  Heightened (7th) Your form is Gargantuan; trunk and tusk attacks have 20-foot reach, foot attack has 15-foot reach. AC is 21 + your level, 25 temporary HP, attack modifier +25, damage bonus +15, double damage dice, Athletics +25.'
+  Upgraded (7th) Your form is Gargantuan; trunk and tusk attacks have 20-foot reach, foot attack has 15-foot reach. AC is 21 + your level, 25 temporary HP, attack modifier +25, damage bonus +15, double damage dice, Athletics +25.'
 tradition: bio_synthetic
 level: 4
 usage_type: prepared

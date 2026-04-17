@@ -1,10 +1,10 @@
 id: psychic_detonation
 name: Psychic Detonation
 description: 'You concentrate devastating psychic energy and detonate it against a
-  creature''s consciousness, dealing 16d6 spirit damage with a basic Toughness save.
+  creature''s consciousness, dealing 16d6 spirit damage with a basic Grit check.
 
 
-  Heightened (+1) The damage increases by 2d6.'
+  Upgraded (+1) The damage increases by 2d6.'
 tradition: neural
 level: 6
 usage_type: prepared

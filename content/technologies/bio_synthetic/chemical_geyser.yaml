@@ -4,11 +4,11 @@ description: 'Area 10-foot radius, 50-foot-tall cylinder
 
   A powerful geyser of superheated chemical compound blasts up from the ground. The
   bottom of this tech''s area must be on solid ground. Each creature in the area takes
-  3d6 bludgeoning damage and 4d6 fire damage, with a Reflex save. A creature that
+  3d6 bludgeoning damage and 4d6 fire damage, with a Quickness check. A creature that
   fails is also pushed to the top of the geyser.
 
 
-  Heightened (+2) The fire damage increases by 2d6.'
+  Upgraded (+2) The fire damage increases by 2d6.'
 tradition: bio_synthetic
 level: 5
 usage_type: prepared

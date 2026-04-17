@@ -1,7 +1,7 @@
 id: vocal_suppressor
 name: Vocal Suppressor
 description: 'You deploy a device that disables a creature''s vocal output. The effect
-  depends on the target''s Toughness save. Temporarily immune for 1 minute after.
+  depends on the target''s Grit check. Temporarily immune for 1 minute after.
   Creatures without voices are immune.
 
 
@@ -28,5 +28,5 @@ effects:
   - type: utility
     dc: 0
     description: You steal a creature's voice, rendering them mute. The effect is
-      determined by the target's Toughness save. The target then becomes temporarily
+      determined by the target's Grit check. The target then becomes temporarily
       immune for 1 minute. A creature that has no voice or can

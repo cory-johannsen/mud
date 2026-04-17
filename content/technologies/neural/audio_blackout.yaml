@@ -1,6 +1,6 @@
 id: audio_blackout
 name: Audio Blackout
-description: 'You overload the target''s auditory cortex, rendering it deaf. The target must attempt a Toughness save.
+description: 'You overload the target''s auditory cortex, rendering it deaf. The target must attempt a Grit check.
 
 
   Critical Success The target is unaffected.
@@ -24,7 +24,7 @@ effects:
   on_apply:
   - type: utility
     dc: 0
-    description: 'The target loses hearing; it must attempt a Toughness save. The target is then temporarily immune for 1 minute.
+    description: 'The target loses hearing; it must attempt a Grit check. The target is then temporarily immune for 1 minute.
 
 
       Critical Success The target is unaffected.

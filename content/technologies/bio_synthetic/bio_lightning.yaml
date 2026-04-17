@@ -1,10 +1,10 @@
 id: bio_lightning
 name: Bio-Lightning
 description: 'You discharge a bolt of bio-generated electricity. The bolt deals 4d12
-  electricity damage in a @Template[line|distance:60] with a basic Reflex save.
+  electricity damage in a @Template[line|distance:60] with a basic Quickness check.
 
 
-  Heightened (+1) The damage increases by 1d12.'
+  Upgraded (+1) The damage increases by 1d12.'
 tradition: bio_synthetic
 level: 2
 usage_type: prepared

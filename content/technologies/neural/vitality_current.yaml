@@ -6,7 +6,7 @@ description: 'You project a stream of restorative energy that sheds dim light fo
 
   Failure As success, but the creature is also knocked Prone. If the creature is undead or corrupted, it takes full damage.
 
-  Critical Failure As failure, but the creature is pushed 20 feet along the current''s path in the direction of flow. If the creature is undead or corrupted, it takes double mental damage.Heightened (+1) The mental damage increases by 1d6.'
+  Critical Failure As failure, but the creature is pushed 20 feet along the current''s path in the direction of flow. If the creature is undead or corrupted, it takes double mental damage.Upgraded (+1) The mental damage increases by 1d6.'
 tradition: neural
 level: 4
 usage_type: prepared

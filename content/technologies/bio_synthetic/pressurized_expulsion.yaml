@@ -1,9 +1,9 @@
 id: pressurized_expulsion
 name: Pressurized Expulsion
-description: 'You expel a blast of superheated bio-gas from your lungs. You deal 4d6 fire damage in a @Template[cone|distance:30]. Each creature in the area must attempt a basic Reflex save.
+description: 'You expel a blast of superheated bio-gas from your lungs. You deal 4d6 fire damage in a @Template[cone|distance:30]. Each creature in the area must attempt a basic Quickness check.
 
 
-  Heightened (+1) The damage increases by 2d6.'
+  Upgraded (+1) The damage increases by 2d6.'
 tradition: bio_synthetic
 level: 2
 usage_type: prepared

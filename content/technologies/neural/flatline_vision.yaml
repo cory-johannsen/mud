@@ -10,7 +10,7 @@ description: 'You force the target to experience a hyper-realistic simulation of
   Failure The target takes full damage and is Frightened 2.
 
   Critical Failure The target takes double damage, is Frightened 4 and is Fleeing
-  for as long as it''s frightened.Heightened (+1) The damage increases by 2d6.'
+  for as long as it''s frightened.Upgraded (+1) The damage increases by 2d6.'
 tradition: neural
 level: 4
 usage_type: prepared

@@ -2,7 +2,7 @@ id: subsonic_shatter_pulse
 name: Subsonic Shatter Pulse
 description: 'You transmit destructive resonance frequencies through a target''s body,
   vibrating their bones and organs at lethal harmonics. The creature takes 8d6 sonic
-  damage and must attempt a Toughness save.
+  damage and must attempt a Grit check.
 
 
   Critical Success The target is unaffected.
@@ -15,7 +15,7 @@ description: 'You transmit destructive resonance frequencies through a target''s
   for 1 minute.
 
 
-  Heightened (+1) The damage increases by 2d6.'
+  Upgraded (+1) The damage increases by 2d6.'
 tradition: neural
 level: 4
 usage_type: prepared

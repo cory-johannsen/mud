@@ -1,10 +1,10 @@
 id: needle_storm
 name: Needle Storm
 description: 'You fire a volley of high-velocity needles from a concealed launcher.
-  Each creature in the area takes 3d6 piercing damage with a basic Reflex save.
+  Each creature in the area takes 3d6 piercing damage with a basic Quickness check.
 
 
-  Heightened (+1) The damage increases by 1d6.'
+  Upgraded (+1) The damage increases by 1d6.'
 tradition: technical
 level: 2
 usage_type: prepared

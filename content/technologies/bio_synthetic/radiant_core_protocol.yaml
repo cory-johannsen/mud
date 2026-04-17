@@ -5,12 +5,12 @@ description: 'You activate a bio-luminescent core implant that fills the area wi
 
   Good Creatures gain a +1 status bonus to attack rolls and Strikes deal an additional 1d6 spirit damage.
 
-  Neutral Creatures that begin their turn in the emanation must succeed at a Will save or be Dazzled for 1 round.
+  Neutral Creatures that begin their turn in the emanation must succeed at a Reasoning check or be Dazzled for 1 round.
 
   Evil Creatures that begin their turn in the emanation must succeed at a Willpower save or be Blinded for 1 round.
 
 
-  Heightened (+2) The additional spirit damage increases by 1d6.'
+  Upgraded (+2) The additional spirit damage increases by 1d6.'
 tradition: bio_synthetic
 level: 4
 usage_type: prepared

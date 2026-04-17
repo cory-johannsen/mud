@@ -10,11 +10,11 @@ description: 'You cultivate an array of resonant fungal spore pods that emit dev
   and trigger another detonation.
 
   Each detonation deals 8d6 sonic damage to all creatures in a 10-foot burst (basic
-  Toughness save). The spore cluster doesn''t take up space, grant flanking, or have
+  Grit check). The spore cluster doesn''t take up space, grant flanking, or have
   any other attributes a creature would.
 
 
-  Heightened (+1) The damage increases by 1d6.'
+  Upgraded (+1) The damage increases by 1d6.'
 tradition: bio_synthetic
 level: 6
 usage_type: prepared

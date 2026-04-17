@@ -3,7 +3,7 @@ name: Summon Plant or Fungus
 description: |-
     You summon a creature that has the plant or fungus trait and whose level is -1 to fight for you.
 
-    Heightened As listed in the summon trait.
+    Upgraded As listed in the summon trait.
 tradition: bio_synthetic
 level: 1
 usage_type: prepared
@@ -19,4 +19,4 @@ effects:
           description: |-
             You summon a creature that has the plant or fungus trait and whose level is -1 to fight for you.
 
-            Heightened As listed in the summon trait.
+            Upgraded As listed in the summon trait.

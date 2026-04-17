@@ -2,10 +2,10 @@ id: neural_detonation
 name: Neural Detonation
 description: 'You psychically detonate a willing ally or minion within range, dealing
   6d6 fire damage in a @Template[burst|distance:20] centered on it. Each creature
-  in the area must attempt a basic Reflex save. The target of the sacrifice is destroyed.
+  in the area must attempt a basic Quickness check. The target of the sacrifice is destroyed.
 
 
-  Heightened (+1) The damage increases by 2d6.'
+  Upgraded (+1) The damage increases by 2d6.'
 tradition: neural
 level: 2
 usage_type: prepared

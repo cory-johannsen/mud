@@ -1,9 +1,9 @@
 id: dominance_broadcast
 name: Dominance Broadcast
-description: 'You project a psychic broadcast of your superiority, bolstering your own neural pathways and degrading your opponents'' confidence. Select one of the following to broadcast about: melee attack rolls, ranged attack rolls, spell attack rolls, or a single skill. Attempt an Intimidation check to Demoralize a creature within 30 feet. Whether or not you succeed, you gain a +1 status bonus to the selected rolls for 1 minute, and a +2 status bonus if you''re a master. Creatures you successfully Demoralize take a -1 status penalty to the selected rolls for as long as they''re Frightened.
+description: 'You project a psychic broadcast of your superiority, bolstering your own neural pathways and degrading your opponents'' confidence. Select one of the following to broadcast about: melee attack rolls, ranged attack rolls, tech attack rolls, or a single skill. Attempt an Intimidation check to Demoralize a creature within 30 feet. Whether or not you succeed, you gain a +1 status bonus to the selected rolls for 1 minute, and a +2 status bonus if you''re a master. Creatures you successfully Demoralize take a -1 status penalty to the selected rolls for as long as they''re Frightened.
 
 
-  Heightened (9th) The status bonus increases to +2, or +3 if you''re a master.'
+  Upgraded (9th) The status bonus increases to +2, or +3 if you''re a master.'
 tradition: neural
 level: 5
 usage_type: prepared

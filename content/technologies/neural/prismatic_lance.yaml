@@ -9,11 +9,11 @@ description: 'You project a beam of variable-frequency energy toward your target
 
   Yellow (electricity) The ray deals @Damage[50[electricity]] damage to the target.
 
-  Green (poison) The ray deals @Damage[25[poison]] damage to the target, and the target must succeed at a Toughness save or be Enfeebled 1 for 1 minute (Enfeebled 2 on a critical failure).
+  Green (poison) The ray deals @Damage[25[poison]] damage to the target, and the target must succeed at a Grit check or be Enfeebled 1 for 1 minute (Enfeebled 2 on a critical failure).
 
 
 
-  Heightened (6th) The damage for @Damage[40[fire]]{Red}, @Damage[50[acid]]{Orange}, @Damage[60[electricity]]{Yellow}, and @Damage[35[poison]]{Green} each increase by 10. Roll [[/r 1d8]]{1d8} to determine the ray''s color, using the results for 1-4 above and the results for 5-8 below.
+  Upgraded (6th) The damage for @Damage[40[fire]]{Red}, @Damage[50[acid]]{Orange}, @Damage[60[electricity]]{Yellow}, and @Damage[35[poison]]{Green} each increase by 10. Roll [[/r 1d8]]{1d8} to determine the ray''s color, using the results for 1-4 above and the results for 5-8 below.
 
 
   Blue The ray has the effect of the Petrify protocol. On a critical hit, the target is Clumsy 1 as long as it''s Slowed by the crystallization effect.

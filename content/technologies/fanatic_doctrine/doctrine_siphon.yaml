@@ -4,11 +4,11 @@ description: 'Area (continued) two 30-foot cones
 
   You channel doctrinal energy that drains life with one pulse and redistributes it
   with another. All living creatures in the first cone take 5d6 void damage with a
-  basic Toughness save. You and all living creatures in the second cone regain Hit
+  basic Grit check. You and all living creatures in the second cone regain Hit
   Points equal to the greatest damage a single creature took.
 
 
-  Heightened (+1) The damage increases by 1d6.'
+  Upgraded (+1) The damage increases by 1d6.'
 tradition: fanatic_doctrine
 level: 5
 usage_type: prepared
