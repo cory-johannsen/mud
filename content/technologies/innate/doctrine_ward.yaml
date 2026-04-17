@@ -1,0 +1,16 @@
+id: doctrine_ward
+name: Doctrine Ward
+description: Faith-hardened subdermal plating grown through doctrinal conviction reduces all incoming damage by 1.
+tradition: fanatic_doctrine
+level: 1
+usage_type: innate
+action_cost: 0
+passive: true
+range: self
+targets: single
+duration: passive
+resolution: none
+effects:
+  on_apply:
+    - type: utility
+      description: "Doctrine Ward reduces all incoming damage by 1."

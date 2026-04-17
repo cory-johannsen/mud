@@ -1,0 +1,15 @@
+id: litany_of_iron
+name: Litany of Iron
+description: Recite a doctrinal litany that steels your will against all threats. Gain +2 circumstance bonus to all saving throws for 1 round.
+tradition: fanatic_doctrine
+level: 1
+usage_type: innate
+action_cost: 1
+range: self
+targets: single
+duration: rounds:1
+resolution: none
+effects:
+  on_apply:
+    - type: utility
+      description: "Litany of Iron grants +2 circumstance bonus to all saving throws for 1 round."

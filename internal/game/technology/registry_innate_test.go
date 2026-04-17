@@ -20,7 +20,7 @@ func TestLoad_InnateSubdirLoads(t *testing.T) {
 	reg, err := technology.Load("../../../content/technologies")
 	require.NoError(t, err)
 	innate := reg.ByUsageType(technology.UsageInnate)
-	assert.Equal(t, 14, len(innate), "expected 14 innate tech files loaded")
+	assert.Equal(t, 19, len(innate), "expected 19 innate tech files loaded")
 }
 
 // TestProperty_Load_InnateCount verifies that Load returns exactly as many innate

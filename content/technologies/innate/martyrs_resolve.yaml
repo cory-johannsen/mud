@@ -1,0 +1,15 @@
+id: martyrs_resolve
+name: Martyr's Resolve
+description: When you reach zero hit points, a surge of doctrinal conviction stabilizes you at 1 HP. Once per scene.
+tradition: fanatic_doctrine
+level: 1
+usage_type: innate
+action_cost: 1
+range: self
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+    - type: utility
+      description: "Martyr's Resolve: when reduced to 0 HP, stabilize at 1 HP (once per scene)."

@@ -1,0 +1,31 @@
+id: fervor_pulse
+name: Fervor Pulse
+description: Radiate a wave of zealous conviction that unsettles the faithless. All enemies in the zone must save or be Frightened.
+tradition: fanatic_doctrine
+level: 1
+usage_type: innate
+action_cost: 2
+range: zone
+targets: all_enemies
+duration: rounds:1
+resolution: save
+save_type: cool
+save_dc: 15
+effects:
+  on_success:
+    - type: utility
+      description: "The pulse washes over you. You hold your ground, unshaken."
+  on_failure:
+    - type: condition
+      condition_id: frightened
+      value: 1
+      duration: rounds:1
+  on_crit_failure:
+    - type: condition
+      condition_id: frightened
+      value: 2
+      duration: rounds:1
+    - type: condition
+      condition_id: fleeing
+      value: 1
+      duration: rounds:1

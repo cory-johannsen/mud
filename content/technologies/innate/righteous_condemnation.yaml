@@ -1,0 +1,15 @@
+id: righteous_condemnation
+name: Righteous Condemnation
+description: Mark a single target as heretic. Your attacks deal an additional 1d4 damage against them for 1 round.
+tradition: fanatic_doctrine
+level: 1
+usage_type: innate
+action_cost: 1
+range: ranged
+targets: single
+duration: rounds:1
+resolution: none
+effects:
+  on_apply:
+    - type: utility
+      description: "The condemned target takes +1d4 damage from your attacks for 1 round."
