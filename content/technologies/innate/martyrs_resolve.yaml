@@ -13,4 +13,4 @@ resolution: none
 effects:
   on_apply:
     - type: utility
-      description: "Martyr's Resolve: when reduced to 0 HP, stabilize at 1 HP. Once per scene. (Pending reaction system support for on_reduced_to_zero_hp trigger.)"
+      description: "Martyr's Resolve: when reduced to 0 HP, stabilize at 1 HP. Once per scene."

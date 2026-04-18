@@ -2175,11 +2175,34 @@ func (h *CombatHandler) resolveAndAdvance(roomID string) {
 // Postcondition: round events are broadcast; combat is ended or next round is started;
 //   SwappedThisRound is reset to false for all player sessions in this combat.
 func (h *CombatHandler) resolveAndAdvanceLocked(roomID string, cbt *combat.Combat) []*gamev1.CombatEvent {
+	const martyrsResolveID = "martyrs_resolve"
 	targetUpdater := func(id string, hp int) {
 		if inst, found := h.npcMgr.Get(id); found {
 			inst.CurrentHP = hp
 		}
 		if sess, found := h.sessions.GetPlayer(id); found {
+			// REQ-MR-1: Martyr's Resolve — passive innate that stabilizes the player at 1 HP
+			// the first time they would be reduced to 0 HP. Triggers once per scene (per use slot).
+			if hp <= 0 {
+				if slot, ok := sess.InnateTechs[martyrsResolveID]; ok {
+					if slot.MaxUses == 0 || slot.UsesRemaining > 0 {
+						hp = 1
+						// Update the combatant pointer so subsequent combat logic sees HP = 1.
+						for _, c := range cbt.Combatants {
+							if c.ID == id {
+								c.CurrentHP = 1
+								break
+							}
+						}
+						// Consume the use if limited (once per scene).
+						if slot.MaxUses > 0 {
+							slot.UsesRemaining--
+							sess.InnateTechs[martyrsResolveID] = slot
+						}
+						h.pushMessageToUID(id, "Martyr's Resolve activates — a surge of conviction stabilizes you at 1 HP!")
+					}
+				}
+			}
 			sess.CurrentHP = hp
 			h.checkHPThresholdFear(id)
 		}

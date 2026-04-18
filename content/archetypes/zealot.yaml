@@ -15,7 +15,7 @@ innate_technologies:
   - id: doctrine_ward
     uses_per_day: 0
   - id: martyrs_resolve
-    uses_per_day: 0
+    uses_per_day: 1
   - id: righteous_condemnation
     uses_per_day: 0
   - id: fervor_pulse
