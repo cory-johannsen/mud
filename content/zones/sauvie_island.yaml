@@ -588,6 +588,9 @@ zone:
       target: sauvie_bridge_south
     - direction: west
       target: sauvie_neutral_farmhouse
+    - direction: south
+      target: ocf_main_gate
+      zone: oregon_country_fair
     map_x: 0
     map_y: 2
     spawns:

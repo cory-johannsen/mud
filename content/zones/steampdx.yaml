@@ -34,6 +34,9 @@ zone:
       target: sp_lobby
     - direction: north
       target: steampdx_brothel
+    - direction: southeast
+      target: market_district
+      zone: downtown
     map_x: 0
     map_y: 0
     spawns:

@@ -20,6 +20,9 @@ zone:
       and whatever this is. Bass frequencies vibrate the floor. A stamp on the wrist
       and a headache that starts immediately.'
     exits:
+    - direction: north
+      target: blood_camp
+      zone: rustbucket_ridge
     - direction: east
       target: cp_bar_1f
     - direction: south

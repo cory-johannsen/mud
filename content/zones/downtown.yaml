@@ -130,6 +130,9 @@ zone:
       target: director_park
     - direction: southwest
       target: dt_park_blocks_south
+    - direction: northwest
+      target: sp_parking_lot
+      zone: steampdx
     map_x: 0
     map_y: 2
     spawns:

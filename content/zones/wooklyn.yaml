@@ -25,6 +25,9 @@ zone:
     exits:
       - direction: south
         target: tofteville_market
+      - direction: southwest
+        target: couve_burnt_ridge
+        zone: the_couve
     spawns:
       - template: wooklyn_quest_giver
         count: 1
