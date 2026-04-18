@@ -51,6 +51,7 @@ export interface ConditionInfo {
   stacks?: number
   durationRemaining?: number
   duration_remaining?: number
+  description?: string
 }
 
 export interface RoomView {

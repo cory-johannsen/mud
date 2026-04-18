@@ -1074,6 +1074,7 @@ message ConditionInfo {
   string name               = 2;
   int32  stacks             = 3;
   int32  duration_remaining = 4;  // -1 = permanent or until_save
+  string description        = 5;  // human-readable mechanical effects summary
 }
 
 // CharacterSheetRequest asks the server for the player's full character sheet.

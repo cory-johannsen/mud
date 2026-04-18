@@ -1,7 +1,51 @@
 import { useEffect, useRef, useState } from 'react'
+import ReactDOM from 'react-dom'
 import { useGame } from '../GameContext'
-import type { SkillEntry } from '../../proto'
+import type { ConditionInfo, SkillEntry } from '../../proto'
 import { FeatChoiceModal } from '../drawers/FeatChoiceModal'
+
+function ConditionTooltip({ condition, pos }: { condition: ConditionInfo; pos: { x: number; y: number } }) {
+  const tooltipStyle: React.CSSProperties = {
+    position: 'fixed',
+    left: Math.min(pos.x, window.innerWidth - 240),
+    top: Math.max(4, pos.y - 10),
+    zIndex: 2000,
+    background: '#1a1a1a',
+    border: '1px solid #444',
+    borderRadius: '4px',
+    padding: '8px',
+    minWidth: '160px',
+    maxWidth: '240px',
+    pointerEvents: 'none',
+    fontFamily: 'monospace',
+    fontSize: '0.78rem',
+    lineHeight: '1.5',
+    color: '#ccc',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.6)',
+    transform: 'translateY(-100%)',
+  }
+  const stacks = condition.stacks ?? 0
+  const dur = condition.durationRemaining ?? condition.duration_remaining ?? -1
+  return ReactDOM.createPortal(
+    <div style={tooltipStyle}>
+      <div style={{ color: '#e0c060', fontWeight: 'bold', marginBottom: '0.2rem' }}>
+        {condition.name}{stacks > 1 ? ` ${stacks}` : ''}
+      </div>
+      {condition.description && (
+        <div style={{ color: '#ccc', marginBottom: '0.15rem' }}>{condition.description}</div>
+      )}
+      {dur >= 0 && (
+        <div style={{ color: '#888', fontSize: '0.7rem' }}>
+          {dur === 0 ? 'Expires this round' : `${dur} round${dur === 1 ? '' : 's'} remaining`}
+        </div>
+      )}
+      {!condition.description && (
+        <div style={{ color: '#555', fontSize: '0.7rem' }}>No description available</div>
+      )}
+    </div>,
+    document.body,
+  )
+}
 
 function HpBar({ current, max }: { current: number; max: number }) {
   const pct = max > 0 ? (current / max) * 100 : 0
@@ -130,6 +174,7 @@ export function CharacterPanel() {
   const { characterInfo, characterSheet, combatRound } = state
   const retryRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const [modal, setModal] = useState<Modal>(null)
+  const [conditionTooltip, setConditionTooltip] = useState<{ condition: ConditionInfo; pos: { x: number; y: number } } | null>(null)
 
   useEffect(() => {
     sendMessage('JobGrantsRequest', {})
@@ -231,13 +276,28 @@ export function CharacterPanel() {
           )
         })()}
 
+        {conditionTooltip && (
+          <ConditionTooltip condition={conditionTooltip.condition} pos={conditionTooltip.pos} />
+        )}
         {conditions.length > 0 && (
           <div className="conditions">
-            {conditions.map((c, i) => (
-              <span key={i} className="condition-badge">
-                {typeof c === 'string' ? c : (c as { name?: string }).name ?? String(c)}
-              </span>
-            ))}
+            {conditions.map((c, i) => {
+              const cond = typeof c === 'string' ? { name: c } as ConditionInfo : c as ConditionInfo
+              return (
+                <span
+                  key={i}
+                  className="condition-badge"
+                  onMouseEnter={(e) => {
+                    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
+                    setConditionTooltip({ condition: cond, pos: { x: rect.left, y: rect.top } })
+                  }}
+                  onMouseLeave={() => setConditionTooltip(null)}
+                  style={{ cursor: 'help' }}
+                >
+                  {cond.name ?? String(c)}
+                </span>
+              )
+            })}
           </div>
         )}
 

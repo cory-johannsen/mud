@@ -272,6 +272,7 @@ func (h *WorldHandler) buildRoomView(uid string, room *world.Room) *gamev1.RoomV
 				Name:              ac.Def.Name,
 				Stacks:            int32(ac.Stacks),
 				DurationRemaining: int32(ac.DurationRemaining),
+				Description:       ac.Def.Description,
 			})
 		}
 	}

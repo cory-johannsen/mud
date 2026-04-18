@@ -10262,6 +10262,7 @@ type ConditionInfo struct {
 	Name              string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
 	Stacks            int32                  `protobuf:"varint,3,opt,name=stacks,proto3" json:"stacks,omitempty"`
 	DurationRemaining int32                  `protobuf:"varint,4,opt,name=duration_remaining,json=durationRemaining,proto3" json:"duration_remaining,omitempty"` // -1 = permanent or until_save
+	Description       string                 `protobuf:"bytes,5,opt,name=description,proto3" json:"description,omitempty"`                                       // human-readable mechanical effects summary
 	unknownFields     protoimpl.UnknownFields
 	sizeCache         protoimpl.SizeCache
 }
@@ -10322,6 +10323,13 @@ func (x *ConditionInfo) GetDurationRemaining() int32 {
 		return x.DurationRemaining
 	}
 	return 0
+}
+
+func (x *ConditionInfo) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
 }
 
 // CharacterSheetRequest asks the server for the player's full character sheet.
@@ -17893,12 +17901,13 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\aitem_id\x18\x01 \x01(\tR\x06itemId\x12\x12\n" +
 	"\x04slot\x18\x02 \x01(\tR\x04slot\"(\n" +
 	"\x12RemoveArmorRequest\x12\x12\n" +
-	"\x04slot\x18\x01 \x01(\tR\x04slot\"z\n" +
+	"\x04slot\x18\x01 \x01(\tR\x04slot\"\x9c\x01\n" +
 	"\rConditionInfo\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x16\n" +
 	"\x06stacks\x18\x03 \x01(\x05R\x06stacks\x12-\n" +
-	"\x12duration_remaining\x18\x04 \x01(\x05R\x11durationRemaining\"\x17\n" +
+	"\x12duration_remaining\x18\x04 \x01(\x05R\x11durationRemaining\x12 \n" +
+	"\vdescription\x18\x05 \x01(\tR\vdescription\"\x17\n" +
 	"\x15CharacterSheetRequest\">\n" +
 	"\x19ArchetypeSelectionRequest\x12!\n" +
 	"\farchetype_id\x18\x01 \x01(\tR\varchetypeId\"\x0e\n" +
