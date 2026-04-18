@@ -3,6 +3,7 @@ package gameserver
 import (
 	"context"
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -675,6 +676,44 @@ func TestHandleBuy_Material_NilRegistry(t *testing.T) {
 	assert.Contains(t, evt.GetMessage().Content, "doesn't sell")
 }
 
+// REQ-NPC-BUY-9: After a successful material purchase, SaveCurrency MUST be called
+// with the post-deduction currency when charSaver is set and CharacterID > 0.
+// This was the actual regression site for Bug #132.
+func TestHandleBuy_MaterialPurchase_PersistsCurrency(t *testing.T) {
+	matReg := crafting.NewMaterialRegistryFromSlice([]*crafting.Material{
+		{ID: "scrap_metal", Name: "Scrap Metal", Category: "metal", Value: 10},
+	})
+	svc, uid, inst := newMerchantTestServerWithMaterialReg(t, matReg)
+	rec := &recordingCharSaver{}
+	svc.charSaver = rec
+
+	sess, ok := svc.sessions.GetPlayer(uid)
+	require.True(t, ok)
+	sess.CharacterID = 42 // must be > 0
+	initialCurrency := sess.Currency
+
+	evt, err := svc.handleBuy(uid, &gamev1.BuyRequest{
+		NpcName:  inst.Name(),
+		ItemId:   "Scrap Metal",
+		Quantity: 1,
+	})
+	require.NoError(t, err)
+	assert.True(t,
+		strings.Contains(evt.GetMessage().Content, "buy") ||
+			strings.Contains(evt.GetMessage().Content, "for"),
+		"expected purchase confirmation, got: %q", evt.GetMessage().Content,
+	)
+
+	// SaveCurrency MUST have been called — this is the regression site.
+	require.Len(t, rec.savedCurrency, 1, "SaveCurrency must be called once after material purchase")
+	assert.Equal(t, int64(42), rec.savedCurrency[0].characterID)
+	assert.Less(t, rec.savedCurrency[0].currency, initialCurrency, "SaveCurrency must reflect deducted amount")
+	assert.Equal(t, sess.Currency, rec.savedCurrency[0].currency)
+
+	// SaveInventory must NOT be called for material purchases (materials go via materialRepo, not backpack).
+	assert.Empty(t, rec.savedInventory, "SaveInventory must not be called for material purchases")
+}
+
 // REQ-NPC-BUY-3: A successful purchase MUST push an updated ShopView to the client
 // so the web UI reflects the decremented stock without requiring the player to
 // close and reopen the shop (BUG-102).
@@ -876,23 +915,24 @@ func TestProperty_HandleBuy_PersistenceInvariant(t *testing.T) {
 		// stim_pack costs 50 and player has 500 — purchase always succeeds
 		_, _ = svc.handleBuy(uid, &gamev1.BuyRequest{NpcName: inst.Name(), ItemId: "stim_pack", Quantity: 1})
 
-		if len(rec.savedCurrency) > 0 {
-			rt.Log("savedCurrency", rec.savedCurrency[0].currency)
-			if rec.savedCurrency[0].currency != sess.Currency {
-				rt.Fatalf("saved currency %d != session currency %d", rec.savedCurrency[0].currency, sess.Currency)
+		if len(rec.savedCurrency) == 0 {
+			rt.Fatal("SaveCurrency must be called when CharacterID > 0")
+		}
+		if rec.savedCurrency[0].currency != sess.Currency {
+			rt.Fatalf("saved currency %d != session currency %d", rec.savedCurrency[0].currency, sess.Currency)
+		}
+		if len(rec.savedInventory) == 0 {
+			rt.Fatal("SaveInventory must be called when CharacterID > 0")
+		}
+		found := false
+		for _, it := range rec.savedInventory[0].items {
+			if it.ItemDefID == "stim_pack" {
+				found = true
+				break
 			}
 		}
-		if len(rec.savedInventory) > 0 {
-			found := false
-			for _, it := range rec.savedInventory[0].items {
-				if it.ItemDefID == "stim_pack" {
-					found = true
-					break
-				}
-			}
-			if !found {
-				rt.Fatal("stim_pack not found in saved inventory")
-			}
+		if !found {
+			rt.Fatal("stim_pack not found in saved inventory")
 		}
 	})
 }
