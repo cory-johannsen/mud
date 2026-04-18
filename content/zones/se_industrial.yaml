@@ -638,7 +638,7 @@ zone:
     - direction: south
       target: sei_chemical_plant
     map_x: -4
-    map_y: 2
+    map_y: -2
     danger_level: dangerous
     spawns:
     - template: chemical_enforcer
