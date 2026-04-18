@@ -777,6 +777,12 @@ func RearrangePreparedTechs(
 				rem = append(rem, e)
 			}
 		}
+		// If all unique entries are exhausted (pool smaller than slot count), allow
+		// duplicate preparation — PF2e prepared casters may prepare the same tech in
+		// multiple slots.
+		if len(rem) == 0 {
+			return base
+		}
 		return rem
 	}
 

@@ -2410,3 +2410,68 @@ func TestRearrangePreparedTechs_SingleTech_AutoAssigns(t *testing.T) {
 	}
 	assert.True(t, found, "auto-assign message must be sent")
 }
+
+// REQ-RAR-BUG148: When the wizard/ranger pool (KnownTechs) has fewer entries than the number
+// of level-N slots, later slots MUST fall back to the full pool so duplicate preparation is
+// allowed rather than presenting an empty option list.
+//
+// Scenario: 4 level-1 slots, 3 known techs. After slots 1-3 consume the unique entries,
+// slot 4 must offer all 3 again (allowing a duplicate), not an empty list.
+func TestRearrangePreparedTechs_Wizard_PoolSmallerThanSlotCount_AllowsDuplicates(t *testing.T) {
+	prep := &fakePreparedRepo{slots: map[int][]*session.PreparedSlot{
+		1: {{TechID: "tech_a"}, {TechID: "tech_b"}, {TechID: "tech_c"}, {TechID: "tech_a"}},
+	}}
+	sess := &session.PlayerSession{
+		CastingModel: ruleset.CastingModelWizard,
+		PreparedTechs: map[int][]*session.PreparedSlot{
+			1: {{TechID: "tech_a"}, {TechID: "tech_b"}, {TechID: "tech_c"}, {TechID: "tech_a"}},
+		},
+		KnownTechs: map[int][]string{1: {"tech_a", "tech_b", "tech_c"}},
+	}
+	job := &ruleset.Job{
+		CastingModel: ruleset.CastingModelWizard,
+		TechnologyGrants: &ruleset.TechnologyGrants{
+			Prepared: &ruleset.PreparedGrants{
+				SlotsByLevel: map[int]int{1: 4},
+				Pool: []ruleset.PreparedEntry{
+					{ID: "tech_a", Level: 1},
+					{ID: "tech_b", Level: 1},
+					{ID: "tech_c", Level: 1},
+				},
+			},
+		},
+	}
+
+	var seenOptions [][]string
+	promptFn := func(_ string, opts []string, _ *gameserver.TechSlotContext) (string, error) {
+		// Record non-sentinel options for the assertion below.
+		var real []string
+		for _, o := range opts {
+			if o != "[back]" && o != "[forward]" && o != "[confirm]" && !strings.HasPrefix(o, "[keep]") {
+				real = append(real, o)
+			}
+		}
+		seenOptions = append(seenOptions, real)
+		// Always pick the first real option (or first option if all sentinels).
+		for _, o := range opts {
+			if o != "[back]" && o != "[forward]" && o != "[confirm]" && !strings.HasPrefix(o, "[keep]") {
+				return o, nil
+			}
+		}
+		if len(opts) > 0 {
+			return opts[0], nil
+		}
+		return "", fmt.Errorf("no options available for slot")
+	}
+
+	err := gameserver.RearrangePreparedTechs(context.Background(), sess, 1, job, nil, nil, promptFn, prep, func(string) {}, technology.TraditionFlavor{SlotNoun: "slot", PrepGerund: "Arranging"})
+	require.NoError(t, err, "RearrangePreparedTechs must not error when pool is smaller than slot count")
+
+	// All 4 slots must be filled.
+	require.Len(t, sess.PreparedTechs[1], 4, "all 4 slots must be filled")
+
+	// No slot's option list must be empty — the fallback to full pool must fire on slot 4.
+	for i, opts := range seenOptions {
+		assert.NotEmpty(t, opts, "slot %d must have non-empty options (pool fallback must prevent empty list)", i+1)
+	}
+}
