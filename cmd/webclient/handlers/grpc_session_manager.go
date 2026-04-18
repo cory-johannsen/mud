@@ -86,3 +86,22 @@ func (s *grpcManagedSession) Kick() error {
 	})
 	return err
 }
+
+// GiveItem calls AdminGiveItem RPC.
+func (g *grpcSessionManager) GiveItem(charID int64, itemID string, quantity int) error {
+	_, err := g.client.AdminGiveItem(context.Background(), &gamev1.AdminGiveItemRequest{
+		CharId:   charID,
+		ItemId:   itemID,
+		Quantity: int32(quantity),
+	})
+	return err
+}
+
+// GiveCurrency calls AdminGiveCurrency RPC.
+func (g *grpcSessionManager) GiveCurrency(charID int64, amount int) error {
+	_, err := g.client.AdminGiveCurrency(context.Background(), &gamev1.AdminGiveCurrencyRequest{
+		CharId: charID,
+		Amount: int32(amount),
+	})
+	return err
+}

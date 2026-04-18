@@ -1,0 +1,16 @@
+# 2026/04/16 23:22:11.970928 [TestProperty_AssignTechnologies_InnateGatedByTechTradition] [rapid] draw archetypeID: "aggressor"
+# 2026/04/16 23:22:11.970954 [TestProperty_AssignTechnologies_InnateGatedByTechTradition] 
+# 	Error Trace:	/home/cjohannsen/src/mud/internal/gameserver/technology_assignment_test.go:1605
+# 	            				/home/cjohannsen/src/mud/vendor/pgregory.net/rapid/engine.go:371
+# 	            				/home/cjohannsen/src/mud/vendor/pgregory.net/rapid/engine.go:380
+# 	            				/home/cjohannsen/src/mud/vendor/pgregory.net/rapid/engine.go:205
+# 	            				/home/cjohannsen/src/mud/vendor/pgregory.net/rapid/engine.go:120
+# 	            				/home/cjohannsen/src/mud/internal/gameserver/technology_assignment_test.go:1588
+# 	            				/home/cjohannsen/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/asm_amd64.s:1771
+# 	Error:      	Should be empty, but was map[blackout_pulse:0x350c118bdaf0]
+# 	Test:       	TestProperty_AssignTechnologies_InnateGatedByTechTradition
+# 	Messages:   	non-tech archetype "aggressor" must receive no innate tech from region
+# 
+v0.4.8#16262707264214410240
+0x115089155777e3
+0x6

@@ -80,6 +80,24 @@ func (m *stubSessionManager) TeleportPlayer(charID int64, _ string) error {
 	return grpcstatus.Error(codes.NotFound, "session not found")
 }
 
+func (m *stubSessionManager) GiveItem(charID int64, _ string, _ int) error {
+	for _, s := range m.sessions {
+		if s.charID == charID {
+			return nil
+		}
+	}
+	return grpcstatus.Error(codes.NotFound, "session not found")
+}
+
+func (m *stubSessionManager) GiveCurrency(charID int64, _ int) error {
+	for _, s := range m.sessions {
+		if s.charID == charID {
+			return nil
+		}
+	}
+	return grpcstatus.Error(codes.NotFound, "session not found")
+}
+
 // stubAccountStore implements handlers.AdminAccountStore.
 type stubAccountStore struct {
 	accounts []postgres.Account

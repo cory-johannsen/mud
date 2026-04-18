@@ -7,9 +7,11 @@ type noOpSessionManager struct{}
 // NewNoOpSessionManager returns a SessionManager that reports no live sessions.
 func NewNoOpSessionManager() SessionManager { return &noOpSessionManager{} }
 
-func (n *noOpSessionManager) AllSessions() ([]ManagedSession, error) { return nil, nil }
-func (n *noOpSessionManager) GetSession(_ int64) (ManagedSession, bool) { return nil, false }
-func (n *noOpSessionManager) TeleportPlayer(_ int64, _ string) error    { return nil }
+func (n *noOpSessionManager) AllSessions() ([]ManagedSession, error)            { return nil, nil }
+func (n *noOpSessionManager) GetSession(_ int64) (ManagedSession, bool)          { return nil, false }
+func (n *noOpSessionManager) TeleportPlayer(_ int64, _ string) error             { return nil }
+func (n *noOpSessionManager) GiveItem(_ int64, _ string, _ int) error            { return nil }
+func (n *noOpSessionManager) GiveCurrency(_ int64, _ int) error                  { return nil }
 
 // noOpWorldEditor is an in-process stub for when no world manager is wired.
 type noOpWorldEditor struct{}

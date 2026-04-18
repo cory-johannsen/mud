@@ -17,6 +17,9 @@ export function PlayersTab() {
   const [error, setError] = useState<string | null>(null)
   const [teleportRoomIDs, setTeleportRoomIDs] = useState<Record<number, string>>({})
   const [messageTexts, setMessageTexts] = useState<Record<number, string>>({})
+  const [itemIDs, setItemIDs] = useState<Record<number, string>>({})
+  const [itemQuantities, setItemQuantities] = useState<Record<number, string>>({})
+  const [currencyAmounts, setCurrencyAmounts] = useState<Record<number, string>>({})
   const [actionStatus, setActionStatus] = useState<Record<number, string>>({})
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
@@ -74,6 +77,29 @@ export function PlayersTab() {
     setActionStatus(prev => ({ ...prev, [charID]: resp.ok ? 'Sent' : `Error ${resp.status}` }))
   }
 
+  const giveItem = async (charID: number) => {
+    const itemID = (itemIDs[charID] ?? '').trim()
+    if (!itemID) return
+    const qty = parseInt(itemQuantities[charID] ?? '1', 10) || 1
+    const resp = await fetch(`/api/admin/players/${charID}/give-item`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ item_id: itemID, quantity: qty }),
+    })
+    setActionStatus(prev => ({ ...prev, [charID]: resp.ok ? `Gave ${qty}x ${itemID}` : `Error ${resp.status}` }))
+  }
+
+  const giveCurrency = async (charID: number) => {
+    const amount = parseInt(currencyAmounts[charID] ?? '0', 10)
+    if (amount < 1) return
+    const resp = await fetch(`/api/admin/players/${charID}/give-currency`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ amount }),
+    })
+    setActionStatus(prev => ({ ...prev, [charID]: resp.ok ? `Gave ${amount} crypto` : `Error ${resp.status}` }))
+  }
+
   return (
     <div style={{ padding: '1rem' }}>
       <h2 style={{ color: '#ccc' }}>Online Players</h2>
@@ -115,6 +141,26 @@ export function PlayersTab() {
                       style={inputStyle}
                     />
                     <button onClick={() => sendMessage(p.char_id)} style={btnStyle('#353')}>Msg</button>
+                    <input
+                      placeholder="item_id"
+                      value={itemIDs[p.char_id] ?? ''}
+                      onChange={e => setItemIDs(prev => ({ ...prev, [p.char_id]: e.target.value }))}
+                      style={{ ...inputStyle, width: '110px' }}
+                    />
+                    <input
+                      placeholder="qty"
+                      value={itemQuantities[p.char_id] ?? '1'}
+                      onChange={e => setItemQuantities(prev => ({ ...prev, [p.char_id]: e.target.value }))}
+                      style={{ ...inputStyle, width: '40px' }}
+                    />
+                    <button onClick={() => giveItem(p.char_id)} style={btnStyle('#553')}>Item</button>
+                    <input
+                      placeholder="crypto"
+                      value={currencyAmounts[p.char_id] ?? ''}
+                      onChange={e => setCurrencyAmounts(prev => ({ ...prev, [p.char_id]: e.target.value }))}
+                      style={{ ...inputStyle, width: '70px' }}
+                    />
+                    <button onClick={() => giveCurrency(p.char_id)} style={btnStyle('#355')}>Currency</button>
                     {actionStatus[p.char_id] && (
                       <span style={{ color: '#9c9', fontSize: '0.8em' }}>{actionStatus[p.char_id]}</span>
                     )}

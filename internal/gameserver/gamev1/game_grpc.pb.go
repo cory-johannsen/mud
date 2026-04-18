@@ -29,6 +29,8 @@ const (
 	GameService_AdminUpdateRoom_FullMethodName       = "/game.v1.GameService/AdminUpdateRoom"
 	GameService_AdminListNPCTemplates_FullMethodName = "/game.v1.GameService/AdminListNPCTemplates"
 	GameService_AdminSpawnNPC_FullMethodName         = "/game.v1.GameService/AdminSpawnNPC"
+	GameService_AdminGiveItem_FullMethodName         = "/game.v1.GameService/AdminGiveItem"
+	GameService_AdminGiveCurrency_FullMethodName     = "/game.v1.GameService/AdminGiveCurrency"
 )
 
 // GameServiceClient is the client API for GameService service.
@@ -53,6 +55,9 @@ type GameServiceClient interface {
 	// NPC admin RPCs.
 	AdminListNPCTemplates(ctx context.Context, in *AdminListNPCTemplatesRequest, opts ...grpc.CallOption) (*AdminListNPCTemplatesResponse, error)
 	AdminSpawnNPC(ctx context.Context, in *AdminSpawnNPCRequest, opts ...grpc.CallOption) (*AdminSpawnNPCResponse, error)
+	// Inventory admin RPCs.
+	AdminGiveItem(ctx context.Context, in *AdminGiveItemRequest, opts ...grpc.CallOption) (*AdminGiveItemResponse, error)
+	AdminGiveCurrency(ctx context.Context, in *AdminGiveCurrencyRequest, opts ...grpc.CallOption) (*AdminGiveCurrencyResponse, error)
 }
 
 type gameServiceClient struct {
@@ -166,6 +171,26 @@ func (c *gameServiceClient) AdminSpawnNPC(ctx context.Context, in *AdminSpawnNPC
 	return out, nil
 }
 
+func (c *gameServiceClient) AdminGiveItem(ctx context.Context, in *AdminGiveItemRequest, opts ...grpc.CallOption) (*AdminGiveItemResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(AdminGiveItemResponse)
+	err := c.cc.Invoke(ctx, GameService_AdminGiveItem_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *gameServiceClient) AdminGiveCurrency(ctx context.Context, in *AdminGiveCurrencyRequest, opts ...grpc.CallOption) (*AdminGiveCurrencyResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(AdminGiveCurrencyResponse)
+	err := c.cc.Invoke(ctx, GameService_AdminGiveCurrency_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // GameServiceServer is the server API for GameService service.
 // All implementations must embed UnimplementedGameServiceServer
 // for forward compatibility.
@@ -188,6 +213,9 @@ type GameServiceServer interface {
 	// NPC admin RPCs.
 	AdminListNPCTemplates(context.Context, *AdminListNPCTemplatesRequest) (*AdminListNPCTemplatesResponse, error)
 	AdminSpawnNPC(context.Context, *AdminSpawnNPCRequest) (*AdminSpawnNPCResponse, error)
+	// Inventory admin RPCs.
+	AdminGiveItem(context.Context, *AdminGiveItemRequest) (*AdminGiveItemResponse, error)
+	AdminGiveCurrency(context.Context, *AdminGiveCurrencyRequest) (*AdminGiveCurrencyResponse, error)
 	mustEmbedUnimplementedGameServiceServer()
 }
 
@@ -227,6 +255,12 @@ func (UnimplementedGameServiceServer) AdminListNPCTemplates(context.Context, *Ad
 }
 func (UnimplementedGameServiceServer) AdminSpawnNPC(context.Context, *AdminSpawnNPCRequest) (*AdminSpawnNPCResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method AdminSpawnNPC not implemented")
+}
+func (UnimplementedGameServiceServer) AdminGiveItem(context.Context, *AdminGiveItemRequest) (*AdminGiveItemResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method AdminGiveItem not implemented")
+}
+func (UnimplementedGameServiceServer) AdminGiveCurrency(context.Context, *AdminGiveCurrencyRequest) (*AdminGiveCurrencyResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method AdminGiveCurrency not implemented")
 }
 func (UnimplementedGameServiceServer) mustEmbedUnimplementedGameServiceServer() {}
 func (UnimplementedGameServiceServer) testEmbeddedByValue()                     {}
@@ -418,6 +452,42 @@ func _GameService_AdminSpawnNPC_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _GameService_AdminGiveItem_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AdminGiveItemRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GameServiceServer).AdminGiveItem(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: GameService_AdminGiveItem_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GameServiceServer).AdminGiveItem(ctx, req.(*AdminGiveItemRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _GameService_AdminGiveCurrency_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AdminGiveCurrencyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GameServiceServer).AdminGiveCurrency(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: GameService_AdminGiveCurrency_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GameServiceServer).AdminGiveCurrency(ctx, req.(*AdminGiveCurrencyRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // GameService_ServiceDesc is the grpc.ServiceDesc for GameService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -460,6 +530,14 @@ var GameService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "AdminSpawnNPC",
 			Handler:    _GameService_AdminSpawnNPC_Handler,
+		},
+		{
+			MethodName: "AdminGiveItem",
+			Handler:    _GameService_AdminGiveItem_Handler,
+		},
+		{
+			MethodName: "AdminGiveCurrency",
+			Handler:    _GameService_AdminGiveCurrency_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

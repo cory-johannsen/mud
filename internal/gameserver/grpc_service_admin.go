@@ -280,3 +280,71 @@ func (s *GameServiceServer) AdminTeleportPlayer(ctx context.Context, req *gamev1
 
 	return &gamev1.AdminTeleportResponse{}, nil
 }
+
+// AdminGiveItem (REQ-ADM-1) adds items directly to a target player's backpack.
+//
+// Precondition: req.CharId must identify an online player; req.ItemId must be a
+// known item in the registry; req.Quantity must be >= 1.
+// Postcondition: items are added to the player's backpack, persisted, and an
+// InventoryView is pushed to the player.
+func (s *GameServiceServer) AdminGiveItem(ctx context.Context, req *gamev1.AdminGiveItemRequest) (*gamev1.AdminGiveItemResponse, error) {
+	target := s.sessions.GetPlayerByCharID(req.CharId)
+	if target == nil {
+		return nil, status.Errorf(codes.NotFound, "player not found")
+	}
+	if s.invRegistry == nil {
+		return nil, status.Errorf(codes.Internal, "item registry unavailable")
+	}
+	if _, ok := s.invRegistry.Item(req.ItemId); !ok {
+		return nil, status.Errorf(codes.NotFound, "unknown item: %q", req.ItemId)
+	}
+	qty := int(req.Quantity)
+	if qty < 1 {
+		qty = 1
+	}
+	if _, err := target.Backpack.Add(req.ItemId, qty, s.invRegistry); err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to add item: %v", err)
+	}
+	if s.charSaver != nil && target.CharacterID > 0 {
+		saveCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		invItems := backpackToInventoryItems(target.Backpack)
+		if err := s.charSaver.SaveInventory(saveCtx, target.CharacterID, invItems); err != nil {
+			s.logger.Warn("AdminGiveItem: SaveInventory failed",
+				zap.Int64("charID", target.CharacterID),
+				zap.Error(err),
+			)
+		}
+	}
+	s.pushInventory(target)
+	return &gamev1.AdminGiveItemResponse{}, nil
+}
+
+// AdminGiveCurrency (REQ-ADM-2) adds currency directly to a target player's balance.
+//
+// Precondition: req.CharId must identify an online player; req.Amount must be >= 1.
+// Postcondition: currency is added to the player's balance, persisted, and an
+// InventoryView is pushed to the player.
+func (s *GameServiceServer) AdminGiveCurrency(ctx context.Context, req *gamev1.AdminGiveCurrencyRequest) (*gamev1.AdminGiveCurrencyResponse, error) {
+	target := s.sessions.GetPlayerByCharID(req.CharId)
+	if target == nil {
+		return nil, status.Errorf(codes.NotFound, "player not found")
+	}
+	amount := int(req.Amount)
+	if amount < 1 {
+		return nil, status.Errorf(codes.InvalidArgument, "amount must be >= 1")
+	}
+	target.Currency += amount
+	if s.charSaver != nil && target.CharacterID > 0 {
+		saveCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		if err := s.charSaver.SaveCurrency(saveCtx, target.CharacterID, target.Currency); err != nil {
+			s.logger.Warn("AdminGiveCurrency: SaveCurrency failed",
+				zap.Int64("charID", target.CharacterID),
+				zap.Error(err),
+			)
+		}
+	}
+	s.pushInventory(target)
+	return &gamev1.AdminGiveCurrencyResponse{}, nil
+}

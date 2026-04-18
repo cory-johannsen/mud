@@ -1,0 +1,72 @@
+# 2026/04/14 15:12:01.355676 [TestProperty_BuildPlayerCombatant_LevelAndStrModAlwaysMatchSession] [rapid] draw level: 7
+# 2026/04/14 15:12:01.355679 [TestProperty_BuildPlayerCombatant_LevelAndStrModAlwaysMatchSession] [rapid] draw brutality: 2
+# 2026/04/14 15:12:01.355693 [TestProperty_BuildPlayerCombatant_LevelAndStrModAlwaysMatchSession] [rapid] draw uid: "wacvtmaz"
+# 2026/04/14 15:12:01.355729 [TestProperty_BuildPlayerCombatant_LevelAndStrModAlwaysMatchSession] 
+# 	Error Trace:	/home/cjohannsen/src/mud/internal/gameserver/combat_handler_player_combatant_test.go:77
+# 	            				/home/cjohannsen/src/mud/vendor/pgregory.net/rapid/engine.go:371
+# 	            				/home/cjohannsen/src/mud/vendor/pgregory.net/rapid/engine.go:380
+# 	            				/home/cjohannsen/src/mud/vendor/pgregory.net/rapid/engine.go:205
+# 	            				/home/cjohannsen/src/mud/vendor/pgregory.net/rapid/engine.go:120
+# 	            				/home/cjohannsen/src/mud/internal/gameserver/combat_handler_player_combatant_test.go:65
+# 	            				/home/cjohannsen/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/asm_amd64.s:1771
+# 	Error:      	Not equal: 
+# 	            	expected: 7
+# 	            	actual  : 1
+# 	Test:       	TestProperty_BuildPlayerCombatant_LevelAndStrModAlwaysMatchSession
+# 	Messages:   	Level must equal sess.Level for any level value
+# 2026/04/14 15:12:01.355769 [TestProperty_BuildPlayerCombatant_LevelAndStrModAlwaysMatchSession] 
+# 	Error Trace:	/home/cjohannsen/src/mud/internal/gameserver/combat_handler_player_combatant_test.go:79
+# 	            				/home/cjohannsen/src/mud/vendor/pgregory.net/rapid/engine.go:371
+# 	            				/home/cjohannsen/src/mud/vendor/pgregory.net/rapid/engine.go:380
+# 	            				/home/cjohannsen/src/mud/vendor/pgregory.net/rapid/engine.go:205
+# 	            				/home/cjohannsen/src/mud/vendor/pgregory.net/rapid/engine.go:120
+# 	            				/home/cjohannsen/src/mud/internal/gameserver/combat_handler_player_combatant_test.go:65
+# 	            				/home/cjohannsen/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/asm_amd64.s:1771
+# 	Error:      	Not equal: 
+# 	            	expected: -4
+# 	            	actual  : 2
+# 	Test:       	TestProperty_BuildPlayerCombatant_LevelAndStrModAlwaysMatchSession
+# 	Messages:   	StrMod must equal AbilityMod(Brutality) for any brutality value
+# 
+v0.4.8#15420110069931548640
+0xa00f503dbbca3
+0x1a70fb19806d7c
+0x14
+0x6
+0x1e68eae12cc4e5
+0xb3f15c49b8547
+0x1
+0x1636f4f50b30a6
+0x0
+0x15beee09fa0e1b
+0x16
+0x32317a7691c37
+0x0
+0x303508320786e
+0x0
+0x10ad9227ea3097
+0x0
+0x62b96ff3da46d
+0x2
+0x13ee70f497f7d6
+0x0
+0x168d9a76f59430
+0x15
+0x119670de4826b6
+0x0
+0x18505286d2b87d
+0x1d
+0x13
+0x166a78658ab8f2
+0x0
+0x1bb36cf24f7d4a
+0xc
+0x1c01a51819599a
+0x0
+0x6a21bcb053fc1
+0x0
+0x14721b3aee9e17
+0x0
+0x18cbd3638ff4f7
+0x19
+0x6ef574c6783da

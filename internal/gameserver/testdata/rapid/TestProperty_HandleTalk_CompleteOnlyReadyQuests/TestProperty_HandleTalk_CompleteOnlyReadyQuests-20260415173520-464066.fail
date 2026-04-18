@@ -1,0 +1,11 @@
+# 2026/04/15 17:35:20.391599 [TestProperty_HandleTalk_CompleteOnlyReadyQuests] [rapid] draw required: 1
+# 2026/04/15 17:35:20.391603 [TestProperty_HandleTalk_CompleteOnlyReadyQuests] [rapid] draw progress: 0
+# 2026/04/15 17:35:20.391606 [TestProperty_HandleTalk_CompleteOnlyReadyQuests] q_ready (all objectives met) must be completed but is still in ActiveQuests
+# 
+v0.4.8#2057779963847505075
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0

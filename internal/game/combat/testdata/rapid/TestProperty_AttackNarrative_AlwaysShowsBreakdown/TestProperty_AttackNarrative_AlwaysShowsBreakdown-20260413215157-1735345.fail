@@ -1,0 +1,29 @@
+# 2026/04/13 21:51:57.598782 [TestProperty_AttackNarrative_AlwaysShowsBreakdown] [rapid] draw diceVal: 0
+# 2026/04/13 21:51:57.598818 [TestProperty_AttackNarrative_AlwaysShowsBreakdown] 
+# 	Error Trace:	/home/cjohannsen/src/mud/internal/game/combat/round_narrative_test.go:159
+# 	            				/home/cjohannsen/src/mud/vendor/pgregory.net/rapid/engine.go:371
+# 	            				/home/cjohannsen/src/mud/vendor/pgregory.net/rapid/engine.go:380
+# 	            				/home/cjohannsen/src/mud/vendor/pgregory.net/rapid/engine.go:205
+# 	            				/home/cjohannsen/src/mud/vendor/pgregory.net/rapid/engine.go:120
+# 	            				/home/cjohannsen/src/mud/internal/game/combat/round_narrative_test.go:144
+# 	            				/home/cjohannsen/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/asm_amd64.s:1771
+# 	Error:      	"Alice attacks Grunt (total 6) — miss." does not contain "1d20 (1)"
+# 	Test:       	TestProperty_AttackNarrative_AlwaysShowsBreakdown
+# 	Messages:   	narrative must show 1d20 (1) for dice val 0 (REQ-67-1)
+# 2026/04/13 21:51:57.598841 [TestProperty_AttackNarrative_AlwaysShowsBreakdown] 
+# 	Error Trace:	/home/cjohannsen/src/mud/internal/game/combat/round_narrative_test.go:161
+# 	            				/home/cjohannsen/src/mud/vendor/pgregory.net/rapid/engine.go:371
+# 	            				/home/cjohannsen/src/mud/vendor/pgregory.net/rapid/engine.go:380
+# 	            				/home/cjohannsen/src/mud/vendor/pgregory.net/rapid/engine.go:205
+# 	            				/home/cjohannsen/src/mud/vendor/pgregory.net/rapid/engine.go:120
+# 	            				/home/cjohannsen/src/mud/internal/game/combat/round_narrative_test.go:144
+# 	            				/home/cjohannsen/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/asm_amd64.s:1771
+# 	Error:      	"Alice attacks Grunt (total 6) — miss." does not contain "vs AC 12"
+# 	Test:       	TestProperty_AttackNarrative_AlwaysShowsBreakdown
+# 	Messages:   	narrative must show target AC for dice val 0 (REQ-67-2)
+# 
+v0.4.8#15549255035152563175
+0xd20a6a3da246b
+0x178bda15abd1fd
+0x1e
+0x0

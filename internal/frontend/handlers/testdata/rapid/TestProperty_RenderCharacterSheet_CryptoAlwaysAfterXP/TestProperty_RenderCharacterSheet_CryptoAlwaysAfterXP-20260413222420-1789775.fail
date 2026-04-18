@@ -1,0 +1,15 @@
+# 2026/04/13 22:24:20.999284 [TestProperty_RenderCharacterSheet_CryptoAlwaysAfterXP] [rapid] draw xp: 0
+# 2026/04/13 22:24:20.999287 [TestProperty_RenderCharacterSheet_CryptoAlwaysAfterXP] [rapid] draw xpToNext: 0
+# 2026/04/13 22:24:20.999288 [TestProperty_RenderCharacterSheet_CryptoAlwaysAfterXP] [rapid] draw crypto: 0
+# 2026/04/13 22:24:20.999310 [TestProperty_RenderCharacterSheet_CryptoAlwaysAfterXP] Crypto not found directly after XP (xpIdx=26); lines=[XP: 0 (max)   Pending Boosts: 0                    |  ]
+# 
+v0.4.8#5729225014300526700
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0

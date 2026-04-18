@@ -36,6 +36,8 @@ type SessionManager interface {
 	AllSessions() ([]ManagedSession, error)
 	GetSession(charID int64) (ManagedSession, bool)
 	TeleportPlayer(charID int64, roomID string) error
+	GiveItem(charID int64, itemID string, quantity int) error
+	GiveCurrency(charID int64, amount int) error
 }
 
 // AdminAccountStore is the subset of AccountRepository required by the admin handler.
@@ -389,6 +391,72 @@ func (ah *AdminHandler) HandleSpawnNPC(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, http.StatusOK, map[string]any{"spawned_count": spawned})
+}
+
+// HandleGiveItem handles POST /api/admin/players/:char_id/give-item.
+//
+// Precondition: Request body MUST contain {"item_id":"non-empty","quantity":>=1}.
+// Postcondition: Returns 400 on invalid input; 404 if session not found; 200 on success.
+func (ah *AdminHandler) HandleGiveItem(w http.ResponseWriter, r *http.Request) {
+	charID, ok := parseCharID(w, r)
+	if !ok {
+		return
+	}
+	var body struct {
+		ItemID   string `json:"item_id"`
+		Quantity int    `json:"quantity"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		writeError(w, http.StatusBadRequest, "invalid JSON")
+		return
+	}
+	if strings.TrimSpace(body.ItemID) == "" {
+		writeError(w, http.StatusBadRequest, "item_id must not be empty")
+		return
+	}
+	if body.Quantity < 1 {
+		body.Quantity = 1
+	}
+	if err := ah.sessions.GiveItem(charID, body.ItemID, body.Quantity); err != nil {
+		if strings.Contains(err.Error(), "not found") {
+			writeError(w, http.StatusNotFound, err.Error())
+			return
+		}
+		writeError(w, http.StatusBadGateway, err.Error())
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]string{"status": "ok"})
+}
+
+// HandleGiveCurrency handles POST /api/admin/players/:char_id/give-currency.
+//
+// Precondition: Request body MUST contain {"amount":>=1}.
+// Postcondition: Returns 400 on invalid input; 404 if session not found; 200 on success.
+func (ah *AdminHandler) HandleGiveCurrency(w http.ResponseWriter, r *http.Request) {
+	charID, ok := parseCharID(w, r)
+	if !ok {
+		return
+	}
+	var body struct {
+		Amount int `json:"amount"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		writeError(w, http.StatusBadRequest, "invalid JSON")
+		return
+	}
+	if body.Amount < 1 {
+		writeError(w, http.StatusBadRequest, "amount must be >= 1")
+		return
+	}
+	if err := ah.sessions.GiveCurrency(charID, body.Amount); err != nil {
+		if strings.Contains(err.Error(), "not found") {
+			writeError(w, http.StatusNotFound, err.Error())
+			return
+		}
+		writeError(w, http.StatusBadGateway, err.Error())
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]string{"status": "ok"})
 }
 
 // HandleAdminEvents handles GET /api/admin/events — an SSE stream of game events.

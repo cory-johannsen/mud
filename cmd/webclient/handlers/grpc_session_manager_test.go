@@ -67,6 +67,14 @@ func (m *mockGameServiceClient) AdminSpawnNPC(_ context.Context, _ *gamev1.Admin
 	panic("not used in tests")
 }
 
+func (m *mockGameServiceClient) AdminGiveItem(_ context.Context, _ *gamev1.AdminGiveItemRequest, _ ...grpc.CallOption) (*gamev1.AdminGiveItemResponse, error) {
+	panic("not used in tests")
+}
+
+func (m *mockGameServiceClient) AdminGiveCurrency(_ context.Context, _ *gamev1.AdminGiveCurrencyRequest, _ ...grpc.CallOption) (*gamev1.AdminGiveCurrencyResponse, error) {
+	panic("not used in tests")
+}
+
 // TestGRPCSessionManager_AllSessions_MapsFields verifies that two AdminSessionInfo entries
 // are correctly mapped to ManagedSession implementations.
 func TestGRPCSessionManager_AllSessions_MapsFields(t *testing.T) {

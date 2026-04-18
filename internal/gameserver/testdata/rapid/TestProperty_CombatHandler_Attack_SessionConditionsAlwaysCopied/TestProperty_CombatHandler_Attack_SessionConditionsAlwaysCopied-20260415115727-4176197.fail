@@ -1,0 +1,5 @@
+# 2026/04/15 11:57:27.825982 [TestProperty_CombatHandler_Attack_SessionConditionsAlwaysCopied] [rapid] draw hasCondition: true
+# 2026/04/15 11:57:27.826002 [TestProperty_CombatHandler_Attack_SessionConditionsAlwaysCopied] session condition must be in combat conditions when present
+# 
+v0.4.8#13233172408573995253
+0x1

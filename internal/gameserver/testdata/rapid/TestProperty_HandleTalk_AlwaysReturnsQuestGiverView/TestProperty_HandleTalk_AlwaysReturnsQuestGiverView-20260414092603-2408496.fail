@@ -1,0 +1,11 @@
+# 2026/04/14 09:26:03.748659 [TestProperty_HandleTalk_AlwaysReturnsQuestGiverView] [rapid] draw dialog: []string{" "}
+# 2026/04/14 09:26:03.748679 [TestProperty_HandleTalk_AlwaysReturnsQuestGiverView] expected QuestGiverView, got payload type *gamev1.ServerEvent_Message
+# 
+v0.4.8#16015141627043803890
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0

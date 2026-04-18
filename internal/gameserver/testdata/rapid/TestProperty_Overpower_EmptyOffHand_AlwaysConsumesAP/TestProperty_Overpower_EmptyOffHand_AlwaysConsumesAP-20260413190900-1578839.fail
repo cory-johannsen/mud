@@ -1,0 +1,19 @@
+# 2026/04/13 19:09:00.381883 [TestProperty_Overpower_EmptyOffHand_AlwaysConsumesAP] [rapid] draw hp: 1
+# 2026/04/13 19:09:00.381962 [TestProperty_Overpower_EmptyOffHand_AlwaysConsumesAP] 
+# 	Error Trace:	/home/cjohannsen/src/mud/internal/gameserver/grpc_service_overpower_test.go:264
+# 	            				/home/cjohannsen/src/mud/vendor/pgregory.net/rapid/engine.go:371
+# 	            				/home/cjohannsen/src/mud/vendor/pgregory.net/rapid/engine.go:380
+# 	            				/home/cjohannsen/src/mud/vendor/pgregory.net/rapid/engine.go:205
+# 	            				/home/cjohannsen/src/mud/vendor/pgregory.net/rapid/engine.go:120
+# 	            				/home/cjohannsen/src/mud/internal/gameserver/grpc_service_overpower_test.go:243
+# 	            				/home/cjohannsen/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/asm_amd64.s:1771
+# 	Error:      	Not equal: 
+# 	            	expected: 1
+# 	            	actual  : 2
+# 	Test:       	TestProperty_Overpower_EmptyOffHand_AlwaysConsumesAP
+# 	Messages:   	Overpower must deduct exactly 1 AP (hp=1)
+# 
+v0.4.8#6812062521871571797
+0x184b0083acd3dd
+0x8a272a37d1c7f
+0x0

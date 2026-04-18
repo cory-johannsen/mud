@@ -259,6 +259,8 @@ func (s *Server) registerRoutes(mux *http.ServeMux) {
 	mux.Handle("POST /api/admin/players/{char_id}/kick", s.adminMiddleware(http.HandlerFunc(adminHandler.HandleKickPlayer)))
 	mux.Handle("POST /api/admin/players/{char_id}/message", s.adminMiddleware(http.HandlerFunc(adminHandler.HandleMessagePlayer)))
 	mux.Handle("POST /api/admin/players/{char_id}/teleport", s.adminMiddleware(http.HandlerFunc(adminHandler.HandleTeleportPlayer)))
+	mux.Handle("POST /api/admin/players/{char_id}/give-item", s.adminMiddleware(http.HandlerFunc(adminHandler.HandleGiveItem)))
+	mux.Handle("POST /api/admin/players/{char_id}/give-currency", s.adminMiddleware(http.HandlerFunc(adminHandler.HandleGiveCurrency)))
 	mux.Handle("GET /api/admin/accounts", s.adminMiddleware(http.HandlerFunc(adminHandler.HandleSearchAccounts)))
 	mux.Handle("PUT /api/admin/accounts/{id}", s.adminMiddleware(http.HandlerFunc(adminHandler.HandleUpdateAccount)))
 	mux.Handle("GET /api/admin/zones", s.adminMiddleware(http.HandlerFunc(adminHandler.HandleListZones)))

@@ -16944,6 +16944,190 @@ func (x *AdminSpawnNPCResponse) GetSpawnedCount() int32 {
 	return 0
 }
 
+type AdminGiveItemRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	CharId        int64                  `protobuf:"varint,1,opt,name=char_id,json=charId,proto3" json:"char_id,omitempty"`
+	ItemId        string                 `protobuf:"bytes,2,opt,name=item_id,json=itemId,proto3" json:"item_id,omitempty"`
+	Quantity      int32                  `protobuf:"varint,3,opt,name=quantity,proto3" json:"quantity,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AdminGiveItemRequest) Reset() {
+	*x = AdminGiveItemRequest{}
+	mi := &file_game_v1_game_proto_msgTypes[239]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AdminGiveItemRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AdminGiveItemRequest) ProtoMessage() {}
+
+func (x *AdminGiveItemRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_game_v1_game_proto_msgTypes[239]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AdminGiveItemRequest.ProtoReflect.Descriptor instead.
+func (*AdminGiveItemRequest) Descriptor() ([]byte, []int) {
+	return file_game_v1_game_proto_rawDescGZIP(), []int{239}
+}
+
+func (x *AdminGiveItemRequest) GetCharId() int64 {
+	if x != nil {
+		return x.CharId
+	}
+	return 0
+}
+
+func (x *AdminGiveItemRequest) GetItemId() string {
+	if x != nil {
+		return x.ItemId
+	}
+	return ""
+}
+
+func (x *AdminGiveItemRequest) GetQuantity() int32 {
+	if x != nil {
+		return x.Quantity
+	}
+	return 0
+}
+
+type AdminGiveItemResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AdminGiveItemResponse) Reset() {
+	*x = AdminGiveItemResponse{}
+	mi := &file_game_v1_game_proto_msgTypes[240]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AdminGiveItemResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AdminGiveItemResponse) ProtoMessage() {}
+
+func (x *AdminGiveItemResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_game_v1_game_proto_msgTypes[240]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AdminGiveItemResponse.ProtoReflect.Descriptor instead.
+func (*AdminGiveItemResponse) Descriptor() ([]byte, []int) {
+	return file_game_v1_game_proto_rawDescGZIP(), []int{240}
+}
+
+type AdminGiveCurrencyRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	CharId        int64                  `protobuf:"varint,1,opt,name=char_id,json=charId,proto3" json:"char_id,omitempty"`
+	Amount        int32                  `protobuf:"varint,2,opt,name=amount,proto3" json:"amount,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AdminGiveCurrencyRequest) Reset() {
+	*x = AdminGiveCurrencyRequest{}
+	mi := &file_game_v1_game_proto_msgTypes[241]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AdminGiveCurrencyRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AdminGiveCurrencyRequest) ProtoMessage() {}
+
+func (x *AdminGiveCurrencyRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_game_v1_game_proto_msgTypes[241]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AdminGiveCurrencyRequest.ProtoReflect.Descriptor instead.
+func (*AdminGiveCurrencyRequest) Descriptor() ([]byte, []int) {
+	return file_game_v1_game_proto_rawDescGZIP(), []int{241}
+}
+
+func (x *AdminGiveCurrencyRequest) GetCharId() int64 {
+	if x != nil {
+		return x.CharId
+	}
+	return 0
+}
+
+func (x *AdminGiveCurrencyRequest) GetAmount() int32 {
+	if x != nil {
+		return x.Amount
+	}
+	return 0
+}
+
+type AdminGiveCurrencyResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AdminGiveCurrencyResponse) Reset() {
+	*x = AdminGiveCurrencyResponse{}
+	mi := &file_game_v1_game_proto_msgTypes[242]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AdminGiveCurrencyResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AdminGiveCurrencyResponse) ProtoMessage() {}
+
+func (x *AdminGiveCurrencyResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_game_v1_game_proto_msgTypes[242]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AdminGiveCurrencyResponse.ProtoReflect.Descriptor instead.
+func (*AdminGiveCurrencyResponse) Descriptor() ([]byte, []int) {
+	return file_game_v1_game_proto_rawDescGZIP(), []int{242}
+}
+
 var File_game_v1_game_proto protoreflect.FileDescriptor
 
 const file_game_v1_game_proto_rawDesc = "" +
@@ -18142,7 +18326,16 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\aroom_id\x18\x02 \x01(\tR\x06roomId\x12\x14\n" +
 	"\x05count\x18\x03 \x01(\x05R\x05count\"<\n" +
 	"\x15AdminSpawnNPCResponse\x12#\n" +
-	"\rspawned_count\x18\x01 \x01(\x05R\fspawnedCount*Y\n" +
+	"\rspawned_count\x18\x01 \x01(\x05R\fspawnedCount\"d\n" +
+	"\x14AdminGiveItemRequest\x12\x17\n" +
+	"\achar_id\x18\x01 \x01(\x03R\x06charId\x12\x17\n" +
+	"\aitem_id\x18\x02 \x01(\tR\x06itemId\x12\x1a\n" +
+	"\bquantity\x18\x03 \x01(\x05R\bquantity\"\x17\n" +
+	"\x15AdminGiveItemResponse\"K\n" +
+	"\x18AdminGiveCurrencyRequest\x12\x17\n" +
+	"\achar_id\x18\x01 \x01(\x03R\x06charId\x12\x16\n" +
+	"\x06amount\x18\x02 \x01(\x05R\x06amount\"\x1b\n" +
+	"\x19AdminGiveCurrencyResponse*Y\n" +
 	"\vMessageType\x12\x1c\n" +
 	"\x18MESSAGE_TYPE_UNSPECIFIED\x10\x00\x12\x14\n" +
 	"\x10MESSAGE_TYPE_SAY\x10\x01\x12\x16\n" +
@@ -18167,7 +18360,7 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\x1bCOMBAT_EVENT_TYPE_CONDITION\x10\x06\x12\x1c\n" +
 	"\x18COMBAT_EVENT_TYPE_RELOAD\x10\a\x12\x1b\n" +
 	"\x17COMBAT_EVENT_TYPE_THROW\x10\b\x12\x1e\n" +
-	"\x1aCOMBAT_EVENT_TYPE_POSITION\x10\t2\xcd\x06\n" +
+	"\x1aCOMBAT_EVENT_TYPE_POSITION\x10\t2\xf9\a\n" +
 	"\vGameService\x12;\n" +
 	"\aSession\x12\x16.game.v1.ClientMessage\x1a\x14.game.v1.ServerEvent(\x010\x01\x12Z\n" +
 	"\x11AdminListSessions\x12!.game.v1.AdminListSessionsRequest\x1a\".game.v1.AdminListSessionsResponse\x12H\n" +
@@ -18178,7 +18371,9 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\x0eAdminListRooms\x12\x1e.game.v1.AdminListRoomsRequest\x1a\x1f.game.v1.AdminListRoomsResponse\x12T\n" +
 	"\x0fAdminUpdateRoom\x12\x1f.game.v1.AdminUpdateRoomRequest\x1a .game.v1.AdminUpdateRoomResponse\x12f\n" +
 	"\x15AdminListNPCTemplates\x12%.game.v1.AdminListNPCTemplatesRequest\x1a&.game.v1.AdminListNPCTemplatesResponse\x12N\n" +
-	"\rAdminSpawnNPC\x12\x1d.game.v1.AdminSpawnNPCRequest\x1a\x1e.game.v1.AdminSpawnNPCResponseB:Z8github.com/cory-johannsen/mud/internal/gameserver/gamev1b\x06proto3"
+	"\rAdminSpawnNPC\x12\x1d.game.v1.AdminSpawnNPCRequest\x1a\x1e.game.v1.AdminSpawnNPCResponse\x12N\n" +
+	"\rAdminGiveItem\x12\x1d.game.v1.AdminGiveItemRequest\x1a\x1e.game.v1.AdminGiveItemResponse\x12Z\n" +
+	"\x11AdminGiveCurrency\x12!.game.v1.AdminGiveCurrencyRequest\x1a\".game.v1.AdminGiveCurrencyResponseB:Z8github.com/cory-johannsen/mud/internal/gameserver/gamev1b\x06proto3"
 
 var (
 	file_game_v1_game_proto_rawDescOnce sync.Once
@@ -18193,7 +18388,7 @@ func file_game_v1_game_proto_rawDescGZIP() []byte {
 }
 
 var file_game_v1_game_proto_enumTypes = make([]protoimpl.EnumInfo, 4)
-var file_game_v1_game_proto_msgTypes = make([]protoimpl.MessageInfo, 243)
+var file_game_v1_game_proto_msgTypes = make([]protoimpl.MessageInfo, 247)
 var file_game_v1_game_proto_goTypes = []any{
 	(MessageType)(0),                      // 0: game.v1.MessageType
 	(RoomEventType)(0),                    // 1: game.v1.RoomEventType
@@ -18438,10 +18633,14 @@ var file_game_v1_game_proto_goTypes = []any{
 	(*AdminListNPCTemplatesResponse)(nil), // 240: game.v1.AdminListNPCTemplatesResponse
 	(*AdminSpawnNPCRequest)(nil),          // 241: game.v1.AdminSpawnNPCRequest
 	(*AdminSpawnNPCResponse)(nil),         // 242: game.v1.AdminSpawnNPCResponse
-	nil,                                   // 243: game.v1.FixerView.BribeCostsEntry
-	nil,                                   // 244: game.v1.CharacterSheetView.ArmorEntry
-	nil,                                   // 245: game.v1.CharacterSheetView.AccessoriesEntry
-	nil,                                   // 246: game.v1.CharacterSheetView.ArmorCategoriesEntry
+	(*AdminGiveItemRequest)(nil),          // 243: game.v1.AdminGiveItemRequest
+	(*AdminGiveItemResponse)(nil),         // 244: game.v1.AdminGiveItemResponse
+	(*AdminGiveCurrencyRequest)(nil),      // 245: game.v1.AdminGiveCurrencyRequest
+	(*AdminGiveCurrencyResponse)(nil),     // 246: game.v1.AdminGiveCurrencyResponse
+	nil,                                   // 247: game.v1.FixerView.BribeCostsEntry
+	nil,                                   // 248: game.v1.CharacterSheetView.ArmorEntry
+	nil,                                   // 249: game.v1.CharacterSheetView.AccessoriesEntry
+	nil,                                   // 250: game.v1.CharacterSheetView.ArmorCategoriesEntry
 }
 var file_game_v1_game_proto_depIdxs = []int32{
 	38,  // 0: game.v1.ClientMessage.join_world:type_name -> game.v1.JoinWorldRequest
@@ -18636,7 +18835,7 @@ var file_game_v1_game_proto_depIdxs = []int32{
 	48,  // 189: game.v1.ExitList.exits:type_name -> game.v1.ExitInfo
 	62,  // 190: game.v1.TrainerView.jobs:type_name -> game.v1.JobOfferEntry
 	65,  // 191: game.v1.TechTrainerView.offers:type_name -> game.v1.TechOfferEntry
-	243, // 192: game.v1.FixerView.bribe_costs:type_name -> game.v1.FixerView.BribeCostsEntry
+	247, // 192: game.v1.FixerView.bribe_costs:type_name -> game.v1.FixerView.BribeCostsEntry
 	83,  // 193: game.v1.LoadoutView.presets:type_name -> game.v1.LoadoutWeaponPreset
 	85,  // 194: game.v1.QuestEntryView.objectives:type_name -> game.v1.QuestObjectiveView
 	86,  // 195: game.v1.QuestGiverView.quests:type_name -> game.v1.QuestEntryView
@@ -18655,8 +18854,8 @@ var file_game_v1_game_proto_depIdxs = []int32{
 	128, // 208: game.v1.ClassFeaturesResponse.archetype_features:type_name -> game.v1.ClassFeatureEntry
 	128, // 209: game.v1.ClassFeaturesResponse.job_features:type_name -> game.v1.ClassFeatureEntry
 	125, // 210: game.v1.UseResponse.choices:type_name -> game.v1.FeatEntry
-	244, // 211: game.v1.CharacterSheetView.armor:type_name -> game.v1.CharacterSheetView.ArmorEntry
-	245, // 212: game.v1.CharacterSheetView.accessories:type_name -> game.v1.CharacterSheetView.AccessoriesEntry
+	248, // 211: game.v1.CharacterSheetView.armor:type_name -> game.v1.CharacterSheetView.ArmorEntry
+	249, // 212: game.v1.CharacterSheetView.accessories:type_name -> game.v1.CharacterSheetView.AccessoriesEntry
 	140, // 213: game.v1.CharacterSheetView.player_resistances:type_name -> game.v1.ResistanceEntry
 	140, // 214: game.v1.CharacterSheetView.player_weaknesses:type_name -> game.v1.ResistanceEntry
 	106, // 215: game.v1.CharacterSheetView.skills:type_name -> game.v1.SkillEntry
@@ -18668,7 +18867,7 @@ var file_game_v1_game_proto_depIdxs = []int32{
 	138, // 221: game.v1.CharacterSheetView.innate_slots:type_name -> game.v1.InnateSlotView
 	135, // 222: game.v1.CharacterSheetView.hardwired_slots:type_name -> game.v1.HardwiredSlotView
 	136, // 223: game.v1.CharacterSheetView.spontaneous_known:type_name -> game.v1.SpontaneousKnownEntry
-	246, // 224: game.v1.CharacterSheetView.armor_categories:type_name -> game.v1.CharacterSheetView.ArmorCategoriesEntry
+	250, // 224: game.v1.CharacterSheetView.armor_categories:type_name -> game.v1.CharacterSheetView.ArmorCategoriesEntry
 	142, // 225: game.v1.ProficienciesResponse.proficiencies:type_name -> game.v1.ProficiencyEntry
 	205, // 226: game.v1.HotbarUpdateEvent.slots:type_name -> game.v1.HotbarSlot
 	210, // 227: game.v1.CraftResultEvent.materials_lost:type_name -> game.v1.MaterialLoss
@@ -18690,18 +18889,22 @@ var file_game_v1_game_proto_depIdxs = []int32{
 	236, // 243: game.v1.GameService.AdminUpdateRoom:input_type -> game.v1.AdminUpdateRoomRequest
 	238, // 244: game.v1.GameService.AdminListNPCTemplates:input_type -> game.v1.AdminListNPCTemplatesRequest
 	241, // 245: game.v1.GameService.AdminSpawnNPC:input_type -> game.v1.AdminSpawnNPCRequest
-	34,  // 246: game.v1.GameService.Session:output_type -> game.v1.ServerEvent
-	223, // 247: game.v1.GameService.AdminListSessions:output_type -> game.v1.AdminListSessionsResponse
-	225, // 248: game.v1.GameService.AdminKickPlayer:output_type -> game.v1.AdminKickResponse
-	227, // 249: game.v1.GameService.AdminMessagePlayer:output_type -> game.v1.AdminMessageResponse
-	229, // 250: game.v1.GameService.AdminTeleportPlayer:output_type -> game.v1.AdminTeleportResponse
-	232, // 251: game.v1.GameService.AdminListZones:output_type -> game.v1.AdminListZonesResponse
-	235, // 252: game.v1.GameService.AdminListRooms:output_type -> game.v1.AdminListRoomsResponse
-	237, // 253: game.v1.GameService.AdminUpdateRoom:output_type -> game.v1.AdminUpdateRoomResponse
-	240, // 254: game.v1.GameService.AdminListNPCTemplates:output_type -> game.v1.AdminListNPCTemplatesResponse
-	242, // 255: game.v1.GameService.AdminSpawnNPC:output_type -> game.v1.AdminSpawnNPCResponse
-	246, // [246:256] is the sub-list for method output_type
-	236, // [236:246] is the sub-list for method input_type
+	243, // 246: game.v1.GameService.AdminGiveItem:input_type -> game.v1.AdminGiveItemRequest
+	245, // 247: game.v1.GameService.AdminGiveCurrency:input_type -> game.v1.AdminGiveCurrencyRequest
+	34,  // 248: game.v1.GameService.Session:output_type -> game.v1.ServerEvent
+	223, // 249: game.v1.GameService.AdminListSessions:output_type -> game.v1.AdminListSessionsResponse
+	225, // 250: game.v1.GameService.AdminKickPlayer:output_type -> game.v1.AdminKickResponse
+	227, // 251: game.v1.GameService.AdminMessagePlayer:output_type -> game.v1.AdminMessageResponse
+	229, // 252: game.v1.GameService.AdminTeleportPlayer:output_type -> game.v1.AdminTeleportResponse
+	232, // 253: game.v1.GameService.AdminListZones:output_type -> game.v1.AdminListZonesResponse
+	235, // 254: game.v1.GameService.AdminListRooms:output_type -> game.v1.AdminListRoomsResponse
+	237, // 255: game.v1.GameService.AdminUpdateRoom:output_type -> game.v1.AdminUpdateRoomResponse
+	240, // 256: game.v1.GameService.AdminListNPCTemplates:output_type -> game.v1.AdminListNPCTemplatesResponse
+	242, // 257: game.v1.GameService.AdminSpawnNPC:output_type -> game.v1.AdminSpawnNPCResponse
+	244, // 258: game.v1.GameService.AdminGiveItem:output_type -> game.v1.AdminGiveItemResponse
+	246, // 259: game.v1.GameService.AdminGiveCurrency:output_type -> game.v1.AdminGiveCurrencyResponse
+	248, // [248:260] is the sub-list for method output_type
+	236, // [236:248] is the sub-list for method input_type
 	236, // [236:236] is the sub-list for extension type_name
 	236, // [236:236] is the sub-list for extension extendee
 	0,   // [0:236] is the sub-list for field type_name
@@ -18901,7 +19104,7 @@ func file_game_v1_game_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_game_v1_game_proto_rawDesc), len(file_game_v1_game_proto_rawDesc)),
 			NumEnums:      4,
-			NumMessages:   243,
+			NumMessages:   247,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

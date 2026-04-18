@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/cory-johannsen/mud/internal/game/combat"
+	"github.com/cory-johannsen/mud/internal/game/inventory"
 	"github.com/cory-johannsen/mud/internal/game/npc"
 	"github.com/cory-johannsen/mud/internal/game/session"
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
@@ -357,4 +358,183 @@ func TestAdminTeleportPlayer_MovesAndBroadcasts(t *testing.T) {
 	msg := evt.GetMessage()
 	require.NotNil(t, msg, "first push must be a message event")
 	assert.Contains(t, msg.Content, "teleported")
+}
+
+// ---------------------------------------------------------------------------
+// AdminGiveItem tests
+// ---------------------------------------------------------------------------
+
+// newAdminSvcWithRegistry creates a minimal GameServiceServer with an invRegistry for item-give tests.
+func newAdminSvcWithRegistry(t *testing.T, reg *inventory.Registry) (*GameServiceServer, *session.Manager) {
+	t.Helper()
+	worldMgr, sessMgr := testWorldAndSession(t)
+	logger := zaptest.NewLogger(t)
+	npcMgr := npc.NewManager()
+	combatHandler := NewCombatHandler(
+		combat.NewEngine(), npcMgr, sessMgr, nil,
+		func(_ string, _ []*gamev1.CombatEvent) {},
+		testRoundDuration, makeTestConditionRegistry(), nil, nil, nil, nil, nil, nil, nil,
+	)
+	svc := newTestGameServiceServer(
+		worldMgr, sessMgr,
+		command.DefaultRegistry(),
+		NewWorldHandler(worldMgr, sessMgr, npcMgr, nil, nil, nil),
+		NewChatHandler(sessMgr),
+		logger,
+		nil, nil, nil, npcMgr, combatHandler, nil,
+		nil, nil, nil, nil, reg, nil,
+		nil, nil, nil, nil, nil, nil, nil, nil, "",
+		nil, nil, nil,
+		nil, nil, nil,
+		nil, nil, nil, nil, nil, nil, nil,
+		nil, nil,
+		nil,
+		nil,
+		nil, nil,
+	)
+	return svc, sessMgr
+}
+
+// REQ-ADM-1: AdminGiveItem must return NotFound when player is not online.
+func TestAdminGiveItem_PlayerNotFound(t *testing.T) {
+	reg := inventory.NewRegistry()
+	svc, _ := newAdminSvcWithRegistry(t, reg)
+
+	_, err := svc.AdminGiveItem(context.Background(), &gamev1.AdminGiveItemRequest{
+		CharId:   999,
+		ItemId:   "potion",
+		Quantity: 1,
+	})
+	require.Error(t, err)
+	st, ok := status.FromError(err)
+	require.True(t, ok)
+	assert.Equal(t, codes.NotFound, st.Code())
+}
+
+// REQ-ADM-1: AdminGiveItem must return NotFound when item_id is not in the registry.
+func TestAdminGiveItem_UnknownItem(t *testing.T) {
+	reg := inventory.NewRegistry()
+	svc, sessMgr := newAdminSvcWithRegistry(t, reg)
+
+	addAdminPlayer(t, sessMgr, session.AddPlayerOptions{
+		UID:         "u_give",
+		Username:    "give_user",
+		CharName:    "Giver",
+		CharacterID: 500,
+		RoomID:      "room_a",
+		Role:        "player",
+	})
+
+	_, err := svc.AdminGiveItem(context.Background(), &gamev1.AdminGiveItemRequest{
+		CharId:   500,
+		ItemId:   "nonexistent_item",
+		Quantity: 1,
+	})
+	require.Error(t, err)
+	st, ok := status.FromError(err)
+	require.True(t, ok)
+	assert.Equal(t, codes.NotFound, st.Code())
+}
+
+// REQ-ADM-1: AdminGiveItem must add the item to the target player's backpack.
+func TestAdminGiveItem_AddsToBackpack(t *testing.T) {
+	reg := inventory.NewRegistry()
+	require.NoError(t, reg.RegisterItem(&inventory.ItemDef{
+		ID:       "test_stim",
+		Name:     "Test Stim",
+		Kind:     inventory.KindConsumable,
+		MaxStack: 10,
+		Weight:   0.1,
+	}))
+	svc, sessMgr := newAdminSvcWithRegistry(t, reg)
+
+	target := addAdminPlayer(t, sessMgr, session.AddPlayerOptions{
+		UID:         "u_give2",
+		Username:    "give_user2",
+		CharName:    "Receiver",
+		CharacterID: 501,
+		RoomID:      "room_a",
+		Role:        "player",
+	})
+
+	resp, err := svc.AdminGiveItem(context.Background(), &gamev1.AdminGiveItemRequest{
+		CharId:   501,
+		ItemId:   "test_stim",
+		Quantity: 3,
+	})
+	require.NoError(t, err)
+	require.NotNil(t, resp)
+
+	// Verify item is in backpack.
+	items := target.Backpack.FindByItemDefID("test_stim")
+	totalQty := 0
+	for _, it := range items {
+		totalQty += it.Quantity
+	}
+	assert.Equal(t, 3, totalQty, "backpack must contain 3 test_stim after AdminGiveItem")
+}
+
+// ---------------------------------------------------------------------------
+// AdminGiveCurrency tests
+// ---------------------------------------------------------------------------
+
+// REQ-ADM-2: AdminGiveCurrency must return NotFound when player is not online.
+func TestAdminGiveCurrency_PlayerNotFound(t *testing.T) {
+	svc, _ := newAdminSvc(t)
+
+	_, err := svc.AdminGiveCurrency(context.Background(), &gamev1.AdminGiveCurrencyRequest{
+		CharId: 999,
+		Amount: 100,
+	})
+	require.Error(t, err)
+	st, ok := status.FromError(err)
+	require.True(t, ok)
+	assert.Equal(t, codes.NotFound, st.Code())
+}
+
+// REQ-ADM-2: AdminGiveCurrency must return InvalidArgument when amount < 1.
+func TestAdminGiveCurrency_InvalidAmount(t *testing.T) {
+	svc, sessMgr := newAdminSvc(t)
+
+	addAdminPlayer(t, sessMgr, session.AddPlayerOptions{
+		UID:         "u_curr",
+		Username:    "curr_user",
+		CharName:    "Holder",
+		CharacterID: 600,
+		RoomID:      "room_a",
+		Role:        "player",
+	})
+
+	_, err := svc.AdminGiveCurrency(context.Background(), &gamev1.AdminGiveCurrencyRequest{
+		CharId: 600,
+		Amount: 0,
+	})
+	require.Error(t, err)
+	st, ok := status.FromError(err)
+	require.True(t, ok)
+	assert.Equal(t, codes.InvalidArgument, st.Code())
+}
+
+// REQ-ADM-2: AdminGiveCurrency must add the amount to the target player's Currency.
+func TestAdminGiveCurrency_AddsToCurrency(t *testing.T) {
+	svc, sessMgr := newAdminSvc(t)
+
+	target := addAdminPlayer(t, sessMgr, session.AddPlayerOptions{
+		UID:         "u_curr2",
+		Username:    "curr_user2",
+		CharName:    "Banker",
+		CharacterID: 601,
+		RoomID:      "room_a",
+		Role:        "player",
+	})
+	initialCurrency := target.Currency
+
+	resp, err := svc.AdminGiveCurrency(context.Background(), &gamev1.AdminGiveCurrencyRequest{
+		CharId: 601,
+		Amount: 250,
+	})
+	require.NoError(t, err)
+	require.NotNil(t, resp)
+
+	assert.Equal(t, initialCurrency+250, target.Currency, "player's Currency must increase by 250 after AdminGiveCurrency")
 }
