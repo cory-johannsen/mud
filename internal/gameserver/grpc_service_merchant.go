@@ -260,6 +260,11 @@ func (s *GameServiceServer) handleBuy(uid string, req *gamev1.BuyRequest) (*game
 			if s.materialRepo != nil {
 				_ = s.materialRepo.Add(context.Background(), sess.CharacterID, ms.ID, 1)
 			}
+			if s.charSaver != nil && sess.CharacterID > 0 {
+				if saveErr := s.charSaver.SaveCurrency(context.Background(), sess.CharacterID, sess.Currency); saveErr != nil {
+					s.logger.Warn("handleBuy(material): SaveCurrency failed", zap.Error(saveErr))
+				}
+			}
 			return messageEvent(fmt.Sprintf("You buy 1 %s for %d credits.", matDef.Name, ms.Price)), nil
 		}
 		return messageEvent(fmt.Sprintf("%s doesn't sell %q.", inst.Name(), itemID)), nil

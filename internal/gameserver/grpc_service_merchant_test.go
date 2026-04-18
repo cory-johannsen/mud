@@ -1,6 +1,7 @@
 package gameserver
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
@@ -10,6 +11,7 @@ import (
 	"google.golang.org/protobuf/proto"
 	"pgregory.net/rapid"
 
+	"github.com/cory-johannsen/mud/internal/game/character"
 	"github.com/cory-johannsen/mud/internal/game/command"
 	"github.com/cory-johannsen/mud/internal/game/crafting"
 	"github.com/cory-johannsen/mud/internal/game/inventory"
@@ -712,6 +714,187 @@ func TestHandleBuy_PushesUpdatedShopViewAfterPurchase(t *testing.T) {
 		}
 	}
 	assert.True(t, foundShopView, "handleBuy must push a ShopView event after a successful purchase")
+}
+
+// recordingCharSaver is a CharacterSaver test double that records SaveInventory and SaveCurrency calls.
+//
+// Precondition: none.
+// Postcondition: savedInventory and savedCurrency slices grow on each corresponding call; all other methods no-op.
+type recordingCharSaver struct {
+	savedInventory []struct {
+		characterID int64
+		items       []inventory.InventoryItem
+	}
+	savedCurrency []struct {
+		characterID int64
+		currency    int
+	}
+}
+
+func (r *recordingCharSaver) SaveState(_ context.Context, _ int64, _ string, _ int) error {
+	return nil
+}
+func (r *recordingCharSaver) LoadWeaponPresets(_ context.Context, _ int64, _ *inventory.Registry) (*inventory.LoadoutSet, error) {
+	return inventory.NewLoadoutSet(), nil
+}
+func (r *recordingCharSaver) SaveWeaponPresets(_ context.Context, _ int64, _ *inventory.LoadoutSet) error {
+	return nil
+}
+func (r *recordingCharSaver) LoadEquipment(_ context.Context, _ int64) (*inventory.Equipment, error) {
+	return inventory.NewEquipment(), nil
+}
+func (r *recordingCharSaver) SaveEquipment(_ context.Context, _ int64, _ *inventory.Equipment) error {
+	return nil
+}
+func (r *recordingCharSaver) LoadInventory(_ context.Context, _ int64) ([]inventory.InventoryItem, error) {
+	return nil, nil
+}
+func (r *recordingCharSaver) SaveInventory(_ context.Context, characterID int64, items []inventory.InventoryItem) error {
+	r.savedInventory = append(r.savedInventory, struct {
+		characterID int64
+		items       []inventory.InventoryItem
+	}{characterID: characterID, items: items})
+	return nil
+}
+func (r *recordingCharSaver) HasReceivedStartingInventory(_ context.Context, _ int64) (bool, error) {
+	return false, nil
+}
+func (r *recordingCharSaver) MarkStartingInventoryGranted(_ context.Context, _ int64) error {
+	return nil
+}
+func (r *recordingCharSaver) GetByID(_ context.Context, id int64) (*character.Character, error) {
+	return &character.Character{ID: id}, nil
+}
+func (r *recordingCharSaver) SaveAbilities(_ context.Context, _ int64, _ character.AbilityScores) error {
+	return nil
+}
+func (r *recordingCharSaver) SaveProgress(_ context.Context, _ int64, _, _, _, _ int) error {
+	return nil
+}
+func (r *recordingCharSaver) SaveDefaultCombatAction(_ context.Context, _ int64, _ string) error {
+	return nil
+}
+func (r *recordingCharSaver) SaveCurrency(_ context.Context, characterID int64, currency int) error {
+	r.savedCurrency = append(r.savedCurrency, struct {
+		characterID int64
+		currency    int
+	}{characterID: characterID, currency: currency})
+	return nil
+}
+func (r *recordingCharSaver) LoadCurrency(_ context.Context, _ int64) (int, error) { return 0, nil }
+func (r *recordingCharSaver) SaveGender(_ context.Context, _ int64, _ string) error { return nil }
+func (r *recordingCharSaver) SaveHeroPoints(_ context.Context, _ int64, _ int) error { return nil }
+func (r *recordingCharSaver) LoadHeroPoints(_ context.Context, _ int64) (int, error) { return 0, nil }
+func (r *recordingCharSaver) SaveJobs(_ context.Context, _ int64, _ map[string]int, _ string) error {
+	return nil
+}
+func (r *recordingCharSaver) SaveInstanceCharges(_ context.Context, _ int64, _, _ string, _ int, _ bool) error {
+	return nil
+}
+func (r *recordingCharSaver) LoadJobs(_ context.Context, _ int64) (map[string]int, string, error) {
+	return map[string]int{}, "", nil
+}
+func (r *recordingCharSaver) LoadFocusPoints(_ context.Context, _ int64) (int, error) { return 0, nil }
+func (r *recordingCharSaver) SaveFocusPoints(_ context.Context, _ int64, _ int) error { return nil }
+func (r *recordingCharSaver) SaveHotbar(_ context.Context, _ int64, _ [10]session.HotbarSlot) error {
+	return nil
+}
+func (r *recordingCharSaver) LoadHotbar(_ context.Context, _ int64) ([10]session.HotbarSlot, error) {
+	return [10]session.HotbarSlot{}, nil
+}
+
+// REQ-NPC-BUY-6: After a successful equipment purchase, SaveInventory MUST have been called exactly once
+// with the purchased item in the items slice, and SaveCurrency MUST have been called exactly once
+// with the reduced currency amount.
+func TestHandleBuy_PersistsInventoryAndCurrency(t *testing.T) {
+	svc, uid, inst := newMerchantTestServer(t)
+	rec := &recordingCharSaver{}
+	svc.charSaver = rec
+	sess, ok := svc.sessions.GetPlayer(uid)
+	require.True(t, ok)
+	sess.CharacterID = 42 // must be > 0 for persistence guard
+	initialCurrency := sess.Currency
+
+	evt, err := svc.handleBuy(uid, &gamev1.BuyRequest{NpcName: inst.Name(), ItemId: "stim_pack", Quantity: 1})
+	require.NoError(t, err)
+	assert.Contains(t, evt.GetMessage().Content, "buy")
+
+	// SaveInventory must have been called with stim_pack in items.
+	require.Len(t, rec.savedInventory, 1, "SaveInventory must be called once")
+	assert.Equal(t, int64(42), rec.savedInventory[0].characterID)
+	var found bool
+	for _, item := range rec.savedInventory[0].items {
+		if item.ItemDefID == "stim_pack" {
+			found = true
+			break
+		}
+	}
+	assert.True(t, found, "SaveInventory must include the purchased stim_pack")
+
+	// SaveCurrency must have been called with reduced amount.
+	require.Len(t, rec.savedCurrency, 1, "SaveCurrency must be called once")
+	assert.Equal(t, int64(42), rec.savedCurrency[0].characterID)
+	assert.Less(t, rec.savedCurrency[0].currency, initialCurrency, "SaveCurrency must receive reduced amount")
+	assert.Equal(t, sess.Currency, rec.savedCurrency[0].currency)
+}
+
+// REQ-NPC-BUY-7: When charSaver is nil or CharacterID is 0, SaveInventory and SaveCurrency
+// MUST NOT be called (the guard works correctly).
+func TestHandleBuy_SkipsPersistenceWhenCharSaverNilOrCharIDZero(t *testing.T) {
+	// Case 1: charSaver nil (default in test server)
+	svc, uid, inst := newMerchantTestServer(t)
+	sess, _ := svc.sessions.GetPlayer(uid)
+	sess.CharacterID = 42
+	// charSaver remains nil — no panic, no error
+	evt, err := svc.handleBuy(uid, &gamev1.BuyRequest{NpcName: inst.Name(), ItemId: "stim_pack", Quantity: 1})
+	require.NoError(t, err)
+	assert.Contains(t, evt.GetMessage().Content, "buy")
+
+	// Case 2: charSaver set but CharacterID == 0
+	svc2, uid2, inst2 := newMerchantTestServer(t)
+	rec := &recordingCharSaver{}
+	svc2.charSaver = rec
+	sess2, _ := svc2.sessions.GetPlayer(uid2)
+	sess2.CharacterID = 0 // guard must skip
+	_, _ = svc2.handleBuy(uid2, &gamev1.BuyRequest{NpcName: inst2.Name(), ItemId: "stim_pack", Quantity: 1})
+	assert.Empty(t, rec.savedInventory, "SaveInventory must not be called when CharacterID == 0")
+	assert.Empty(t, rec.savedCurrency, "SaveCurrency must not be called when CharacterID == 0")
+}
+
+// REQ-NPC-BUY-8 (property): For any valid purchase where charSaver is set and CharacterID > 0,
+// the saved currency equals sess.Currency after the purchase, and the saved inventory contains
+// the purchased item.
+func TestProperty_HandleBuy_PersistenceInvariant(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		svc, uid, inst := newMerchantTestServer(t)
+		rec := &recordingCharSaver{}
+		svc.charSaver = rec
+		sess, ok := svc.sessions.GetPlayer(uid)
+		require.True(t, ok)
+		sess.CharacterID = int64(rapid.IntRange(1, 1000).Draw(rt, "charID"))
+
+		// stim_pack costs 50 and player has 500 — purchase always succeeds
+		_, _ = svc.handleBuy(uid, &gamev1.BuyRequest{NpcName: inst.Name(), ItemId: "stim_pack", Quantity: 1})
+
+		if len(rec.savedCurrency) > 0 {
+			rt.Log("savedCurrency", rec.savedCurrency[0].currency)
+			if rec.savedCurrency[0].currency != sess.Currency {
+				rt.Fatalf("saved currency %d != session currency %d", rec.savedCurrency[0].currency, sess.Currency)
+			}
+		}
+		if len(rec.savedInventory) > 0 {
+			found := false
+			for _, it := range rec.savedInventory[0].items {
+				if it.ItemDefID == "stim_pack" {
+					found = true
+					break
+				}
+			}
+			if !found {
+				rt.Fatal("stim_pack not found in saved inventory")
+			}
+		}
+	})
 }
 
 func TestProperty_HandleBuy_MaterialStock_NeverPanics(t *testing.T) {
