@@ -260,7 +260,7 @@ export function RoomPanel() {
               const health = npc.healthDescription ?? npc.health_description ?? ''
               if (tag !== '') {
                 // Non-combat NPC: Name [type], clickable
-                const onClick = npcType === 'merchant'
+                const onClick = (npcType === 'merchant' || npcType === 'black_market_merchant')
                   ? () => sendMessage('BrowseRequest', { npc_name: npc.name })
                   : npcType === 'quest_giver'
                   ? () => sendMessage('TalkRequest', { npc_name: npc.name })
