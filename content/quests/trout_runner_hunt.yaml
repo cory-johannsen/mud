@@ -1,0 +1,17 @@
+id: trout_runner_hunt
+title: Gorge Runner Hunt
+description: >
+  A gorge runner has been operating an intelligence network along the Sandy
+  River approaches, tipping off bandit crews whenever a valuable convoy
+  leaves the truck stop. Taking this runner down cuts the network.
+giver_npc_id: troutdale_quest_giver
+repeatable: false
+objectives:
+  - id: kill_runner
+    type: kill
+    description: Kill the Gorge Runner
+    target_id: gorge_runner
+    quantity: 1
+rewards:
+  xp: 450
+  credits: 275

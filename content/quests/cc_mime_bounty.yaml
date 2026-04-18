@@ -1,0 +1,17 @@
+id: cc_mime_bounty
+title: Silent Threat Bounty
+description: >
+  The mimes in the changing rooms are less harmless than they look.
+  Three of them have been running a coordinated shakedown operation
+  in complete silence. Take them out before they add another act.
+giver_npc_id: clown_camp_quest_giver
+repeatable: false
+objectives:
+  - id: kill_mimes
+    type: kill
+    description: Kill 3 Clown Mimes
+    target_id: clown_mime
+    quantity: 3
+rewards:
+  xp: 300
+  credits: 175

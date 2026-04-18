@@ -1,0 +1,25 @@
+id: steampdx_quest_giver
+name: "Steam Room Attendant"
+npc_type: quest_giver
+npc_role: quest_giver
+type: human
+description: "Manages the back-room contract board between towel changes. Keeps it dry, keeps it current, never asks follow-up questions."
+level: 4
+max_hp: 28
+ac: 11
+awareness: 5
+disposition: neutral
+personality: neutral
+quest_giver:
+  placeholder_dialog:
+    - "Steam room's a crime scene most days. Board's got contracts."
+    - "Bouncers and patrons both get violent here. Pay distinguishes the targets."
+    - "Three jobs up. No judgment. Just work."
+  quest_ids:
+    - sp_bouncer_sweep
+    - sp_patron_bounty
+    - sp_big_3_hunt
+loot:
+  currency:
+    min: 0
+    max: 0

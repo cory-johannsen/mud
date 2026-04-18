@@ -1,0 +1,25 @@
+id: colonel_summers_park_quest_giver
+name: "Park Liaison"
+npc_type: quest_giver
+npc_role: quest_giver
+type: human
+description: "Posts contracts near the main entrance for anyone willing to push back against the Shrimp Gang's grip on the park grounds."
+level: 4
+max_hp: 28
+ac: 11
+awareness: 5
+disposition: neutral
+personality: neutral
+quest_giver:
+  placeholder_dialog:
+    - "Shrimp Gang owns the park. Board's got work to change that."
+    - "Colonel Summers would've wanted this park free. Do the job."
+    - "Clearance contracts, sweep jobs, and one very big bounty. Board's open."
+  quest_ids:
+    - csp_gang_goon_sweep
+    - csp_dazzler_bounty
+    - csp_yo_yo_master_hunt
+loot:
+  currency:
+    min: 0
+    max: 0

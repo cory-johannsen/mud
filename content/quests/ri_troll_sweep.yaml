@@ -1,0 +1,17 @@
+id: ri_troll_sweep
+title: Bridge Troll Sweep
+description: >
+  Bridge trolls are running toll operations on both the bridge approaches
+  and the toll gate, extorting every crew that tries to cross to the island.
+  Clear out three of them and reclaim the crossing routes.
+giver_npc_id: ross_island_quest_giver
+repeatable: false
+objectives:
+  - id: kill_trolls
+    type: kill
+    description: Eliminate 3 Bridge Trolls
+    target_id: bridge_troll
+    quantity: 3
+rewards:
+  xp: 280
+  credits: 160

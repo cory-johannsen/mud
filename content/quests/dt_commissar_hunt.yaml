@@ -1,0 +1,17 @@
+id: dt_commissar_hunt
+title: Commissar Hunt
+description: >
+  A Collective commissar has set up a command post in the ruins above
+  the Underground and is coordinating gang activity across downtown.
+  Take this one down and disrupt the Collective's downtown operation.
+giver_npc_id: downtown_quest_giver
+repeatable: false
+objectives:
+  - id: kill_commissar
+    type: kill
+    description: Kill the Commissar
+    target_id: commissar
+    quantity: 1
+rewards:
+  xp: 450
+  credits: 275

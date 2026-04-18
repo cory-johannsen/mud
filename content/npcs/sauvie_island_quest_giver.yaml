@@ -1,0 +1,25 @@
+id: sauvie_island_quest_giver
+name: "Farm Stand Coordinator"
+npc_type: quest_giver
+npc_role: quest_giver
+type: human
+description: "Posts work orders at the farm stand for clearing wild dogs, river pirates, and survivalists who raid the fields and disrupt trade on the island."
+level: 3
+max_hp: 28
+ac: 11
+awareness: 5
+disposition: neutral
+personality: neutral
+quest_giver:
+  placeholder_dialog:
+    - "Wild dogs hit the fields again. Board's got the contract."
+    - "River pirates are taxing every boat that comes through. Jobs pay to stop that."
+    - "Island's fertile but dangerous. Board reflects both."
+  quest_ids:
+    - si_wild_dog_sweep
+    - si_pirate_bounty
+    - si_survivalist_hunt
+loot:
+  currency:
+    min: 0
+    max: 0

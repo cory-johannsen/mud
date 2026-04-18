@@ -1,0 +1,17 @@
+id: cp_bouncer_sweep
+title: Door Staff Clearance
+description: >
+  Club Privata's bouncers have been running their own operation on the side —
+  extorting guests and locking down floors for their own crews. Clear out
+  three of them and restore some order to the chaos.
+giver_npc_id: club_privata_quest_giver
+repeatable: false
+objectives:
+  - id: kill_bouncers
+    type: kill
+    description: Eliminate 3 Club Bouncers
+    target_id: club_bouncer
+    quantity: 3
+rewards:
+  xp: 250
+  credits: 150

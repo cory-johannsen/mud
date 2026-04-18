@@ -1,0 +1,25 @@
+id: pdx_international_quest_giver
+name: "Terminal Coordinator"
+npc_type: quest_giver
+npc_role: quest_giver
+type: human
+description: "Posts contracts on the terminal wall — clearance work for squatters, cultists, and raiders who've turned PDX into a no-go zone."
+level: 3
+max_hp: 28
+ac: 11
+awareness: 5
+disposition: neutral
+personality: neutral
+quest_giver:
+  placeholder_dialog:
+    - "Airport's crawling with cargo cultists and squatters. Board's got answers."
+    - "Tarmac raiders are shutting down movement. Contracts pay to clear them."
+    - "Three jobs posted. Terminal B is still safe enough to read the board."
+  quest_ids:
+    - pdx_squatter_sweep
+    - pdx_cultist_bounty
+    - pdx_tarmac_raider_hunt
+loot:
+  currency:
+    min: 0
+    max: 0

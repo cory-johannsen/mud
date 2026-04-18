@@ -1,0 +1,25 @@
+- id: se_industrial_quest_giver
+  name: "Dock Coordinator"
+  npc_type: quest_giver
+  npc_role: quest_giver
+  type: human
+  description: "Posts work orders on the wall of the break room — clearance jobs, sweeps, and bounties for the zone's chronic problems."
+  level: 4
+  max_hp: 28
+  ac: 11
+  awareness: 5
+  disposition: neutral
+  personality: neutral
+  quest_giver:
+    placeholder_dialog:
+      - "Board's got jobs. Pick one and don't come back empty-handed."
+      - "Industrial district doesn't police itself. That's what the board is for."
+      - "Got three open contracts right now. Take one before someone else does."
+    quest_ids:
+      - sei_dock_clearance
+      - sei_chemical_enforcer_sweep
+      - sei_scavenger_bounty
+  loot:
+    currency:
+      min: 0
+      max: 0

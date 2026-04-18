@@ -1,0 +1,17 @@
+id: dt_ganger_sweep
+title: Downtown Ganger Sweep
+description: >
+  Gangers have locked down Pioneer Square and the surrounding blocks,
+  running protection shakedowns on every trader trying to move through
+  downtown. Clear out four of them and open the trade routes.
+giver_npc_id: downtown_quest_giver
+repeatable: false
+objectives:
+  - id: kill_gangers
+    type: kill
+    description: Eliminate 4 Gangers
+    target_id: ganger
+    quantity: 4
+rewards:
+  xp: 250
+  credits: 150

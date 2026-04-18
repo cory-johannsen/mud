@@ -1,0 +1,17 @@
+id: cp_dancer_bounty
+title: Performer Bounty
+description: >
+  Several of Club Privata's dancers have turned their access to the VIP floors
+  into a blackmail operation. Two specific performers need to be removed
+  from the equation before the leverage they hold becomes a weapon.
+giver_npc_id: club_privata_quest_giver
+repeatable: false
+objectives:
+  - id: kill_dancers
+    type: kill
+    description: Kill 2 Club Dancers
+    target_id: club_dancer
+    quantity: 2
+rewards:
+  xp: 300
+  credits: 175

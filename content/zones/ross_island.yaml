@@ -644,6 +644,9 @@ zone:
     - template: ross_island_motel_keeper
       count: 1
       respawn_after: 0s
+    - template: ross_island_quest_giver
+      count: 1
+      respawn_after: 0s
     properties:
       lighting: firelight
       atmosphere: commerce

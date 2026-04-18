@@ -1,0 +1,17 @@
+id: pdx_squatter_sweep
+title: Terminal Squatter Sweep
+description: >
+  Terminal squatters have occupied the ticketing hall and concourse
+  approaches, blocking all movement through the terminal. Clear out
+  four of them and restore passage through PDX.
+giver_npc_id: pdx_international_quest_giver
+repeatable: false
+objectives:
+  - id: kill_squatters
+    type: kill
+    description: Eliminate 4 Terminal Squatters
+    target_id: terminal_squatter
+    quantity: 4
+rewards:
+  xp: 250
+  credits: 150

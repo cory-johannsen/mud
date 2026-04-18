@@ -1,0 +1,17 @@
+id: si_wild_dog_sweep
+title: Wild Dog Sweep
+description: >
+  Packs of wild dogs have been raiding the berry fields and pumpkin patches,
+  driving off field workers and destroying crops. Clear out four of them
+  before the season's harvest is completely lost.
+giver_npc_id: sauvie_island_quest_giver
+repeatable: false
+objectives:
+  - id: kill_dogs
+    type: kill
+    description: Eliminate 4 Sauvie Wild Dogs
+    target_id: sauvie_wild_dog
+    quantity: 4
+rewards:
+  xp: 220
+  credits: 130

@@ -1,0 +1,25 @@
+id: troutdale_quest_giver
+name: "Truck Stop Dispatcher"
+npc_type: quest_giver
+npc_role: quest_giver
+type: human
+description: "Keeps the truck stop's work board stocked with contracts from haulers and salvagers sick of gorge bandits, outlet scavengers, and runners taxing every move through I-84."
+level: 3
+max_hp: 28
+ac: 11
+awareness: 5
+disposition: neutral
+personality: neutral
+quest_giver:
+  placeholder_dialog:
+    - "Gorge bandits hit another convoy. Board's got the bounty."
+    - "Outlet scavengers are locking down the mall. Contract pays to clear it."
+    - "Three jobs on the board. Truck stop's the safest place to read it."
+  quest_ids:
+    - trout_bandit_sweep
+    - trout_scavenger_bounty
+    - trout_runner_hunt
+loot:
+  currency:
+    min: 0
+    max: 0

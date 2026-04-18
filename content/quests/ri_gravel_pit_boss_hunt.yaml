@@ -1,0 +1,17 @@
+id: ri_gravel_pit_boss_hunt
+title: Gravel Pit Boss Hunt
+description: >
+  The Gravel Pit Boss controls the island's most defensible ground and
+  coordinates all the gang muscle on the south shore. Cutting down this
+  boss breaks the island's gang command structure.
+giver_npc_id: ross_island_quest_giver
+repeatable: false
+objectives:
+  - id: kill_gravel_pit_boss
+    type: kill
+    description: Kill the Gravel Pit Boss
+    target_id: gravel_pit_boss
+    quantity: 1
+rewards:
+  xp: 500
+  credits: 300

@@ -1,0 +1,17 @@
+id: ff_motel_raider_bounty
+title: Motel Raider Bounty
+description: >
+  Motel raiders have been hitting overnight crews and anyone stupid enough
+  to sleep in Motel Row. Take out two of them and reduce the body count
+  before the Jade District loses all incoming traffic.
+giver_npc_id: felony_flats_quest_giver
+repeatable: false
+objectives:
+  - id: kill_motel_raiders
+    type: kill
+    description: Kill 2 Motel Raiders
+    target_id: motel_raider
+    quantity: 2
+rewards:
+  xp: 320
+  credits: 190

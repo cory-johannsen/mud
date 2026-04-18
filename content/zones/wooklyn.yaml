@@ -25,6 +25,10 @@ zone:
     exits:
       - direction: south
         target: tofteville_market
+    spawns:
+      - template: wooklyn_quest_giver
+        count: 1
+        respawn_after: 0s
 
   - id: tofteville_market
     title: Tofteville Market

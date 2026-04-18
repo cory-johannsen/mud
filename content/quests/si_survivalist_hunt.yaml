@@ -1,0 +1,17 @@
+id: si_survivalist_hunt
+title: Survivalist Hunt
+description: >
+  A Sauvie survivalist has been raiding the farmhouse and driving off
+  island workers, declaring the farmland their personal territory. Taking
+  this threat down restores security to the island's agricultural core.
+giver_npc_id: sauvie_island_quest_giver
+repeatable: false
+objectives:
+  - id: kill_survivalist
+    type: kill
+    description: Kill the Sauvie Survivalist
+    target_id: sauvie_survivalist
+    quantity: 1
+rewards:
+  xp: 400
+  credits: 250

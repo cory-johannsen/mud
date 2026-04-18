@@ -1,0 +1,17 @@
+id: pdx_cultist_bounty
+title: Cargo Cultist Bounty
+description: >
+  The cargo cultists have declared the terminal carpet sacred ground
+  and are attacking anyone who walks on it. Take out three of them
+  before their rituals expand into Terminal B.
+giver_npc_id: pdx_international_quest_giver
+repeatable: false
+objectives:
+  - id: kill_cultists
+    type: kill
+    description: Kill 3 Cargo Cultists
+    target_id: cargo_cultist
+    quantity: 3
+rewards:
+  xp: 300
+  credits: 175

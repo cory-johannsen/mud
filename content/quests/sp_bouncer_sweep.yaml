@@ -1,0 +1,17 @@
+id: sp_bouncer_sweep
+title: Steam Bouncer Sweep
+description: >
+  The steam room bouncers have turned the parking lot and lobby into
+  their personal shakedown territory, extorting arrivals before they
+  even get inside. Clear out three of them.
+giver_npc_id: steampdx_quest_giver
+repeatable: false
+objectives:
+  - id: kill_bouncers
+    type: kill
+    description: Eliminate 3 Steam Bouncers
+    target_id: steam_bouncer
+    quantity: 3
+rewards:
+  xp: 280
+  credits: 160

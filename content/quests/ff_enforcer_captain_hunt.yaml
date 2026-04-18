@@ -1,0 +1,17 @@
+id: ff_enforcer_captain_hunt
+title: Enforcer Captain Hunt
+description: >
+  The Flats enforcer captain coordinates all the violence on 82nd Avenue
+  and keeps the pressure on Jade District traders. Taking this one down
+  breaks the command chain that makes Felony Flats what it is.
+giver_npc_id: felony_flats_quest_giver
+repeatable: false
+objectives:
+  - id: kill_captain
+    type: kill
+    description: Kill the Flats Enforcer Captain
+    target_id: flats_enforcer_captain
+    quantity: 1
+rewards:
+  xp: 500
+  credits: 300

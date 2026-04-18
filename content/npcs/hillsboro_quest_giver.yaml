@@ -1,0 +1,25 @@
+id: hillsboro_quest_giver
+name: "Resistance Contact"
+npc_type: quest_giver
+npc_role: quest_giver
+type: human
+description: "Operates quietly from the Keep, posting contracts for anyone willing to push back against the tech barons' silicon serfs and campus guards."
+level: 3
+max_hp: 28
+ac: 11
+awareness: 5
+disposition: neutral
+personality: neutral
+quest_giver:
+  placeholder_dialog:
+    - "Tech barons run this zone. Board pays to reduce that grip."
+    - "Intel guards, silicon serfs, hillsboro knights — take your pick."
+    - "Three contracts up. The Keep's safe enough to read the board."
+  quest_ids:
+    - hills_guard_sweep
+    - hills_serf_bounty
+    - hills_knight_hunt
+loot:
+  currency:
+    min: 0
+    max: 0

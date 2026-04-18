@@ -1,0 +1,17 @@
+id: dt_scavenger_bounty
+title: Downtown Scavenger Bounty
+description: >
+  Scavengers have been picking clean every building that still has value
+  and defending their hauls with violence. Take out three of them and
+  reduce the pressure on independent salvagers.
+giver_npc_id: downtown_quest_giver
+repeatable: false
+objectives:
+  - id: kill_scavengers
+    type: kill
+    description: Kill 3 Scavengers
+    target_id: scavenger
+    quantity: 3
+rewards:
+  xp: 300
+  credits: 175

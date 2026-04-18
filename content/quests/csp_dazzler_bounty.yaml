@@ -1,0 +1,17 @@
+id: csp_dazzler_bounty
+title: Dazzler Bounty
+description: >
+  The Shrimp Gang's dazzlers have been blinding and disorienting anyone
+  trying to move through the amphitheater and basketball courts. Take
+  out two of them and clear the approaches.
+giver_npc_id: colonel_summers_park_quest_giver
+repeatable: false
+objectives:
+  - id: kill_dazzlers
+    type: kill
+    description: Kill 2 Shrimp Gang Dazzlers
+    target_id: shrimp_gang_dazzler
+    quantity: 2
+rewards:
+  xp: 350
+  credits: 200

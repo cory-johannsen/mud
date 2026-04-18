@@ -1,0 +1,17 @@
+id: wook_enforcer_bounty
+title: Wook Enforcer Bounty
+description: >
+  Wook enforcers have been running unauthorized checkpoints on storybook
+  lane and beyond, demanding tribute from travelers and attacking those
+  who refuse. Take out two of them and push the perimeter back.
+giver_npc_id: wooklyn_quest_giver
+repeatable: false
+objectives:
+  - id: kill_enforcers
+    type: kill
+    description: Kill 2 Wook Enforcers
+    target_id: wook_enforcer
+    quantity: 2
+rewards:
+  xp: 320
+  credits: 190

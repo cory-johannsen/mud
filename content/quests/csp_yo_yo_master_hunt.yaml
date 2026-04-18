@@ -1,0 +1,17 @@
+id: csp_yo_yo_master_hunt
+title: Yo Yo Master Takedown
+description: >
+  The Yo Yo Master runs the Shrimp Gang's operations in Colonel Summers Park
+  from the storage shed. Cutting this leader down collapses the gang's
+  command structure and frees the park grounds.
+giver_npc_id: colonel_summers_park_quest_giver
+repeatable: false
+objectives:
+  - id: kill_yo_yo_master
+    type: kill
+    description: Kill the Yo Yo Master
+    target_id: yo_yo_master
+    quantity: 1
+rewards:
+  xp: 500
+  credits: 300

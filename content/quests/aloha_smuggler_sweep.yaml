@@ -1,0 +1,17 @@
+id: aloha_smuggler_sweep
+title: Smuggler Sweep
+description: >
+  Smugglers have been slipping contraband through the Bazaar and disrupting
+  neutral trade. Clear out three of them before the sentry posts start
+  shutting down traffic.
+giver_npc_id: aloha_quest_giver
+repeatable: false
+objectives:
+  - id: kill_smugglers
+    type: kill
+    description: Eliminate 3 Smugglers
+    target_id: smuggler
+    quantity: 3
+rewards:
+  xp: 200
+  credits: 120

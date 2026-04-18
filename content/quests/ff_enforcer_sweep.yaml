@@ -1,0 +1,17 @@
+id: ff_enforcer_sweep
+title: 82nd Avenue Enforcer Sweep
+description: >
+  The 82nd Avenue enforcers have been locking down the main corridor and
+  running toll checkpoints on every route through Felony Flats. Eliminate
+  three of them and reopen the 82nd Avenue runs.
+giver_npc_id: felony_flats_quest_giver
+repeatable: false
+objectives:
+  - id: kill_enforcers
+    type: kill
+    description: Eliminate 3 82nd Enforcers
+    target_id: 82nd_enforcer
+    quantity: 3
+rewards:
+  xp: 280
+  credits: 160

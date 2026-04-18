@@ -1,0 +1,17 @@
+id: sp_patron_bounty
+title: Violent Patron Bounty
+description: >
+  Several steam room patrons have turned assault into recreation, attacking
+  other guests and staff with disturbing enthusiasm. Take out two of the
+  worst offenders before the liability becomes unmanageable.
+giver_npc_id: steampdx_quest_giver
+repeatable: false
+objectives:
+  - id: kill_patrons
+    type: kill
+    description: Kill 2 Steam Patrons
+    target_id: steam_patron
+    quantity: 2
+rewards:
+  xp: 300
+  credits: 175

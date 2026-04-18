@@ -1,0 +1,25 @@
+id: clown_camp_quest_giver
+name: "Sad Clown Fixer"
+npc_type: quest_giver
+npc_role: quest_giver
+type: human
+description: "A retired clown who now runs the camp's odd-jobs board from the back of the brothel. Wears full face paint. Never smiles."
+level: 4
+max_hp: 28
+ac: 11
+awareness: 5
+disposition: neutral
+personality: neutral
+quest_giver:
+  placeholder_dialog:
+    - "Board's full of clown trouble. That's redundant, I know."
+    - "Pay's real even if everything else here is fake."
+    - "You want a job or a balloon animal? Board's to your left."
+  quest_ids:
+    - cc_clown_sweep
+    - cc_mime_bounty
+    - cc_just_clownin_hunt
+loot:
+  currency:
+    min: 0
+    max: 0

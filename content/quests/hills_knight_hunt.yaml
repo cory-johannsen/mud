@@ -1,0 +1,17 @@
+id: hills_knight_hunt
+title: Hillsboro Knight Hunt
+description: >
+  A Hillsboro Knight has been running raids out of the server keep and
+  targeting independent tech salvagers across the campus zone. Taking
+  this knight down signals that the barons don't own the whole corridor.
+giver_npc_id: hillsboro_quest_giver
+repeatable: false
+objectives:
+  - id: kill_knight
+    type: kill
+    description: Kill a Hillsboro Knight
+    target_id: hillsboro_knight
+    quantity: 1
+rewards:
+  xp: 450
+  credits: 275

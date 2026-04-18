@@ -1,0 +1,17 @@
+id: beav_minuteman_bounty
+title: Minuteman Bounty
+description: >
+  Beaverton Minutemen have been running enforcement operations that target
+  independent contractors more than actual threats. Take out two of them
+  before the Free Market loses all its outside business.
+giver_npc_id: beaverton_quest_giver
+repeatable: false
+objectives:
+  - id: kill_minutemen
+    type: kill
+    description: Kill 2 Beaverton Minutemen
+    target_id: beaverton_minuteman
+    quantity: 2
+rewards:
+  xp: 300
+  credits: 175

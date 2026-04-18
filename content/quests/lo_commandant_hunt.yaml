@@ -1,0 +1,18 @@
+id: lo_commandant_hunt
+title: Commandant Takedown
+description: >
+  Commandant Prescott has declared open season on contractors who enter
+  Lake Oswego Nation without filing proper clearance paperwork — which
+  no one outside the Nation can actually obtain. Taking Prescott down
+  ends the policy and opens the enclave to outside commerce.
+giver_npc_id: lake_oswego_quest_giver
+repeatable: false
+objectives:
+  - id: kill_commandant
+    type: kill
+    description: Kill Commandant Prescott
+    target_id: lake_oswego_commandant
+    quantity: 1
+rewards:
+  xp: 500
+  credits: 300

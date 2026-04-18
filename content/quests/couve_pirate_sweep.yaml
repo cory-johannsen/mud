@@ -1,0 +1,17 @@
+id: couve_pirate_sweep
+title: Jantzen Beach Pirate Sweep
+description: >
+  Jantzen Beach pirates have locked down the waterfront and hayden island
+  causeway, running tolls and raiding cargo moving across the Columbia.
+  Eliminate four of them and restore movement through the crossing.
+giver_npc_id: the_couve_quest_giver
+repeatable: false
+objectives:
+  - id: kill_pirates
+    type: kill
+    description: Eliminate 4 Jantzen Beach Pirates
+    target_id: jantzen_beach_pirate
+    quantity: 4
+rewards:
+  xp: 280
+  credits: 160

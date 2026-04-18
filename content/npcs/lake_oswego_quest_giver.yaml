@@ -1,0 +1,25 @@
+id: lake_oswego_quest_giver
+name: "Compliance Officer"
+npc_type: quest_giver
+npc_role: quest_giver
+type: human
+description: "Manages the Lake Oswego Nation's enforcement contract board from a corner of the Commons. Every job pays in documented credits and maintains deniability."
+level: 2
+max_hp: 28
+ac: 11
+awareness: 5
+disposition: neutral
+personality: neutral
+quest_giver:
+  placeholder_dialog:
+    - "Nation's security requires active contractors. Board is current."
+    - "Oswego Guard handled as many problems as it creates. Some contracts fix both."
+    - "Compliance is maintained through incentivized enforcement. That's you."
+  quest_ids:
+    - lo_guard_sweep
+    - lo_enforcer_bounty
+    - lo_commandant_hunt
+loot:
+  currency:
+    min: 0
+    max: 0

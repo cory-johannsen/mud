@@ -1,0 +1,17 @@
+id: lo_enforcer_bounty
+title: HOA Enforcer Bounty
+description: >
+  HOA Enforcers have been issued new directives that classify contractors
+  as code violations. Two enforcement crews need to be taken down before
+  the Nation loses all outside access to independent workers.
+giver_npc_id: lake_oswego_quest_giver
+repeatable: false
+objectives:
+  - id: kill_hoa_enforcers
+    type: kill
+    description: Kill 2 HOA Enforcers
+    target_id: country_club_sniper
+    quantity: 2
+rewards:
+  xp: 250
+  credits: 150

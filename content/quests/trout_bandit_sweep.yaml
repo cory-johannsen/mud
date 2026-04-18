@@ -1,0 +1,17 @@
+id: trout_bandit_sweep
+title: Gorge Bandit Sweep
+description: >
+  Gorge bandits have been hitting I-84 convoys and the truck stop approaches,
+  turning every westbound run into a dice roll. Clear out four of them
+  and reduce the pressure on the trade corridor.
+giver_npc_id: troutdale_quest_giver
+repeatable: false
+objectives:
+  - id: kill_bandits
+    type: kill
+    description: Eliminate 4 Gorge Bandits
+    target_id: gorge_bandit
+    quantity: 4
+rewards:
+  xp: 280
+  credits: 160

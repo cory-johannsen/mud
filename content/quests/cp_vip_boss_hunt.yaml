@@ -1,0 +1,17 @@
+id: cp_vip_boss_hunt
+title: VIP Suite Takedown
+description: >
+  The VIP Suite boss has turned the top floor into a private power base —
+  running protection, blackmail, and worse from the penthouse. Taking
+  this target down breaks the entire operation.
+giver_npc_id: club_privata_quest_giver
+repeatable: false
+objectives:
+  - id: kill_vip_boss
+    type: kill
+    description: Kill the Club VIP Boss
+    target_id: club_vip_boss
+    quantity: 1
+rewards:
+  xp: 500
+  credits: 300

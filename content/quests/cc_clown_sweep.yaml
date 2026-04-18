@@ -1,0 +1,17 @@
+id: cc_clown_sweep
+title: Clown Camp Clearance
+description: >
+  The clowns have spread beyond the theater into every corridor of the camp.
+  Clear out four of them and push back the honking tide before it reaches
+  the back rooms.
+giver_npc_id: clown_camp_quest_giver
+repeatable: false
+objectives:
+  - id: kill_clowns
+    type: kill
+    description: Eliminate 4 Clowns
+    target_id: clown
+    quantity: 4
+rewards:
+  xp: 250
+  credits: 150

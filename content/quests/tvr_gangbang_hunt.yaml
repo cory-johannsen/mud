@@ -1,0 +1,17 @@
+id: tvr_gangbang_hunt
+title: Party Theater Takedown
+description: >
+  The crew that calls itself Gangbang has taken over the party theater and
+  is running their own operation in defiance of house management. Taking
+  them down clears the top floor and ends the problem.
+giver_npc_id: the_velvet_rope_quest_giver
+repeatable: false
+objectives:
+  - id: kill_gangbang
+    type: kill
+    description: Kill Gangbang
+    target_id: gangbang
+    quantity: 1
+rewards:
+  xp: 500
+  credits: 300

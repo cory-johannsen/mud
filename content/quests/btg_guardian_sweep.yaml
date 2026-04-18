@@ -1,0 +1,18 @@
+id: btg_guardian_sweep
+title: Collective Guardian Sweep
+description: >
+  The Collective's guardians have been pushing into infirmary-adjacent
+  territory and harassing contractors. Take out four of them and push
+  the front line back.
+giver_npc_id: battleground_quest_giver
+repeatable: true
+cooldown: 24h
+objectives:
+  - id: kill_guardians
+    type: kill
+    description: Eliminate 4 Collective Guardians
+    target_id: collective_guardian
+    quantity: 4
+rewards:
+  xp: 350
+  credits: 200

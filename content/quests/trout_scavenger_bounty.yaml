@@ -1,0 +1,17 @@
+id: trout_scavenger_bounty
+title: Outlet Scavenger Bounty
+description: >
+  Outlet scavengers have locked down the outlet mall and are defending
+  their finds with lethal force. Take out three of them and reclaim
+  some of the mall's salvageable inventory.
+giver_npc_id: troutdale_quest_giver
+repeatable: false
+objectives:
+  - id: kill_scavengers
+    type: kill
+    description: Kill 3 Outlet Scavengers
+    target_id: outlet_scavenger
+    quantity: 3
+rewards:
+  xp: 300
+  credits: 175

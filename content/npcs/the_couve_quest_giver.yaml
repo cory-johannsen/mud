@@ -1,0 +1,25 @@
+id: the_couve_quest_giver
+name: "Crossing Fixer"
+npc_type: quest_giver
+npc_role: quest_giver
+type: human
+description: "Manages enforcement contracts from the Crossing hub — jobs targeting the pirates, gang enforcers, and militia that have locked down Vancouver's streets."
+level: 3
+max_hp: 28
+ac: 11
+awareness: 5
+disposition: neutral
+personality: neutral
+quest_giver:
+  placeholder_dialog:
+    - "Couve's a gang zone and a pirate port. Board's got work on both."
+    - "Militia's been expanding territory. Contracts pay to push back."
+    - "Three jobs on the board. Cross the bridge, pick the work."
+  quest_ids:
+    - couve_pirate_sweep
+    - couve_thug_bounty
+    - couve_gang_enforcer_hunt
+loot:
+  currency:
+    min: 0
+    max: 0

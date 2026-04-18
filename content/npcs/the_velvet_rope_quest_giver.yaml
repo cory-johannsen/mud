@@ -1,0 +1,25 @@
+id: the_velvet_rope_quest_giver
+name: "House Manager"
+npc_type: quest_giver
+npc_role: quest_giver
+type: human
+description: "Handles problem contracts from the back of the Rope with professional calm. Some guests don't leave voluntarily. That's what the board is for."
+level: 4
+max_hp: 28
+ac: 11
+awareness: 5
+disposition: neutral
+personality: neutral
+quest_giver:
+  placeholder_dialog:
+    - "Velvet Rope has rules. Not everyone follows them. Board pays to fix that."
+    - "Patrons get out of hand. Hostesses handle what they can. Board handles the rest."
+    - "Three contracts. No questions asked, no judgment passed."
+  quest_ids:
+    - tvr_patron_sweep
+    - tvr_hostess_bounty
+    - tvr_gangbang_hunt
+loot:
+  currency:
+    min: 0
+    max: 0

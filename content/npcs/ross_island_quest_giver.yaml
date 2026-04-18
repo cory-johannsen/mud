@@ -1,0 +1,25 @@
+id: ross_island_quest_giver
+name: "Dock Master"
+npc_type: quest_giver
+npc_role: quest_giver
+type: human
+description: "Keeps the dock shack's contract board stocked with jobs for clearing bridge trolls, salvagers, and the gang muscle that claims the island's best ground."
+level: 4
+max_hp: 28
+ac: 11
+awareness: 5
+disposition: neutral
+personality: neutral
+quest_giver:
+  placeholder_dialog:
+    - "Island's got too many bridge trolls and too few contractors."
+    - "Dock board's current. Salvagers, gang enforcers, and worse."
+    - "Pay's posted. Work's available. Don't waste my time."
+  quest_ids:
+    - ri_troll_sweep
+    - ri_salvager_bounty
+    - ri_gravel_pit_boss_hunt
+loot:
+  currency:
+    min: 0
+    max: 0

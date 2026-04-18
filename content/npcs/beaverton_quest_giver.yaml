@@ -1,0 +1,25 @@
+id: beaverton_quest_giver
+name: "Free Market Operator"
+npc_type: quest_giver
+npc_role: quest_giver
+type: human
+description: "Keeps the job board at the Free Market stocked with contracts from residents fed up with the HOA's armed enforcers and mall militia."
+level: 3
+max_hp: 28
+ac: 11
+awareness: 5
+disposition: neutral
+personality: neutral
+quest_giver:
+  placeholder_dialog:
+    - "HOA's been a problem since day one. Board's got work if you want it."
+    - "Mall cops and minutemen run this zone. Jobs exist to push back."
+    - "Free Market means free enterprise. Including enforcement contracts."
+  quest_ids:
+    - beav_mall_cop_sweep
+    - beav_minuteman_bounty
+    - beav_hoa_enforcer_hunt
+loot:
+  currency:
+    min: 0
+    max: 0

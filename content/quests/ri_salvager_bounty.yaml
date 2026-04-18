@@ -1,0 +1,17 @@
+id: ri_salvager_bounty
+title: Ross Salvager Bounty
+description: >
+  Ross salvagers have been running an armed monopoly on the east shore,
+  attacking independent salvage crews and keeping the best finds locked
+  down. Take out two of them and break the chokehold.
+giver_npc_id: ross_island_quest_giver
+repeatable: false
+objectives:
+  - id: kill_salvagers
+    type: kill
+    description: Kill 2 Ross Salvagers
+    target_id: ross_salvager
+    quantity: 2
+rewards:
+  xp: 320
+  credits: 190

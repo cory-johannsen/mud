@@ -1,0 +1,25 @@
+id: club_privata_quest_giver
+name: "Floor Manager"
+npc_type: quest_giver
+npc_role: quest_giver
+type: human
+description: "Manages the club's unofficial enforcement contracts from a quiet corner of the back room. Problems on the dance floor have professional solutions."
+level: 4
+max_hp: 28
+ac: 11
+awareness: 5
+disposition: neutral
+personality: neutral
+quest_giver:
+  placeholder_dialog:
+    - "Some guests don't know when to leave. Contract board handles that."
+    - "Club runs smooth when the right people handle the rough situations."
+    - "Discretion costs extra. So does inaction. Pick your tab."
+  quest_ids:
+    - cp_bouncer_sweep
+    - cp_dancer_bounty
+    - cp_vip_boss_hunt
+loot:
+  currency:
+    min: 0
+    max: 0

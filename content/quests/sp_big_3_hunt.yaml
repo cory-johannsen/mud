@@ -1,0 +1,17 @@
+id: sp_big_3_hunt
+title: The Big 3 Takedown
+description: >
+  The Big 3 have claimed the glory hole as their personal domain and run
+  the most violent operation inside SteamPDX. Taking all three down at
+  once is the only way to clear the back rooms permanently.
+giver_npc_id: steampdx_quest_giver
+repeatable: false
+objectives:
+  - id: kill_the_big_3
+    type: kill
+    description: Kill The Big 3
+    target_id: the_big_3
+    quantity: 1
+rewards:
+  xp: 500
+  credits: 300

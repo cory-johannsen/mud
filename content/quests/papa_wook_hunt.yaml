@@ -1,0 +1,17 @@
+id: papa_wook_hunt
+title: Papa Wook Hunt
+description: >
+  Papa Wook controls the inner sanctum of Wooklyn and coordinates all the
+  feral wook activity beyond the safe perimeter. Taking Papa Wook down
+  in the chamber disrupts the hierarchy and quiets the outer territories.
+giver_npc_id: wooklyn_quest_giver
+repeatable: false
+objectives:
+  - id: kill_papa_wook
+    type: kill
+    description: Kill Papa Wook
+    target_id: papa_wook
+    quantity: 1
+rewards:
+  xp: 500
+  credits: 300

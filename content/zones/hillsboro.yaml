@@ -609,6 +609,9 @@ zone:
     - template: hillsboro_healer
       count: 1
       respawn_after: 0s
+    - template: hillsboro_quest_giver
+      count: 1
+      respawn_after: 0s
     properties:
       lighting: firelight
       atmosphere: guarded

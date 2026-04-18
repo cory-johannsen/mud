@@ -1,0 +1,17 @@
+id: hills_guard_sweep
+title: Intel Guard Sweep
+description: >
+  The Intel Guards on the campus perimeter have been turning away
+  independent traders and running shakedowns on the TV Highway approaches.
+  Clear out three of them and open the eastern route.
+giver_npc_id: hillsboro_quest_giver
+repeatable: false
+objectives:
+  - id: kill_guards
+    type: kill
+    description: Eliminate 3 Intel Guards
+    target_id: intel_guard
+    quantity: 3
+rewards:
+  xp: 250
+  credits: 150

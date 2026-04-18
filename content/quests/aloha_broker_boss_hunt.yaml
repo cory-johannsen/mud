@@ -1,0 +1,17 @@
+id: aloha_broker_boss_hunt
+title: Broker Boss Hunt
+description: >
+  The Aloha Broker who's been skimming protection fees from every trader in
+  the Bazaar has a crew and a territory. Take down the ringleader and send
+  a message that the Bazaar doesn't belong to any one broker.
+giver_npc_id: aloha_quest_giver
+repeatable: false
+objectives:
+  - id: kill_broker
+    type: kill
+    description: Kill the Aloha Broker
+    target_id: aloha_broker
+    quantity: 1
+rewards:
+  xp: 400
+  credits: 250

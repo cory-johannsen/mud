@@ -1,0 +1,17 @@
+id: beav_mall_cop_sweep
+title: Mall Cop Clearance
+description: >
+  The mall cops have locked down sections of the Town Center and are
+  collecting tolls from every trader who passes through. Clear out
+  three of them and open the routes back up.
+giver_npc_id: beaverton_quest_giver
+repeatable: false
+objectives:
+  - id: kill_mall_cops
+    type: kill
+    description: Eliminate 3 Mall Cops
+    target_id: mall_cop_elite
+    quantity: 3
+rewards:
+  xp: 250
+  credits: 150

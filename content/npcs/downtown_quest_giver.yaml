@@ -1,0 +1,25 @@
+id: downtown_quest_giver
+name: "Underground Dispatcher"
+npc_type: quest_giver
+npc_role: quest_giver
+type: human
+description: "Works the job board from the Underground hub, matching contractors with clearance and sweep work in the abandoned streets above."
+level: 3
+max_hp: 28
+ac: 11
+awareness: 5
+disposition: neutral
+personality: neutral
+quest_giver:
+  placeholder_dialog:
+    - "Downtown's a mess up top. Board's got contracts to help clean it up."
+    - "Gangers and scavengers picked the bones clean. Jobs exist to thin the herd."
+    - "Three open contracts. Pick one before someone else does."
+  quest_ids:
+    - dt_ganger_sweep
+    - dt_scavenger_bounty
+    - dt_commissar_hunt
+loot:
+  currency:
+    min: 0
+    max: 0

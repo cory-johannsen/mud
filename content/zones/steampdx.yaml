@@ -163,3 +163,6 @@ zone:
     - template: steampdx_fixer
       count: 1
       respawn_after: 0s
+    - template: steampdx_quest_giver
+      count: 1
+      respawn_after: 0s

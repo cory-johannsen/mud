@@ -1,0 +1,17 @@
+id: tvr_patron_sweep
+title: Patron Clearance
+description: >
+  Several Velvet Rope patrons have graduated from paying guests to full-time
+  residents who assault staff and other guests with impunity. Clear out
+  four of them and restore some semblance of order to the buffet and play rooms.
+giver_npc_id: the_velvet_rope_quest_giver
+repeatable: false
+objectives:
+  - id: kill_patrons
+    type: kill
+    description: Eliminate 4 Velvet Patrons
+    target_id: velvet_patron
+    quantity: 4
+rewards:
+  xp: 280
+  credits: 160

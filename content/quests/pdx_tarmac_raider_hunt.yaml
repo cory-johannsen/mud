@@ -1,0 +1,17 @@
+id: pdx_tarmac_raider_hunt
+title: Tarmac Raider Hunt
+description: >
+  Tarmac raiders control the runway approaches and I-84 connector,
+  hitting every crew that tries to move through the airport zone.
+  Taking down two of their number disrupts the raider corridor.
+giver_npc_id: pdx_international_quest_giver
+repeatable: false
+objectives:
+  - id: kill_tarmac_raiders
+    type: kill
+    description: Kill 2 Tarmac Raiders
+    target_id: tarmac_raider
+    quantity: 2
+rewards:
+  xp: 400
+  credits: 250

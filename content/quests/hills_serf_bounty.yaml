@@ -1,0 +1,18 @@
+id: hills_serf_bounty
+title: Silicon Serf Bounty
+description: >
+  The tech barons' silicon serfs have been enforcing a knowledge blackout
+  across the campus corridors — destroying salvage and executing anyone
+  caught with tech they didn't buy through official channels. Take out
+  two of them.
+giver_npc_id: hillsboro_quest_giver
+repeatable: false
+objectives:
+  - id: kill_serfs
+    type: kill
+    description: Kill 2 Silicon Serfs
+    target_id: silicon_serf
+    quantity: 2
+rewards:
+  xp: 300
+  credits: 175

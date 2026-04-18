@@ -1,0 +1,17 @@
+id: tvr_hostess_bounty
+title: Hostess Bounty
+description: >
+  Two hostesses have gone rogue — running their own extortion operation
+  from the pineapple room and refusing all management oversight. They need
+  to be removed from the floor permanently.
+giver_npc_id: the_velvet_rope_quest_giver
+repeatable: false
+objectives:
+  - id: kill_hostesses
+    type: kill
+    description: Kill 2 Velvet Hostesses
+    target_id: velvet_hostess
+    quantity: 2
+rewards:
+  xp: 320
+  credits: 190

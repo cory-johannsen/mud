@@ -1,0 +1,17 @@
+id: lo_guard_sweep
+title: Oswego Guard Sweep
+description: >
+  A rogue squad of Oswego Guards has been extorting contractors who enter
+  the Nation's perimeter, pocketing credits and roughing up anyone who
+  refuses. Eliminate three of them before the practice becomes policy.
+giver_npc_id: lake_oswego_quest_giver
+repeatable: false
+objectives:
+  - id: kill_guards
+    type: kill
+    description: Eliminate 3 Oswego Guards
+    target_id: country_club_sniper
+    quantity: 3
+rewards:
+  xp: 200
+  credits: 120

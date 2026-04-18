@@ -1,0 +1,25 @@
+id: felony_flats_quest_giver
+name: "Jade District Fixer"
+npc_type: quest_giver
+npc_role: quest_giver
+type: human
+description: "Runs the Jade District's enforcement board — a tightly curated list of contracts for clearing out the enforcers, raiders, and scav crews that make the Flats hell to navigate."
+level: 4
+max_hp: 28
+ac: 11
+awareness: 5
+disposition: neutral
+personality: neutral
+quest_giver:
+  placeholder_dialog:
+    - "82nd Avenue's a war zone. Board reflects that."
+    - "Enforcers, raiders, scavs — pick your problem. Pay's attached."
+    - "Flats don't clean themselves. Job board handles that part."
+  quest_ids:
+    - ff_enforcer_sweep
+    - ff_motel_raider_bounty
+    - ff_enforcer_captain_hunt
+loot:
+  currency:
+    min: 0
+    max: 0

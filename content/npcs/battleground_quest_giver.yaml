@@ -1,0 +1,25 @@
+id: battleground_quest_giver
+name: "Collective Handler"
+npc_type: quest_giver
+npc_role: quest_giver
+type: human
+description: "A grim-faced operative who manages the infirmary's assignment board. Every contract on it ends in blood — that's just the nature of all-out war."
+level: 6
+max_hp: 28
+ac: 11
+awareness: 5
+disposition: neutral
+personality: neutral
+quest_giver:
+  placeholder_dialog:
+    - "The Collective's got more enemies than time. Pick a target."
+    - "Infirmary board runs hot. Bounties go fast around here."
+    - "You want credits? The war's hiring. It's always hiring."
+  quest_ids:
+    - btg_guardian_sweep
+    - btg_commissar_bounty
+    - btg_lieutenant_hunt
+loot:
+  currency:
+    min: 0
+    max: 0

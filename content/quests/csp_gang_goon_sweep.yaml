@@ -1,0 +1,17 @@
+id: csp_gang_goon_sweep
+title: Park Goon Clearance
+description: >
+  Shrimp Gang goons have occupied the park grounds and are shaking down
+  anyone who tries to pass through. Eliminate four of them and push
+  the gang's perimeter back.
+giver_npc_id: colonel_summers_park_quest_giver
+repeatable: false
+objectives:
+  - id: kill_goons
+    type: kill
+    description: Eliminate 4 Shrimp Gang Goons
+    target_id: shrimp_gang_goon
+    quantity: 4
+rewards:
+  xp: 280
+  credits: 160

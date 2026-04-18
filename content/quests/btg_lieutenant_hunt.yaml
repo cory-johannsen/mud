@@ -1,0 +1,17 @@
+id: btg_lieutenant_hunt
+title: Lieutenant Hunt
+description: >
+  A Collective lieutenant has been running brutal enforcement operations
+  across the Battleground zone. Taking this one down breaks a chain
+  of command that's been bleeding contractors for months.
+giver_npc_id: battleground_quest_giver
+repeatable: false
+objectives:
+  - id: kill_lieutenant
+    type: kill
+    description: Kill the Collective Lieutenant
+    target_id: lieutenant
+    quantity: 1
+rewards:
+  xp: 500
+  credits: 300

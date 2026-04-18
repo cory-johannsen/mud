@@ -1,0 +1,17 @@
+id: beav_hoa_enforcer_hunt
+title: HOA Enforcer Hunt
+description: >
+  The HOA Enforcer crew running the residential corridors has gone
+  rogue — issuing fines at gunpoint and keeping the credits. Take down
+  the enforcer at the core of it and reclaim the neighborhood routes.
+giver_npc_id: beaverton_quest_giver
+repeatable: false
+objectives:
+  - id: kill_hoa_enforcer
+    type: kill
+    description: Kill the HOA Enforcer
+    target_id: hoa_enforcer
+    quantity: 1
+rewards:
+  xp: 400
+  credits: 250

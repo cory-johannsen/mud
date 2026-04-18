@@ -1,0 +1,17 @@
+id: aloha_sentry_bounty
+title: Rogue Sentry Bounty
+description: >
+  A handful of neutral zone sentries have gone off-contract and are running
+  their own shakedown operation near the TV Highway crossing. Take out two
+  of them and restore the Bazaar's access routes.
+giver_npc_id: aloha_quest_giver
+repeatable: false
+objectives:
+  - id: kill_sentries
+    type: kill
+    description: Kill 2 Rogue Sentries
+    target_id: neutral_zone_sentry
+    quantity: 2
+rewards:
+  xp: 250
+  credits: 150

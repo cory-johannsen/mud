@@ -1,0 +1,17 @@
+id: si_pirate_bounty
+title: River Pirate Bounty
+description: >
+  River pirates have been taxing every boat on the Sauvie Island waterways
+  and raiding the dock at gunpoint. Take out two of them and restore safe
+  passage on the island's trade routes.
+giver_npc_id: sauvie_island_quest_giver
+repeatable: false
+objectives:
+  - id: kill_pirates
+    type: kill
+    description: Kill 2 River Pirates
+    target_id: river_pirate
+    quantity: 2
+rewards:
+  xp: 300
+  credits: 175

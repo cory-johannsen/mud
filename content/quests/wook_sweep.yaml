@@ -1,0 +1,17 @@
+id: wook_sweep
+title: Wook Sweep
+description: >
+  Feral wooks have been ranging beyond their usual territory and harassing
+  travelers near the Tofteville perimeter. Clear out four of them before
+  the council has to issue a formal border closure.
+giver_npc_id: wooklyn_quest_giver
+repeatable: false
+objectives:
+  - id: kill_wooks
+    type: kill
+    description: Eliminate 4 Wooks
+    target_id: wook
+    quantity: 4
+rewards:
+  xp: 250
+  credits: 150

@@ -167,3 +167,6 @@ zone:
     - template: the_velvet_rope_fixer
       count: 1
       respawn_after: 0s
+    - template: the_velvet_rope_quest_giver
+      count: 1
+      respawn_after: 0s

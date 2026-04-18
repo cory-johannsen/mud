@@ -1,0 +1,17 @@
+id: couve_thug_bounty
+title: Mill Plain Thug Bounty
+description: >
+  The Mill Plain thugs have been terrorizing Esther Short Park and the
+  officers' row approaches, shaking down travelers and roughing up
+  anyone who doesn't pay. Take out three of them.
+giver_npc_id: the_couve_quest_giver
+repeatable: false
+objectives:
+  - id: kill_thugs
+    type: kill
+    description: Kill 3 Mill Plain Thugs
+    target_id: mill_plain_thug
+    quantity: 3
+rewards:
+  xp: 300
+  credits: 175

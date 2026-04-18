@@ -1,0 +1,17 @@
+id: btg_commissar_bounty
+title: Commissar Bounty
+description: >
+  Two Collective commissars are coordinating the push against neutral
+  contractors in the Battleground zone. Take them both out and disrupt
+  the command structure.
+giver_npc_id: battleground_quest_giver
+repeatable: false
+objectives:
+  - id: kill_commissars
+    type: kill
+    description: Kill 2 Commissars
+    target_id: commissar
+    quantity: 2
+rewards:
+  xp: 400
+  credits: 250

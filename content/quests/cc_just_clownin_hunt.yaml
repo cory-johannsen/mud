@@ -1,0 +1,17 @@
+id: cc_just_clownin_hunt
+title: Main Act Takedown
+description: >
+  The performer they call Just Clownin runs the stage and controls every
+  clown crew in the camp. Taking down this act ends the show — and
+  ends the violence that comes with it.
+giver_npc_id: clown_camp_quest_giver
+repeatable: false
+objectives:
+  - id: kill_just_clownin
+    type: kill
+    description: Kill Just Clownin
+    target_id: just_clownin
+    quantity: 1
+rewards:
+  xp: 500
+  credits: 300

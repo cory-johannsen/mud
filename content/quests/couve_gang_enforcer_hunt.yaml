@@ -1,0 +1,17 @@
+id: couve_gang_enforcer_hunt
+title: Couve Gang Enforcer Hunt
+description: >
+  The gang enforcer coordinating criminal operations across Vancouver's
+  waterfront has been identified. Taking this enforcer down disrupts the
+  network that keeps the crossing dangerous for everyone else.
+giver_npc_id: the_couve_quest_giver
+repeatable: false
+objectives:
+  - id: kill_gang_enforcer
+    type: kill
+    description: Kill the Couve Gang Enforcer
+    target_id: couve_gang_enforcer
+    quantity: 1
+rewards:
+  xp: 450
+  credits: 275
