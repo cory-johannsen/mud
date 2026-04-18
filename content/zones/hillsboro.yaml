@@ -162,6 +162,8 @@ zone:
     exits:
     - direction: south
       target: hills_server_keep
+    - direction: north
+      target: hills_royal_archives
     map_x: -6
     map_y: -2
     spawns:
@@ -185,9 +187,11 @@ zone:
 
       '
     danger_level: sketchy
-    exits: []
-    map_x: 202
-    map_y: 0
+    exits:
+    - direction: south
+      target: hills_throne_room
+    map_x: -6
+    map_y: -4
     spawns:
     - template: intel_guard
       count: 1
@@ -212,6 +216,8 @@ zone:
     exits:
     - direction: north
       target: hills_the_foundry
+    - direction: south
+      target: hills_refugee_processing
     map_x: -6
     map_y: 4
     spawns:
@@ -264,6 +270,8 @@ zone:
     exits:
     - direction: south
       target: hills_campus_boulevard
+    - direction: west
+      target: hills_training_grounds
     map_x: -4
     map_y: -2
     spawns:
@@ -287,9 +295,11 @@ zone:
 
       '
     danger_level: sketchy
-    exits: []
-    map_x: 202
-    map_y: 2
+    exits:
+    - direction: east
+      target: hills_knight_barracks
+    map_x: -4
+    map_y: -4
     spawns:
     - template: hillsboro_knight
       count: 1
@@ -399,7 +409,11 @@ zone:
 
       '
     danger_level: sketchy
-    exits: []
+    exits:
+    - direction: east
+      target: hills_cornell_road
+    - direction: north
+      target: hills_campus_gate
     map_x: -2
     map_y: -2
     spawns:
@@ -481,9 +495,11 @@ zone:
 
       '
     danger_level: sketchy
-    exits: []
+    exits:
+    - direction: north
+      target: hills_solar_farm
     map_x: -6
-    map_y: 8
+    map_y: 6
     spawns:
     - template: silicon_serf
       count: 1
@@ -564,6 +580,8 @@ zone:
       target: hills_cornell_road
     - direction: southeast
       target: hills_suburban_wasteland
+    - direction: north
+      target: hills_outer_fields_north
     map_x: 0
     map_y: -4
     spawns:
@@ -651,7 +669,7 @@ zone:
     danger_level: sketchy
     exits:
     - direction: south
-      target: hills_tv_highway_east
+      target: hills_helvetia_overlook
     - direction: west
       target: hills_outer_fields_south
     map_x: 0
