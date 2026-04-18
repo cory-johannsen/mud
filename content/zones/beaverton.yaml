@@ -31,6 +31,8 @@ zone:
       target: beav_beaverton_hillsdale
     - direction: north
       target: beav_free_market
+    - direction: northeast
+      target: beav_suburban_ruins_east
     map_x: 0
     map_y: 0
     equipment:
@@ -169,6 +171,8 @@ zone:
       '
     danger_level: safe
     exits:
+    - direction: north
+      target: beav_parking_garage_b
     - direction: south
       target: beav_progress_ridge
     - direction: east
@@ -292,6 +296,10 @@ zone:
       '
     danger_level: safe
     exits:
+    - direction: east
+      target: beav_hall_boulevard
+    - direction: north
+      target: beav_hoa_court
     - direction: west
       target: beav_suburban_ruins_west
     map_x: -6
@@ -408,8 +416,8 @@ zone:
       '
     danger_level: safe
     exits:
-    - direction: east
-      target: beav_hall_boulevard
+    - direction: south
+      target: beav_walker_road
     map_x: -6
     map_y: 0
     properties:
@@ -456,6 +464,8 @@ zone:
       target: beav_sunset_transit
     - direction: north
       target: beav_fine_dining_ruins
+    - direction: east
+      target: beav_neighborhood_watch_east
     map_x: -2
     map_y: -4
     properties:
@@ -477,7 +487,9 @@ zone:
     danger_level: safe
     exits:
     - direction: south
-      target: beav_beaverton_hillsdale
+      target: beav_free_market
+    - direction: west
+      target: beav_neighborhood_watch_north
     map_x: 0
     map_y: -4
     properties:
@@ -502,6 +514,8 @@ zone:
       target: beav_canyon_road_east
     - direction: west
       target: beav_murray_blvd
+    - direction: south
+      target: beav_cul_de_sac_south
     map_x: 0
     map_y: 2
     properties:
@@ -524,6 +538,8 @@ zone:
     exits:
     - direction: west
       target: beav_progress_ridge
+    - direction: east
+      target: beav_cul_de_sac_south
     map_x: 0
     map_y: 4
     properties:
@@ -545,7 +561,9 @@ zone:
     danger_level: safe
     exits:
     - direction: west
-      target: beav_progress_ridge
+      target: beav_scholls_ferry
+    - direction: north
+      target: beav_beaverton_hillsdale
     map_x: 2
     map_y: 4
     properties:
@@ -556,6 +574,8 @@ zone:
     description: 'An open-air block of vendor stalls under corrugated aluminum roofing. The smell of hot food and machine oil. People come here to trade, not fight.'
     danger_level: safe
     exits:
+    - direction: north
+      target: beav_neighborhood_watch_east
     - direction: south
       target: beav_canyon_road_east
     map_x: 0
@@ -660,7 +680,7 @@ zone:
       missed. The checkpoint at Canyon Road is visible a few blocks east.
     danger_level: safe
     exits:
-    - direction: west
+    - direction: southwest
       target: beav_canyon_road_east
     map_x: 2
     map_y: 0
