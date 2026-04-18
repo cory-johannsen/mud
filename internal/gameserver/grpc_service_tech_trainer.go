@@ -162,7 +162,7 @@ func isTechKnown(sess *session.PlayerSession, techID string) bool {
 			}
 		}
 	}
-	for _, ids := range sess.SpontaneousTechs {
+	for _, ids := range sess.KnownTechs {
 		for _, id := range ids {
 			if id == techID {
 				return true
@@ -324,17 +324,17 @@ func (s *GameServiceServer) doTrainTech(
 		}
 
 	case string(technology.UsageSpontaneous):
-		if sess.SpontaneousTechs == nil {
-			sess.SpontaneousTechs = make(map[int][]string)
+		if sess.KnownTechs == nil {
+			sess.KnownTechs = make(map[int][]string)
 		}
-		sess.SpontaneousTechs[matched.techLevel] = append(
-			sess.SpontaneousTechs[matched.techLevel],
+		sess.KnownTechs[matched.techLevel] = append(
+			sess.KnownTechs[matched.techLevel],
 			techID,
 		)
 		// Persist spontaneous slot to DB.
-		if s.spontaneousTechRepo != nil && sess.CharacterID > 0 {
-			if err := s.spontaneousTechRepo.Add(ctx, sess.CharacterID, techID, matched.techLevel); err != nil {
-				s.logger.Warn("doTrainTech: spontaneousTechRepo.Add failed",
+		if s.knownTechRepo != nil && sess.CharacterID > 0 {
+			if err := s.knownTechRepo.Add(ctx, sess.CharacterID, techID, matched.techLevel); err != nil {
+				s.logger.Warn("doTrainTech: knownTechRepo.Add failed",
 					zap.String("tech_id", techID),
 					zap.Error(err),
 				)

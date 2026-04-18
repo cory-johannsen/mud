@@ -25,7 +25,7 @@ type charCreationRepos struct {
 	skills        *postgres.CharacterSkillsRepository
 	feats         *postgres.CharacterFeatsRepository
 	hwTech        *postgres.CharacterHardwiredTechRepository
-	spontTech     *postgres.CharacterSpontaneousTechRepository
+	knownTech     *postgres.CharacterKnownTechRepository
 	preparedTech  *postgres.CharacterPreparedTechRepository
 }
 
@@ -112,14 +112,14 @@ func (s *Server) WithCharCreationRepos(
 	skills *postgres.CharacterSkillsRepository,
 	feats *postgres.CharacterFeatsRepository,
 	hwTech *postgres.CharacterHardwiredTechRepository,
-	spontTech *postgres.CharacterSpontaneousTechRepository,
+	knownTech *postgres.CharacterKnownTechRepository,
 ) *Server {
 	s.charCreationRepos = &charCreationRepos{
 		abilityBoosts: abilityBoosts,
 		skills:        skills,
 		feats:         feats,
 		hwTech:        hwTech,
-		spontTech:     spontTech,
+		knownTech:     knownTech,
 	}
 	return s
 }
@@ -227,7 +227,7 @@ func (s *Server) registerRoutes(mux *http.ServeMux) {
 			s.charCreationRepos.skills,
 			s.charCreationRepos.feats,
 			s.charCreationRepos.hwTech,
-			s.charCreationRepos.spontTech,
+			s.charCreationRepos.knownTech,
 		)
 		if s.charCreationRepos.preparedTech != nil {
 			charHandler = charHandler.WithPreparedTechRepo(s.charCreationRepos.preparedTech)

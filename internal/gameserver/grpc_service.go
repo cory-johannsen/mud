@@ -240,7 +240,7 @@ type GameServiceServer struct {
 	techRegistry               *technology.Registry
 	hardwiredTechRepo          HardwiredTechRepo
 	preparedTechRepo           PreparedTechRepo
-	spontaneousTechRepo        SpontaneousTechRepo
+	knownTechRepo        KnownTechRepo
 	innateTechRepo             InnateTechRepo
 	spontaneousUsePoolRepo     SpontaneousUsePoolRepo
 	loadoutsDir                string
@@ -489,7 +489,7 @@ func NewGameServiceServer(
 		techRegistry:               content.TechRegistry,
 		hardwiredTechRepo:          storage.HardwiredTechRepo,
 		preparedTechRepo:           storage.PreparedTechRepo,
-		spontaneousTechRepo:        storage.SpontaneousTechRepo,
+		knownTechRepo:        storage.KnownTechRepo,
 		innateTechRepo:             storage.InnateTechRepo,
 		spontaneousUsePoolRepo:     storage.SpontaneousUsePoolRepo,
 		loadoutsDir:                string(content.LoadoutsDir),
@@ -751,8 +751,8 @@ func (s *GameServiceServer) SetHardwiredTechRepo(r HardwiredTechRepo) { s.hardwi
 // SetPreparedTechRepo injects a prepared tech repo for testing.
 func (s *GameServiceServer) SetPreparedTechRepo(r PreparedTechRepo) { s.preparedTechRepo = r }
 
-// SetSpontaneousTechRepo injects a spontaneous tech repo for testing.
-func (s *GameServiceServer) SetSpontaneousTechRepo(r SpontaneousTechRepo) { s.spontaneousTechRepo = r }
+// SetKnownTechRepo injects a spontaneous tech repo for testing.
+func (s *GameServiceServer) SetKnownTechRepo(r KnownTechRepo) { s.knownTechRepo = r }
 
 // SetInnateTechRepo injects an innate tech repo for testing.
 func (s *GameServiceServer) SetInnateTechRepo(r InnateTechRepo) { s.innateTechRepo = r }
@@ -1693,8 +1693,8 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 					alreadyAssigned = true
 				}
 			}
-			if !alreadyAssigned && s.spontaneousTechRepo != nil {
-				existingSpont, spontCheckErr := s.spontaneousTechRepo.GetAll(stream.Context(), characterID)
+			if !alreadyAssigned && s.knownTechRepo != nil {
+				existingSpont, spontCheckErr := s.knownTechRepo.GetAll(stream.Context(), characterID)
 				if spontCheckErr != nil {
 					s.logger.Warn("checking existing spontaneous technologies", zap.Int64("character_id", characterID), zap.Error(spontCheckErr))
 				} else if len(existingSpont) > 0 {
@@ -1730,7 +1730,7 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 					}
 					if assignErr := AssignTechnologies(stream.Context(), sess, characterID,
 						job, archetype, s.techRegistry, promptFn,
-						s.hardwiredTechRepo, s.preparedTechRepo, s.spontaneousTechRepo, s.innateTechRepo, s.spontaneousUsePoolRepo,
+						s.hardwiredTechRepo, s.preparedTechRepo, s.knownTechRepo, s.innateTechRepo, s.spontaneousUsePoolRepo,
 						region,
 					); assignErr != nil {
 						s.logger.Warn("assigning technologies", zap.Int64("character_id", characterID), zap.Error(assignErr))
@@ -1780,7 +1780,7 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 	// Load persisted technology assignments for this session.
 	if s.hardwiredTechRepo != nil && characterID > 0 {
 		if techErr := LoadTechnologies(stream.Context(), sess, characterID,
-			s.hardwiredTechRepo, s.preparedTechRepo, s.spontaneousTechRepo, s.innateTechRepo, s.spontaneousUsePoolRepo,
+			s.hardwiredTechRepo, s.preparedTechRepo, s.knownTechRepo, s.innateTechRepo, s.spontaneousUsePoolRepo,
 		); techErr != nil {
 			s.logger.Warn("loading technologies", zap.Int64("character_id", characterID), zap.Error(techErr))
 		}
@@ -1802,7 +1802,7 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 			mergedLUG := ruleset.MergeLevelUpGrants(archetypeLUG, job.LevelUpGrants)
 			pendingFromBackfill, backfillErr := BackfillLevelUpTechnologies(stream.Context(), sess, characterID,
 				job, archetype, mergedLUG, s.techRegistry,
-				s.hardwiredTechRepo, s.preparedTechRepo, s.spontaneousTechRepo, s.innateTechRepo, s.spontaneousUsePoolRepo,
+				s.hardwiredTechRepo, s.preparedTechRepo, s.knownTechRepo, s.innateTechRepo, s.spontaneousUsePoolRepo,
 			)
 			if backfillErr != nil {
 				s.logger.Warn("BackfillLevelUpTechnologies failed",
@@ -1875,7 +1875,7 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 			if err := ResolvePendingTechGrants(stream.Context(), sess, characterID,
 				job, s.techRegistry, promptFn,
 				s.hardwiredTechRepo, s.preparedTechRepo,
-				s.spontaneousTechRepo, s.innateTechRepo, s.spontaneousUsePoolRepo,
+				s.knownTechRepo, s.innateTechRepo, s.spontaneousUsePoolRepo,
 				s.progressRepo,
 			); err != nil {
 				s.logger.Warn("Session: ResolvePendingTechGrants failed", zap.Error(err))
@@ -4465,7 +4465,7 @@ func (s *GameServiceServer) handleSelectTech(uid string, requestID string, strea
 	if err := ResolvePendingTechGrants(stream.Context(), sess, sess.CharacterID,
 		job, s.techRegistry, promptFn,
 		s.hardwiredTechRepo, s.preparedTechRepo,
-		s.spontaneousTechRepo, s.innateTechRepo, s.spontaneousUsePoolRepo,
+		s.knownTechRepo, s.innateTechRepo, s.spontaneousUsePoolRepo,
 		s.progressRepo,
 	); err != nil {
 		s.logger.Warn("handleSelectTech failed", zap.String("uid", uid), zap.Error(err))
@@ -6389,14 +6389,14 @@ func (s *GameServiceServer) handleChar(uid string) (*gamev1.ServerEvent, error) 
 	}
 
 	// Spontaneous known techs with names.
-	if len(sess.SpontaneousTechs) > 0 {
-		knownLevels := make([]int, 0, len(sess.SpontaneousTechs))
-		for lvl := range sess.SpontaneousTechs {
+	if len(sess.KnownTechs) > 0 {
+		knownLevels := make([]int, 0, len(sess.KnownTechs))
+		for lvl := range sess.KnownTechs {
 			knownLevels = append(knownLevels, lvl)
 		}
 		sort.Ints(knownLevels)
 		for _, lvl := range knownLevels {
-			for _, tid := range sess.SpontaneousTechs[lvl] {
+			for _, tid := range sess.KnownTechs[lvl] {
 				techName := tid
 				techDesc := ""
 				techFX := ""
@@ -8022,7 +8022,7 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string, targetX, 
 		}
 	}
 
-	if s.characterFeatsRepo == nil && s.characterClassFeaturesRepo == nil && s.preparedTechRepo == nil && s.spontaneousUsePoolRepo == nil && s.innateTechRepo == nil && len(sess.SpontaneousTechs) == 0 && len(sess.InnateTechs) == 0 {
+	if s.characterFeatsRepo == nil && s.characterClassFeaturesRepo == nil && s.preparedTechRepo == nil && s.spontaneousUsePoolRepo == nil && s.innateTechRepo == nil && len(sess.KnownTechs) == 0 && len(sess.InnateTechs) == 0 {
 		return messageEvent("Ability data is not available."), nil
 	}
 
@@ -8112,9 +8112,9 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string, targetX, 
 			}
 		}
 		// Append spontaneous tech entries with remaining use counts.
-		if len(sess.SpontaneousTechs) > 0 {
-			spontLevels := make([]int, 0, len(sess.SpontaneousTechs))
-			for l := range sess.SpontaneousTechs {
+		if len(sess.KnownTechs) > 0 {
+			spontLevels := make([]int, 0, len(sess.KnownTechs))
+			for l := range sess.KnownTechs {
 				spontLevels = append(spontLevels, l)
 			}
 			sort.Ints(spontLevels)
@@ -8123,7 +8123,7 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string, targetX, 
 				if pool.Remaining <= 0 {
 					continue
 				}
-				for _, techID := range sess.SpontaneousTechs[l] {
+				for _, techID := range sess.KnownTechs[l] {
 					displayName := techID
 					var spontIsReaction bool
 					if s.techRegistry != nil {
@@ -8501,15 +8501,15 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string, targetX, 
 		// Tech not in prepared slots at all — fall through to spontaneous/innate lookup.
 	}
 	// Spontaneous tech lookup — only if no feat/class-feature/prepared-tech matched.
-	if len(sess.SpontaneousTechs) > 0 {
-		levels := make([]int, 0, len(sess.SpontaneousTechs))
-		for l := range sess.SpontaneousTechs {
+	if len(sess.KnownTechs) > 0 {
+		levels := make([]int, 0, len(sess.KnownTechs))
+		for l := range sess.KnownTechs {
 			levels = append(levels, l)
 		}
 		sort.Ints(levels)
 		foundLevel := -1
 		for _, l := range levels {
-			for _, tid := range sess.SpontaneousTechs[l] {
+			for _, tid := range sess.KnownTechs[l] {
 				if tid == abilityID {
 					foundLevel = l
 					break
@@ -8670,13 +8670,13 @@ func (s *GameServiceServer) handleAmpedUse(
 
 	// Find which level this tech lives at in the player's spontaneous pool.
 	foundLevel := -1
-	levels := make([]int, 0, len(sess.SpontaneousTechs))
-	for l := range sess.SpontaneousTechs {
+	levels := make([]int, 0, len(sess.KnownTechs))
+	for l := range sess.KnownTechs {
 		levels = append(levels, l)
 	}
 	sort.Ints(levels)
 	for _, l := range levels {
-		for _, tid := range sess.SpontaneousTechs[l] {
+		for _, tid := range sess.KnownTechs[l] {
 			if tid == abilityID {
 				foundLevel = l
 				break
@@ -11842,12 +11842,12 @@ func (s *GameServiceServer) applyLevelUpTechGrants(ctx context.Context, sess *se
 		if immediate != nil {
 			hwBefore := append([]string{}, sess.HardwiredTechs...)
 			prepBefore := snapshotPreparedTechIDs(sess.PreparedTechs)
-			spontBefore := snapshotSpontaneousTechIDs(sess.SpontaneousTechs)
+			spontBefore := snapshotKnownTechIDs(sess.KnownTechs)
 
 			if err := LevelUpTechnologies(ctx, sess, sess.CharacterID,
 				immediate, s.techRegistry, nil,
 				s.hardwiredTechRepo, s.preparedTechRepo,
-				s.spontaneousTechRepo, s.innateTechRepo, s.spontaneousUsePoolRepo,
+				s.knownTechRepo, s.innateTechRepo, s.spontaneousUsePoolRepo,
 			); err != nil {
 				s.logger.Warn("applyLevelUpTechGrants: LevelUpTechnologies failed",
 					zap.Int64("character_id", sess.CharacterID),
@@ -11867,7 +11867,7 @@ func (s *GameServiceServer) applyLevelUpTechGrants(ctx context.Context, sess *se
 					_ = sess.Entity.Push(data)
 				}
 			}
-			for _, id := range newTechIDsFromSpontaneous(spontBefore, sess.SpontaneousTechs) {
+			for _, id := range newTechIDsFromSpontaneous(spontBefore, sess.KnownTechs) {
 				notifMsg := messageEvent(fmt.Sprintf("You gained %s (auto-assigned).", id))
 				if data, mErr := proto.Marshal(notifMsg); mErr == nil {
 					_ = sess.Entity.Push(data)

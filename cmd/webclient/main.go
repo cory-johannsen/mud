@@ -63,7 +63,7 @@ func main() {
 	skillsRepo := postgres.NewCharacterSkillsRepository(pool.DB())
 	featsRepo := postgres.NewCharacterFeatsRepository(pool.DB())
 	hwTechRepo := postgres.NewCharacterHardwiredTechRepository(pool.DB())
-	spontTechRepo := postgres.NewCharacterSpontaneousTechRepository(pool.DB())
+	knownTechRepo := postgres.NewCharacterKnownTechRepository(pool.DB())
 	preparedTechRepo := postgres.NewCharacterPreparedTechRepository(pool.DB())
 
 	// Load character creation options from content directories.
@@ -117,7 +117,7 @@ func main() {
 		skills:        skillsRepo,
 		feats:         featsRepo,
 		hwTech:        hwTechRepo,
-		spontTech:     spontTechRepo,
+		knownTech:     knownTechRepo,
 		preparedTech:  preparedTechRepo,
 	}
 

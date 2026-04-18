@@ -70,7 +70,7 @@ func (r *bugLUTPreparedRepo) SetExpended(_ context.Context, _ int64, level, inde
 	return nil
 }
 
-// bugLUTSpontaneousRepo is a SpontaneousTechRepo for BUG-99 tests.
+// bugLUTSpontaneousRepo is a KnownTechRepo for BUG-99 tests.
 type bugLUTSpontaneousRepo struct{ techs map[int][]string }
 
 func (r *bugLUTSpontaneousRepo) GetAll(_ context.Context, _ int64) (map[int][]string, error) {
@@ -184,7 +184,7 @@ func buildApplyLevelUpTechGrantsSvc(
 	// Wire repos.
 	svc.SetHardwiredTechRepo(&bugLUTHardwiredRepo{})
 	svc.SetPreparedTechRepo(&bugLUTPreparedRepo{})
-	svc.SetSpontaneousTechRepo(&bugLUTSpontaneousRepo{})
+	svc.SetKnownTechRepo(&bugLUTSpontaneousRepo{})
 	svc.SetInnateTechRepo(&bugLUTInnateRepo{})
 	svc.progressRepo = &bugLUTProgressRepo{}
 

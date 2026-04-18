@@ -21,6 +21,6 @@ func TestPlayerSession_TechFields_NilUntilLoaded(t *testing.T) {
 	sess := &session.PlayerSession{}
 	assert.Nil(t, sess.HardwiredTechs)
 	assert.Nil(t, sess.PreparedTechs)
-	assert.Nil(t, sess.SpontaneousTechs)
+	assert.Nil(t, sess.KnownTechs)
 	assert.Nil(t, sess.InnateTechs)
 }

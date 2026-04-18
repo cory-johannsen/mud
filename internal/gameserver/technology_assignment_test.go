@@ -142,7 +142,7 @@ func TestAssignTechnologies_FullJob(t *testing.T) {
 	assert.Equal(t, []string{"neural_shock"}, sess.HardwiredTechs)
 	require.Len(t, sess.PreparedTechs[1], 1)
 	assert.Equal(t, "mind_spike", sess.PreparedTechs[1][0].TechID)
-	assert.Equal(t, []string{"battle_fervor"}, sess.SpontaneousTechs[1])
+	assert.Equal(t, []string{"battle_fervor"}, sess.KnownTechs[1])
 	require.NotNil(t, sess.InnateTechs["acid_spray"])
 	assert.Equal(t, 2, sess.InnateTechs["acid_spray"].MaxUses)
 }
@@ -163,7 +163,7 @@ func TestAssignTechnologies_NilGrants(t *testing.T) {
 
 	assert.Nil(t, sess.HardwiredTechs)
 	assert.Nil(t, sess.PreparedTechs)
-	assert.Nil(t, sess.SpontaneousTechs)
+	assert.Nil(t, sess.KnownTechs)
 	assert.Nil(t, sess.InnateTechs)
 }
 
@@ -222,7 +222,7 @@ func TestAssignTechnologies_SpontaneousAutoAssign(t *testing.T) {
 	err := gameserver.AssignTechnologies(ctx, sess, 1, job, nil, nil, promptFn, hw, prep, spont, inn, nil, nil)
 	require.NoError(t, err)
 	assert.False(t, promptCalled, "prompt should not be called when pool == open slots")
-	assert.Equal(t, []string{"battle_fervor"}, sess.SpontaneousTechs[1])
+	assert.Equal(t, []string{"battle_fervor"}, sess.KnownTechs[1])
 }
 
 // TestPropertyAssignTechnologies_HardwiredRoundTrip verifies that AssignTechnologies
@@ -346,7 +346,7 @@ func TestLoadTechnologies(t *testing.T) {
 
 	assert.Equal(t, []string{"neural_shock"}, sess.HardwiredTechs)
 	assert.Equal(t, map[int][]*session.PreparedSlot{1: {{TechID: "mind_spike"}}}, sess.PreparedTechs)
-	assert.Equal(t, map[int][]string{1: {"battle_fervor"}}, sess.SpontaneousTechs)
+	assert.Equal(t, map[int][]string{1: {"battle_fervor"}}, sess.KnownTechs)
 	assert.Equal(t, map[string]*session.InnateSlot{"acid_spray": {MaxUses: 3}}, sess.InnateTechs)
 }
 
@@ -418,7 +418,7 @@ func TestLevelUpTechnologies_SpontaneousAppendsToExisting(t *testing.T) {
 	}}
 	inn := &fakeInnateRepo{}
 	sess := &session.PlayerSession{
-		SpontaneousTechs: map[int][]string{
+		KnownTechs: map[int][]string{
 			1: {"existing_spont"},
 		},
 	}
@@ -433,7 +433,7 @@ func TestLevelUpTechnologies_SpontaneousAppendsToExisting(t *testing.T) {
 	err := gameserver.LevelUpTechnologies(ctx, sess, 1, grants, nil, noPrompt, hw, prep, spont, inn, nil)
 	require.NoError(t, err)
 
-	assert.ElementsMatch(t, []string{"existing_spont", "new_spont"}, sess.SpontaneousTechs[1])
+	assert.ElementsMatch(t, []string{"existing_spont", "new_spont"}, sess.KnownTechs[1])
 	assert.ElementsMatch(t, []string{"existing_spont", "new_spont"}, spont.techs[1])
 }
 
@@ -1309,7 +1309,7 @@ func TestPropertyLevelUpTechnologies_SpontaneousPromptCount(t *testing.T) {
 		grants := &ruleset.TechnologyGrants{
 			Spontaneous: &ruleset.SpontaneousGrants{
 				KnownByLevel: map[int]int{1: nOpen},
-				// No Fixed entries — only prompt-chosen techs populate SpontaneousTechs[1].
+				// No Fixed entries — only prompt-chosen techs populate KnownTechs[1].
 				Pool: pool,
 			},
 		}
@@ -1341,11 +1341,11 @@ func TestPropertyLevelUpTechnologies_SpontaneousPromptCount(t *testing.T) {
 			rt.Fatalf("expected promptFn called %d times, got %d", nOpen, promptCallCount)
 		}
 
-		chosen := sess.SpontaneousTechs[1]
+		chosen := sess.KnownTechs[1]
 
 		// Invariant 2: exactly nOpen entries in session.
 		if len(chosen) != nOpen {
-			rt.Fatalf("expected %d entries in SpontaneousTechs[1], got %d", nOpen, len(chosen))
+			rt.Fatalf("expected %d entries in KnownTechs[1], got %d", nOpen, len(chosen))
 		}
 
 		// Invariant 3: all IDs are from the pool.
@@ -1363,7 +1363,7 @@ func TestPropertyLevelUpTechnologies_SpontaneousPromptCount(t *testing.T) {
 		seen := make(map[string]bool, len(chosen))
 		for _, id := range chosen {
 			if seen[id] {
-				rt.Fatalf("duplicate tech ID %q in SpontaneousTechs[1]", id)
+				rt.Fatalf("duplicate tech ID %q in KnownTechs[1]", id)
 			}
 			seen[id] = true
 		}

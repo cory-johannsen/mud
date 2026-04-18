@@ -320,7 +320,7 @@ func TestHandleUse_NoArg_SpontaneousTech_UsesDisplayName(t *testing.T) {
 	require.NoError(t, err)
 	sess, ok := sessMgr.GetPlayer(uid)
 	require.True(t, ok)
-	sess.SpontaneousTechs = map[int][]string{1: {"neural_spike"}}
+	sess.KnownTechs = map[int][]string{1: {"neural_spike"}}
 	sess.SpontaneousUsePools = map[int]session.UsePool{1: {Remaining: 2, Max: 2}}
 
 	evt, err := svc.handleUse(uid, "", "", 0, 0)

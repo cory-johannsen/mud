@@ -80,11 +80,11 @@ type HardwiredTechSetter interface {
 	SetAll(ctx context.Context, characterID int64, techIDs []string) error
 }
 
-// SpontaneousTechAdder persists spontaneous technology known-slot assignments.
+// KnownTechAdder persists spontaneous technology known-slot assignments.
 //
 // Precondition: characterID > 0; techID must be non-empty; level > 0.
 // Postcondition: A row for (character_id, tech_id) exists with the given level.
-type SpontaneousTechAdder interface {
+type KnownTechAdder interface {
 	Add(ctx context.Context, characterID int64, techID string, level int) error
 }
 
@@ -124,7 +124,7 @@ type CharacterHandler struct {
 	skillsSetter   SkillsSetter             // may be nil
 	featsSetter    FeatsSetter              // may be nil
 	hwTechSetter   HardwiredTechSetter      // may be nil
-	spontAdder     SpontaneousTechAdder     // may be nil
+	knownAdder     KnownTechAdder     // may be nil
 	preparedSetter PreparedTechSetter       // may be nil
 	registry       *ActiveCharacterRegistry // may be nil
 	// roomLookup maps room ID → "Zone Name — Room Title". May be nil (falls back to raw room ID).
@@ -177,13 +177,13 @@ func (h *CharacterHandler) WithPersistenceRepos(
 	skills SkillsSetter,
 	feats FeatsSetter,
 	hwTech HardwiredTechSetter,
-	spont SpontaneousTechAdder,
+	spont KnownTechAdder,
 ) *CharacterHandler {
 	h.boostsAdder = boosts
 	h.skillsSetter = skills
 	h.featsSetter = feats
 	h.hwTechSetter = hwTech
-	h.spontAdder = spont
+	h.knownAdder = spont
 	return h
 }
 
@@ -481,9 +481,9 @@ func (h *CharacterHandler) persistCharacterChoices(ctx context.Context, characte
 	}
 
 	// Spontaneous technologies: player choices from the job's spontaneous pool.
-	if h.spontAdder != nil {
+	if h.knownAdder != nil {
 		for _, choice := range req.SpontaneousChoices {
-			_ = h.spontAdder.Add(ctx, characterID, choice.ID, choice.Level)
+			_ = h.knownAdder.Add(ctx, characterID, choice.ID, choice.Level)
 		}
 	}
 

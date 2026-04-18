@@ -106,20 +106,20 @@ func (r *prepRepoInternal) SetExpended(_ context.Context, _ int64, level, index 
 	return nil
 }
 
-// spontRepoInternal is a minimal SpontaneousTechRepo for internal tests.
-type spontRepoInternal struct{ techs map[int][]string }
+// knownRepoInternal is a minimal KnownTechRepo for internal tests.
+type knownRepoInternal struct{ techs map[int][]string }
 
-func (r *spontRepoInternal) GetAll(_ context.Context, _ int64) (map[int][]string, error) {
+func (r *knownRepoInternal) GetAll(_ context.Context, _ int64) (map[int][]string, error) {
 	return r.techs, nil
 }
-func (r *spontRepoInternal) Add(_ context.Context, _ int64, techID string, level int) error {
+func (r *knownRepoInternal) Add(_ context.Context, _ int64, techID string, level int) error {
 	if r.techs == nil {
 		r.techs = make(map[int][]string)
 	}
 	r.techs[level] = append(r.techs[level], techID)
 	return nil
 }
-func (r *spontRepoInternal) DeleteAll(_ context.Context, _ int64) error { r.techs = nil; return nil }
+func (r *knownRepoInternal) DeleteAll(_ context.Context, _ int64) error { r.techs = nil; return nil }
 
 // innateRepoInternal is a minimal InnateTechRepo for internal tests.
 type innateRepoInternal struct {
@@ -177,7 +177,7 @@ func buildLevelUpTechSvc(
 	progressRepo ProgressRepository,
 	hwRepo HardwiredTechRepo,
 	prepRepo PreparedTechRepo,
-	spontRepo SpontaneousTechRepo,
+	knownRepo KnownTechRepo,
 	innateRepo InnateTechRepo,
 	levelUpGrants *ruleset.TechnologyGrants,
 ) *GameServiceServer {
@@ -216,7 +216,7 @@ func buildLevelUpTechSvc(
 
 	svc.SetHardwiredTechRepo(hwRepo)
 	svc.SetPreparedTechRepo(prepRepo)
-	svc.SetSpontaneousTechRepo(spontRepo)
+	svc.SetKnownTechRepo(knownRepo)
 	svc.SetInnateTechRepo(innateRepo)
 
 	return svc
@@ -260,7 +260,7 @@ func TestHandleGrant_LevelUp_AutoAssignOnly_NoPending(t *testing.T) {
 	pendingRepo := &fakePendingTechLevelsRepoInternal{}
 	hwRepo := &hwRepoInternal{}
 	prepRepo := &prepRepoInternal{}
-	spontRepo := &spontRepoInternal{}
+	knownRepo := &knownRepoInternal{}
 	innateRepo := &innateRepoInternal{}
 
 	grants := &ruleset.TechnologyGrants{
@@ -270,7 +270,7 @@ func TestHandleGrant_LevelUp_AutoAssignOnly_NoPending(t *testing.T) {
 		},
 	}
 
-	svc := buildLevelUpTechSvc(t, pendingRepo, hwRepo, prepRepo, spontRepo, innateRepo, grants)
+	svc := buildLevelUpTechSvc(t, pendingRepo, hwRepo, prepRepo, knownRepo, innateRepo, grants)
 	addEditorForGrant(t, svc, "editor_auto")
 	target := addTargetWithJobForLevelUp(t, svc, "target_auto", "AutoChar")
 
@@ -304,7 +304,7 @@ func TestHandleGrant_LevelUp_PoolChoiceDeferred(t *testing.T) {
 	pendingRepo := &fakePendingTechLevelsRepoInternal{}
 	hwRepo := &hwRepoInternal{}
 	prepRepo := &prepRepoInternal{}
-	spontRepo := &spontRepoInternal{}
+	knownRepo := &knownRepoInternal{}
 	innateRepo := &innateRepoInternal{}
 
 	grants := &ruleset.TechnologyGrants{
@@ -317,7 +317,7 @@ func TestHandleGrant_LevelUp_PoolChoiceDeferred(t *testing.T) {
 		},
 	}
 
-	svc := buildLevelUpTechSvc(t, pendingRepo, hwRepo, prepRepo, spontRepo, innateRepo, grants)
+	svc := buildLevelUpTechSvc(t, pendingRepo, hwRepo, prepRepo, knownRepo, innateRepo, grants)
 	addEditorForGrant(t, svc, "editor_defer")
 	target := addTargetWithJobForLevelUp(t, svc, "target_defer", "DeferChar")
 
@@ -343,7 +343,7 @@ func TestHandleGrant_LevelUp_AutoAssign_PushesNotification(t *testing.T) {
 	pendingRepo := &fakePendingTechLevelsRepoInternal{}
 	hwRepo := &hwRepoInternal{}
 	prepRepo := &prepRepoInternal{}
-	spontRepo := &spontRepoInternal{}
+	knownRepo := &knownRepoInternal{}
 	innateRepo := &innateRepoInternal{}
 
 	grants := &ruleset.TechnologyGrants{
@@ -353,7 +353,7 @@ func TestHandleGrant_LevelUp_AutoAssign_PushesNotification(t *testing.T) {
 		},
 	}
 
-	svc := buildLevelUpTechSvc(t, pendingRepo, hwRepo, prepRepo, spontRepo, innateRepo, grants)
+	svc := buildLevelUpTechSvc(t, pendingRepo, hwRepo, prepRepo, knownRepo, innateRepo, grants)
 	addEditorForGrant(t, svc, "editor_notify_auto")
 	target := addTargetWithJobForLevelUp(t, svc, "target_notify_auto", "NotifyAutoChar")
 
@@ -388,7 +388,7 @@ func TestHandleGrant_LevelUp_Deferred_PushesSelectTechNotification(t *testing.T)
 	pendingRepo := &fakePendingTechLevelsRepoInternal{}
 	hwRepo := &hwRepoInternal{}
 	prepRepo := &prepRepoInternal{}
-	spontRepo := &spontRepoInternal{}
+	knownRepo := &knownRepoInternal{}
 	innateRepo := &innateRepoInternal{}
 
 	grants := &ruleset.TechnologyGrants{
@@ -401,7 +401,7 @@ func TestHandleGrant_LevelUp_Deferred_PushesSelectTechNotification(t *testing.T)
 		},
 	}
 
-	svc := buildLevelUpTechSvc(t, pendingRepo, hwRepo, prepRepo, spontRepo, innateRepo, grants)
+	svc := buildLevelUpTechSvc(t, pendingRepo, hwRepo, prepRepo, knownRepo, innateRepo, grants)
 	addEditorForGrant(t, svc, "editor_notify_defer")
 	target := addTargetWithJobForLevelUp(t, svc, "target_notify_defer", "NotifyDeferChar")
 
@@ -450,13 +450,13 @@ func TestPropertyHandleGrant_LevelUp_PartitionInvariant(t *testing.T) {
 		pendingRepo := &fakePendingTechLevelsRepoInternal{}
 		hwRepo := &hwRepoInternal{}
 		prepRepo := &prepRepoInternal{}
-		spontRepo := &spontRepoInternal{}
+		knownRepo := &knownRepoInternal{}
 		innateRepo := &innateRepoInternal{}
 
 		uid := fmt.Sprintf("prop-player-%d", rapid.IntRange(0, 9999).Draw(rt, "uid"))
 		charName := fmt.Sprintf("PropChar%d", rapid.IntRange(0, 9999).Draw(rt, "charName"))
 
-		svc := buildLevelUpTechSvc(t, pendingRepo, hwRepo, prepRepo, spontRepo, innateRepo, grants)
+		svc := buildLevelUpTechSvc(t, pendingRepo, hwRepo, prepRepo, knownRepo, innateRepo, grants)
 		addEditorForGrant(t, svc, "prop_editor_"+uid)
 		target := addTargetWithJobForLevelUp(t, svc, uid, charName)
 

@@ -134,7 +134,7 @@ func TestHandleGrant_LevelUp_AppliesTechGrantsForEachLevel(t *testing.T) {
 	hw := &lutHardwiredRepo{}
 	svc.SetHardwiredTechRepo(hw)
 	svc.SetPreparedTechRepo(&lutPreparedRepo{})
-	svc.SetSpontaneousTechRepo(&lutSpontaneousRepo{})
+	svc.SetKnownTechRepo(&lutSpontaneousRepo{})
 	svc.SetInnateTechRepo(&lutInnateRepo{})
 
 	// Add editor and target; target starts at level 2 with CharacterID and Class set.
@@ -205,7 +205,7 @@ func TestHandleGrant_LevelUp_AppliesTechGrantsForEachLevel_Property(t *testing.T
 		hw := &lutHardwiredRepo{}
 		svc.SetHardwiredTechRepo(hw)
 		svc.SetPreparedTechRepo(&lutPreparedRepo{})
-		svc.SetSpontaneousTechRepo(&lutSpontaneousRepo{})
+		svc.SetKnownTechRepo(&lutSpontaneousRepo{})
 		svc.SetInnateTechRepo(&lutInnateRepo{})
 
 		addEditorForGrant(t, svc, "prop_editor")

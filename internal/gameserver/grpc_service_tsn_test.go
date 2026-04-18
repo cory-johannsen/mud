@@ -70,7 +70,7 @@ func TestHandleUse_ShortName_ResolvesToCanonicalID(t *testing.T) {
 
 	sess, ok := sessMgr.GetPlayer("u_tsn")
 	require.True(t, ok)
-	sess.SpontaneousTechs = map[int][]string{1: {"tech_alpha"}}
+	sess.KnownTechs = map[int][]string{1: {"tech_alpha"}}
 	sess.SpontaneousUsePools = map[int]session.UsePool{1: {Remaining: 0, Max: 2}}
 
 	event, err := svc.handleUse("u_tsn", "ta", "", 0, 0)

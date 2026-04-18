@@ -105,7 +105,7 @@ func newSpontaneousSvc(t *testing.T, repo SpontaneousUsePoolRepo) (*GameServiceS
 // addSpontaneousPlayer adds a player session with the given spontaneous tech configuration.
 //
 // Precondition: sessMgr must be non-nil; uid must be non-empty.
-// Postcondition: Returns the created PlayerSession with SpontaneousTechs and SpontaneousUsePools set.
+// Postcondition: Returns the created PlayerSession with KnownTechs and SpontaneousUsePools set.
 func addSpontaneousPlayer(
 	t *testing.T,
 	sessMgr *session.Manager,
@@ -126,7 +126,7 @@ func addSpontaneousPlayer(
 		Role:        "player",
 	})
 	require.NoError(t, err)
-	sess.SpontaneousTechs = spontTechs
+	sess.KnownTechs = spontTechs
 	sess.SpontaneousUsePools = spontPools
 	return sess
 }
@@ -134,7 +134,7 @@ func addSpontaneousPlayer(
 // TestHandleUse_SpontaneousActivation_REQ_SUC1 verifies that activating a known spontaneous
 // tech with uses remaining decrements the pool and returns the expected confirmation message.
 //
-// Precondition: session has SpontaneousTechs = {1: ["mind_spike"]}, SpontaneousUsePools = {1: UsePool{Remaining:2, Max:3}}.
+// Precondition: session has KnownTechs = {1: ["mind_spike"]}, SpontaneousUsePools = {1: UsePool{Remaining:2, Max:3}}.
 // Postcondition: message = "You activate mind_spike. (1 uses remaining at level 1.)"; pool.Remaining == 1.
 func TestHandleUse_SpontaneousActivation_REQ_SUC1(t *testing.T) {
 	pools := map[int]session.UsePool{1: {Remaining: 2, Max: 3}}
@@ -157,7 +157,7 @@ func TestHandleUse_SpontaneousActivation_REQ_SUC1(t *testing.T) {
 // TestHandleUse_SpontaneousNoUsesRemaining_REQ_SUC2 verifies that attempting to activate a
 // spontaneous tech when the pool is exhausted returns the appropriate error message.
 //
-// Precondition: session has SpontaneousTechs = {1: ["mind_spike"]}, SpontaneousUsePools = {1: UsePool{Remaining:0, Max:3}}.
+// Precondition: session has KnownTechs = {1: ["mind_spike"]}, SpontaneousUsePools = {1: UsePool{Remaining:0, Max:3}}.
 // Postcondition: message = "No level 1 uses remaining."
 func TestHandleUse_SpontaneousNoUsesRemaining_REQ_SUC2(t *testing.T) {
 	svc, sessMgr := newSpontaneousSvc(t, newFakeSpontaneousUsePoolRepo(map[int]session.UsePool{}))
@@ -178,7 +178,7 @@ func TestHandleUse_SpontaneousNoUsesRemaining_REQ_SUC2(t *testing.T) {
 // TestHandleUse_SpontaneousUnknownTech_REQ_SUC3 verifies that activating a tech not in
 // the character's spontaneous tech list returns a "You don't know X." message.
 //
-// Precondition: session has SpontaneousTechs = {1: ["mind_spike"]}.
+// Precondition: session has KnownTechs = {1: ["mind_spike"]}.
 // Postcondition: message contains "You don't know unknown_tech."
 func TestHandleUse_SpontaneousUnknownTech_REQ_SUC3(t *testing.T) {
 	svc, sessMgr := newSpontaneousSvc(t, newFakeSpontaneousUsePoolRepo(map[int]session.UsePool{}))
@@ -199,7 +199,7 @@ func TestHandleUse_SpontaneousUnknownTech_REQ_SUC3(t *testing.T) {
 // TestHandleUse_ListMode_IncludesSpontaneous_REQ_SUC4 verifies that listing available
 // abilities (abilityID == "") includes spontaneous tech entries with use counts.
 //
-// Precondition: session has SpontaneousTechs = {1: ["mind_spike"]}, SpontaneousUsePools = {1: UsePool{Remaining:2, Max:3}}.
+// Precondition: session has KnownTechs = {1: ["mind_spike"]}, SpontaneousUsePools = {1: UsePool{Remaining:2, Max:3}}.
 // Postcondition: UseResponse.Choices contains an entry with Description matching "mind_spike (2 uses remaining at level 1)".
 func TestHandleUse_ListMode_IncludesSpontaneous_REQ_SUC4(t *testing.T) {
 	svc, sessMgr := newSpontaneousSvc(t, newFakeSpontaneousUsePoolRepo(map[int]session.UsePool{}))

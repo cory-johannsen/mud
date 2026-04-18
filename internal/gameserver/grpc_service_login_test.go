@@ -929,7 +929,7 @@ func testGRPCServerWithTechRepos(
 	saver CharacterSaver,
 	hwRepo HardwiredTechRepo,
 	prepRepo PreparedTechRepo,
-	spontRepo SpontaneousTechRepo,
+	knownRepo KnownTechRepo,
 	innateRepo InnateTechRepo,
 	usePoolRepo SpontaneousUsePoolRepo,
 ) (gamev1.GameServiceClient, *session.Manager) {
@@ -948,7 +948,7 @@ func testGRPCServerWithTechRepos(
 		saver, nil, nil, npcMgr, nil, nil,
 		nil, nil, nil, nil, nil, nil,
 		nil, nil, nil, nil,
-		hwRepo, prepRepo, spontRepo, innateRepo,
+		hwRepo, prepRepo, knownRepo, innateRepo,
 		"",
 		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
 		nil, nil,
@@ -987,7 +987,7 @@ func TestSession_InitialHotbarEvent_IncludesInnateTechUseState(t *testing.T) {
 	}}
 
 	client, _ := testGRPCServerWithTechRepos(t, saver,
-		&hwRepoInternal{}, &prepRepoInternal{}, &spontRepoInternal{},
+		&hwRepoInternal{}, &prepRepoInternal{}, &knownRepoInternal{},
 		innateRepo, newStubSpontaneousUsePoolRepo(nil),
 	)
 

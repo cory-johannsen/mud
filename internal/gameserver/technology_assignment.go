@@ -42,8 +42,8 @@ type PreparedTechRepo interface {
 	SetExpended(ctx context.Context, characterID int64, level, index int, expended bool) error
 }
 
-// SpontaneousTechRepo defines persistence for spontaneous technology known-slot assignments.
-type SpontaneousTechRepo interface {
+// KnownTechRepo defines persistence for known technology slot assignments.
+type KnownTechRepo interface {
 	GetAll(ctx context.Context, characterID int64) (map[int][]string, error)
 	Add(ctx context.Context, characterID int64, techID string, level int) error
 	DeleteAll(ctx context.Context, characterID int64) error
@@ -131,7 +131,7 @@ type PendingTechSlotsRepo interface {
 // AssignTechnologies assigns technologies from job and archetype grants to the session
 // and persists them. Called during character creation.
 //
-// Precondition: sess, hwRepo, prepRepo, spontRepo, innateRepo are not nil.
+// Precondition: sess, hwRepo, prepRepo, knownRepo, innateRepo are not nil.
 // job, archetype, and region may be nil; nil values skip the corresponding grant blocks.
 // techReg may be nil (tech names/descriptions will not be shown in prompts).
 // Postcondition: If both archetype.TechnologyGrants and job.TechnologyGrants are nil,
@@ -146,7 +146,7 @@ func AssignTechnologies(
 	promptFn TechPromptFn,
 	hwRepo HardwiredTechRepo,
 	prepRepo PreparedTechRepo,
-	spontRepo SpontaneousTechRepo,
+	knownRepo KnownTechRepo,
 	innateRepo InnateTechRepo,
 	usePoolRepo SpontaneousUsePoolRepo,
 	region *ruleset.Region,
@@ -239,13 +239,13 @@ func AssignTechnologies(
 
 	// Spontaneous
 	if grants != nil && grants.Spontaneous != nil {
-		sess.SpontaneousTechs = make(map[int][]string)
+		sess.KnownTechs = make(map[int][]string)
 		for lvl, known := range grants.Spontaneous.KnownByLevel {
-			chosen, err := fillFromSpontaneousPool(ctx, lvl, known, grants.Spontaneous, techReg, promptFn, characterID, spontRepo)
+			chosen, err := fillFromSpontaneousPool(ctx, lvl, known, grants.Spontaneous, techReg, promptFn, characterID, knownRepo)
 			if err != nil {
 				return fmt.Errorf("AssignTechnologies spontaneous level %d: %w", lvl, err)
 			}
-			sess.SpontaneousTechs[lvl] = chosen
+			sess.KnownTechs[lvl] = chosen
 		}
 		if sess.SpontaneousUsePools == nil {
 			sess.SpontaneousUsePools = make(map[int]session.UsePool)
@@ -274,7 +274,7 @@ func LoadTechnologies(
 	characterID int64,
 	hwRepo HardwiredTechRepo,
 	prepRepo PreparedTechRepo,
-	spontRepo SpontaneousTechRepo,
+	knownRepo KnownTechRepo,
 	innateRepo InnateTechRepo,
 	usePoolRepo SpontaneousUsePoolRepo,
 ) error {
@@ -290,11 +290,11 @@ func LoadTechnologies(
 	}
 	sess.PreparedTechs = prep
 
-	spont, err := spontRepo.GetAll(ctx, characterID)
+	spont, err := knownRepo.GetAll(ctx, characterID)
 	if err != nil {
 		return fmt.Errorf("LoadTechnologies spontaneous: %w", err)
 	}
-	sess.SpontaneousTechs = spont
+	sess.KnownTechs = spont
 
 	if usePoolRepo != nil {
 		pools, err := usePoolRepo.GetAll(ctx, characterID)
@@ -329,7 +329,7 @@ func LevelUpTechnologies(
 	promptFn TechPromptFn,
 	hwRepo HardwiredTechRepo,
 	prepRepo PreparedTechRepo,
-	spontRepo SpontaneousTechRepo,
+	knownRepo KnownTechRepo,
 	innateRepo InnateTechRepo,
 	usePoolRepo SpontaneousUsePoolRepo,
 ) error {
@@ -385,15 +385,15 @@ func LevelUpTechnologies(
 
 	// Spontaneous: add new known techs without removing existing ones.
 	if grants.Spontaneous != nil {
-		if sess.SpontaneousTechs == nil {
-			sess.SpontaneousTechs = make(map[int][]string)
+		if sess.KnownTechs == nil {
+			sess.KnownTechs = make(map[int][]string)
 		}
 		for lvl, known := range grants.Spontaneous.KnownByLevel {
-			chosen, err := fillFromSpontaneousPool(ctx, lvl, known, grants.Spontaneous, techReg, promptFn, characterID, spontRepo)
+			chosen, err := fillFromSpontaneousPool(ctx, lvl, known, grants.Spontaneous, techReg, promptFn, characterID, knownRepo)
 			if err != nil {
 				return fmt.Errorf("LevelUpTechnologies spontaneous level %d: %w", lvl, err)
 			}
-			sess.SpontaneousTechs[lvl] = append(sess.SpontaneousTechs[lvl], chosen...)
+			sess.KnownTechs[lvl] = append(sess.KnownTechs[lvl], chosen...)
 		}
 		if sess.SpontaneousUsePools == nil {
 			sess.SpontaneousUsePools = make(map[int]session.UsePool)
@@ -879,7 +879,7 @@ func ResolvePendingTechGrants(
 	promptFn TechPromptFn,
 	hwRepo HardwiredTechRepo,
 	prepRepo PreparedTechRepo,
-	spontRepo SpontaneousTechRepo,
+	knownRepo KnownTechRepo,
 	innateRepo InnateTechRepo,
 	usePoolRepo SpontaneousUsePoolRepo,
 	progressRepo PendingTechLevelsRepo,
@@ -902,7 +902,7 @@ func ResolvePendingTechGrants(
 
 		if l1Grants != nil {
 			if err := LevelUpTechnologies(ctx, sess, characterID, l1Grants, techReg, promptFn,
-				hwRepo, prepRepo, spontRepo, innateRepo, usePoolRepo,
+				hwRepo, prepRepo, knownRepo, innateRepo, usePoolRepo,
 			); err != nil {
 				return fmt.Errorf("ResolvePendingTechGrants level %d (L1): %w", lvl, err)
 			}
@@ -1131,7 +1131,7 @@ func fillFromSpontaneousPool(
 	techReg *technology.Registry,
 	promptFn TechPromptFn,
 	characterID int64,
-	repo SpontaneousTechRepo,
+	repo KnownTechRepo,
 ) ([]string, error) {
 	var result []string
 
@@ -1291,7 +1291,7 @@ func BackfillLevelUpTechnologies(
 	techReg *technology.Registry,
 	hwRepo HardwiredTechRepo,
 	prepRepo PreparedTechRepo,
-	spontRepo SpontaneousTechRepo,
+	knownRepo KnownTechRepo,
 	innateRepo InnateTechRepo,
 	usePoolRepo SpontaneousUsePoolRepo,
 ) (*ruleset.TechnologyGrants, error) {
@@ -1436,7 +1436,7 @@ func BackfillLevelUpTechnologies(
 				},
 			}
 			if applyErr := LevelUpTechnologies(ctx, sess, characterID, deltaGrant, techReg, nil,
-				hwRepo, prepRepo, spontRepo, innateRepo, usePoolRepo,
+				hwRepo, prepRepo, knownRepo, innateRepo, usePoolRepo,
 			); applyErr != nil {
 				return nil, fmt.Errorf("BackfillLevelUpTechnologies prepared spell level %d: %w", spellLvl, applyErr)
 			}
@@ -1470,7 +1470,7 @@ func BackfillLevelUpTechnologies(
 		if len(missing) > 0 {
 			hwGrant := &ruleset.TechnologyGrants{Hardwired: missing}
 			if applyErr := LevelUpTechnologies(ctx, sess, characterID, hwGrant, techReg, nil,
-				hwRepo, prepRepo, spontRepo, innateRepo, usePoolRepo,
+				hwRepo, prepRepo, knownRepo, innateRepo, usePoolRepo,
 			); applyErr != nil {
 				return nil, fmt.Errorf("BackfillLevelUpTechnologies hardwired: %w", applyErr)
 			}

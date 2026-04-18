@@ -52,7 +52,7 @@ func Initialize(ctx context.Context, cfg *AppConfig, clock *gameserver.GameClock
 	postgresCharacterAbilityBoostsRepository := postgres.NewCharacterAbilityBoostsRepository(pgxpoolPool)
 	characterHardwiredTechRepository := postgres.NewCharacterHardwiredTechRepository(pgxpoolPool)
 	characterPreparedTechRepository := postgres.NewCharacterPreparedTechRepository(pgxpoolPool)
-	characterSpontaneousTechRepository := postgres.NewCharacterSpontaneousTechRepository(pgxpoolPool)
+	characterKnownTechRepository := postgres.NewCharacterKnownTechRepository(pgxpoolPool)
 	characterInnateTechRepository := postgres.NewCharacterInnateTechRepository(pgxpoolPool)
 	characterSpontaneousUsePoolRepository := postgres.NewCharacterSpontaneousUsePoolRepository(pgxpoolPool)
 	wantedRepository := postgres.NewWantedRepository(pgxpoolPool)
@@ -75,7 +75,7 @@ func Initialize(ctx context.Context, cfg *AppConfig, clock *gameserver.GameClock
 		AbilityBoostsRepo:      postgresCharacterAbilityBoostsRepository,
 		HardwiredTechRepo:      characterHardwiredTechRepository,
 		PreparedTechRepo:       characterPreparedTechRepository,
-		SpontaneousTechRepo:    characterSpontaneousTechRepository,
+		KnownTechRepo:          characterKnownTechRepository,
 		InnateTechRepo:         characterInnateTechRepository,
 		SpontaneousUsePoolRepo: characterSpontaneousUsePoolRepository,
 		WantedRepo:             wantedRepository,

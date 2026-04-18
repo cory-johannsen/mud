@@ -167,8 +167,8 @@ func (s *GameServiceServer) resolveHotbarSlotUseState(sess *session.PlayerSessio
 				maxUses = total
 				usesRemaining = remaining
 			} else if sess.SpontaneousUsePools != nil {
-				// Spontaneous tech: find pool level from SpontaneousTechs.
-				for lvl, techIDs := range sess.SpontaneousTechs {
+				// Spontaneous tech: find pool level from KnownTechs.
+				for lvl, techIDs := range sess.KnownTechs {
 					for _, tid := range techIDs {
 						if tid == slot.Ref {
 							if pool, ok := sess.SpontaneousUsePools[lvl]; ok && pool.Max > 0 {

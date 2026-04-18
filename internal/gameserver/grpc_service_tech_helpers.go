@@ -18,11 +18,11 @@ func snapshotPreparedTechIDs(pt map[int][]*session.PreparedSlot) map[string]bool
 	return out
 }
 
-// snapshotSpontaneousTechIDs returns a set of all tech IDs in SpontaneousTechs.
+// snapshotKnownTechIDs returns a set of all tech IDs in KnownTechs.
 //
 // Precondition: st may be nil.
-// Postcondition: Returns a non-nil map of tech IDs present in any spontaneous slot.
-func snapshotSpontaneousTechIDs(st map[int][]string) map[string]bool {
+// Postcondition: Returns a non-nil map of tech IDs present in any known slot.
+func snapshotKnownTechIDs(st map[int][]string) map[string]bool {
 	out := make(map[string]bool)
 	for _, ids := range st {
 		for _, id := range ids {

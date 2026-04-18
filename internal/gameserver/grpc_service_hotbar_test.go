@@ -546,7 +546,7 @@ func TestHotbarUpdateEvent_SpontaneousTechSlot_PopulatesUseCounts(t *testing.T) 
 	// PreparedTechs must be non-nil but empty so the code enters the else-if branch
 	// and falls through to the spontaneous pool lookup (total == 0 → spontaneous path).
 	sess.PreparedTechs = map[int][]*session.PreparedSlot{}
-	sess.SpontaneousTechs = map[int][]string{
+	sess.KnownTechs = map[int][]string{
 		1: {techID},
 	}
 	sess.SpontaneousUsePools = map[int]session.UsePool{

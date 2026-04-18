@@ -69,7 +69,7 @@ func (r *sslFakeProgressRepo) SetPendingTechLevels(_ context.Context, _ int64, _
 }
 
 // spontaneousSelectionTestService builds a minimal GameServiceServer suitable for
-// handleSelectTech tests. Injects a non-nil jobRegistry, spontaneousTechRepo, and
+// handleSelectTech tests. Injects a non-nil jobRegistry, knownTechRepo, and
 // progressRepo — the three dependencies that handleSelectTech requires to proceed past
 // its early-exit guards.
 func spontaneousSelectionTestService(t *testing.T) (*GameServiceServer, *session.Manager, *sslFakeSpontaneousRepo) {
@@ -83,7 +83,7 @@ func spontaneousSelectionTestService(t *testing.T) (*GameServiceServer, *session
 	svc.SetJobRegistry(reg)
 
 	spontRepo := &sslFakeSpontaneousRepo{}
-	svc.SetSpontaneousTechRepo(spontRepo)
+	svc.SetKnownTechRepo(spontRepo)
 	svc.SetProgressRepo(&sslFakeProgressRepo{})
 
 	return svc, sessMgr, spontRepo
@@ -144,13 +144,13 @@ func TestHandleSelectTech_SpontaneousGrant_ValidChoice_ResolvesGrant(t *testing.
 	assert.Empty(t, sess.PendingTechGrants, "PendingTechGrants must be empty after resolution")
 
 	// Tech added to session.
-	require.NotNil(t, sess.SpontaneousTechs)
-	assert.Contains(t, sess.SpontaneousTechs[1], "neural_static",
-		"neural_static must appear in SpontaneousTechs[1]")
+	require.NotNil(t, sess.KnownTechs)
+	assert.Contains(t, sess.KnownTechs[1], "neural_static",
+		"neural_static must appear in KnownTechs[1]")
 
 	// Repo persisted the choice.
 	assert.Contains(t, spontRepo.techs[1], "neural_static",
-		"spontaneousTechRepo must have recorded neural_static at level 1")
+		"knownTechRepo must have recorded neural_static at level 1")
 }
 
 // REQ-SSL2: selecttech sends "Invalid selection" when an out-of-range numeric choice is submitted.
@@ -189,7 +189,7 @@ func TestHandleSelectTech_SpontaneousGrant_InvalidChoice_SendsInvalidSelection(t
 
 	// No valid pool tech must be assigned — implementation may append "" on invalid input,
 	// so we assert that none of the known pool IDs appear in the result.
-	assigned := sess.SpontaneousTechs[1]
+	assigned := sess.KnownTechs[1]
 	assert.NotContains(t, assigned, "mind_spike", "mind_spike must not be assigned after invalid selection")
 	assert.NotContains(t, assigned, "neural_static", "neural_static must not be assigned after invalid selection")
 	assert.NotContains(t, assigned, "synaptic_surge", "synaptic_surge must not be assigned after invalid selection")

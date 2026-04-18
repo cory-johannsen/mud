@@ -37,7 +37,7 @@ type StorageDeps struct {
 	AbilityBoostsRepo      postgres.CharacterAbilityBoostsRepository
 	HardwiredTechRepo      HardwiredTechRepo
 	PreparedTechRepo       PreparedTechRepo
-	SpontaneousTechRepo    SpontaneousTechRepo
+	KnownTechRepo          KnownTechRepo
 	InnateTechRepo         InnateTechRepo
 	SpontaneousUsePoolRepo SpontaneousUsePoolRepo
 	WantedRepo             *postgres.WantedRepository

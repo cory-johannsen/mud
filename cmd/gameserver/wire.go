@@ -85,7 +85,7 @@ func Initialize(ctx context.Context, cfg *AppConfig, clock *gameserver.GameClock
 		wire.Bind(new(gameserver.CharacterFeatureChoicesRepository), new(*postgres.CharacterFeatureChoicesRepo)),
 		wire.Bind(new(gameserver.HardwiredTechRepo), new(*postgres.CharacterHardwiredTechRepository)),
 		wire.Bind(new(gameserver.PreparedTechRepo), new(*postgres.CharacterPreparedTechRepository)),
-		wire.Bind(new(gameserver.SpontaneousTechRepo), new(*postgres.CharacterSpontaneousTechRepository)),
+		wire.Bind(new(gameserver.KnownTechRepo), new(*postgres.CharacterKnownTechRepository)),
 		wire.Bind(new(gameserver.InnateTechRepo), new(*postgres.CharacterInnateTechRepository)),
 		wire.Bind(new(gameserver.SpontaneousUsePoolRepo), new(*postgres.CharacterSpontaneousUsePoolRepository)),
 		wire.Bind(new(gameserver.CharacterDowntimeRepository), new(*postgres.CharacterDowntimeRepository)),
