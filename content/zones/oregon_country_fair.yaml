@@ -27,9 +27,9 @@ zone:
         target: ocf_main_stage_ruins
       - direction: south
         target: ocf_market_row
-      - direction: north
-        target: sauvie_farm_stand
-        zone: sauvie_island
+      - direction: northwest
+        target: beav_beaverton_hillsdale
+        zone: beaverton
     spawns:
       - template: juggalo
         count: 1

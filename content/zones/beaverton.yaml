@@ -516,6 +516,9 @@ zone:
       target: beav_murray_blvd
     - direction: south
       target: beav_cul_de_sac_south
+    - direction: southeast
+      target: ocf_main_gate
+      zone: oregon_country_fair
     map_x: 0
     map_y: 2
     properties:
