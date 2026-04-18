@@ -1,6 +1,11 @@
 /* Reset browser default margins */
 *, *::before, *::after { box-sizing: border-box; }
-html, body, #root { margin: 0; padding: 0; height: 100%; overflow: hidden; }
+html, body, #root { margin: 0; padding: 0; }
+
+/* Lock scroll only when the game layout is mounted (non-game pages can scroll freely) */
+html:has(.game-layout) { height: 100%; overflow: hidden; }
+body:has(.game-layout) { height: 100%; overflow: hidden; }
+body:has(.game-layout) #root { height: 100%; overflow: hidden; }
 
 /* Game layout: CSS Grid with named areas */
 .game-layout {
