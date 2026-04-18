@@ -108,47 +108,48 @@ export function FeatureChoiceModal({ onClose: _onClose }: { onClose?: () => void
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       fontFamily: 'monospace',
     }}>
+      {/* Outer modal shell: flex column, capped at 80vh, overflow hidden so inner sections control scroll */}
       <div style={{
         backgroundColor: '#111', border: '2px solid #4a6a2a',
-        padding: '20px', maxWidth: '600px', width: '90%', maxHeight: '80vh',
-        overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '10px',
+        maxWidth: '600px', width: '90%', maxHeight: '80vh',
+        display: 'flex', flexDirection: 'column', overflow: 'hidden',
       }}>
-        {/* Slot progress header */}
-        {cp.slotContext && (
-          <div style={{ color: '#888', fontSize: '0.85em', textAlign: 'right' }}>
-            Slot {cp.slotContext.slotNum} of {cp.slotContext.totalSlots} — Level {cp.slotContext.slotLevel}
-          </div>
-        )}
+        {/* Fixed header: slot progress + prompt title + level tabs — never scrolls */}
+        <div style={{ padding: '16px 20px 0', flexShrink: 0 }}>
+          {cp.slotContext && (
+            <div style={{ color: '#888', fontSize: '0.85em', textAlign: 'right', marginBottom: '6px' }}>
+              Slot {cp.slotContext.slotNum} of {cp.slotContext.totalSlots} — Level {cp.slotContext.slotLevel}
+            </div>
+          )}
 
-        {/* Prompt title */}
-        <div style={{ color: '#e0c060', fontSize: '1.1em', marginBottom: '8px' }}>
-          {cp.prompt}
+          <div style={{ color: '#e0c060', fontSize: '1.1em', marginBottom: '10px' }}>
+            {cp.prompt}
+          </div>
+
+          {availableLevels.length > 0 && (
+            <div style={{ display: 'flex', gap: '6px', marginBottom: '10px' }}>
+              {availableLevels.map(lvl => (
+                <button
+                  key={lvl}
+                  onClick={() => setActiveLevel(lvl)}
+                  style={{
+                    padding: '4px 10px',
+                    backgroundColor: lvl === activeLevel ? '#4a6a2a' : '#222',
+                    color: lvl === activeLevel ? '#e0c060' : '#aaa',
+                    border: '1px solid #4a6a2a',
+                    cursor: 'pointer',
+                    fontFamily: 'monospace',
+                  }}
+                >
+                  L{lvl}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
-        {/* Level filter tabs */}
-        {availableLevels.length > 0 && (
-          <div style={{ display: 'flex', gap: '6px', marginBottom: '8px' }}>
-            {availableLevels.map(lvl => (
-              <button
-                key={lvl}
-                onClick={() => setActiveLevel(lvl)}
-                style={{
-                  padding: '4px 10px',
-                  backgroundColor: lvl === activeLevel ? '#4a6a2a' : '#222',
-                  color: lvl === activeLevel ? '#e0c060' : '#aaa',
-                  border: '1px solid #4a6a2a',
-                  cursor: 'pointer',
-                  fontFamily: 'monospace',
-                }}
-              >
-                L{lvl}
-              </button>
-            ))}
-          </div>
-        )}
-
-        {/* Option buttons */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+        {/* Scrollable option list — grows to fill available space */}
+        <div style={{ overflowY: 'auto', padding: '0 20px', flex: '1 1 auto', display: 'flex', flexDirection: 'column', gap: '6px' }}>
           {filteredOptions.map((opt, i) => {
             const { text: withoutHeighten, delta } = parseHeightenSentinel(opt)
             const displayText = stripTechIdPrefix(withoutHeighten)
@@ -161,6 +162,7 @@ export function FeatureChoiceModal({ onClose: _onClose }: { onClose?: () => void
                   backgroundColor: '#1a1a1a', color: '#ccc',
                   border: '1px solid #4a6a2a', cursor: 'pointer',
                   fontFamily: 'monospace', display: 'flex', alignItems: 'center', gap: '8px',
+                  flexShrink: 0,
                 }}
               >
                 <span style={{ color: '#4a6a2a', minWidth: '20px' }}>{i + 1}.</span>
@@ -178,16 +180,19 @@ export function FeatureChoiceModal({ onClose: _onClose }: { onClose?: () => void
           })}
         </div>
 
-        {/* Navigation row */}
+        {/* Navigation row — always visible at bottom, never scrolls away */}
         {(hasBack || hasForward || hasConfirm) && (
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '12px' }}>
+          <div style={{
+            display: 'flex', justifyContent: 'space-between', padding: '12px 20px',
+            borderTop: '1px solid #2a3a1a', flexShrink: 0,
+          }}>
             <div>
               {hasBack && (
                 <button
                   onClick={() => handleNavigation(BACK_SENTINEL)}
                   style={{
-                    padding: '6px 16px', backgroundColor: '#222', color: '#aaa',
-                    border: '1px solid #555', cursor: 'pointer', fontFamily: 'monospace',
+                    padding: '6px 16px', backgroundColor: '#222', color: '#ccc',
+                    border: '1px solid #888', cursor: 'pointer', fontFamily: 'monospace',
                   }}
                 >
                   ← Back
