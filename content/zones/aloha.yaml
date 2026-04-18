@@ -115,6 +115,8 @@ zone:
       target: aloha_park
     - direction: west
       target: aloha_brothel
+    - direction: east
+      target: aloha_trade_road_east
     map_x: -4
     map_y: 2
     spawns:
@@ -185,6 +187,8 @@ zone:
       target: aloha_caravansary
     - direction: west
       target: aloha_tv_highway_west
+    - direction: south
+      target: aloha_water_tower
     map_x: -10
     map_y: 0
     spawns:
@@ -264,6 +268,8 @@ zone:
       target: aloha_the_bazaar
     - direction: west
       target: aloha_warehouse_district
+    - direction: south
+      target: aloha_farm_collective
     map_x: -4
     map_y: 4
     properties:
@@ -285,6 +291,8 @@ zone:
     exits:
     - direction: north
       target: aloha_trading_post
+    - direction: south
+      target: aloha_old_church
     map_x: -2
     map_y: 6
     properties:
@@ -414,6 +422,8 @@ zone:
       target: aloha_inn
     - direction: west
       target: aloha_water_station
+    - direction: north
+      target: aloha_school_shelter
     map_x: -4
     map_y: -2
     properties:
@@ -475,6 +485,8 @@ zone:
     exits:
     - direction: north
       target: aloha_caravansary
+    - direction: south
+      target: aloha_solar_array
     map_x: -8
     map_y: 2
     properties:
@@ -491,7 +503,11 @@ zone:
       go wrong and people disappear. The shadows seem to have eyes.
 
       '
-    exits: []
+    exits:
+    - direction: north
+      target: aloha_warehouse_district
+    - direction: east
+      target: aloha_scrap_yard
     map_x: -6
     map_y: 6
     spawns:
@@ -517,8 +533,10 @@ zone:
     exits:
     - direction: north
       target: aloha_warehouse_district
-    map_x: 202
-    map_y: 0
+    - direction: west
+      target: aloha_back_alley
+    map_x: -4
+    map_y: 6
     properties:
       lighting: overcast
       atmosphere: industrial
@@ -538,8 +556,8 @@ zone:
     exits:
     - direction: north
       target: aloha_refugee_camp
-    map_x: 202
-    map_y: 2
+    map_x: -2
+    map_y: 8
     properties:
       lighting: dim
       atmosphere: solemn
@@ -720,8 +738,8 @@ zone:
     title: Discount Motel Room 7
     danger_level: safe
     description: The back corner of a strip mall that never quite became anything else. A hand-stenciled "7" marks the door. Inside, fluorescent tubes flicker over linoleum floors, a folding table, and two locked back rooms. The smell of pine cleaner barely covers what came before it. Services are transactional and the rate card is taped to the door.
-    map_x: 0
-    map_y: 100
+    map_x: -6
+    map_y: 3
     exits:
     - direction: east
       target: aloha_the_bazaar
