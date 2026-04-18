@@ -105,12 +105,26 @@ interface HotbarTooltipProps {
   pos: { x: number; y: number }
 }
 
+function ApPips({ cost }: { cost: number }) {
+  if (cost <= 0) return null
+  const pips = Math.min(cost, 5)
+  return (
+    <span style={{ display: 'inline-flex', gap: '2px', alignItems: 'center' }}>
+      {Array.from({ length: pips }, (_, i) => (
+        <span key={i} style={{ display: 'inline-block', width: '7px', height: '7px', background: '#e0c060', borderRadius: '1px', transform: 'rotate(45deg)' }} />
+      ))}
+    </span>
+  )
+}
+
 function HotbarTooltip({ slot, pos }: HotbarTooltipProps) {
   const name = slot.displayName ?? slot.display_name ?? slot.ref
   const desc = slot.description
   const maxUses = slot.maxUses ?? slot.max_uses ?? 0
   const usesRemaining = slot.usesRemaining ?? slot.uses_remaining ?? 0
   const rechargeCondition = slot.rechargeCondition ?? slot.recharge_condition ?? ''
+  const apCost = slot.apCost ?? slot.ap_cost ?? 0
+  const damageSummary = slot.damageSummary ?? slot.damage_summary ?? ''
   const isCommand = !slot.kind || slot.kind === 'command'
 
   const tooltipStyle: React.CSSProperties = {
@@ -138,6 +152,16 @@ function HotbarTooltip({ slot, pos }: HotbarTooltipProps) {
       <div style={{ color: '#fff', fontWeight: 'bold', marginBottom: '0.15rem' }}>{name}</div>
       {!isCommand && desc && (
         <div style={{ color: '#ccc', marginBottom: '0.15rem' }}>{desc}</div>
+      )}
+      {apCost > 0 && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.1rem' }}>
+          <span style={{ color: '#888', fontSize: '0.72rem' }}>AP:</span>
+          <ApPips cost={apCost} />
+          <span style={{ color: '#e0c060', fontSize: '0.72rem' }}>{apCost}</span>
+        </div>
+      )}
+      {damageSummary && (
+        <div style={{ color: '#f87', fontSize: '0.72rem', marginBottom: '0.1rem' }}>{damageSummary}</div>
       )}
       {maxUses < 0 && (
         <div style={{ color: '#7bc', marginBottom: '0.1rem' }}>∞ unlimited uses</div>
@@ -293,6 +317,8 @@ export function HotbarPanel() {
           const usesRemaining = slot.usesRemaining ?? slot.uses_remaining ?? 0
           const isInfinite = maxUses < 0
           const isExpended = maxUses > 0 && usesRemaining === 0
+          const apCost = slot.apCost ?? slot.ap_cost ?? 0
+          const isTech = slot.kind === 'technology'
           let cls = 'hotbar-slot'
           if (isEmpty) cls += ' hotbar-slot-empty'
           if (isExpended) cls += ' hotbar-slot-expended'
@@ -312,6 +338,13 @@ export function HotbarPanel() {
             >
               <span className="hotbar-key">{key}</span>
               <span className="hotbar-label">{label || '—'}</span>
+              {isTech && apCost > 0 && (
+                <span className="hotbar-ap-badge">
+                  {Array.from({ length: Math.min(apCost, 5) }, (_, j) => (
+                    <span key={j} className="hotbar-ap-pip" />
+                  ))}
+                </span>
+              )}
               {isInfinite && (
                 <span className="hotbar-use-badge hotbar-use-infinite">∞</span>
               )}

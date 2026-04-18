@@ -7,6 +7,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/cory-johannsen/mud/internal/game/session"
+	"github.com/cory-johannsen/mud/internal/game/technology"
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 )
 
@@ -105,6 +106,7 @@ func (s *GameServiceServer) hotbarUpdateEvent(sess *session.PlayerSession) *game
 		if !sl.IsEmpty() {
 			ps.DisplayName, ps.Description = s.resolveHotbarSlotDisplay(sl)
 			ps.UsesRemaining, ps.MaxUses, ps.RechargeCondition = s.resolveHotbarSlotUseState(sess, sl)
+			ps.ApCost, ps.DamageSummary = s.resolveHotbarSlotTechInfo(sl)
 		}
 		protoSlots[i] = ps
 	}
@@ -112,6 +114,75 @@ func (s *GameServiceServer) hotbarUpdateEvent(sess *session.PlayerSession) *game
 		Payload: &gamev1.ServerEvent_HotbarUpdate{
 			HotbarUpdate: &gamev1.HotbarUpdateEvent{Slots: protoSlots},
 		},
+	}
+}
+
+// resolveHotbarSlotTechInfo returns the AP cost and a compact damage/heal summary
+// for technology and feat hotbar slots. Returns (0, "") for command slots and
+// slots not found in any registry.
+//
+// Precondition: slot.Ref is non-empty.
+// Postcondition: ApCost > 0 only for technology/feat slots with a defined action cost.
+// DamageSummary is a compact string like "2d6 fire" or "1d8 healing", or "" if none.
+func (s *GameServiceServer) resolveHotbarSlotTechInfo(slot session.HotbarSlot) (apCost int32, damageSummary string) {
+	if slot.Kind != session.HotbarSlotKindTechnology {
+		return 0, ""
+	}
+	if s.techRegistry == nil {
+		return 0, ""
+	}
+	tech, ok := s.techRegistry.Get(slot.Ref)
+	if !ok {
+		return 0, ""
+	}
+	apCost = int32(tech.ActionCost)
+	damageSummary = primaryDamageSummary(tech)
+	return apCost, damageSummary
+}
+
+// primaryDamageSummary extracts a compact damage or heal summary from the primary
+// tier of effects for a technology definition.
+// Returns "" if no damage or heal effect is found.
+//
+// Precondition: tech is non-nil.
+func primaryDamageSummary(tech *technology.TechnologyDef) string {
+	var candidates []technology.TechEffect
+	switch tech.Resolution {
+	case "attack":
+		candidates = append(candidates, tech.Effects.OnHit...)
+		candidates = append(candidates, tech.Effects.OnCritHit...)
+	case "save":
+		candidates = append(candidates, tech.Effects.OnFailure...)
+		candidates = append(candidates, tech.Effects.OnCritFailure...)
+		candidates = append(candidates, tech.Effects.OnSuccess...)
+	default:
+		candidates = append(candidates, tech.Effects.OnApply...)
+	}
+	for _, e := range candidates {
+		switch e.Type {
+		case technology.EffectDamage:
+			s := formatDiceAmount(e.Dice, e.Amount)
+			if e.DamageType != "" {
+				s += " " + e.DamageType
+			}
+			return s
+		case technology.EffectHeal:
+			return formatDiceAmount(e.Dice, e.Amount) + " healing"
+		}
+	}
+	return ""
+}
+
+func formatDiceAmount(dice string, amount int) string {
+	switch {
+	case dice != "" && amount != 0:
+		return fmt.Sprintf("%s+%d", dice, amount)
+	case dice != "":
+		return dice
+	case amount != 0:
+		return fmt.Sprintf("%d", amount)
+	default:
+		return ""
 	}
 }
 

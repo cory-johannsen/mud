@@ -719,6 +719,12 @@ export interface HotbarSlot {
   max_uses?: number
   rechargeCondition?: string
   recharge_condition?: string
+  // ap_cost is the action point cost; 0 for command slots and non-tech slots.
+  apCost?: number
+  ap_cost?: number
+  // damage_summary is a compact primary damage/heal description, e.g. "2d6 fire" or "1d8 healing".
+  damageSummary?: string
+  damage_summary?: string
 }
 
 export interface ConditionEvent {

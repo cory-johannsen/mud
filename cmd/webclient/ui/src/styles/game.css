@@ -299,6 +299,23 @@ body:has(.game-layout) #root { height: 100%; overflow: hidden; }
   font-size: 0.8rem;
 }
 .hotbar-slot-expended { opacity: 0.45; }
+.hotbar-ap-badge {
+  position: absolute;
+  bottom: 2px;
+  left: 3px;
+  display: flex;
+  gap: 1px;
+  align-items: center;
+  pointer-events: none;
+}
+.hotbar-ap-pip {
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  background: #e0c060;
+  border-radius: 1px;
+  transform: rotate(45deg);
+}
 
 /* Input panel */
 .input-form {

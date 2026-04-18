@@ -14886,8 +14886,13 @@ type HotbarSlot struct {
 	UsesRemaining     int32                  `protobuf:"varint,5,opt,name=uses_remaining,json=usesRemaining,proto3" json:"uses_remaining,omitempty"`
 	MaxUses           int32                  `protobuf:"varint,6,opt,name=max_uses,json=maxUses,proto3" json:"max_uses,omitempty"`
 	RechargeCondition string                 `protobuf:"bytes,7,opt,name=recharge_condition,json=rechargeCondition,proto3" json:"recharge_condition,omitempty"`
-	unknownFields     protoimpl.UnknownFields
-	sizeCache         protoimpl.SizeCache
+	// ap_cost is the action point cost for technology/feat slots; 0 for command slots.
+	ApCost int32 `protobuf:"varint,8,opt,name=ap_cost,json=apCost,proto3" json:"ap_cost,omitempty"`
+	// damage_summary is a compact description of the primary damage or heal effect,
+	// e.g. "2d6 fire" or "1d8 healing". Empty for non-damaging techs and command slots.
+	DamageSummary string `protobuf:"bytes,9,opt,name=damage_summary,json=damageSummary,proto3" json:"damage_summary,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *HotbarSlot) Reset() {
@@ -14965,6 +14970,20 @@ func (x *HotbarSlot) GetMaxUses() int32 {
 func (x *HotbarSlot) GetRechargeCondition() string {
 	if x != nil {
 		return x.RechargeCondition
+	}
+	return ""
+}
+
+func (x *HotbarSlot) GetApCost() int32 {
+	if x != nil {
+		return x.ApCost
+	}
+	return 0
+}
+
+func (x *HotbarSlot) GetDamageSummary() string {
+	if x != nil {
+		return x.DamageSummary
 	}
 	return ""
 }
@@ -18187,7 +18206,7 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\rshadow_target\x18\x02 \x01(\tR\fshadowTarget\"\x10\n" +
 	"\x0eRefocusRequest\"'\n" +
 	"\rSeduceRequest\x12\x16\n" +
-	"\x06target\x18\x01 \x01(\tR\x06target\"\xe8\x01\n" +
+	"\x06target\x18\x01 \x01(\tR\x06target\"\xa8\x02\n" +
 	"\n" +
 	"HotbarSlot\x12\x12\n" +
 	"\x04kind\x18\x01 \x01(\tR\x04kind\x12\x10\n" +
@@ -18196,7 +18215,9 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\vdescription\x18\x04 \x01(\tR\vdescription\x12%\n" +
 	"\x0euses_remaining\x18\x05 \x01(\x05R\rusesRemaining\x12\x19\n" +
 	"\bmax_uses\x18\x06 \x01(\x05R\amaxUses\x12-\n" +
-	"\x12recharge_condition\x18\a \x01(\tR\x11rechargeCondition\"u\n" +
+	"\x12recharge_condition\x18\a \x01(\tR\x11rechargeCondition\x12\x17\n" +
+	"\aap_cost\x18\b \x01(\x05R\x06apCost\x12%\n" +
+	"\x0edamage_summary\x18\t \x01(\tR\rdamageSummary\"u\n" +
 	"\rHotbarRequest\x12\x16\n" +
 	"\x06action\x18\x01 \x01(\tR\x06action\x12\x12\n" +
 	"\x04slot\x18\x02 \x01(\x05R\x04slot\x12\x12\n" +

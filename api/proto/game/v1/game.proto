@@ -1586,6 +1586,11 @@ message HotbarSlot {
   int32  uses_remaining     = 5;
   int32  max_uses           = 6;
   string recharge_condition = 7;
+  // ap_cost is the action point cost for technology/feat slots; 0 for command slots.
+  int32  ap_cost            = 8;
+  // damage_summary is a compact description of the primary damage or heal effect,
+  // e.g. "2d6 fire" or "1d8 healing". Empty for non-damaging techs and command slots.
+  string damage_summary     = 9;
 }
 
 // HotbarRequest asks the server to set, clear, or show a hotbar slot.
