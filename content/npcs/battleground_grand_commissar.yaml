@@ -1,0 +1,57 @@
+id: battleground_grand_commissar
+name: Grand Commissar Volkov
+description: >
+  A barrel-chested ideologue in a long grey coat adorned with hand-stitched
+  rank insignia. Volkov has ruled the Battleground Collective's war room
+  for six years through sheer force of doctrine and fists. He believes
+  every word of the collective's ideology and enforces it without mercy.
+  His revolutionary tribunal has sentenced dozens to reeducation.
+level: 6
+max_hp: 80
+ac: 18
+rob_multiplier: 2.0
+awareness: 9
+ai_domain: battleground_grand_commissar_combat
+respawn_delay: "10m"
+abilities:
+  brutality: 18
+  quickness: 10
+  grit: 18
+  reasoning: 14
+  savvy: 10
+  flair: 10
+loot:
+  currency:
+    min: 90
+    max: 220
+  items:
+    - item: scrap_metal
+      chance: 0.6
+      min_qty: 2
+      max_qty: 4
+    - item: medkit
+      chance: 0.4
+      min_qty: 1
+      max_qty: 2
+    - item: kevlar_vest
+      chance: 0.25
+      min_qty: 1
+      max_qty: 1
+weapon:
+  - id: rebar_club
+    weight: 3
+  - id: steel_pipe
+    weight: 2
+armor:
+  - id: kevlar_vest
+    weight: 3
+  - id: leather_jacket
+    weight: 2
+taunts:
+  - "The collective does not fall. Its enemies do."
+  - "Ideological deviation is a disease. I am the cure."
+  - "You assault the war room of a sovereign collective. This is an act of war."
+  - "Every challenger to collective authority ends up in reeducation — or the river."
+  - "The revolution is permanent. So is my authority."
+  - "You think individual courage beats collective discipline? Let me demonstrate otherwise."
+  - "This coat has more blood on it than you can imagine. Most of it justified."

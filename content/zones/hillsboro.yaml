@@ -638,6 +638,7 @@ zone:
       atmosphere: military
   - id: hills_armory_hall
     title: Armory Hall
+    boss_room: true
     description: |
       Racks of salvaged weapons line every wall — rebar halberds, sharpened
       server blades, and a few precious firearms kept under lock and chain.
@@ -655,6 +656,9 @@ zone:
     - template: hills_armory_warden
       count: 1
       respawn_after: 5m
+    - template: hillsboro_knight_commander
+      count: 1
+      respawn_after: 10m
     properties:
       lighting: forge_glow
       atmosphere: industrial

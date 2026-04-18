@@ -1,0 +1,19 @@
+id: ross_island_pit_king_takedown
+title: Pit King Takedown
+description: >
+  The Pit King rules Ross Island's gravel operation through brutality,
+  working prisoners to exhaustion and taking the lion's share of every
+  load. The bridge toll gangs answer to him, making the entire island
+  a tribute-collection machine. Defeating him in the gravel pit would
+  break his hold on the island's resources.
+giver_npc_id: ross_island_quest_giver
+repeatable: false
+objectives:
+  - id: defeat_ross_island_pit_king
+    type: kill
+    description: Defeat the Pit King
+    target_id: ross_island_pit_king
+    quantity: 1
+rewards:
+  xp: 500
+  credits: 290

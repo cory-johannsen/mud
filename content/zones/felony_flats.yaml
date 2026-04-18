@@ -766,6 +766,7 @@ zone:
       atmosphere: chemical
   - id: flats_enforcer_den
     core: true
+    boss_room: true
     title: Enforcer Den
     description: 'A fortified storefront with steel-plate shutters and a reinforced
 
@@ -789,6 +790,9 @@ zone:
     - template: 82nd_enforcer
       count: 1
       respawn_after: 5m
+    - template: felony_flats_enforcer_lord
+      count: 1
+      respawn_after: 10m
     properties:
       lighting: dim
       atmosphere: hostile

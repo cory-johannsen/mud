@@ -1,0 +1,56 @@
+id: aloha_smuggler_king
+name: The Smuggler King
+description: >
+  A wiry, sharp-eyed man who clawed his way to the top of Aloha's black market
+  trade through a combination of cunning, ruthlessness, and an uncanny ability
+  to make problems disappear. He operates from the scrap yard's depths, surrounded
+  by loyal enforcers and crates of contraband. His knife is always within reach.
+level: 5
+max_hp: 72
+ac: 17
+rob_multiplier: 2.0
+awareness: 10
+ai_domain: aloha_smuggler_king_combat
+respawn_delay: "10m"
+abilities:
+  brutality: 14
+  quickness: 16
+  grit: 15
+  reasoning: 12
+  savvy: 16
+  flair: 12
+loot:
+  currency:
+    min: 100
+    max: 250
+  items:
+    - item: scrap_metal
+      chance: 0.6
+      min_qty: 2
+      max_qty: 4
+    - item: medkit
+      chance: 0.4
+      min_qty: 1
+      max_qty: 2
+    - item: kevlar_vest
+      chance: 0.25
+      min_qty: 1
+      max_qty: 1
+weapon:
+  - id: rebar_club
+    weight: 2
+  - id: steel_pipe
+    weight: 3
+armor:
+  - id: kevlar_vest
+    weight: 3
+  - id: leather_jacket
+    weight: 2
+taunts:
+  - "Every deal through Aloha passes through me. Every. Single. One."
+  - "You think neutral zone means safe? Wrong. It means my rules."
+  - "The sentries answer to the council. The council owes me favors."
+  - "I've buried better threats than you in this scrap yard."
+  - "The neutral zone is a lie I sell to keep the credits flowing."
+  - "You should have paid the toll and kept walking."
+  - "I didn't build this operation to lose it to someone like you."

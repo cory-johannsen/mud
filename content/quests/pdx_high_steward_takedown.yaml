@@ -1,0 +1,19 @@
+id: pdx_high_steward_takedown
+title: High Steward Takedown
+description: >
+  High Steward Manifest has turned PDX International into a cult empire,
+  using cargo doctrine to justify violent control of the tarmac and hangars.
+  His cultists attack scavenger camps and demand tribute from anyone
+  trying to salvage the airport's vast stores. Taking him down from the
+  control tower would collapse the cult's command structure.
+giver_npc_id: pdx_international_quest_giver
+repeatable: false
+objectives:
+  - id: defeat_pdx_high_steward
+    type: kill
+    description: Defeat High Steward Manifest
+    target_id: pdx_high_steward
+    quantity: 1
+rewards:
+  xp: 500
+  credits: 280

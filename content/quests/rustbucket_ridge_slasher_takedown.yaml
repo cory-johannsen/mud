@@ -1,0 +1,19 @@
+id: rustbucket_ridge_slasher_takedown
+title: Slasher Takedown
+description: >
+  The Slasher's Blood Camp has terrorized Rustbucket Ridge's residents
+  for months, extorting protection money and eliminating anyone who
+  refuses to pay. His den at the heart of the trailer park is where
+  the terror originates. Clearing it would allow the ridge's legitimate
+  residents to breathe again.
+giver_npc_id: rustbucket_ridge_quest_giver
+repeatable: false
+objectives:
+  - id: defeat_rustbucket_ridge_slasher
+    type: kill
+    description: Defeat the Slasher
+    target_id: rustbucket_ridge_slasher
+    quantity: 1
+rewards:
+  xp: 500
+  credits: 280

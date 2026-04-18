@@ -1,0 +1,19 @@
+id: ne_portland_brew_lord_takedown
+title: Brew Lord Takedown
+description: >
+  Dex the Brew Lord has used his alcohol monopoly to transform Northeast
+  Portland's brewery district into a personal fiefdom, funding enforcers
+  and extorting every faction from the bike couriers to the gallery gangs.
+  Breaking his hold on the brewery compound would free the district from
+  the tax that funds most of its violence.
+giver_npc_id: ne_portland_quest_giver
+repeatable: false
+objectives:
+  - id: defeat_ne_portland_brew_lord
+    type: kill
+    description: Defeat Dex the Brew Lord
+    target_id: ne_portland_brew_lord
+    quantity: 1
+rewards:
+  xp: 480
+  credits: 260

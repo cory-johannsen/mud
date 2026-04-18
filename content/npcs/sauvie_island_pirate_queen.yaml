@@ -1,0 +1,57 @@
+id: sauvie_island_pirate_queen
+name: Captain Red Moira
+description: >
+  The undisputed queen of Sauvie Island's river pirates rules from the
+  fortified River Dock with an iron hand and a cutlass made from a
+  boat prop blade. Red Moira controls what moves on the Multnomah Channel
+  and takes a cut of everything that doesn't move fast enough. The island
+  farmers hate her. The pirates worship her. The river fears her.
+level: 7
+max_hp: 82
+ac: 17
+rob_multiplier: 2.0
+awareness: 10
+ai_domain: sauvie_island_pirate_queen_combat
+respawn_delay: "10m"
+abilities:
+  brutality: 17
+  quickness: 14
+  grit: 17
+  reasoning: 12
+  savvy: 13
+  flair: 12
+loot:
+  currency:
+    min: 110
+    max: 290
+  items:
+    - item: scrap_metal
+      chance: 0.6
+      min_qty: 2
+      max_qty: 4
+    - item: medkit
+      chance: 0.4
+      min_qty: 1
+      max_qty: 2
+    - item: kevlar_vest
+      chance: 0.25
+      min_qty: 1
+      max_qty: 1
+weapon:
+  - id: rebar_club
+    weight: 2
+  - id: steel_pipe
+    weight: 3
+armor:
+  - id: kevlar_vest
+    weight: 2
+  - id: leather_jacket
+    weight: 3
+taunts:
+  - "The channel is mine. The dock is mine. Right now, so are you."
+  - "I've sunk bigger threats than you and fed them to the sturgeon."
+  - "Red Moira doesn't negotiate with people who come armed to her dock."
+  - "Every boat on this river pays tribute or pays in blood. Choose."
+  - "The island council thinks they run things here. I let them think that."
+  - "My crew has claimed this waterway for three years. You won't take it in three minutes."
+  - "The Multnomah Channel runs red when I'm angry. Get ready to see it."

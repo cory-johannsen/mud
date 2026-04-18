@@ -1,0 +1,57 @@
+id: hillsboro_knight_commander
+name: Knight-Commander Valdris
+description: >
+  Encased in the heaviest server-rack armor in the Kingdom, Valdris earned
+  the commander's position by defeating three challengers in the training yard.
+  She maintains the armory with obsessive precision and personally oversees
+  the forging of every weapon issued to the Kingdom's knights. Her blade
+  is a sharpened server blade half a meter long, and she knows how to use it.
+level: 7
+max_hp: 85
+ac: 19
+rob_multiplier: 2.0
+awareness: 10
+ai_domain: hillsboro_knight_commander_combat
+respawn_delay: "10m"
+abilities:
+  brutality: 18
+  quickness: 12
+  grit: 18
+  reasoning: 12
+  savvy: 10
+  flair: 10
+loot:
+  currency:
+    min: 100
+    max: 280
+  items:
+    - item: scrap_metal
+      chance: 0.6
+      min_qty: 2
+      max_qty: 4
+    - item: medkit
+      chance: 0.4
+      min_qty: 1
+      max_qty: 2
+    - item: kevlar_vest
+      chance: 0.25
+      min_qty: 1
+      max_qty: 1
+weapon:
+  - id: rebar_club
+    weight: 3
+  - id: steel_pipe
+    weight: 2
+armor:
+  - id: kevlar_vest
+    weight: 3
+  - id: leather_jacket
+    weight: 2
+taunts:
+  - "The armory is the Kingdom's spine. You won't break it."
+  - "Every weapon here was forged by my hand. This one is for you."
+  - "Knights train every day for the moment an enemy enters these halls."
+  - "Server-rack armor has turned better blades than yours."
+  - "The Kingdom's strength lives in this room. Leave or prove why you deserve to challenge it."
+  - "I've seen squires die for less than this offense."
+  - "Your defeat will be catalogued and used to train the next generation of knights."

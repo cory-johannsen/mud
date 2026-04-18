@@ -1,0 +1,57 @@
+id: lake_oswego_commandant
+name: Commandant Prescott
+description: >
+  A silver-haired martinet in pressed tactical gear who commands Lake Oswego
+  Nation's military forces from Iron Mountain Overlook. Prescott earned
+  his position by executing three previous commandants for incompetence.
+  He runs sniper qualification from the bunker's firing positions and
+  personally reviews every property violation that earns an armed response.
+level: 7
+max_hp: 80
+ac: 18
+rob_multiplier: 2.0
+awareness: 11
+ai_domain: lake_oswego_commandant_combat
+respawn_delay: "10m"
+abilities:
+  brutality: 16
+  quickness: 14
+  grit: 17
+  reasoning: 14
+  savvy: 12
+  flair: 10
+loot:
+  currency:
+    min: 110
+    max: 300
+  items:
+    - item: scrap_metal
+      chance: 0.6
+      min_qty: 2
+      max_qty: 4
+    - item: medkit
+      chance: 0.4
+      min_qty: 1
+      max_qty: 2
+    - item: kevlar_vest
+      chance: 0.25
+      min_qty: 1
+      max_qty: 1
+weapon:
+  - id: rebar_club
+    weight: 2
+  - id: steel_pipe
+    weight: 3
+armor:
+  - id: kevlar_vest
+    weight: 3
+  - id: leather_jacket
+    weight: 2
+taunts:
+  - "You've crossed into Lake Oswego Nation without authorization. That's a capital offense."
+  - "Iron Mountain exists to prevent exactly this kind of incursion. I exist to enforce that."
+  - "Property value is meaningless without the force to defend it. I am that force."
+  - "My snipers have overwatch on every approach. You made it this far by luck. Luck ends here."
+  - "The enclave's survival depends on absolute response to threats. You are a threat."
+  - "I've repelled three organized assaults on this position. You are not organized."
+  - "Excellence in defense. That's what separates Lake Oswego from the wasteland."

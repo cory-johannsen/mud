@@ -1,0 +1,19 @@
+id: hillsboro_knight_commander_takedown
+title: Knight-Commander Takedown
+description: >
+  Knight-Commander Valdris controls Hillsboro's military arsenal and
+  personally oversees the brutal conscription of serfs into the knight
+  order. Without her leadership, the Kingdom's military machine loses
+  its edge. The armory hall is the heart of Hillsboro's capacity for
+  organized violence.
+giver_npc_id: hillsboro_quest_giver
+repeatable: false
+objectives:
+  - id: defeat_hillsboro_knight_commander
+    type: kill
+    description: Defeat Knight-Commander Valdris
+    target_id: hillsboro_knight_commander
+    quantity: 1
+rewards:
+  xp: 500
+  credits: 280

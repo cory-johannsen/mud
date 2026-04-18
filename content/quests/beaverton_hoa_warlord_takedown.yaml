@@ -1,0 +1,19 @@
+id: beaverton_hoa_warlord_takedown
+title: Director Grunfeld Takedown
+description: >
+  Director Grunfeld has turned Beaverton's HOA enforcement into a
+  reign of bureaucratic terror, issuing death sentences for parking
+  violations and purging anyone who questions the free state's
+  increasingly erratic edicts. Removing him from the Mall Enforcement
+  Core might be the only way to reform the system.
+giver_npc_id: beaverton_quest_giver
+repeatable: false
+objectives:
+  - id: defeat_beaverton_hoa_warlord
+    type: kill
+    description: Defeat Director Grunfeld
+    target_id: beaverton_hoa_warlord
+    quantity: 1
+rewards:
+  xp: 480
+  credits: 260

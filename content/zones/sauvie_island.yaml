@@ -333,6 +333,7 @@ zone:
       atmosphere: smoky
   - id: sauvie_river_dock
     title: River Dock
+    boss_room: true
     description: 'A ramshackle dock extends into the Multnomah Channel on barnacle-crusted
 
       pilings. Boats of various sizes are tied off — rowboats, a pontoon
@@ -354,6 +355,9 @@ zone:
     - template: river_pirate
       count: 1
       respawn_after: 5m
+    - template: sauvie_island_pirate_queen
+      count: 1
+      respawn_after: 10m
     properties:
       lighting: overcast
       atmosphere: wind

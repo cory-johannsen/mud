@@ -1,0 +1,18 @@
+id: aloha_smuggler_king_takedown
+title: Smuggler King Takedown
+description: >
+  The Smuggler King has been manipulating the Aloha Neutral Zone from the
+  shadows for years, controlling black market trade and corrupting the sentry
+  councils. The zone's uneasy peace depends on cutting off his operation
+  at the source — in the scrap yard where he holds court.
+giver_npc_id: aloha_quest_giver
+repeatable: false
+objectives:
+  - id: defeat_aloha_smuggler_king
+    type: kill
+    description: Defeat the Smuggler King
+    target_id: aloha_smuggler_king
+    quantity: 1
+rewards:
+  xp: 450
+  credits: 250

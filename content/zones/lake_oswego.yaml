@@ -200,6 +200,7 @@ zone:
       atmosphere: commerce
   - id: lo_iron_mountain
     title: Iron Mountain Overlook
+    boss_room: true
     description: 'The hilltop offers a commanding view of the entire enclave
 
       and the surrounding wasteland beyond. Sniper nests are dug
@@ -216,6 +217,13 @@ zone:
       target: lo_tennis_grounds
     map_x: 8
     map_y: 2
+    spawns:
+    - template: lake_oswego_commandant
+      count: 1
+      respawn_after: 10m
+    - template: country_club_sniper
+      count: 2
+      respawn_after: 5m
     properties:
       lighting: exposed
       atmosphere: windswept

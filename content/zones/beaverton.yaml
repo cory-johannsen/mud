@@ -599,11 +599,15 @@ zone:
     - template: beaverton_hireling
       count: 1
       respawn_after: 0s
+    - template: beaverton_quest_giver
+      count: 1
+      respawn_after: 0s
     properties:
       lighting: overcast
       atmosphere: commerce
   - id: beav_mall_core
     title: Mall Enforcement Core
+    boss_room: true
     description: |
       The reinforced core of the Beaverton Town Center mall serves as the nerve
       center of the Free State's enforcement apparatus. Steel blast doors seal
@@ -626,6 +630,9 @@ zone:
     - template: compound_guard
       count: 1
       respawn_after: 5m
+    - template: beaverton_hoa_warlord
+      count: 1
+      respawn_after: 10m
     properties:
       lighting: fluorescent
       atmosphere: tense

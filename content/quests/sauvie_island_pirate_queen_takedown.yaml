@@ -1,0 +1,19 @@
+id: sauvie_island_pirate_queen_takedown
+title: Pirate Queen Takedown
+description: >
+  Captain Red Moira's river pirates have strangled Sauvie Island's trade
+  routes, seizing cargo and demanding tribute from the farming collective.
+  The island's food production suffers under her tax, and her river dock
+  has become a fortified stronghold. Taking her down would free the
+  channel and restore legitimate commerce.
+giver_npc_id: sauvie_island_quest_giver
+repeatable: false
+objectives:
+  - id: defeat_sauvie_island_pirate_queen
+    type: kill
+    description: Defeat Captain Red Moira
+    target_id: sauvie_island_pirate_queen
+    quantity: 1
+rewards:
+  xp: 500
+  credits: 290

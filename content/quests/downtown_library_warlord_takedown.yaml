@@ -1,0 +1,19 @@
+id: downtown_library_warlord_takedown
+title: The Archivist Takedown
+description: >
+  The Archivist has held the Central Library for a decade, cataloguing
+  debts and dispensing violence from behind its concrete walls. His
+  card-catalogue execution orders keep the downtown core in a state of
+  perpetual fear. Taking him down would open up a major strategic position
+  in the heart of Portland's ruins.
+giver_npc_id: downtown_quest_giver
+repeatable: false
+objectives:
+  - id: defeat_downtown_library_warlord
+    type: kill
+    description: Defeat the Archivist
+    target_id: downtown_library_warlord
+    quantity: 1
+rewards:
+  xp: 480
+  credits: 260

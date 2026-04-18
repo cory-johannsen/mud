@@ -448,6 +448,7 @@ zone:
       atmosphere: industrial
   - id: pdx_control_tower
     title: Control Tower
+    boss_room: true
     danger_level: sketchy
     description: 'The air traffic control tower rises above the airport like a
 
@@ -473,6 +474,9 @@ zone:
     - template: rogue_security
       count: 1
       respawn_after: 5m
+    - template: pdx_high_steward
+      count: 1
+      respawn_after: 10m
     properties:
       lighting: exposed
       atmosphere: wind

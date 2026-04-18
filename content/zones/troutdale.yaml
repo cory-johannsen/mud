@@ -238,6 +238,7 @@ zone:
       atmosphere: gale
   - id: trout_multnomah_falls
     title: Multnomah Falls
+    boss_room: true
     description: 'The great waterfall plunges six hundred feet down the basalt cliff face,
 
       its roar drowning out even the gorge winds. The old Benson Bridge
@@ -261,6 +262,9 @@ zone:
     - template: wind_walker
       count: 1
       respawn_after: 5m
+    - template: troutdale_gorge_king
+      count: 1
+      respawn_after: 10m
     properties:
       lighting: misty
       atmosphere: roaring_water

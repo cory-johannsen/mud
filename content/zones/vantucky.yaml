@@ -816,6 +816,7 @@ zone:
       cover_hp: 3
   - id: vantucky_ammo_depot
     title: Ammo Depot
+    boss_room: true
     description: 'A fortified storage building behind the shooting range serves as the
 
       militia''s ammunition depot. The cinderblock walls are reinforced with
@@ -841,6 +842,9 @@ zone:
     - template: compound_guard
       count: 1
       respawn_after: 5m
+    - template: vantucky_militia_commander
+      count: 1
+      respawn_after: 10m
     properties:
       lighting: dim
       atmosphere: secure

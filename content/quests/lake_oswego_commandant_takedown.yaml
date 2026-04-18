@@ -1,0 +1,19 @@
+id: lake_oswego_commandant_takedown
+title: Commandant Prescott Takedown
+description: >
+  Commandant Prescott orchestrates Lake Oswego Nation's brutal enforcement
+  from Iron Mountain Overlook, authorizing shoot-on-sight orders for
+  anyone who can't prove residency. His military command keeps the enclave
+  locked in perpetual siege mentality. Removing him could force a more
+  reasonable leadership to the surface.
+giver_npc_id: lake_oswego_quest_giver
+repeatable: false
+objectives:
+  - id: defeat_lake_oswego_commandant
+    type: kill
+    description: Defeat Commandant Prescott
+    target_id: lake_oswego_commandant
+    quantity: 1
+rewards:
+  xp: 500
+  credits: 290

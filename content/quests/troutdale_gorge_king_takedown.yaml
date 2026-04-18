@@ -1,0 +1,19 @@
+id: troutdale_gorge_king_takedown
+title: Wind King Takedown
+description: >
+  Wind King Voss rules the gorge approaches through a combination of
+  mystic authority over the wind walkers and brute force applied by
+  his gorge bandits. Multnomah Falls has become his fortress, and
+  anyone trying to use the I-84 corridor without paying tribute faces
+  his wrath. Defeating him would open the gorge routes.
+giver_npc_id: troutdale_quest_giver
+repeatable: false
+objectives:
+  - id: defeat_troutdale_gorge_king
+    type: kill
+    description: Defeat Wind King Voss
+    target_id: troutdale_gorge_king
+    quantity: 1
+rewards:
+  xp: 480
+  credits: 260

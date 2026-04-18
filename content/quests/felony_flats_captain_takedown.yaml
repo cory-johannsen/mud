@@ -1,0 +1,19 @@
+id: felony_flats_captain_takedown
+title: The Captain Takedown
+description: >
+  The Captain runs Felony Flats' most brutal protection racket from
+  the Enforcer Den, collecting tribute from every motel, crack house,
+  and strip mall in the district. Taking him down would break the
+  enforcer hierarchy and give the Flats' residents a chance to breathe
+  without paying for the privilege.
+giver_npc_id: felony_flats_quest_giver
+repeatable: false
+objectives:
+  - id: defeat_felony_flats_enforcer_lord
+    type: kill
+    description: Defeat the Captain
+    target_id: felony_flats_enforcer_lord
+    quantity: 1
+rewards:
+  xp: 480
+  credits: 260

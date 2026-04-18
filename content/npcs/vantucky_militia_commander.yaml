@@ -1,0 +1,58 @@
+id: vantucky_militia_commander
+name: Colonel Hardcase
+description: >
+  A barrel-chested ex-prepper who turned his survivalist obsession into a
+  paramilitary empire. Hardcase controls the Vantucky ammo depot with
+  military precision and distributes weapons as currency, power, and leverage.
+  He drills his compound guards daily and views anyone outside the militia
+  as a potential enemy. The ammo depot is his inner sanctum, and he defends
+  it with everything he has.
+level: 7
+max_hp: 85
+ac: 19
+rob_multiplier: 2.0
+awareness: 10
+ai_domain: vantucky_militia_commander_combat
+respawn_delay: "10m"
+abilities:
+  brutality: 18
+  quickness: 11
+  grit: 19
+  reasoning: 12
+  savvy: 11
+  flair: 9
+loot:
+  currency:
+    min: 110
+    max: 290
+  items:
+    - item: scrap_metal
+      chance: 0.6
+      min_qty: 2
+      max_qty: 4
+    - item: medkit
+      chance: 0.4
+      min_qty: 1
+      max_qty: 2
+    - item: kevlar_vest
+      chance: 0.25
+      min_qty: 1
+      max_qty: 1
+weapon:
+  - id: rebar_club
+    weight: 3
+  - id: steel_pipe
+    weight: 2
+armor:
+  - id: kevlar_vest
+    weight: 3
+  - id: leather_jacket
+    weight: 2
+taunts:
+  - "The ammo depot is Vantucky's beating heart. I am its guardian."
+  - "I was prepping for exactly this situation long before it happened."
+  - "Free territory means free to defend itself. That's my job."
+  - "The militia is the only law worth having out here. Compound law."
+  - "You think you can walk into my depot? I've got rounds counted to the shell."
+  - "Everyone in Vantucky either works with me or works against me. Pick one."
+  - "Colonel Hardcase earned that rank the hard way. Today you'll see how."

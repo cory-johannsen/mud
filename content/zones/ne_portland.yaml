@@ -461,6 +461,7 @@ zone:
       atmosphere: desolate
   - id: ne_brewery_compound
     title: Brewery Compound
+    boss_room: true
     description: 'A cluster of old craft breweries has been welded together into a
 
       fortified compound. The air is thick with the smell of fermenting
@@ -482,6 +483,9 @@ zone:
     - template: brew_warlord
       count: 1
       respawn_after: 5m
+    - template: ne_portland_brew_lord
+      count: 1
+      respawn_after: 10m
     properties:
       lighting: firelight
       atmosphere: smoke

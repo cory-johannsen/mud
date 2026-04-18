@@ -1,0 +1,57 @@
+id: downtown_library_warlord
+name: The Archivist
+description: >
+  A gaunt, bespectacled man who seized the Central Library a decade ago and
+  has held it through a combination of paranoia, firepower, and genuine
+  organizational genius. He catalogs every debt, every favor, and every slight
+  in the card catalogue, which he consults before every execution. His militia
+  calls him the Archivist. His enemies call him something else, but only once.
+level: 6
+max_hp: 75
+ac: 17
+rob_multiplier: 2.0
+awareness: 10
+ai_domain: downtown_library_warlord_combat
+respawn_delay: "10m"
+abilities:
+  brutality: 15
+  quickness: 12
+  grit: 16
+  reasoning: 16
+  savvy: 14
+  flair: 9
+loot:
+  currency:
+    min: 90
+    max: 230
+  items:
+    - item: scrap_metal
+      chance: 0.6
+      min_qty: 2
+      max_qty: 4
+    - item: medkit
+      chance: 0.4
+      min_qty: 1
+      max_qty: 2
+    - item: kevlar_vest
+      chance: 0.25
+      min_qty: 1
+      max_qty: 1
+weapon:
+  - id: rebar_club
+    weight: 2
+  - id: steel_pipe
+    weight: 3
+armor:
+  - id: kevlar_vest
+    weight: 3
+  - id: leather_jacket
+    weight: 2
+taunts:
+  - "I have your name in the catalogue. The entry under 'threats' is extensive."
+  - "Knowledge is power. I have catalogued every way to end you."
+  - "This library is the last repository of order in downtown. I will protect it."
+  - "Every challenger to my authority has been filed under 'Deceased.'"
+  - "The card catalogue doesn't lie. Your fate has already been indexed."
+  - "You're about to become a footnote."
+  - "I built this fortress from paper and gunpowder. Don't underestimate either."

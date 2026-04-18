@@ -1,0 +1,58 @@
+id: ross_island_pit_king
+name: The Pit King
+description: >
+  The supreme authority of Ross Island's gravel operation, who rules from
+  the center of the pit in a cluster of armored prefab buildings. Larger
+  and meaner than any of his workers, the Pit King enforces productivity
+  through terror and tribute, collecting a cut of every load hauled up
+  the switchback road. His great-coat is stained with gravel dust and
+  the evidence of past confrontations.
+level: 7
+max_hp: 88
+ac: 18
+rob_multiplier: 2.0
+awareness: 9
+ai_domain: ross_island_pit_king_combat
+respawn_delay: "10m"
+abilities:
+  brutality: 20
+  quickness: 10
+  grit: 19
+  reasoning: 9
+  savvy: 10
+  flair: 9
+loot:
+  currency:
+    min: 110
+    max: 300
+  items:
+    - item: scrap_metal
+      chance: 0.6
+      min_qty: 2
+      max_qty: 4
+    - item: medkit
+      chance: 0.4
+      min_qty: 1
+      max_qty: 2
+    - item: kevlar_vest
+      chance: 0.25
+      min_qty: 1
+      max_qty: 1
+weapon:
+  - id: rebar_club
+    weight: 3
+  - id: steel_pipe
+    weight: 2
+armor:
+  - id: kevlar_vest
+    weight: 3
+  - id: leather_jacket
+    weight: 2
+taunts:
+  - "The island is mine. Everything you see was won in blood."
+  - "I've put down four challengers in this pit. The gravel ate them all."
+  - "You want the king? You found him. Now pay the price."
+  - "This operation runs because I break anyone who threatens it. Starting with you."
+  - "The gravel pit is my throne. You've just walked into the throne room."
+  - "Bridge tolls, pit tribute, river trade — all mine. Including your fate."
+  - "Nobody crosses this pit without my permission. You just did."

@@ -1,0 +1,58 @@
+id: troutdale_gorge_king
+name: Wind King Voss
+description: >
+  A wild-haired mystic-warlord who rules the gorge approaches from Multnomah
+  Falls, claiming divine mandate from the wind itself. Voss commands both
+  the wind walkers and the gorge bandits, using the cult's mysticism to
+  motivate the faithful and brute force for everyone else. He wears layered
+  salvaged gear decorated with feathers, and fights with a brutal efficiency
+  that contradicts the mystical persona.
+level: 6
+max_hp: 78
+ac: 17
+rob_multiplier: 2.0
+awareness: 10
+ai_domain: troutdale_gorge_king_combat
+respawn_delay: "10m"
+abilities:
+  brutality: 17
+  quickness: 13
+  grit: 16
+  reasoning: 11
+  savvy: 12
+  flair: 14
+loot:
+  currency:
+    min: 90
+    max: 240
+  items:
+    - item: scrap_metal
+      chance: 0.6
+      min_qty: 2
+      max_qty: 4
+    - item: medkit
+      chance: 0.4
+      min_qty: 1
+      max_qty: 2
+    - item: kevlar_vest
+      chance: 0.25
+      min_qty: 1
+      max_qty: 1
+weapon:
+  - id: rebar_club
+    weight: 3
+  - id: steel_pipe
+    weight: 2
+armor:
+  - id: kevlar_vest
+    weight: 2
+  - id: leather_jacket
+    weight: 3
+taunts:
+  - "The wind brought you here. The wind will scatter what remains."
+  - "Multnomah Falls is a sacred place. You've made it a battlefield. So be it."
+  - "The gorge runners answer to the wind. The wind answers to me."
+  - "You think the falls are beautiful? Wait until you see the view from the bottom."
+  - "Every traveler through the gorge pays tribute to the Wind King."
+  - "The mystic path and the violent path converge here. At me."
+  - "The gorge has claimed better fighters than you. The wind remembers them."

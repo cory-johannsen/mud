@@ -1,0 +1,19 @@
+id: the_couve_warlord_takedown
+title: Mall King Takedown
+description: >
+  Mall King Grogan has consolidated control of Vancouver's key territories
+  from his throne in the Vancouver Mall, extracting tribute from Jantzen
+  Beach to Fourth Plain. His network of militia enforcers makes expansion
+  south toward Portland nearly impossible. Defeating him would fracture
+  the Couve's power structure.
+giver_npc_id: the_couve_quest_giver
+repeatable: false
+objectives:
+  - id: defeat_the_couve_warlord
+    type: kill
+    description: Defeat Mall King Grogan
+    target_id: the_couve_warlord
+    quantity: 1
+rewards:
+  xp: 480
+  credits: 270

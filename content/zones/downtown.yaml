@@ -599,6 +599,7 @@ zone:
   - id: dt_main_library
     title: Main Library Fortress
     core: true
+    boss_room: true
     description: |
       The central library's modernist concrete shell is almost perfectly defensible.
       A faction has made it their seat — the upper floors are occupied, the entrance
@@ -617,6 +618,9 @@ zone:
     - template: 82nd_enforcer
       count: 1
       respawn_after: 6m
+    - template: downtown_library_warlord
+      count: 1
+      respawn_after: 10m
     properties:
       lighting: controlled
       atmosphere: occupied

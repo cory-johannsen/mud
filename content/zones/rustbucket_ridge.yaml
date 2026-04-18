@@ -1132,6 +1132,7 @@ zone:
   - id: the_slashers_den
     title: The Slasher's Den
     core: true
+    boss_room: true
     description: This trailer belongs to Grit, a former gang leader who's turned Shiv Way into his personal turf. Grit's trailer
       is heavily fortified, with armed guards often lurking outside. It's a hub for illegal dealings, weapon sales, and brawls.
       Inside, the trailer is filled with loot from years of crime, and Grit runs the show with an iron fist.
@@ -1149,6 +1150,9 @@ zone:
     - template: commissar
       count: 1
       respawn_after: 5m
+    - template: rustbucket_ridge_slasher
+      count: 1
+      respawn_after: 10m
     properties:
       area: shiv_way
     equipment:

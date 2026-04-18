@@ -387,6 +387,9 @@ zone:
     - template: battleground_job_trainer
       count: 1
       respawn_after: 0s
+    - template: battleground_quest_giver
+      count: 1
+      respawn_after: 0s
     properties:
       lighting: fluorescent
       atmosphere: antiseptic
@@ -747,6 +750,7 @@ zone:
       atmosphere: oppressive
   - id: battle_war_room
     core: true
+    boss_room: true
     title: War Room
     description: 'A former bank vault converted into a strategic planning chamber.
 
@@ -771,6 +775,9 @@ zone:
     - template: lieutenant
       count: 3
       respawn_after: 5m
+    - template: battleground_grand_commissar
+      count: 1
+      respawn_after: 10m
     properties:
       lighting: dim
       atmosphere: strategic

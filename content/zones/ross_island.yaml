@@ -400,6 +400,7 @@ zone:
       atmosphere: industrial
   - id: ross_gravel_pit
     title: Gravel Pit
+    boss_room: true
     description: 'The massive excavation is a world unto itself. Terraced walls
 
       of grey stone and compacted earth rise on all sides. At the
@@ -425,6 +426,9 @@ zone:
     - template: gravel_pit_boss
       count: 1
       respawn_after: 5m
+    - template: ross_island_pit_king
+      count: 1
+      respawn_after: 10m
     properties:
       lighting: overcast
       atmosphere: industrial

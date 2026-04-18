@@ -1,0 +1,58 @@
+id: beaverton_hoa_warlord
+name: Director Grunfeld
+description: >
+  The self-styled Director of the Beaverton Free State wears a modified riot
+  suit over a collared shirt and carries a reinforced clipboard that doubles
+  as a bludgeon. Grunfeld rose through the HOA enforcement ranks by writing
+  more violations than anyone else, then had his rivals cited for unauthorized
+  personal conduct. He runs the Mall Enforcement Core with bureaucratic
+  brutality and a zero-tolerance policy on dissent.
+level: 6
+max_hp: 78
+ac: 18
+rob_multiplier: 2.0
+awareness: 9
+ai_domain: beaverton_hoa_warlord_combat
+respawn_delay: "10m"
+abilities:
+  brutality: 17
+  quickness: 11
+  grit: 17
+  reasoning: 13
+  savvy: 12
+  flair: 10
+loot:
+  currency:
+    min: 90
+    max: 230
+  items:
+    - item: scrap_metal
+      chance: 0.6
+      min_qty: 2
+      max_qty: 4
+    - item: medkit
+      chance: 0.4
+      min_qty: 1
+      max_qty: 2
+    - item: kevlar_vest
+      chance: 0.25
+      min_qty: 1
+      max_qty: 1
+weapon:
+  - id: rebar_club
+    weight: 2
+  - id: steel_pipe
+    weight: 3
+armor:
+  - id: kevlar_vest
+    weight: 3
+  - id: leather_jacket
+    weight: 2
+taunts:
+  - "You are in violation of Free State Code 47.2 — unauthorized premises entry."
+  - "Your resistance has been logged. The fine will be substantial."
+  - "Order is not negotiable in the Free State. Neither am I."
+  - "I've cited people for worse offenses and watched them cry. You won't be different."
+  - "The mall enforcement apparatus will neutralize your threat. That's policy."
+  - "Every infraction gets documented. Starting with this one."
+  - "The Free State does not parley with vandals and trespassers."

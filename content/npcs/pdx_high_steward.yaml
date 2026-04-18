@@ -1,0 +1,58 @@
+id: pdx_high_steward
+name: High Steward Manifest
+description: >
+  The self-appointed spiritual and military commander of the PDX cargo cult
+  wears a salvaged pilot's uniform layered with boarding passes, luggage
+  tags, and sacred manifests. Manifest claims divine authority granted by
+  the sky gods and backs it up with a brutal talent for violence. He sits
+  atop the control tower, interpreting cargo law and sending his cultists
+  to enforce it across the tarmac.
+level: 7
+max_hp: 80
+ac: 18
+rob_multiplier: 2.0
+awareness: 10
+ai_domain: pdx_high_steward_combat
+respawn_delay: "10m"
+abilities:
+  brutality: 17
+  quickness: 12
+  grit: 17
+  reasoning: 12
+  savvy: 11
+  flair: 12
+loot:
+  currency:
+    min: 100
+    max: 270
+  items:
+    - item: scrap_metal
+      chance: 0.6
+      min_qty: 2
+      max_qty: 4
+    - item: medkit
+      chance: 0.4
+      min_qty: 1
+      max_qty: 2
+    - item: kevlar_vest
+      chance: 0.25
+      min_qty: 1
+      max_qty: 1
+weapon:
+  - id: rebar_club
+    weight: 3
+  - id: steel_pipe
+    weight: 2
+armor:
+  - id: kevlar_vest
+    weight: 3
+  - id: leather_jacket
+    weight: 2
+taunts:
+  - "The sky gods have revealed your fate in the sacred manifest. It is not good."
+  - "I am the voice of the cargo law. Cargo law is absolute."
+  - "The control tower sees all approaches. We saw you coming hours ago."
+  - "Every plane on this tarmac is a temple. You have desecrated sacred ground."
+  - "The manifest shows no authorized entry for you. You will be processed and removed."
+  - "The sky gods demand sacrifice from those who disrupt the sacred order."
+  - "I have guided this cult from chaos to doctrine. You cannot undo that with violence."

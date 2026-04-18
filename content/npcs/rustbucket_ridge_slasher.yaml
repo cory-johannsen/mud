@@ -1,0 +1,58 @@
+id: rustbucket_ridge_slasher
+name: The Slasher
+description: >
+  A terrifyingly efficient killer who carved out a bloody corner of Rustbucket
+  Ridge and holds it through pure violent intimidation. The Slasher wears
+  a patchwork of salvaged armor decorated with trophies from fallen enemies.
+  Nobody in the ridge knows where he came from, only that the Blood Camp
+  appeared overnight and bodies appeared with it. His den is the most
+  feared place in the trailer park.
+level: 7
+max_hp: 90
+ac: 18
+rob_multiplier: 2.0
+awareness: 9
+ai_domain: rustbucket_ridge_slasher_combat
+respawn_delay: "10m"
+abilities:
+  brutality: 20
+  quickness: 12
+  grit: 18
+  reasoning: 9
+  savvy: 10
+  flair: 9
+loot:
+  currency:
+    min: 100
+    max: 280
+  items:
+    - item: scrap_metal
+      chance: 0.6
+      min_qty: 2
+      max_qty: 4
+    - item: medkit
+      chance: 0.4
+      min_qty: 1
+      max_qty: 2
+    - item: kevlar_vest
+      chance: 0.25
+      min_qty: 1
+      max_qty: 1
+weapon:
+  - id: rebar_club
+    weight: 3
+  - id: steel_pipe
+    weight: 2
+armor:
+  - id: kevlar_vest
+    weight: 3
+  - id: leather_jacket
+    weight: 2
+taunts:
+  - "The Blood Camp exists because I made it exist. Nobody gave it to me."
+  - "They call me the Slasher. I've earned every letter of that name."
+  - "Rustbucket Ridge has laws. Mine are the only ones enforced in this den."
+  - "You walked into my nest. That's the last mistake a lot of people made."
+  - "The trophies on my armor used to be people. Add another set."
+  - "Fear keeps this corner of the ridge productive. Let me remind you why."
+  - "Nobody challenges the Slasher twice. The den has room for another example."

@@ -1,0 +1,19 @@
+id: vantucky_militia_commander_takedown
+title: Colonel Hardcase Takedown
+description: >
+  Colonel Hardcase controls Vantucky's entire ammo supply and uses that
+  leverage to keep every faction in the territory under his thumb.
+  His militia conscripts settlers and hoards weapons that could
+  help the entire region. Taking him down at the ammo depot would
+  break his monopoly on firepower in Vantucky.
+giver_npc_id: vantucky_quest_giver
+repeatable: false
+objectives:
+  - id: defeat_vantucky_militia_commander
+    type: kill
+    description: Defeat Colonel Hardcase
+    target_id: vantucky_militia_commander
+    quantity: 1
+rewards:
+  xp: 500
+  credits: 290

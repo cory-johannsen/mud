@@ -1,0 +1,19 @@
+id: battleground_grand_commissar_takedown
+title: Grand Commissar Takedown
+description: >
+  Grand Commissar Volkov runs the Battleground Collective's war room and
+  authorizes every reeducation sentence, every purge, and every attack
+  on outside settlements. Taking him down would crack the collective's
+  military command and give the survivors a chance to build something less
+  oppressive from the ruins.
+giver_npc_id: battleground_quest_giver
+repeatable: false
+objectives:
+  - id: defeat_battleground_grand_commissar
+    type: kill
+    description: Defeat Grand Commissar Volkov
+    target_id: battleground_grand_commissar
+    quantity: 1
+rewards:
+  xp: 480
+  credits: 270
