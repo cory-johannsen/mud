@@ -1,0 +1,16 @@
+id: sei_chemical_enforcer_sweep
+title: Chemical District Sweep
+description: >
+  Chemical enforcers have locked down the industrial corridor. Clear out three
+  of them to open the routes between the warehouses and the river.
+giver_npc_id: se_industrial_quest_giver
+repeatable: false
+objectives:
+  - id: kill_chemical_enforcers
+    type: kill
+    description: Eliminate 3 Chemical Enforcers
+    target_id: chemical_enforcer
+    quantity: 3
+rewards:
+  xp: 320
+  credits: 180

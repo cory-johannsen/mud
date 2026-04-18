@@ -1,0 +1,59 @@
+id: sei_dock_warlord
+name: The Dock Warlord
+description: >
+  A mountain of a man who seized control of the dry dock through sheer brutality.
+  He wears salvaged plate armor welded from shipping container panels, and carries
+  a crane hook on a length of chain as a weapon. His word is law on the waterfront —
+  until someone proves otherwise.
+level: 7
+max_hp: 85
+ac: 18
+rob_multiplier: 2.0
+awareness: 9
+ai_domain: dock_warlord_combat
+respawn_delay: "10m"
+abilities:
+  brutality: 19
+  quickness: 10
+  grit: 18
+  reasoning: 9
+  savvy: 11
+  flair: 10
+loot:
+  currency:
+    min: 80
+    max: 250
+  items:
+    - item: scrap_metal
+      chance: 0.6
+      min_qty: 2
+      max_qty: 4
+    - item: medkit
+      chance: 0.4
+      min_qty: 1
+      max_qty: 2
+    - item: kevlar_vest
+      chance: 0.3
+      min_qty: 1
+      max_qty: 1
+weapon:
+  - id: rebar_club
+    weight: 3
+  - id: steel_pipe
+    weight: 2
+armor:
+  - id: kevlar_vest
+    weight: 3
+  - id: leather_jacket
+    weight: 2
+taunts:
+  - "I own every inch of this dry dock. Prove otherwise."
+  - "You came to the waterfront looking for trouble. You found it."
+  - "The chain and hook — that's how I settled the last argument."
+  - "Nothing moves through this dock without my say-so. Including you."
+  - "I've cracked skulls from the river to the rail yard. You're next."
+  - "Waterfront law: the strongest decides. I've been deciding for years."
+  - "This armor is made from the same steel as this dock. So am I."
+  - "Every challenger rots in the river. Join the queue."
+  - "My crew doesn't lose. Neither do I."
+  - "Take one more step and I'll show you why they call this a dry dock."

@@ -128,6 +128,8 @@ zone:
       target: sei_pipe_yard
     - direction: north
       target: sei_mcloughlin_blvd
+    - direction: west
+      target: sei_pipe_maze
     map_x: -2
     map_y: 2
     danger_level: dangerous
@@ -156,6 +158,8 @@ zone:
       target: sei_crane_yard
     - direction: west
       target: sei_chemical_plant
+    - direction: east
+      target: sei_milwaukie_junction
     map_x: -2
     map_y: 0
     danger_level: dangerous
@@ -182,9 +186,9 @@ zone:
     exits:
     - direction: south
       target: sei_rail_siding
-    - direction: east
-      target: sei_holgate_blvd
-    map_x: 202
+    - direction: west
+      target: sei_mcloughlin_blvd
+    map_x: 0
     map_y: 0
     danger_level: dangerous
     spawns:
@@ -212,9 +216,12 @@ zone:
     exits:
     - direction: west
       target: sei_ross_bridge_approach
+    - direction: north
+      target: sei_derelict_crane
     map_x: 2
     map_y: 4
     danger_level: dangerous
+    boss_room: true
     spawns:
     - template: warehouse_guard
       count: 1
@@ -222,6 +229,9 @@ zone:
     - template: dock_worker
       count: 1
       respawn_after: 5m
+    - template: sei_dock_warlord
+      count: 1
+      respawn_after: 10m
     properties:
       lighting: dim
       atmosphere: fortified
@@ -365,6 +375,8 @@ zone:
     exits:
     - direction: east
       target: sei_mcloughlin_blvd
+    - direction: north
+      target: sei_fuel_depot
     map_x: -4
     map_y: 0
     danger_level: dangerous
@@ -449,7 +461,7 @@ zone:
     exits:
     - direction: north
       target: sei_milwaukie_junction
-    map_x: 200
+    map_x: -2
     map_y: 6
     danger_level: dangerous
     spawns:
@@ -565,6 +577,8 @@ zone:
     exits:
     - direction: north
       target: sei_warehouse_interior
+    - direction: south
+      target: sei_outflow_canal
     map_x: 6
     map_y: 6
     danger_level: dangerous
@@ -623,7 +637,7 @@ zone:
       target: sei_mcloughlin_blvd
     - direction: south
       target: sei_chemical_plant
-    map_x: 202
+    map_x: -4
     map_y: 2
     danger_level: dangerous
     spawns:
@@ -662,6 +676,9 @@ zone:
       count: 1
       respawn_after: 0s
     - template: se_industrial_motel_keeper
+      count: 1
+      respawn_after: 0s
+    - template: se_industrial_quest_giver
       count: 1
       respawn_after: 0s
     properties:
@@ -793,7 +810,7 @@ zone:
     exits:
     - direction: north
       target: sei_rail_siding
-    map_x: 200
+    map_x: -2
     map_y: 8
     danger_level: dangerous
     spawns:

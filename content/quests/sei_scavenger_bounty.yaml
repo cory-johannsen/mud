@@ -1,0 +1,16 @@
+id: sei_scavenger_bounty
+title: Scavenger Bounty
+description: >
+  Industrial scavengers have been stripping critical equipment from the pipe
+  yards and crane yard. Put down four of them before the damage becomes permanent.
+giver_npc_id: se_industrial_quest_giver
+repeatable: false
+objectives:
+  - id: kill_industrial_scavengers
+    type: kill
+    description: Kill 4 Industrial Scavengers
+    target_id: industrial_scav
+    quantity: 4
+rewards:
+  xp: 280
+  credits: 150

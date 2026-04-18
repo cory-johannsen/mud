@@ -1,0 +1,16 @@
+id: sei_dock_clearance
+title: Dock Clearance
+description: >
+  The dry dock has been seized by the Dock Warlord and his crew. Clear them out
+  and bring proof of the warlord's defeat.
+giver_npc_id: se_industrial_quest_giver
+repeatable: false
+objectives:
+  - id: kill_dock_warlord
+    type: kill
+    description: Defeat the Dock Warlord
+    target_id: sei_dock_warlord
+    quantity: 1
+rewards:
+  xp: 450
+  credits: 250
