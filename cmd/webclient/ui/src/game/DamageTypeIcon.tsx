@@ -23,6 +23,9 @@ const DAMAGE_TYPE_MAP: Record<string, DamageTypeIconInfo> = {
   void:        { symbol: '◉', color: '#7050a0' },
 }
 
+/** All recognized damage type strings, derived from DAMAGE_TYPE_MAP. */
+export const KNOWN_DAMAGE_TYPES: readonly string[] = Object.keys(DAMAGE_TYPE_MAP)
+
 const FALLBACK: DamageTypeIconInfo = { symbol: '?', color: '#666' }
 
 export function damageTypeInfo(damageType: string): DamageTypeIconInfo {

@@ -9,7 +9,7 @@ import type {
   SpontaneousUsePoolView,
 } from '../../proto'
 import { HotbarSlotPicker } from '../HotbarSlotPicker'
-import { DamageTypeIcon } from '../DamageTypeIcon'
+import { DamageTypeIcon, KNOWN_DAMAGE_TYPES } from '../DamageTypeIcon'
 
 function SectionLabel({ label }: { label: string }) {
   return <div style={styles.sectionLabel}>{label}</div>
@@ -34,12 +34,6 @@ function UsePips({ remaining, max }: { remaining: number; max: number }) {
 function InfiniteUses() {
   return <span style={styles.infiniteUses} title="Unlimited uses">∞</span>
 }
-
-const KNOWN_DAMAGE_TYPES = [
-  'acid', 'bleed', 'bludgeoning', 'cold', 'electricity', 'fire', 'force',
-  'mental', 'neural', 'piercing', 'poison', 'slashing', 'sonic', 'spirit',
-  'untyped', 'vitality', 'void',
-]
 
 function detectDamageType(line: string): string {
   const lower = line.toLowerCase()
