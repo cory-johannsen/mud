@@ -1798,6 +1798,40 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 		}
 	}
 
+	// Backfill KnownTechs from PreparedTechs for wizard/ranger characters created before the
+	// KnownTechs catalog feature was introduced. Characters that have PreparedTechs but an empty
+	// KnownTechs table would otherwise see no options during rest rearrangement.
+	// This is idempotent: the INSERT uses ON CONFLICT DO NOTHING.
+	if s.knownTechRepo != nil && characterID > 0 &&
+		(sess.CastingModel == ruleset.CastingModelWizard || sess.CastingModel == ruleset.CastingModelRanger) &&
+		len(sess.KnownTechs) == 0 && len(sess.PreparedTechs) > 0 {
+		if sess.KnownTechs == nil {
+			sess.KnownTechs = make(map[int][]string)
+		}
+		for lvl, slots := range sess.PreparedTechs {
+			for _, slot := range slots {
+				if slot == nil {
+					continue
+				}
+				if !containsString(sess.KnownTechs[lvl], slot.TechID) {
+					sess.KnownTechs[lvl] = append(sess.KnownTechs[lvl], slot.TechID)
+				}
+				if addErr := s.knownTechRepo.Add(stream.Context(), characterID, slot.TechID, lvl); addErr != nil {
+					s.logger.Warn("KnownTechs backfill: Add failed",
+						zap.Int64("character_id", characterID),
+						zap.String("tech_id", slot.TechID),
+						zap.Int("level", lvl),
+						zap.Error(addErr),
+					)
+				}
+			}
+		}
+		s.logger.Info("KnownTechs backfilled from PreparedTechs",
+			zap.Int64("character_id", characterID),
+			zap.String("casting_model", string(sess.CastingModel)),
+		)
+	}
+
 	// Retroactively backfill any technology level-up grants that were never applied.
 	// This covers characters created before the archetype level_up_grants bug was fixed.
 	// BackfillLevelUpTechnologies is idempotent: only missing grants (delta > 0) are applied.
