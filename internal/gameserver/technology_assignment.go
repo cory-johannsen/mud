@@ -758,6 +758,10 @@ func RearrangePreparedTechs(
 	// When all pool slots are filled (or [confirm] selected), flush to DB and return.
 	cur := 0
 	totalPoolSlots := len(poolSlots)
+	// backtracking is set to true when the user navigates backward via [back].
+	// Auto-assignment (REQ-TC-17) is suppressed during backtracking so that the
+	// user can navigate through auto-assigned slots and reach earlier interactive slots.
+	backtracking := false
 
 	// remainingByLevel tracks the available pool entries for slot selection.
 	// It is recomputed on each prompt from poolByLevel minus already-chosen techs at the same level.
@@ -791,13 +795,16 @@ func RearrangePreparedTechs(
 		remaining := computeRemaining(cur)
 
 		// REQ-TC-17: Auto-assign without prompting when exactly one eligible tech exists.
-		if len(remaining) == 1 {
+		// Exception: suppress auto-assignment when backtracking so the user can navigate
+		// through previously auto-assigned slots and reach earlier interactive slots.
+		if len(remaining) == 1 && !backtracking {
 			techID := remaining[0].ID
 			inProgress[cur] = techID
 			send(fmt.Sprintf("Level %d, %s %d of %d (auto): %s", ps.level, flavor.SlotNoun, ps.slotNum, ps.totalLevel, techID))
 			cur++
 			continue
 		}
+		backtracking = false
 
 		send(fmt.Sprintf("Level %d, %s %d of %d: choose from pool", ps.level, flavor.SlotNoun, ps.slotNum, ps.totalLevel))
 
@@ -865,8 +872,11 @@ func RearrangePreparedTechs(
 		switch {
 		case chosen == backSentinel:
 			// REQ-TC-16: Navigate back to the previous pool slot.
+			// Set backtracking=true so the next slot (which may have been auto-assigned
+			// with only one option) is still shown to the user for review.
 			if cur > 0 {
 				cur--
+				backtracking = true
 			}
 		case chosen == forwardSentinel:
 			// REQ-TC-16: Navigate forward without changing the current in-progress choice.

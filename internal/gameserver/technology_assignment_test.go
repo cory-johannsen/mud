@@ -667,6 +667,116 @@ func TestRearrangePreparedTechs_SingleEligibleTech_AutoAssigns(t *testing.T) {
 	assert.True(t, found, "auto-assign message must be sent when single tech is auto-assigned")
 }
 
+// REQ-BUG149: When navigating back from a slot that follows an auto-assigned slot,
+// the auto-assigned slot MUST be shown interactively (not re-auto-forwarded),
+// so the user can navigate through it to reach earlier interactive slots.
+func TestRearrangePreparedTechs_BackNavigation_PastAutoAssignedSlot(t *testing.T) {
+	ctx := context.Background()
+	// 4 pool slots at level 1, pool has 3 techs. Slots 1 and 2 are chosen interactively.
+	// Slot 3 has only 1 remaining option (auto-assigned). Slot 4 is the final slot.
+	// Sequence: pick slot1, pick slot2, slot3 auto-assigns, show slot4.
+	// User clicks [back] at slot4 → should show slot3 (not immediately bounce back to slot4).
+	// User clicks [back] again at slot3 → should show slot2.
+	prep := &fakePreparedRepo{slots: map[int][]*session.PreparedSlot{
+		1: {{TechID: "tech_a"}, {TechID: "tech_b"}, {TechID: "tech_c"}, {TechID: "tech_a"}},
+	}}
+	sess := &session.PlayerSession{
+		PreparedTechs: map[int][]*session.PreparedSlot{
+			1: {{TechID: "tech_a"}, {TechID: "tech_b"}, {TechID: "tech_c"}, {TechID: "tech_a"}},
+		},
+	}
+	job := &ruleset.Job{
+		TechnologyGrants: &ruleset.TechnologyGrants{
+			Prepared: &ruleset.PreparedGrants{
+				SlotsByLevel: map[int]int{1: 4},
+				Pool: []ruleset.PreparedEntry{
+					{ID: "tech_a", Level: 1},
+					{ID: "tech_b", Level: 1},
+					{ID: "tech_c", Level: 1},
+				},
+			},
+		},
+	}
+
+	// promptFn simulates:
+	//  call 1 (slot1): choose tech_a → forward
+	//  call 2 (slot2): choose tech_b → forward
+	//  (slot3 auto-assigns tech_c)
+	//  call 3 (slot4): click [back]
+	//  call 4 (slot3, shown during backtrack): click [back]
+	//  call 5 (slot2, shown during backtrack): choose tech_b → forward
+	//  (slot3 re-auto-assigns tech_c)
+	//  call 6 (slot4): choose tech_a → confirm
+	callCount := 0
+	var slotNums []int
+	promptFn := func(prompt string, options []string, slotCtx *gameserver.TechSlotContext) (string, error) {
+		callCount++
+		if slotCtx != nil {
+			slotNums = append(slotNums, slotCtx.SlotNum)
+		}
+		backIdx := -1
+		for i, o := range options {
+			if o == "[back]" {
+				backIdx = i
+			}
+		}
+		switch callCount {
+		case 1: // slot1: pick tech_a
+			for _, o := range options {
+				if strings.Contains(o, "tech_a") {
+					return o, nil
+				}
+			}
+			return options[0], nil
+		case 2: // slot2: pick tech_b
+			for _, o := range options {
+				if strings.Contains(o, "tech_b") {
+					return o, nil
+				}
+			}
+			return options[0], nil
+		case 3: // slot4 (first time): click back
+			require.True(t, backIdx >= 0, "slot4 must offer [back]")
+			return "[back]", nil
+		case 4: // slot3 (backtrack): click back
+			// This is the key assertion: slot3 must be shown interactively, not auto-forwarded.
+			require.True(t, backIdx >= 0, "slot3 during backtrack must offer [back]")
+			return "[back]", nil
+		case 5: // slot2 (backtrack): pick tech_b again
+			for _, o := range options {
+				if strings.Contains(o, "tech_b") || strings.Contains(o, "keep") {
+					return o, nil
+				}
+			}
+			return options[0], nil
+		case 6: // slot4 (second time): confirm
+			for _, o := range options {
+				if o == "[confirm]" {
+					return o, nil
+				}
+			}
+			return options[len(options)-1], nil
+		}
+		return options[0], nil
+	}
+
+	err := gameserver.RearrangePreparedTechs(ctx, sess, 1, job, nil, nil, promptFn, prep, nil, technology.TraditionFlavor{SlotNoun: "slot", PrepGerund: "Arranging"})
+	require.NoError(t, err)
+
+	// Must have been prompted at least 6 times (slots: 1, 2, 4, 3-backtrack, 2-backtrack, 4).
+	assert.GreaterOrEqual(t, callCount, 6, "expected prompt to fire 6 times for back-navigation through auto-assigned slot")
+	// slot3 must appear in slotNums (showing it was shown interactively during backtrack).
+	foundSlot3 := false
+	for _, n := range slotNums {
+		if n == 3 {
+			foundSlot3 = true
+		}
+	}
+	assert.True(t, foundSlot3, "slot 3 must be shown interactively when backtracking past an auto-assigned slot")
+	// Final assignment must have all 4 slots filled.
+	require.Len(t, sess.PreparedTechs[1], 4, "all 4 slots must be filled after navigation")
+}
+
 // REQ-RAR6: When the currently assigned tech is still in the available pool, RearrangePreparedTechs
 // MUST present a "[keep] Keep current: <name>" option as the first choice.
 func TestRearrangePreparedTechs_KeepCurrentOption_OfferedWhenTechInPool(t *testing.T) {
