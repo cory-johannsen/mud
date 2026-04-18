@@ -166,6 +166,63 @@ func TestProperty_PlainConsumable_NeverReturnsPreparedTechError(t *testing.T) {
 	})
 }
 
+// TestHandleUse_HealConsumable_MessageDescribesHPRecovered verifies that using
+// a consumable with a heal effect produces a message mentioning HP recovery.
+//
+// REQ-CONSUME-1: Using a consumable with a heal effect MUST return a message
+// that includes the amount of HP recovered.
+func TestHandleUse_HealConsumable_MessageDescribesHPRecovered(t *testing.T) {
+	item := &inventory.ItemDef{
+		ID:       "bacon_heal",
+		Name:     "Healing Bacon",
+		Kind:     inventory.KindConsumable,
+		Stackable: true,
+		MaxStack: 5,
+		Effect:   &inventory.ConsumableEffect{Heal: "4"}, // fixed roll for determinism
+	}
+	sessMgr := session.NewManager()
+	svc := buildConsumeItemService(t, sessMgr, item)
+	reg := svc.invRegistry
+
+	sess := addPlayerWithBackpack(t, sessMgr, "u_heal_bacon", item, 1, reg)
+	sess.CurrentHP = 5
+	sess.MaxHP = 20
+
+	event, err := svc.handleUse("u_heal_bacon", "bacon_heal", "", 0, 0)
+	require.NoError(t, err)
+	require.NotNil(t, event)
+
+	msg := event.GetMessage()
+	require.NotNil(t, msg)
+	assert.Contains(t, msg.Content, "HP", "heal message must mention HP")
+	assert.Contains(t, msg.Content, "Healing Bacon", "message must name the item")
+}
+
+// TestBuildConsumableResultMsg_HealOnly verifies the message when only HP is recovered.
+func TestBuildConsumableResultMsg_HealOnly(t *testing.T) {
+	r := inventory.ConsumableResult{HealApplied: 7}
+	msg := buildConsumableResultMsg("Scrap Bandage", r)
+	assert.Contains(t, msg, "Scrap Bandage")
+	assert.Contains(t, msg, "7 HP")
+}
+
+// TestBuildConsumableResultMsg_NoEffect verifies the generic fallback message when
+// no effect is produced.
+func TestBuildConsumableResultMsg_NoEffect(t *testing.T) {
+	r := inventory.ConsumableResult{}
+	msg := buildConsumableResultMsg("Mystery Pill", r)
+	assert.Contains(t, msg, "Mystery Pill")
+	assert.Contains(t, msg, "use the")
+}
+
+// TestBuildConsumableResultMsg_ConditionsApplied verifies that applied conditions are named.
+func TestBuildConsumableResultMsg_ConditionsApplied(t *testing.T) {
+	r := inventory.ConsumableResult{ConditionsApplied: []string{"energized", "fortified"}}
+	msg := buildConsumableResultMsg("Energy Drink", r)
+	assert.Contains(t, msg, "energized")
+	assert.Contains(t, msg, "fortified")
+}
+
 func contains(s, sub string) bool {
 	return len(s) >= len(sub) && (s == sub || len(s) > 0 && containsStr(s, sub))
 }

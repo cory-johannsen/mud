@@ -5128,6 +5128,34 @@ func messageEvent(text string) *gamev1.ServerEvent {
 	}
 }
 
+// buildConsumableResultMsg constructs a player-facing message describing the effects
+// that were applied from using a consumable item.
+//
+// Precondition: itemName must be non-empty.
+// Postcondition: Returns a non-empty string describing the outcome.
+func buildConsumableResultMsg(itemName string, r inventory.ConsumableResult) string {
+	var parts []string
+	if r.HealApplied > 0 {
+		parts = append(parts, fmt.Sprintf("You recover %d HP.", r.HealApplied))
+	}
+	for _, cid := range r.ConditionsRemoved {
+		parts = append(parts, fmt.Sprintf("Removed condition: %s.", cid))
+	}
+	for _, cid := range r.ConditionsApplied {
+		parts = append(parts, fmt.Sprintf("Applied condition: %s.", cid))
+	}
+	if r.DiseaseApplied != "" {
+		parts = append(parts, fmt.Sprintf("Contracted disease: %s.", r.DiseaseApplied))
+	}
+	if r.ToxinApplied != "" {
+		parts = append(parts, fmt.Sprintf("Exposed to toxin: %s.", r.ToxinApplied))
+	}
+	if len(parts) == 0 {
+		return fmt.Sprintf("You use the %s.", itemName)
+	}
+	return fmt.Sprintf("You use the %s. %s", itemName, strings.Join(parts, " "))
+}
+
 // handleEquip equips a weapon from the player's backpack into the named slot.
 //
 // Precondition: uid identifies an active session; req is non-nil.
@@ -8045,18 +8073,21 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string, targetX, 
 		if itemDef, itemOK := s.invRegistry.Item(abilityID); itemOK && itemDef.Kind == inventory.KindConsumable && itemDef.SubstanceID == "" {
 			instances := sess.Backpack.FindByItemDefID(abilityID)
 			if len(instances) > 0 {
+				msg := fmt.Sprintf("You use the %s.", itemDef.Name)
 				if itemDef.Effect != nil {
 					adapter := &playerActivateAdapter{sess: sess, svc: s}
 					var rng inventory.Roller
 					if s.dice != nil {
 						rng = &diceRollerAdapter{r: s.dice}
 					} else {
-						rng = &DurabilityRoller{}
+						rng = NewDurabilityRoller(rand.NewSource(time.Now().UnixNano())) //nolint:gosec
 					}
-					inventory.ApplyConsumable(adapter, itemDef, rng)
+					result := inventory.ApplyConsumable(adapter, itemDef, rng)
+					msg = buildConsumableResultMsg(itemDef.Name, result)
 				}
 				_ = sess.Backpack.Remove(instances[0].InstanceID, 1)
-				return messageEvent(fmt.Sprintf("You use the %s.", itemDef.Name)), nil
+				s.pushInventory(sess)
+				return messageEvent(msg), nil
 			}
 		}
 	}
