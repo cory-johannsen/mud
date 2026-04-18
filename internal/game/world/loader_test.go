@@ -944,7 +944,9 @@ func TestLoadZone_ClownCamp_HasFiveRooms(t *testing.T) {
 	require.NoError(t, err)
 	zone, err := LoadZoneFromBytes(data)
 	require.NoError(t, err)
-	assert.Len(t, zone.Rooms, 6, "Clown Camp must have exactly 6 rooms")
+	// 7 rooms: cc_front_entrance (added for zone entrance via Interstate Ave), cc_coat_check,
+	// cc_empty_theater, cc_changing_rooms, cc_backstage, cc_the_stage, clown_camp_brothel.
+	assert.Len(t, zone.Rooms, 7, "Clown Camp must have exactly 7 rooms")
 	assert.Equal(t, "clown_camp", zone.ID)
 }
 

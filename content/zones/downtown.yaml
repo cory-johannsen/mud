@@ -532,6 +532,9 @@ zone:
       target: dt_chinatown_gate
     - direction: northwest
       target: pioneer_square
+    - direction: northeast
+      target: cp_entry
+      zone: club_privata
     - direction: east
       target: dt_powell_books_ruin
     - direction: south
@@ -768,6 +771,9 @@ zone:
       target: dt_steel_bridge_west
     - direction: northeast
       target: dt_salmon_street_springs
+    - direction: south
+      target: tofteville_gate
+      zone: wooklyn
     map_x: -3
     map_y: 0
     spawns:

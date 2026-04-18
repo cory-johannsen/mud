@@ -1104,9 +1104,6 @@ zone:
       target: blade_house
     - direction: east
       target: the_cutthroat
-    - direction: south
-      target: cp_entry
-      zone: club_privata
     map_x: 5
     map_y: 6
     spawns:

@@ -25,9 +25,9 @@ zone:
     exits:
       - direction: south
         target: tofteville_market
-      - direction: southwest
-        target: couve_burnt_ridge
-        zone: the_couve
+      - direction: northeast
+        target: dt_naito_parkway
+        zone: downtown
     spawns:
       - template: wooklyn_quest_giver
         count: 1

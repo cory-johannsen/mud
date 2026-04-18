@@ -314,6 +314,9 @@ zone:
       target: ne_rose_quarter
     - direction: east
       target: ne_williams_corridor
+    - direction: west
+      target: cc_front_entrance
+      zone: clown_camp
     map_x: -4
     map_y: 0
     spawns:

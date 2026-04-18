@@ -816,9 +816,6 @@ zone:
     exits:
     - direction: west
       target: couve_garrison_road
-    - direction: northeast
-      target: tofteville_gate
-      zone: wooklyn
     map_x: 4
     map_y: -9
     spawns:

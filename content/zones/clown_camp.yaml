@@ -5,7 +5,7 @@ zone:
   world_y: 2
   name: Clown Camp
   description: A derelict circus lot on the eastern edge of the city, festering with something that used to be entertainment.
-  start_room: cc_coat_check
+  start_room: cc_front_entrance
   zone_effects:
   - track: delirium
     severity: mild
@@ -18,6 +18,27 @@ zone:
     cooldown_rounds: 3
     cooldown_minutes: 5
   rooms:
+  - id: cc_front_entrance
+    danger_level: sketchy
+    title: Front Entrance
+    description: 'The circus lot entrance is marked by a rusted chain-link gate hung
+      with deflated balloons and waterlogged banners. A hand-painted sign reads WELCOME
+      TO THE SHOW in letters that have bled into something illegible. The smell of
+      something sweet and chemical drifts from within. Interstate Avenue lies to the east.
+      The coat check is west.'
+    exits:
+    - direction: east
+      target: ne_interstate_ave
+      zone: ne_portland
+    - direction: west
+      target: cc_coat_check
+    map_x: -1
+    map_y: 0
+    spawns:
+    - template: clown
+      count: 1
+      respawn_after: 5m
+    boss_room: false
   - id: cc_coat_check
     danger_level: dangerous
     title: Coat Check
@@ -25,6 +46,8 @@ zone:
       oversized coat. The smell of greasepaint and something chemical hangs in the air.
       Squeaky shoes somewhere in the dark. A door east leads deeper in.'
     exits:
+    - direction: west
+      target: cc_front_entrance
     - direction: east
       target: cc_empty_theater
     - direction: south
