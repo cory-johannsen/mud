@@ -532,9 +532,10 @@ func buildOptionsWithHeighten(pool []ruleset.PreparedEntry, slotLevel int, reg *
 
 // rearrangeSlot represents one prepared slot position during rearrangement navigation.
 type rearrangeSlot struct {
-	level   int
-	slotNum int // 1-based within level
-	total   int // total slots at this level
+	level      int
+	slotNum    int // 1-based within level (counting fixed slots)
+	total      int // total slots at this level
+	fixedCount int // how many fixed slots were pre-filled at this level
 }
 
 // RearrangePreparedTechs deletes all existing prepared slots and re-fills them
@@ -676,19 +677,255 @@ func RearrangePreparedTechs(
 		prevSlots[lvl] = cp
 	}
 
-	// Clear existing slots before re-filling.
+	// Sort levels for deterministic navigation order.
+	sortedLevels := make([]int, 0, len(slotsByLevel))
+	for lvl := range slotsByLevel {
+		sortedLevels = append(sortedLevels, lvl)
+	}
+	sort.Ints(sortedLevels)
+
+	// Phase 1: Pre-fill fixed slots for all levels (auto, no prompt).
+	// fixedByLevel holds the fixed slots already assigned per level.
+	// inProgressFixed stores the result slot objects for later DB flush.
+	fixedByLevel := make(map[int][]*session.PreparedSlot)
+	for _, lvl := range sortedLevels {
+		totalAtLevel := slotsByLevel[lvl]
+		for _, e := range merged.Fixed {
+			if e.Level == lvl {
+				slotNum := len(fixedByLevel[lvl]) + 1
+				send(fmt.Sprintf("Level %d, %s %d (fixed): %s", lvl, flavor.SlotNoun, slotNum, e.ID))
+				fixedByLevel[lvl] = append(fixedByLevel[lvl], &session.PreparedSlot{TechID: e.ID})
+			}
+		}
+		_ = totalAtLevel // used below
+	}
+
+	// Phase 2: Build flat list of interactive (pool) slots across all levels.
+	// Each entry tracks which level it belongs to, its slot number within the level,
+	// and how many fixed slots have already been pre-filled at that level.
+	type poolSlotEntry struct {
+		level      int
+		slotNum    int // 1-based within level (fixed slots included in numbering)
+		totalLevel int // total slots at this level
+		fixedCount int // number of fixed slots already filled at this level
+	}
+	var poolSlots []poolSlotEntry
+	for _, lvl := range sortedLevels {
+		totalAtLevel := slotsByLevel[lvl]
+		fc := len(fixedByLevel[lvl])
+		openCount := totalAtLevel - fc
+		for i := 0; i < openCount; i++ {
+			poolSlots = append(poolSlots, poolSlotEntry{
+				level:      lvl,
+				slotNum:    fc + i + 1, // 1-based within level
+				totalLevel: totalAtLevel,
+				fixedCount: fc,
+			})
+		}
+	}
+
+	// Phase 3: Build per-level pool entries for pool slot selection.
+	// poolByLevel holds the full set of pool entries per level (before any slot consumes them).
+	poolByLevel := make(map[int][]ruleset.PreparedEntry)
+	for _, e := range merged.Pool {
+		poolByLevel[e.Level] = append(poolByLevel[e.Level], e)
+	}
+	// Build per-level previous-slot lookup for "keep" option (indexed by pool slot position).
+	prevPoolByLevel := make(map[int][]*session.PreparedSlot)
+	for lvl, fixed := range fixedByLevel {
+		prev := prevSlots[lvl]
+		if len(prev) > len(fixed) {
+			prevPoolByLevel[lvl] = prev[len(fixed):]
+		}
+	}
+	for _, lvl := range sortedLevels {
+		if _, ok := prevPoolByLevel[lvl]; !ok {
+			prev := prevSlots[lvl]
+			fc := len(fixedByLevel[lvl])
+			if len(prev) > fc {
+				prevPoolByLevel[lvl] = prev[fc:]
+			}
+		}
+	}
+
+	// inProgress holds the chosen techID for each pool slot index (empty = not yet chosen).
+	inProgress := make([]string, len(poolSlots))
+	// poolSlotIdx tracks, per level, which pool slot within that level we are filling
+	// so we can find the correct prevSlot entry.
+	// We derive this on-demand from the flat poolSlots index.
+
+	// Navigate pool slots with back/forward/confirm sentinels.
+	// When all pool slots are filled (or [confirm] selected), flush to DB and return.
+	cur := 0
+	totalPoolSlots := len(poolSlots)
+
+	// remainingByLevel tracks the available pool entries for slot selection.
+	// It is recomputed on each prompt from poolByLevel minus already-chosen techs at the same level.
+	computeRemaining := func(cur int) []ruleset.PreparedEntry {
+		lvl := poolSlots[cur].level
+		base := poolByLevel[lvl]
+		// Collect IDs chosen so far at this level (from other pool slots before cur).
+		chosen := make(map[string]bool)
+		for i, ps := range poolSlots {
+			if i != cur && ps.level == lvl && inProgress[i] != "" {
+				chosen[inProgress[i]] = true
+			}
+		}
+		var rem []ruleset.PreparedEntry
+		for _, e := range base {
+			if !chosen[e.ID] {
+				rem = append(rem, e)
+			}
+		}
+		return rem
+	}
+
+	for cur < totalPoolSlots {
+		ps := poolSlots[cur]
+		remaining := computeRemaining(cur)
+
+		// REQ-TC-17: Auto-assign without prompting when exactly one eligible tech exists.
+		if len(remaining) == 1 {
+			techID := remaining[0].ID
+			inProgress[cur] = techID
+			send(fmt.Sprintf("Level %d, %s %d of %d (auto): %s", ps.level, flavor.SlotNoun, ps.slotNum, ps.totalLevel, techID))
+			cur++
+			continue
+		}
+
+		send(fmt.Sprintf("Level %d, %s %d of %d: choose from pool", ps.level, flavor.SlotNoun, ps.slotNum, ps.totalLevel))
+
+		// Build option list; prepend a "keep" option when the current tech is still available.
+		options := buildPreparedOptions(remaining, techReg)
+
+		// Determine pool-slot-local index for prevSlot lookup.
+		levelPoolIdx := 0
+		for i := 0; i < cur; i++ {
+			if poolSlots[i].level == ps.level {
+				levelPoolIdx++
+			}
+		}
+		var prevTechID string
+		prevPool := prevPoolByLevel[ps.level]
+		if prevPool != nil && levelPoolIdx < len(prevPool) && prevPool[levelPoolIdx] != nil {
+			prevTechID = prevPool[levelPoolIdx].TechID
+		}
+		if prevTechID != "" {
+			// Check if prevTechID is still available in remaining.
+			inRemaining := false
+			for _, e := range remaining {
+				if e.ID == prevTechID {
+					inRemaining = true
+					break
+				}
+			}
+			if inRemaining {
+				keepName := prevTechID
+				if techReg != nil {
+					if def, ok := techReg.Get(prevTechID); ok {
+						keepName = def.Name
+					}
+				}
+				// Remove prevTechID from pool options before prepending keep (REQ-BUG101-1).
+				for i, opt := range options {
+					if parseTechID(opt) == prevTechID {
+						options = append(options[:i], options[i+1:]...)
+						break
+					}
+				}
+				options = append([]string{keepSentinel + "Keep current: " + keepName}, options...)
+			}
+		}
+
+		// REQ-TC-16: Insert navigation sentinels.
+		// [back] prepended for all pool slots except the first.
+		// [confirm] appended for the last pool slot; [forward] appended for all others.
+		if cur > 0 {
+			options = append([]string{backSentinel}, options...)
+		}
+		if cur == totalPoolSlots-1 {
+			options = append(options, confirmSentinel)
+		} else {
+			options = append(options, forwardSentinel)
+		}
+
+		slotPrompt := fmt.Sprintf("Choose a Level %d technology to prepare (%s %d of %d):", ps.level, flavor.SlotNoun, ps.slotNum, ps.totalLevel)
+		slotCtx := &TechSlotContext{SlotNum: ps.slotNum, TotalSlots: ps.totalLevel, SlotLevel: ps.level}
+		chosen, err := promptFn(slotPrompt, options, slotCtx)
+		if err != nil {
+			return err
+		}
+
+		switch {
+		case chosen == backSentinel:
+			// REQ-TC-16: Navigate back to the previous pool slot.
+			if cur > 0 {
+				cur--
+			}
+		case chosen == forwardSentinel:
+			// REQ-TC-16: Navigate forward without changing the current in-progress choice.
+			if cur < totalPoolSlots-1 {
+				cur++
+			}
+		case chosen == confirmSentinel:
+			// REQ-TC-16: Commit all collected assignments.
+			// Any unfilled slots remaining are auto-filled from the first available pool entry.
+			for i := cur; i < totalPoolSlots; i++ {
+				if inProgress[i] == "" {
+					rem := computeRemaining(i)
+					if len(rem) > 0 {
+						inProgress[i] = rem[0].ID
+					}
+				}
+			}
+			cur = totalPoolSlots // exit loop
+		default:
+			// A technology was selected.
+			var techID string
+			if strings.HasPrefix(chosen, keepSentinel) {
+				techID = prevTechID
+			} else {
+				techID = parseTechID(chosen)
+			}
+			inProgress[cur] = techID
+			cur++
+		}
+	}
+
+	// Phase 4: Flush all assignments to DB atomically.
+	// Clear existing slots, then write fixed + pool slots per level.
 	if err := prepRepo.DeleteAll(ctx, characterID); err != nil {
 		return fmt.Errorf("RearrangePreparedTechs DeleteAll: %w", err)
 	}
 	sess.PreparedTechs = make(map[int][]*session.PreparedSlot)
 
-	// Re-fill each level.
-	for lvl, slots := range slotsByLevel {
-		chosen, err := fillFromPreparedPoolWithSend(ctx, lvl, slots, 0, merged, techReg, promptFn, characterID, prepRepo, send, prevSlots[lvl], flavor)
-		if err != nil {
-			return fmt.Errorf("RearrangePreparedTechs level %d: %w", lvl, err)
+	for _, lvl := range sortedLevels {
+		idx := 0
+		var result []*session.PreparedSlot
+		// Write fixed slots.
+		for _, slot := range fixedByLevel[lvl] {
+			if err := prepRepo.Set(ctx, characterID, lvl, idx, slot.TechID); err != nil {
+				return fmt.Errorf("RearrangePreparedTechs Set fixed level %d idx %d: %w", lvl, idx, err)
+			}
+			result = append(result, slot)
+			idx++
 		}
-		sess.PreparedTechs[lvl] = chosen
+		// Write pool slots.
+		for i, ps := range poolSlots {
+			if ps.level != lvl {
+				continue
+			}
+			techID := inProgress[i]
+			if techID == "" {
+				continue // skip unfilled (should not happen after confirm)
+			}
+			if err := prepRepo.Set(ctx, characterID, lvl, idx, techID); err != nil {
+				return fmt.Errorf("RearrangePreparedTechs Set pool level %d idx %d: %w", lvl, idx, err)
+			}
+			result = append(result, &session.PreparedSlot{TechID: techID})
+			idx++
+		}
+		sess.PreparedTechs[lvl] = result
 	}
 	return nil
 }

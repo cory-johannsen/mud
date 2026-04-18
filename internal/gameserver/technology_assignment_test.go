@@ -544,8 +544,7 @@ func TestRearrangePreparedTechs_FixedFirst(t *testing.T) {
 
 // REQ-RAR3: LevelUpGrants entries above sess.Level are excluded from the pool.
 // With level 3 excluded, only the level2 entry is in the pool.
-// RearrangePreparedTechs always prompts for pool slots (no auto-assign shortcut),
-// so the prompt fires exactly once and the player selects from the single available option.
+// REQ-TC-17: With exactly one eligible tech, the slot is auto-assigned without prompting.
 func TestRearrangePreparedTechs_LevelUpGrantsFiltered(t *testing.T) {
 	ctx := context.Background()
 	prep := &fakePreparedRepo{slots: map[int][]*session.PreparedSlot{
@@ -571,9 +570,9 @@ func TestRearrangePreparedTechs_LevelUpGrantsFiltered(t *testing.T) {
 	promptCalled := false
 	promptFn := func(_ string, options []string, _ *gameserver.TechSlotContext) (string, error) {
 		promptCalled = true
-		// Select the first non-keep option (level2_pool).
+		// Select the first non-sentinel, non-keep option (level2_pool).
 		for _, opt := range options {
-			if !strings.HasPrefix(opt, "[keep]") {
+			if !strings.HasPrefix(opt, "[keep]") && opt != "[back]" && opt != "[forward]" && opt != "[confirm]" {
 				return opt, nil
 			}
 		}
@@ -583,8 +582,8 @@ func TestRearrangePreparedTechs_LevelUpGrantsFiltered(t *testing.T) {
 	err := gameserver.RearrangePreparedTechs(ctx, sess, 1, job, nil, nil, promptFn, prep, nil, technology.TraditionFlavor{})
 	require.NoError(t, err)
 
-	// Level3 excluded → pool has 1 entry → prompt always fires for pool slots.
-	assert.True(t, promptCalled, "prompt must always fire for pool slots in RearrangePreparedTechs")
+	// Level3 excluded → pool has 1 entry → REQ-TC-17: auto-assigns without prompting.
+	assert.False(t, promptCalled, "prompt must not fire when only one tech is eligible (REQ-TC-17 auto-assign)")
 	require.Len(t, sess.PreparedTechs[1], 1)
 	assert.Equal(t, "level2_pool", sess.PreparedTechs[1][0].TechID)
 }
@@ -624,7 +623,9 @@ func (r *fakePendingTechLevelsRepo) SetPendingTechLevels(_ context.Context, _ in
 
 // REQ-RAR5: RearrangePreparedTechs MUST always prompt for pool slots, even when
 // pool size equals available slots, so the player can review their selection.
-func TestRearrangePreparedTechs_AlwaysPromptsPoolSlots(t *testing.T) {
+// REQ-TC-17: When exactly one eligible tech exists for a slot during rearrangement,
+// the tech is auto-assigned without prompting.
+func TestRearrangePreparedTechs_SingleEligibleTech_AutoAssigns(t *testing.T) {
 	ctx := context.Background()
 	prep := &fakePreparedRepo{slots: map[int][]*session.PreparedSlot{
 		1: {{TechID: "old"}},
@@ -649,13 +650,21 @@ func TestRearrangePreparedTechs_AlwaysPromptsPoolSlots(t *testing.T) {
 		return options[0], nil
 	}
 
-	err := gameserver.RearrangePreparedTechs(ctx, sess, 1, job, nil, nil, promptFn, prep, nil, technology.TraditionFlavor{})
+	var messages []string
+	err := gameserver.RearrangePreparedTechs(ctx, sess, 1, job, nil, nil, promptFn, prep, func(s string) { messages = append(messages, s) }, technology.TraditionFlavor{SlotNoun: "slot", PrepGerund: "Arranging"})
 	require.NoError(t, err)
-	// Prompt must fire even when pool size == open slots.
-	assert.True(t, promptCalled, "prompt must always fire for pool slots in RearrangePreparedTechs")
+	// REQ-TC-17: prompt must NOT fire when only one tech is eligible.
+	assert.False(t, promptCalled, "prompt must not fire when exactly one tech is eligible for auto-assign")
 	require.Len(t, sess.PreparedTechs[1], 1)
-	// "old" is not in the current pool, so no [keep] option is presented; first option is "only_option".
 	assert.Equal(t, "only_option", sess.PreparedTechs[1][0].TechID)
+	// An (auto) message must be emitted.
+	found := false
+	for _, m := range messages {
+		if strings.Contains(m, "auto") {
+			found = true
+		}
+	}
+	assert.True(t, found, "auto-assign message must be sent when single tech is auto-assigned")
 }
 
 // REQ-RAR6: When the currently assigned tech is still in the available pool, RearrangePreparedTechs
@@ -1542,6 +1551,12 @@ func TestRearrangePreparedTechs_ArchetypePoolIncluded(t *testing.T) {
 	promptCallCount := 0
 	promptFn := func(_ string, options []string, _ *gameserver.TechSlotContext) (string, error) {
 		promptCallCount++
+		// Skip navigation sentinels to avoid loops; pick first real tech option.
+		for _, o := range options {
+			if o != "[back]" && o != "[forward]" && o != "[confirm]" {
+				return o, nil
+			}
+		}
 		if len(options) == 0 {
 			return "", fmt.Errorf("empty options on prompt call %d", promptCallCount)
 		}
@@ -1624,13 +1639,11 @@ func TestRearrangePreparedTechs_DeferredL2SlotsOfferedAtRest(t *testing.T) {
 		},
 	}}
 
-	promptedLevels := make(map[int]int)
-	promptFn := func(prompt string, options []string, _ *gameserver.TechSlotContext) (string, error) {
-		// Parse level from prompt to track which levels are prompted.
-		for lvl := 1; lvl <= 5; lvl++ {
-			if fmt.Sprintf("Level %d", lvl) == prompt[:len(fmt.Sprintf("Level %d", lvl))] {
-				promptedLevels[lvl]++
-				break
+	promptFn := func(_ string, options []string, _ *gameserver.TechSlotContext) (string, error) {
+		// Skip navigation sentinels; pick first real tech option.
+		for _, o := range options {
+			if o != "[back]" && o != "[forward]" && o != "[confirm]" {
+				return o, nil
 			}
 		}
 		if len(options) == 0 {
@@ -2202,4 +2215,94 @@ func TestProperty_Rearrange_BackForwardNeverOutOfBounds(t *testing.T) {
 			}
 		}
 	})
+}
+
+// REQ-TC-16: [back] sentinel appears in option list for non-first slots; [confirm] appears on last slot.
+func TestRearrangePreparedTechs_BackSentinelOnNonFirstSlot(t *testing.T) {
+	prep := &fakePreparedRepo{slots: map[int][]*session.PreparedSlot{1: {{TechID: "a"}, {TechID: "b"}}}}
+	sess := &session.PlayerSession{
+		CastingModel:  ruleset.CastingModelWizard,
+		PreparedTechs: map[int][]*session.PreparedSlot{1: {{TechID: "a"}, {TechID: "b"}}},
+		KnownTechs:    map[int][]string{1: {"a", "b", "c"}},
+	}
+	job := &ruleset.Job{
+		CastingModel: ruleset.CastingModelWizard,
+		TechnologyGrants: &ruleset.TechnologyGrants{
+			Prepared: &ruleset.PreparedGrants{
+				SlotsByLevel: map[int]int{1: 2},
+				Pool: []ruleset.PreparedEntry{
+					{ID: "a", Level: 1},
+					{ID: "b", Level: 1},
+					{ID: "c", Level: 1},
+				},
+			},
+		},
+	}
+	callIdx := 0
+	var slot1Opts, slot2Opts []string
+	promptFn := func(_ string, opts []string, _ *gameserver.TechSlotContext) (string, error) {
+		callIdx++
+		if callIdx == 1 {
+			slot1Opts = opts
+			// Pick first non-sentinel option for slot 1.
+			for _, o := range opts {
+				if o != "[back]" && o != "[forward]" && o != "[confirm]" && !strings.HasPrefix(o, "[keep]") {
+					return o, nil
+				}
+			}
+			return opts[0], nil
+		}
+		slot2Opts = opts
+		// Pick first non-sentinel option for slot 2.
+		for _, o := range opts {
+			if o != "[back]" && o != "[forward]" && o != "[confirm]" && !strings.HasPrefix(o, "[keep]") {
+				return o, nil
+			}
+		}
+		return opts[0], nil
+	}
+	err := gameserver.RearrangePreparedTechs(context.Background(), sess, 1, job, nil, nil, promptFn, prep, func(string) {}, technology.TraditionFlavor{SlotNoun: "slot", PrepGerund: "Arranging"})
+	require.NoError(t, err)
+	assert.NotContains(t, slot1Opts, "[back]", "first slot must not have back sentinel")
+	assert.Contains(t, slot2Opts, "[back]", "second slot must have back sentinel")
+	assert.NotContains(t, slot1Opts, "[confirm]", "first (non-last) slot must not have confirm sentinel")
+	assert.Contains(t, slot1Opts, "[forward]", "first (non-last) slot must have forward sentinel")
+	assert.Contains(t, slot2Opts, "[confirm]", "last slot must have confirm sentinel instead of forward")
+	assert.NotContains(t, slot2Opts, "[forward]", "last slot must not have forward sentinel")
+}
+
+// REQ-TC-17: When exactly one eligible tech exists for a slot during rearrangement,
+// the slot is auto-assigned without prompting and an (auto) message is emitted.
+func TestRearrangePreparedTechs_SingleTech_AutoAssigns(t *testing.T) {
+	prep := &fakePreparedRepo{slots: map[int][]*session.PreparedSlot{1: {{TechID: "only_tech"}}}}
+	sess := &session.PlayerSession{
+		CastingModel:  ruleset.CastingModelWizard,
+		PreparedTechs: map[int][]*session.PreparedSlot{1: {{TechID: "only_tech"}}},
+		KnownTechs:    map[int][]string{1: {"only_tech"}},
+	}
+	job := &ruleset.Job{
+		CastingModel: ruleset.CastingModelWizard,
+		TechnologyGrants: &ruleset.TechnologyGrants{
+			Prepared: &ruleset.PreparedGrants{
+				SlotsByLevel: map[int]int{1: 1},
+				Pool:         []ruleset.PreparedEntry{{ID: "only_tech", Level: 1}},
+			},
+		},
+	}
+	promptCalled := false
+	promptFn := func(_ string, _ []string, _ *gameserver.TechSlotContext) (string, error) {
+		promptCalled = true
+		return "", nil
+	}
+	var messages []string
+	err := gameserver.RearrangePreparedTechs(context.Background(), sess, 1, job, nil, nil, promptFn, prep, func(s string) { messages = append(messages, s) }, technology.TraditionFlavor{SlotNoun: "slot", PrepGerund: "Arranging"})
+	require.NoError(t, err)
+	assert.False(t, promptCalled, "promptFn must not be called when only one tech is eligible")
+	found := false
+	for _, m := range messages {
+		if strings.Contains(m, "auto") {
+			found = true
+		}
+	}
+	assert.True(t, found, "auto-assign message must be sent")
 }
