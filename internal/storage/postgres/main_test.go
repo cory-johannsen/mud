@@ -249,6 +249,13 @@ func applyAllMigrations(pool *pgxpool.Pool) error {
 			PRIMARY KEY (character_id, tech_id)
 		);
 
+		CREATE TABLE IF NOT EXISTS character_known_technologies (
+			character_id BIGINT NOT NULL REFERENCES characters(id) ON DELETE CASCADE,
+			tech_id      TEXT   NOT NULL,
+			level        INT    NOT NULL,
+			PRIMARY KEY (character_id, tech_id)
+		);
+
 		CREATE TABLE IF NOT EXISTS character_innate_technologies (
 			character_id   BIGINT NOT NULL REFERENCES characters(id) ON DELETE CASCADE,
 			tech_id        TEXT   NOT NULL,

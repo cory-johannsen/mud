@@ -134,24 +134,24 @@ func TestPropertyCharacterPreparedTechRepo_RoundTrip(t *testing.T) {
 	})
 }
 
-// --- Spontaneous repo ---
+// --- KnownTech repo ---
 
-func TestCharacterSpontaneousTechRepo_GetAll_EmptyForNew(t *testing.T) {
+func TestCharacterKnownTechRepository_GetAll_EmptyForNew(t *testing.T) {
 	ctx := context.Background()
 	charRepo := pgstore.NewCharacterRepository(sharedPool)
 	ch := createTestCharacter(t, charRepo, ctx)
-	repo := pgstore.NewCharacterSpontaneousTechRepository(sharedPool)
+	repo := pgstore.NewCharacterKnownTechRepository(sharedPool)
 
 	got, err := repo.GetAll(ctx, ch.ID)
 	require.NoError(t, err)
 	assert.Empty(t, got)
 }
 
-func TestCharacterSpontaneousTechRepo_Add_And_GetAll(t *testing.T) {
+func TestCharacterKnownTechRepository_Add_And_GetAll(t *testing.T) {
 	ctx := context.Background()
 	charRepo := pgstore.NewCharacterRepository(sharedPool)
 	ch := createTestCharacter(t, charRepo, ctx)
-	repo := pgstore.NewCharacterSpontaneousTechRepository(sharedPool)
+	repo := pgstore.NewCharacterKnownTechRepository(sharedPool)
 
 	require.NoError(t, repo.Add(ctx, ch.ID, "battle_fervor", 1))
 	require.NoError(t, repo.Add(ctx, ch.ID, "acid_spray", 1))
@@ -161,11 +161,11 @@ func TestCharacterSpontaneousTechRepo_Add_And_GetAll(t *testing.T) {
 	assert.ElementsMatch(t, []string{"battle_fervor", "acid_spray"}, got[1])
 }
 
-func TestCharacterSpontaneousTechRepo_DeleteAll(t *testing.T) {
+func TestCharacterKnownTechRepository_DeleteAll(t *testing.T) {
 	ctx := context.Background()
 	charRepo := pgstore.NewCharacterRepository(sharedPool)
 	ch := createTestCharacter(t, charRepo, ctx)
-	repo := pgstore.NewCharacterSpontaneousTechRepository(sharedPool)
+	repo := pgstore.NewCharacterKnownTechRepository(sharedPool)
 
 	require.NoError(t, repo.Add(ctx, ch.ID, "battle_fervor", 1))
 	require.NoError(t, repo.DeleteAll(ctx, ch.ID))
@@ -174,10 +174,10 @@ func TestCharacterSpontaneousTechRepo_DeleteAll(t *testing.T) {
 	assert.Empty(t, got)
 }
 
-func TestPropertyCharacterSpontaneousTechRepo_RoundTrip(t *testing.T) {
+func TestPropertyCharacterKnownTechRepo_RoundTrip(t *testing.T) {
 	ctx := context.Background()
 	charRepo := pgstore.NewCharacterRepository(sharedPool)
-	repo := pgstore.NewCharacterSpontaneousTechRepository(sharedPool)
+	repo := pgstore.NewCharacterKnownTechRepository(sharedPool)
 
 	rapid.Check(t, func(rt *rapid.T) {
 		ch := createTestCharacter(t, charRepo, ctx)

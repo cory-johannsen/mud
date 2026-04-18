@@ -24,7 +24,7 @@ var StorageProviders = wire.NewSet(
 	NewCharacterAbilityBoostsRepository,
 	NewCharacterHardwiredTechRepository,
 	NewCharacterPreparedTechRepository,
-	NewCharacterSpontaneousTechRepository,
+	NewCharacterKnownTechRepository,
 	NewCharacterInnateTechRepository,
 	NewCharacterSpontaneousUsePoolRepository,
 	NewWantedRepository,
