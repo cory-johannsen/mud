@@ -1,6 +1,6 @@
 package gameserver
 
-// REQ-60-1: Activating Overpower in combat MUST deduct 1 Action Point from the player's queue.
+// REQ-60-1: Activating Overpower in combat MUST deduct 2 Action Points from the player's queue.
 // REQ-60-2: Activating Overpower MUST be rejected with an error message when an item is
 //
 //	equipped in the off-hand slot.
@@ -167,11 +167,11 @@ func apRemainingForPlayer(combatH *CombatHandler, uid, roomID string) int {
 // TestHandleUse_Overpower_InCombat_ConsumesOneAP verifies that activating Overpower
 // while in active combat deducts exactly 1 AP from the player's action queue.
 //
-// REQ-60-1: Overpower MUST consume 1 AP when activated during combat.
+// REQ-60-1: Overpower MUST consume 2 AP when activated during combat.
 //
 // Precondition: Player is in combat with 3 AP; off-hand is empty.
-// Postcondition: Player has 2 AP remaining after Overpower activation.
-func TestHandleUse_Overpower_InCombat_ConsumesOneAP(t *testing.T) {
+// Postcondition: Player has 1 AP remaining after Overpower activation.
+func TestHandleUse_Overpower_InCombat_ConsumesTwoAP(t *testing.T) {
 	const uid = "u_op_ap"
 	svc, sessMgr, npcMgr, combatH := newOverpowerSvc(t)
 
@@ -192,7 +192,7 @@ func TestHandleUse_Overpower_InCombat_ConsumesOneAP(t *testing.T) {
 	require.NotNil(t, evt, "expected non-nil event")
 
 	apAfter := apRemainingForPlayer(combatH, uid, overpowerRoom)
-	assert.Equal(t, 1, apAfter, "Overpower must deduct exactly 1 AP (REQ-60-1)")
+	assert.Equal(t, 0, apAfter, "Overpower must deduct exactly 2 AP (REQ-60-1)")
 }
 
 // TestHandleUse_Overpower_OffHandOccupied_IsRejected verifies that Overpower is refused
@@ -239,7 +239,7 @@ func TestHandleUse_Overpower_OffHandOccupied_IsRejected(t *testing.T) {
 // Property: regardless of starting HP or ability scores, an empty off-hand always results
 // in exactly 1 AP spent when Overpower is activated in combat.
 //
-// REQ-60-1 (property): AP deduction is invariant over player stats.
+// REQ-60-1 (property): 2 AP deduction is invariant over player stats.
 func TestProperty_Overpower_EmptyOffHand_AlwaysConsumesAP(t *testing.T) {
 	rapid.Check(t, func(rt *rapid.T) {
 		hp := rapid.IntRange(1, 50).Draw(rt, "hp")
@@ -262,7 +262,7 @@ func TestProperty_Overpower_EmptyOffHand_AlwaysConsumesAP(t *testing.T) {
 		require.NoError(rt, err)
 
 		apAfter := apRemainingForPlayer(combatH, uid, overpowerRoom)
-		assert.Equal(rt, apBefore-1, apAfter,
-			"Overpower must deduct exactly 1 AP (hp=%d)", hp)
+		assert.Equal(rt, apBefore-2, apAfter,
+			"Overpower must deduct exactly 2 AP (hp=%d)", hp)
 	})
 }

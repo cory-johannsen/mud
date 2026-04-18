@@ -11277,11 +11277,11 @@ func (s *GameServiceServer) handleWrath(uid string) (*gamev1.ServerEvent, error)
 
 // handleOverpower activates the Overpower feat, applying the brutal_surge_active condition.
 //
-// REQ-60-1: Overpower costs 1 AP when activated during combat.
+// REQ-60-1: Overpower costs 2 AP when activated during combat.
 // REQ-60-2: Overpower requires an empty off-hand slot (it is a two-handed wind-up strike).
 //
 // Precondition: uid must be a valid player session; player must be in active combat.
-// Postcondition: On success, brutal_surge_active condition is applied and 1 AP is spent.
+// Postcondition: On success, brutal_surge_active condition is applied and 2 AP is spent.
 func (s *GameServiceServer) handleOverpower(uid string) (*gamev1.ServerEvent, error) {
 	sess, ok := s.sessions.GetPlayer(uid)
 	if !ok {
@@ -11304,8 +11304,8 @@ func (s *GameServiceServer) handleOverpower(uid string) (*gamev1.ServerEvent, er
 		return messageEvent("You must be in combat to use Overpower."), nil
 	}
 
-	// REQ-60-1: Spend 1 AP.
-	if err := s.combatH.SpendAP(uid, 1); err != nil {
+	// REQ-60-1: Spend 2 AP.
+	if err := s.combatH.SpendAP(uid, 2); err != nil {
 		return errorEvent(err.Error()), nil
 	}
 
