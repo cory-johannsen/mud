@@ -338,39 +338,47 @@ func conditionApplyAllowed(cbt *Combat, uid, condID string, stacks int) bool {
 
 // applyConditionIfAllowed applies a condition to uid only when the on_condition_apply hook permits.
 // Precondition: uid and condID must be non-empty; stacks >= 1.
-// Postcondition: Condition is applied; skipped if hook returns false.
+// Postcondition: Returns true if the condition was applied; false if blocked by hook or registry error.
 //
 //	Skipped silently if condID is not in the registry (content configuration error).
-func applyConditionIfAllowed(cbt *Combat, uid, condID string, stacks, duration int) {
+func applyConditionIfAllowed(cbt *Combat, uid, condID string, stacks, duration int) bool {
 	if !conditionApplyAllowed(cbt, uid, condID, stacks) {
-		return
+		return false
 	}
 	if err := cbt.ApplyCondition(uid, condID, stacks, duration); err != nil {
 		// Condition ID not found in registry; skip silently.
 		// This indicates a content configuration error at startup.
-		return
+		return false
 	}
+	return true
 }
 
 // applyAttackConditions applies conditions triggered by an attack result:
-//   - CritFailure: attacker gains prone (permanent)
+//   - CritFailure: attacker gains prone (permanent, -2 to attacks)
 //   - CritSuccess: target gains flat_footed (1 round)
 //   - Player target at 0 HP (not already dying): gains dying(1 + wounded stacks)
 //
 // Precondition: cbt, target, and r must be valid; cbt.condRegistry must be non-nil.
 // Postcondition: Conditions are applied in-place on cbt, subject to on_condition_apply hooks.
-func applyAttackConditions(cbt *Combat, actor, target *Combatant, r AttackResult) {
+// Returns a slice of human-readable narratives describing each condition applied.
+func applyAttackConditions(cbt *Combat, actor, target *Combatant, r AttackResult) []string {
+	var notes []string
 	switch r.Outcome {
 	case CritFailure:
-		applyConditionIfAllowed(cbt, actor.ID, "prone", 1, -1)
+		if applyConditionIfAllowed(cbt, actor.ID, "prone", 1, -1) {
+			notes = append(notes, actor.Name+" falls prone! (-2 to attacks; stand up costs 1 AP)")
+		}
 	case CritSuccess:
-		applyConditionIfAllowed(cbt, target.ID, "flat_footed", 1, 1)
+		if applyConditionIfAllowed(cbt, target.ID, "flat_footed", 1, 1) {
+			notes = append(notes, target.Name+" is flat-footed! (-2 AC this round)")
+		}
 	}
 	// Only apply dying if the target is a player, at 0 HP, and NOT already dying
 	if target.CurrentHP <= 0 && target.Kind == KindPlayer && !cbt.HasCondition(target.ID, "dying") {
 		woundedStacks := cbt.Conditions[target.ID].Stacks("wounded")
 		applyConditionIfAllowed(cbt, target.ID, "dying", 1+woundedStacks, -1)
 	}
+	return notes
 }
 
 // applyPassiveFeats evaluates all active passive feats for actor against target and returns
@@ -796,7 +804,7 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 						}
 					}
 				}
-				applyAttackConditions(cbt, actor, target, r)
+				condNotes := applyAttackConditions(cbt, actor, target, r)
 				attackVerb1 := actor.AttackVerb
 				if attackVerb1 == "" {
 					attackVerb1 = "attacks"
@@ -807,6 +815,9 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 				}
 				if flanked {
 					narrative += " (flanking +2)"
+				}
+				for _, note := range condNotes {
+					narrative += " " + note
 				}
 				events = append(events, RoundEvent{
 					AttackResult: &r,
@@ -930,7 +941,7 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 						}
 					}
 				}
-				applyAttackConditions(cbt, actor, target, r1)
+				condNotes1 := applyAttackConditions(cbt, actor, target, r1)
 				strikeVerb1 := actor.AttackVerb
 				if strikeVerb1 == "" {
 					strikeVerb1 = "strikes"
@@ -938,6 +949,9 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 				narrative1 := attackNarrative(actor.Name, strikeVerb1, target.Name, r1.WeaponName, r1.Outcome, r1.AttackRoll, r1.AttackTotal, effectiveAC1, dmg1)
 				if len(rwAnnotations1) > 0 {
 					narrative1 += " (" + strings.Join(rwAnnotations1, "; ") + ")"
+				}
+				for _, note := range condNotes1 {
+					narrative1 += " " + note
 				}
 				events = append(events, RoundEvent{
 					AttackResult: &r1,
@@ -1036,7 +1050,7 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 						}
 					}
 				}
-				applyAttackConditions(cbt, actor, target, r2)
+				condNotes2 := applyAttackConditions(cbt, actor, target, r2)
 				strikeVerb2 := actor.AttackVerb
 				if strikeVerb2 == "" {
 					strikeVerb2 = "strikes"
@@ -1044,6 +1058,9 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 				narrative2 := attackNarrative(actor.Name, strikeVerb2, target.Name, r2.WeaponName, r2.Outcome, r2.AttackRoll, r2.AttackTotal, effectiveAC2, dmg2)
 				if len(rwAnnotations2) > 0 {
 					narrative2 += " (" + strings.Join(rwAnnotations2, "; ") + ")"
+				}
+				for _, note := range condNotes2 {
+					narrative2 += " " + note
 				}
 				events = append(events, RoundEvent{
 					AttackResult: &r2,

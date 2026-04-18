@@ -1,6 +1,7 @@
 package combat_test
 
 import (
+	"strings"
 	"testing"
 
 	"pgregory.net/rapid"
@@ -1138,6 +1139,107 @@ func TestResolveRound_ActionUseTech_ProducesEvent(t *testing.T) {
 	}
 	if !containsStr(techEvent.Narrative, "shock_grenade") {
 		t.Errorf("Narrative %q does not contain tech ID", techEvent.Narrative)
+	}
+}
+
+// makeCritConditionCombat creates a two-combatant combat rigged for crit outcomes.
+// For CritFailure: attacker has untrained, StrMod=0; target has AC=30 — val=0 → d20=1, total=1 < 30-10=20.
+// For CritSuccess: attacker has untrained, StrMod=0; target has AC=1 — val=19 → d20=20, total=20 >= 1+10=11.
+func makeCritConditionCombat(t *testing.T, targetAC int) *combat.Combat {
+	t.Helper()
+	reg := condition.NewRegistry()
+	reg.Register(&condition.ConditionDef{ID: "prone", Name: "Prone", DurationType: "permanent", MaxStacks: 0, AttackPenalty: 2})
+	reg.Register(&condition.ConditionDef{ID: "flat_footed", Name: "Flat-Footed", DurationType: "rounds", MaxStacks: 0, ACPenalty: 2})
+	reg.Register(&condition.ConditionDef{ID: "dying", Name: "Dying", DurationType: "until_save", MaxStacks: 4})
+	reg.Register(&condition.ConditionDef{ID: "wounded", Name: "Wounded", DurationType: "permanent", MaxStacks: 3})
+	eng := combat.NewEngine()
+	combatants := []*combat.Combatant{
+		{ID: "p1", Kind: combat.KindPlayer, Name: "Alice", MaxHP: 20, CurrentHP: 20, AC: 14, Level: 1, StrMod: 0, DexMod: 0},
+		{ID: "n1", Kind: combat.KindNPC, Name: "Ganger", MaxHP: 50, CurrentHP: 50, AC: targetAC, Level: 1, StrMod: 0, DexMod: 0},
+	}
+	cbt, err := eng.StartCombat("room_crit", combatants, reg, nil, "")
+	if err != nil {
+		t.Fatalf("StartCombat: %v", err)
+	}
+	_ = cbt.StartRound(3)
+	return cbt
+}
+
+// TestResolveRound_CritMiss_NarrativeContainsProneCondition verifies that a critical miss
+// produces a narrative that reports the prone condition being applied to the attacker.
+//
+// Setup: target AC=30, attacker has no mods → val=0 → d20=1, total=1 < 30-10=20 → CritFailure.
+func TestResolveRound_CritMiss_NarrativeContainsProneCondition(t *testing.T) {
+	// target AC=30: any d20 roll with StrMod=0, untrained proficiency → CritFailure
+	cbt := makeCritConditionCombat(t, 30)
+	src := fixedSrc{val: 0} // d20=1, total=1 vs AC 30 → CritFailure
+
+	if err := cbt.QueueAction("p1", combat.QueuedAction{Type: combat.ActionAttack, Target: "Ganger"}); err != nil {
+		t.Fatalf("QueueAction p1: %v", err)
+	}
+	if err := cbt.QueueAction("n1", combat.QueuedAction{Type: combat.ActionPass}); err != nil {
+		t.Fatalf("QueueAction n1: %v", err)
+	}
+
+	events := combat.ResolveRound(cbt, src, noopUpdater, nil)
+
+	var attackEv *combat.RoundEvent
+	for i := range events {
+		if events[i].ActionType == combat.ActionAttack && events[i].ActorID == "p1" {
+			attackEv = &events[i]
+			break
+		}
+	}
+	if attackEv == nil {
+		t.Fatal("no attack event found for p1")
+	}
+	if attackEv.AttackResult == nil {
+		t.Fatal("attack event has nil AttackResult")
+	}
+	if attackEv.AttackResult.Outcome != combat.CritFailure {
+		t.Fatalf("expected CritFailure, got %v", attackEv.AttackResult.Outcome)
+	}
+	if !strings.Contains(attackEv.Narrative, "prone") {
+		t.Errorf("critical miss narrative %q does not mention 'prone'", attackEv.Narrative)
+	}
+}
+
+// TestResolveRound_CritHit_NarrativeContainsFlatFootedCondition verifies that a critical hit
+// produces a narrative that reports the flat-footed condition being applied to the target.
+//
+// Setup: target AC=1, attacker has no mods → val=19 → d20=20, total=20 >= 1+10=11 → CritSuccess.
+func TestResolveRound_CritHit_NarrativeContainsFlatFootedCondition(t *testing.T) {
+	// target AC=1: val=19 → d20=20, total=20 → 20 >= 1+10=11 → CritSuccess
+	cbt := makeCritConditionCombat(t, 1)
+	src := fixedSrc{val: 19} // d20=20, total=20 vs AC 1 → CritSuccess
+
+	if err := cbt.QueueAction("p1", combat.QueuedAction{Type: combat.ActionAttack, Target: "Ganger"}); err != nil {
+		t.Fatalf("QueueAction p1: %v", err)
+	}
+	if err := cbt.QueueAction("n1", combat.QueuedAction{Type: combat.ActionPass}); err != nil {
+		t.Fatalf("QueueAction n1: %v", err)
+	}
+
+	events := combat.ResolveRound(cbt, src, noopUpdater, nil)
+
+	var attackEv *combat.RoundEvent
+	for i := range events {
+		if events[i].ActionType == combat.ActionAttack && events[i].ActorID == "p1" {
+			attackEv = &events[i]
+			break
+		}
+	}
+	if attackEv == nil {
+		t.Fatal("no attack event found for p1")
+	}
+	if attackEv.AttackResult == nil {
+		t.Fatal("attack event has nil AttackResult")
+	}
+	if attackEv.AttackResult.Outcome != combat.CritSuccess {
+		t.Fatalf("expected CritSuccess, got %v", attackEv.AttackResult.Outcome)
+	}
+	if !strings.Contains(attackEv.Narrative, "flat-footed") {
+		t.Errorf("critical hit narrative %q does not mention 'flat-footed'", attackEv.Narrative)
 	}
 }
 
