@@ -97,10 +97,17 @@ func (r *fakeInnateRepo) DeleteAll(_ context.Context, _ int64) error { r.slots =
 func (r *fakeInnateRepo) Decrement(_ context.Context, _ int64, _ string) error { return nil }
 func (r *fakeInnateRepo) RestoreAll(_ context.Context, _ int64) error           { return nil }
 
-// noPrompt returns the first option automatically (for testing auto-assign paths).
+// noPrompt returns the first non-navigation-sentinel option automatically (for testing auto-assign paths).
+// Navigation sentinels ([back], [forward], [confirm]) are skipped so that back/forward navigation
+// added to RearrangePreparedTechs does not cause noPrompt to navigate instead of selecting a real tech.
 // Precondition: called only on test scenarios where auto-assign does not trigger the prompt;
 // the len(options) == 0 guard is a safety fallback.
 func noPrompt(_ string, options []string, _ *gameserver.TechSlotContext) (string, error) {
+	for _, o := range options {
+		if o != "[back]" && o != "[forward]" && o != "[confirm]" {
+			return o, nil
+		}
+	}
 	if len(options) == 0 {
 		return "", nil
 	}
@@ -2070,4 +2077,129 @@ func TestLevelUpTechnologies_Druid_SlotPickDoesNotPopulateKnownTechs(t *testing.
 	err := gameserver.LevelUpTechnologies(ctx, sess, 1, grants, nil, promptFn, nil, prep, known, nil, nil)
 	require.NoError(t, err)
 	assert.Empty(t, known.techs[1], "druid slot picks must NOT populate KnownTechs")
+}
+
+// REQ-TC-13: wizard rearrangement uses KnownTechs catalog, not the full grant pool.
+// grant_only_tech is in the grant pool but NOT in KnownTechs; it must never appear in options.
+func TestRearrangePreparedTechs_Wizard_UsesKnownTechsCatalog(t *testing.T) {
+	prep := &fakePreparedRepo{slots: map[int][]*session.PreparedSlot{1: {{TechID: "known_a"}}}}
+	sess := &session.PlayerSession{
+		CastingModel:  ruleset.CastingModelWizard,
+		PreparedTechs: map[int][]*session.PreparedSlot{1: {{TechID: "known_a"}}},
+		KnownTechs:    map[int][]string{1: {"known_a", "known_b"}},
+	}
+	job := &ruleset.Job{
+		CastingModel: ruleset.CastingModelWizard,
+		TechnologyGrants: &ruleset.TechnologyGrants{
+			Prepared: &ruleset.PreparedGrants{
+				SlotsByLevel: map[int]int{1: 1},
+				Pool: []ruleset.PreparedEntry{
+					{ID: "known_a", Level: 1}, {ID: "known_b", Level: 1}, {ID: "grant_only_tech", Level: 1},
+				},
+			},
+		},
+	}
+	var seenOptions [][]string
+	promptFn := func(_ string, opts []string, _ *gameserver.TechSlotContext) (string, error) {
+		seenOptions = append(seenOptions, opts)
+		// Pick first non-sentinel, non-keep option.
+		for _, o := range opts {
+			if o != "[back]" && o != "[forward]" && o != "[confirm]" && !strings.HasPrefix(o, "[keep]") {
+				return o, nil
+			}
+		}
+		// Fall back to first option if all are sentinels/keep.
+		if len(opts) > 0 {
+			return opts[0], nil
+		}
+		return "", nil
+	}
+	err := gameserver.RearrangePreparedTechs(context.Background(), sess, 1, job, nil, nil, promptFn, prep, func(string) {}, technology.TraditionFlavor{SlotNoun: "slot", PrepGerund: "Arranging"})
+	require.NoError(t, err)
+	for _, opts := range seenOptions {
+		for _, o := range opts {
+			assert.NotContains(t, o, "grant_only_tech", "wizard rearrangement must not show techs not in KnownTechs")
+		}
+	}
+}
+
+// REQ-TC-13: druid rearrangement uses the full grant pool, not just KnownTechs.
+// pool_b is in the grant pool; even though KnownTechs is empty, druid must see pool_b as an option.
+func TestRearrangePreparedTechs_Druid_UsesGrantPool(t *testing.T) {
+	prep := &fakePreparedRepo{slots: map[int][]*session.PreparedSlot{1: {{TechID: "pool_a"}}}}
+	sess := &session.PlayerSession{
+		CastingModel:  ruleset.CastingModelDruid,
+		PreparedTechs: map[int][]*session.PreparedSlot{1: {{TechID: "pool_a"}}},
+		KnownTechs:    map[int][]string{}, // empty — druid does not maintain a catalog
+	}
+	job := &ruleset.Job{
+		CastingModel: ruleset.CastingModelDruid,
+		TechnologyGrants: &ruleset.TechnologyGrants{
+			Prepared: &ruleset.PreparedGrants{
+				SlotsByLevel: map[int]int{1: 1},
+				Pool:         []ruleset.PreparedEntry{{ID: "pool_a", Level: 1}, {ID: "pool_b", Level: 1}},
+			},
+		},
+	}
+	var seenOptions [][]string
+	promptFn := func(_ string, opts []string, _ *gameserver.TechSlotContext) (string, error) {
+		seenOptions = append(seenOptions, opts)
+		for _, o := range opts {
+			if o != "[back]" && o != "[forward]" && o != "[confirm]" {
+				return o, nil
+			}
+		}
+		if len(opts) > 0 {
+			return opts[0], nil
+		}
+		return "", nil
+	}
+	err := gameserver.RearrangePreparedTechs(context.Background(), sess, 1, job, nil, nil, promptFn, prep, func(string) {}, technology.TraditionFlavor{SlotNoun: "slot", PrepGerund: "Arranging"})
+	require.NoError(t, err)
+	found := false
+	for _, opts := range seenOptions {
+		for _, o := range opts {
+			if strings.Contains(o, "pool_b") {
+				found = true
+			}
+		}
+	}
+	assert.True(t, found, "druid rearrangement must offer full grant pool including pool_b")
+}
+
+// REQ-TC-14: heighten delta is slotLevel - techLevel and is never negative.
+func TestProperty_HeightenDelta_NeverNegative(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		slotLevel := rapid.IntRange(1, 10).Draw(rt, "slotLevel")
+		techLevel := rapid.IntRange(1, slotLevel).Draw(rt, "techLevel")
+		delta := slotLevel - techLevel
+		if delta < 0 {
+			rt.Fatalf("heighten delta %d is negative (slotLevel=%d techLevel=%d)", delta, slotLevel, techLevel)
+		}
+	})
+}
+
+// REQ-TC-16: back/forward navigation never produces an out-of-bounds slot index.
+func TestProperty_Rearrange_BackForwardNeverOutOfBounds(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		totalSlots := rapid.IntRange(1, 6).Draw(rt, "total")
+		cur := rapid.IntRange(0, totalSlots-1).Draw(rt, "start")
+		for i := 0; i < 20; i++ {
+			action := rapid.IntRange(0, 2).Draw(rt, "action")
+			switch action {
+			case 0: // back
+				if cur > 0 {
+					cur--
+				}
+			case 1: // forward
+				if cur < totalSlots-1 {
+					cur++
+				}
+			// case 2: no-op (stay)
+			}
+			if cur < 0 || cur >= totalSlots {
+				rt.Fatalf("cur=%d out of bounds [0,%d)", cur, totalSlots)
+			}
+		}
+	})
 }

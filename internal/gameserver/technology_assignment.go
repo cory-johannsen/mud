@@ -462,6 +462,81 @@ func LevelUpTechnologies(
 	return nil
 }
 
+// Sentinel options used during prepared-tech rearrangement navigation.
+const (
+	backSentinel    = "[back]"
+	forwardSentinel = "[forward]"
+	confirmSentinel = "[confirm]"
+)
+
+// buildCatalogPool returns PreparedEntry values from KnownTechs at all levels ≤ slotLevel.
+// Used for wizard and ranger casting models where the player prepares from their personal catalog.
+//
+// Precondition: knownTechs may be nil or empty (returns empty slice in that case).
+// Postcondition: all returned entries have Level ≤ slotLevel.
+func buildCatalogPool(knownTechs map[int][]string, slotLevel int) []ruleset.PreparedEntry {
+	var pool []ruleset.PreparedEntry
+	for lvl := 1; lvl <= slotLevel; lvl++ {
+		for _, id := range knownTechs[lvl] {
+			pool = append(pool, ruleset.PreparedEntry{ID: id, Level: lvl})
+		}
+	}
+	return pool
+}
+
+// buildGrantPool returns PreparedEntry values from grants.Pool at all levels ≤ slotLevel.
+// Used for druid casting model where the player prepares from the full grant pool at rest.
+//
+// Precondition: grants may be nil (returns empty slice in that case).
+// Postcondition: all returned entries have Level ≤ slotLevel.
+func buildGrantPool(grants *ruleset.PreparedGrants, slotLevel int) []ruleset.PreparedEntry {
+	if grants == nil {
+		return nil
+	}
+	var pool []ruleset.PreparedEntry
+	for _, e := range grants.Pool {
+		if e.Level <= slotLevel {
+			pool = append(pool, e)
+		}
+	}
+	return pool
+}
+
+// buildOptionsWithHeighten builds option strings for a slot of slotLevel.
+// Options for techs at levels below slotLevel get a [heightened:N] annotation
+// where N = slotLevel - techLevel.
+//
+// Precondition: pool may be empty (returns empty slice). reg may be nil.
+// Postcondition: each option encodes the tech ID in "[id]" prefix format so parseTechID can extract it.
+func buildOptionsWithHeighten(pool []ruleset.PreparedEntry, slotLevel int, reg *technology.Registry) []string {
+	var opts []string
+	for _, e := range pool {
+		var s string
+		if reg != nil {
+			if def, ok := reg.Get(e.ID); ok {
+				s = fmt.Sprintf("[%s] %s (Lv %d)", e.ID, def.Name, e.Level)
+			} else {
+				s = fmt.Sprintf("[%s] (Lv %d)", e.ID, e.Level)
+			}
+		} else {
+			s = fmt.Sprintf("[%s] (Lv %d)", e.ID, e.Level)
+		}
+		delta := slotLevel - e.Level
+		if delta > 0 {
+			s += fmt.Sprintf(" [heightened:%d]", delta)
+		}
+		opts = append(opts, s)
+	}
+	return opts
+}
+
+// rearrangeSlot represents one prepared slot position during rearrangement navigation.
+type rearrangeSlot struct {
+	level   int
+	slotNum int // 1-based within level
+	total   int // total slots at this level
+}
+
 // RearrangePreparedTechs deletes all existing prepared slots and re-fills them
 // by aggregating grants from job.TechnologyGrants, archetype.TechnologyGrants,
 // job.LevelUpGrants, and archetype.LevelUpGrants for levels 1..sess.Level.
@@ -554,6 +629,31 @@ func RearrangePreparedTechs(
 		return nil
 	}
 
+	// REQ-TC-13: Resolve casting model and apply casting-model-aware pool selection.
+	// Wizard and ranger prepare from their personal KnownTechs catalog; druid and all other
+	// models prepare from the full aggregated grant pool.
+	castingModel := ruleset.ResolveCastingModel(job, archetype)
+	var effectivePool []ruleset.PreparedEntry
+	switch castingModel {
+	case ruleset.CastingModelWizard, ruleset.CastingModelRanger:
+		// Build pool from KnownTechs catalog: only techs the player has previously learned.
+		// allPool is still used as the universe of valid entries; entries not in KnownTechs are excluded.
+		knownSet := make(map[string]bool)
+		for _, ids := range sess.KnownTechs {
+			for _, id := range ids {
+				knownSet[id] = true
+			}
+		}
+		for _, e := range allPool {
+			if knownSet[e.ID] {
+				effectivePool = append(effectivePool, e)
+			}
+		}
+	default:
+		// Druid and spontaneous/none models: use full aggregated grant pool.
+		effectivePool = allPool
+	}
+
 	send := func(msg string) {
 		if sendFn != nil {
 			sendFn(msg)
@@ -565,7 +665,7 @@ func RearrangePreparedTechs(
 	merged := &ruleset.PreparedGrants{
 		SlotsByLevel: slotsByLevel,
 		Fixed:        allFixed,
-		Pool:         allPool,
+		Pool:         effectivePool,
 	}
 
 	// Snapshot current assignments before clearing — used to offer "keep" options during re-selection.

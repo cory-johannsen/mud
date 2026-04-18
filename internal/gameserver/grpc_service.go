@@ -3910,7 +3910,7 @@ func (s *GameServiceServer) applyLongRestEffects(uid string, sess *session.Playe
 			Options: options,
 			Key:     "tech_choice",
 		}
-		return s.promptFeatureChoice(stream, "tech_choice", choices, headless)
+		return s.promptTechSlotChoice(stream, "tech_choice", choices, slotCtx, headless)
 	}
 	return s.applyFullLongRestCtx(uid, sess, ctx, sendMsg, promptFn)
 }
@@ -4302,7 +4302,7 @@ func (s *GameServiceServer) applyFullLongRest(uid string, sess *session.PlayerSe
 			Options: options,
 			Key:     "tech_choice",
 		}
-		return s.promptFeatureChoice(stream, "tech_choice", choices, headless)
+		return s.promptTechSlotChoice(stream, "tech_choice", choices, slotCtx, headless)
 	}
 	return s.applyFullLongRestCtx(uid, sess, stream.Context(), sendMsg, promptFn)
 }
@@ -4471,7 +4471,7 @@ func (s *GameServiceServer) handleSelectTech(uid string, requestID string, strea
 			Options: options,
 			Key:     "tech_choice",
 		}
-		return s.promptFeatureChoice(stream, "tech_choice", choices, headlessFlag)
+		return s.promptTechSlotChoice(stream, "tech_choice", choices, slotCtx, headlessFlag)
 	}
 
 	if err := ResolvePendingTechGrants(stream.Context(), sess, sess.CharacterID,
@@ -9080,9 +9080,18 @@ func wrapOption(prefix, text string, width int) string {
 
 // choicePromptPayload is the JSON structure sent inside the "\x00choice\x00" sentinel.
 type choicePromptPayload struct {
-	FeatureID string   `json:"featureId"`
-	Prompt    string   `json:"prompt"`
-	Options   []string `json:"options"`
+	FeatureID   string           `json:"featureId"`
+	Prompt      string           `json:"prompt"`
+	Options     []string         `json:"options"`
+	SlotContext *techSlotContext `json:"slotContext,omitempty"`
+}
+
+// techSlotContext carries prepared-slot metadata to the frontend so it can render
+// slot tabs, level headers, and heightened-tier badges.
+type techSlotContext struct {
+	SlotNum    int `json:"slotNum"`
+	TotalSlots int `json:"totalSlots"`
+	SlotLevel  int `json:"slotLevel"`
 }
 
 // maxChoiceAttempts is the maximum number of stream.Recv iterations before
@@ -9185,6 +9194,112 @@ func (s *GameServiceServer) promptFeatureChoice(
 	}
 
 	// All attempts exhausted or invalid selection received.
+	if sendErr := stream.Send(&gamev1.ServerEvent{
+		Payload: &gamev1.ServerEvent_Message{
+			Message: &gamev1.MessageEvent{Content: "Invalid selection. You will be prompted again on next login."},
+		},
+	}); sendErr != nil {
+		if s.logger != nil {
+			s.logger.Warn("sending invalid-selection feedback", zap.String("feature", featureID), zap.Error(sendErr))
+		}
+		return "", sendErr
+	}
+	return "", nil
+}
+
+// promptTechSlotChoice is like promptFeatureChoice but includes prepared-slot metadata
+// (slotCtx) in the JSON payload so that frontend clients can render slot tabs and level headers.
+// slotCtx may be nil; when nil the payload is equivalent to promptFeatureChoice.
+//
+// Precondition: stream must be writable; choices must be non-nil with non-empty Options.
+// Postcondition: Returns (selectedValue, nil) on valid input, ("", nil) on invalid input.
+func (s *GameServiceServer) promptTechSlotChoice(
+	stream gamev1.GameService_SessionServer,
+	featureID string,
+	choices *ruleset.FeatureChoices,
+	slotCtx *TechSlotContext,
+	headless bool,
+) (string, error) {
+	if len(choices.Options) == 0 {
+		return "", fmt.Errorf("feature %s has empty Options slice", featureID)
+	}
+	if headless {
+		return choices.Options[0], nil
+	}
+
+	var sc *techSlotContext
+	if slotCtx != nil {
+		sc = &techSlotContext{
+			SlotNum:    slotCtx.SlotNum,
+			TotalSlots: slotCtx.TotalSlots,
+			SlotLevel:  slotCtx.SlotLevel,
+		}
+	}
+	payload := choicePromptPayload{
+		FeatureID:   featureID,
+		Prompt:      choices.Prompt,
+		Options:     choices.Options,
+		SlotContext: sc,
+	}
+	data, err := json.Marshal(payload)
+	if err != nil {
+		return "", fmt.Errorf("marshalling tech slot choice prompt for %s: %w", featureID, err)
+	}
+	const choiceSentinel = "\x00choice\x00"
+	if sendErr := stream.Send(&gamev1.ServerEvent{
+		Payload: &gamev1.ServerEvent_Message{
+			Message: &gamev1.MessageEvent{Content: choiceSentinel + string(data)},
+		},
+	}); sendErr != nil {
+		return "", fmt.Errorf("sending tech slot choice prompt for %s: %w", featureID, sendErr)
+	}
+
+	// Reuse the same receive loop logic as promptFeatureChoice.
+	for attempt := 0; attempt < maxChoiceAttempts; attempt++ {
+		msg, recvErr := stream.Recv()
+		if recvErr != nil {
+			return "", fmt.Errorf("receiving tech slot choice for %s: %w", featureID, recvErr)
+		}
+		selText := ""
+		switch {
+		case msg.GetSay() != nil:
+			selText = strings.TrimSpace(msg.GetSay().GetMessage())
+		case msg.GetMove() != nil:
+			selText = strings.TrimSpace(msg.GetMove().GetDirection())
+		default:
+			continue
+		}
+		var n int
+		_, scanErr := fmt.Sscanf(selText, "%d", &n)
+		if scanErr != nil {
+			continue
+		}
+		idx := -1
+		if n >= 1 && n <= len(choices.Options) {
+			idx = n - 1
+		}
+		if idx < 0 {
+			if s.logger != nil {
+				s.logger.Warn("invalid tech slot choice selection",
+					zap.String("feature", featureID),
+					zap.String("input", selText),
+				)
+			}
+			break
+		}
+		chosen := choices.Options[idx]
+		if sendErr := stream.Send(&gamev1.ServerEvent{
+			Payload: &gamev1.ServerEvent_Message{
+				Message: &gamev1.MessageEvent{Content: choices.Key + " set to: " + chosen},
+			},
+		}); sendErr != nil {
+			if s.logger != nil {
+				s.logger.Warn("sending tech slot choice confirmation", zap.String("feature", featureID), zap.Error(sendErr))
+			}
+		}
+		return chosen, nil
+	}
+
 	if sendErr := stream.Send(&gamev1.ServerEvent{
 		Payload: &gamev1.ServerEvent_Message{
 			Message: &gamev1.MessageEvent{Content: "Invalid selection. You will be prompted again on next login."},
