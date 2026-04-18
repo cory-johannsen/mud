@@ -63,10 +63,17 @@ export interface CombatantHp {
   max: number
 }
 
+export interface SlotContext {
+  slotNum: number
+  totalSlots: number
+  slotLevel: number
+}
+
 export interface ChoicePrompt {
   featureId: string
   prompt: string
   options: string[]
+  slotContext?: SlotContext
 }
 
 export interface CombatantAP {
@@ -657,13 +664,14 @@ export function GameProvider({ children }: { children: ReactNode }) {
           break
         }
         case 'FeatureChoicePrompt': {
-          const cp = payload as { featureId?: string; prompt?: string; options?: string[] }
+          const cp = payload as { featureId?: string; prompt?: string; options?: string[]; slotContext?: SlotContext }
           dispatch({
             type: 'SET_CHOICE_PROMPT',
             prompt: {
               featureId: cp.featureId ?? '',
               prompt: cp.prompt ?? '',
               options: Array.isArray(cp.options) ? cp.options : [],
+              slotContext: cp.slotContext,
             },
           })
           break
