@@ -102,7 +102,7 @@ zone:
     map_x: 4
     map_y: 0
     spawns:
-    - template: just_clownin
+    - template: big_top
       count: 1
       respawn_after: 30m
     boss_room: true
