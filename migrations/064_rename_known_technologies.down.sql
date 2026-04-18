@@ -1,0 +1,1 @@
+ALTER TABLE character_known_technologies RENAME TO character_spontaneous_technologies;
