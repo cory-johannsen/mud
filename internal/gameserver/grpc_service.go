@@ -602,13 +602,15 @@ func NewGameServiceServer(
 		// REQ-BUG96-1: wire saveInventory so looted items are persisted immediately.
 		s.combatH.SetSaveInventoryFn(s.saveInventory)
 		// Wire tech use resolver so ActionUseTech round events apply effects post-round.
-		s.combatH.SetTechUseResolverFn(func(uid, techID, targetID string, targetX, targetY int32) {
+		// cbt is passed directly from resolveAndAdvanceLocked to avoid re-acquiring combatMu
+		// inside the callback (which would deadlock since combatMu is already held at call time).
+		s.combatH.SetTechUseResolverFn(func(uid, techID, targetID string, targetX, targetY int32, cbt *combat.Combat) {
 			sess, ok := s.sessions.GetPlayer(uid)
 			if !ok {
 				return
 			}
-			evt, err := s.activateTechWithEffects(sess, uid, techID, targetID,
-				fmt.Sprintf("You use %s.", techID), nil, targetX, targetY)
+			evt, err := s.activateTechWithEffectsWithCombat(sess, uid, techID, targetID,
+				fmt.Sprintf("You use %s.", techID), nil, targetX, targetY, cbt)
 			if err != nil || evt == nil {
 				return
 			}
@@ -8986,6 +8988,58 @@ func (s *GameServiceServer) activateTechWithEffects(sess *session.PlayerSession,
 	// REQ-AOE-1: When tech has aoe_radius > 0 and target coordinates are provided,
 	// collect all living combatants within Chebyshev distance aoe_radius of the target square.
 	// Sentinel: targetX < 0 or targetY < 0 means no AoE target (use single-target path instead).
+	if techDef.AoeRadius > 0 && (targetX >= 0 && targetY >= 0) && cbt != nil {
+		center := combat.Combatant{GridX: int(targetX), GridY: int(targetY)}
+		techTargets = combat.CombatantsInRadius(cbt, center, techDef.AoeRadius)
+	} else {
+		target, errMsg := s.resolveUseTarget(uid, targetID, techDef)
+		if errMsg != "" {
+			return messageEvent(errMsg), nil
+		}
+		if techDef.Targets == technology.TargetsAllEnemies && cbt != nil { //nolint:gocritic
+			for _, c := range cbt.Combatants {
+				if c.Kind == combat.KindNPC && !c.IsDead() {
+					techTargets = append(techTargets, c)
+				}
+			}
+		} else if target != nil {
+			techTargets = []*combat.Combatant{target}
+		}
+	}
+
+	msgs := ResolveTechEffects(sess, techDef, techTargets, cbt, s.condRegistry, globalRandSrc{}, querier)
+	return messageEvent(strings.Join(msgs, "\n")), nil
+}
+
+// activateTechWithEffectsWithCombat is a variant of activateTechWithEffects that accepts
+// an already-resolved *combat.Combat instead of calling ActiveCombatForPlayer internally.
+// Use this inside callbacks that are invoked while combatMu is already held to prevent deadlock.
+//
+// Precondition: sess and cbt may be nil; cbt == nil falls back to no AoE/target-list logic.
+// Postcondition: same as activateTechWithEffects.
+func (s *GameServiceServer) activateTechWithEffectsWithCombat(sess *session.PlayerSession, uid, abilityID, targetID, fallbackMsg string, querier RoomQuerier, targetX, targetY int32, cbt *combat.Combat) (*gamev1.ServerEvent, error) {
+	if s.techRegistry == nil {
+		return messageEvent(fallbackMsg), nil
+	}
+	techDef, ok := s.techRegistry.Get(abilityID)
+	if !ok {
+		return messageEvent(fallbackMsg), nil
+	}
+	// REQ-FP-3/REQ-FP-4/REQ-FP-5/REQ-FP-6: Enforce Focus Point cost before activation.
+	if techDef.FocusCost {
+		next, ok := focuspoints.Spend(sess.FocusPoints, sess.MaxFocusPoints)
+		if !ok {
+			return messageEvent(fmt.Sprintf("Not enough Focus Points. (%d/%d)", sess.FocusPoints, sess.MaxFocusPoints)), nil
+		}
+		sess.FocusPoints = next
+		if s.charSaver != nil {
+			if err := s.charSaver.SaveFocusPoints(context.Background(), sess.CharacterID, sess.FocusPoints); err != nil {
+				return nil, fmt.Errorf("persist focus points: %w", err)
+			}
+		}
+	}
+
+	var techTargets []*combat.Combatant
 	if techDef.AoeRadius > 0 && (targetX >= 0 && targetY >= 0) && cbt != nil {
 		center := combat.Combatant{GridX: int(targetX), GridY: int(targetY)}
 		techTargets = combat.CombatantsInRadius(cbt, center, techDef.AoeRadius)

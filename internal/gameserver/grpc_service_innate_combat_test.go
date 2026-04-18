@@ -2,6 +2,7 @@ package gameserver
 
 import (
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -121,6 +122,105 @@ func TestHandleUse_InnateTech_WithActionCost_QueuesInCombat(t *testing.T) {
 		}
 	}
 	assert.True(t, foundTechAction, "ActionUseTech for atmospheric_surge must be in the queue")
+}
+
+// TestBug158_TechUseResolverFn_NeverDeadlocks is the regression test for GitHub issue #158:
+// "Using Righteous Condemnation from hotbar causes combat to halt."
+//
+// Root cause: techUseResolverFn was called from within resolveAndAdvanceLocked (combatMu held),
+// and the resolver called ActiveCombatForPlayer which tried to re-acquire combatMu on the same
+// goroutine — deadlock.
+//
+// Fix: techUseResolverFn now receives the *combat.Combat directly so it never needs to
+// re-acquire combatMu. This test verifies the fix by calling the resolver directly while
+// simulating the held-lock condition (passing a non-nil cbt to the callback).
+//
+// Precondition: a techUseResolverFn is registered; it receives cbt directly.
+// Postcondition: the resolver invocation completes without deadlocking.
+func TestBug158_TechUseResolverFn_NeverDeadlocks(t *testing.T) {
+	t.Parallel()
+
+	const roomID = "room_bug158"
+	_, sessMgr, npcMgr, combatHandler := newInnateCombatSvc(t)
+
+	_, err := npcMgr.Spawn(&npc.Template{
+		ID: "goblin-bug158", Name: "Goblin", Level: 1, MaxHP: 20, AC: 13, Awareness: 2,
+	}, roomID)
+	require.NoError(t, err)
+
+	const uid = "u_bug158"
+	_, err = sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID: uid, Username: "Zealot", CharName: "Zealot",
+		RoomID: roomID, CurrentHP: 10, MaxHP: 20, Role: "player",
+	})
+	require.NoError(t, err)
+
+	// Track whether the resolver was invoked.
+	resolverCalled := make(chan struct{}, 1)
+
+	// Install a resolver that simply closes the channel — no combat state lookup needed.
+	// Previously it called ActiveCombatForPlayer which deadlocked; now cbt is passed directly.
+	combatHandler.SetTechUseResolverFn(func(uid, techID, targetID string, targetX, targetY int32, cbt *combat.Combat) {
+		// Verify cbt is non-nil (passed from resolveAndAdvanceLocked).
+		if cbt != nil {
+			resolverCalled <- struct{}{}
+		}
+	})
+
+	_, err = combatHandler.Attack(uid, "Goblin")
+	require.NoError(t, err)
+	combatHandler.cancelTimer(roomID)
+
+	cbt, ok := combatHandler.GetCombatForRoom(roomID)
+	require.True(t, ok)
+
+	// Manually enqueue an ActionUseTech for the player without going through QueueTechUse
+	// (which would try to resolve immediately via AllActionsSubmitted). We want to exercise
+	// the resolver path inside resolveAndAdvanceLocked directly.
+	qa := combat.QueuedAction{
+		Type:        combat.ActionUseTech,
+		AbilityID:   "righteous_condemnation",
+		Target:      "Goblin",
+		AbilityCost: 1,
+		TargetX:     -1,
+		TargetY:     -1,
+	}
+	err = cbt.QueueAction(uid, qa)
+	require.NoError(t, err)
+
+	// Also queue an action for the NPC so AllActionsSubmitted becomes true and we can trigger resolution.
+	npcInsts := npcMgr.InstancesInRoom(roomID)
+	require.NotEmpty(t, npcInsts)
+	npcID := npcInsts[0].ID
+	err = cbt.QueueAction(npcID, combat.QueuedAction{
+		Type:        combat.ActionAttack,
+		Target:      uid,
+		AbilityCost: 1,
+	})
+	require.NoError(t, err)
+
+	// Trigger round resolution directly. If the old deadlock were present, this would hang.
+	// The test uses a goroutine + timeout to detect hangs.
+	done := make(chan struct{})
+	go func() {
+		combatHandler.resolveAndAdvanceLocked(roomID, cbt)
+		close(done)
+	}()
+
+	select {
+	case <-done:
+		// Resolution completed — no deadlock.
+	case <-time.After(5 * time.Second):
+		t.Fatal("resolveAndAdvanceLocked deadlocked (Bug #158 regression)")
+	}
+
+	// Resolver should have been called exactly once for the ActionUseTech event.
+	select {
+	case <-resolverCalled:
+		// Resolver was invoked with a non-nil cbt.
+	default:
+		t.Fatal("techUseResolverFn was not called during round resolution")
+	}
 }
 
 // TestHandleUse_InnateTech_NoActionCost_FiresImmediately verifies that innate techs

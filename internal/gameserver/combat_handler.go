@@ -139,8 +139,9 @@ type CombatHandler struct {
 	onLevelUpFn func(ctx context.Context, sess *session.PlayerSession, fromLevel, toLevel int)
 	// techUseResolverFn is an optional callback invoked after round resolution for each
 	// ActionUseTech event. It applies tech effects and pushes the result to the player.
+	// cbt is the active Combat, passed directly to avoid re-acquiring combatMu inside the callback.
 	// May be nil; tech effects are skipped when nil.
-	techUseResolverFn func(uid, techID, targetID string, targetX, targetY int32)
+	techUseResolverFn func(uid, techID, targetID string, targetX, targetY int32, cbt *combat.Combat)
 }
 
 // NewCombatHandler creates a CombatHandler with a round timer and broadcast function.
@@ -795,10 +796,12 @@ func (h *CombatHandler) Aid(uid, allyName string) ([]*gamev1.CombatEvent, error)
 
 // SetTechUseResolverFn registers the callback that applies technology effects during
 // post-round processing. Called once for each ActionUseTech event after ResolveRound.
+// The callback receives the active *combat.Combat directly so it can avoid re-acquiring
+// combatMu (which is already held by resolveAndAdvanceLocked at call time).
 //
 // Precondition: fn may be nil (tech effects are skipped when nil).
 // Postcondition: h.techUseResolverFn is set to fn.
-func (h *CombatHandler) SetTechUseResolverFn(fn func(uid, techID, targetID string, targetX, targetY int32)) {
+func (h *CombatHandler) SetTechUseResolverFn(fn func(uid, techID, targetID string, targetX, targetY int32, cbt *combat.Combat)) {
 	h.techUseResolverFn = fn
 }
 
@@ -2497,10 +2500,11 @@ func (h *CombatHandler) resolveAndAdvanceLocked(roomID string, cbt *combat.Comba
 
 	// Apply tech effects for ActionUseTech events before building the broadcast list.
 	// techUseResolverFn pushes the result directly to the player's stream.
+	// cbt is passed directly to avoid re-acquiring combatMu inside the callback (deadlock guard).
 	if h.techUseResolverFn != nil {
 		for _, re := range roundEvents {
 			if re.ActionType == combat.ActionUseTech {
-				h.techUseResolverFn(re.ActorID, re.AbilityID, re.TargetID, re.TargetX, re.TargetY)
+				h.techUseResolverFn(re.ActorID, re.AbilityID, re.TargetID, re.TargetX, re.TargetY, cbt)
 			}
 		}
 	}
