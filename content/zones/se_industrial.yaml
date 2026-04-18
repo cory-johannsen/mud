@@ -188,8 +188,8 @@ zone:
       target: sei_rail_siding
     - direction: west
       target: sei_mcloughlin_blvd
-    map_x: 0
-    map_y: 0
+    map_x: -10
+    map_y: -2
     danger_level: dangerous
     spawns:
     - template: rail_gang_raider
@@ -461,8 +461,8 @@ zone:
     exits:
     - direction: north
       target: sei_milwaukie_junction
-    map_x: -2
-    map_y: 6
+    map_x: -10
+    map_y: 0
     danger_level: dangerous
     spawns:
     - template: warehouse_guard
@@ -810,8 +810,8 @@ zone:
     exits:
     - direction: north
       target: sei_rail_siding
-    map_x: -2
-    map_y: 8
+    map_x: -10
+    map_y: 2
     danger_level: dangerous
     spawns:
     - template: rail_gang_raider

@@ -536,7 +536,7 @@ zone:
     - direction: west
       target: aloha_back_alley
     map_x: -4
-    map_y: 6
+    map_y: 8
     properties:
       lighting: overcast
       atmosphere: industrial
