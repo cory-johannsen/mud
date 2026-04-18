@@ -125,19 +125,28 @@ func (s *GameServiceServer) hotbarUpdateEvent(sess *session.PlayerSession) *game
 // Postcondition: ApCost > 0 only for technology/feat slots with a defined action cost.
 // DamageSummary is a compact string like "2d6 fire" or "1d8 healing", or "" if none.
 func (s *GameServiceServer) resolveHotbarSlotTechInfo(slot session.HotbarSlot) (apCost int32, damageSummary string) {
-	if slot.Kind != session.HotbarSlotKindTechnology {
+	switch slot.Kind {
+	case session.HotbarSlotKindTechnology:
+		if s.techRegistry == nil {
+			return 0, ""
+		}
+		tech, ok := s.techRegistry.Get(slot.Ref)
+		if !ok {
+			return 0, ""
+		}
+		return int32(tech.ActionCost), primaryDamageSummary(tech)
+	case session.HotbarSlotKindFeat:
+		if s.featRegistry == nil {
+			return 0, ""
+		}
+		feat, ok := s.featRegistry.Feat(slot.Ref)
+		if !ok {
+			return 0, ""
+		}
+		return int32(feat.ActionCost), ""
+	default:
 		return 0, ""
 	}
-	if s.techRegistry == nil {
-		return 0, ""
-	}
-	tech, ok := s.techRegistry.Get(slot.Ref)
-	if !ok {
-		return 0, ""
-	}
-	apCost = int32(tech.ActionCost)
-	damageSummary = primaryDamageSummary(tech)
-	return apCost, damageSummary
 }
 
 // primaryDamageSummary extracts a compact damage or heal summary from the primary

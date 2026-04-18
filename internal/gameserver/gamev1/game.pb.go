@@ -10462,6 +10462,7 @@ type FeatEntry struct {
 	ActivateText  string                 `protobuf:"bytes,6,opt,name=activate_text,json=activateText,proto3" json:"activate_text,omitempty"`
 	IsReaction    bool                   `protobuf:"varint,7,opt,name=is_reaction,json=isReaction,proto3" json:"is_reaction,omitempty"`
 	ArmorCategory string                 `protobuf:"bytes,8,opt,name=armor_category,json=armorCategory,proto3" json:"armor_category,omitempty"`
+	ActionCost    int32                  `protobuf:"varint,9,opt,name=action_cost,json=actionCost,proto3" json:"action_cost,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -10550,6 +10551,13 @@ func (x *FeatEntry) GetArmorCategory() string {
 		return x.ArmorCategory
 	}
 	return ""
+}
+
+func (x *FeatEntry) GetActionCost() int32 {
+	if x != nil {
+		return x.ActionCost
+	}
+	return 0
 }
 
 // FeatsResponse contains all feat entries for the character.
@@ -17911,7 +17919,7 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\x15CharacterSheetRequest\">\n" +
 	"\x19ArchetypeSelectionRequest\x12!\n" +
 	"\farchetype_id\x18\x01 \x01(\tR\varchetypeId\"\x0e\n" +
-	"\fFeatsRequest\"\xfb\x01\n" +
+	"\fFeatsRequest\"\x9c\x02\n" +
 	"\tFeatEntry\x12\x17\n" +
 	"\afeat_id\x18\x01 \x01(\tR\x06featId\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x1a\n" +
@@ -17921,7 +17929,9 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\ractivate_text\x18\x06 \x01(\tR\factivateText\x12\x1f\n" +
 	"\vis_reaction\x18\a \x01(\bR\n" +
 	"isReaction\x12%\n" +
-	"\x0earmor_category\x18\b \x01(\tR\rarmorCategory\"9\n" +
+	"\x0earmor_category\x18\b \x01(\tR\rarmorCategory\x12\x1f\n" +
+	"\vaction_cost\x18\t \x01(\x05R\n" +
+	"actionCost\"9\n" +
 	"\rFeatsResponse\x12(\n" +
 	"\x05feats\x18\x01 \x03(\v2\x12.game.v1.FeatEntryR\x05feats\"\x16\n" +
 	"\x14ClassFeaturesRequest\"\xd5\x01\n" +

@@ -29,6 +29,11 @@ function FeatItem({
         <span style={feat.isReaction ? styles.badgeReaction : feat.active ? styles.badgeActive : styles.badgePassive}>
           {feat.isReaction ? 'reaction' : feat.active ? 'active' : 'passive'}
         </span>
+        {feat.active && !feat.isReaction && !!((feat.actionCost ?? feat.action_cost) ?? 0) && (
+          <span style={styles.apCostBadge}>
+            {feat.actionCost ?? feat.action_cost} AP
+          </span>
+        )}
       </div>
       {feat.description && (
         <p style={styles.featDesc}>{feat.description}</p>
@@ -181,5 +186,14 @@ const styles: Record<string, React.CSSProperties> = {
     cursor: 'pointer',
     fontFamily: 'monospace',
     fontSize: '0.75rem',
+  },
+  apCostBadge: {
+    fontSize: '0.65rem',
+    padding: '0.1rem 0.4rem',
+    borderRadius: '3px',
+    background: '#1a1a3a',
+    border: '1px solid #3a3a7a',
+    color: '#aaf',
+    whiteSpace: 'nowrap' as const,
   },
 }

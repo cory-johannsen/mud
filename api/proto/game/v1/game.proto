@@ -1098,6 +1098,7 @@ message FeatEntry {
   string activate_text  = 6;
   bool   is_reaction    = 7;
   string armor_category = 8;
+  int32  action_cost    = 9;
 }
 
 // FeatsResponse contains all feat entries for the character.

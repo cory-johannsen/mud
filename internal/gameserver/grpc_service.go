@@ -6348,6 +6348,7 @@ func (s *GameServiceServer) handleChar(uid string) (*gamev1.ServerEvent, error) 
 					ActivateText:  f.ActivateText,
 					IsReaction:    f.Reaction != nil,
 					ArmorCategory: armorCat,
+					ActionCost:    int32(f.ActionCost),
 				})
 			}
 		}
@@ -7335,6 +7336,7 @@ func (s *GameServiceServer) handleFeats(uid string) (*gamev1.ServerEvent, error)
 			ActivateText:  f.ActivateText,
 			IsReaction:    f.Reaction != nil,
 			ArmorCategory: armorCat,
+			ActionCost:    int32(f.ActionCost),
 		})
 	}
 	return &gamev1.ServerEvent{
@@ -8135,6 +8137,7 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string, targetX, 
 				Description:  desc,
 				ActivateText: f.ActivateText,
 				IsReaction:   f.Reaction != nil,
+				ActionCost:   int32(f.ActionCost),
 			})
 		}
 	}
@@ -8155,6 +8158,7 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string, targetX, 
 					Active:       cf.Active,
 					Description:  cf.Description,
 					ActivateText: cf.ActivateText,
+					ActionCost:   int32(cf.ActionCost),
 				})
 			}
 		}
@@ -8174,10 +8178,12 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string, targetX, 
 			for techID, remaining := range counts {
 				displayName := techID
 				var prepIsReaction bool
+				var prepActionCost int32
 				if s.techRegistry != nil {
 					if def, ok := s.techRegistry.Get(techID); ok {
 						displayName = def.Name
 						prepIsReaction = def.Reaction != nil
+						prepActionCost = int32(def.ActionCost)
 					}
 				}
 				active = append(active, &gamev1.FeatEntry{
@@ -8187,6 +8193,7 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string, targetX, 
 					Active:      true,
 					Description: fmt.Sprintf("%d use(s) remaining", remaining),
 					IsReaction:  prepIsReaction,
+					ActionCost:  prepActionCost,
 				})
 			}
 		}
@@ -8205,10 +8212,12 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string, targetX, 
 				for _, techID := range sess.KnownTechs[l] {
 					displayName := techID
 					var spontIsReaction bool
+					var spontActionCost int32
 					if s.techRegistry != nil {
 						if def, ok := s.techRegistry.Get(techID); ok {
 							displayName = def.Name
 							spontIsReaction = def.Reaction != nil
+							spontActionCost = int32(def.ActionCost)
 						}
 					}
 					active = append(active, &gamev1.FeatEntry{
@@ -8218,6 +8227,7 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string, targetX, 
 						Active:      true,
 						Description: fmt.Sprintf("%s (%d uses remaining at level %d)", displayName, pool.Remaining, l),
 						IsReaction:  spontIsReaction,
+						ActionCost:  spontActionCost,
 					})
 				}
 			}
@@ -8233,10 +8243,12 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string, targetX, 
 				slot := sess.InnateTechs[id]
 				displayName := id
 				var innateIsReaction bool
+				var innateActionCost int32
 				if s.techRegistry != nil {
 					if def, ok := s.techRegistry.Get(id); ok {
 						displayName = def.Name
 						innateIsReaction = def.Reaction != nil
+						innateActionCost = int32(def.ActionCost)
 					}
 				}
 				var desc string
@@ -8254,6 +8266,7 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string, targetX, 
 					Active:      true,
 					Description: desc,
 					IsReaction:  innateIsReaction,
+					ActionCost:  innateActionCost,
 				})
 			}
 		}

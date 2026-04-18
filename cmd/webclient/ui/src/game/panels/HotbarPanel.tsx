@@ -319,6 +319,7 @@ export function HotbarPanel() {
           const isExpended = maxUses > 0 && usesRemaining === 0
           const apCost = slot.apCost ?? slot.ap_cost ?? 0
           const isTech = slot.kind === 'technology'
+          const isFeat = slot.kind === 'feat'
           let cls = 'hotbar-slot'
           if (isEmpty) cls += ' hotbar-slot-empty'
           if (isExpended) cls += ' hotbar-slot-expended'
@@ -338,7 +339,7 @@ export function HotbarPanel() {
             >
               <span className="hotbar-key">{key}</span>
               <span className="hotbar-label">{label || '—'}</span>
-              {isTech && apCost > 0 && (
+              {(isTech || isFeat) && apCost > 0 && (
                 <span className="hotbar-ap-badge">
                   {Array.from({ length: Math.min(apCost, 5) }, (_, j) => (
                     <span key={j} className="hotbar-ap-pip" />

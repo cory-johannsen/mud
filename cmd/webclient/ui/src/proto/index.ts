@@ -121,6 +121,8 @@ export interface FeatEntry {
   activateText?: string
   isReaction?: boolean
   armorCategory?: string
+  actionCost?: number
+  action_cost?: number
 }
 
 export interface PreparedSlotView {
