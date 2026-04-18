@@ -346,6 +346,8 @@ export interface InventoryItem {
   effectsSummary?: string
   effects_summary?: string
   throwable?: boolean
+  weaponDamageType?: string
+  weapon_damage_type?: string
 }
 
 export interface InventoryView {
