@@ -6,9 +6,7 @@ import (
 
 	"github.com/cory-johannsen/mud/internal/game/combat"
 	"github.com/cory-johannsen/mud/internal/game/reaction"
-	"github.com/cory-johannsen/mud/internal/game/ruleset"
 	"github.com/cory-johannsen/mud/internal/game/session"
-	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 )
 
 // triggerDescriptions provides human-readable descriptions for each trigger type.
@@ -243,12 +241,12 @@ func executeReadiedAction(s *GameServiceServer, uid string, sess *session.Player
 
 // buildReactionCallback constructs the ReactionCallback for a player session.
 //
-// Precondition: uid, sess, and stream must not be nil.
-// Postcondition: Returns a ReactionCallback that prompts the player interactively.
+// Precondition: uid and sess must not be nil.
+// Postcondition: Returns a ReactionCallback that fires automatically without blocking
+// combat flow. The player receives a console notification describing what fired.
 func (s *GameServiceServer) buildReactionCallback(
 	uid string,
 	sess *session.PlayerSession,
-	stream gamev1.GameService_SessionServer,
 ) reaction.ReactionCallback {
 	return func(triggerUID string, trigger reaction.ReactionTriggerType, ctx reaction.ReactionContext) (bool, error) {
 		if triggerUID != uid {
@@ -270,41 +268,35 @@ func (s *GameServiceServer) buildReactionCallback(
 			return false, nil
 		}
 
+		// Auto-fire the reaction — never block combat with a modal prompt.
+		sess.ReactionsRemaining--
 		desc, ok := triggerDescriptions[trigger]
 		if !ok {
 			desc = string(trigger)
 		}
-		prompt := "Reaction available: " + pr.FeatName + " \u2014 " + desc + ". Use it? (yes / no)"
-		choices := &ruleset.FeatureChoices{
-			Key:     "reaction",
-			Prompt:  prompt,
-			Options: []string{"yes", "no"},
-		}
-		chosen, err := s.promptFeatureChoice(stream, "reaction", choices, sess.Headless)
-		if err != nil {
-			return false, err
-		}
-		if chosen != "yes" {
-			return false, nil
-		}
-
-		sess.ReactionsRemaining--
 		damageBeforeEffect := 0
 		if ctx.DamagePending != nil {
 			damageBeforeEffect = *ctx.DamagePending
 		}
 		// ctx is passed by value but DamagePending and SaveOutcome are pointers into the caller's
 		// data. ApplyReactionEffect mutates through these pointers, so effects propagate to the
-		// caller. Any future effect that assigns a new pointer field rather than dereferencing
-		// must pass ctx by pointer instead.
+		// caller.
 		ApplyReactionEffect(sess, pr.Def.Effect, &ctx)
-		if pr.Def.Effect.Type == reaction.ReactionEffectReduceDamage && ctx.DamagePending != nil {
-			blocked := damageBeforeEffect - *ctx.DamagePending
-			if *ctx.DamagePending <= 0 {
-				s.pushMessageToUID(uid, "Reactive Block: fully blocked the attack.")
-			} else {
-				s.pushMessageToUID(uid, fmt.Sprintf("Reactive Block: blocked %d damage.", blocked))
+
+		switch pr.Def.Effect.Type {
+		case reaction.ReactionEffectReduceDamage:
+			if ctx.DamagePending != nil {
+				blocked := damageBeforeEffect - *ctx.DamagePending
+				if *ctx.DamagePending <= 0 {
+					s.pushMessageToUID(uid, fmt.Sprintf("Reaction — %s triggered (%s): fully blocked the attack.", pr.FeatName, desc))
+				} else {
+					s.pushMessageToUID(uid, fmt.Sprintf("Reaction — %s triggered (%s): blocked %d damage.", pr.FeatName, desc, blocked))
+				}
 			}
+		case reaction.ReactionEffectRerollSave:
+			s.pushMessageToUID(uid, fmt.Sprintf("Reaction — %s triggered (%s): saving throw rerolled, keeping better result.", pr.FeatName, desc))
+		default:
+			s.pushMessageToUID(uid, fmt.Sprintf("Reaction — %s triggered (%s).", pr.FeatName, desc))
 		}
 		return true, nil
 	}

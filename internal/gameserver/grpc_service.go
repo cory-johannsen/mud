@@ -1998,7 +1998,7 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 
 	// REQ-RXN20: build and store the interactive reaction callback.
 	// Must use ss so that reaction prompts go through the mutex.
-	sess.ReactionFn = s.buildReactionCallback(uid, sess, ss)
+	sess.ReactionFn = s.buildReactionCallback(uid, sess)
 
 	// Subscribe to calendar ticks for this session (nil-safe: calendar may be nil).
 	var calCh chan GameDateTime
