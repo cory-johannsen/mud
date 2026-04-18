@@ -186,6 +186,23 @@ function SpontaneousItem({
   )
 }
 
+// Known-but-unassigned tech item — shown greyed out for prepared casters
+function UnassignedKnownItem({ entry }: { entry: SpontaneousKnownEntry }) {
+  const techId = entry.techId ?? entry.tech_id ?? ''
+  const name = entry.techName ?? entry.tech_name ?? techId
+  const level = entry.techLevel ?? entry.tech_level ?? 0
+  return (
+    <li style={{ ...styles.techItem, opacity: 0.45 }}>
+      <div style={styles.techHeader}>
+        <strong style={{ color: '#888' }}>{name}</strong>
+        <LevelBadge level={level} />
+        <span style={styles.badgeUnassigned}>unassigned</span>
+      </div>
+      {entry.description && <p style={styles.techDesc}>{entry.description}</p>}
+    </li>
+  )
+}
+
 // Passive tech item — Innate with passive: true
 function PassiveInnateItem({ slot }: { slot: InnateSlotView }) {
   const techId = slot.techId ?? slot.tech_id ?? ''
@@ -287,12 +304,19 @@ export function TechnologyDrawer({ onClose }: { onClose: () => void }) {
   }
   const preparedGroups = [...preparedGroupMap.values()]
 
+  // Unassigned known techs: for prepared casters (have spontKnown but no spontPools),
+  // show techs that are known but not assigned to any prepared slot.
+  const assignedIds = new Set(prepared.map(p => p.techId ?? p.tech_id ?? ''))
+  const unassignedKnown = spontPools.length === 0
+    ? spontKnown.filter(e => !assignedIds.has(e.techId ?? e.tech_id ?? ''))
+    : []
+
   const reactionInnate = innate.filter((s) => s.isReaction)
   const passiveInnate = innate.filter((s) => !s.isReaction && s.passive)
   const normalInnate = innate.filter((s) => !s.isReaction && !s.passive)
 
   const hasReactions = reactionInnate.length > 0
-  const hasActive = preparedGroups.length > 0 || normalInnate.length > 0 || spontKnown.length > 0
+  const hasActive = preparedGroups.length > 0 || normalInnate.length > 0 || spontKnown.length > 0 || unassignedKnown.length > 0
   const hasPassive = hardwired.length > 0 || passiveInnate.length > 0
   const hasAny = hasReactions || hasActive || hasPassive
 
@@ -351,6 +375,9 @@ export function TechnologyDrawer({ onClose }: { onClose: () => void }) {
                       hotbarSlots={state.hotbarSlots}
                       sendMessage={sendMessage}
                     />
+                  ))}
+                  {unassignedKnown.map((entry) => (
+                    <UnassignedKnownItem key={entry.techId ?? entry.tech_id ?? ''} entry={entry} />
                   ))}
                   {sortedPools.map((pool) => {
                     const lvl = pool.techLevel ?? pool.tech_level ?? 0
@@ -466,6 +493,15 @@ const styles: Record<string, React.CSSProperties> = {
     background: '#1a1a2a',
     border: '1px solid #3a3a5a',
     color: '#778',
+    whiteSpace: 'nowrap' as const,
+  },
+  badgeUnassigned: {
+    fontSize: '0.65rem',
+    padding: '0.1rem 0.4rem',
+    borderRadius: '3px',
+    background: '#1a1a1a',
+    border: '1px solid #3a3a3a',
+    color: '#666',
     whiteSpace: 'nowrap' as const,
   },
   levelBadge: {
