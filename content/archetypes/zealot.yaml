@@ -5,6 +5,7 @@ description: True believers and community enforcers. Zealots draw power from con
   the wicked.
 key_ability: grit
 hit_points_per_level: 8
+casting_model: druid
 ability_boosts:
   fixed:
   - grit

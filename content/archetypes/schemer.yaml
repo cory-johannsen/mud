@@ -5,6 +5,7 @@ description: Knowledge is power, and Schemers collect both. Through chemical mas
   — to their will.
 key_ability: savvy
 hit_points_per_level: 6
+casting_model: wizard
 ability_boosts:
   fixed:
   - savvy

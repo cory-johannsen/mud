@@ -4,6 +4,7 @@ description: Ummm, ACTUALLY. Nerds possess deep specialized knowledge that most 
   consider useless — until it isn't.
 key_ability: reasoning
 hit_points_per_level: 6
+casting_model: wizard
 ability_boosts:
   fixed:
   - reasoning

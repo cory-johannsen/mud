@@ -21,6 +21,7 @@ type Archetype struct {
 	TechnologyGrants   *TechnologyGrants         `yaml:"technology_grants,omitempty"`
 	LevelUpGrants      map[int]*TechnologyGrants `yaml:"level_up_grants,omitempty"`
 	LevelUpFeatGrants  map[int]*FeatGrants       `yaml:"level_up_feat_grants,omitempty"`
+	CastingModel       CastingModel              `yaml:"casting_model,omitempty"`
 }
 
 // LoadArchetypes reads all .yaml files in dir and parses each as an Archetype.

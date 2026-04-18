@@ -5,6 +5,7 @@ description: When civilization collapses, someone has to understand what grows i
   than any map.
 key_ability: reasoning
 hit_points_per_level: 8
+casting_model: druid
 ability_boosts:
   fixed:
   - grit
