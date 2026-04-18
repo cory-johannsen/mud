@@ -173,6 +173,8 @@ zone:
     exits:
     - direction: south
       target: trout_stark_street
+    - direction: north
+      target: trout_sandy_river_bank
     map_x: 2
     map_y: -2
     spawns:
@@ -367,6 +369,8 @@ zone:
     exits:
     - direction: north
       target: trout_outlet_mall
+    - direction: northwest
+      target: trout_wood_village
     map_x: 2
     map_y: 4
     spawns:
@@ -551,6 +555,8 @@ zone:
     exits:
     - direction: west
       target: trout_edgefield
+    - direction: east
+      target: trout_east_gorge_road
     map_x: 6
     map_y: 0
     spawns:
@@ -762,6 +768,8 @@ zone:
       target: trout_halsey_street
     - direction: east
       target: trout_crown_point_trail
+    - direction: north
+      target: trout_old_highway_ruins
     map_x: 8
     map_y: 0
     spawns:
@@ -845,6 +853,8 @@ zone:
       target: trout_ranger_station
     - direction: south
       target: trout_crown_point_trail
+    - direction: west
+      target: trout_east_gorge_road
     map_x: 10
     map_y: -4
     spawns:
