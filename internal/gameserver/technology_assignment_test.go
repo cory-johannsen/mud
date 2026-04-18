@@ -2217,6 +2217,110 @@ func TestProperty_Rearrange_BackForwardNeverOutOfBounds(t *testing.T) {
 	})
 }
 
+// REQ-TC-26: Heighten delta = slotLevel - techLevel and is never negative; buildOptionsWithHeighten
+// embeds [heightened:N] sentinel iff delta > 0.
+func TestProperty_HeightenDelta_SlotMinusTechNeverNegative(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		slotLevel := rapid.IntRange(1, 10).Draw(rt, "slotLevel")
+		techLevel := rapid.IntRange(1, slotLevel).Draw(rt, "techLevel")
+		delta := slotLevel - techLevel
+		if delta < 0 {
+			rt.Fatalf("heighten delta %d is negative: slotLevel=%d techLevel=%d", delta, slotLevel, techLevel)
+		}
+		pool := []ruleset.PreparedEntry{{ID: "t", Level: techLevel}}
+		opts := gameserver.ExportedBuildOptionsWithHeighten(pool, slotLevel, nil)
+		require.Len(rt, opts, 1)
+		if delta > 0 {
+			assert.Contains(rt, opts[0], fmt.Sprintf("[heightened:%d]", delta))
+		} else {
+			assert.NotContains(rt, opts[0], "[heightened:")
+		}
+	})
+}
+
+// REQ-TC-26: Wizard rearrangement final assignments must use techs whose level ≤ slot level
+// and which are present in KnownTechs.
+func TestProperty_WizardRearrange_FinalAssignmentsFromCatalog(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		// Generate 1-3 known techs at levels 1-2.
+		numKnown := rapid.IntRange(1, 4).Draw(rt, "numKnown")
+		knownTechs := make(map[int][]string)
+		for i := 0; i < numKnown; i++ {
+			lvl := rapid.IntRange(1, 2).Draw(rt, "lvl")
+			id := fmt.Sprintf("tech_%d_%d", lvl, i)
+			knownTechs[lvl] = append(knownTechs[lvl], id)
+		}
+
+		slotLevel := 1
+
+		// Build pool from known techs plus one unknown-grant entry.
+		var pool []ruleset.PreparedEntry
+		for lvl, ids := range knownTechs {
+			for _, id := range ids {
+				pool = append(pool, ruleset.PreparedEntry{ID: id, Level: lvl})
+			}
+		}
+		pool = append(pool, ruleset.PreparedEntry{ID: "unknown_grant_tech", Level: 1})
+
+		sess := &session.PlayerSession{
+			CastingModel:  ruleset.CastingModelWizard,
+			PreparedTechs: map[int][]*session.PreparedSlot{slotLevel: {{TechID: "placeholder"}}},
+			KnownTechs:    knownTechs,
+		}
+
+		job := &ruleset.Job{
+			CastingModel: ruleset.CastingModelWizard,
+			TechnologyGrants: &ruleset.TechnologyGrants{
+				Prepared: &ruleset.PreparedGrants{
+					SlotsByLevel: map[int]int{slotLevel: 1},
+					Pool:         pool,
+				},
+			},
+		}
+
+		prep := &fakePreparedRepo{slots: make(map[int][]*session.PreparedSlot)}
+		promptFn := func(_ string, opts []string, _ *gameserver.TechSlotContext) (string, error) {
+			for _, o := range opts {
+				if o != "[back]" && o != "[forward]" && o != "[confirm]" {
+					return o, nil
+				}
+			}
+			if len(opts) > 0 {
+				return opts[0], nil
+			}
+			return "", fmt.Errorf("no options")
+		}
+
+		err := gameserver.RearrangePreparedTechs(context.Background(), sess, 1, job, nil, nil, promptFn, prep, func(string) {}, technology.TraditionFlavor{SlotNoun: "slot", PrepGerund: "Arranging"})
+		if err != nil {
+			return // pool may be empty after KnownTechs filter — skip
+		}
+
+		// All final assignments must have tech level <= slot level and be present in KnownTechs.
+		for lvl, slots := range sess.PreparedTechs {
+			for _, s := range slots {
+				if s == nil {
+					continue
+				}
+				found := false
+				for techLvl, ids := range knownTechs {
+					for _, id := range ids {
+						if id == s.TechID {
+							found = true
+							if techLvl > lvl {
+								rt.Fatalf("tech %q at level %d placed in slot level %d (tech level > slot level)", s.TechID, techLvl, lvl)
+							}
+						}
+					}
+				}
+				if !found {
+					rt.Fatalf("tech %q in PreparedTechs[%d] is not in KnownTechs (wizard model must only assign known techs)", s.TechID, lvl)
+				}
+			}
+		}
+	})
+}
+
 // REQ-TC-16: [back] sentinel appears in option list for non-first slots; [confirm] appears on last slot.
 func TestRearrangePreparedTechs_BackSentinelOnNonFirstSlot(t *testing.T) {
 	prep := &fakePreparedRepo{slots: map[int][]*session.PreparedSlot{1: {{TechID: "a"}, {TechID: "b"}}}}

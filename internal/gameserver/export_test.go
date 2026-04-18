@@ -4,6 +4,7 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/ai"
 	"github.com/cory-johannsen/mud/internal/game/combat"
 	"github.com/cory-johannsen/mud/internal/game/npc"
+	"github.com/cory-johannsen/mud/internal/game/ruleset"
 	"github.com/cory-johannsen/mud/internal/game/session"
 	"github.com/cory-johannsen/mud/internal/game/technology"
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
@@ -47,4 +48,9 @@ var RequireAdmin = func(sess *session.PlayerSession) *gamev1.ServerEvent {
 // ApplyExploreModeOnCombatStartForTest is an exported test shim for applyExploreModeOnCombatStart.
 func ApplyExploreModeOnCombatStartForTest(sess *session.PlayerSession, playerCbt *combat.Combatant, h *CombatHandler) []string {
 	return applyExploreModeOnCombatStart(sess, playerCbt, h)
+}
+
+// ExportedBuildOptionsWithHeighten exposes buildOptionsWithHeighten for white-box testing.
+func ExportedBuildOptionsWithHeighten(pool []ruleset.PreparedEntry, slotLevel int, reg *technology.Registry) []string {
+	return buildOptionsWithHeighten(pool, slotLevel, reg)
 }
