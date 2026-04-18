@@ -1856,6 +1856,134 @@ func TestProperty_AssignTechnologies_TraditionGrantsAllUnlimited(t *testing.T) {
 	})
 }
 
+// REQ-TC-9: wizard L1 creation gets 2 extra catalog entries beyond slot count.
+func TestLevelUpTechnologies_Wizard_L1ExtrasAddedToKnownTechs(t *testing.T) {
+	ctx := context.Background()
+	known := &fakeSpontaneousRepo{techs: make(map[int][]string)}
+	prep := &fakePreparedRepo{slots: make(map[int][]*session.PreparedSlot)}
+	sess := &session.PlayerSession{CastingModel: ruleset.CastingModelWizard}
+
+	grants := &ruleset.TechnologyGrants{
+		Prepared: &ruleset.PreparedGrants{
+			SlotsByLevel: map[int]int{1: 1},
+			Pool: []ruleset.PreparedEntry{
+				{ID: "a", Level: 1},
+				{ID: "b", Level: 1},
+				{ID: "c", Level: 1},
+				{ID: "d", Level: 1},
+				{ID: "e", Level: 1},
+			},
+		},
+	}
+	promptFn := func(_ string, opts []string, _ *gameserver.TechSlotContext) (string, error) {
+		return opts[0], nil
+	}
+	err := gameserver.LevelUpTechnologies(ctx, sess, 0, grants, nil, promptFn, nil, prep, known, nil, nil)
+	require.NoError(t, err)
+	// 1 slot pick + 2 extras = 3 total in KnownTechs[1].
+	assert.Len(t, known.techs[1], 3, "wizard L1 must have slot picks + 2 extras in KnownTechs")
+}
+
+// REQ-TC-9: wizard with non-wizard model (ranger) does NOT get catalog extras.
+func TestLevelUpTechnologies_Ranger_NoExtras(t *testing.T) {
+	ctx := context.Background()
+	known := &fakeSpontaneousRepo{techs: make(map[int][]string)}
+	prep := &fakePreparedRepo{slots: make(map[int][]*session.PreparedSlot)}
+	sess := &session.PlayerSession{CastingModel: ruleset.CastingModelRanger}
+
+	grants := &ruleset.TechnologyGrants{
+		Prepared: &ruleset.PreparedGrants{
+			SlotsByLevel: map[int]int{1: 1},
+			Pool: []ruleset.PreparedEntry{
+				{ID: "a", Level: 1},
+				{ID: "b", Level: 1},
+				{ID: "c", Level: 1},
+			},
+		},
+	}
+	promptFn := func(_ string, opts []string, _ *gameserver.TechSlotContext) (string, error) {
+		return opts[0], nil
+	}
+	err := gameserver.LevelUpTechnologies(ctx, sess, 0, grants, nil, promptFn, nil, prep, known, nil, nil)
+	require.NoError(t, err)
+	// Ranger: only 1 slot pick, no extras.
+	assert.Len(t, known.techs[1], 1, "ranger must have only slot picks in KnownTechs, no catalog extras")
+}
+
+// REQ-TC-9 / REQ-TC-10: PickCatalogExtras never adds a tech already in KnownTechs (property test).
+func TestProperty_WizardCatalogPicker_NeverDuplicates(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		existingCount := rapid.IntRange(0, 3).Draw(rt, "existing")
+		poolSize := rapid.IntRange(existingCount, existingCount+5).Draw(rt, "pool")
+		var existing []string
+		for i := 0; i < existingCount; i++ {
+			existing = append(existing, fmt.Sprintf("tech_%d", i))
+		}
+		var pool []ruleset.PreparedEntry
+		for i := 0; i < poolSize; i++ {
+			pool = append(pool, ruleset.PreparedEntry{ID: fmt.Sprintf("tech_%d", i), Level: 1})
+		}
+		known := &fakeSpontaneousRepo{techs: map[int][]string{1: append([]string{}, existing...)}}
+		sess := &session.PlayerSession{KnownTechs: map[int][]string{1: append([]string{}, existing...)}}
+		promptFn := func(_ string, opts []string, _ *gameserver.TechSlotContext) (string, error) {
+			if len(opts) == 0 {
+				return "", fmt.Errorf("no options")
+			}
+			return opts[0], nil
+		}
+		err := gameserver.PickCatalogExtras(context.Background(), 1, 2, 0, pool, known, sess, promptFn, nil)
+		if err != nil {
+			return // skip invalid combos (e.g., no options)
+		}
+		seen := make(map[string]int)
+		for _, id := range sess.KnownTechs[1] {
+			seen[id]++
+			if seen[id] > 1 {
+				rt.Fatalf("duplicate tech %q in KnownTechs after catalog pick", id)
+			}
+		}
+	})
+}
+
+// REQ-TC-10: PickCatalogExtras auto-adds remaining when pool size < count (no prompt needed).
+func TestPickCatalogExtras_AutoAddsWhenPoolSmallerThanCount(t *testing.T) {
+	ctx := context.Background()
+	known := &fakeSpontaneousRepo{techs: make(map[int][]string)}
+	sess := &session.PlayerSession{}
+	pool := []ruleset.PreparedEntry{
+		{ID: "x", Level: 1},
+	}
+	promptCalled := false
+	promptFn := func(_ string, opts []string, _ *gameserver.TechSlotContext) (string, error) {
+		promptCalled = true
+		return opts[0], nil
+	}
+	err := gameserver.PickCatalogExtras(ctx, 1, 2, 0, pool, known, sess, promptFn, nil)
+	require.NoError(t, err)
+	assert.False(t, promptCalled, "prompt must not be called when pool size < count")
+	assert.Equal(t, []string{"x"}, sess.KnownTechs[1], "all remaining pool entries must be auto-added")
+}
+
+// REQ-TC-9: PickCatalogExtras returns immediately when pool is exhausted (all techs already known).
+func TestPickCatalogExtras_EmptyPoolAfterKnownFilter_NoOp(t *testing.T) {
+	ctx := context.Background()
+	known := &fakeSpontaneousRepo{techs: map[int][]string{1: {"a", "b"}}}
+	sess := &session.PlayerSession{KnownTechs: map[int][]string{1: {"a", "b"}}}
+	pool := []ruleset.PreparedEntry{
+		{ID: "a", Level: 1},
+		{ID: "b", Level: 1},
+	}
+	promptCalled := false
+	promptFn := func(_ string, opts []string, _ *gameserver.TechSlotContext) (string, error) {
+		promptCalled = true
+		return opts[0], nil
+	}
+	err := gameserver.PickCatalogExtras(ctx, 1, 2, 0, pool, known, sess, promptFn, nil)
+	require.NoError(t, err)
+	assert.False(t, promptCalled, "prompt must not be called when all pool entries already known")
+	assert.Len(t, sess.KnownTechs[1], 2, "KnownTechs must not grow when pool is exhausted")
+}
+
 func TestLevelUpTechnologies_CastingModelField_Exists(t *testing.T) {
 	sess := &session.PlayerSession{}
 	// Verify CastingModel field compiles and can be assigned.
@@ -1870,7 +1998,8 @@ func TestTechSlotContext_Compiles(t *testing.T) {
 	assert.Equal(t, 2, slotCtx.SlotLevel)
 }
 
-// REQ-TC-8: wizard level-up slot picks populate KnownTechs
+// REQ-TC-8 / REQ-TC-9: wizard level-up slot picks populate KnownTechs, plus +2 catalog extras.
+// Pool has 3 entries and 2 slots; after slot picks 1 entry remains and is auto-added as an extra.
 func TestLevelUpTechnologies_Wizard_SlotPickPopulatesKnownTechs(t *testing.T) {
 	ctx := context.Background()
 	known := &fakeSpontaneousRepo{techs: make(map[int][]string)}
@@ -1895,7 +2024,10 @@ func TestLevelUpTechnologies_Wizard_SlotPickPopulatesKnownTechs(t *testing.T) {
 	}
 	err := gameserver.LevelUpTechnologies(ctx, sess, 1, grants, nil, promptFn, nil, prep, known, nil, nil)
 	require.NoError(t, err)
-	assert.Len(t, known.techs[1], 2, "both slot picks must be in KnownTechs")
+	// 2 slot picks + 1 remaining pool entry auto-added as catalog extra = 3 total.
+	assert.Len(t, known.techs[1], 3, "wizard must have slot picks + catalog extras in KnownTechs")
+	// Verify slot picks are in known techs.
+	assert.Len(t, prep.slots[1], 2, "exactly 2 prepared slots must be filled")
 }
 
 // REQ-TC-8: ranger level-up slot picks also populate KnownTechs

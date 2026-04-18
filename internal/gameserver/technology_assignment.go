@@ -412,6 +412,23 @@ func LevelUpTechnologies(
 		}
 	}
 
+	// REQ-TC-9 / REQ-TC-10: Wizard catalog extras.
+	// After slot picks, offer +2 additional catalog entries per tech level from the prepared pool.
+	// Ranger and druid do NOT get extras (druid has no persistent catalog).
+	if grants.Prepared != nil && sess.CastingModel == ruleset.CastingModelWizard {
+		// Sort levels for deterministic ordering.
+		var prepLevels []int
+		for lvl := range grants.Prepared.SlotsByLevel {
+			prepLevels = append(prepLevels, lvl)
+		}
+		sort.Ints(prepLevels)
+		for _, lvl := range prepLevels {
+			if pickErr := PickCatalogExtras(ctx, lvl, 2, characterID, grants.Prepared.Pool, knownRepo, sess, promptFn, techReg); pickErr != nil {
+				return fmt.Errorf("LevelUpTechnologies wizard catalog extras level %d: %w", lvl, pickErr)
+			}
+		}
+	}
+
 	// Spontaneous: add new known techs without removing existing ones.
 	if grants.Spontaneous != nil {
 		if sess.KnownTechs == nil {
@@ -1522,4 +1539,72 @@ func containsString(ss []string, s string) bool {
 		}
 	}
 	return false
+}
+
+// PickCatalogExtras prompts the player to add `count` techs from pool to their KnownTechs
+// catalog at tech level `lvl`. Techs already in sess.KnownTechs[lvl] are excluded from options.
+// If fewer than `count` eligible techs remain in the pool, all remaining are added without prompting.
+// If zero remain, the function returns immediately.
+//
+// Precondition: knownRepo may be nil (skips persistence); characterID > 0 required for persistence.
+// Postcondition: up to `count` new, non-duplicate techs are added to sess.KnownTechs[lvl] and persisted.
+func PickCatalogExtras(
+	ctx context.Context,
+	lvl, count int,
+	characterID int64,
+	pool []ruleset.PreparedEntry,
+	knownRepo KnownTechRepo,
+	sess *session.PlayerSession,
+	promptFn TechPromptFn,
+	techReg *technology.Registry,
+) error {
+	if sess.KnownTechs == nil {
+		sess.KnownTechs = make(map[int][]string)
+	}
+
+	// Build set of already-known techs at this level to avoid duplicates.
+	knownSet := make(map[string]bool, len(sess.KnownTechs[lvl]))
+	for _, id := range sess.KnownTechs[lvl] {
+		knownSet[id] = true
+	}
+
+	// Filter pool to entries at this level that are not already known.
+	var remaining []ruleset.PreparedEntry
+	for _, e := range pool {
+		if e.Level == lvl && !knownSet[e.ID] {
+			remaining = append(remaining, e)
+		}
+	}
+	if len(remaining) == 0 {
+		return nil
+	}
+
+	// If the pool has fewer entries than requested, auto-add all remaining without prompting.
+	if len(remaining) <= count {
+		for _, e := range remaining {
+			sess.KnownTechs[lvl] = append(sess.KnownTechs[lvl], e.ID)
+			if knownRepo != nil {
+				_ = knownRepo.Add(ctx, characterID, e.ID, lvl)
+			}
+		}
+		return nil
+	}
+
+	// Prompt for each of the `count` extras.
+	for i := 0; i < count; i++ {
+		options := buildPreparedOptions(remaining, techReg)
+		prompt := fmt.Sprintf("Choose a Level %d technology to add to your catalog (extra %d of %d):", lvl, i+1, count)
+		chosen, err := promptFn(prompt, options, nil)
+		if err != nil {
+			return err
+		}
+		techID := parseTechID(chosen)
+		sess.KnownTechs[lvl] = append(sess.KnownTechs[lvl], techID)
+		if knownRepo != nil {
+			_ = knownRepo.Add(ctx, characterID, techID, lvl)
+		}
+		// Remove chosen from remaining so it cannot be picked again.
+		remaining = removePreparedByID(remaining, techID)
+	}
+	return nil
 }
