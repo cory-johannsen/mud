@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from 'react'
 import ReactDOM from 'react-dom'
 import { useGame } from '../GameContext'
 import type { HotbarSlot } from '../../proto'
+import { DamageTypeIcon, parseDamageType } from '../DamageTypeIcon'
 
 const KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0']
 
@@ -161,7 +162,10 @@ function HotbarTooltip({ slot, pos }: HotbarTooltipProps) {
         </div>
       )}
       {damageSummary && (
-        <div style={{ color: '#f87', fontSize: '0.72rem', marginBottom: '0.1rem' }}>{damageSummary}</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.72rem', marginBottom: '0.1rem' }}>
+          <DamageTypeIcon damageType={parseDamageType(damageSummary)} size="0.85em" />
+          <span style={{ color: '#f87' }}>{damageSummary}</span>
+        </div>
       )}
       {maxUses < 0 && (
         <div style={{ color: '#7bc', marginBottom: '0.1rem' }}>∞ unlimited uses</div>
