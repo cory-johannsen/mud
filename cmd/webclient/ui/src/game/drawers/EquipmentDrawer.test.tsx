@@ -251,10 +251,8 @@ describe('EquipmentDrawer — empty slot click opens picker', () => {
     mockUseGame.mockReturnValue(ctx)
     render(<EquipmentDrawer onClose={vi.fn()} />)
 
-    // Click the Head slot empty button
+    // Click the Head slot empty button (main + off = 2 weapon slots, Head is index 2)
     const emptySlots = screen.getAllByRole('button', { name: '—' })
-    // Head is the first armor slot
-    const headSlot = emptySlots.find((_, i) => i >= 2) // weapon slots come first
     fireEvent.click(emptySlots[2]) // first armor empty slot (Head)
 
     expect(screen.getByTestId('slot-picker')).toBeDefined()
