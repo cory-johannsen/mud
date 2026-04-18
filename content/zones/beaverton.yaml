@@ -672,9 +672,6 @@ zone:
     exits:
     - direction: south
       target: beav_neighborhood_watch_north
-    - direction: north
-      target: tvr_the_buffet
-      zone: the_velvet_rope
     map_x: -2
     map_y: -6
     properties:

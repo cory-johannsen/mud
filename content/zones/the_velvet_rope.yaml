@@ -34,9 +34,9 @@ zone:
       target: tvr_play_rooms
     - direction: west
       target: the_velvet_rope_brothel
-    - direction: south
-      target: beav_fine_dining_ruins
-      zone: beaverton
+    - direction: southeast
+      target: flats_foster_south
+      zone: felony_flats
     map_x: 0
     map_y: 0
     spawns:
