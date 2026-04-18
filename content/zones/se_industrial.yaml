@@ -154,6 +154,8 @@ zone:
 
       '
     exits:
+    - direction: north
+      target: sei_powell_terminus
     - direction: south
       target: sei_crane_yard
     - direction: west
@@ -461,6 +463,8 @@ zone:
     exits:
     - direction: north
       target: sei_milwaukie_junction
+    - direction: south
+      target: sei_rail_yard_south
     map_x: -10
     map_y: 0
     danger_level: dangerous

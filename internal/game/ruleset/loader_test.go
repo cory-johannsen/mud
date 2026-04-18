@@ -155,10 +155,17 @@ func TestLoadRegions_AllHaveInnateGrant(t *testing.T) {
 // have at least one innate technology populated after the tradition cantrip content is added.
 //
 // Precondition: content/archetypes/{nerd,naturalist,drifter,schemer,influencer,zealot}.yaml
-//   each have an innate_technologies block with uses_per_day: 0 entries.
+//   each have an innate_technologies block. Most grants have uses_per_day: 0 (unlimited);
+//   limited-use passive feats (e.g. martyrs_resolve, once-per-scene) may have uses_per_day > 0.
 // Postcondition: each tech-capable archetype has len(InnateTechnologies) >= 1;
-//   every grant has UsesPerDay == 0.
+//   every grant except explicitly-limited passives has UsesPerDay == 0.
 func TestLoadArchetypes_TechCapable_AllHaveInnate(t *testing.T) {
+	// limitedUsePassives lists innate tech IDs that intentionally have uses_per_day > 0
+	// because they are once-per-scene passive effects rather than unlimited cantrips.
+	limitedUsePassives := map[string]bool{
+		"martyrs_resolve": true, // once per scene — stabilizes player at 1 HP (REQ-MR-1)
+	}
+
 	archetypes, err := ruleset.LoadArchetypes("../../../content/archetypes")
 	require.NoError(t, err)
 
@@ -174,6 +181,9 @@ func TestLoadArchetypes_TechCapable_AllHaveInnate(t *testing.T) {
 		assert.NotEmpty(t, arch.InnateTechnologies,
 			"archetype %q must have innate_technologies populated", id)
 		for _, grant := range arch.InnateTechnologies {
+			if limitedUsePassives[grant.ID] {
+				continue // intentionally limited; skip unlimited check
+			}
 			assert.Equal(t, 0, grant.UsesPerDay,
 				"archetype %q innate tech %q must have uses_per_day: 0 (unlimited)", id, grant.ID)
 		}
