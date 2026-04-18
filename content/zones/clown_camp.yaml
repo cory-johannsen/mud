@@ -112,6 +112,9 @@ zone:
     - template: clown
       count: 1
       respawn_after: 5m
+    - template: just_clownin
+      count: 1
+      respawn_after: 10m
     boss_room: false
   - id: cc_the_stage
     danger_level: dangerous
