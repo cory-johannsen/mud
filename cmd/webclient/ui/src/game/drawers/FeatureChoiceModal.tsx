@@ -126,7 +126,7 @@ export function FeatureChoiceModal({ onClose: _onClose }: { onClose?: () => void
         </div>
 
         {/* Level filter tabs */}
-        {availableLevels.length > 1 && (
+        {availableLevels.length > 0 && (
           <div style={{ display: 'flex', gap: '6px', marginBottom: '8px' }}>
             {availableLevels.map(lvl => (
               <button
@@ -190,12 +190,12 @@ export function FeatureChoiceModal({ onClose: _onClose }: { onClose?: () => void
                     border: '1px solid #555', cursor: 'pointer', fontFamily: 'monospace',
                   }}
                 >
-                  Back
+                  ← Back
                 </button>
               )}
             </div>
             <div style={{ display: 'flex', gap: '8px' }}>
-              {hasForward && (
+              {hasForward && !hasConfirm && (
                 <button
                   onClick={() => handleNavigation(FORWARD_SENTINEL)}
                   style={{
@@ -203,7 +203,7 @@ export function FeatureChoiceModal({ onClose: _onClose }: { onClose?: () => void
                     border: '1px solid #4a6a2a', cursor: 'pointer', fontFamily: 'monospace',
                   }}
                 >
-                  Next
+                  Next →
                 </button>
               )}
               {hasConfirm && (
