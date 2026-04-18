@@ -9,6 +9,7 @@ import type {
   SpontaneousUsePoolView,
 } from '../../proto'
 import { HotbarSlotPicker } from '../HotbarSlotPicker'
+import { DamageTypeIcon } from '../DamageTypeIcon'
 
 function SectionLabel({ label }: { label: string }) {
   return <div style={styles.sectionLabel}>{label}</div>
@@ -34,13 +35,30 @@ function InfiniteUses() {
   return <span style={styles.infiniteUses} title="Unlimited uses">∞</span>
 }
 
+const KNOWN_DAMAGE_TYPES = [
+  'acid', 'bleed', 'bludgeoning', 'cold', 'electricity', 'fire', 'force',
+  'mental', 'neural', 'piercing', 'poison', 'slashing', 'sonic', 'spirit',
+  'untyped', 'vitality', 'void',
+]
+
+function detectDamageType(line: string): string {
+  const lower = line.toLowerCase()
+  return KNOWN_DAMAGE_TYPES.find(t => lower.includes(t)) ?? ''
+}
+
 function EffectsSummary({ text }: { text: string }) {
   const lines = text.split('\n')
   return (
     <div style={styles.effectsSummary}>
-      {lines.map((line, i) => (
-        <div key={i} style={line.startsWith('  ') ? styles.effectsIndent : undefined}>{line}</div>
-      ))}
+      {lines.map((line, i) => {
+        const dt = detectDamageType(line)
+        return (
+          <div key={i} style={{ ...(line.startsWith('  ') ? styles.effectsIndent : undefined), display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+            {dt && <DamageTypeIcon damageType={dt} size="0.8em" />}
+            <span>{line}</span>
+          </div>
+        )
+      })}
     </div>
   )
 }
