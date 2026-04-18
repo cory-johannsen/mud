@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useGame } from '../GameContext'
 import type { InventoryItem, HotbarSlot } from '../../proto'
 import { HotbarSlotPicker } from '../HotbarSlotPicker'
+import { DamageTypeIcon } from '../DamageTypeIcon'
 
 function ConsumableRow({
   item,
@@ -147,7 +148,14 @@ function WeaponRow({
 
   return (
     <tr style={{ position: 'relative' }}>
-      <td>{item.name}</td>
+      <td>
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>
+          {(item.weaponDamageType ?? item.weapon_damage_type) && (
+            <DamageTypeIcon damageType={item.weaponDamageType ?? item.weapon_damage_type ?? ''} size="0.85em" />
+          )}
+          {item.name}
+        </span>
+      </td>
       <td>{item.kind}</td>
       <td>{item.quantity ?? 1}</td>
       <td>{(item.weight ?? 0).toFixed(1)}</td>
