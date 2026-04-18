@@ -25,7 +25,7 @@ zone:
     danger_level: safe
     exits:
     - direction: north
-      target: couve_jantzen_beach
+      target: couve_i5_corridor
     - direction: south
       target: ne_i5_bridge_approach
     - direction: west
@@ -62,7 +62,7 @@ zone:
     danger_level: sketchy
     exits:
     - direction: south
-      target: couve_interstate_bridge_south
+      target: couve_i5_corridor
     - direction: north
       target: couve_hayden_island_causeway
     - direction: east
@@ -121,6 +121,8 @@ zone:
       target: couve_esther_short_park
     - direction: east
       target: couve_columbia_way
+    - direction: south
+      target: couve_river_access
     map_x: 2
     map_y: -2
     spawns:
@@ -147,6 +149,8 @@ zone:
       target: couve_waterfront
     - direction: north
       target: couve_officers_row
+    - direction: south
+      target: couve_columbia_shore
     map_x: 4
     map_y: -2
     spawns:
@@ -176,7 +180,7 @@ zone:
     - direction: east
       target: couve_officers_row
     - direction: north
-      target: couve_mill_plain_blvd
+      target: couve_neutral_diner
     map_x: 2
     map_y: -4
     spawns:
@@ -265,6 +269,8 @@ zone:
       target: couve_strip_mall_west
     - direction: north
       target: couve_fourth_plain
+    - direction: northwest
+      target: couve_highway_99_north
     map_x: 2
     map_y: -6
     spawns:
@@ -321,6 +327,8 @@ zone:
       target: couve_mill_plain_blvd
     - direction: north
       target: couve_residential_blocks
+    - direction: northeast
+      target: couve_mill_plain_district
     map_x: 0
     map_y: -6
     spawns:
@@ -402,7 +410,11 @@ zone:
 
       '
     danger_level: sketchy
-    exits: []
+    exits:
+    - direction: south
+      target: couve_interstate_bridge_south
+    - direction: north
+      target: couve_jantzen_beach
     map_x: 0
     map_y: -1
     spawns:
@@ -489,6 +501,8 @@ zone:
       target: vantucky_fourth_plain_west
     - direction: west
       target: couve_chkalov_drive
+    - direction: northeast
+      target: couve_orchards_district
     map_x: 8
     map_y: -8
     spawns:
@@ -637,6 +651,8 @@ zone:
     - direction: east
       target: couve_neutral_back_room
     - direction: north
+      target: couve_mill_plain_blvd
+    - direction: up
       target: the_couve_brothel
     map_x: 2
     map_y: -5
@@ -708,6 +724,8 @@ zone:
     exits:
     - direction: south
       target: couve_mill_plain_blvd
+    - direction: southwest
+      target: couve_strip_mall_west
     - direction: east
       target: couve_fourth_plain_district
     map_x: 0
@@ -892,7 +910,7 @@ zone:
     map_x: 1
     map_y: -4
     exits:
-    - direction: south
+    - direction: down
       target: couve_neutral_diner
     spawns:
     - template: the_couve_brothel_keeper
