@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useGame } from '../GameContext'
-import type { LoadoutWeaponPreset } from '../../proto'
+import type { InventoryItem, LoadoutWeaponPreset } from '../../proto'
 
 interface WeaponTooltipData {
   name: string
@@ -50,6 +50,7 @@ function EquipSlot({
   bonus,
   dmg,
   onUnequip,
+  onEquip,
   weaponTooltip,
 }: {
   label: string
@@ -57,6 +58,7 @@ function EquipSlot({
   bonus?: string | null
   dmg?: string | null
   onUnequip?: () => void
+  onEquip?: () => void
   weaponTooltip?: WeaponTooltipData | null
 }) {
   const [hovered, setHovered] = useState(false)
@@ -82,7 +84,12 @@ function EquipSlot({
           )}
         </div>
       ) : (
-        <div className="equip-slot-value equip-empty">—</div>
+        <div className="equip-slot-value equip-empty">
+          {onEquip
+            ? <button style={styles.equipEmptyBtn} onClick={onEquip} type="button">—</button>
+            : '—'
+          }
+        </div>
       )}
     </div>
   )
@@ -142,6 +149,87 @@ function PresetCard({
   )
 }
 
+// SlotPicker renders an inline list of items eligible for a slot.
+// For weapon slots (slotKind === 'weapon'): shows weapons; selecting one triggers preset/hand picker.
+// For armor slots (slotKind === 'armor'): shows matching armor items; selecting one calls onWear.
+function SlotPicker({
+  slotKey,
+  slotKind,
+  items,
+  numPresets,
+  onEquip,
+  onWear,
+  onCancel,
+}: {
+  slotKey: string       // 'main' | 'off' | armor slot key
+  slotKind: 'weapon' | 'armor'
+  items: InventoryItem[]
+  numPresets: number
+  onEquip: (weaponId: string, slot: 'main' | 'off', preset: number) => void
+  onWear: (itemId: string, slot: string) => void
+  onCancel: () => void
+}) {
+  const [stage, setStage] = useState<'items' | 'preset'>('items')
+  const [chosenItem, setChosenItem] = useState<string>('')
+
+  if (items.length === 0) {
+    return (
+      <div style={styles.pickerOverlay} data-testid="slot-picker">
+        <span style={{ color: '#666', fontSize: '0.75rem' }}>No eligible items</span>
+        <button style={styles.cancelBtn} onClick={onCancel} type="button">✕</button>
+      </div>
+    )
+  }
+
+  if (stage === 'items') {
+    return (
+      <div style={styles.pickerOverlay} data-testid="slot-picker">
+        {items.map(item => {
+          const id = item.itemDefId ?? item.item_def_id ?? item.name
+          return (
+            <button
+              key={id}
+              style={styles.pickerBtn}
+              type="button"
+              onClick={() => {
+                if (slotKind === 'armor') {
+                  onWear(id, slotKey)
+                } else if (numPresets <= 1) {
+                  onEquip(id, slotKey as 'main' | 'off', 1)
+                } else {
+                  setChosenItem(id)
+                  setStage('preset')
+                }
+              }}
+            >
+              {item.name}
+            </button>
+          )
+        })}
+        <button style={styles.cancelBtn} onClick={onCancel} type="button">✕</button>
+      </div>
+    )
+  }
+
+  // stage === 'preset'
+  return (
+    <div style={styles.pickerOverlay} data-testid="slot-picker">
+      {Array.from({ length: numPresets }, (_, i) => (
+        <button
+          key={i}
+          style={styles.pickerBtn}
+          type="button"
+          onClick={() => onEquip(chosenItem, slotKey as 'main' | 'off', i + 1)}
+        >
+          Preset {i + 1}
+        </button>
+      ))}
+      <button style={styles.cancelBtn} onClick={() => setStage('items')} type="button">←</button>
+      <button style={styles.cancelBtn} onClick={onCancel} type="button">✕</button>
+    </div>
+  )
+}
+
 const ARMOR_SLOTS: Array<{ key: string; label: string }> = [
   { key: 'head',      label: 'Head'      },
   { key: 'torso',     label: 'Torso'     },
@@ -170,12 +258,14 @@ const ACCESSORY_SLOTS: Array<{ key: string; label: string }> = [
 export function EquipmentDrawer({ onClose }: { onClose: () => void }) {
   const { state, sendMessage, sendCommand, clearLoadout } = useGame()
   const [isSwitching, setIsSwitching] = useState(false)
+  const [pickingSlot, setPickingSlot] = useState<string | null>(null)
 
   useEffect(() => {
     if (!state.characterSheet) {
       sendMessage('CharacterSheetRequest', {})
     }
     sendMessage('LoadoutRequest', { arg: '' })
+    sendMessage('InventoryRequest', {})
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Re-fetch after a switch settles.
@@ -204,6 +294,27 @@ export function EquipmentDrawer({ onClose }: { onClose: () => void }) {
   function handleClose() {
     clearLoadout()
     onClose()
+  }
+
+  // REQ-UI-EQUIP-2: Clicking an empty slot equips an item from inventory.
+  function handleEquipFromSlot(weaponId: string, slot: 'main' | 'off', preset: number) {
+    sendMessage('EquipRequest', { weaponId, slot, preset })
+    setPickingSlot(null)
+  }
+
+  function handleWearFromSlot(itemId: string, slot: string) {
+    sendMessage('WearRequest', { item_id: itemId, slot })
+    setPickingSlot(null)
+  }
+
+  const invItems = state.inventoryView?.items ?? []
+  const weaponItems = invItems.filter(it => it.kind === 'weapon')
+
+  function armorItemsForSlot(slotKey: string): InventoryItem[] {
+    return invItems.filter(it => {
+      const s = it.armorSlot ?? it.armor_slot ?? ''
+      return s === slotKey
+    })
   }
 
   const sheet = state.characterSheet
@@ -276,16 +387,40 @@ export function EquipmentDrawer({ onClose }: { onClose: () => void }) {
               bonus={mainHandBonus}
               dmg={mainHandDamage}
               onUnequip={mainHand ? () => handleUnequip('main') : undefined}
+              onEquip={!mainHand ? () => setPickingSlot('main') : undefined}
               weaponTooltip={mainHandTooltip}
             />
+            {pickingSlot === 'main' && (
+              <SlotPicker
+                slotKey="main"
+                slotKind="weapon"
+                items={weaponItems}
+                numPresets={presets.length || 1}
+                onEquip={handleEquipFromSlot}
+                onWear={handleWearFromSlot}
+                onCancel={() => setPickingSlot(null)}
+              />
+            )}
             <EquipSlot
               label="Off Hand"
               value={offHand}
               bonus={offHandBonus}
               dmg={offHandDamage}
               onUnequip={offHand ? () => handleUnequip('off') : undefined}
+              onEquip={!offHand ? () => setPickingSlot('off') : undefined}
               weaponTooltip={offHandTooltip}
             />
+            {pickingSlot === 'off' && (
+              <SlotPicker
+                slotKey="off"
+                slotKind="weapon"
+                items={weaponItems}
+                numPresets={presets.length || 1}
+                onEquip={handleEquipFromSlot}
+                onWear={handleWearFromSlot}
+                onCancel={() => setPickingSlot(null)}
+              />
+            )}
 
             {/* Armor */}
             <div style={{ ...styles.sectionLabel, marginTop: '0.75rem' }}>Armor</div>
@@ -294,12 +429,25 @@ export function EquipmentDrawer({ onClose }: { onClose: () => void }) {
               const cat = armorCategories[key]
               const displayName = armor[key] ? (cat ? `${armor[key]} [${cat}]` : armor[key]) : null
               return (
-                <EquipSlot
-                  key={key}
-                  label={label}
-                  value={displayName}
-                  onUnequip={armor[key] ? () => handleUnequip(key) : undefined}
-                />
+                <div key={key}>
+                  <EquipSlot
+                    label={label}
+                    value={displayName}
+                    onUnequip={armor[key] ? () => handleUnequip(key) : undefined}
+                    onEquip={!armor[key] ? () => setPickingSlot(key) : undefined}
+                  />
+                  {pickingSlot === key && (
+                    <SlotPicker
+                      slotKey={key}
+                      slotKind="armor"
+                      items={armorItemsForSlot(key)}
+                      numPresets={presets.length || 1}
+                      onEquip={handleEquipFromSlot}
+                      onWear={handleWearFromSlot}
+                      onCancel={() => setPickingSlot(null)}
+                    />
+                  )}
+                </div>
               )
             })}
 
@@ -407,5 +555,45 @@ const styles: Record<string, React.CSSProperties> = {
     fontFamily: 'monospace',
     fontSize: '0.65rem',
     flexShrink: 0,
+  },
+  equipEmptyBtn: {
+    background: 'transparent',
+    border: 'none',
+    color: '#555',
+    cursor: 'pointer',
+    fontFamily: 'monospace',
+    fontSize: '0.85rem',
+    padding: '0 0.2rem',
+    textDecoration: 'underline dotted',
+  },
+  pickerOverlay: {
+    display: 'flex',
+    flexWrap: 'wrap' as const,
+    gap: '0.25rem',
+    padding: '0.3rem 0.4rem',
+    background: '#0d0d1a',
+    border: '1px solid #3a3a5a',
+    borderRadius: '4px',
+    marginBottom: '0.4rem',
+  },
+  pickerBtn: {
+    padding: '0.15rem 0.45rem',
+    background: '#1a1a3a',
+    border: '1px solid #4a4a7a',
+    color: '#aac',
+    borderRadius: '3px',
+    cursor: 'pointer',
+    fontFamily: 'monospace',
+    fontSize: '0.72rem',
+  },
+  cancelBtn: {
+    padding: '0.15rem 0.4rem',
+    background: '#2a1a1a',
+    border: '1px solid #5a2a2a',
+    color: '#c66',
+    borderRadius: '3px',
+    cursor: 'pointer',
+    fontFamily: 'monospace',
+    fontSize: '0.72rem',
   },
 }

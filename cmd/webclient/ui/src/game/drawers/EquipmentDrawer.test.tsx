@@ -13,6 +13,7 @@ const BASE_STATE = {
     connected: false,
     characterSheet: null,
     loadoutView: null,
+    inventoryView: null,
   },
   sendMessage: vi.fn(),
   sendCommand: vi.fn(),
@@ -125,5 +126,144 @@ describe('EquipmentDrawer — weapon hover tooltip', () => {
 
     fireEvent.mouseLeave(target)
     expect(container.querySelector('[data-testid="weapon-tooltip"]')).toBeNull()
+  })
+})
+
+const EMPTY_SHEET = { name: 'Test Player', level: 1 }
+
+const WEAPON_INVENTORY = {
+  items: [
+    { name: 'Rusty Blade', kind: 'weapon', itemDefId: 'rusty_blade', quantity: 1, weight: 1.5 },
+    { name: 'Iron Knife', kind: 'weapon', itemDefId: 'iron_knife', quantity: 1, weight: 0.8 },
+  ],
+}
+
+const ARMOR_INVENTORY = {
+  items: [
+    { name: 'Leather Cap', kind: 'armor', itemDefId: 'leather_cap', armorSlot: 'head', quantity: 1, weight: 0.5 },
+    { name: 'Leather Jacket', kind: 'armor', itemDefId: 'leather_jacket', armorSlot: 'torso', quantity: 1, weight: 2.0 },
+  ],
+}
+
+// REQ-UI-EQUIP-2: Clicking an empty weapon slot MUST show a picker with weapons from inventory.
+describe('EquipmentDrawer — empty slot click opens picker', () => {
+  it('clicking empty Main Hand slot shows weapon picker', () => {
+    mockUseGame.mockReturnValue({
+      ...BASE_STATE,
+      state: {
+        ...BASE_STATE.state,
+        characterSheet: EMPTY_SHEET,
+        inventoryView: WEAPON_INVENTORY,
+        loadoutView: { activeIndex: 0, presets: [{ mainHand: null, offHand: null }] },
+      },
+    })
+    render(<EquipmentDrawer onClose={vi.fn()} />)
+
+    // Empty slots show '—' as a clickable button
+    const emptySlots = screen.getAllByRole('button', { name: '—' })
+    expect(emptySlots.length).toBeGreaterThan(0)
+    fireEvent.click(emptySlots[0])
+
+    // Picker should appear with weapon items
+    expect(screen.getByTestId('slot-picker')).toBeDefined()
+    expect(screen.getByText('Rusty Blade')).toBeDefined()
+    expect(screen.getByText('Iron Knife')).toBeDefined()
+  })
+
+  it('selecting weapon with single preset sends EquipRequest immediately', () => {
+    const ctx = {
+      ...BASE_STATE,
+      state: {
+        ...BASE_STATE.state,
+        characterSheet: EMPTY_SHEET,
+        inventoryView: WEAPON_INVENTORY,
+        loadoutView: { activeIndex: 0, presets: [{ mainHand: null, offHand: null }] },
+      },
+      sendMessage: vi.fn(),
+    }
+    mockUseGame.mockReturnValue(ctx)
+    render(<EquipmentDrawer onClose={vi.fn()} />)
+
+    const emptySlots = screen.getAllByRole('button', { name: '—' })
+    fireEvent.click(emptySlots[0])
+
+    // Click the first weapon item in the picker
+    fireEvent.click(screen.getByText('Rusty Blade'))
+
+    expect(ctx.sendMessage).toHaveBeenCalledWith('EquipRequest', {
+      weaponId: 'rusty_blade',
+      slot: 'main',
+      preset: 1,
+    })
+  })
+
+  it('selecting weapon with multiple presets shows preset picker before sending', () => {
+    const ctx = {
+      ...BASE_STATE,
+      state: {
+        ...BASE_STATE.state,
+        characterSheet: EMPTY_SHEET,
+        inventoryView: WEAPON_INVENTORY,
+        loadoutView: {
+          activeIndex: 0,
+          presets: [
+            { mainHand: null, offHand: null },
+            { mainHand: null, offHand: null },
+          ],
+        },
+      },
+      sendMessage: vi.fn(),
+    }
+    mockUseGame.mockReturnValue(ctx)
+    render(<EquipmentDrawer onClose={vi.fn()} />)
+
+    const emptySlots = screen.getAllByRole('button', { name: '—' })
+    fireEvent.click(emptySlots[0])
+    fireEvent.click(screen.getByText('Rusty Blade'))
+
+    // Should now show preset picker — findAll because the preset cards also say "Preset N"
+    const picker = screen.getByTestId('slot-picker')
+    expect(picker).toBeDefined()
+    const presetBtns = Array.from(picker.querySelectorAll('button')).filter(b => b.textContent?.startsWith('Preset'))
+    expect(presetBtns.length).toBe(2)
+    expect(ctx.sendMessage).not.toHaveBeenCalledWith('EquipRequest', expect.anything())
+
+    // Click the Preset 2 button inside the picker
+    fireEvent.click(presetBtns[1])
+    expect(ctx.sendMessage).toHaveBeenCalledWith('EquipRequest', {
+      weaponId: 'rusty_blade',
+      slot: 'main',
+      preset: 2,
+    })
+  })
+
+  it('clicking empty armor slot shows armor picker and selecting sends WearRequest', () => {
+    const ctx = {
+      ...BASE_STATE,
+      state: {
+        ...BASE_STATE.state,
+        characterSheet: EMPTY_SHEET,
+        inventoryView: ARMOR_INVENTORY,
+        loadoutView: { activeIndex: 0, presets: [] },
+      },
+      sendMessage: vi.fn(),
+    }
+    mockUseGame.mockReturnValue(ctx)
+    render(<EquipmentDrawer onClose={vi.fn()} />)
+
+    // Click the Head slot empty button
+    const emptySlots = screen.getAllByRole('button', { name: '—' })
+    // Head is the first armor slot
+    const headSlot = emptySlots.find((_, i) => i >= 2) // weapon slots come first
+    fireEvent.click(emptySlots[2]) // first armor empty slot (Head)
+
+    expect(screen.getByTestId('slot-picker')).toBeDefined()
+    expect(screen.getByText('Leather Cap')).toBeDefined()
+
+    fireEvent.click(screen.getByText('Leather Cap'))
+    expect(ctx.sendMessage).toHaveBeenCalledWith('WearRequest', {
+      item_id: 'leather_cap',
+      slot: 'head',
+    })
   })
 })
