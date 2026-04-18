@@ -1716,7 +1716,7 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 						archetype = s.archetypes[archetypeID]
 					}
 					headless := sess.Headless
-					promptFn := func(prompt string, options []string) (string, error) {
+					promptFn := func(prompt string, options []string, slotCtx *TechSlotContext) (string, error) {
 						choices := &ruleset.FeatureChoices{
 							Prompt:  prompt,
 							Options: options,
@@ -1783,6 +1783,18 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 			s.hardwiredTechRepo, s.preparedTechRepo, s.knownTechRepo, s.innateTechRepo, s.spontaneousUsePoolRepo,
 		); techErr != nil {
 			s.logger.Warn("loading technologies", zap.Int64("character_id", characterID), zap.Error(techErr))
+		}
+	}
+
+	// Resolve and cache the casting model for this character's job+archetype combination.
+	// Used throughout the session to select the correct tech pool and catalog population logic.
+	if s.jobRegistry != nil && sess.Class != "" {
+		if loginJob, loginJobOK := s.jobRegistry.Job(sess.Class); loginJobOK {
+			var loginArchetype *ruleset.Archetype
+			if loginJob.Archetype != "" {
+				loginArchetype = s.archetypes[loginJob.Archetype]
+			}
+			sess.CastingModel = ruleset.ResolveCastingModel(loginJob, loginArchetype)
 		}
 	}
 
@@ -1864,7 +1876,7 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 	if len(sess.PendingTechGrants) > 0 && s.jobRegistry != nil {
 		if job, ok := s.jobRegistry.Job(sess.Class); ok {
 			headless := sess.Headless
-			promptFn := func(prompt string, options []string) (string, error) {
+			promptFn := func(prompt string, options []string, slotCtx *TechSlotContext) (string, error) {
 				choices := &ruleset.FeatureChoices{
 					Prompt:  prompt,
 					Options: options,
@@ -3892,7 +3904,7 @@ func (s *GameServiceServer) handleMotelRest(uid string, sess *session.PlayerSess
 // Postcondition: HP + tech pools fully restored; tech-choice prompt sent if needed.
 func (s *GameServiceServer) applyLongRestEffects(uid string, sess *session.PlayerSession, ctx context.Context, sendMsg func(string) error, stream gamev1.GameService_SessionServer) error {
 	headless := sess.Headless
-	promptFn := func(prompt string, options []string) (string, error) {
+	promptFn := func(prompt string, options []string, slotCtx *TechSlotContext) (string, error) {
 		choices := &ruleset.FeatureChoices{
 			Prompt:  prompt,
 			Options: options,
@@ -4162,7 +4174,7 @@ func (s *GameServiceServer) checkCampingStatus(uid string) {
 			s.pushMessageToUID(uid, text)
 			return nil
 		}
-		promptFn := func(_ string, options []string) (string, error) {
+		promptFn := func(_ string, options []string, _ *TechSlotContext) (string, error) {
 			if len(options) == 0 {
 				return "", nil
 			}
@@ -4284,7 +4296,7 @@ func (s *GameServiceServer) applyFullLongRest(uid string, sess *session.PlayerSe
 		})
 	}
 	headless := sess.Headless
-	promptFn := func(prompt string, options []string) (string, error) {
+	promptFn := func(prompt string, options []string, slotCtx *TechSlotContext) (string, error) {
 		choices := &ruleset.FeatureChoices{
 			Prompt:  prompt,
 			Options: options,
@@ -4453,7 +4465,7 @@ func (s *GameServiceServer) handleSelectTech(uid string, requestID string, strea
 	}
 
 	headlessFlag := sess.Headless
-	promptFn := func(prompt string, options []string) (string, error) {
+	promptFn := func(prompt string, options []string, slotCtx *TechSlotContext) (string, error) {
 		choices := &ruleset.FeatureChoices{
 			Prompt:  prompt,
 			Options: options,

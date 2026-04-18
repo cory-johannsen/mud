@@ -190,10 +190,13 @@ type PlayerSession struct {
 	// Used for decay calculations.
 	LastViolationDay map[string]int
 	// Technology slots — nil until loaded from DB at login.
-	HardwiredTechs   []string                // tech IDs; unlimited use
-	PreparedTechs    map[int][]*PreparedSlot // slot level → ordered slots
-	KnownTechs map[int][]string        // tech level → known tech IDs
-	InnateTechs      map[string]*InnateSlot  // tech_id → innate slot info
+	HardwiredTechs []string                // tech IDs; unlimited use
+	PreparedTechs  map[int][]*PreparedSlot // slot level → ordered slots
+	KnownTechs     map[int][]string        // tech level → known tech IDs
+	InnateTechs    map[string]*InnateSlot  // tech_id → innate slot info
+	// CastingModel is the resolved tech casting model for this character's job+archetype.
+	// Set at login; controls prepared slot pool selection and catalog population.
+	CastingModel ruleset.CastingModel
 	// SpontaneousUsePools tracks daily use pools per tech level.
 	// Key: tech level (1-based). Value: UsePool with remaining and max uses.
 	SpontaneousUsePools map[int]UsePool

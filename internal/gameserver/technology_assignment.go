@@ -11,9 +11,18 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/technology"
 )
 
+// TechSlotContext provides slot metadata for the frontend modal when prompting
+// the player to fill a prepared tech slot during rearrangement.
+type TechSlotContext struct {
+	SlotNum    int // 1-based slot number within the level
+	TotalSlots int // total slots at this level
+	SlotLevel  int // tech level of the slot being filled
+}
+
 // TechPromptFn presents a prompt header and list of technology options to the player and returns
 // the selected option string.
-type TechPromptFn func(prompt string, options []string) (string, error)
+// slotCtx is non-nil only during rest rearrangement; it is nil during level-up prompts.
+type TechPromptFn func(prompt string, options []string, slotCtx *TechSlotContext) (string, error)
 
 // keepSentinel is the option prefix used to offer "keep current" in pool slot prompts.
 // Callers that see this prefix in the chosen string use the existing tech rather than parsing a new ID.
@@ -338,7 +347,7 @@ func LevelUpTechnologies(
 	}
 	// Use first-option fallback when no promptFn is provided (e.g., admin grant path).
 	if promptFn == nil {
-		promptFn = func(_ string, options []string) (string, error) {
+		promptFn = func(_ string, options []string, _ *TechSlotContext) (string, error) {
 			if len(options) == 0 {
 				return "", nil
 			}
@@ -1023,7 +1032,8 @@ func fillFromPreparedPoolWithSend(
 		}
 
 		slotPrompt := fmt.Sprintf("Choose a Level %d technology to prepare (%s %d of %d):", lvl, flavor.SlotNoun, slotNum, slots)
-		chosen, err := promptFn(slotPrompt, options)
+		slotCtx := &TechSlotContext{SlotNum: slotNum, TotalSlots: slots, SlotLevel: lvl}
+		chosen, err := promptFn(slotPrompt, options, slotCtx)
 		if err != nil {
 			return nil, err
 		}
@@ -1106,7 +1116,7 @@ func fillFromPreparedPool(
 	copy(remaining, pool)
 	for open > 0 {
 		options := buildPreparedOptions(remaining, techReg)
-		chosen, err := promptFn(fmt.Sprintf("Choose a Level %d technology to prepare:", lvl), options)
+		chosen, err := promptFn(fmt.Sprintf("Choose a Level %d technology to prepare:", lvl), options, nil)
 		if err != nil {
 			return nil, err
 		}
@@ -1174,7 +1184,7 @@ func fillFromSpontaneousPool(
 	copy(remaining, pool)
 	for open > 0 {
 		options := buildSpontaneousOptions(remaining, techReg)
-		chosen, err := promptFn(fmt.Sprintf("Choose a Level %d technology to learn:", lvl), options)
+		chosen, err := promptFn(fmt.Sprintf("Choose a Level %d technology to learn:", lvl), options, nil)
 		if err != nil {
 			return nil, err
 		}

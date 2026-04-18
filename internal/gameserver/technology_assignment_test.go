@@ -100,7 +100,7 @@ func (r *fakeInnateRepo) RestoreAll(_ context.Context, _ int64) error           
 // noPrompt returns the first option automatically (for testing auto-assign paths).
 // Precondition: called only on test scenarios where auto-assign does not trigger the prompt;
 // the len(options) == 0 guard is a safety fallback.
-func noPrompt(_ string, options []string) (string, error) {
+func noPrompt(_ string, options []string, _ *gameserver.TechSlotContext) (string, error) {
 	if len(options) == 0 {
 		return "", nil
 	}
@@ -172,7 +172,7 @@ func TestAssignTechnologies_PreparedAutoAssign(t *testing.T) {
 	ctx := context.Background()
 	sess := &session.PlayerSession{}
 	promptCalled := false
-	promptFn := func(_ string, options []string) (string, error) {
+	promptFn := func(_ string, options []string, _ *gameserver.TechSlotContext) (string, error) {
 		promptCalled = true
 		return options[0], nil
 	}
@@ -201,7 +201,7 @@ func TestAssignTechnologies_SpontaneousAutoAssign(t *testing.T) {
 	ctx := context.Background()
 	sess := &session.PlayerSession{}
 	promptCalled := false
-	promptFn := func(_ string, options []string) (string, error) {
+	promptFn := func(_ string, options []string, _ *gameserver.TechSlotContext) (string, error) {
 		promptCalled = true
 		return options[0], nil
 	}
@@ -295,7 +295,7 @@ func TestPropertyAssignTechnologies_AutoAssignNeverPrompts(t *testing.T) {
 		pool = uniquePool
 
 		promptCalled := false
-		trackingPrompt := func(_ string, options []string) (string, error) {
+		trackingPrompt := func(_ string, options []string, _ *gameserver.TechSlotContext) (string, error) {
 			promptCalled = true
 			return options[0], nil
 		}
@@ -562,7 +562,7 @@ func TestRearrangePreparedTechs_LevelUpGrantsFiltered(t *testing.T) {
 	}
 
 	promptCalled := false
-	promptFn := func(_ string, options []string) (string, error) {
+	promptFn := func(_ string, options []string, _ *gameserver.TechSlotContext) (string, error) {
 		promptCalled = true
 		// Select the first non-keep option (level2_pool).
 		for _, opt := range options {
@@ -637,7 +637,7 @@ func TestRearrangePreparedTechs_AlwaysPromptsPoolSlots(t *testing.T) {
 	}
 
 	promptCalled := false
-	promptFn := func(_ string, options []string) (string, error) {
+	promptFn := func(_ string, options []string, _ *gameserver.TechSlotContext) (string, error) {
 		promptCalled = true
 		return options[0], nil
 	}
@@ -676,7 +676,7 @@ func TestRearrangePreparedTechs_KeepCurrentOption_OfferedWhenTechInPool(t *testi
 	}
 
 	var capturedOptions []string
-	promptFn := func(_ string, options []string) (string, error) {
+	promptFn := func(_ string, options []string, _ *gameserver.TechSlotContext) (string, error) {
 		capturedOptions = options
 		return options[0], nil // select first option ([keep])
 	}
@@ -711,7 +711,7 @@ func TestRearrangePreparedTechs_SelectKeep_PreservesCurrentTech(t *testing.T) {
 		},
 	}
 
-	promptFn := func(_ string, options []string) (string, error) {
+	promptFn := func(_ string, options []string, _ *gameserver.TechSlotContext) (string, error) {
 		// Always select the [keep] option (first).
 		return options[0], nil
 	}
@@ -746,7 +746,7 @@ func TestRearrangePreparedTechs_NoKeepOption_WhenTechNotInPool(t *testing.T) {
 	}
 
 	var capturedOptions []string
-	promptFn := func(_ string, options []string) (string, error) {
+	promptFn := func(_ string, options []string, _ *gameserver.TechSlotContext) (string, error) {
 		capturedOptions = options
 		return options[0], nil
 	}
@@ -785,7 +785,7 @@ func TestRearrangePreparedTechs_KeepCurrentOption_NotDuplicatedInPoolList(t *tes
 	}
 
 	var capturedOptions []string
-	promptFn := func(_ string, options []string) (string, error) {
+	promptFn := func(_ string, options []string, _ *gameserver.TechSlotContext) (string, error) {
 		capturedOptions = options
 		return options[0], nil
 	}
@@ -1280,7 +1280,7 @@ func TestRearrangePreparedTechs_SendFn_SlotMessages(t *testing.T) {
 	var messages []string
 	sendFn := func(msg string) { messages = append(messages, msg) }
 
-	promptFn := func(_ string, options []string) (string, error) {
+	promptFn := func(_ string, options []string, _ *gameserver.TechSlotContext) (string, error) {
 		return options[0], nil
 	}
 
@@ -1321,7 +1321,7 @@ func TestPropertyLevelUpTechnologies_SpontaneousPromptCount(t *testing.T) {
 		inn := &fakeInnateRepo{}
 
 		promptCallCount := 0
-		promptFn := func(_ string, options []string) (string, error) {
+		promptFn := func(_ string, options []string, _ *gameserver.TechSlotContext) (string, error) {
 			promptCallCount++
 			// Return the first option each time (greedy selection).
 			if len(options) == 0 {
@@ -1533,7 +1533,7 @@ func TestRearrangePreparedTechs_ArchetypePoolIncluded(t *testing.T) {
 	}}
 
 	promptCallCount := 0
-	promptFn := func(_ string, options []string) (string, error) {
+	promptFn := func(_ string, options []string, _ *gameserver.TechSlotContext) (string, error) {
 		promptCallCount++
 		if len(options) == 0 {
 			return "", fmt.Errorf("empty options on prompt call %d", promptCallCount)
@@ -1618,7 +1618,7 @@ func TestRearrangePreparedTechs_DeferredL2SlotsOfferedAtRest(t *testing.T) {
 	}}
 
 	promptedLevels := make(map[int]int)
-	promptFn := func(prompt string, options []string) (string, error) {
+	promptFn := func(prompt string, options []string, _ *gameserver.TechSlotContext) (string, error) {
 		// Parse level from prompt to track which levels are prompted.
 		for lvl := 1; lvl <= 5; lvl++ {
 			if fmt.Sprintf("Level %d", lvl) == prompt[:len(fmt.Sprintf("Level %d", lvl))] {
@@ -1854,4 +1854,18 @@ func TestProperty_AssignTechnologies_TraditionGrantsAllUnlimited(t *testing.T) {
 			}
 		}
 	})
+}
+
+func TestLevelUpTechnologies_CastingModelField_Exists(t *testing.T) {
+	sess := &session.PlayerSession{}
+	// Verify CastingModel field compiles and can be assigned.
+	sess.CastingModel = ruleset.CastingModelWizard
+	assert.Equal(t, ruleset.CastingModelWizard, sess.CastingModel)
+}
+
+func TestTechSlotContext_Compiles(t *testing.T) {
+	slotCtx := &gameserver.TechSlotContext{SlotNum: 1, TotalSlots: 3, SlotLevel: 2}
+	assert.Equal(t, 1, slotCtx.SlotNum)
+	assert.Equal(t, 3, slotCtx.TotalSlots)
+	assert.Equal(t, 2, slotCtx.SlotLevel)
 }
