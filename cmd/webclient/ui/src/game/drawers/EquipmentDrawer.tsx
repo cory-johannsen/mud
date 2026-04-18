@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useGame } from '../GameContext'
 import type { InventoryItem, LoadoutWeaponPreset } from '../../proto'
+import { DamageTypeIcon, parseDamageType } from '../DamageTypeIcon'
 
 interface WeaponTooltipData {
   name: string
@@ -32,7 +33,11 @@ function WeaponTooltip({ data }: { data: WeaponTooltipData }): JSX.Element {
       }}
     >
       <div style={{ color: '#e0c060', fontWeight: 'bold', marginBottom: '0.25rem' }}>{data.name}</div>
-      <div><span style={{ color: '#7af' }}>Damage:</span> {data.damage}</div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+        <span style={{ color: '#7af' }}>Damage:</span>
+        <DamageTypeIcon damageType={parseDamageType(data.damage)} size="0.85em" />
+        <span>{data.damage}</span>
+      </div>
       <div style={{ marginTop: '0.2rem' }}>
         <span style={{ color: '#7af' }}>To-hit:</span> {data.attackBonus}
       </div>
