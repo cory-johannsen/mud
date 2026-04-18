@@ -22,8 +22,6 @@ zone:
 
       '
     exits:
-    - direction: north
-      target: director_park
     - direction: south
       target: lo_lake_view_blvd
     - direction: east
@@ -85,6 +83,8 @@ zone:
       target: lo_driving_range
     - direction: west
       target: lo_the_commons
+    - direction: east
+      target: lo_country_club_east
     map_x: 2
     map_y: 4
     properties:
@@ -108,6 +108,10 @@ zone:
       target: lo_lake_view_blvd
     - direction: north
       target: lo_boat_house
+    - direction: west
+      target: lo_marina
+    - direction: south
+      target: lo_south_shore
     map_x: -2
     map_y: 2
     properties:
@@ -210,8 +214,8 @@ zone:
     exits:
     - direction: west
       target: lo_tennis_grounds
-    map_x: 202
-    map_y: 0
+    map_x: 8
+    map_y: 2
     properties:
       lighting: exposed
       atmosphere: windswept
@@ -231,6 +235,8 @@ zone:
     exits:
     - direction: west
       target: lo_gated_estates
+    - direction: east
+      target: lo_memorial_garden
     map_x: 2
     map_y: 8
     properties:
@@ -275,6 +281,8 @@ zone:
     exits:
     - direction: east
       target: lo_the_commons
+    - direction: west
+      target: lo_lakeside_promenade
     map_x: -2
     map_y: 4
     properties:
@@ -316,8 +324,8 @@ zone:
       '
     exits:
     - direction: east
-      target: lo_millennium_park
-    map_x: 202
+      target: lo_lakewood_bay
+    map_x: -4
     map_y: 2
     properties:
       lighting: overcast
@@ -338,8 +346,10 @@ zone:
     exits:
     - direction: east
       target: lo_iron_mountain
-    map_x: 202
-    map_y: 4
+    - direction: west
+      target: lo_patrol_route_east
+    map_x: 6
+    map_y: 2
     properties:
       lighting: open
       atmosphere: drill
@@ -359,7 +369,9 @@ zone:
     exits:
     - direction: west
       target: lo_supply_depot
-    map_x: 202
+    - direction: south
+      target: lo_citation_court
+    map_x: 6
     map_y: 6
     properties:
       lighting: candlelit
@@ -380,6 +392,10 @@ zone:
     exits:
     - direction: east
       target: lo_tryon_creek
+    - direction: west
+      target: lo_garden_district
+    - direction: south
+      target: lo_country_club_west
     map_x: 0
     map_y: 8
     properties:
@@ -403,6 +419,8 @@ zone:
       target: lo_first_addition
     - direction: south
       target: lo_checkpoint_south
+    - direction: east
+      target: lo_tennis_grounds
     map_x: 4
     map_y: 2
     properties:
@@ -421,7 +439,11 @@ zone:
       the forest at night.
 
       '
-    exits: []
+    exits:
+    - direction: north
+      target: lo_patrol_route_east
+    - direction: south
+      target: lo_memorial_garden
     map_x: 4
     map_y: 4
     properties:
@@ -464,10 +486,10 @@ zone:
     exits:
     - direction: east
       target: lo_wine_cellar_bunker
-    - direction: north
-      target: lo_hoa_headquarters
-    map_x: 202
-    map_y: 8
+    - direction: west
+      target: lo_driving_range
+    map_x: 4
+    map_y: 6
     properties:
       lighting: fluorescent
       atmosphere: orderly
@@ -487,6 +509,8 @@ zone:
     exits:
     - direction: north
       target: lo_country_club
+    - direction: east
+      target: lo_supply_depot
     map_x: 2
     map_y: 6
     properties:
@@ -505,9 +529,11 @@ zone:
       Sentences range from fines to exile, with little in between.
 
       '
-    exits: []
-    map_x: 202
-    map_y: 10
+    exits:
+    - direction: north
+      target: lo_wine_cellar_bunker
+    map_x: 6
+    map_y: 8
     properties:
       lighting: overhead
       atmosphere: judicial
@@ -526,9 +552,11 @@ zone:
       '
     exits:
     - direction: north
-      target: lo_the_commons
-    map_x: 202
-    map_y: 12
+      target: lo_checkpoint_south
+    - direction: west
+      target: lo_tryon_creek
+    map_x: 4
+    map_y: 8
     properties:
       lighting: natural
       atmosphere: solemn
@@ -578,6 +606,8 @@ zone:
     exits:
     - direction: east
       target: lo_country_club
+    - direction: north
+      target: lo_gated_estates
     map_x: 0
     map_y: 10
     properties:
