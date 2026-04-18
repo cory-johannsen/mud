@@ -322,6 +322,26 @@ func (s *GameServiceServer) doTrainTech(
 				)
 			}
 		}
+		// Catalog-based models (wizard, ranger) track all trained techs in KnownTechs.
+		// Druid model uses the full pool at rest and does not track individual techs.
+		// REQ-TC-11: Trainer populates KnownTechs for wizard and ranger models.
+		// REQ-TC-22: For druid model, trainer assigns PreparedTechs but does NOT add to KnownTechs.
+		if sess.CastingModel == ruleset.CastingModelWizard || sess.CastingModel == ruleset.CastingModelRanger {
+			if sess.KnownTechs == nil {
+				sess.KnownTechs = make(map[int][]string)
+			}
+			if !containsString(sess.KnownTechs[matched.techLevel], techID) {
+				sess.KnownTechs[matched.techLevel] = append(sess.KnownTechs[matched.techLevel], techID)
+			}
+			if s.knownTechRepo != nil && sess.CharacterID > 0 {
+				if err := s.knownTechRepo.Add(ctx, sess.CharacterID, techID, matched.techLevel); err != nil {
+					s.logger.Warn("doTrainTech: knownTechRepo.Add failed",
+						zap.String("tech_id", techID),
+						zap.Error(err),
+					)
+				}
+			}
+		}
 
 	case string(technology.UsageSpontaneous):
 		if sess.KnownTechs == nil {
@@ -357,6 +377,24 @@ func (s *GameServiceServer) doTrainTech(
 					zap.String("tech_id", techID),
 					zap.Error(err),
 				)
+			}
+		}
+		// Catalog-based models (wizard, ranger) track all trained techs in KnownTechs.
+		// REQ-TC-11: Trainer populates KnownTechs for wizard and ranger models.
+		if sess.CastingModel == ruleset.CastingModelWizard || sess.CastingModel == ruleset.CastingModelRanger {
+			if sess.KnownTechs == nil {
+				sess.KnownTechs = make(map[int][]string)
+			}
+			if !containsString(sess.KnownTechs[matched.techLevel], techID) {
+				sess.KnownTechs[matched.techLevel] = append(sess.KnownTechs[matched.techLevel], techID)
+			}
+			if s.knownTechRepo != nil && sess.CharacterID > 0 {
+				if err := s.knownTechRepo.Add(ctx, sess.CharacterID, techID, matched.techLevel); err != nil {
+					s.logger.Warn("doTrainTech: knownTechRepo.Add failed",
+						zap.String("tech_id", techID),
+						zap.Error(err),
+					)
+				}
 			}
 		}
 	}

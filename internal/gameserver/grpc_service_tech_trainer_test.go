@@ -284,3 +284,123 @@ func TestProperty_HandleTrainTech_CurrencyNeverNegative(t *testing.T) {
 		}
 	})
 }
+
+// TestDoTrainTech_WizardModelPopulatesKnownTechs verifies that after training a prepared tech
+// with a wizard casting model, the tech appears in sess.KnownTechs.
+//
+// Precondition: Player has wizard casting model and a pending prepared L2 neural tech.
+// Postcondition: sess.KnownTechs[2] contains "neural_strike" after successful training.
+// REQ-TC-11: Trainer populates KnownTechs for wizard and ranger models.
+func TestDoTrainTech_WizardModelPopulatesKnownTechs(t *testing.T) {
+	svc, uid, trainerName := newTechTrainerTestServer(t)
+	sess, _ := svc.sessions.GetPlayer(uid)
+	sess.CastingModel = ruleset.CastingModelWizard
+	sess.Currency = 500
+
+	evt, err := svc.handleTrainTech(uid, trainerName, "neural_strike")
+	require.NoError(t, err)
+	require.NotNil(t, evt)
+
+	msg := evt.GetMessage().GetContent()
+	assert.NotEmpty(t, msg, "success message must be non-empty")
+
+	sess, _ = svc.sessions.GetPlayer(uid)
+	require.NotNil(t, sess.KnownTechs, "REQ-TC-11: KnownTechs must be populated for wizard model")
+	found := false
+	for _, id := range sess.KnownTechs[2] {
+		if id == "neural_strike" {
+			found = true
+		}
+	}
+	assert.True(t, found, "REQ-TC-11: neural_strike must appear in KnownTechs[2] for wizard model")
+}
+
+// TestDoTrainTech_RangerModelPopulatesKnownTechs verifies that after training a prepared tech
+// with a ranger casting model, the tech appears in sess.KnownTechs.
+//
+// Precondition: Player has ranger casting model and a pending prepared L2 neural tech.
+// Postcondition: sess.KnownTechs[2] contains "neural_strike" after successful training.
+// REQ-TC-11: Trainer populates KnownTechs for wizard and ranger models.
+func TestDoTrainTech_RangerModelPopulatesKnownTechs(t *testing.T) {
+	svc, uid, trainerName := newTechTrainerTestServer(t)
+	sess, _ := svc.sessions.GetPlayer(uid)
+	sess.CastingModel = ruleset.CastingModelRanger
+	sess.Currency = 500
+
+	evt, err := svc.handleTrainTech(uid, trainerName, "neural_strike")
+	require.NoError(t, err)
+	require.NotNil(t, evt)
+
+	msg := evt.GetMessage().GetContent()
+	assert.NotEmpty(t, msg, "success message must be non-empty")
+
+	sess, _ = svc.sessions.GetPlayer(uid)
+	require.NotNil(t, sess.KnownTechs, "REQ-TC-11: KnownTechs must be populated for ranger model")
+	found := false
+	for _, id := range sess.KnownTechs[2] {
+		if id == "neural_strike" {
+			found = true
+		}
+	}
+	assert.True(t, found, "REQ-TC-11: neural_strike must appear in KnownTechs[2] for ranger model")
+}
+
+// TestDoTrainTech_DruidModelDoesNotPopulateKnownTechs verifies that after training a prepared tech
+// with a druid casting model, KnownTechs is NOT populated (druid uses the full pool at rest).
+//
+// Precondition: Player has druid casting model and a pending prepared L2 neural tech.
+// Postcondition: sess.KnownTechs does NOT contain "neural_strike" after training.
+// REQ-TC-22: For druid model, trainer assigns PreparedTechs but does NOT add to KnownTechs.
+func TestDoTrainTech_DruidModelDoesNotPopulateKnownTechs(t *testing.T) {
+	svc, uid, trainerName := newTechTrainerTestServer(t)
+	sess, _ := svc.sessions.GetPlayer(uid)
+	sess.CastingModel = ruleset.CastingModelDruid
+	sess.Currency = 500
+
+	evt, err := svc.handleTrainTech(uid, trainerName, "neural_strike")
+	require.NoError(t, err)
+	require.NotNil(t, evt)
+
+	msg := evt.GetMessage().GetContent()
+	assert.NotEmpty(t, msg, "success message must be non-empty")
+
+	sess, _ = svc.sessions.GetPlayer(uid)
+	// PreparedTechs must still be filled.
+	require.NotNil(t, sess.PreparedTechs, "REQ-TC-22: PreparedTechs must be populated for druid model")
+	slots := sess.PreparedTechs[2]
+	require.NotEmpty(t, slots, "REQ-TC-22: level-2 prepared slots must be non-empty for druid model")
+
+	// KnownTechs must NOT contain the tech.
+	for _, ids := range sess.KnownTechs {
+		for _, id := range ids {
+			assert.NotEqual(t, "neural_strike", id,
+				"REQ-TC-22: neural_strike must NOT appear in KnownTechs for druid model")
+		}
+	}
+}
+
+// TestProperty_DoTrainTech_WizardKnownTechsNeverEmpty verifies that for a wizard model,
+// KnownTechs is never empty after a successful training.
+//
+// Precondition: Player has wizard casting model; training succeeds.
+// Postcondition: KnownTechs is non-empty after successful training.
+func TestProperty_DoTrainTech_WizardKnownTechsNeverEmpty(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		svc, uid, trainerName := newTechTrainerTestServer(t)
+		sess, _ := svc.sessions.GetPlayer(uid)
+		sess.CastingModel = ruleset.CastingModelWizard
+		sess.Currency = 500
+
+		evt, err := svc.handleTrainTech(uid, trainerName, "neural_strike")
+		if err != nil {
+			rt.Fatalf("unexpected error: %v", err)
+		}
+		if evt == nil {
+			rt.Fatalf("expected non-nil event")
+		}
+		sess, _ = svc.sessions.GetPlayer(uid)
+		if len(sess.KnownTechs) == 0 {
+			rt.Fatalf("REQ-TC-11: KnownTechs must be non-empty after wizard training")
+		}
+	})
+}
