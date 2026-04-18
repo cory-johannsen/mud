@@ -133,7 +133,7 @@ docker-down:
 REGISTRY              := registry.johannsen.cloud:5000
 DB_USER               := mud
 DB_PASSWORD           := mud
-WEBCLIENT_JWT_SECRET  ?= dev-secret-change-in-prod
+WEBCLIENT_JWT_SECRET  ?=
 HELM_NAMESPACE        := mud
 IMAGE_TAG   := $(VERSION)
 HELM_CHART  := deployments/k8s/mud
@@ -168,6 +168,7 @@ docker-push: check-fresh-version
 	docker push $(REGISTRY)/mud-webclient:$(IMAGE_TAG)
 
 helm-install:
+	@if [ -z "$(WEBCLIENT_JWT_SECRET)" ]; then echo "ERROR: WEBCLIENT_JWT_SECRET must be set for initial install"; exit 1; fi
 	helm install $(HELM_RELEASE) $(HELM_CHART) \
 		--namespace $(HELM_NAMESPACE) \
 		--create-namespace \
@@ -183,8 +184,7 @@ helm-upgrade:
 		--values $(HELM_VALUES) \
 		--set db.user=$(DB_USER) \
 		--set db.password=$(DB_PASSWORD) \
-		--set image.tag=$(IMAGE_TAG) \
-		--set webClient.jwtSecret=$(WEBCLIENT_JWT_SECRET)
+		--set image.tag=$(IMAGE_TAG)
 
 helm-uninstall:
 	helm uninstall $(HELM_RELEASE) --namespace $(HELM_NAMESPACE)
