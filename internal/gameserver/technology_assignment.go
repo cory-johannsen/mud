@@ -389,6 +389,26 @@ func LevelUpTechnologies(
 				return fmt.Errorf("LevelUpTechnologies prepared level %d: %w", lvl, err)
 			}
 			sess.PreparedTechs[lvl] = append(sess.PreparedTechs[lvl], chosen...)
+
+			// Populate KnownTechs for catalog-based casting models (wizard, ranger).
+			// Druid prepares from the full pool at rest and does not maintain a catalog.
+			if knownRepo != nil && (sess.CastingModel == ruleset.CastingModelWizard || sess.CastingModel == ruleset.CastingModelRanger) {
+				for _, slot := range chosen {
+					if slot == nil {
+						continue
+					}
+					if addErr := knownRepo.Add(ctx, characterID, slot.TechID, lvl); addErr != nil {
+						// Non-fatal: log and continue.
+						_ = addErr
+					}
+					if sess.KnownTechs == nil {
+						sess.KnownTechs = make(map[int][]string)
+					}
+					if !containsString(sess.KnownTechs[lvl], slot.TechID) {
+						sess.KnownTechs[lvl] = append(sess.KnownTechs[lvl], slot.TechID)
+					}
+				}
+			}
 		}
 	}
 
@@ -1492,4 +1512,14 @@ func BackfillLevelUpTechnologies(
 		return &ruleset.TechnologyGrants{Prepared: pendingPrepared}, nil
 	}
 	return nil, nil
+}
+
+// containsString reports whether ss contains s.
+func containsString(ss []string, s string) bool {
+	for _, v := range ss {
+		if v == s {
+			return true
+		}
+	}
+	return false
 }

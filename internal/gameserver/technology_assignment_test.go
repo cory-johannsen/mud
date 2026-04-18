@@ -1869,3 +1869,73 @@ func TestTechSlotContext_Compiles(t *testing.T) {
 	assert.Equal(t, 3, slotCtx.TotalSlots)
 	assert.Equal(t, 2, slotCtx.SlotLevel)
 }
+
+// REQ-TC-8: wizard level-up slot picks populate KnownTechs
+func TestLevelUpTechnologies_Wizard_SlotPickPopulatesKnownTechs(t *testing.T) {
+	ctx := context.Background()
+	known := &fakeSpontaneousRepo{techs: make(map[int][]string)}
+	prep := &fakePreparedRepo{slots: make(map[int][]*session.PreparedSlot)}
+	sess := &session.PlayerSession{CastingModel: ruleset.CastingModelWizard}
+
+	grants := &ruleset.TechnologyGrants{
+		Prepared: &ruleset.PreparedGrants{
+			SlotsByLevel: map[int]int{1: 2},
+			Pool: []ruleset.PreparedEntry{
+				{ID: "tech_a", Level: 1},
+				{ID: "tech_b", Level: 1},
+				{ID: "tech_c", Level: 1},
+			},
+		},
+	}
+	pickIdx := 0
+	promptFn := func(_ string, opts []string, _ *gameserver.TechSlotContext) (string, error) {
+		choice := opts[pickIdx%len(opts)]
+		pickIdx++
+		return choice, nil
+	}
+	err := gameserver.LevelUpTechnologies(ctx, sess, 1, grants, nil, promptFn, nil, prep, known, nil, nil)
+	require.NoError(t, err)
+	assert.Len(t, known.techs[1], 2, "both slot picks must be in KnownTechs")
+}
+
+// REQ-TC-8: ranger level-up slot picks also populate KnownTechs
+func TestLevelUpTechnologies_Ranger_SlotPickPopulatesKnownTechs(t *testing.T) {
+	ctx := context.Background()
+	known := &fakeSpontaneousRepo{techs: make(map[int][]string)}
+	prep := &fakePreparedRepo{slots: make(map[int][]*session.PreparedSlot)}
+	sess := &session.PlayerSession{CastingModel: ruleset.CastingModelRanger}
+
+	grants := &ruleset.TechnologyGrants{
+		Prepared: &ruleset.PreparedGrants{
+			SlotsByLevel: map[int]int{1: 1},
+			Pool:         []ruleset.PreparedEntry{{ID: "tech_x", Level: 1}},
+		},
+	}
+	promptFn := func(_ string, opts []string, _ *gameserver.TechSlotContext) (string, error) {
+		return opts[0], nil
+	}
+	err := gameserver.LevelUpTechnologies(ctx, sess, 1, grants, nil, promptFn, nil, prep, known, nil, nil)
+	require.NoError(t, err)
+	assert.Contains(t, known.techs[1], "tech_x")
+}
+
+// REQ-TC-8: druid level-up slot picks do NOT populate KnownTechs
+func TestLevelUpTechnologies_Druid_SlotPickDoesNotPopulateKnownTechs(t *testing.T) {
+	ctx := context.Background()
+	known := &fakeSpontaneousRepo{techs: make(map[int][]string)}
+	prep := &fakePreparedRepo{slots: make(map[int][]*session.PreparedSlot)}
+	sess := &session.PlayerSession{CastingModel: ruleset.CastingModelDruid}
+
+	grants := &ruleset.TechnologyGrants{
+		Prepared: &ruleset.PreparedGrants{
+			SlotsByLevel: map[int]int{1: 1},
+			Pool:         []ruleset.PreparedEntry{{ID: "tech_y", Level: 1}},
+		},
+	}
+	promptFn := func(_ string, opts []string, _ *gameserver.TechSlotContext) (string, error) {
+		return opts[0], nil
+	}
+	err := gameserver.LevelUpTechnologies(ctx, sess, 1, grants, nil, promptFn, nil, prep, known, nil, nil)
+	require.NoError(t, err)
+	assert.Empty(t, known.techs[1], "druid slot picks must NOT populate KnownTechs")
+}
