@@ -26,6 +26,7 @@
 - AGENT-13: Agents MUST launch all Agent tool calls with `run_in_background: true` by default, unless the result is immediately required to proceed.
 - AGENT-14: Agents MUST maximize concurrency by launching all independent Agent tool calls in a single message, running them in parallel.
 - AGENT-15: Agents MUST prefer JetBrains MCP tools over direct file operations for all supported operations (file reads, searches, symbol lookup, navigation, refactoring, diagnostics, terminal commands). Direct shell tools (grep, sed, find, cat, bash file I/O) MUST NOT be used when an equivalent JetBrains MCP tool is available. The JetBrains IDE maintains an indexed knowledge base that makes these operations faster and more accurate.
+- AGENT-16: After every `make k8s-redeploy`, agents MUST verify that all pods in the `mud` namespace are stable and running before considering the deployment complete. Verification command: `kubectl rollout status deployment -n mud --timeout=120s && kubectl get pods -n mud`. A deployment is NOT complete until all pods show `Running` (1/1 Ready) with 0 CrashLoopBackOff or Error states. If any pod is in CrashLoopBackOff, agents MUST immediately fetch its logs (`kubectl logs -n mud <pod> --tail=100`), diagnose the root cause, fix it, recommit, and redeploy before proceeding.
 
 ## 3. Software Engineering Best Practices
 
