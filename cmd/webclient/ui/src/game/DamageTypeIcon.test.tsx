@@ -19,8 +19,8 @@ describe('damageTypeInfo', () => {
 
   it('returns fallback for unknown type', () => {
     const info = damageTypeInfo('unknown')
-    expect(info.symbol.length).toBeGreaterThan(0)
-    expect(info.color.startsWith('#')).toBe(true)
+    expect(info.symbol).toBe('?')
+    expect(info.color).toBe('#666')
   })
 })
 
@@ -37,6 +37,10 @@ describe('parseDamageType', () => {
     expect(parseDamageType('')).toBe('')
   })
 
+  it('returns empty string for whitespace-only input', () => {
+    expect(parseDamageType('   ')).toBe('')
+  })
+
   it('handles single word (type only)', () => {
     expect(parseDamageType('poison')).toBe('poison')
   })
@@ -46,6 +50,11 @@ describe('DamageTypeIcon', () => {
   it('renders with title for known type', () => {
     render(<DamageTypeIcon damageType="fire" />)
     expect(screen.getByTitle(/fire/i)).toBeTruthy()
+  })
+
+  it('renders fallback symbol for unknown type', () => {
+    render(<DamageTypeIcon damageType="unknown" />)
+    expect(screen.getByTitle('unknown')).toBeTruthy()
   })
 
   it('renders nothing for empty string', () => {
