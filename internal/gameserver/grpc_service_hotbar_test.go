@@ -522,7 +522,7 @@ func TestHotbarUpdateEvent_PreparedTechSlot_PopulatesUseCounts(t *testing.T) {
 }
 
 // REQ-HB-UC-6: hotbarUpdateEvent reflects the spontaneous use pool for a spontaneous technology slot.
-func TestHotbarUpdateEvent_SpontaneousTechSlot_PopulatesUseCounts(t *testing.T) {
+func TestHotbarUpdateEvent_KnownTechSlot_PopulatesUseCounts(t *testing.T) {
 	t.Parallel()
 	sessMgr := session.NewManager()
 	svc := testMinimalService(t, sessMgr)

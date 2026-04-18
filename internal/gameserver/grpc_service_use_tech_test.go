@@ -299,7 +299,7 @@ func TestHandleUse_NoArg_PreparedTech_UsesDisplayName(t *testing.T) {
 }
 
 // REQ-BUG18-2: use (no arg) lists spontaneous tech display name instead of raw ID when techRegistry is set.
-func TestHandleUse_NoArg_SpontaneousTech_UsesDisplayName(t *testing.T) {
+func TestHandleUse_NoArg_KnownTech_UsesDisplayName(t *testing.T) {
 	sessMgr := session.NewManager()
 	svc := testMinimalService(t, sessMgr)
 
