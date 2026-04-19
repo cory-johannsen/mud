@@ -125,6 +125,7 @@ type Action =
   | { type: 'SET_MAP_TILES'; tiles: MapTile[] }
   | { type: 'SET_WORLD_TILES'; tiles: WorldZoneTile[] }
   | { type: 'SET_COMBAT_ROUND'; round: RoundStartEvent | null }
+  | { type: 'START_COMBAT_ROUND'; round: RoundStartEvent; positions: Record<string, { x: number; y: number }>; ap: Record<string, CombatantAP>; gridWidth: number; gridHeight: number }
   | { type: 'SET_COMBAT_GRID'; width: number; height: number }
   | { type: 'UPDATE_COMBAT_POSITION'; combatantName: string; x: number; y: number }
   | { type: 'CLEAR_COMBAT_POSITIONS' }
@@ -171,6 +172,15 @@ export function reducer(state: GameState, action: Action): GameState {
       return { ...state, worldTiles: action.tiles }
     case 'SET_COMBAT_ROUND':
       return { ...state, combatRound: action.round }
+    case 'START_COMBAT_ROUND':
+      return {
+        ...state,
+        combatRound: action.round,
+        combatPositions: action.positions,
+        combatantAP: { ...state.combatantAP, ...action.ap },
+        combatGridWidth: action.gridWidth,
+        combatGridHeight: action.gridHeight,
+      }
     case 'SET_COMBAT_GRID':
       return { ...state, combatGridWidth: action.width, combatGridHeight: action.height }
     case 'UPDATE_COMBAT_POSITION':
@@ -480,39 +490,38 @@ export function GameProvider({ children }: { children: ReactNode }) {
         }
         case 'RoundStartEvent': {
           const rs = payload as RoundStartEvent
-          dispatch({ type: 'SET_COMBAT_ROUND', round: rs })
           const actionsPerTurn = rs.actionsPerTurn ?? rs.actions_per_turn ?? 3
+          // Build positions and AP maps atomically to avoid intermediate renders
+          // where combatRound is set but combatPositions is empty (REQ-BUG183-1).
+          const positions: Record<string, { x: number; y: number }> = {}
+          const apMap: Record<string, CombatantAP> = {}
+          const hpUpdates: Array<{ name: string; current: number; max: number }> = []
           if (rs.initialPositions) {
             for (const pos of rs.initialPositions as CombatantPosition[]) {
-              dispatch({
-                type: 'UPDATE_COMBAT_POSITION',
-                combatantName: pos.name,
-                x: pos.x ?? 0,
-                y: pos.y ?? 0,
-              })
+              positions[pos.name] = { x: pos.x ?? 0, y: pos.y ?? 0 }
               const apTotal = pos.apTotal ?? pos.ap_total ?? actionsPerTurn
               const apRemaining = pos.apRemaining ?? pos.ap_remaining ?? apTotal
-              // Reset movement AP to 2 (MaxMovementAP) at round start for all combatants
-              dispatch({
-                type: 'UPDATE_COMBATANT_AP',
-                name: pos.name,
-                remaining: apRemaining,
-                total: apTotal,
-                movementRemaining: 2,
-              })
+              apMap[pos.name] = { remaining: apRemaining, total: apTotal, movementRemaining: 2 }
               const hpMax = pos.hpMax ?? pos.hp_max ?? 0
               const hpCurrent = pos.hpCurrent ?? pos.hp_current ?? 0
               if (hpMax > 0) {
-                dispatch({ type: 'UPDATE_COMBATANT_HP', name: pos.name, current: hpCurrent, max: hpMax })
+                hpUpdates.push({ name: pos.name, current: hpCurrent, max: hpMax })
               }
             }
           }
-          // Store grid dimensions from server
+          // Single dispatch: round + positions + AP + grid all in one state update (REQ-BUG183-1)
           dispatch({
-            type: 'SET_COMBAT_GRID',
-            width: rs.gridWidth ?? rs.grid_width ?? 20,
-            height: rs.gridHeight ?? rs.grid_height ?? 20,
+            type: 'START_COMBAT_ROUND',
+            round: rs,
+            positions,
+            ap: apMap,
+            gridWidth: rs.gridWidth ?? rs.grid_width ?? 20,
+            gridHeight: rs.gridHeight ?? rs.grid_height ?? 20,
           })
+          // HP updates don't affect movement range display; can dispatch separately.
+          for (const hp of hpUpdates) {
+            dispatch({ type: 'UPDATE_COMBATANT_HP', name: hp.name, current: hp.current, max: hp.max })
+          }
           const order = Array.isArray(rs.turnOrder) ? rs.turnOrder.join(', ') : ''
           dispatch({
             type: 'APPEND_FEED',
