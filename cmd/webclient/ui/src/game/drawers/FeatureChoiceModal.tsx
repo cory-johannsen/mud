@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useRef } from 'react'
 import { useGame } from '../GameContext'
 
 // FeatureChoiceModal renders an overlay modal presenting a feature choice prompt.
@@ -41,7 +41,12 @@ function stripTechIdPrefix(opt: string): string {
 // the modal dismisses itself via clearChoicePrompt().
 export function FeatureChoiceModal({ onClose: _onClose }: { onClose?: () => void }) {
   const { state, sendCommand, clearChoicePrompt } = useGame()
+  // REQ-FCM-10: A sent ref prevents double-submission when the user clicks faster than
+  // React's async state update can unmount the modal after clearChoicePrompt().
+  const sentRef = useRef(false)
   const cp = state.choicePrompt
+  // Reset sentRef whenever the prompt changes so each new prompt accepts one submission.
+  React.useEffect(() => { sentRef.current = false }, [cp?.featureId, cp?.prompt])
   if (!cp) return null
 
   const options = cp.options ?? []
@@ -89,6 +94,8 @@ export function FeatureChoiceModal({ onClose: _onClose }: { onClose?: () => void
     : realOptions
 
   function handleSelect(filteredIdx: number) {
+    if (sentRef.current) return
+    sentRef.current = true
     const opt = filteredOptions[filteredIdx]
     const originalIdx = options.indexOf(opt)
     clearChoicePrompt()
@@ -96,6 +103,8 @@ export function FeatureChoiceModal({ onClose: _onClose }: { onClose?: () => void
   }
 
   function handleNavigation(sentinel: string) {
+    if (sentRef.current) return
+    sentRef.current = true
     const idx = options.indexOf(sentinel)
     clearChoicePrompt()
     sendCommand(String(idx + 1))
@@ -156,6 +165,7 @@ export function FeatureChoiceModal({ onClose: _onClose }: { onClose?: () => void
             return (
               <button
                 key={i}
+                type="button"
                 onClick={() => handleSelect(i)}
                 style={{
                   textAlign: 'left', padding: '8px 12px',
@@ -189,6 +199,7 @@ export function FeatureChoiceModal({ onClose: _onClose }: { onClose?: () => void
             <div>
               {hasBack && (
                 <button
+                  type="button"
                   onClick={() => handleNavigation(BACK_SENTINEL)}
                   style={{
                     padding: '6px 16px', backgroundColor: '#222', color: '#ccc',
@@ -202,6 +213,7 @@ export function FeatureChoiceModal({ onClose: _onClose }: { onClose?: () => void
             <div style={{ display: 'flex', gap: '8px' }}>
               {hasForward && !hasConfirm && (
                 <button
+                  type="button"
                   onClick={() => handleNavigation(FORWARD_SENTINEL)}
                   style={{
                     padding: '6px 16px', backgroundColor: '#222', color: '#aaa',
@@ -213,6 +225,7 @@ export function FeatureChoiceModal({ onClose: _onClose }: { onClose?: () => void
               )}
               {hasConfirm && (
                 <button
+                  type="button"
                   onClick={() => handleNavigation(CONFIRM_SENTINEL)}
                   style={{
                     padding: '6px 16px', backgroundColor: '#4a6a2a', color: '#e0c060',
