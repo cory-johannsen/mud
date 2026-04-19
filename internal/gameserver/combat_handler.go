@@ -1869,6 +1869,14 @@ func (h *CombatHandler) startPursuitCombatLocked(playerSess *session.PlayerSessi
 				HpMax:       int32(c.MaxHP),
 			})
 		}
+		// Collect cover objects from room equipment to populate the combat map.
+		var coverObjects []*gamev1.CoverObjectPosition
+		if h.worldMgr != nil {
+			if room, ok := h.worldMgr.GetRoom(playerSess.RoomID); ok {
+				coverObjects = coverObjectsForRoom(room)
+			}
+		}
+
 		h.roundStartBroadcastFn(playerSess.RoomID, &gamev1.RoundStartEvent{
 			Round:            int32(cbt.Round),
 			ActionsPerTurn:   3,
@@ -1877,6 +1885,7 @@ func (h *CombatHandler) startPursuitCombatLocked(playerSess *session.PlayerSessi
 			InitialPositions: initialPositions,
 			GridWidth:        int32(cbt.GridWidth),
 			GridHeight:       int32(cbt.GridHeight),
+			CoverObjects:     coverObjects,
 		})
 	}
 
