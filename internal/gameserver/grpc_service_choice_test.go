@@ -152,8 +152,8 @@ func TestPromptFeatureChoice_ExhaustsAllAttempts_SendsInvalidSelection(t *testin
 	svc := &GameServiceServer{}
 	choices := choiceOptions()
 
-	// Queue 20 status messages to exhaust the retry loop.
-	recv := make([]*gamev1.ClientMessage, 20)
+	// Queue maxChoiceAttempts status messages to exhaust the retry loop.
+	recv := make([]*gamev1.ClientMessage, maxChoiceAttempts)
 	for i := range recv {
 		recv[i] = statusMsg()
 	}

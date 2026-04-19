@@ -759,11 +759,17 @@ func RearrangePreparedTechs(
 	cur := 0
 	totalPoolSlots := len(poolSlots)
 
-	// computeRemaining returns the full pool for the current slot's level.
+	// computeRemaining returns all pool entries with Level ≤ the current slot's level.
+	// This enables heightened assignment: a level-1 tech can fill a level-2 slot.
 	// Duplicate selections are permitted — prepared casters may prepare the same
 	// tech in multiple slots (REQ-TC-17 auto-assignment removed).
 	computeRemaining := func(cur int) []ruleset.PreparedEntry {
-		return poolByLevel[poolSlots[cur].level]
+		slotLvl := poolSlots[cur].level
+		var rem []ruleset.PreparedEntry
+		for lvl := 1; lvl <= slotLvl; lvl++ {
+			rem = append(rem, poolByLevel[lvl]...)
+		}
+		return rem
 	}
 
 	for cur < totalPoolSlots {

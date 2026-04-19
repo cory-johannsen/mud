@@ -909,6 +909,119 @@ func poolEntriesAtLevel(pool []ruleset.PreparedEntry, techLvl int) []ruleset.Pre
 	return result
 }
 
+// TestRearrangePreparedTechs_Bug190_HeightenedL1TechFillsL2Slot verifies that when a player
+// has no known level-2 techs, level-1 techs are offered as heightened options for level-2 slots.
+//
+// REQ-TECH-REG-6: When a pool slot at level N is presented and no level-N pool entries exist,
+// pool entries at levels 1..(N-1) MUST be offered as heightened candidates so the player
+// can always fill the slot.
+//
+// Precondition: wizard model, level 6 engineer, 3 level-1 techs known, 0 level-2 techs known,
+//
+//	1 level-1 slot and 1 level-2 slot in prepared grants.
+//
+// Postcondition: promptFn called for the level-2 slot with non-empty options including level-1 entries.
+func TestRearrangePreparedTechs_Bug190_HeightenedL1TechFillsL2Slot(t *testing.T) {
+	ctx := context.Background()
+	sess := &session.PlayerSession{
+		Level: 6,
+		PreparedTechs: map[int][]*session.PreparedSlot{
+			1: {{TechID: "tech_a"}},
+			2: {{TechID: "tech_a"}}, // previously assigned a L1 tech to L2 slot
+		},
+		KnownTechs: map[int][]string{
+			1: {"tech_a", "tech_b", "tech_c"},
+			// No level-2 techs known
+		},
+	}
+
+	engineerJob := &ruleset.Job{
+		ID:        "engineer",
+		Archetype: "nerd",
+		TechnologyGrants: &ruleset.TechnologyGrants{
+			Prepared: &ruleset.PreparedGrants{
+				SlotsByLevel: map[int]int{1: 1},
+				Pool: []ruleset.PreparedEntry{
+					{ID: "tech_a", Level: 1},
+					{ID: "tech_b", Level: 1},
+					{ID: "tech_c", Level: 1},
+				},
+			},
+		},
+	}
+
+	nerdArchetype := &ruleset.Archetype{
+		ID:           "nerd",
+		CastingModel: ruleset.CastingModelWizard,
+		TechnologyGrants: &ruleset.TechnologyGrants{
+			Prepared: &ruleset.PreparedGrants{
+				SlotsByLevel: map[int]int{2: 1},
+				// No level-2 pool entries — player hasn't learned any L2 techs
+			},
+		},
+	}
+
+	prep := &fakePreparedRepo{slots: map[int][]*session.PreparedSlot{
+		1: sess.PreparedTechs[1],
+		2: sess.PreparedTechs[2],
+	}}
+
+	type callRecord struct {
+		slotLevel int
+		opts      []string
+	}
+	var calls []callRecord
+
+	promptFn := func(prompt string, opts []string, slotCtx *gameserver.TechSlotContext) (string, error) {
+		slotLevel := 0
+		if slotCtx != nil {
+			slotLevel = slotCtx.SlotLevel
+		}
+		calls = append(calls, callRecord{slotLevel: slotLevel, opts: opts})
+		// Pick first real option (skip sentinels)
+		for _, o := range opts {
+			if o != "[back]" && o != "[forward]" && o != "[confirm]" && !strings.HasPrefix(o, "[keep]") {
+				return o, nil
+			}
+		}
+		// If only sentinels, pick confirm if available
+		for _, o := range opts {
+			if o == "[confirm]" {
+				return o, nil
+			}
+		}
+		return opts[0], nil
+	}
+
+	err := gameserver.RearrangePreparedTechs(
+		ctx, sess, 1, engineerJob, nerdArchetype, nil, promptFn, prep, nil,
+		technology.TraditionFlavor{SlotNoun: "slot", PrepGerund: "Arranging"},
+	)
+	require.NoError(t, err)
+
+	// REQ-TECH-REG-6: Exactly 2 prompt calls expected (one L1 slot, one L2 slot).
+	require.Len(t, calls, 2, "promptFn must be called twice: once for L1 slot, once for L2 slot")
+
+	// Find the L2 prompt call.
+	var l2Call *callRecord
+	for i := range calls {
+		if calls[i].slotLevel == 2 {
+			l2Call = &calls[i]
+			break
+		}
+	}
+	require.NotNil(t, l2Call, "promptFn must be called for the level-2 slot")
+
+	// REQ-TECH-REG-6: L2 options must not be empty — level-1 techs must be offered as heightened candidates.
+	realOpts := 0
+	for _, o := range l2Call.opts {
+		if o != "[back]" && o != "[forward]" && o != "[confirm]" && !strings.HasPrefix(o, "[keep]") {
+			realOpts++
+		}
+	}
+	assert.Positive(t, realOpts, "level-2 slot must offer non-empty options (L1 techs as heightened candidates)")
+}
+
 // clonePrepMap deep-copies a prepared slot map.
 func clonePrepMap(m map[int][]*session.PreparedSlot) map[int][]*session.PreparedSlot {
 	out := make(map[int][]*session.PreparedSlot, len(m))
