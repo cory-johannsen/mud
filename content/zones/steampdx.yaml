@@ -155,7 +155,7 @@ zone:
       management and maintains a certain nostalgic warmth. Not affiliated with whatever happens inside.
       Separate operation, separate staff, separate philosophy.
     map_x: 0
-    map_y: 100
+    map_y: -1
     exits:
     - direction: south
       target: sp_parking_lot
