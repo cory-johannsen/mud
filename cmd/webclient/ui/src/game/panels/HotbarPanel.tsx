@@ -290,6 +290,28 @@ export function HotbarPanel() {
     sendCommand(cmd)
   }
 
+  // REQ-HKB-1: Digit keys 1-9 and 0 MUST activate the corresponding hotbar slot regardless
+  // of which UI element has focus, except when a non-prompt input (e.g. EditPopup) is active.
+  // REQ-HKB-2: Intercepted keypresses MUST NOT be forwarded to the prompt or the server.
+  const activateRef = useRef(activate)
+  useEffect(() => { activateRef.current = activate })
+  useEffect(() => {
+    if (editingSlot !== null) return // EditPopup is open — let it receive key events
+    function handleKeyDown(e: globalThis.KeyboardEvent) {
+      const idx = KEYS.indexOf(e.key)
+      if (idx === -1) return
+      const active = document.activeElement
+      const tag = active?.tagName ?? ''
+      const isOtherInput = (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT')
+        && !active?.classList.contains('input-field')
+      if (isOtherInput) return // Don't intercept keys in edit popups / drawer inputs
+      e.preventDefault()
+      activateRef.current(idx)
+    }
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [editingSlot])
+
   function handleSave(slot: number, text: string) {
     sendMessage('HotbarRequest', { action: 'set', slot, text })
     setEditingSlot(null)
