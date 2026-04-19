@@ -7,8 +7,8 @@ zone:
   world_y: 2
   script_dir: content/scripts/zones/felony_flats
   name: Felony Flats
-  description: The sprawl of SE 82nd Avenue and its surrounding blocks — a wasteland of burned-out strip malls, fortified
-    motels, and desperate survivors clinging to the hustle.
+  description: The sprawl of SE 82nd Avenue and its surrounding blocks — a wasteland of burned-out strip
+    malls, fortified motels, and desperate survivors clinging to the hustle.
   start_room: flats_jade_district
   rooms:
   - id: flats_82nd_ave
@@ -59,15 +59,15 @@ zone:
         trigger: on_use
         outcomes:
           crit_success:
-            message: "The terminal's security bypass clicks over. You pull the full district layout."
+            message: The terminal's security bypass clicks over. You pull the full district layout.
           success:
-            message: "The lock clicks. You're in — partial map data loads onto the screen."
+            message: The lock clicks. You're in — partial map data loads onto the screen.
           failure:
-            message: "The terminal rejects your attempt. The interface locks you out."
+            message: The terminal rejects your attempt. The interface locks you out.
             effect:
               type: deny
           crit_failure:
-            message: "You fumble the bypass and trigger an alert. The terminal goes dark."
+            message: You fumble the bypass and trigger an alert. The terminal goes dark.
             effect:
               type: deny
     properties:
@@ -136,19 +136,19 @@ zone:
       trigger: on_enter
       outcomes:
         crit_success:
-          message: "You vault the collapsed awning with practiced ease, landing clean on the far side."
+          message: You vault the collapsed awning with practiced ease, landing clean on the far side.
         success:
-          message: "You carefully pick your way through the debris, ducking under buckled metal."
+          message: You carefully pick your way through the debris, ducking under buckled metal.
         failure:
-          message: "You stumble through the wreckage, scraping yourself on a jagged edge."
+          message: You stumble through the wreckage, scraping yourself on a jagged edge.
           effect:
             type: damage
-            formula: "1d4"
+            formula: 1d4
         crit_failure:
-          message: "You trip hard on a chunk of concrete and crash into the rubble."
+          message: You trip hard on a chunk of concrete and crash into the rubble.
           effect:
             type: damage
-            formula: "2d4"
+            formula: 2d4
     properties:
       lighting: dim
       atmosphere: dusty
@@ -260,6 +260,9 @@ zone:
       target: flats_gas_station
     - direction: north
       target: flats_powell_overpass
+    - direction: southwest
+      target: tvr_front_door
+      zone: the_velvet_rope
     map_x: 0
     map_y: -2
     spawns:
@@ -388,9 +391,6 @@ zone:
       target: sei_powell_terminus
     - direction: southeast
       target: flats_johnson_creek
-    - direction: northwest
-      target: tvr_the_buffet
-      zone: the_velvet_rope
     map_x: 0
     map_y: 4
     spawns:
@@ -425,11 +425,11 @@ zone:
       lighting: dim
       atmosphere: stale
     effects:
-      - track: fear
-        severity: mild
-        base_dc: 10
-        cooldown_rounds: 3
-        cooldown_minutes: 5
+    - track: fear
+      severity: mild
+      base_dc: 10
+      cooldown_rounds: 3
+      cooldown_minutes: 5
   - id: flats_motel_back_lot
     danger_level: sketchy
     title: Motel Back Lot
@@ -514,19 +514,21 @@ zone:
       trigger: on_enter
       outcomes:
         crit_success:
-          message: "Your sharp eye catches a narrow gap between the cinderblock walls — a hidden passage leads south through the dumpster yard."
+          message: Your sharp eye catches a narrow gap between the cinderblock walls — a hidden passage
+            leads south through the dumpster yard.
           effect:
             type: reveal
             target: south
         success:
-          message: "Something catches your eye — there's a concealed passage squeezed between the walls to the south."
+          message: Something catches your eye — there's a concealed passage squeezed between the walls
+            to the south.
           effect:
             type: reveal
             target: south
         failure:
-          message: "Nothing unusual catches your attention."
+          message: Nothing unusual catches your attention.
         crit_failure:
-          message: "You're completely oblivious to your surroundings."
+          message: You're completely oblivious to your surroundings.
     properties:
       lighting: dark
       atmosphere: fetid
@@ -649,11 +651,11 @@ zone:
       lighting: exposed
       atmosphere: wind
     effects:
-      - track: despair
-        severity: mild
-        base_dc: 11
-        cooldown_rounds: 3
-        cooldown_minutes: 5
+    - track: despair
+      severity: mild
+      base_dc: 11
+      cooldown_rounds: 3
+      cooldown_minutes: 5
   - id: flats_pawn_shop
     danger_level: sketchy
     title: Ruined Pawn Shop
@@ -749,10 +751,9 @@ zone:
     title: Crack House Row
     description: 'A block of condemned row houses, their windows dark and boarded.
 
-      Chemical reek hangs in the air — burnt plastic and something
-      sweet underneath. Lookouts perch on the stoops, eyes tracking
-      every movement on the street. This is prime territory, earned
-      in blood and held the same way.
+      Chemical reek hangs in the air — burnt plastic and something sweet underneath. Lookouts perch on
+      the stoops, eyes tracking every movement on the street. This is prime territory, earned in blood
+      and held the same way.
 
       '
     exits:
@@ -778,10 +779,8 @@ zone:
     title: Enforcer Den
     description: 'A fortified storefront with steel-plate shutters and a reinforced
 
-      door. Inside, the enforcers who run this block gather between
-      shifts — cards, weapons maintenance, and the low hum of
-      territorial tension. The walls are papered with warning
-      flyers and wanted faces.
+      door. Inside, the enforcers who run this block gather between shifts — cards, weapons maintenance,
+      and the low hum of territorial tension. The walls are papered with warning flyers and wanted faces.
 
       '
     exits:
@@ -971,11 +970,12 @@ zone:
     properties:
       lighting: firelight
       atmosphere: herbal
-
   - id: felony_flats_brothel
     title: The Broken Arrow Lounge
     danger_level: safe
-    description: A reinforced back room above the safe house, reached through a door that has no number and is only ever mentioned by address. Scavenged velvet curtains, a locked cashbox, and a bouncer who doesn't make conversation. Cash first, questions never.
+    description: A reinforced back room above the safe house, reached through a door that has no number
+      and is only ever mentioned by address. Scavenged velvet curtains, a locked cashbox, and a bouncer
+      who doesn't make conversation. Cash first, questions never.
     map_x: 4
     map_y: -6
     exits:

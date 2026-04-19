@@ -977,7 +977,7 @@ func TestLoadZone_TheVelvetRope_HasTerrainLubeEffect(t *testing.T) {
 	require.NoError(t, err)
 	zone, err := LoadZoneFromBytes(data)
 	require.NoError(t, err)
-	assert.Len(t, zone.Rooms, 8, "The Velvet Rope must have exactly 8 rooms")
+	assert.Len(t, zone.Rooms, 9, "The Velvet Rope must have exactly 9 rooms")
 	assert.Equal(t, "the_velvet_rope", zone.ID)
 	tracks := make([]string, 0, len(zone.ZoneEffects))
 	for _, e := range zone.ZoneEffects {

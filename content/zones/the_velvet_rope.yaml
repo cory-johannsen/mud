@@ -8,7 +8,7 @@ zone:
   name: The Velvet Rope
   description: A private social club north of Beaverton where the dress code is optional and everything
     else costs extra.
-  start_room: tvr_the_buffet
+  start_room: tvr_front_door
   zone_effects:
   - track: temptation
     severity: mild
@@ -26,6 +26,28 @@ zone:
     cooldown_rounds: 3
     cooldown_minutes: 5
   rooms:
+  - id: tvr_front_door
+    title: The Velvet Rope Front Door
+    danger_level: sketchy
+    description: A nondescript door on a side street off Powell Boulevard, marked only by a length of
+      actual velvet rope strung between two brass posts. A card taped to the door reads "Members and guests
+      only." The bouncer lifts the rope without expression. Inside, the bass from within vibrates the
+      frame.
+    exits:
+    - direction: northeast
+      target: flats_powell_blvd
+      zone: felony_flats
+    - direction: south
+      target: tvr_the_buffet
+    map_x: 0
+    map_y: -2
+    spawns:
+    - template: velvet_bouncer
+      count: 1
+      respawn_after: 0s
+    properties:
+      lighting: dim
+      atmosphere: exclusive
   - id: tvr_the_buffet
     danger_level: sketchy
     title: The Buffet
@@ -37,9 +59,8 @@ zone:
       target: tvr_play_rooms
     - direction: west
       target: the_velvet_rope_brothel
-    - direction: southeast
-      target: flats_foster_south
-      zone: felony_flats
+    - direction: north
+      target: tvr_front_door
     map_x: 0
     map_y: 0
     spawns:
