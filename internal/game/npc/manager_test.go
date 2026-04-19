@@ -40,6 +40,26 @@ func TestManager_InstanceByID_MissingReturnsNil(t *testing.T) {
 	assert.Nil(t, mgr.InstanceByID("ghost"))
 }
 
+func TestManager_TemplateLevel_ReturnsLevelForKnownTemplate(t *testing.T) {
+	mgr := NewManager()
+	tmpl := &Template{
+		ID: "guard_alpha", Name: "Guard Alpha", NPCType: "combat",
+		MaxHP: 20, AC: 12, Level: 5,
+	}
+	_, err := mgr.Spawn(tmpl, "room-1")
+	require.NoError(t, err)
+	level, ok := mgr.TemplateLevel("guard_alpha")
+	require.True(t, ok)
+	assert.Equal(t, 5, level)
+}
+
+func TestManager_TemplateLevel_ReturnsFalseForUnknownTemplate(t *testing.T) {
+	mgr := NewManager()
+	level, ok := mgr.TemplateLevel("nonexistent_npc_xyz_12345")
+	assert.False(t, ok)
+	assert.Equal(t, 0, level)
+}
+
 // TestInstancesInRoom_StableOrder verifies that InstancesInRoom returns instances
 // in a deterministic order regardless of internal map iteration order.
 //

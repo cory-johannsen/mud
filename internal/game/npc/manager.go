@@ -246,6 +246,20 @@ func (m *Manager) TemplateByID(id string) *Template {
 	return m.templates[id]
 }
 
+// TemplateLevel returns the level of the NPC template with the given ID.
+//
+// Precondition: id must be non-empty.
+// Postcondition: returns (level, true) if found, (0, false) if not.
+func (m *Manager) TemplateLevel(id string) (int, bool) {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	tmpl, ok := m.templates[id]
+	if !ok {
+		return 0, false
+	}
+	return tmpl.Level, true
+}
+
 // AllTemplates returns a copy of all registered templates.
 //
 // Postcondition: Returns a non-nil slice of all registered templates.
