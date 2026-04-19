@@ -16,6 +16,7 @@ import type { DrawerType } from '../game/drawers/DrawerContainer'
 import { HelpModal } from '../game/HelpModal'
 import { NpcModal } from '../game/NpcModal'
 import { NpcInteractModal } from '../game/NpcInteractModal'
+import { CombatNpcModal } from '../game/CombatNpcModal'
 import { FeatureChoiceModal } from '../game/drawers/FeatureChoiceModal'
 import { QuestGiverModal } from '../game/QuestGiverModal'
 import { QuestCompleteNotification } from '../game/QuestCompleteNotification'
@@ -125,6 +126,7 @@ function GameLayout() {
       )}
       {state.shopView && <NpcModal />}
       <NpcInteractModal />
+      <CombatNpcModal />
       <QuestGiverModal />
       <QuestCompleteNotification />
       {state.choicePrompt && <FeatureChoiceModal onClose={() => { /* modal self-closes on selection */ }} />}

@@ -108,6 +108,7 @@ export interface GameState {
   fixerView: import('../proto').FixerView | null
   restView: import('../proto').RestView | null
   npcView: { name: string; description: string; npcType: string; level: number; health: string } | null
+  combatNpcView: { name: string; description: string; npcType: string; level: number; health: string } | null
   questGiverView: import('../proto').QuestGiverView | null
   questLogView: import('../proto').QuestLogView | null
   questCompleteQueue: import('../proto').QuestCompleteEvent[]
@@ -145,6 +146,7 @@ type Action =
   | { type: 'SET_FIXER_VIEW'; view: import('../proto').FixerView | null }
   | { type: 'SET_REST_VIEW'; view: import('../proto').RestView | null }
   | { type: 'SET_NPC_VIEW'; view: { name: string; description: string; npcType: string; level: number; health: string } | null }
+  | { type: 'SET_COMBAT_NPC_VIEW'; view: { name: string; description: string; npcType: string; level: number; health: string } | null }
   | { type: 'SET_QUEST_GIVER_VIEW'; view: import('../proto').QuestGiverView | null }
   | { type: 'SET_QUEST_LOG_VIEW'; view: import('../proto').QuestLogView | null }
   | { type: 'ENQUEUE_QUEST_COMPLETE'; event: import('../proto').QuestCompleteEvent }
@@ -231,6 +233,8 @@ export function reducer(state: GameState, action: Action): GameState {
       return { ...state, restView: action.view }
     case 'SET_NPC_VIEW':
       return { ...state, npcView: action.view }
+    case 'SET_COMBAT_NPC_VIEW':
+      return { ...state, combatNpcView: action.view }
     case 'SET_QUEST_GIVER_VIEW':
       return { ...state, questGiverView: action.view }
     case 'SET_QUEST_LOG_VIEW':
@@ -287,6 +291,7 @@ export const initialState: GameState = {
   fixerView: null,
   restView: null,
   npcView: null,
+  combatNpcView: null,
   questGiverView: null,
   questLogView: null,
   questCompleteQueue: [],
@@ -306,6 +311,7 @@ interface GameContextValue {
   clearFixer: () => void
   clearRestView: () => void
   clearNpcView: () => void
+  clearCombatNpcView: () => void
   clearQuestGiverView: () => void
   dismissQuestComplete: () => void
   clearLoadout: () => void
@@ -595,20 +601,21 @@ export function GameProvider({ children }: { children: ReactNode }) {
           const nv = payload as { name?: string; description?: string; healthDescription?: string; health_description?: string; level?: number; npcType?: string; npc_type?: string }
           const npcType = nv.npcType ?? nv.npc_type ?? ''
           const combatTypes = new Set(['combat', ''])
+          const npcViewPayload = {
+            name: nv.name ?? 'Unknown',
+            description: nv.description ?? '',
+            npcType,
+            level: nv.level ?? 0,
+            health: nv.healthDescription ?? nv.health_description ?? '',
+          }
           if (!combatTypes.has(npcType)) {
             // Non-combat NPC: show as modal
-            dispatch({
-              type: 'SET_NPC_VIEW',
-              view: {
-                name: nv.name ?? 'Unknown',
-                description: nv.description ?? '',
-                npcType,
-                level: nv.level ?? 0,
-                health: nv.healthDescription ?? nv.health_description ?? '',
-              },
-            })
+            dispatch({ type: 'SET_NPC_VIEW', view: npcViewPayload })
+          } else if (state.combatRound !== null) {
+            // Combat NPC examined during active combat: show combat examine modal
+            dispatch({ type: 'SET_COMBAT_NPC_VIEW', view: npcViewPayload })
           } else {
-            // Combat NPC: append to feed as before
+            // Combat NPC outside combat: append to feed
             const health = nv.healthDescription ?? nv.health_description ?? ''
             const lines = [
               `${nv.name ?? 'Unknown'} (level ${nv.level ?? '?'}) — ${health}`,
@@ -756,6 +763,10 @@ export function GameProvider({ children }: { children: ReactNode }) {
     dispatch({ type: 'SET_NPC_VIEW', view: null })
   }, [])
 
+  const clearCombatNpcView = useCallback(() => {
+    dispatch({ type: 'SET_COMBAT_NPC_VIEW', view: null })
+  }, [])
+
   const clearQuestGiverView = useCallback(() => {
     dispatch({ type: 'SET_QUEST_GIVER_VIEW', view: null })
   }, [])
@@ -772,7 +783,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   }, [])
 
   return (
-    <GameContext.Provider value={{ state, sendMessage, sendCommand, clearShop, clearHealer, clearTrainer, clearTechTrainer, clearFixer, clearRestView, clearNpcView, clearQuestGiverView, dismissQuestComplete, clearLoadout, clearChoicePrompt }}>
+    <GameContext.Provider value={{ state, sendMessage, sendCommand, clearShop, clearHealer, clearTrainer, clearTechTrainer, clearFixer, clearRestView, clearNpcView, clearCombatNpcView, clearQuestGiverView, dismissQuestComplete, clearLoadout, clearChoicePrompt }}>
       {children}
     </GameContext.Provider>
   )

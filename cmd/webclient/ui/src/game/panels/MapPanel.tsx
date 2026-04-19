@@ -70,6 +70,7 @@ function renderBattleGrid(
   onCellHover: (x: number, y: number) => void,
   onCellHoverEnd: () => void,
   onCellClick: (x: number, y: number) => void,
+  onEnemyClick: (name: string) => void,
   playerX: number,
   playerY: number,
   strideCells: number,
@@ -112,7 +113,7 @@ function renderBattleGrid(
         ? `2px solid ${moveCost === 1 ? '#4a8a4a' : '#8a7a00'}`
         : '1px solid #333'
 
-      const cursor = moveCost > 0 ? 'pointer' : 'default'
+      const cursor = moveCost > 0 || isEnemy ? 'pointer' : 'default'
 
       const token = name ? name[0].toUpperCase() : ''
       cells.push(
@@ -144,7 +145,10 @@ function renderBattleGrid(
               onHoverEnd()
             }
           }}
-          onClick={() => { if (moveCost > 0) onCellClick(x, y) }}
+          onClick={() => {
+            if (isEnemy) onEnemyClick(name)
+            else if (moveCost > 0) onCellClick(x, y)
+          }}
         >
           {token}
         </div>
@@ -299,6 +303,7 @@ export function MapPanel() {
               (x, y) => setHoveredCell({ x, y }),
               () => setHoveredCell(null),
               handleCellClick,
+              (name) => sendMessage('ExamineRequest', { target: name }),
               playerPos?.x ?? -1,
               playerPos?.y ?? -1,
               strideCells,

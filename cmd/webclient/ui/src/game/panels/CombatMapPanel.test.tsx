@@ -14,6 +14,8 @@ vi.mock('react-resizable-panels', () => ({
 const mockSendCommand = vi.fn()
 const mockSendMessage = vi.fn()
 
+const mockClearCombatNpcView = vi.fn()
+
 function makeGameContext(overrides?: Record<string, unknown>) {
   return {
     useGame: () => ({
@@ -22,16 +24,18 @@ function makeGameContext(overrides?: Record<string, unknown>) {
         mapTiles: [],
         worldTiles: [],
         combatRound: { round: 1 },
-        combatPositions: { Hero: { x: 5, y: 5 } },
+        combatPositions: { Hero: { x: 5, y: 5 }, Goblin: { x: 7, y: 5 } },
         combatantAP: { Hero: { remaining: 2, total: 3, movementRemaining: 2 } },
         combatGridWidth: 10,
         combatGridHeight: 10,
         characterInfo: { name: 'Hero' },
         characterSheet: { speedPenalty: 0 },
+        combatNpcView: null,
         ...overrides,
       },
       sendMessage: mockSendMessage,
       sendCommand: mockSendCommand,
+      clearCombatNpcView: mockClearCombatNpcView,
     }),
   }
 }
@@ -239,6 +243,24 @@ describe('cellMoveCost', () => {
         }
       )
     )
+  })
+})
+
+describe('MapPanel combat mode — enemy click', () => {
+  beforeEach(() => {
+    mockSendCommand.mockClear()
+    mockSendMessage.mockClear()
+  })
+
+  it('clicking an enemy cell sends ExamineRequest with the enemy name', () => {
+    // Hero at (5,5), Goblin at (7,5) per base mock — enemy cell index = 5*10+7 = 57
+    render(<MapPanel />)
+    const gridContainer = document.querySelector('[style*="grid-template-columns"]')
+    expect(gridContainer).not.toBeNull()
+    const enemyCell = gridContainer!.children[57] as HTMLElement
+    expect(enemyCell).not.toBeNull()
+    fireEvent.click(enemyCell)
+    expect(mockSendMessage).toHaveBeenCalledWith('ExamineRequest', { target: 'Goblin' })
   })
 })
 
