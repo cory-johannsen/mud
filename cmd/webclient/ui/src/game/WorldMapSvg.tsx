@@ -28,6 +28,31 @@ interface TooltipState {
   y: number
 }
 
+// Tooltip dimensions used for edge-clamping. The tooltip maxWidth is 240px;
+// 160px is a conservative height estimate (adjusts for near-bottom edges).
+const TOOLTIP_W = 256
+const TOOLTIP_H = 160
+const TOOLTIP_OFFSET = 12
+
+// computeTooltipPos returns { x, y } clamped so the tooltip stays within containerRect.
+// REQ-WM-TT-1: Near right edge, tooltip flips to the left of the cursor.
+// REQ-WM-TT-2: Near bottom edge, tooltip flips above the cursor.
+export function computeTooltipPos(
+  clientX: number,
+  clientY: number,
+  containerRect: DOMRect,
+): { x: number; y: number } {
+  const relX = clientX - containerRect.left
+  const relY = clientY - containerRect.top
+  const x = relX + TOOLTIP_OFFSET + TOOLTIP_W > containerRect.width
+    ? relX - TOOLTIP_W - TOOLTIP_OFFSET
+    : relX + TOOLTIP_OFFSET
+  const y = relY + TOOLTIP_OFFSET + TOOLTIP_H > containerRect.height
+    ? relY - TOOLTIP_H - TOOLTIP_OFFSET
+    : relY + TOOLTIP_OFFSET
+  return { x, y }
+}
+
 interface WorldMapSvgProps {
   tiles: WorldZoneTile[]
   onTravel: (zoneId: string) => void
@@ -137,13 +162,11 @@ export function WorldMapSvg({ tiles, onTravel, playerLevel }: WorldMapSvgProps):
               style={{ cursor: canTravel ? 'pointer' : 'default' }}
               onMouseEnter={(e) => {
                 const svgEl = (e.currentTarget as SVGGElement).closest('svg')
-                const rect = svgEl?.getBoundingClientRect()
                 const containerRect = svgEl?.parentElement?.getBoundingClientRect()
-                if (rect && containerRect) {
+                if (containerRect) {
                   setTooltip({
                     tile,
-                    x: e.clientX - containerRect.left + 12,
-                    y: e.clientY - containerRect.top + 12,
+                    ...computeTooltipPos(e.clientX, e.clientY, containerRect),
                   })
                 }
               }}
@@ -153,8 +176,7 @@ export function WorldMapSvg({ tiles, onTravel, playerLevel }: WorldMapSvgProps):
                 if (containerRect) {
                   setTooltip(prev => prev ? {
                     ...prev,
-                    x: e.clientX - containerRect.left + 12,
-                    y: e.clientY - containerRect.top + 12,
+                    ...computeTooltipPos(e.clientX, e.clientY, containerRect),
                   } : null)
                 }
               }}

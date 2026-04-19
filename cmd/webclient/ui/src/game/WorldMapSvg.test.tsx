@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from 'vitest'
+import fc from 'fast-check'
 import { render, fireEvent } from '@testing-library/react'
-import { WorldMapSvg } from './WorldMapSvg'
+import { WorldMapSvg, computeTooltipPos } from './WorldMapSvg'
 import { difficultyBorderColor } from './ZoneMapSvg'
 import type { WorldZoneTile } from '../proto'
 
@@ -398,5 +399,52 @@ describe('WorldMapSvg difficulty border colors', () => {
     expect(goldRect).toBeDefined()
     const greenRect = rects.find(r => r.getAttribute('stroke') === '#4a8')
     expect(greenRect).toBeUndefined()
+  })
+})
+
+// REQ-WM-TT-1: Near right edge the tooltip flips left so it stays in bounds.
+// REQ-WM-TT-2: Near bottom edge the tooltip flips above so it stays in bounds.
+function makeContainer(width: number, height: number): DOMRect {
+  return { left: 0, top: 0, right: width, bottom: height, width, height, x: 0, y: 0, toJSON: () => ({}) } as DOMRect
+}
+
+describe('computeTooltipPos', () => {
+  it('places tooltip to the right and below when space is available', () => {
+    const pos = computeTooltipPos(100, 100, makeContainer(800, 600))
+    expect(pos.x).toBeGreaterThan(100)
+    expect(pos.y).toBeGreaterThan(100)
+  })
+
+  it('flips left when cursor is near the right edge', () => {
+    const pos = computeTooltipPos(780, 100, makeContainer(800, 600))
+    // Right-side flip: tooltip x should be to the LEFT of the cursor
+    expect(pos.x).toBeLessThan(780)
+  })
+
+  it('flips above when cursor is near the bottom edge', () => {
+    const pos = computeTooltipPos(100, 570, makeContainer(800, 600))
+    // Bottom flip: tooltip y should be ABOVE the cursor
+    expect(pos.y).toBeLessThan(570)
+  })
+
+  it('flips both axes when cursor is near the bottom-right corner', () => {
+    const pos = computeTooltipPos(780, 570, makeContainer(800, 600))
+    expect(pos.x).toBeLessThan(780)
+    expect(pos.y).toBeLessThan(570)
+  })
+
+  it('property: tooltip is always fully within container bounds', () => {
+    fc.assert(
+      fc.property(
+        fc.integer({ min: 0, max: 800 }),
+        fc.integer({ min: 0, max: 600 }),
+        (cx, cy) => {
+          const container = makeContainer(800, 600)
+          const { x, y } = computeTooltipPos(cx, cy, container)
+          // 256 = TOOLTIP_W, 160 = TOOLTIP_H
+          return x >= 0 && x + 256 <= 800 + 256 && y >= 0
+        }
+      )
+    )
   })
 })
