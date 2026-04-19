@@ -140,10 +140,40 @@ export function ZoneMapSvg({ tiles, onHover, onHoverEnd, containerWidth }: ZoneM
     if (tile.roomId) tileByRoomId.set(tile.roomId, tile)
   }
 
+  // Connector color palette — each connection gets a distinct color from this palette,
+  // cycling as needed, so overlapping lines remain visually distinguishable.
+  const CONNECTOR_COLORS = [
+    '#6688bb', // blue-grey
+    '#88bb66', // green-grey
+    '#bb8866', // amber
+    '#66bbbb', // teal
+    '#bb6688', // pink
+    '#bbbb66', // yellow-green
+    '#8866bb', // purple
+    '#66bb88', // mint
+  ]
+
+  // edgePoint returns the point on the border of a cell rect that faces toward (towardX, towardY).
+  // Lines drawn from one cell's edge to another's edge avoid interior-cell rendering: since cells
+  // are drawn on top of connectors, only the gap-area portions of each path are visible.
+  function edgePoint(rx: number, ry: number, cW: number, cH: number, towardX: number, towardY: number): { x: number; y: number } {
+    const cx = rx + cW / 2
+    const cy = ry + cH / 2
+    const dx = towardX - cx
+    const dy = towardY - cy
+    // Compare normalized distances to determine which edge (east/west vs north/south) is closer.
+    if (Math.abs(dx) * cH >= Math.abs(dy) * cW) {
+      return { x: dx > 0 ? rx + cW : rx, y: cy }
+    } else {
+      return { x: cx, y: dy > 0 ? ry + cH : ry }
+    }
+  }
+
   // Build connectors using same-zone exit targets (direction → target room ID).
   // This correctly handles exits that are not spatially adjacent in the grid.
   const drawnPairs = new Set<string>()
   const connectors: JSX.Element[] = []
+  let colorIdx = 0
 
   for (const tile of tiles) {
     const tx = tile.x ?? 0
@@ -164,13 +194,47 @@ export function ZoneMapSvg({ tiles, onHover, onHoverEnd, containerWidth }: ZoneM
       if (drawnPairs.has(pairKey)) continue
       drawnPairs.add(pairKey)
 
+      const color = CONNECTOR_COLORS[colorIdx % CONNECTOR_COLORS.length]
+      colorIdx++
+
+      const aCX = centerX(ax)
+      const aCY = centerY(ay)
+      const bCX = centerX(bx)
+      const bCY = centerY(by)
+
+      // Edge-based endpoints: line exits the source cell face toward the destination
+      // and enters the destination cell face toward the source.
+      const dep = edgePoint(px(ax), py(ay), cellW, cellH, bCX, bCY)
+      const arr = edgePoint(px(bx), py(by), cellW, cellH, aCX, aCY)
+
+      // Adjacent connections (normalized distance ≤ 1 in both axes) use a straight line.
+      // Non-adjacent connections use a quadratic Bézier arc — the control point is offset
+      // perpendicular to the direct path by one STEP, routing the curve through the gap
+      // area and visually clearing intermediate cells.
+      const aNX = normX.get(ax) ?? 0
+      const aNY = normY.get(ay) ?? 0
+      const bNX = normX.get(bx) ?? 0
+      const bNY = normY.get(by) ?? 0
+      const isAdjacent = Math.abs(aNX - bNX) <= 1 && Math.abs(aNY - bNY) <= 1
+
+      let pathD: string
+      if (isAdjacent) {
+        pathD = `M ${dep.x} ${dep.y} L ${arr.x} ${arr.y}`
+      } else {
+        const midX = (dep.x + arr.x) / 2
+        const midY = (dep.y + arr.y) / 2
+        const lineX = arr.x - dep.x
+        const lineY = arr.y - dep.y
+        const len = Math.sqrt(lineX * lineX + lineY * lineY) || 1
+        // Perpendicular unit vector (rotate 90° clockwise)
+        const perpX = lineY / len
+        const perpY = -lineX / len
+        const arcOffset = Math.max(STEP, STEP_H) * 0.75
+        pathD = `M ${dep.x} ${dep.y} Q ${midX + perpX * arcOffset} ${midY + perpY * arcOffset} ${arr.x} ${arr.y}`
+      }
+
       connectors.push(
-        <line
-          key={pairKey}
-          x1={centerX(tx)} y1={centerY(ty)} x2={centerX(fnx)} y2={centerY(fny)}
-          stroke="#888"
-          strokeWidth={2}
-        />
+        <path key={pairKey} d={pathD} stroke={color} strokeWidth={2} fill="none" />
       )
     }
   }

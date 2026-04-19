@@ -71,11 +71,59 @@ describe('ZoneMapSvg', () => {
   })
 
   // REQ-MAP-CONN-1: Connectors MUST be drawn between rooms that share sameZoneExitTargets.
-  it('renders at least one <line> connecting tiles that share sameZoneExitTargets', () => {
+  it('renders at least one connector path connecting tiles that share sameZoneExitTargets', () => {
     // CURRENT_TILE and BOSS_TILE both declare sameZoneExitTargets pointing at each other.
     const { container: c } = render(<ZoneMapSvg tiles={[CURRENT_TILE, BOSS_TILE]} />)
-    const lines = c.querySelectorAll('line')
-    expect(lines.length).toBeGreaterThanOrEqual(1)
+    const paths = c.querySelectorAll('path')
+    expect(paths.length).toBeGreaterThanOrEqual(1)
+  })
+
+  // REQ-MAP-CONN-2: Adjacent connectors MUST use straight-line paths (M L command).
+  it('renders straight-line path for directly adjacent room pair', () => {
+    const tileA: MapTile = { roomId: 'a', roomName: 'A', x: 0, y: 0, pois: [], current: false, bossRoom: false,
+      sameZoneExitTargets: [{ direction: 'east', targetRoomId: 'b' }] }
+    const tileB: MapTile = { roomId: 'b', roomName: 'B', x: 1, y: 0, pois: [], current: false, bossRoom: false,
+      sameZoneExitTargets: [{ direction: 'west', targetRoomId: 'a' }] }
+    const { container: c } = render(<ZoneMapSvg tiles={[tileA, tileB]} />)
+    const paths = Array.from(c.querySelectorAll('path'))
+    expect(paths.length).toBeGreaterThanOrEqual(1)
+    // Adjacent rooms: path d attribute should use M...L (straight line, no Q)
+    const connectorPath = paths[0]
+    expect(connectorPath.getAttribute('d')).toMatch(/^M .* L /)
+  })
+
+  // REQ-MAP-CONN-3: Non-adjacent connectors MUST use curved paths (M Q command) to arc around intermediate cells.
+  it('renders curved path (Q) for non-adjacent room pair', () => {
+    // Create three tiles: A at x=0, Middle at x=1 (intermediate, no direct connection to C),
+    // C at x=2 — with a connection from A directly to C skipping the middle tile.
+    const tileA: MapTile = { roomId: 'far_a', roomName: 'A', x: 0, y: 0, pois: [], current: false, bossRoom: false,
+      sameZoneExitTargets: [{ direction: 'east', targetRoomId: 'far_c' }] }
+    const tileMiddle: MapTile = { roomId: 'far_mid', roomName: 'Mid', x: 1, y: 0, pois: [], current: false, bossRoom: false,
+      sameZoneExitTargets: [] }
+    const tileC: MapTile = { roomId: 'far_c', roomName: 'C', x: 2, y: 0, pois: [], current: false, bossRoom: false,
+      sameZoneExitTargets: [{ direction: 'west', targetRoomId: 'far_a' }] }
+    // With three tiles at normalized x=0,1,2, tiles A and C have normalized distance=2 → non-adjacent
+    const { container: c } = render(<ZoneMapSvg tiles={[tileA, tileMiddle, tileC]} />)
+    const paths = Array.from(c.querySelectorAll('path'))
+    expect(paths.length).toBeGreaterThanOrEqual(1)
+    const connectorPath = paths[0]
+    expect(connectorPath.getAttribute('d')).toMatch(/^M .* Q /)
+  })
+
+  // REQ-MAP-CONN-4: Each connector MUST have a distinct stroke color from the palette.
+  it('renders connectors with distinct colors when multiple connections exist', () => {
+    const tileA: MapTile = { roomId: 'a', roomName: 'A', x: 0, y: 0, pois: [], current: false, bossRoom: false,
+      sameZoneExitTargets: [{ direction: 'east', targetRoomId: 'b' }, { direction: 'south', targetRoomId: 'c' }] }
+    const tileB: MapTile = { roomId: 'b', roomName: 'B', x: 1, y: 0, pois: [], current: false, bossRoom: false,
+      sameZoneExitTargets: [{ direction: 'west', targetRoomId: 'a' }] }
+    const tileC: MapTile = { roomId: 'c', roomName: 'C', x: 0, y: 1, pois: [], current: false, bossRoom: false,
+      sameZoneExitTargets: [{ direction: 'north', targetRoomId: 'a' }] }
+    const { container: c } = render(<ZoneMapSvg tiles={[tileA, tileB, tileC]} />)
+    const paths = Array.from(c.querySelectorAll('path'))
+    expect(paths.length).toBe(2)
+    const colors = paths.map(p => p.getAttribute('stroke'))
+    // Each connector must have a distinct color
+    expect(colors[0]).not.toBe(colors[1])
   })
 
   // REQ-MAP-POI-1: Multiple POI symbols MUST be rendered without whitespace between them,
