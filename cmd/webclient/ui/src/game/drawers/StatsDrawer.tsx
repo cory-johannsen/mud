@@ -15,11 +15,21 @@ function SectionHeader({ label }: { label: string }) {
 
 function StatRow({ label, value, color, title }: { label: string; value: string | number; color?: string; title?: string }) {
   return (
-    <div className="stats-row">
+    <div className="stats-row" title={title}>
       <span className="stats-label">{label}</span>
-      <span className="stats-value" style={color ? { color } : undefined} title={title}>{value}</span>
+      <span className="stats-value" style={color ? { color } : undefined}>{value}</span>
     </div>
   )
+}
+
+// ABILITY_TOOLTIPS provides hover descriptions for each ability score.
+const ABILITY_TOOLTIPS: Record<string, string> = {
+  Brutality: 'Brutality — Raw physical power. Used for melee attacks, forced entry, and resisting knockback. Powers Toughness saves vs physical hazards.',
+  Grit:      'Grit — Endurance and resilience. Determines max HP and Toughness saves vs poison, disease, exhaustion, and death effects.',
+  Quickness: 'Quickness — Speed and reflexes. Used for ranged attacks, Initiative, Hustle saves vs traps, and determines Speed penalty from heavy armor.',
+  Reasoning: 'Reasoning — Intelligence and technical aptitude. Powers tech usage, knowledge checks, and Toughness saves vs mental effects and confusion.',
+  Savvy:     'Savvy — Street smarts and situational awareness. Used for Awareness checks, detecting threats, and Cool saves vs deception and surprise.',
+  Flair:     'Flair — Charm and social presence. Powers Negotiate, intimidation, and Cool saves vs fear and influence effects.',
 }
 
 export function StatsDrawer({ onClose }: { onClose: () => void }) {
@@ -54,7 +64,7 @@ export function StatsDrawer({ onClose }: { onClose: () => void }) {
                 { label: 'Savvy',     val: sheet.savvy     ?? 0 },
                 { label: 'Flair',     val: sheet.flair     ?? 0 },
               ].map(({ label, val }) => (
-                <div key={label} className="stats-ability-cell">
+                <div key={label} className="stats-ability-cell" title={ABILITY_TOOLTIPS[label]}>
                   <span className="stats-label">{label}</span>
                   <span className="stats-value">{abilMod(val)}</span>
                 </div>
