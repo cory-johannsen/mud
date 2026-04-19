@@ -209,6 +209,21 @@ describe('WorldMapSvg', () => {
       expect(tooltip.textContent).toContain('Undiscovered')
     })
 
+    it('does not reveal zone name in tooltip for undiscovered zone', () => {
+      const undiscoveredWithName: WorldZoneTile = {
+        zoneId: 'hidden_zone', zoneName: 'Secret Place',
+        worldX: 0, worldY: 0,
+        discovered: false, current: false,
+      }
+      const { container, getByRole } = render(
+        <WorldMapSvg tiles={[undiscoveredWithName]} onTravel={vi.fn()} />
+      )
+      fireEvent.mouseEnter(container.querySelector('svg g')!)
+      const tooltip = getByRole('tooltip')
+      expect(tooltip.textContent).not.toContain('Secret Place')
+      expect(tooltip.textContent).toContain('???')
+    })
+
     it('shows Enemy Territory in tooltip for enemy zone', () => {
       const enemyTile: WorldZoneTile = {
         zoneId: 'enemy_zone', zoneName: 'Enemy Zone',

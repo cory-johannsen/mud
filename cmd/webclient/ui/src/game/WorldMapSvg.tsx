@@ -278,9 +278,13 @@ function ZoneTooltip({ tooltip }: { tooltip: TooltipState }): JSX.Element {
         boxShadow: '0 2px 8px rgba(0,0,0,0.6)',
       }}
     >
-      <div style={{ fontWeight: 'bold', fontSize: '0.8rem', color: isEnemy ? '#c07070' : '#eee', marginBottom: '0.25rem' }}>
-        {tile.zoneName ?? tile.zoneId}
-      </div>
+      {discovered ? (
+        <div style={{ fontWeight: 'bold', fontSize: '0.8rem', color: isEnemy ? '#c07070' : '#eee', marginBottom: '0.25rem' }}>
+          {tile.zoneName ?? tile.zoneId}
+        </div>
+      ) : (
+        <div style={{ fontWeight: 'bold', fontSize: '0.8rem', color: '#555', marginBottom: '0.25rem' }}>???</div>
+      )}
       {!discovered && (
         <div style={{ color: '#666', fontStyle: 'italic' }}>Undiscovered</div>
       )}
