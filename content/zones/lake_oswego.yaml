@@ -1,14 +1,15 @@
 zone:
   id: lake_oswego
-  danger_level: safe
+  danger_level: dangerous
   min_level: 2
   max_level: 7
   world_x: 0
   world_y: 4
   script_dir: content/scripts/zones/lake_oswego
   name: Lake Oswego Nation
-  description: A fortified enclave of pre-collapse wealth, where HOA bylaws carry the force of law and country clubs serve
-    as military command posts. The residents traded democracy for security and never looked back.
+  description: A fortified enclave of pre-collapse wealth, where HOA bylaws carry the force of law and
+    country clubs serve as military command posts. The residents traded democracy for security and never
+    looked back.
   start_room: lo_the_commons
   rooms:
   - id: lo_checkpoint_north
@@ -219,7 +220,7 @@ zone:
       '
     exits:
     - direction: west
-      target: lo_tennis_grounds
+      target: lo_command_trench
     map_x: 8
     map_y: 2
     spawns:
@@ -232,6 +233,7 @@ zone:
     properties:
       lighting: exposed
       atmosphere: windswept
+    danger_level: all_out_war
   - id: lo_tryon_creek
     title: Tryon Creek Buffer Zone
     description: 'Dense forest fills the ravine, a natural barrier between
@@ -358,7 +360,7 @@ zone:
       '
     exits:
     - direction: east
-      target: lo_iron_mountain
+      target: lo_outer_bunker
     - direction: west
       target: lo_patrol_route_east
     map_x: 6
@@ -575,12 +577,10 @@ zone:
       atmosphere: solemn
   - id: lo_lakeside_promenade
     title: Lakeside Promenade
-    description: 'A paved walkway curves along the western shore of the lake,
-      lined with ornamental lampposts still burning. Residents exercise
-      in matching athletic wear, nodding to one another with the measured
-      civility of people who have learned that friendliness is a social
-      obligation. The water reflects the lights like a mirror.
-      '
+    description: 'A paved walkway curves along the western shore of the lake, lined with ornamental lampposts
+      still burning. Residents exercise in matching athletic wear, nodding to one another with the measured
+      civility of people who have learned that friendliness is a social obligation. The water reflects
+      the lights like a mirror. '
     exits:
     - direction: east
       target: lo_millennium_park
@@ -593,12 +593,10 @@ zone:
       atmosphere: leisure
   - id: lo_country_club_east
     title: Country Club East Wing
-    description: 'The east wing of the country club retains its pre-collapse
-      grandeur — vaulted ceilings, parquet floors, and oil portraits
-      of men in khakis. The bar still operates, serving a single
-      whiskey to officers and senior council members only. The smell
-      of leather and gun solvent has replaced the original cologne.
-      '
+    description: 'The east wing of the country club retains its pre-collapse grandeur — vaulted ceilings,
+      parquet floors, and oil portraits of men in khakis. The bar still operates, serving a single whiskey
+      to officers and senior council members only. The smell of leather and gun solvent has replaced the
+      original cologne. '
     exits:
     - direction: west
       target: lo_country_club
@@ -609,13 +607,10 @@ zone:
       atmosphere: exclusive
   - id: lo_country_club_west
     title: Country Club West Wing
-    description: 'The west wing has been converted into a communications
-      center. Long tables hold radio equipment, and operators with
-      headsets monitor a dozen channels simultaneously. Maps cover
-      every wall, marked with patrol schedules and threat assessments.
-      The original wood paneling survives, incongruous beneath tactical
-      overlays.
-      '
+    description: 'The west wing has been converted into a communications center. Long tables hold radio
+      equipment, and operators with headsets monitor a dozen channels simultaneously. Maps cover every
+      wall, marked with patrol schedules and threat assessments. The original wood paneling survives,
+      incongruous beneath tactical overlays. '
     exits:
     - direction: east
       target: lo_country_club
@@ -628,12 +623,10 @@ zone:
       atmosphere: operations
   - id: lo_south_shore
     title: South Shore
-    description: 'The southern bank of the lake is a controlled recreational
-      area. Swimming is permitted between 0800 and 1700 with prior
-      approval. The beach is raked smooth each morning. Guard posts
-      watch from elevated platforms on either side. Children build
-      sandcastles under the supervision of armed lifeguards.
-      '
+    description: 'The southern bank of the lake is a controlled recreational area. Swimming is permitted
+      between 0800 and 1700 with prior approval. The beach is raked smooth each morning. Guard posts watch
+      from elevated platforms on either side. Children build sandcastles under the supervision of armed
+      lifeguards. '
     exits:
     - direction: north
       target: lo_lakewood_bay
@@ -644,13 +637,10 @@ zone:
       atmosphere: controlled
   - id: lo_garden_district
     title: Garden District
-    description: 'A residential pocket where the HOA bylaws regarding
-      horticulture reach their apex. Every hedge is geometrically
-      perfect. Flower varieties are standardized by council decree.
-      A laminated guide to approved plantings hangs on each fence
-      post. Violations are reported within the hour. The flowers
-      are genuinely beautiful, which makes it worse.
-      '
+    description: 'A residential pocket where the HOA bylaws regarding horticulture reach their apex. Every
+      hedge is geometrically perfect. Flower varieties are standardized by council decree. A laminated
+      guide to approved plantings hangs on each fence post. Violations are reported within the hour. The
+      flowers are genuinely beautiful, which makes it worse. '
     exits:
     - direction: north
       target: lo_hoa_headquarters
@@ -664,13 +654,10 @@ zone:
   - id: lo_civic_center
     title: Civic Center
     danger_level: safe
-    description: 'The civic center occupies a renovated bank building,
-      its vault now serving as a records archive. The lobby is open
-      to residents who can demonstrate proper standing. Information
-      boards list community announcements, approved vendors, and
-      the week''s compliance schedule. A sense of deliberate calm
-      pervades the space.
-      '
+    description: 'The civic center occupies a renovated bank building, its vault now serving as a records
+      archive. The lobby is open to residents who can demonstrate proper standing. Information boards
+      list community announcements, approved vendors, and the week''s compliance schedule. A sense of
+      deliberate calm pervades the space. '
     exits:
     - direction: north
       target: lo_lakeside_promenade
@@ -686,12 +673,10 @@ zone:
   - id: lo_civic_garden
     title: Civic Garden
     danger_level: safe
-    description: 'A walled garden adjoining the civic center, planted
-      with medicinal herbs and fruit trees tended by a rotating roster
-      of community volunteers. Stone benches line the paths. The
-      garden is one of the few places in the enclave where raised
-      voices are genuinely unwelcome rather than merely prohibited.
-      '
+    description: 'A walled garden adjoining the civic center, planted with medicinal herbs and fruit trees
+      tended by a rotating roster of community volunteers. Stone benches line the paths. The garden is
+      one of the few places in the enclave where raised voices are genuinely unwelcome rather than merely
+      prohibited. '
     exits:
     - direction: west
       target: lo_civic_center
@@ -703,13 +688,10 @@ zone:
   - id: lo_civic_hall
     title: Civic Hall
     danger_level: safe
-    description: 'The civic hall is a low building of clean lines and
-      muted colors, used for community gatherings and quiet administrative
-      work. A discreet door near the back leads to a tastefully appointed
-      clinic where a specialist handles sensitive medical procedures
-      with practiced discretion. Residents know better than to ask
-      questions.
-      '
+    description: 'The civic hall is a low building of clean lines and muted colors, used for community
+      gatherings and quiet administrative work. A discreet door near the back leads to a tastefully appointed
+      clinic where a specialist handles sensitive medical procedures with practiced discretion. Residents
+      know better than to ask questions. '
     exits:
     - direction: east
       target: lo_civic_center
@@ -722,4 +704,45 @@ zone:
     properties:
       lighting: soft
       atmosphere: discreet
-
+  - id: lo_outer_bunker
+    title: Outer Bunker Ring
+    danger_level: dangerous
+    description: 'A ring of reinforced concrete emplacements circles the approach to Iron Mountain. Razor
+      wire and trip flares line the perimeter. Off-duty snipers clean their rifles in sandbagged alcoves.
+      The path narrows toward a hardened gate marked with a stenciled skull and the words: COMMAND PERIMETER
+      — AUTHORIZED PERSONNEL ONLY.'
+    exits:
+    - direction: west
+      target: lo_tennis_grounds
+    - direction: east
+      target: lo_command_trench
+    map_x: 8
+    map_y: 0
+    spawns:
+    - template: country_club_sniper
+      count: 2
+      respawn_after: 5m
+    properties:
+      lighting: floodlit
+      atmosphere: militarized
+  - id: lo_command_trench
+    title: Command Trench
+    danger_level: dangerous
+    description: A deep trench cut into the hillside channels attackers into a killing ground. Firing
+      slits line both walls. The trench smells of cordite and cold earth. A metal hatch at the far end
+      bears the Lake Oswego Nation crest — an eagle clutching a clipboard — and opens only to the commandant's
+      personal clearance code. Iron Mountain looms above.
+    exits:
+    - direction: west
+      target: lo_outer_bunker
+    - direction: east
+      target: lo_iron_mountain
+    map_x: 9
+    map_y: 1
+    spawns:
+    - template: country_club_sniper
+      count: 2
+      respawn_after: 5m
+    properties:
+      lighting: exposed
+      atmosphere: siege
