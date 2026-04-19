@@ -8891,6 +8891,7 @@ type WorldZoneTile struct {
 	Current       bool                   `protobuf:"varint,6,opt,name=current,proto3" json:"current,omitempty"`
 	DangerLevel   string                 `protobuf:"bytes,7,opt,name=danger_level,json=dangerLevel,proto3" json:"danger_level,omitempty"`
 	LevelRange    string                 `protobuf:"bytes,8,opt,name=level_range,json=levelRange,proto3" json:"level_range,omitempty"`
+	Enemy         bool                   `protobuf:"varint,9,opt,name=enemy,proto3" json:"enemy,omitempty"` // true if this zone is enemy territory for the current player's team
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -8979,6 +8980,13 @@ func (x *WorldZoneTile) GetLevelRange() string {
 		return x.LevelRange
 	}
 	return ""
+}
+
+func (x *WorldZoneTile) GetEnemy() bool {
+	if x != nil {
+		return x.Enemy
+	}
+	return false
 }
 
 // MapResponse is returned by the server with discovered tiles for the current zone
@@ -17788,7 +17796,7 @@ const file_game_v1_game_proto_rawDesc = "" +
 	" \x03(\v2\x13.game.v1.PoiWithNpcR\apoiNpcs\x124\n" +
 	"\n" +
 	"zone_exits\x18\v \x03(\v2\x15.game.v1.ZoneExitInfoR\tzoneExits\x12P\n" +
-	"\x16same_zone_exit_targets\x18\f \x03(\v2\x1b.game.v1.SameZoneExitTargetR\x13sameZoneExitTargets\"\xf5\x01\n" +
+	"\x16same_zone_exit_targets\x18\f \x03(\v2\x1b.game.v1.SameZoneExitTargetR\x13sameZoneExitTargets\"\x8b\x02\n" +
 	"\rWorldZoneTile\x12\x17\n" +
 	"\azone_id\x18\x01 \x01(\tR\x06zoneId\x12\x1b\n" +
 	"\tzone_name\x18\x02 \x01(\tR\bzoneName\x12\x17\n" +
@@ -17800,7 +17808,8 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\acurrent\x18\x06 \x01(\bR\acurrent\x12!\n" +
 	"\fdanger_level\x18\a \x01(\tR\vdangerLevel\x12\x1f\n" +
 	"\vlevel_range\x18\b \x01(\tR\n" +
-	"levelRange\"n\n" +
+	"levelRange\x12\x14\n" +
+	"\x05enemy\x18\t \x01(\bR\x05enemy\"n\n" +
 	"\vMapResponse\x12&\n" +
 	"\x05tiles\x18\x01 \x03(\v2\x10.game.v1.MapTileR\x05tiles\x127\n" +
 	"\vworld_tiles\x18\x02 \x03(\v2\x16.game.v1.WorldZoneTileR\n" +

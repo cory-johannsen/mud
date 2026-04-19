@@ -72,11 +72,12 @@ export function WorldMapSvg({ tiles, onTravel }: WorldMapSvgProps): JSX.Element 
           const ry = py(tile.worldY ?? 0)
           const discovered = tile.discovered ?? false
           const isCurrent = tile.current ?? false
+          const isEnemy = tile.enemy ?? false
           const danger = tile.dangerLevel ?? tile.danger_level ?? ''
           const fill = discovered ? (DANGER_FILLS[danger] ?? DANGER_FILLS['safe']) : UNDISCOVERED_FILL
-          const stroke = isCurrent ? CURRENT_STROKE : DEFAULT_STROKE
-          const strokeWidth = isCurrent ? CURRENT_STROKE_WIDTH : DEFAULT_STROKE_WIDTH
-          const canTravel = discovered && !isCurrent
+          const stroke = isEnemy ? '#c02020' : isCurrent ? CURRENT_STROKE : DEFAULT_STROKE
+          const strokeWidth = isEnemy ? 2 : isCurrent ? CURRENT_STROKE_WIDTH : DEFAULT_STROKE_WIDTH
+          const canTravel = discovered && !isCurrent && !isEnemy
           const name = tile.zoneName ?? id
 
           return (
@@ -105,7 +106,7 @@ export function WorldMapSvg({ tiles, onTravel }: WorldMapSvgProps): JSX.Element 
                       textAnchor="middle"
                       dominantBaseline="middle"
                       fontSize={10}
-                      fill="#ccc"
+                      fill={isEnemy ? '#c07070' : '#ccc'}
                       clipPath={`url(#clip-${id})`}
                     >
                       {name}
@@ -126,6 +127,20 @@ export function WorldMapSvg({ tiles, onTravel }: WorldMapSvgProps): JSX.Element 
                   </>
                 )
               })()}
+              {isEnemy && (
+                <>
+                  <line
+                    x1={rx + 4} y1={ry + 4}
+                    x2={rx + ZONE_W - 4} y2={ry + ZONE_H - 4}
+                    stroke="#c02020" strokeWidth={1.5} opacity={0.6}
+                  />
+                  <line
+                    x1={rx + ZONE_W - 4} y1={ry + 4}
+                    x2={rx + 4} y2={ry + ZONE_H - 4}
+                    stroke="#c02020" strokeWidth={1.5} opacity={0.6}
+                  />
+                </>
+              )}
             </g>
           )
         })}
@@ -165,6 +180,18 @@ export function WorldMapSvg({ tiles, onTravel }: WorldMapSvgProps): JSX.Element 
             flexShrink: 0,
           }} />
           <span style={{ color: '#aaa' }}>Undiscovered</span>
+        </span>
+        <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+          <span style={{
+            display: 'inline-block',
+            width: 12,
+            height: 12,
+            background: '#1a1a2e',
+            border: '2px solid #c02020',
+            borderRadius: 2,
+            flexShrink: 0,
+          }} />
+          <span style={{ color: '#c07070' }}>Enemy Territory</span>
         </span>
       </div>
     </div>

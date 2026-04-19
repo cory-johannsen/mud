@@ -879,6 +879,26 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 		genderVal = dbChar.Gender
 		teamVal = dbChar.Team
 	}
+
+	// Team territory enforcement: redirect spawn to home room if saved location is in enemy territory (REQ-TEAM-3).
+	if teamVal != "" {
+		if spawnRoom != nil {
+			if isEnemyZone(teamVal, spawnRoom.ZoneID) {
+				if homeRoomID, homeOK := teamHomeRooms[teamVal]; homeOK {
+					if homeRoom, worldOK := s.world.GetRoom(homeRoomID); worldOK {
+						s.logger.Warn("player spawn in enemy zone; redirecting to home room",
+							zap.String("uid", uid),
+							zap.String("team", teamVal),
+							zap.String("bad_room", spawnRoom.ID),
+							zap.String("home_room", homeRoomID),
+						)
+						spawnRoom = homeRoom
+					}
+				}
+			}
+		}
+	}
+
 	sess, err := s.sessions.AddPlayer(session.AddPlayerOptions{
 		UID:                 uid,
 		Username:            username,
@@ -2624,6 +2644,15 @@ func (s *GameServiceServer) handleMove(uid string, req *gamev1.MoveRequest) (*ga
 						}
 					}
 				}
+			}
+		}
+	}
+
+	// Team territory enforcement: block movement into enemy zones (REQ-TEAM-1).
+	if teamSess, teamSessOK := s.sessions.GetPlayer(uid); teamSessOK && teamSess.Team != "" {
+		if destRoom, navErr := s.world.Navigate(teamSess.RoomID, dir); navErr == nil {
+			if isEnemyZone(teamSess.Team, destRoom.ZoneID) {
+				return messageEvent("Enemy territory — that zone is closed to you."), nil
 			}
 		}
 	}
@@ -7122,7 +7151,8 @@ func (s *GameServiceServer) handleMap(uid string, req *gamev1.MapRequest) (*game
 			if z.WorldX == nil || z.WorldY == nil {
 				continue
 			}
-			isDiscovered := len(sess.AutomapCache[z.ID]) > 0
+			enemy := isEnemyZone(sess.Team, z.ID)
+			isDiscovered := len(sess.AutomapCache[z.ID]) > 0 || enemy // enemy zones always visible
 			current := z.ID == zone.ID
 			var levelRange string
 			switch {
@@ -7144,6 +7174,7 @@ func (s *GameServiceServer) handleMap(uid string, req *gamev1.MapRequest) (*game
 				Current:     current,
 				DangerLevel: z.DangerLevel,
 				LevelRange:  levelRange,
+				Enemy:       enemy,
 			})
 		}
 		return &gamev1.ServerEvent{

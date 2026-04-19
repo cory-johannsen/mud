@@ -35,6 +35,11 @@ func (s *GameServiceServer) handleTravel(uid string, req *gamev1.TravelRequest) 
 		return messageEvent("That zone does not exist."), nil
 	}
 
+	// Team territory enforcement: block travel into enemy zones (REQ-TEAM-2).
+	if isEnemyZone(sess.Team, req.GetZoneId()) {
+		return messageEvent("That zone is enemy territory. You cannot travel there."), nil
+	}
+
 	// REQ-WM-18: zone must be discovered.
 	if len(sess.AutomapCache[req.GetZoneId()]) == 0 {
 		return messageEvent("You don't know how to get there."), nil

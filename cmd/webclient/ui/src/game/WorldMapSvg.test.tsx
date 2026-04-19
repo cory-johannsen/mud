@@ -63,6 +63,37 @@ describe('WorldMapSvg', () => {
     expect(legendText).toContain('safe')
     expect(legendText).toContain('dangerous')
     expect(legendText).toContain('Undiscovered')
+    expect(legendText).toContain('Enemy Territory')
+  })
+
+  it('renders enemy zone with red stroke and X lines', () => {
+    const enemyTile: WorldZoneTile = {
+      zoneId: 'enemy_zone', zoneName: 'Enemy Zone',
+      worldX: 0, worldY: 0,
+      discovered: true, current: false, dangerLevel: 'dangerous',
+      enemy: true,
+    }
+    const { container } = render(<WorldMapSvg tiles={[enemyTile]} onTravel={vi.fn()} />)
+    const rects = Array.from(container.querySelectorAll('svg rect:not(defs rect)'))
+    const enemyRect = rects.find(r => r.getAttribute('stroke') === '#c02020')
+    expect(enemyRect).toBeDefined()
+    // Two X lines should be present
+    const lines = container.querySelectorAll('line')
+    expect(lines.length).toBe(2)
+  })
+
+  it('does not call onTravel when enemy zone tile is clicked', () => {
+    const enemyTile: WorldZoneTile = {
+      zoneId: 'enemy_zone', zoneName: 'Enemy Zone',
+      worldX: 0, worldY: 0,
+      discovered: true, current: false, dangerLevel: 'dangerous',
+      enemy: true,
+    }
+    const onTravel = vi.fn()
+    const { container } = render(<WorldMapSvg tiles={[enemyTile]} onTravel={onTravel} />)
+    const rects = Array.from(container.querySelectorAll('svg rect:not(defs rect)'))
+    fireEvent.click(rects[0]!)
+    expect(onTravel).not.toHaveBeenCalled()
   })
 
   it('renders level range text when levelRange is set', () => {
