@@ -7,8 +7,8 @@ zone:
   world_y: 0
   script_dir: content/scripts/zones/troutdale
   name: Troutdale
-  description: Gateway to the Columbia River Gorge, where outlet mall ruins and relentless winds define a landscape of scavengers,
-    runners, and wind mystics.
+  description: Gateway to the Columbia River Gorge, where outlet mall ruins and relentless winds define
+    a landscape of scavengers, runners, and wind mystics.
   start_room: trout_truck_stop
   rooms:
   - id: trout_i84_west
@@ -65,6 +65,8 @@ zone:
     - direction: west
       target: pdx_i84_east
       zone: pdx_international
+    - direction: east
+      target: trout_frontage_road
     map_x: -2
     map_y: 2
     spawns:
@@ -231,6 +233,8 @@ zone:
       target: trout_gorge_trail
     - direction: east
       target: trout_wind_tunnel
+    - direction: west
+      target: trout_gorge_trail
     map_x: 202
     map_y: 12
     spawns:
@@ -347,6 +351,8 @@ zone:
       target: trout_frontage_road
     - direction: south
       target: trout_parking_lot
+    - direction: southeast
+      target: trout_parking_lot
     map_x: 202
     map_y: 20
     spawns:
@@ -373,6 +379,8 @@ zone:
       target: trout_outlet_mall
     - direction: northwest
       target: trout_wood_village
+    - direction: east
+      target: trout_loading_docks
     map_x: 2
     map_y: 4
     spawns:
@@ -401,6 +409,8 @@ zone:
       target: trout_gorge_trail
     - direction: east
       target: trout_dam_overlook
+    - direction: west
+      target: trout_old_highway_ruins
     map_x: 202
     map_y: 24
     spawns:
@@ -533,6 +543,8 @@ zone:
     exits:
     - direction: east
       target: trout_lewis_clark_park
+    - direction: west
+      target: trout_sandy_river_bank
     map_x: 202
     map_y: 34
     spawns:
@@ -646,7 +658,8 @@ zone:
       atmosphere: wind
   - id: trout_truck_stop
     title: Truck Stop
-    description: 'A diesel-soaked rest stop with a diner counter, a parts wall, and a back room where deals get made. Everyone passes through Troutdale eventually.'
+    description: A diesel-soaked rest stop with a diner counter, a parts wall, and a back room where deals
+      get made. Everyone passes through Troutdale eventually.
     danger_level: safe
     exits:
     - direction: south
@@ -798,6 +811,8 @@ zone:
       target: trout_sandy_river
     - direction: east
       target: trout_river_trail
+    - direction: south
+      target: trout_sandy_river
     map_x: 5
     map_y: -2
     spawns:
@@ -866,11 +881,12 @@ zone:
     properties:
       lighting: overcast
       atmosphere: desolate
-
   - id: troutdale_brothel
     title: The River's Edge Tavern
     danger_level: safe
-    description: The highway motel's western wing, kept in better condition than the rest. A hand-painted sign reads RIVER'S EDGE with a fish below it. Inside, the carpeting is old but clean, the beds are actual beds, and the proprietor maintains a small bar. Small-town hospitality, small-town discretion.
+    description: The highway motel's western wing, kept in better condition than the rest. A hand-painted
+      sign reads RIVER'S EDGE with a fish below it. Inside, the carpeting is old but clean, the beds are
+      actual beds, and the proprietor maintains a small bar. Small-town hospitality, small-town discretion.
     map_x: 0
     map_y: 100
     exits:
