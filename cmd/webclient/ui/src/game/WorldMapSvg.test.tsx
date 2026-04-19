@@ -155,4 +155,84 @@ describe('WorldMapSvg', () => {
     const { container } = render(<WorldMapSvg tiles={tiles} onTravel={vi.fn()} />)
     expect(container.textContent).not.toContain('Hidden Zone')
   })
+
+  describe('hover tooltip', () => {
+    it('shows tooltip with zone name on mouseenter', () => {
+      const { container, getByRole } = render(
+        <WorldMapSvg tiles={[DISCOVERED_ZONE]} onTravel={vi.fn()} />
+      )
+      const g = container.querySelector('svg g')!
+      fireEvent.mouseEnter(g)
+      const tooltip = getByRole('tooltip')
+      expect(tooltip.textContent).toContain('Beta Zone')
+    })
+
+    it('shows danger level in tooltip for discovered zone', () => {
+      const { container, getByRole } = render(
+        <WorldMapSvg tiles={[DISCOVERED_ZONE]} onTravel={vi.fn()} />
+      )
+      fireEvent.mouseEnter(container.querySelector('svg g')!)
+      const tooltip = getByRole('tooltip')
+      expect(tooltip.textContent).toContain('Dangerous')
+    })
+
+    it('shows level range in tooltip when set', () => {
+      const tile: WorldZoneTile = {
+        ...DISCOVERED_ZONE, levelRange: '5-10',
+      }
+      const { container, getByRole } = render(
+        <WorldMapSvg tiles={[tile]} onTravel={vi.fn()} />
+      )
+      fireEvent.mouseEnter(container.querySelector('svg g')!)
+      const tooltip = getByRole('tooltip')
+      expect(tooltip.textContent).toContain('5-10')
+    })
+
+    it('shows description in tooltip when present', () => {
+      const tile: WorldZoneTile = {
+        ...DISCOVERED_ZONE, description: 'A gritty urban zone.',
+      }
+      const { container, getByRole } = render(
+        <WorldMapSvg tiles={[tile]} onTravel={vi.fn()} />
+      )
+      fireEvent.mouseEnter(container.querySelector('svg g')!)
+      const tooltip = getByRole('tooltip')
+      expect(tooltip.textContent).toContain('A gritty urban zone.')
+    })
+
+    it('shows Undiscovered in tooltip for undiscovered zone', () => {
+      const { container, getByRole } = render(
+        <WorldMapSvg tiles={[UNDISCOVERED_ZONE]} onTravel={vi.fn()} />
+      )
+      fireEvent.mouseEnter(container.querySelector('svg g')!)
+      const tooltip = getByRole('tooltip')
+      expect(tooltip.textContent).toContain('Undiscovered')
+    })
+
+    it('shows Enemy Territory in tooltip for enemy zone', () => {
+      const enemyTile: WorldZoneTile = {
+        zoneId: 'enemy_zone', zoneName: 'Enemy Zone',
+        worldX: 0, worldY: 0,
+        discovered: true, current: false, dangerLevel: 'dangerous',
+        enemy: true,
+      }
+      const { container, getByRole } = render(
+        <WorldMapSvg tiles={[enemyTile]} onTravel={vi.fn()} />
+      )
+      fireEvent.mouseEnter(container.querySelector('svg g')!)
+      const tooltip = getByRole('tooltip')
+      expect(tooltip.textContent).toContain('Enemy Territory')
+    })
+
+    it('hides tooltip on mouseleave from tile', () => {
+      const { container, queryByRole } = render(
+        <WorldMapSvg tiles={[DISCOVERED_ZONE]} onTravel={vi.fn()} />
+      )
+      const g = container.querySelector('svg g')!
+      fireEvent.mouseEnter(g)
+      expect(queryByRole('tooltip')).not.toBeNull()
+      fireEvent.mouseLeave(g)
+      expect(queryByRole('tooltip')).toBeNull()
+    })
+  })
 })

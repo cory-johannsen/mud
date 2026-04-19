@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import type { WorldZoneTile } from '../proto'
 
 const ZONE_W = 72
@@ -20,12 +21,20 @@ const CURRENT_STROKE_WIDTH = 2
 const DEFAULT_STROKE = '#333'
 const DEFAULT_STROKE_WIDTH = 1
 
+interface TooltipState {
+  tile: WorldZoneTile
+  x: number
+  y: number
+}
+
 interface WorldMapSvgProps {
   tiles: WorldZoneTile[]
   onTravel: (zoneId: string) => void
 }
 
 export function WorldMapSvg({ tiles, onTravel }: WorldMapSvgProps): JSX.Element {
+  const [tooltip, setTooltip] = useState<TooltipState | null>(null)
+
   if (tiles.length === 0) {
     return <p style={{ color: '#666', fontFamily: 'monospace', padding: '0.5rem' }}>No world map data.</p>
   }
@@ -46,12 +55,13 @@ export function WorldMapSvg({ tiles, onTravel }: WorldMapSvgProps): JSX.Element 
   const viewBox = `-4 -4 ${totalW + 8} ${totalH + 8}`
 
   return (
-    <div style={{ overflow: 'auto', padding: '0.5rem' }}>
+    <div style={{ overflow: 'auto', padding: '0.5rem', position: 'relative' }}>
       <svg
         viewBox={viewBox}
         width={totalW + 8}
         height={totalH + 8}
         style={{ display: 'block', fontFamily: 'monospace' }}
+        onMouseLeave={() => setTooltip(null)}
       >
         <defs>
           {tiles.map(tile => {
@@ -85,6 +95,30 @@ export function WorldMapSvg({ tiles, onTravel }: WorldMapSvgProps): JSX.Element 
               key={id}
               onClick={canTravel ? () => onTravel(id) : undefined}
               style={{ cursor: canTravel ? 'pointer' : 'default' }}
+              onMouseEnter={(e) => {
+                const svgEl = (e.currentTarget as SVGGElement).closest('svg')
+                const rect = svgEl?.getBoundingClientRect()
+                const containerRect = svgEl?.parentElement?.getBoundingClientRect()
+                if (rect && containerRect) {
+                  setTooltip({
+                    tile,
+                    x: e.clientX - containerRect.left + 12,
+                    y: e.clientY - containerRect.top + 12,
+                  })
+                }
+              }}
+              onMouseMove={(e) => {
+                const svgEl = (e.currentTarget as SVGGElement).closest('svg')
+                const containerRect = svgEl?.parentElement?.getBoundingClientRect()
+                if (containerRect) {
+                  setTooltip(prev => prev ? {
+                    ...prev,
+                    x: e.clientX - containerRect.left + 12,
+                    y: e.clientY - containerRect.top + 12,
+                  } : null)
+                }
+              }}
+              onMouseLeave={() => setTooltip(null)}
             >
               <rect
                 x={rx}
@@ -146,6 +180,10 @@ export function WorldMapSvg({ tiles, onTravel }: WorldMapSvgProps): JSX.Element 
         })}
       </svg>
 
+      {tooltip && (
+        <ZoneTooltip tooltip={tooltip} />
+      )}
+
       <div style={{
         display: 'flex',
         flexWrap: 'wrap',
@@ -194,6 +232,84 @@ export function WorldMapSvg({ tiles, onTravel }: WorldMapSvgProps): JSX.Element 
           <span style={{ color: '#c07070' }}>Enemy Territory</span>
         </span>
       </div>
+    </div>
+  )
+}
+
+const DANGER_LABELS: Record<string, string> = {
+  safe: 'Safe',
+  sketchy: 'Sketchy',
+  dangerous: 'Dangerous',
+  deadly: 'Deadly',
+}
+
+const DANGER_COLORS: Record<string, string> = {
+  safe: '#6abf69',
+  sketchy: '#e6c84e',
+  dangerous: '#e08030',
+  deadly: '#c03030',
+}
+
+function ZoneTooltip({ tooltip }: { tooltip: TooltipState }): JSX.Element {
+  const { tile, x, y } = tooltip
+  const danger = tile.dangerLevel ?? tile.danger_level ?? ''
+  const levelRange = tile.levelRange ?? tile.level_range ?? ''
+  const description = tile.description ?? ''
+  const isEnemy = tile.enemy ?? false
+  const discovered = tile.discovered ?? false
+
+  return (
+    <div
+      role="tooltip"
+      style={{
+        position: 'absolute',
+        left: x,
+        top: y,
+        zIndex: 100,
+        background: '#1a1a1a',
+        border: `1px solid ${isEnemy ? '#c02020' : '#444'}`,
+        borderRadius: 4,
+        padding: '0.5rem 0.75rem',
+        fontFamily: 'monospace',
+        fontSize: '0.72rem',
+        color: '#ccc',
+        maxWidth: 240,
+        pointerEvents: 'none',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.6)',
+      }}
+    >
+      <div style={{ fontWeight: 'bold', fontSize: '0.8rem', color: isEnemy ? '#c07070' : '#eee', marginBottom: '0.25rem' }}>
+        {tile.zoneName ?? tile.zoneId}
+      </div>
+      {!discovered && (
+        <div style={{ color: '#666', fontStyle: 'italic' }}>Undiscovered</div>
+      )}
+      {discovered && (
+        <>
+          {danger && (
+            <div style={{ marginBottom: '0.15rem' }}>
+              <span style={{ color: '#888' }}>Danger: </span>
+              <span style={{ color: DANGER_COLORS[danger] ?? '#ccc' }}>
+                {DANGER_LABELS[danger] ?? danger}
+              </span>
+            </div>
+          )}
+          {levelRange && (
+            <div style={{ marginBottom: '0.15rem' }}>
+              <span style={{ color: '#888' }}>Levels: </span>
+              <span style={{ color: '#bbb' }}>{levelRange}</span>
+            </div>
+          )}
+          {isEnemy && (
+            <div style={{ color: '#c07070', marginBottom: '0.15rem' }}>Enemy Territory</div>
+          )}
+          {description && (
+            <div style={{ color: '#999', marginTop: '0.35rem', lineHeight: 1.4, borderTop: '1px solid #333', paddingTop: '0.35rem' }}>
+              {description}
+            </div>
+          )}
+        </>
+      )}
     </div>
   )
 }

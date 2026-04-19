@@ -7175,6 +7175,7 @@ func (s *GameServiceServer) handleMap(uid string, req *gamev1.MapRequest) (*game
 				DangerLevel: z.DangerLevel,
 				LevelRange:  levelRange,
 				Enemy:       enemy,
+				Description: z.Description,
 			})
 		}
 		return &gamev1.ServerEvent{

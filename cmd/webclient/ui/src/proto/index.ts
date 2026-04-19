@@ -417,6 +417,7 @@ export interface WorldZoneTile {
   levelRange?: string
   level_range?: string
   enemy?: boolean
+  description?: string
 }
 
 export interface MapResponse {
