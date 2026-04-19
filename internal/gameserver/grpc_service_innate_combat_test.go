@@ -223,6 +223,93 @@ func TestBug158_TechUseResolverFn_NeverDeadlocks(t *testing.T) {
 	}
 }
 
+// TestBug197_PreparedAttackTech_ResolverNeverDeadlocks is the regression test for GitHub issue #197:
+// "Using Cryo-Gel Projectile halts combat, requires server restart."
+//
+// Root cause: activateTechWithEffectsWithCombat called resolveUseTarget, which called
+// ActiveCombatForPlayer — that tried to re-acquire combatMu on the same goroutine, causing deadlock.
+//
+// Fix: activateTechWithEffectsWithCombat now resolves the target directly from the provided
+// *combat.Combat without calling ActiveCombatForPlayer.
+//
+// Precondition: player has a prepared attack-based tech (resolution:"attack") queued in combat.
+// Postcondition: resolveAndAdvanceLocked completes within 5s without deadlock; resolver is called.
+func TestBug197_PreparedAttackTech_ResolverNeverDeadlocks(t *testing.T) {
+	t.Parallel()
+
+	const roomID = "room_bug197"
+	_, sessMgr, npcMgr, combatHandler := newInnateCombatSvc(t)
+
+	_, err := npcMgr.Spawn(&npc.Template{
+		ID: "rat-bug197", Name: "Giant Rat", Level: 1, MaxHP: 20, AC: 10, Awareness: 2,
+	}, roomID)
+	require.NoError(t, err)
+
+	const uid = "u_bug197"
+	_, err = sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID: uid, Username: "Engineer", CharName: "Engineer",
+		RoomID: roomID, CurrentHP: 10, MaxHP: 20, Role: "player",
+	})
+	require.NoError(t, err)
+
+	resolverCalled := make(chan struct{}, 1)
+
+	// Install a resolver that records the call — previously this caused a deadlock.
+	combatHandler.SetTechUseResolverFn(func(uid, techID, targetID string, targetX, targetY int32, cbt *combat.Combat) {
+		if cbt != nil {
+			resolverCalled <- struct{}{}
+		}
+	})
+
+	_, err = combatHandler.Attack(uid, "Giant Rat")
+	require.NoError(t, err)
+	combatHandler.cancelTimer(roomID)
+
+	cbt, ok := combatHandler.GetCombatForRoom(roomID)
+	require.True(t, ok)
+
+	// Manually enqueue an ActionUseTech (prepared, resolution:attack) for the player.
+	qa := combat.QueuedAction{
+		Type:        combat.ActionUseTech,
+		AbilityID:   "cryo_gel_projectile",
+		Target:      "Giant Rat",
+		AbilityCost: 2,
+		TargetX:     -1,
+		TargetY:     -1,
+	}
+	err = cbt.QueueAction(uid, qa)
+	require.NoError(t, err)
+
+	npcInsts := npcMgr.InstancesInRoom(roomID)
+	require.NotEmpty(t, npcInsts)
+	err = cbt.QueueAction(npcInsts[0].ID, combat.QueuedAction{
+		Type:        combat.ActionAttack,
+		Target:      uid,
+		AbilityCost: 1,
+	})
+	require.NoError(t, err)
+
+	done := make(chan struct{})
+	go func() {
+		combatHandler.resolveAndAdvanceLocked(roomID, cbt)
+		close(done)
+	}()
+
+	select {
+	case <-done:
+		// Resolution completed — no deadlock.
+	case <-time.After(5 * time.Second):
+		t.Fatal("resolveAndAdvanceLocked deadlocked (Bug #197 regression: prepared attack tech)")
+	}
+
+	select {
+	case <-resolverCalled:
+		// Resolver was invoked with a non-nil cbt.
+	default:
+		t.Fatal("techUseResolverFn was not called during round resolution")
+	}
+}
+
 // TestHandleUse_InnateTech_NoActionCost_FiresImmediately verifies that innate techs
 // with no action_cost (true cantrips) still fire immediately — existing behavior preserved.
 //

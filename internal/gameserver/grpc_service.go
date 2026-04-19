@@ -9142,23 +9142,36 @@ func (s *GameServiceServer) activateTechWithEffectsWithCombat(sess *session.Play
 		}
 	}
 
+	// Use the pre-acquired cbt directly instead of calling resolveUseTarget (which would
+	// re-acquire combatMu and deadlock since the caller already holds it).
 	var techTargets []*combat.Combatant
 	if techDef.AoeRadius > 0 && (targetX >= 0 && targetY >= 0) && cbt != nil {
 		center := combat.Combatant{GridX: int(targetX), GridY: int(targetY)}
 		techTargets = combat.CombatantsInRadius(cbt, center, techDef.AoeRadius)
-	} else {
-		target, errMsg := s.resolveUseTarget(uid, targetID, techDef)
-		if errMsg != "" {
-			return messageEvent(errMsg), nil
+	} else if techDef.Targets == technology.TargetsAllEnemies && cbt != nil {
+		for _, c := range cbt.Combatants {
+			if c.Kind == combat.KindNPC && !c.IsDead() {
+				techTargets = append(techTargets, c)
+			}
 		}
-		if techDef.Targets == technology.TargetsAllEnemies && cbt != nil { //nolint:gocritic
+	} else if techDef.Targets != "self" && techDef.Resolution != "" && techDef.Resolution != "none" && cbt != nil {
+		// Single-target attack or save: find the named target or default to first living NPC.
+		if targetID == "" {
 			for _, c := range cbt.Combatants {
 				if c.Kind == combat.KindNPC && !c.IsDead() {
-					techTargets = append(techTargets, c)
+					techTargets = []*combat.Combatant{c}
+					break
 				}
 			}
-		} else if target != nil {
-			techTargets = []*combat.Combatant{target}
+		} else {
+			lower := strings.ToLower(targetID)
+			for _, c := range cbt.Combatants {
+				if c.Kind == combat.KindNPC && !c.IsDead() &&
+					strings.HasPrefix(strings.ToLower(c.Name), lower) {
+					techTargets = []*combat.Combatant{c}
+					break
+				}
+			}
 		}
 	}
 
