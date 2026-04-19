@@ -3,10 +3,11 @@ zone:
   danger_level: dangerous
   min_level: 2
   max_level: 7
-  world_x: -2
-  world_y: 4
+  world_x: 3
+  world_y: 1
   name: The Velvet Rope
-  description: A private social club north of Beaverton where the dress code is optional and everything else costs extra.
+  description: A private social club north of Beaverton where the dress code is optional and everything
+    else costs extra.
   start_room: tvr_the_buffet
   zone_effects:
   - track: temptation
@@ -28,9 +29,9 @@ zone:
   - id: tvr_the_buffet
     danger_level: sketchy
     title: The Buffet
-    description: 'A long table draped in red velvet holds offerings of dubious origin
-      under warming lights. Patrons mill about with plates, watching the door. The
-      floors are suspiciously slick. Stairs and exits warn of treacherous footing.'
+    description: A long table draped in red velvet holds offerings of dubious origin under warming lights.
+      Patrons mill about with plates, watching the door. The floors are suspiciously slick. Stairs and
+      exits warn of treacherous footing.
     exits:
     - direction: east
       target: tvr_play_rooms
@@ -49,9 +50,9 @@ zone:
   - id: tvr_play_rooms
     danger_level: sketchy
     title: The Play Rooms
-    description: 'A central hub connecting the club''s various chambers. Curtained
-      doorways in every direction. A hostess at a velvet rope manages traffic with
-      a clipboard and a practiced smile. The floor is worse here.'
+    description: A central hub connecting the club's various chambers. Curtained doorways in every direction.
+      A hostess at a velvet rope manages traffic with a clipboard and a practiced smile. The floor is
+      worse here.
     exits:
     - direction: west
       target: tvr_the_buffet
@@ -71,9 +72,9 @@ zone:
   - id: tvr_the_strangers
     danger_level: sketchy
     title: The Strangers
-    description: 'A dimly lit room with no furniture and no names. Patrons enter as
-      strangers and some of them leave that way too. Two figures turn to assess you
-      with professional disinterest that shifts into something else.'
+    description: A dimly lit room with no furniture and no names. Patrons enter as strangers and some
+      of them leave that way too. Two figures turn to assess you with professional disinterest that shifts
+      into something else.
     exits:
     - direction: south
       target: tvr_play_rooms
@@ -87,9 +88,9 @@ zone:
   - id: tvr_spit_roast
     danger_level: sketchy
     title: Spit Roast
-    description: 'The name is painted on the door in gold script, which does not make
-      it less alarming. Inside, the room is arranged for activities that the furniture
-      suggests but does not explain. Two patrons are unhappy about the interruption.'
+    description: The name is painted on the door in gold script, which does not make it less alarming.
+      Inside, the room is arranged for activities that the furniture suggests but does not explain. Two
+      patrons are unhappy about the interruption.
     exits:
     - direction: west
       target: tvr_play_rooms
@@ -105,9 +106,9 @@ zone:
   - id: tvr_pineapple_room
     danger_level: dangerous
     title: Pineapple Room
-    description: 'A pineapple painted on the door, the universal signal for something
-      you have to know about to understand. Inside it is immediately clear why the
-      danger rating is elevated. Two hostesses who are done being polite.'
+    description: A pineapple painted on the door, the universal signal for something you have to know
+      about to understand. Inside it is immediately clear why the danger rating is elevated. Two hostesses
+      who are done being polite.
     exits:
     - direction: north
       target: tvr_spit_roast
@@ -121,9 +122,9 @@ zone:
   - id: tvr_party_theater
     danger_level: dangerous
     title: Party Theater
-    description: 'A small theater with raked seating facing a stage equipped for performance.
-      The performance currently underway involves audience participation. Two patrons
-      in the wings are not interested in new cast members.'
+    description: A small theater with raked seating facing a stage equipped for performance. The performance
+      currently underway involves audience participation. Two patrons in the wings are not interested
+      in new cast members.
     exits:
     - direction: north
       target: tvr_play_rooms
@@ -139,9 +140,9 @@ zone:
   - id: tvr_gangbang_room
     danger_level: dangerous
     title: The VIP Chamber
-    description: 'The innermost room. No sign. No clipboard. Just a presence that
-      has been holding court here since the club opened and intends to continue doing
-      so. The floor is at its worst here. Everything is.'
+    description: The innermost room. No sign. No clipboard. Just a presence that has been holding court
+      here since the club opened and intends to continue doing so. The floor is at its worst here. Everything
+      is.
     exits:
     - direction: west
       target: tvr_party_theater
@@ -152,11 +153,13 @@ zone:
       count: 1
       respawn_after: 30m
     boss_room: true
-
   - id: the_velvet_rope_brothel
     title: The VIP Lounge
     danger_level: safe
-    description: A quiet anteroom off the buffet, separated from the main club by a heavy velvet curtain and a sign reading VIP ONLY. The VIP Lounge is the velvet rope's velvet rope — quieter, better lit, more expensive, and administered with the kind of studied discretion that the main club only pretends to offer. Membership implied.
+    description: A quiet anteroom off the buffet, separated from the main club by a heavy velvet curtain
+      and a sign reading VIP ONLY. The VIP Lounge is the velvet rope's velvet rope — quieter, better lit,
+      more expensive, and administered with the kind of studied discretion that the main club only pretends
+      to offer. Membership implied.
     map_x: 0
     map_y: 100
     exits:

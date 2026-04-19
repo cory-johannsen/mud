@@ -3,10 +3,11 @@ zone:
   danger_level: dangerous
   min_level: 2
   max_level: 7
-  world_x: 6
-  world_y: 2
+  world_x: 2
+  world_y: -1
   name: Clown Camp
-  description: A derelict circus lot on the eastern edge of the city, festering with something that used to be entertainment.
+  description: A derelict circus lot on the eastern edge of the city, festering with something that used
+    to be entertainment.
   start_room: cc_front_entrance
   zone_effects:
   - track: delirium
@@ -23,11 +24,10 @@ zone:
   - id: cc_front_entrance
     danger_level: sketchy
     title: Front Entrance
-    description: 'The circus lot entrance is marked by a rusted chain-link gate hung
-      with deflated balloons and waterlogged banners. A hand-painted sign reads WELCOME
-      TO THE SHOW in letters that have bled into something illegible. The smell of
-      something sweet and chemical drifts from within. Interstate Avenue lies to the east.
-      The coat check is west.'
+    description: The circus lot entrance is marked by a rusted chain-link gate hung with deflated balloons
+      and waterlogged banners. A hand-painted sign reads WELCOME TO THE SHOW in letters that have bled
+      into something illegible. The smell of something sweet and chemical drifts from within. Interstate
+      Avenue lies to the east. The coat check is west.
     exits:
     - direction: east
       target: ne_interstate_ave
@@ -44,9 +44,9 @@ zone:
   - id: cc_coat_check
     danger_level: dangerous
     title: Coat Check
-    description: 'A warped plywood counter holds rows of hooks, each hung with a single
-      oversized coat. The smell of greasepaint and something chemical hangs in the air.
-      Squeaky shoes somewhere in the dark. A door east leads deeper in.'
+    description: A warped plywood counter holds rows of hooks, each hung with a single oversized coat.
+      The smell of greasepaint and something chemical hangs in the air. Squeaky shoes somewhere in the
+      dark. A door east leads deeper in.
     exits:
     - direction: west
       target: cc_front_entrance
@@ -64,9 +64,9 @@ zone:
   - id: cc_empty_theater
     danger_level: dangerous
     title: Empty Theater
-    description: 'Folding chairs are arranged in ragged rows facing a dark stage. The
-      spotlight flickers, catching dust motes and something that moves between the seats.
-      Two painted faces turn toward you from the wings.'
+    description: Folding chairs are arranged in ragged rows facing a dark stage. The spotlight flickers,
+      catching dust motes and something that moves between the seats. Two painted faces turn toward you
+      from the wings.
     exits:
     - direction: west
       target: cc_coat_check
@@ -82,9 +82,8 @@ zone:
   - id: cc_changing_rooms
     danger_level: dangerous
     title: Changing Rooms
-    description: 'Mirrors line three walls, each reflecting a figure that is slightly
-      wrong. Wig stands. Prop trunks. Two mimes stand perfectly still until you move,
-      then they move with you.'
+    description: Mirrors line three walls, each reflecting a figure that is slightly wrong. Wig stands.
+      Prop trunks. Two mimes stand perfectly still until you move, then they move with you.
     exits:
     - direction: west
       target: cc_empty_theater
@@ -100,9 +99,9 @@ zone:
   - id: cc_backstage
     danger_level: dangerous
     title: Backstage
-    description: 'Cables and sandbags dangle from the fly system. A single work light
-      throws everything into harsh shadow. Props of uncertain purpose crowd every corner.
-      Something laughs from the stage beyond.'
+    description: Cables and sandbags dangle from the fly system. A single work light throws everything
+      into harsh shadow. Props of uncertain purpose crowd every corner. Something laughs from the stage
+      beyond.
     exits:
     - direction: west
       target: cc_changing_rooms
@@ -121,9 +120,9 @@ zone:
   - id: cc_the_stage
     danger_level: dangerous
     title: The Stage
-    description: 'Center stage. The house lights blaze on you from the grid above.
-      A single figure stands downstage, enormous and grinning, waiting for its cue.
-      The audience seats are all empty. Or they were.'
+    description: Center stage. The house lights blaze on you from the grid above. A single figure stands
+      downstage, enormous and grinning, waiting for its cue. The audience seats are all empty. Or they
+      were.
     exits:
     - direction: west
       target: cc_backstage
@@ -134,11 +133,13 @@ zone:
       count: 1
       respawn_after: 30m
     boss_room: true
-
   - id: clown_camp_brothel
     title: The Big Top Boudoir
     danger_level: safe
-    description: A side door off the coat check opens into a low-ceilinged room decorated with salvaged circus posters and string lights. The Big Top Boudoir maintains a determinedly cheerful aesthetic that is somehow more unsettling than the rest of the camp. The greasepaint smell does not diminish. The rates are genuinely affordable.
+    description: A side door off the coat check opens into a low-ceilinged room decorated with salvaged
+      circus posters and string lights. The Big Top Boudoir maintains a determinedly cheerful aesthetic
+      that is somehow more unsettling than the rest of the camp. The greasepaint smell does not diminish.
+      The rates are genuinely affordable.
     map_x: 0
     map_y: 100
     exits:
