@@ -8702,11 +8702,9 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string, targetX, 
 			}
 		}
 		if foundLevel < 0 {
-			// REQ-USE-1: fall through to room equipment before reporting no match.
-			if evt, err := s.tryRoomEquipFallback(uid, sess.RoomID, abilityID); evt != nil || err != nil {
-				return evt, err
-			}
-			return messageEvent(fmt.Sprintf("You don't know %s.", abilityID)), nil
+			// Tech not in spontaneous pool — fall through to innate/room-equip paths before
+			// reporting no match. Do NOT return here: innate techs must be checked next.
+			goto innateCheck
 		}
 		pool := sess.SpontaneousUsePools[foundLevel]
 		if pool.Remaining <= 0 {
@@ -8751,6 +8749,10 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string, targetX, 
 		}
 		return s.activateTechWithEffects(sess, uid, abilityID, targetID, fmt.Sprintf("You activate %s. (%d uses remaining at level %d.)", abilityID, pool.Remaining, foundLevel), nil, targetX, targetY)
 	}
+// innateCheck is the target for goto from the spontaneous path when the tech is not
+// found in KnownTechs. This allows innate techs to be checked even when the player
+// also has spontaneous techs, preventing "You don't know <tech>" false negatives.
+innateCheck:
 	// Innate tech activation. Innate techs with action_cost 0 fire immediately (cantrip parity);
 	// innate techs with action_cost > 0 queue for round resolution in combat, same as other techs.
 	if s.innateTechRepo != nil {

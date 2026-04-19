@@ -310,6 +310,61 @@ func TestBug197_PreparedAttackTech_ResolverNeverDeadlocks(t *testing.T) {
 	}
 }
 
+// TestBug198_InnateTech_WithKnownTechs_NotRejected is the regression test for GitHub issue #198:
+// "Innate techs produce 'You don't know <tech>' error when activated."
+//
+// Root cause: handleUse reached the spontaneous (KnownTechs) branch when the player is a
+// wizard/ranger and has KnownTechs populated. That branch returned "You don't know <tech>"
+// when the innate tech ID was absent from KnownTechs, never falling through to the innate
+// check further down.
+//
+// Fix: the spontaneous branch now uses goto innateCheck when the tech is not in KnownTechs,
+// allowing the innate branch to run.
+//
+// Precondition: player has both KnownTechs (wizard model) and an innate tech assigned.
+// Postcondition: handleUse activates the innate tech successfully — returns a non-nil event.
+func TestBug198_InnateTech_WithKnownTechs_NotRejected(t *testing.T) {
+	t.Parallel()
+
+	const roomID = "room_bug198"
+	svc, sessMgr, _, _ := newInnateCombatSvc(t)
+
+	svc.SetTechRegistry(makeTechRegistry(&technology.TechnologyDef{
+		ID:         "atmospheric_surge",
+		Name:       "Atmospheric Surge",
+		UsageType:  "innate",
+		ActionCost: 0,
+	}))
+	svc.SetInnateTechRepo(&innateRepoForGrpcTest{})
+
+	const uid = "u_bug198"
+	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID: uid, Username: "Nerd", CharName: "Nerd",
+		RoomID: roomID, CurrentHP: 10, MaxHP: 20, Role: "player",
+	})
+	require.NoError(t, err)
+
+	// Wizard model: has KnownTechs but atmospheric_surge is innate, NOT in KnownTechs.
+	sess.KnownTechs = map[int][]string{
+		1: {"shock_wave", "emp_burst"},
+	}
+	sess.InnateTechs = map[string]*session.InnateSlot{
+		"atmospheric_surge": {MaxUses: 0, UsesRemaining: 0}, // unlimited uses
+	}
+
+	// Without the fix, this returns "You don't know atmospheric_surge.".
+	// With the fix, it should fall through to the innate path and return a non-nil event.
+	evt, err := svc.handleUse(uid, "atmospheric_surge", "", -1, -1)
+	require.NoError(t, err)
+	require.NotNil(t, evt, "innate tech must activate successfully even when player has KnownTechs (wizard model)")
+
+	// Verify the event is not an error message.
+	if msg := evt.GetMessage(); msg != nil {
+		assert.NotContains(t, msg.Content, "don't know", "must not return 'You don't know' for an innate tech")
+		assert.NotContains(t, msg.Content, "don't have", "must not return 'You don't have' for an innate tech")
+	}
+}
+
 // TestHandleUse_InnateTech_NoActionCost_FiresImmediately verifies that innate techs
 // with no action_cost (true cantrips) still fire immediately — existing behavior preserved.
 //

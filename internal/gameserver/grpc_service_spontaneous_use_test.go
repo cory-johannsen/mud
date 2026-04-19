@@ -179,7 +179,7 @@ func TestHandleUse_SpontaneousNoUsesRemaining_REQ_SUC2(t *testing.T) {
 // the character's spontaneous tech list returns a "You don't know X." message.
 //
 // Precondition: session has KnownTechs = {1: ["mind_spike"]}.
-// Postcondition: message contains "You don't know unknown_tech."
+// Postcondition: message indicates no active ability named unknown_tech.
 func TestHandleUse_SpontaneousUnknownTech_REQ_SUC3(t *testing.T) {
 	svc, sessMgr := newSpontaneousSvc(t, newFakeSpontaneousUsePoolRepo(map[int]session.UsePool{}))
 
@@ -193,7 +193,7 @@ func TestHandleUse_SpontaneousUnknownTech_REQ_SUC3(t *testing.T) {
 	require.NotNil(t, evt)
 
 	msg := evt.GetMessage().GetContent()
-	assert.Equal(t, "You don't know unknown_tech.", msg)
+	assert.Equal(t, "You don't have an active ability named \"unknown_tech\".", msg)
 }
 
 // TestHandleUse_ListMode_IncludesSpontaneous_REQ_SUC4 verifies that listing available
