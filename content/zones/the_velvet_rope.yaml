@@ -42,7 +42,7 @@ zone:
     map_x: 0
     map_y: -2
     spawns:
-    - template: velvet_bouncer
+    - template: club_bouncer
       count: 1
       respawn_after: 0s
     properties:
