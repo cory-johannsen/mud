@@ -7,13 +7,14 @@ zone:
   world_y: -2
   script_dir: content/scripts/zones/sauvie_island
   name: Sauvie Island
-  description: The last agrarian holdout in the region. Farm compounds and river pirates contest over the only place still
-    growing real food.
+  description: The last agrarian holdout in the region. Farm compounds and river pirates
+    contest over the only place still growing real food.
   start_room: sauvie_farm_stand
   rooms:
   - id: sauvie_bridge_south
     title: Sauvie Island Bridge — South End
-    description: 'The southern end of the old Sauvie Island Bridge groans under your weight.
+    description: 'The southern end of the old Sauvie Island Bridge groans under your
+      weight.
 
       Rusted cables sway in the river wind. Below, the Multnomah Channel churns
 
@@ -49,7 +50,8 @@ zone:
       atmosphere: wind
   - id: sauvie_tollgate
     title: Bridge Tollgate
-    description: 'A crude checkpoint blocks the road just past the bridge. Concrete barriers
+    description: 'A crude checkpoint blocks the road just past the bridge. Concrete
+      barriers
 
       funnel traffic through a single lane watched by armed sentries. A hand-painted
 
@@ -75,7 +77,8 @@ zone:
       atmosphere: tense
   - id: sauvie_road
     title: Sauvie Island Road
-    description: 'The main road cuts through overgrown fields and collapsed utility poles.
+    description: 'The main road cuts through overgrown fields and collapsed utility
+      poles.
 
       Cracked asphalt stretches in both directions, patched here and there with
 
@@ -105,7 +108,8 @@ zone:
       atmosphere: rural
   - id: sauvie_pumpkin_patch
     title: Pumpkin Patch Fields
-    description: 'Rows of squash, beans, and corn stretch across the old u-pick farm grounds.
+    description: 'Rows of squash, beans, and corn stretch across the old u-pick farm
+      grounds.
 
       The soil here is dark and rich, tended by hand. Scarecrows made from
 
@@ -168,6 +172,8 @@ zone:
     exits:
     - direction: west
       target: sauvie_trading_post
+    - direction: east
+      target: sauvie_granary
     map_x: 2
     map_y: -6
     spawns:
@@ -189,7 +195,9 @@ zone:
 
       '
     danger_level: sketchy
-    exits: []
+    exits:
+    - direction: west
+      target: sauvie_the_orchard
     map_x: 4
     map_y: -8
     spawns:
@@ -267,7 +275,9 @@ zone:
 
       '
     danger_level: sketchy
-    exits: []
+    exits:
+    - direction: west
+      target: sauvie_farmhouse
     map_x: 4
     map_y: -6
     spawns:
@@ -307,7 +317,8 @@ zone:
       atmosphere: humid
   - id: sauvie_collins_beach
     title: Collins Beach — Pirate Cove
-    description: 'A sandy beach sheltered by cottonwood trees serves as the river pirates''
+    description: 'A sandy beach sheltered by cottonwood trees serves as the river
+      pirates''
 
       base of operations. Flat-bottomed boats are pulled up on the sand.
 
@@ -324,6 +335,8 @@ zone:
       target: sauvie_irrigation_canal
     - direction: north
       target: sauvie_river_dock
+    - direction: west
+      target: sauvie_river_landing
     map_x: -4
     map_y: -4
     spawns:
@@ -408,6 +421,8 @@ zone:
     exits:
     - direction: south
       target: sauvie_dairy_farm
+    - direction: west
+      target: sauvie_wildlife_refuge
     map_x: 0
     map_y: -14
     spawns:
@@ -436,6 +451,8 @@ zone:
       target: sauvie_berry_fields
     - direction: north
       target: sauvie_north_fields
+    - direction: east
+      target: sauvie_barn
     map_x: 2
     map_y: -8
     spawns:
@@ -464,6 +481,8 @@ zone:
       target: sauvie_north_tip
     - direction: south
       target: sauvie_the_orchard
+    - direction: east
+      target: sauvie_old_orchard
     map_x: 2
     map_y: -10
     spawns:
@@ -475,7 +494,8 @@ zone:
       atmosphere: open
   - id: sauvie_sturgeon_lake
     title: Sturgeon Lake
-    description: 'A broad, shallow lake fills the island''s interior basin. Fishing camps
+    description: 'A broad, shallow lake fills the island''s interior basin. Fishing
+      camps
 
       cluster along the southern shore — canvas tents, drying racks heavy
 
@@ -503,7 +523,8 @@ zone:
       atmosphere: calm
   - id: sauvie_fishing_camp
     title: Fishing Camp
-    description: 'A permanent camp of driftwood shacks and canvas shelters sits at the
+    description: 'A permanent camp of driftwood shacks and canvas shelters sits at
+      the
 
       lake''s edge. Nets hang drying between poles. A smokehouse built from
 
@@ -527,7 +548,8 @@ zone:
       atmosphere: busy
   - id: sauvie_north_tip
     title: North Tip Overlook
-    description: 'The northern point of Sauvie Island juts into the confluence of the
+    description: 'The northern point of Sauvie Island juts into the confluence of
+      the
 
       Willamette and Columbia rivers. The view is vast — grey water stretching
 
@@ -542,6 +564,8 @@ zone:
     exits:
     - direction: south
       target: sauvie_north_fields
+    - direction: north
+      target: sauvie_logging_road
     map_x: 2
     map_y: -12
     spawns:
@@ -584,12 +608,16 @@ zone:
   - id: sauvie_farm_stand
     title: Farm Stand
     danger_level: safe
-    description: 'A roadside stand that evolved into a community hub. Folding tables with produce, herbs, and handmade goods. Calm enough that people leave their weapons at the door.'
+    description: A roadside stand that evolved into a community hub. Folding tables
+      with produce, herbs, and handmade goods. Calm enough that people leave their
+      weapons at the door.
     exits:
     - direction: north
       target: sauvie_bridge_south
     - direction: west
       target: sauvie_neutral_farmhouse
+    - direction: south
+      target: sauvie_south_fields
     map_x: 0
     map_y: 2
     spawns:
@@ -616,7 +644,8 @@ zone:
       atmosphere: peaceful
   - id: sauvie_neutral_farmhouse
     title: Neutral Farmhouse
-    description: 'A solidly built farmhouse sitting apart from the main road, claimed by
+    description: 'A solidly built farmhouse sitting apart from the main road, claimed
+      by
 
       neither the island council nor the river pirates. Mismatched curtains
 
@@ -644,7 +673,8 @@ zone:
       atmosphere: neutral
   - id: sauvie_neutral_barn
     title: Neutral Farmhouse Barn
-    description: 'A well-maintained barn behind the neutral farmhouse. Stalls have been
+    description: 'A well-maintained barn behind the neutral farmhouse. Stalls have
+      been
 
       converted into sleeping quarters with straw pallets and moth-eaten blankets.
 
@@ -677,6 +707,8 @@ zone:
     exits:
     - direction: north
       target: sauvie_farm_stand
+    - direction: south
+      target: sauvie_overgrown_lot
     map_x: 0
     map_y: 4
     spawns:
@@ -691,7 +723,8 @@ zone:
       atmosphere: desolate
   - id: sauvie_wildlife_refuge
     title: Wildlife Refuge Marsh
-    description: 'A protected wetland area turned feral since the collapse. Cattails and
+    description: 'A protected wetland area turned feral since the collapse. Cattails
+      and
 
       sedge grass tower overhead. Egrets pick through the shallows. The boardwalk
 
@@ -704,6 +737,8 @@ zone:
     exits:
     - direction: east
       target: sauvie_oak_island
+    - direction: south
+      target: sauvie_logging_road
     map_x: -2
     map_y: -14
     spawns:
@@ -715,7 +750,8 @@ zone:
       atmosphere: marshy
   - id: sauvie_old_orchard
     title: Old Orchard — Abandoned
-    description: 'A neglected orchard at the island''s edge, its trees gnarled and untended.
+    description: 'A neglected orchard at the island''s edge, its trees gnarled and
+      untended.
 
       Windfall apples rot in the grass. The old irrigation pipes are dry and cracked.
 
@@ -739,7 +775,8 @@ zone:
       atmosphere: tense
   - id: sauvie_river_landing
     title: River Landing
-    description: 'A muddy flat on the island''s western bank where boats beach to unload.
+    description: 'A muddy flat on the island''s western bank where boats beach to
+      unload.
 
       Tire tracks and boot prints churn the bank into muck. Crates and tarps
 
@@ -766,7 +803,8 @@ zone:
       atmosphere: furtive
   - id: sauvie_logging_road
     title: Old Logging Road
-    description: 'A dirt track cuts through a second-growth forest, the remains of old
+    description: 'A dirt track cuts through a second-growth forest, the remains of
+      old
 
       clear-cut operations visible in the uniform young trees. Ruts are deep
 
@@ -795,7 +833,8 @@ zone:
       atmosphere: isolated
   - id: sauvie_overgrown_lot
     title: Overgrown Lot
-    description: 'A residential neighborhood that never was — foundations poured before the
+    description: 'A residential neighborhood that never was — foundations poured before
+      the
 
       collapse, now cracked open by tree roots. Walls of blackberry and ivy
 
@@ -820,11 +859,14 @@ zone:
     properties:
       lighting: overcast
       atmosphere: overgrown
-
   - id: sauvie_island_brothel
     title: The Farmhouse Hideaway
     danger_level: safe
-    description: A converted summer kitchen annexed to the neutral farmhouse's west wall. The original hearth still works. Rough-hewn shelves hold mason jars of unknown contents. The Farmhouse Hideaway maintains the island's pastoral aesthetic while conducting entirely non-agricultural business. Beds are actual beds. Rates are actual rates.
+    description: A converted summer kitchen annexed to the neutral farmhouse's west
+      wall. The original hearth still works. Rough-hewn shelves hold mason jars of
+      unknown contents. The Farmhouse Hideaway maintains the island's pastoral aesthetic
+      while conducting entirely non-agricultural business. Beds are actual beds. Rates
+      are actual rates.
     map_x: -4
     map_y: 2
     exits:
