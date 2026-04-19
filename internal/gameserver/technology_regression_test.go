@@ -175,6 +175,352 @@ func TestRearrangePreparedTechs_Bug149_WizardBackNavigationAtSlot4(t *testing.T)
 	assert.True(t, calls[2].hasBack, "slot 4 must have [back] when slot 3 was auto-assigned (Bug #149)")
 }
 
+// TestRearrangePreparedTechs_Bug149_BackNavigation_ActualClick exercises the full back-navigation
+// path from Bug #149: user navigates to slot 4, clicks [back], views auto-assigned slot 3,
+// then accepts slot 3 via [forward] and completes slot 4.
+//
+// REQ-TECH-REG-5: Clicking [back] at slot 4 (when slot 3 was auto-assigned) MUST show
+// slot 3 interactively, and clicking [forward] at slot 3 MUST return to slot 4 with [confirm].
+//
+// Precondition: 3 unique pool entries, 4 prepared slots, wizard model.
+// Postcondition: All 4 slots filled; promptFn called 4 times total (slots 1, 2, 4, 3, 4).
+func TestRearrangePreparedTechs_Bug149_BackNavigation_ActualClick(t *testing.T) {
+	ctx := context.Background()
+	sess := &session.PlayerSession{
+		Level: 7,
+		PreparedTechs: map[int][]*session.PreparedSlot{
+			1: {
+				{TechID: "tech_a"},
+				{TechID: "tech_b"},
+				{TechID: "tech_c"},
+				{TechID: "tech_a"},
+			},
+		},
+		KnownTechs: map[int][]string{
+			1: {"tech_a", "tech_b", "tech_c"},
+		},
+	}
+
+	engineerJob := &ruleset.Job{
+		ID:        "engineer",
+		Archetype: "nerd",
+		TechnologyGrants: &ruleset.TechnologyGrants{
+			Prepared: &ruleset.PreparedGrants{
+				SlotsByLevel: map[int]int{1: 1},
+				Pool: []ruleset.PreparedEntry{
+					{ID: "tech_a", Level: 1},
+					{ID: "tech_b", Level: 1},
+					{ID: "tech_c", Level: 1},
+				},
+			},
+		},
+	}
+
+	nerdArchetype := &ruleset.Archetype{
+		ID:           "nerd",
+		CastingModel: ruleset.CastingModelWizard,
+		TechnologyGrants: &ruleset.TechnologyGrants{
+			Prepared: &ruleset.PreparedGrants{
+				SlotsByLevel: map[int]int{1: 2},
+			},
+		},
+		LevelUpGrants: map[int]*ruleset.TechnologyGrants{
+			2: {
+				Prepared: &ruleset.PreparedGrants{
+					SlotsByLevel: map[int]int{1: 1},
+				},
+			},
+		},
+	}
+
+	prep := &fakePreparedRepo{slots: map[int][]*session.PreparedSlot{
+		1: sess.PreparedTechs[1],
+	}}
+
+	// Script: slots visited in order: 1, 2, [auto:3], 4, back→3, forward→4, confirm
+	// promptFn drives this by a step counter.
+	step := 0
+	type callRecord struct {
+		slotNum int
+		hasBack bool
+		opts    []string
+	}
+	var calls []callRecord
+
+	promptFn := func(prompt string, opts []string, slotCtx *gameserver.TechSlotContext) (string, error) {
+		slotNum := 0
+		if slotCtx != nil {
+			slotNum = slotCtx.SlotNum
+		}
+		hasBack := false
+		for _, o := range opts {
+			if o == "[back]" {
+				hasBack = true
+				break
+			}
+		}
+		calls = append(calls, callRecord{slotNum: slotNum, hasBack: hasBack, opts: opts})
+		step++
+
+		switch step {
+		case 1:
+			// Slot 1: pick tech_a (first real option)
+			for _, o := range opts {
+				if o != "[back]" && o != "[forward]" && o != "[confirm]" && !strings.HasPrefix(o, "[keep]") {
+					return o, nil
+				}
+			}
+		case 2:
+			// Slot 2: pick tech_b (second real option, after tech_a is excluded from remaining)
+			for _, o := range opts {
+				if o != "[back]" && o != "[forward]" && o != "[confirm]" && !strings.HasPrefix(o, "[keep]") {
+					return o, nil
+				}
+			}
+			// (slot 3 is auto-assigned to tech_c, no promptFn call)
+		case 3:
+			// Slot 4: click [back]
+			return "[back]", nil
+		case 4:
+			// Slot 3 (backtracking): click [forward] to accept the auto-assigned tech
+			return "[forward]", nil
+		case 5:
+			// Slot 4 (second visit): pick first real option and confirm
+			for _, o := range opts {
+				if o == "[confirm]" {
+					return o, nil
+				}
+			}
+			for _, o := range opts {
+				if o != "[back]" && o != "[forward]" && !strings.HasPrefix(o, "[keep]") {
+					return o, nil
+				}
+			}
+		}
+		return opts[0], nil
+	}
+
+	err := gameserver.RearrangePreparedTechs(
+		ctx, sess, 1, engineerJob, nerdArchetype, nil, promptFn, prep, nil,
+		technology.TraditionFlavor{SlotNoun: "slot", PrepGerund: "Arranging"},
+	)
+	require.NoError(t, err, "RearrangePreparedTechs must not error during back navigation")
+
+	// REQ-TECH-REG-5a: All 4 slots must be filled.
+	require.Len(t, sess.PreparedTechs[1], 4, "all 4 slots must be filled after back navigation")
+	for i, slot := range sess.PreparedTechs[1] {
+		assert.NotNil(t, slot, "slot %d must not be nil", i+1)
+		assert.NotEmpty(t, slot.TechID, "slot %d must have a non-empty TechID", i+1)
+	}
+
+	// REQ-TECH-REG-5b: promptFn must be called 5 times: slots 1, 2, 4, 3(backtrack), 4 again.
+	require.Len(t, calls, 5, "promptFn must be called 5 times: 1, 2, 4, [back→3], 4again")
+
+	// First two calls: slots 1 and 2.
+	assert.Equal(t, 1, calls[0].slotNum, "call 1 must be for slot 1")
+	assert.False(t, calls[0].hasBack, "slot 1 must not have [back]")
+	assert.Equal(t, 2, calls[1].slotNum, "call 2 must be for slot 2")
+	assert.True(t, calls[1].hasBack, "slot 2 must have [back]")
+
+	// Third call: slot 4 (first visit), user clicks [back].
+	assert.Equal(t, 4, calls[2].slotNum, "call 3 must be for slot 4 (first visit)")
+	assert.True(t, calls[2].hasBack, "slot 4 first visit must have [back]")
+
+	// REQ-TECH-REG-5c: Fourth call must be for slot 3 in backtracking mode.
+	assert.Equal(t, 3, calls[3].slotNum, "call 4 must be for slot 3 (backtracking)")
+	assert.True(t, calls[3].hasBack, "slot 3 in backtracking mode must have [back]")
+
+	// REQ-TECH-REG-5d: Fifth call must be slot 4 again with [confirm].
+	assert.Equal(t, 4, calls[4].slotNum, "call 5 must be for slot 4 (second visit)")
+	assert.True(t, calls[4].hasBack, "slot 4 second visit must have [back]")
+	hasConfirm := false
+	for _, o := range calls[4].opts {
+		if o == "[confirm]" {
+			hasConfirm = true
+			break
+		}
+	}
+	assert.True(t, hasConfirm, "slot 4 second visit must have [confirm]")
+}
+
+// TestRearrangePreparedTechs_Bug149_BackNavigation_ThroughToSlot2 exercises back navigation
+// all the way from slot 4 through slot 3 to slot 2, changing the slot 2 choice.
+//
+// REQ-TECH-REG-6: User clicking [back] twice from slot 4 (through auto-assigned slot 3)
+// MUST reach slot 2 and allow a new choice; subsequent forward navigation MUST re-auto-assign
+// slot 3 and re-present slot 4.
+//
+// Precondition: 3 unique pool entries, 4 prepared slots, wizard model.
+// Postcondition: All 4 slots filled; slot 2 reflects the new choice.
+func TestRearrangePreparedTechs_Bug149_BackNavigation_ThroughToSlot2(t *testing.T) {
+	ctx := context.Background()
+	sess := &session.PlayerSession{
+		Level: 7,
+		PreparedTechs: map[int][]*session.PreparedSlot{
+			1: {
+				{TechID: "tech_a"},
+				{TechID: "tech_b"},
+				{TechID: "tech_c"},
+				{TechID: "tech_a"},
+			},
+		},
+		KnownTechs: map[int][]string{
+			1: {"tech_a", "tech_b", "tech_c"},
+		},
+	}
+
+	engineerJob := &ruleset.Job{
+		ID:        "engineer",
+		Archetype: "nerd",
+		TechnologyGrants: &ruleset.TechnologyGrants{
+			Prepared: &ruleset.PreparedGrants{
+				SlotsByLevel: map[int]int{1: 1},
+				Pool: []ruleset.PreparedEntry{
+					{ID: "tech_a", Level: 1},
+					{ID: "tech_b", Level: 1},
+					{ID: "tech_c", Level: 1},
+				},
+			},
+		},
+	}
+
+	nerdArchetype := &ruleset.Archetype{
+		ID:           "nerd",
+		CastingModel: ruleset.CastingModelWizard,
+		TechnologyGrants: &ruleset.TechnologyGrants{
+			Prepared: &ruleset.PreparedGrants{
+				SlotsByLevel: map[int]int{1: 2},
+			},
+		},
+		LevelUpGrants: map[int]*ruleset.TechnologyGrants{
+			2: {
+				Prepared: &ruleset.PreparedGrants{
+					SlotsByLevel: map[int]int{1: 1},
+				},
+			},
+		},
+	}
+
+	prep := &fakePreparedRepo{slots: map[int][]*session.PreparedSlot{
+		1: sess.PreparedTechs[1],
+	}}
+
+	// Script: 1, 2(pick b), [auto:3=c], 4(back), 3(back), 2(pick c), [auto:3=b], 4(confirm)
+	step := 0
+	type callRecord struct {
+		slotNum int
+		hasBack bool
+		chosen  string
+	}
+	var calls []callRecord
+
+	pickFirstReal := func(opts []string) string {
+		for _, o := range opts {
+			if o != "[back]" && o != "[forward]" && o != "[confirm]" && !strings.HasPrefix(o, "[keep]") {
+				return o
+			}
+		}
+		return opts[0]
+	}
+
+	promptFn := func(prompt string, opts []string, slotCtx *gameserver.TechSlotContext) (string, error) {
+		slotNum := 0
+		if slotCtx != nil {
+			slotNum = slotCtx.SlotNum
+		}
+		hasBack := false
+		for _, o := range opts {
+			if o == "[back]" {
+				hasBack = true
+				break
+			}
+		}
+		step++
+
+		var chosen string
+		switch step {
+		case 1:
+			// Slot 1: pick tech_a
+			chosen = pickFirstReal(opts)
+		case 2:
+			// Slot 2: pick tech_b
+			chosen = pickFirstReal(opts)
+		case 3:
+			// Slot 4 (first visit): click [back]
+			chosen = "[back]"
+		case 4:
+			// Slot 3 (backtracking): click [back] again
+			chosen = "[back]"
+		case 5:
+			// Slot 2 (backtracking): pick tech_c instead (the second real option)
+			var secondReal string
+			count := 0
+			for _, o := range opts {
+				if o != "[back]" && o != "[forward]" && o != "[confirm]" && !strings.HasPrefix(o, "[keep]") {
+					count++
+					if count == 1 {
+						secondReal = o // first real option — pick it for simplicity
+					}
+				}
+			}
+			// We want tech_c specifically: find it in opts
+			for _, o := range opts {
+				if strings.Contains(o, "tech_c") {
+					secondReal = o
+				}
+			}
+			chosen = secondReal
+		case 6:
+			// Slot 4 (second visit, slot 3 re-auto-assigned): confirm
+			for _, o := range opts {
+				if o == "[confirm]" {
+					chosen = o
+				}
+			}
+			if chosen == "" {
+				chosen = pickFirstReal(opts)
+			}
+		default:
+			chosen = pickFirstReal(opts)
+		}
+
+		calls = append(calls, callRecord{slotNum: slotNum, hasBack: hasBack, chosen: chosen})
+		return chosen, nil
+	}
+
+	err := gameserver.RearrangePreparedTechs(
+		ctx, sess, 1, engineerJob, nerdArchetype, nil, promptFn, prep, nil,
+		technology.TraditionFlavor{SlotNoun: "slot", PrepGerund: "Arranging"},
+	)
+	require.NoError(t, err, "RearrangePreparedTechs must not error during full back navigation to slot 2")
+
+	// All 4 slots must be filled.
+	require.Len(t, sess.PreparedTechs[1], 4, "all 4 slots must be filled")
+	for i, slot := range sess.PreparedTechs[1] {
+		assert.NotNil(t, slot, "slot %d must not be nil", i+1)
+		assert.NotEmpty(t, slot.TechID, "slot %d must have a non-empty TechID", i+1)
+	}
+
+	// Expect 6 prompt calls: 1, 2, 4(back), 3(back), 2(new pick), 4(confirm)
+	require.Len(t, calls, 6, "expected 6 prompt calls for full back-navigation path")
+
+	// REQ-TECH-REG-6a: Call sequence must match expected slot order.
+	assert.Equal(t, 1, calls[0].slotNum, "call 1: slot 1")
+	assert.Equal(t, 2, calls[1].slotNum, "call 2: slot 2 (first visit)")
+	assert.Equal(t, 4, calls[2].slotNum, "call 3: slot 4 (back clicked)")
+	assert.Equal(t, 3, calls[3].slotNum, "call 4: slot 3 (backtracking, back clicked)")
+	assert.Equal(t, 2, calls[4].slotNum, "call 5: slot 2 (backtracking, pick tech_c)")
+	assert.Equal(t, 4, calls[5].slotNum, "call 6: slot 4 (confirm)")
+
+	// REQ-TECH-REG-6b: All intermediate slots must have [back] except slot 1.
+	assert.False(t, calls[0].hasBack, "slot 1 must not have [back]")
+	assert.True(t, calls[1].hasBack, "slot 2 first visit must have [back]")
+	assert.True(t, calls[2].hasBack, "slot 4 first visit must have [back]")
+	assert.True(t, calls[3].hasBack, "slot 3 backtracking must have [back]")
+	assert.True(t, calls[4].hasBack, "slot 2 backtracking must have [back]")
+	assert.True(t, calls[5].hasBack, "slot 4 second visit must have [back]")
+}
+
 // TestRearrangePreparedTechs_AllJobs_AllLevels_NoPanic exercises RearrangePreparedTechs
 // for all jobs in content/jobs that have prepared technology grants, at every character
 // level from 1 through the max level found in level_up_grants.
