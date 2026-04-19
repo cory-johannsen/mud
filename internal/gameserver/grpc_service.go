@@ -666,6 +666,21 @@ func (s *GameServiceServer) ValidateQuestRegistry() error {
 	return s.questSvc.Registry().CrossValidate(npcIDs, itemIDs, roomIDs)
 }
 
+// ValidateZoneNPCLevels cross-checks all zone NPC spawns against zone level ranges.
+// Zones without min_level/max_level (both 0) are skipped.
+//
+// Precondition: world and npcMgr must be fully initialized.
+// Postcondition: returns nil if all NPC levels are in-range, or a non-nil error describing the violation.
+func (s *GameServiceServer) ValidateZoneNPCLevels() error {
+	zones := s.world.AllZones()
+	for _, zone := range zones {
+		if err := zone.ValidateNPCLevels(s.npcMgr); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 // SetNPCIdleTickInterval sets the zone-tick interval used to convert say cooldown durations
 // to tick counts. REQ-NB-2. Must be called before StartZoneTicks.
 //

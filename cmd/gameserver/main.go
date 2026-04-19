@@ -213,6 +213,11 @@ func main() {
 		log.Fatalf("quest registry validation failed: %v", err)
 	}
 
+	// Validate zone NPC level ranges at startup.
+	if err := app.GRPCService.ValidateZoneNPCLevels(); err != nil {
+		log.Fatalf("zone NPC level validation failed: %v", err)
+	}
+
 	// Wire broadcast function: CombatHandler needs GRPCService after both are constructed.
 	app.CombatHandler.SetBroadcastFn(func(roomID string, events []*gamev1.CombatEvent) {
 		if app.GRPCService != nil {
