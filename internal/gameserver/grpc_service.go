@@ -9287,7 +9287,7 @@ type techSlotContext struct {
 
 // maxChoiceAttempts is the maximum number of stream.Recv iterations before
 // promptFeatureChoice gives up waiting for a valid choice.
-const maxChoiceAttempts = 20
+const maxChoiceAttempts = 100
 
 func (s *GameServiceServer) promptFeatureChoice(
 	stream gamev1.GameService_SessionServer,

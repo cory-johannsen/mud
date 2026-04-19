@@ -758,53 +758,17 @@ func RearrangePreparedTechs(
 	// When all pool slots are filled (or [confirm] selected), flush to DB and return.
 	cur := 0
 	totalPoolSlots := len(poolSlots)
-	// backtracking is set to true when the user navigates backward via [back].
-	// Auto-assignment (REQ-TC-17) is suppressed during backtracking so that the
-	// user can navigate through auto-assigned slots and reach earlier interactive slots.
-	backtracking := false
 
-	// remainingByLevel tracks the available pool entries for slot selection.
-	// It is recomputed on each prompt from poolByLevel minus already-chosen techs at the same level.
+	// computeRemaining returns the full pool for the current slot's level.
+	// Duplicate selections are permitted — prepared casters may prepare the same
+	// tech in multiple slots (REQ-TC-17 auto-assignment removed).
 	computeRemaining := func(cur int) []ruleset.PreparedEntry {
-		lvl := poolSlots[cur].level
-		base := poolByLevel[lvl]
-		// Collect IDs chosen so far at this level (from other pool slots before cur).
-		chosen := make(map[string]bool)
-		for i, ps := range poolSlots {
-			if i != cur && ps.level == lvl && inProgress[i] != "" {
-				chosen[inProgress[i]] = true
-			}
-		}
-		var rem []ruleset.PreparedEntry
-		for _, e := range base {
-			if !chosen[e.ID] {
-				rem = append(rem, e)
-			}
-		}
-		// If all unique entries are exhausted (pool smaller than slot count), allow
-		// duplicate preparation — PF2e prepared casters may prepare the same tech in
-		// multiple slots.
-		if len(rem) == 0 {
-			return base
-		}
-		return rem
+		return poolByLevel[poolSlots[cur].level]
 	}
 
 	for cur < totalPoolSlots {
 		ps := poolSlots[cur]
 		remaining := computeRemaining(cur)
-
-		// REQ-TC-17: Auto-assign without prompting when exactly one eligible tech exists.
-		// Exception: suppress auto-assignment when backtracking so the user can navigate
-		// through previously auto-assigned slots and reach earlier interactive slots.
-		if len(remaining) == 1 && !backtracking {
-			techID := remaining[0].ID
-			inProgress[cur] = techID
-			send(fmt.Sprintf("Level %d, %s %d of %d (auto): %s", ps.level, flavor.SlotNoun, ps.slotNum, ps.totalLevel, techID))
-			cur++
-			continue
-		}
-		backtracking = false
 
 		send(fmt.Sprintf("Level %d, %s %d of %d: choose from pool", ps.level, flavor.SlotNoun, ps.slotNum, ps.totalLevel))
 
@@ -872,11 +836,8 @@ func RearrangePreparedTechs(
 		switch {
 		case chosen == backSentinel:
 			// REQ-TC-16: Navigate back to the previous pool slot.
-			// Set backtracking=true so the next slot (which may have been auto-assigned
-			// with only one option) is still shown to the user for review.
 			if cur > 0 {
 				cur--
-				backtracking = true
 			}
 		case chosen == forwardSentinel:
 			// REQ-TC-16: Navigate forward without changing the current in-progress choice.
