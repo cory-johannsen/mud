@@ -383,8 +383,8 @@ export function MapPanel() {
             onHoverEnd={handleRoomLeave}
             playerLevel={state.characterSheet?.level ?? 0}
             zoneLevelRange={
-              (state.worldTiles.find(t => t.current || t.current === true)?.levelRange)
-              ?? (state.worldTiles.find(t => t.current || t.current === true)?.level_range)
+              (state.worldTiles.find(t => !!t.current)?.levelRange)
+              ?? (state.worldTiles.find(t => !!t.current)?.level_range)
             }
           />
           {hoveredTile && (
