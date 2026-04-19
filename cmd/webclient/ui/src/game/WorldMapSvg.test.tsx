@@ -92,8 +92,9 @@ describe('WorldMapSvg', () => {
     }]
     const { container } = render(<WorldMapSvg tiles={tiles} onTravel={vi.fn()} />)
     const texts = container.querySelectorAll('text')
-    const contents = Array.from(texts).map(t => t.textContent ?? '')
-    expect(contents.every(t => !t.match(/\d+-\d+/))).toBe(true)
+    // Exactly one text element (the zone name) — no level range text rendered
+    expect(texts).toHaveLength(1)
+    expect(texts[0].textContent).toBe('Test Zone')
   })
 
   it('renders zone name on discovered tile', () => {
