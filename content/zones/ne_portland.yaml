@@ -7,9 +7,9 @@ zone:
   world_y: 0
   script_dir: content/scripts/zones/ne_portland
   name: Northeast Portland
-  description: The old neighborhoods of Northeast Portland have devolved into a patchwork of bike-courier territories, fortified
-    breweries, and feral art collectives. Alberta Street's galleries now house gangs, while the brewery row on Mississippi
-    has become a warlord's domain.
+  description: The old neighborhoods of Northeast Portland have devolved into a patchwork of bike-courier
+    territories, fortified breweries, and feral art collectives. Alberta Street's galleries now house
+    gangs, while the brewery row on Mississippi has become a warlord's domain.
   start_room: ne_corner_store
   rooms:
   - id: ne_alberta_street
@@ -401,6 +401,9 @@ zone:
     exits:
     - direction: north
       target: ne_hollywood_district
+    - direction: northwest
+      target: sp_parking_lot
+      zone: steampdx
     map_x: 2
     map_y: 6
     spawns:
@@ -640,7 +643,8 @@ zone:
       atmosphere: wind
   - id: ne_corner_store
     title: Corner Store
-    description: "A converted convenience store with the shelving pushed to the walls. Locals come here to restock, get patched up, and hear what's going on in the neighborhood."
+    description: A converted convenience store with the shelving pushed to the walls. Locals come here
+      to restock, get patched up, and hear what's going on in the neighborhood.
     danger_level: safe
     exits:
     - direction: south
@@ -890,11 +894,13 @@ zone:
     properties:
       lighting: dim
       atmosphere: quiet
-
   - id: ne_portland_brothel
     title: The Velvet Spoke
     danger_level: safe
-    description: Adjacent to the neutral bunker, through a door painted with an ironic mural of a bicycle wheel. The Velvet Spoke operates with Northeast Portland's characteristic self-awareness — locally owned, community-priced, and entirely earnest about what it offers. Drinks available. Conversation optional.
+    description: Adjacent to the neutral bunker, through a door painted with an ironic mural of a bicycle
+      wheel. The Velvet Spoke operates with Northeast Portland's characteristic self-awareness — locally
+      owned, community-priced, and entirely earnest about what it offers. Drinks available. Conversation
+      optional.
     map_x: 6
     map_y: -6
     exits:

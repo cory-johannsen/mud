@@ -6,7 +6,8 @@ zone:
   world_x: 0
   world_y: -2
   name: SteamPDX
-  description: A men's bathhouse south of downtown, notorious for its hostile door policy and even more hostile interior.
+  description: A men's bathhouse south of downtown, notorious for its hostile door policy and even more
+    hostile interior.
   start_room: sp_parking_lot
   zone_effects:
   - track: horror
@@ -27,18 +28,17 @@ zone:
   rooms:
   - id: sp_parking_lot
     danger_level: dangerous
-    title: Parking Lot
-    description: 'A cracked asphalt lot behind a nondescript building with blacked-out
-      windows. A hand-lettered sign reads "Members Only." The bouncer at the door
-      looks you over with practiced contempt.'
+    title: SteamPDX Parking Lot
+    description: A cracked asphalt lot behind a nondescript building with blacked-out windows. A hand-lettered
+      sign reads "Members Only." The bouncer at the door looks you over with practiced contempt.
     exits:
     - direction: east
       target: sp_lobby
     - direction: north
       target: steampdx_brothel
-    - direction: southeast
-      target: market_district
-      zone: downtown
+    - direction: southwest
+      target: ne_sandy_boulevard
+      zone: ne_portland
     map_x: 0
     map_y: 0
     spawns:
@@ -49,9 +49,9 @@ zone:
   - id: sp_lobby
     danger_level: dangerous
     title: Lobby
-    description: 'Wood paneling, low lighting, and a reception desk attended by no
-      one. Lockers line one wall. A faint chemical smell — chlorine and something
-      else — drifts from further inside. Patrons eye new arrivals.'
+    description: Wood paneling, low lighting, and a reception desk attended by no one. Lockers line one
+      wall. A faint chemical smell — chlorine and something else — drifts from further inside. Patrons
+      eye new arrivals.
     exits:
     - direction: west
       target: sp_parking_lot
@@ -67,9 +67,9 @@ zone:
   - id: sp_locker_room
     danger_level: dangerous
     title: Locker Room
-    description: 'Banks of metal lockers, most hanging open. Towels on hooks. The
-      tile floor is wet. Three exits lead deeper into the facility — south to the
-      showers, east to the sauna. The steam is already thick.'
+    description: Banks of metal lockers, most hanging open. Towels on hooks. The tile floor is wet. Three
+      exits lead deeper into the facility — south to the showers, east to the sauna. The steam is already
+      thick.
     exits:
     - direction: west
       target: sp_lobby
@@ -83,9 +83,8 @@ zone:
   - id: sp_showers
     danger_level: dangerous
     title: Showers
-    description: 'A row of open shower stalls, visibility near zero in the billowing
-      steam. Water runs hot and constant. Movement in the fog. Patrons who are no
-      longer interested in relaxing.'
+    description: A row of open shower stalls, visibility near zero in the billowing steam. Water runs
+      hot and constant. Movement in the fog. Patrons who are no longer interested in relaxing.
     exits:
     - direction: north
       target: sp_locker_room
@@ -99,9 +98,9 @@ zone:
   - id: sp_sauna
     danger_level: dangerous
     title: Sauna
-    description: 'Cedar benches in a cedar room heated to an unreasonable temperature.
-      Coals glow in a central pit. The air scorches the lungs. Patrons recline with
-      territorial ease, sweating profusely and watching the door.'
+    description: Cedar benches in a cedar room heated to an unreasonable temperature. Coals glow in a
+      central pit. The air scorches the lungs. Patrons recline with territorial ease, sweating profusely
+      and watching the door.
     exits:
     - direction: west
       target: sp_locker_room
@@ -117,9 +116,9 @@ zone:
   - id: sp_hot_tub
     danger_level: dangerous
     title: Hot Tub
-    description: 'A large circular tub set into the floor, bubbling at a concerning
-      temperature. The water is cloudy. More patrons, equally unwelcoming. A passage
-      south leads somewhere the signage has been removed from.'
+    description: A large circular tub set into the floor, bubbling at a concerning temperature. The water
+      is cloudy. More patrons, equally unwelcoming. A passage south leads somewhere the signage has been
+      removed from.
     exits:
     - direction: north
       target: sp_sauna
@@ -135,9 +134,9 @@ zone:
   - id: sp_glory_hole
     danger_level: dangerous
     title: The Glory Hole
-    description: 'A low-ceilinged alcove at the deepest point of the facility. Three
-      men of extraordinary size occupy every corner. They are not pleased to have company
-      unless company was invited. You were not invited.'
+    description: A low-ceilinged alcove at the deepest point of the facility. Three men of extraordinary
+      size occupy every corner. They are not pleased to have company unless company was invited. You were
+      not invited.
     exits:
     - direction: north
       target: sp_hot_tub
@@ -148,11 +147,13 @@ zone:
       count: 1
       respawn_after: 30m
     boss_room: true
-
   - id: steampdx_brothel
     title: The Brass Bed Chamber
     danger_level: safe
-    description: A converted attendant booth behind the parking lot, expanded into a proper room with salvaged brass fixtures and heavy curtains. The Brass Bed Chamber predates the bathhouse's current management and maintains a certain nostalgic warmth. Not affiliated with whatever happens inside. Separate operation, separate staff, separate philosophy.
+    description: A converted attendant booth behind the parking lot, expanded into a proper room with
+      salvaged brass fixtures and heavy curtains. The Brass Bed Chamber predates the bathhouse's current
+      management and maintains a certain nostalgic warmth. Not affiliated with whatever happens inside.
+      Separate operation, separate staff, separate philosophy.
     map_x: 0
     map_y: 100
     exits:

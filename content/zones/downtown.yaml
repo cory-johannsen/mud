@@ -6,8 +6,8 @@ zone:
   world_x: 0
   world_y: 0
   name: Downtown Portland
-  description: The shattered remains of Portland's urban core, where rain-slicked rubble and rusting infrastructure form the
-    bones of a dead civilization.
+  description: The shattered remains of Portland's urban core, where rain-slicked rubble and rusting infrastructure
+    form the bones of a dead civilization.
   start_room: downtown_underground
   script_dir: content/scripts/zones/downtown
   rooms:
@@ -132,9 +132,6 @@ zone:
       target: director_park
     - direction: southwest
       target: dt_park_blocks_south
-    - direction: northwest
-      target: sp_parking_lot
-      zone: steampdx
     map_x: 0
     map_y: 2
     spawns:
@@ -287,11 +284,11 @@ zone:
   - id: cliff_base
     title: Base of the Cliff
     danger_level: safe
-    description: 'A sheer rock face rises before you. Hand-holds have been carved into the stone,
-      worn smooth by countless ascents. The cliff stretches upward into darkness above.
+    description: 'A sheer rock face rises before you. Hand-holds have been carved into the stone, worn
+      smooth by countless ascents. The cliff stretches upward into darkness above.
 
-      You can see the stone glints with moisture in places, suggesting water seeps from cracks
-      higher up.
+      You can see the stone glints with moisture in places, suggesting water seeps from cracks higher
+      up.
 
       '
     exits:
@@ -302,19 +299,18 @@ zone:
     map_x: 4
     map_y: 2
     properties:
-      climbable: "true"
-      climb_dc: "15"
+      climbable: 'true'
+      climb_dc: '15'
       lighting: dim
       atmosphere: stone
   - id: cliff_top
     title: Top of the Cliff
     danger_level: safe
-    description: 'You stand on a rocky ledge overlooking the city ruins below. From this vantage,
-      you can see the twisted streets and collapsed buildings of the downtown core spreading
-      out in all directions.
+    description: 'You stand on a rocky ledge overlooking the city ruins below. From this vantage, you
+      can see the twisted streets and collapsed buildings of the downtown core spreading out in all directions.
 
-      The wind is stronger up here, carrying the smell of rain and rust. To the east,
-      a steep ravine drops away sharply.
+      The wind is stronger up here, carrying the smell of rain and rust. To the east, a steep ravine drops
+      away sharply.
 
       '
     exits:
@@ -330,11 +326,11 @@ zone:
   - id: ravine_flooded
     title: Flooded Ravine
     danger_level: safe
-    description: 'You stand in a narrow ravine filled with murky water. The current is strong,
-      fed by underground springs and seepage from the cliff face above.
+    description: 'You stand in a narrow ravine filled with murky water. The current is strong, fed by
+      underground springs and seepage from the cliff face above.
 
-      The water is cold and opaque, impossible to see more than a few inches down.
-      The ravine walls are slick with moss and algae.
+      The water is cold and opaque, impossible to see more than a few inches down. The ravine walls are
+      slick with moss and algae.
 
       '
     exits:
@@ -345,11 +341,12 @@ zone:
     properties:
       lighting: dim
       atmosphere: flooded
-      water_terrain: "true"
-      water_dc: "12"
+      water_terrain: 'true'
+      water_dc: '12'
   - id: downtown_underground
     title: The Underground
-    description: 'A repurposed parking garage two levels below street level. Strip lighting, folding tables, and the low hum of people who need things and people who have them.'
+    description: A repurposed parking garage two levels below street level. Strip lighting, folding tables,
+      and the low hum of people who need things and people who have them.
     danger_level: safe
     exits:
     - direction: south
@@ -380,16 +377,18 @@ zone:
     properties:
       lighting: strip
       atmosphere: commerce
-  # --- New rooms added for zone-content-expansion ---
-  # Edge rooms (safe)
   - id: dt_old_post_office
     title: Old Post Office Ruin
     danger_level: safe
-    description: |
-      The massive Romanesque Revival building has lost most of its roof but its thick
+    description: 'The massive Romanesque Revival building has lost most of its roof but its thick
+
       granite walls still stand. Pigeons nest in the arched window frames. The cavernous
+
       interior smells of wet stone and old paper. Collapsed sorting racks form strange
+
       metallic sculptures on the flooded floor.
+
+      '
     exits:
     - direction: northeast
       target: dt_union_station_ruins
@@ -403,10 +402,13 @@ zone:
   - id: dt_park_blocks_north
     title: North Park Blocks
     danger_level: safe
-    description: |
-      A narrow strip of parkland between old brick buildings. The elms have grown wild
+    description: 'A narrow strip of parkland between old brick buildings. The elms have grown wild
+
       and enormous, their root systems cracking the brick pathways. Moss-covered statues
-      peer from the undergrowth. It's quieter here than most of downtown — almost peaceful.
+
+      peer from the undergrowth. It''s quieter here than most of downtown — almost peaceful.
+
+      '
     exits:
     - direction: west
       target: dt_old_post_office
@@ -422,10 +424,13 @@ zone:
   - id: dt_park_blocks_south
     title: South Park Blocks
     danger_level: safe
-    description: |
-      The southern extension of the park blocks runs past the ruins of art museums and
+    description: 'The southern extension of the park blocks runs past the ruins of art museums and
+
       university buildings. Flowering weeds have colonized every planter. Someone has
+
       arranged salvaged sculptures into a rough avenue of strange totems.
+
+      '
     exits:
     - direction: north
       target: dt_park_blocks_north
@@ -439,10 +444,13 @@ zone:
   - id: dt_pearl_district_edge
     title: Pearl District Edge
     danger_level: safe
-    description: |
-      The former gallery district's brick warehouses are gutted but structurally intact.
+    description: 'The former gallery district''s brick warehouses are gutted but structurally intact.
+
       Someone is growing food in the ground-floor spaces — rows of kale visible through
-      broken windows, tended by people who don't make eye contact with strangers.
+
+      broken windows, tended by people who don''t make eye contact with strangers.
+
+      '
     exits:
     - direction: west
       target: broadway_ruins
@@ -458,10 +466,13 @@ zone:
   - id: dt_burnside_overpass
     title: Burnside Overpass
     danger_level: safe
-    description: |
-      The old Burnside Bridge overpass spans a dry concrete channel. The underside is
+    description: 'The old Burnside Bridge overpass spans a dry concrete channel. The underside is
+
       a city of tarpaulins and rope ladders — people live here, tucked above the flood
+
       line. They watch you cross with the calm assessment of people who have seen worse.
+
+      '
     exits:
     - direction: west
       target: burnside_crossing
@@ -475,11 +486,15 @@ zone:
   - id: dt_union_station_ruins
     title: Union Station Ruins
     danger_level: safe
-    description: |
-      The terra cotta clock tower still stands, improbably, its clock frozen at 3:17.
+    description: 'The terra cotta clock tower still stands, improbably, its clock frozen at 3:17.
+
       The vaulted waiting hall has become a kind of neutral ground — its size and
+
       multiple entrances make it impossible to hold, so no one tries. People pass through
+
       without incident, by unspoken agreement.
+
+      '
     exits:
     - direction: southwest
       target: dt_old_post_office
@@ -494,15 +509,18 @@ zone:
     properties:
       lighting: hall
       atmosphere: neutral
-  # Core rooms (sketchy — zone default)
   - id: dt_chinatown_gate
     title: Chinatown Gate
     core: true
-    description: |
-      The ornate ceremonial gate still spans the intersection, its paint faded but
+    description: 'The ornate ceremonial gate still spans the intersection, its paint faded but
+
       its dragons intact. The neighborhood behind it is contested territory — the gate
+
       marks the edge of a dozen overlapping claims. Gang tags have been painted over
+
       gang tags so many times the wall is thick with pigment.
+
+      '
     exits:
     - direction: northwest
       target: dt_burnside_overpass
@@ -525,10 +543,13 @@ zone:
   - id: dt_old_town_square
     title: Old Town Square
     core: true
-    description: |
-      The cobblestone plaza is cracked but open, surrounded by brick facades with
-      empty windows. It was once full of late-night crowds. Now it's full of tension —
+    description: 'The cobblestone plaza is cracked but open, surrounded by brick facades with
+
+      empty windows. It was once full of late-night crowds. Now it''s full of tension —
+
       the kind of wide open space where everyone can see everyone else coming.
+
+      '
     exits:
     - direction: north
       target: dt_chinatown_gate
@@ -556,11 +577,15 @@ zone:
   - id: dt_powell_books_ruin
     title: Powell's Books Ruin
     core: true
-    description: |
-      The famous bookstore's block-filling warren of rooms is mostly intact. The books
+    description: 'The famous bookstore''s block-filling warren of rooms is mostly intact. The books
+
       are mostly ruined by water damage, but the shelves still stand and the rooms still
+
       connect in their labyrinthine way. Scavengers come to trade pages of dry text for
+
       kindling or insulation. Occasionally someone reads.
+
+      '
     exits:
     - direction: west
       target: dt_old_town_square
@@ -583,11 +608,15 @@ zone:
   - id: dt_city_hall
     title: City Hall Stronghold
     core: true
-    description: |
-      The white stone pile of the old city hall has been fortified by whoever currently
-      holds it — the occupants change, the sandbags don't. Arrow slits have been cut
+    description: 'The white stone pile of the old city hall has been fortified by whoever currently
+
+      holds it — the occupants change, the sandbags don''t. Arrow slits have been cut
+
       through the ornamental stonework. The plaza in front is clear and unobstructed,
+
       which is a threat in itself.
+
+      '
     exits:
     - direction: north
       target: dt_old_town_square
@@ -611,10 +640,13 @@ zone:
     title: Main Library Fortress
     core: true
     boss_room: true
-    description: |
-      The central library's modernist concrete shell is almost perfectly defensible.
+    description: 'The central library''s modernist concrete shell is almost perfectly defensible.
+
       A faction has made it their seat — the upper floors are occupied, the entrance
+
       is guarded, and the card catalogue has been repurposed as a ledger of debts.
+
+      '
     exits:
     - direction: west
       target: dt_city_hall
@@ -635,15 +667,18 @@ zone:
     properties:
       lighting: controlled
       atmosphere: occupied
-  # Safe cluster (5 rooms, all exit-connected)
   - id: dt_salmon_street_springs
     title: Salmon Street Springs
     danger_level: safe
-    description: |
-      The old fountain plaza still produces water — something to do with the original
+    description: 'The old fountain plaza still produces water — something to do with the original
+
       city water infrastructure that nobody has figured out how to shut off. A small
+
       settlement has grown around it. Dr. Reyes has set up her clinic under a canvas
-      awning at the fountain's edge, her instruments laid out with surgical precision.
+
+      awning at the fountain''s edge, her instruments laid out with surgical precision.
+
+      '
     exits:
     - direction: northwest
       target: morrison_bridge
@@ -667,10 +702,13 @@ zone:
   - id: dt_esplanade_north
     title: East Bank Esplanade North
     danger_level: safe
-    description: |
-      The elevated walkway along the east bank of the Willamette offers a view of the
-      downtown skyline — or what's left of it. The suspension walkway sways slightly
+    description: 'The elevated walkway along the east bank of the Willamette offers a view of the
+
+      downtown skyline — or what''s left of it. The suspension walkway sways slightly
+
       in the river wind. Below, the water is dark and moving fast. The railing is solid.
+
+      '
     exits:
     - direction: west
       target: dt_salmon_street_springs
@@ -684,10 +722,13 @@ zone:
   - id: dt_esplanade_south
     title: East Bank Esplanade South
     danger_level: safe
-    description: |
-      The southern stretch of the esplanade widens into a plaza where the old dock
+    description: 'The southern stretch of the esplanade widens into a plaza where the old dock
+
       pilings are visible at low water. A few fire rings have been built here, their
+
       ash cold. The city wall is visible across the river, its old mural mostly intact.
+
+      '
     exits:
     - direction: north
       target: dt_esplanade_north
@@ -701,11 +742,15 @@ zone:
   - id: dt_hawthorne_bridge_east
     title: Hawthorne Bridge East Approach
     danger_level: safe
-    description: |
-      The Hawthorne Bridge still stands — one of the few bridges across the Willamette
+    description: 'The Hawthorne Bridge still stands — one of the few bridges across the Willamette
+
       that remains passable. The east approach is considered safe by common consent;
+
       both sides of the river need the crossing too much to fight over it. Sentinels
-      watch from both ends but don't interfere with transit.
+
+      watch from both ends but don''t interfere with transit.
+
+      '
     exits:
     - direction: east
       target: dt_esplanade_south
@@ -719,10 +764,13 @@ zone:
   - id: dt_sw_hills_road
     title: SW Hills Road
     danger_level: safe
-    description: |
-      The road climbs steeply toward the west hills, switchbacking through tall firs
+    description: 'The road climbs steeply toward the west hills, switchbacking through tall firs
+
       that have reclaimed the shoulder. The air is noticeably cleaner here. You can
+
       hear the city below but the distance makes it abstract, almost peaceful.
+
+      '
     exits:
     - direction: north
       target: dt_salmon_street_springs
@@ -733,14 +781,16 @@ zone:
     properties:
       lighting: filtered
       atmosphere: forest
-  # Additional sketchy rooms
   - id: dt_steel_bridge_west
     title: Steel Bridge West Approach
     core: true
-    description: |
-      The Steel Bridge's double-deck swing span is frozen in a half-open position,
+    description: 'The Steel Bridge''s double-deck swing span is frozen in a half-open position,
+
       leaving a gap that can only be crossed on a narrow steel catwalk someone bolted
+
       on afterward. The catwalk is solid but narrow. Wind off the river is constant.
+
+      '
     exits:
     - direction: southeast
       target: dt_naito_parkway
@@ -761,11 +811,15 @@ zone:
   - id: dt_naito_parkway
     title: Naito Parkway
     core: true
-    description: |
-      The old riverside highway is cracked and heaved by tree roots, but wide enough
+    description: 'The old riverside highway is cracked and heaved by tree roots, but wide enough
+
       to still feel like a road. It connects the waterfront to downtown in a straight
+
       shot, which makes it useful and dangerous in equal measure. You are visible for
+
       a long way in both directions.
+
+      '
     exits:
     - direction: north
       target: waterfront_trail
@@ -788,11 +842,13 @@ zone:
     properties:
       lighting: exposed
       atmosphere: open
-
   - id: downtown_brothel
     title: The Back Room
     danger_level: safe
-    description: A converted service corridor off the Underground, accessed through a heavy steel door with a hand-lettered sign that reads BACK ROOM. Inside, red-tinted strip lighting, curtained alcoves, and a folding table where three people conduct three different businesses simultaneously. Noise from the parking garage is entirely muffled.
+    description: A converted service corridor off the Underground, accessed through a heavy steel door
+      with a hand-lettered sign that reads BACK ROOM. Inside, red-tinted strip lighting, curtained alcoves,
+      and a folding table where three people conduct three different businesses simultaneously. Noise
+      from the parking garage is entirely muffled.
     map_x: -6
     map_y: -4
     exits:
