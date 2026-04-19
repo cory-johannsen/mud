@@ -1,6 +1,8 @@
 zone:
   id: battleground
   danger_level: all_out_war
+  min_level: 1
+  max_level: 6
   world_x: 4
   world_y: -6
   script_dir: content/scripts/zones/battleground

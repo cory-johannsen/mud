@@ -1,6 +1,8 @@
 zone:
   id: beaverton
   danger_level: sketchy
+  min_level: 1
+  max_level: 6
   world_x: -2
   world_y: 0
   script_dir: content/scripts/zones/beaverton

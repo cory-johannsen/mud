@@ -1,6 +1,8 @@
 zone:
   id: the_velvet_rope
   danger_level: dangerous
+  min_level: 2
+  max_level: 7
   world_x: -2
   world_y: 4
   name: The Velvet Rope

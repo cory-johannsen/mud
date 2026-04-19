@@ -4,6 +4,8 @@ zone:
   description: The Enchanted Forest theme park grounds (Turner, OR, I-5 exit 248), colonized by the Wooks into an eternal open-air festival compound. Fairy-tale architecture persists beneath layers of tie-dye, compost, patchouli, and mycelium.
   faction_id: wooks
   danger_level: sketchy
+  min_level: 2
+  max_level: 10
   world_x: 0
   world_y: -10
   start_room: tofteville_gate

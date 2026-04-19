@@ -1,6 +1,8 @@
 zone:
   id: clown_camp
   danger_level: dangerous
+  min_level: 2
+  max_level: 7
   world_x: 6
   world_y: 2
   name: Clown Camp

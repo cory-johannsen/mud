@@ -4,6 +4,8 @@ zone:
   description: The Veneta fairgrounds, 13 miles west of Eugene on Hwy 126 — a forested river-adjacent festival site turned three-way warzone. Wooks, Juggalos, and Tweakers each control a pocket of the fairgrounds and fight continuously for dominance.
   faction_id: ""
   danger_level: dangerous
+  min_level: 2
+  max_level: 12
   world_x: -2
   world_y: -3
   start_room: ocf_main_gate

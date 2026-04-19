@@ -1,6 +1,8 @@
 zone:
   id: colonel_summers_park
   danger_level: dangerous
+  min_level: 2
+  max_level: 8
   world_x: 2
   world_y: 3
   name: Colonel Summers Park

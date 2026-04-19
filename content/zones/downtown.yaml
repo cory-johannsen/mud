@@ -1,6 +1,8 @@
 zone:
   id: downtown
   danger_level: sketchy
+  min_level: 1
+  max_level: 6
   world_x: 0
   world_y: 0
   name: Downtown Portland

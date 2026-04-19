@@ -1,6 +1,8 @@
 zone:
   id: ross_island
   danger_level: dangerous
+  min_level: 2
+  max_level: 7
   world_x: 0
   world_y: 2
   script_dir: content/scripts/zones/ross_island
