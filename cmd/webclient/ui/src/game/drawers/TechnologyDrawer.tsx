@@ -90,9 +90,7 @@ function PreparedItem({
         </strong>
         <LevelBadge level={level} />
         <span style={styles.badgeActive}>active</span>
-        {total > 1
-          ? <UsePips remaining={remaining} max={total} />
-          : exhausted && <span style={styles.expendedBadge}>expended</span>}
+        {total >= 1 && <UsePips remaining={remaining} max={total} />}
       </div>
       {slot.description && <p style={styles.techDesc}>{slot.description}</p>}
       {slot.effectsSummary && <EffectsSummary text={slot.effectsSummary} />}
