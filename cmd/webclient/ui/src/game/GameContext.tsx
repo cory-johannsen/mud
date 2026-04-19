@@ -423,7 +423,10 @@ export function GameProvider({ children }: { children: ReactNode }) {
             dispatch({ type: 'SET_MAP_TILES', tiles: map.tiles })
           }
           const wt = map.worldTiles ?? map.world_tiles
-          if (wt !== undefined) {
+          // EmitUnpopulated: true on the server marshaler causes nil repeated fields
+          // to appear as [] in zone map responses. Guard against clearing world tiles
+          // with an empty array from a non-world response.
+          if (wt !== undefined && wt.length > 0) {
             dispatch({ type: 'SET_WORLD_TILES', tiles: wt })
           }
           break
