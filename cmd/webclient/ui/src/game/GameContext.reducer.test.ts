@@ -103,3 +103,46 @@ describe('reducer: SET_QUEST_GIVER_VIEW', () => {
     )
   })
 })
+
+// REQ-BUG195-1: QUEST_ADDED MUST increment questFlashCount each time it fires.
+// REQ-BUG195-2: initialState MUST have questFlashCount === 0.
+describe('reducer: QUEST_ADDED', () => {
+  it('initialState has questFlashCount 0', () => {
+    expect(initialState.questFlashCount).toBe(0)
+  })
+
+  it('QUEST_ADDED increments questFlashCount by 1', () => {
+    const state = reducer(initialState, { type: 'QUEST_ADDED' })
+    expect(state.questFlashCount).toBe(1)
+  })
+
+  it('QUEST_ADDED increments questFlashCount each time', () => {
+    let state = initialState
+    state = reducer(state, { type: 'QUEST_ADDED' })
+    state = reducer(state, { type: 'QUEST_ADDED' })
+    state = reducer(state, { type: 'QUEST_ADDED' })
+    expect(state.questFlashCount).toBe(3)
+  })
+
+  it('QUEST_ADDED does not mutate other state fields', () => {
+    const state = reducer(initialState, { type: 'QUEST_ADDED' })
+    const { questFlashCount, ...rest } = state
+    const { questFlashCount: _qfc, ...initialRest } = initialState
+    expect(rest).toEqual(initialRest)
+  })
+
+  it('property: QUEST_ADDED always produces questFlashCount === initial + n after n dispatches', () => {
+    fc.assert(
+      fc.property(
+        fc.integer({ min: 0, max: 20 }),
+        (n) => {
+          let state = initialState
+          for (let i = 0; i < n; i++) {
+            state = reducer(state, { type: 'QUEST_ADDED' })
+          }
+          return state.questFlashCount === n
+        }
+      )
+    )
+  })
+})

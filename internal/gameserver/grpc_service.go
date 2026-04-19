@@ -12162,11 +12162,15 @@ func (s *GameServiceServer) issueTechTrainerQuests(
 				continue
 			}
 			// Accept the quest (auto-grant, no NPC giver required).
-			if _, _, err := s.questSvc.Accept(ctx, sess, sess.CharacterID, questID); err != nil {
+			title, _, err := s.questSvc.Accept(ctx, sess, sess.CharacterID, questID)
+			if err != nil {
 				s.logger.Warn("issueTechTrainerQuests: Accept failed",
 					zap.String("quest_id", questID),
 					zap.Error(err),
 				)
+			} else if title != "" {
+				// REQ-BUG195-1: Notify the player that a new quest was added to the log.
+				s.pushMessageToUID(sess.UID, fmt.Sprintf("New quest added to your quest log: %s", title))
 			}
 		}
 	}

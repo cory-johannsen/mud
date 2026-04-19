@@ -37,7 +37,7 @@ const ACTIVE_QUESTS = [
 
 function makeState(quests: typeof ACTIVE_QUESTS | null) {
   return {
-    state: { questLogView: quests === null ? null : { quests } },
+    state: { questLogView: quests === null ? null : { quests }, questCompleteQueue: [] },
     sendMessage,
   }
 }

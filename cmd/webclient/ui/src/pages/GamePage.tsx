@@ -59,6 +59,13 @@ function GameLayout() {
   const activeWeather = state.activeWeather
   const activeWeatherDescription = state.activeWeatherDescription
   const [openDrawer, setOpenDrawer] = useState<DrawerType | null>(null)
+  const [questsFlashing, setQuestsFlashing] = useState(false)
+  useEffect(() => {
+    if (state.questFlashCount === 0) return
+    setQuestsFlashing(true)
+    const timer = setTimeout(() => setQuestsFlashing(false), 1200)
+    return () => clearTimeout(timer)
+  }, [state.questFlashCount])
   const { defaultLayout: verticalLayout, onLayoutChanged: onVerticalLayoutChanged } = useDefaultLayout({
     id: 'game-vertical',
     storage: localStorage,
@@ -105,7 +112,11 @@ function GameLayout() {
           {(['inventory', 'equipment', 'skills', 'feats', 'stats', 'technology', 'job', 'explore', 'quests'] as DrawerType[]).map((d) => (
             <button
               key={d}
-              className={`toolbar-btn${openDrawer === d ? ' active' : ''}`}
+              className={[
+                'toolbar-btn',
+                openDrawer === d ? 'active' : '',
+                d === 'quests' && questsFlashing ? 'toolbar-btn--quest-flash' : '',
+              ].filter(Boolean).join(' ')}
               onClick={() => toggleDrawer(d)}
             >
               {d.charAt(0).toUpperCase() + d.slice(1)}

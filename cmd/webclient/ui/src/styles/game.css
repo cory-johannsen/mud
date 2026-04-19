@@ -108,6 +108,14 @@ body:has(.game-layout) #root { height: 100%; overflow: hidden; }
 .toolbar-btn.active { border-color: #e0c060; color: #e0c060; }
 .toolbar-btn-logout { margin-left: auto; border-color: #666; color: #999; }
 
+@keyframes quest-flash {
+  0%, 100% { background: #1a1a1a; color: #aaa; border-color: #4a6a2a; }
+  50% { background: #4a6a2a; color: #e0c060; border-color: #e0c060; }
+}
+.toolbar-btn--quest-flash {
+  animation: quest-flash 0.4s ease-in-out 3;
+}
+
 /* Combat banner */
 .combat-banner {
   background: #8b0000;

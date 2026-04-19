@@ -115,6 +115,7 @@ export interface GameState {
   loadoutView: LoadoutView | null
   choicePrompt: ChoicePrompt | null
   jobGrants: JobGrantsResponse | null
+  questFlashCount: number
 }
 
 type Action =
@@ -155,6 +156,7 @@ type Action =
   | { type: 'SET_CHOICE_PROMPT'; prompt: ChoicePrompt }
   | { type: 'CLEAR_CHOICE_PROMPT' }
   | { type: 'SET_JOB_GRANTS'; grants: JobGrantsResponse | null }
+  | { type: 'QUEST_ADDED' }
 
 export function reducer(state: GameState, action: Action): GameState {
   switch (action.type) {
@@ -251,6 +253,8 @@ export function reducer(state: GameState, action: Action): GameState {
       return { ...state, choicePrompt: null }
     case 'SET_JOB_GRANTS':
       return { ...state, jobGrants: action.grants }
+    case 'QUEST_ADDED':
+      return { ...state, questFlashCount: state.questFlashCount + 1 }
     case 'APPEND_FEED': {
       const updated = [...state.feedEntries, action.entry]
       return {
@@ -298,6 +302,7 @@ export const initialState: GameState = {
   loadoutView: null,
   choicePrompt: null,
   jobGrants: null,
+  questFlashCount: 0,
 }
 
 interface GameContextValue {
@@ -449,9 +454,13 @@ export function GameProvider({ children }: { children: ReactNode }) {
         }
         case 'MessageEvent': {
           const msg = payload as { sender?: string; content?: string }
+          const content = msg.content ?? ''
+          if (!msg.sender && content.startsWith('New quest added to your quest log:')) {
+            dispatch({ type: 'QUEST_ADDED' })
+          }
           dispatch({
             type: 'APPEND_FEED',
-            entry: makeFeedEntry('message', msg.sender ? `${msg.sender}: ${msg.content ?? ''}` : (msg.content ?? '')),
+            entry: makeFeedEntry('message', msg.sender ? `${msg.sender}: ${content}` : content),
           })
           break
         }
