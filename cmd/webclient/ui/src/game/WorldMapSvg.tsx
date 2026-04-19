@@ -56,6 +56,38 @@ export function WorldMapSvg({ tiles, onTravel, playerLevel }: WorldMapSvgProps):
   const totalH = sortedUniqueYs.length * STEP_H - GAP
   const viewBox = `-4 -4 ${totalW + 8} ${totalH + 8}`
 
+  // Build a lookup map from zoneId to tile for connection rendering.
+  const tileByZoneId = new Map(tiles.map(t => [t.zoneId ?? '', t]))
+
+  // Build zone connection lines. Each connection is drawn once (dedup by sorted pair key).
+  const drawnConnections = new Set<string>()
+  const connectionLines: JSX.Element[] = []
+  for (const tile of tiles) {
+    const connections = tile.connectedZoneIds ?? tile.connected_zone_ids ?? []
+    const ax = tile.worldX ?? 0
+    const ay = tile.worldY ?? 0
+    for (const targetId of connections) {
+      const target = tileByZoneId.get(targetId)
+      if (!target) continue
+      const bx = target.worldX ?? 0
+      const by = target.worldY ?? 0
+      const [ka, kb] = ax < bx || (ax === bx && ay < by)
+        ? [`${ax},${ay}`, `${bx},${by}`]
+        : [`${bx},${by}`, `${ax},${ay}`]
+      const pairKey = `${ka}-${kb}`
+      if (drawnConnections.has(pairKey)) continue
+      drawnConnections.add(pairKey)
+      const x1 = px(ax) + ZONE_W / 2
+      const y1 = py(ay) + ZONE_H / 2
+      const x2 = px(bx) + ZONE_W / 2
+      const y2 = py(by) + ZONE_H / 2
+      connectionLines.push(
+        <line key={pairKey} x1={x1} y1={y1} x2={x2} y2={y2}
+          stroke="#5577aa" strokeWidth={1.5} opacity={0.6} />
+      )
+    }
+  }
+
   return (
     <div style={{ overflow: 'auto', padding: '0.5rem', position: 'relative' }}>
       <svg
@@ -77,6 +109,8 @@ export function WorldMapSvg({ tiles, onTravel, playerLevel }: WorldMapSvgProps):
             )
           })}
         </defs>
+
+        {connectionLines}
 
         {tiles.map(tile => {
           const id = tile.zoneId ?? `${tile.worldX ?? 0}-${tile.worldY ?? 0}`

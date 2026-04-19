@@ -253,6 +253,60 @@ describe('WorldMapSvg', () => {
   })
 })
 
+describe('WorldMapSvg zone connections', () => {
+  it('renders a line for each connected zone pair', () => {
+    const tileA: WorldZoneTile = {
+      zoneId: 'zone_a', zoneName: 'Alpha Zone',
+      worldX: 0, worldY: 0,
+      discovered: true, current: true, dangerLevel: 'safe',
+      connectedZoneIds: ['zone_b'],
+    }
+    const tileB: WorldZoneTile = {
+      zoneId: 'zone_b', zoneName: 'Beta Zone',
+      worldX: 1, worldY: 0,
+      discovered: true, current: false, dangerLevel: 'safe',
+      connectedZoneIds: ['zone_a'],
+    }
+    const { container } = render(<WorldMapSvg tiles={[tileA, tileB]} onTravel={vi.fn()} />)
+    const lines = container.querySelectorAll('svg line')
+    // Exactly one connection line drawn (deduped from bidirectional data)
+    expect(lines.length).toBe(1)
+  })
+
+  it('deduplicates connections from both ends', () => {
+    const tileA: WorldZoneTile = {
+      zoneId: 'zone_a', zoneName: 'A',
+      worldX: 0, worldY: 0,
+      discovered: true, current: false, dangerLevel: 'safe',
+      connectedZoneIds: ['zone_b', 'zone_c'],
+    }
+    const tileB: WorldZoneTile = {
+      zoneId: 'zone_b', zoneName: 'B',
+      worldX: 1, worldY: 0,
+      discovered: true, current: false, dangerLevel: 'safe',
+      connectedZoneIds: ['zone_a'],
+    }
+    const tileC: WorldZoneTile = {
+      zoneId: 'zone_c', zoneName: 'C',
+      worldX: 0, worldY: 1,
+      discovered: true, current: false, dangerLevel: 'safe',
+      connectedZoneIds: ['zone_a'],
+    }
+    const { container } = render(<WorldMapSvg tiles={[tileA, tileB, tileC]} onTravel={vi.fn()} />)
+    const lines = container.querySelectorAll('svg line')
+    // A-B and A-C: exactly 2 lines
+    expect(lines.length).toBe(2)
+  })
+
+  it('renders no lines when no connections exist', () => {
+    const { container } = render(
+      <WorldMapSvg tiles={[CURRENT_ZONE, DISCOVERED_ZONE, UNDISCOVERED_ZONE]} onTravel={vi.fn()} />
+    )
+    const lines = container.querySelectorAll('svg line')
+    expect(lines.length).toBe(0)
+  })
+})
+
 describe('difficultyBorderColor', () => {
   it('returns green when player level is within zone range', () => {
     expect(difficultyBorderColor('3-5', 4)).toBe('#4a8')

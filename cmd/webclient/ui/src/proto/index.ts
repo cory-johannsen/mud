@@ -418,6 +418,8 @@ export interface WorldZoneTile {
   level_range?: string
   enemy?: boolean
   description?: string
+  connectedZoneIds?: string[]
+  connected_zone_ids?: string[]
 }
 
 export interface MapResponse {

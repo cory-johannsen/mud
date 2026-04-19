@@ -7146,6 +7146,14 @@ func (s *GameServiceServer) handleMap(uid string, req *gamev1.MapRequest) (*game
 
 	// World view: populate world_tiles for all zones with non-nil WorldX/WorldY.
 	if req.GetView() == "world" {
+		// Build a set of zone IDs that have world map positions, for connection filtering.
+		worldMapZoneIDs := make(map[string]bool)
+		for _, z := range s.world.AllZones() {
+			if z.WorldX != nil && z.WorldY != nil {
+				worldMapZoneIDs[z.ID] = true
+			}
+		}
+
 		var worldTiles []*gamev1.WorldZoneTile
 		for _, z := range s.world.AllZones() {
 			if z.WorldX == nil || z.WorldY == nil {
@@ -7165,17 +7173,40 @@ func (s *GameServiceServer) handleMap(uid string, req *gamev1.MapRequest) (*game
 			default:
 				levelRange = ""
 			}
+
+			// Collect IDs of directly connected zones (via any zone-crossing exit from any room).
+			connectedSet := make(map[string]bool)
+			for _, room := range z.Rooms {
+				for _, exit := range room.Exits {
+					if exit.TargetRoom == "" {
+						continue
+					}
+					targetRoom, ok := s.world.GetRoom(exit.TargetRoom)
+					if !ok {
+						continue
+					}
+					if targetRoom.ZoneID != z.ID && worldMapZoneIDs[targetRoom.ZoneID] {
+						connectedSet[targetRoom.ZoneID] = true
+					}
+				}
+			}
+			var connectedZoneIDs []string
+			for cid := range connectedSet {
+				connectedZoneIDs = append(connectedZoneIDs, cid)
+			}
+
 			worldTiles = append(worldTiles, &gamev1.WorldZoneTile{
-				ZoneId:      z.ID,
-				ZoneName:    z.Name,
-				WorldX:      int32(*z.WorldX),
-				WorldY:      int32(*z.WorldY),
-				Discovered:  isDiscovered,
-				Current:     current,
-				DangerLevel: z.DangerLevel,
-				LevelRange:  levelRange,
-				Enemy:       enemy,
-				Description: z.Description,
+				ZoneId:           z.ID,
+				ZoneName:         z.Name,
+				WorldX:           int32(*z.WorldX),
+				WorldY:           int32(*z.WorldY),
+				Discovered:       isDiscovered,
+				Current:          current,
+				DangerLevel:      z.DangerLevel,
+				LevelRange:       levelRange,
+				Enemy:            enemy,
+				Description:      z.Description,
+				ConnectedZoneIds: connectedZoneIDs,
 			})
 		}
 		return &gamev1.ServerEvent{

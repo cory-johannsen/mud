@@ -903,8 +903,9 @@ message WorldZoneTile {
     bool   current      = 6;
     string danger_level = 7;
     string level_range  = 8;
-    bool   enemy        = 9; // true if this zone is enemy territory for the current player's team
+    bool   enemy        = 9;  // true if this zone is enemy territory for the current player's team
     string description  = 10; // zone flavor text shown in hover tooltip
+    repeated string connected_zone_ids = 11; // IDs of zones directly connected via zone exits
 }
 
 // MapResponse is returned by the server with discovered tiles for the current zone
