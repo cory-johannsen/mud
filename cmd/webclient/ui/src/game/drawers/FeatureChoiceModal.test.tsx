@@ -92,6 +92,57 @@ describe('FeatureChoiceModal option selection', () => {
     expect(mockSendCommand).toHaveBeenCalledTimes(1)
   })
 
+    // REQ-FCM-11: L1 tech in an L2 slot shows a +1 heightened badge.
+  it('shows +1 badge for L1 tech in L2 slot (computed from slotLevel - techLevel)', () => {
+    const prompt = makePrompt(
+      ['[back]', '[shock_wave] Shock Wave (Lv 1) — desc', '[confirm]'],
+      { slotNum: 1, totalSlots: 1, slotLevel: 2 },
+    )
+    mockUseGame.mockReturnValue({
+      ...BASE_STATE,
+      state: { ...BASE_STATE.state, choicePrompt: prompt },
+      sendCommand: mockSendCommand,
+      clearChoicePrompt: mockClearChoicePrompt,
+    })
+    render(<FeatureChoiceModal />)
+
+    expect(screen.getByText('+1')).toBeTruthy()
+  })
+
+  // REQ-FCM-11: L1 tech in an L3 slot shows a +2 heightened badge.
+  it('shows +2 badge for L1 tech in L3 slot', () => {
+    const prompt = makePrompt(
+      ['[shock_wave] Shock Wave (Lv 1) — desc', '[forward]'],
+      { slotNum: 1, totalSlots: 2, slotLevel: 3 },
+    )
+    mockUseGame.mockReturnValue({
+      ...BASE_STATE,
+      state: { ...BASE_STATE.state, choicePrompt: prompt },
+      sendCommand: mockSendCommand,
+      clearChoicePrompt: mockClearChoicePrompt,
+    })
+    render(<FeatureChoiceModal />)
+
+    expect(screen.getByText('+2')).toBeTruthy()
+  })
+
+  // REQ-FCM-11: L1 tech in L1 slot should NOT show any heightened badge.
+  it('shows no badge for L1 tech in L1 slot (same level)', () => {
+    const prompt = makePrompt(
+      ['[shock_wave] Shock Wave (Lv 1) — desc', '[forward]'],
+      { slotNum: 1, totalSlots: 2, slotLevel: 1 },
+    )
+    mockUseGame.mockReturnValue({
+      ...BASE_STATE,
+      state: { ...BASE_STATE.state, choicePrompt: prompt },
+      sendCommand: mockSendCommand,
+      clearChoicePrompt: mockClearChoicePrompt,
+    })
+    render(<FeatureChoiceModal />)
+
+    expect(screen.queryByText(/^\+\d+$/)).toBeNull()
+  })
+
   // REQ-FCM-10: Double-clicking a navigation button MUST NOT send twice.
   it('ignores a second click on a navigation sentinel (forward)', () => {
     const prompt = makePrompt(['[shock_wave] Shock Wave (Lv 1) — desc', '[forward]'])

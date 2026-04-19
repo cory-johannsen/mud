@@ -160,7 +160,12 @@ export function FeatureChoiceModal({ onClose: _onClose }: { onClose?: () => void
         {/* Scrollable option list — grows to fill available space */}
         <div style={{ overflowY: 'auto', padding: '0 20px', flex: '1 1 auto', display: 'flex', flexDirection: 'column', gap: '6px' }}>
           {filteredOptions.map((opt, i) => {
-            const { text: withoutHeighten, delta } = parseHeightenSentinel(opt)
+            const { text: withoutHeighten, delta: sentinelDelta } = parseHeightenSentinel(opt)
+            const techLevel = parseLevelFromOption(opt)
+            // REQ-FCM-11: Compute heighten delta from slotLevel - techLevel when the option
+            // does not carry an explicit [heightened:N] sentinel (server omits it).
+            const delta = sentinelDelta > 0 ? sentinelDelta
+              : (slotLevel > 0 && techLevel > 0 && slotLevel > techLevel ? slotLevel - techLevel : 0)
             const displayText = stripTechIdPrefix(withoutHeighten)
             return (
               <button
