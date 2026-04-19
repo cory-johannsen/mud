@@ -17,7 +17,7 @@ zone:
     cooldown_minutes: 5
   rooms:
   - id: cp_entry
-    danger_level: dangerous
+    danger_level: safe
     title: Club Entry
     description: A velvet rope and two bouncers mark the threshold between outside and whatever this is.
       Bass frequencies vibrate the floor. A stamp on the wrist and a headache that starts immediately.
@@ -32,6 +32,13 @@ zone:
     map_x: 0
     map_y: 0
     boss_room: false
+    equipment:
+    - item_id: zone_map
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      script: zone_map_use
+      description: Zone Map
   - id: cp_bar_1f
     danger_level: dangerous
     title: First Floor Bar

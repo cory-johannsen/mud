@@ -326,6 +326,13 @@ zone:
     - template: juggalo_banker
       count: 1
       respawn_after: 0s
+    equipment:
+    - item_id: zone_map
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      script: zone_map_use
+      description: Zone Map
   - id: the_faygo_fountain
     title: The Faygo Fountain
     description: 'A salvaged pump system feeds a permanent Faygo spray fountain at the heart of
