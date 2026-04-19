@@ -7124,6 +7124,17 @@ func (s *GameServiceServer) handleMap(uid string, req *gamev1.MapRequest) (*game
 			}
 			isDiscovered := len(sess.AutomapCache[z.ID]) > 0
 			current := z.ID == zone.ID
+			var levelRange string
+			switch {
+			case z.MinLevel > 0 && z.MaxLevel > 0:
+				levelRange = fmt.Sprintf("%d-%d", z.MinLevel, z.MaxLevel)
+			case z.MinLevel > 0:
+				levelRange = fmt.Sprintf("%d+", z.MinLevel)
+			case z.MaxLevel > 0:
+				levelRange = fmt.Sprintf("1-%d", z.MaxLevel)
+			default:
+				levelRange = ""
+			}
 			worldTiles = append(worldTiles, &gamev1.WorldZoneTile{
 				ZoneId:      z.ID,
 				ZoneName:    z.Name,
@@ -7132,6 +7143,7 @@ func (s *GameServiceServer) handleMap(uid string, req *gamev1.MapRequest) (*game
 				Discovered:  isDiscovered,
 				Current:     current,
 				DangerLevel: z.DangerLevel,
+				LevelRange:  levelRange,
 			})
 		}
 		return &gamev1.ServerEvent{

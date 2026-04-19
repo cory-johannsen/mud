@@ -902,6 +902,7 @@ message WorldZoneTile {
     bool   discovered   = 5;
     bool   current      = 6;
     string danger_level = 7;
+    string level_range  = 8;
 }
 
 // MapResponse is returned by the server with discovered tiles for the current zone
