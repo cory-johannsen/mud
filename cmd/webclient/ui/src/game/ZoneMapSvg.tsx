@@ -64,12 +64,42 @@ function buildZoneExitArrows(cellW: number, cellH: number, gap: number): Record<
   }
 }
 
+// parseLevelRange parses "min-max" or "N" into numeric bounds. Returns null if unparseable.
+function parseLevelRange(range: string): { min: number; max: number } | null {
+  const rangeMatch = range.match(/^(\d+)-(\d+)$/)
+  if (rangeMatch) return { min: parseInt(rangeMatch[1], 10), max: parseInt(rangeMatch[2], 10) }
+  const singleMatch = range.match(/^(\d+)$/)
+  if (singleMatch) { const n = parseInt(singleMatch[1], 10); return { min: n, max: n } }
+  return null
+}
+
+// difficultyBorderColor returns a CSS color string for a zone's difficulty relative to the player's
+// level, or null when no comparison can be made (missing range or level).
+//
+// Postcondition: returns one of: '#4a8' (green), '#e6c84e' (yellow), '#e08030' (orange),
+//   '#c03030' (red), '#444' (dark grey), or null.
+export function difficultyBorderColor(levelRange: string | undefined, playerLevel: number): string | null {
+  if (!levelRange || !playerLevel) return null
+  const parsed = parseLevelRange(levelRange)
+  if (!parsed) return null
+  const { min, max } = parsed
+  if (max < playerLevel) return '#444'            // zone is below player level
+  if (playerLevel >= min && playerLevel <= max) return '#4a8'  // player is within range
+  const gap = min - playerLevel
+  if (gap <= 2) return '#e6c84e'                 // 1–2 levels above player
+  if (gap <= 4) return '#e08030'                 // 3–4 levels above player
+  return '#c03030'                               // 5+ levels above player
+}
+
 interface ZoneMapSvgProps {
   tiles: MapTile[]
   onHover?: (tile: MapTile, e: React.MouseEvent) => void
   onHoverEnd?: () => void
   // containerWidth drives adaptive gap/cell scaling. Defaults to REFERENCE_W.
   containerWidth?: number
+  // playerLevel and zoneLevelRange enable difficulty-relative border color coding.
+  playerLevel?: number
+  zoneLevelRange?: string
 }
 
 function clipId(tile: MapTile): string {
@@ -100,7 +130,7 @@ function wrapRoomName(name: string, maxChars = 10): [string, string | null] {
   return [name.slice(0, maxChars), name.slice(maxChars, maxChars * 2).trim() || null]
 }
 
-export function ZoneMapSvg({ tiles, onHover, onHoverEnd, containerWidth }: ZoneMapSvgProps): JSX.Element {
+export function ZoneMapSvg({ tiles, onHover, onHoverEnd, containerWidth, playerLevel, zoneLevelRange }: ZoneMapSvgProps): JSX.Element {
   if (tiles.length === 0) {
     return <p style={{ color: '#666', fontFamily: 'monospace', padding: '0.5rem' }}>No map data.</p>
   }
@@ -256,7 +286,10 @@ export function ZoneMapSvg({ tiles, onHover, onHoverEnd, containerWidth }: ZoneM
     const fill = DANGER_FILLS[dangerKey] ?? '#1e1e2e'
     const isCurrent = tile.current ?? false
     const isBoss = tile.bossRoom ?? tile.boss ?? false
-    const stroke = isCurrent ? '#f0c040' : isBoss ? '#cc4444' : '#333'
+    const diffColor = (!isCurrent && !isBoss)
+      ? (difficultyBorderColor(zoneLevelRange, playerLevel ?? 0) ?? '#333')
+      : '#333'
+    const stroke = isCurrent ? '#f0c040' : isBoss ? '#cc4444' : diffColor
     const strokeWidth = isCurrent || isBoss ? 2 : 1
     const name = tile.roomName ?? ''
     const id = clipId(tile)

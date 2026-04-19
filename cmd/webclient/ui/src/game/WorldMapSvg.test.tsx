@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, fireEvent } from '@testing-library/react'
 import { WorldMapSvg } from './WorldMapSvg'
+import { difficultyBorderColor } from './ZoneMapSvg'
 import type { WorldZoneTile } from '../proto'
 
 const CURRENT_ZONE: WorldZoneTile = {
@@ -249,5 +250,99 @@ describe('WorldMapSvg', () => {
       fireEvent.mouseLeave(g)
       expect(queryByRole('tooltip')).toBeNull()
     })
+  })
+})
+
+describe('difficultyBorderColor', () => {
+  it('returns green when player level is within zone range', () => {
+    expect(difficultyBorderColor('3-5', 4)).toBe('#4a8')
+    expect(difficultyBorderColor('3-5', 3)).toBe('#4a8')
+    expect(difficultyBorderColor('3-5', 5)).toBe('#4a8')
+  })
+
+  it('returns dark grey when zone is below player level', () => {
+    expect(difficultyBorderColor('1-3', 5)).toBe('#444')
+    expect(difficultyBorderColor('3', 4)).toBe('#444')
+  })
+
+  it('returns yellow for zone 1-2 levels above player', () => {
+    expect(difficultyBorderColor('5-7', 4)).toBe('#e6c84e') // min=5, player=4 → gap=1
+    expect(difficultyBorderColor('5-7', 3)).toBe('#e6c84e') // gap=2
+  })
+
+  it('returns orange for zone 3-4 levels above player', () => {
+    expect(difficultyBorderColor('6-8', 3)).toBe('#e08030') // min=6, player=3 → gap=3
+    expect(difficultyBorderColor('7-9', 3)).toBe('#e08030') // gap=4
+  })
+
+  it('returns red for zone 5+ levels above player', () => {
+    expect(difficultyBorderColor('8-10', 3)).toBe('#c03030') // min=8, player=3 → gap=5
+    expect(difficultyBorderColor('10-12', 1)).toBe('#c03030')
+  })
+
+  it('returns null when levelRange is undefined', () => {
+    expect(difficultyBorderColor(undefined, 5)).toBeNull()
+  })
+
+  it('returns null when playerLevel is 0', () => {
+    expect(difficultyBorderColor('3-5', 0)).toBeNull()
+  })
+})
+
+describe('WorldMapSvg difficulty border colors', () => {
+  it('applies green border to a zone at player level', () => {
+    const tile: WorldZoneTile = {
+      zoneId: 'z1', zoneName: 'Zone 1',
+      worldX: 0, worldY: 0,
+      discovered: true, current: false, dangerLevel: 'safe',
+      levelRange: '3-5',
+    }
+    const { container } = render(<WorldMapSvg tiles={[tile]} onTravel={vi.fn()} playerLevel={4} />)
+    const rects = Array.from(container.querySelectorAll('svg rect:not(defs rect)'))
+    const greenRect = rects.find(r => r.getAttribute('stroke') === '#4a8')
+    expect(greenRect).toBeDefined()
+  })
+
+  it('applies red border to a zone 5+ levels above player', () => {
+    const tile: WorldZoneTile = {
+      zoneId: 'z1', zoneName: 'Zone 1',
+      worldX: 0, worldY: 0,
+      discovered: true, current: false, dangerLevel: 'safe',
+      levelRange: '10-12',
+    }
+    const { container } = render(<WorldMapSvg tiles={[tile]} onTravel={vi.fn()} playerLevel={1} />)
+    const rects = Array.from(container.querySelectorAll('svg rect:not(defs rect)'))
+    const redRect = rects.find(r => r.getAttribute('stroke') === '#c03030')
+    expect(redRect).toBeDefined()
+  })
+
+  it('does not apply difficulty color to undiscovered zones', () => {
+    const tile: WorldZoneTile = {
+      zoneId: 'z1',
+      worldX: 0, worldY: 0,
+      discovered: false, current: false,
+      levelRange: '3-5',
+    }
+    const { container } = render(<WorldMapSvg tiles={[tile]} onTravel={vi.fn()} playerLevel={4} />)
+    const rects = Array.from(container.querySelectorAll('svg rect:not(defs rect)'))
+    // Undiscovered — should not have green difficulty border
+    const greenRect = rects.find(r => r.getAttribute('stroke') === '#4a8')
+    expect(greenRect).toBeUndefined()
+  })
+
+  it('does not apply difficulty color to current zone', () => {
+    const tile: WorldZoneTile = {
+      zoneId: 'z1', zoneName: 'Zone 1',
+      worldX: 0, worldY: 0,
+      discovered: true, current: true, dangerLevel: 'safe',
+      levelRange: '3-5',
+    }
+    const { container } = render(<WorldMapSvg tiles={[tile]} onTravel={vi.fn()} playerLevel={4} />)
+    const rects = Array.from(container.querySelectorAll('svg rect:not(defs rect)'))
+    // Current zone — gold stroke takes priority
+    const goldRect = rects.find(r => r.getAttribute('stroke') === '#f0c040')
+    expect(goldRect).toBeDefined()
+    const greenRect = rects.find(r => r.getAttribute('stroke') === '#4a8')
+    expect(greenRect).toBeUndefined()
   })
 })

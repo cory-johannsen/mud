@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { WorldZoneTile } from '../proto'
+import { difficultyBorderColor } from './ZoneMapSvg'
 
 const ZONE_W = 72
 const ZONE_H = 44
@@ -30,9 +31,10 @@ interface TooltipState {
 interface WorldMapSvgProps {
   tiles: WorldZoneTile[]
   onTravel: (zoneId: string) => void
+  playerLevel?: number
 }
 
-export function WorldMapSvg({ tiles, onTravel }: WorldMapSvgProps): JSX.Element {
+export function WorldMapSvg({ tiles, onTravel, playerLevel }: WorldMapSvgProps): JSX.Element {
   const [tooltip, setTooltip] = useState<TooltipState | null>(null)
 
   if (tiles.length === 0) {
@@ -85,7 +87,11 @@ export function WorldMapSvg({ tiles, onTravel }: WorldMapSvgProps): JSX.Element 
           const isEnemy = tile.enemy ?? false
           const danger = tile.dangerLevel ?? tile.danger_level ?? ''
           const fill = discovered ? (DANGER_FILLS[danger] ?? DANGER_FILLS['safe']) : UNDISCOVERED_FILL
-          const stroke = isEnemy ? '#c02020' : isCurrent ? CURRENT_STROKE : DEFAULT_STROKE
+          const levelRange = tile.levelRange ?? tile.level_range ?? ''
+          const diffColor = (!isEnemy && !isCurrent && discovered)
+            ? (difficultyBorderColor(levelRange, playerLevel ?? 0) ?? DEFAULT_STROKE)
+            : DEFAULT_STROKE
+          const stroke = isEnemy ? '#c02020' : isCurrent ? CURRENT_STROKE : diffColor
           const strokeWidth = isEnemy ? 2 : isCurrent ? CURRENT_STROKE_WIDTH : DEFAULT_STROKE_WIDTH
           const canTravel = discovered && !isCurrent && !isEnemy
           const name = tile.zoneName ?? id
@@ -130,7 +136,6 @@ export function WorldMapSvg({ tiles, onTravel }: WorldMapSvgProps): JSX.Element 
                 strokeWidth={strokeWidth}
               />
               {discovered && (() => {
-                const levelRange = tile.levelRange ?? tile.level_range ?? ''
                 const nameY = levelRange ? ry + ZONE_H / 2 - 5 : ry + ZONE_H / 2
                 return (
                   <>

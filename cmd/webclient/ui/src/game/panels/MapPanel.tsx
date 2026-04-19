@@ -367,7 +367,11 @@ export function MapPanel() {
         </div>
       </div>
       {showWorld ? (
-        <WorldMapSvg tiles={state.worldTiles} onTravel={handleTravel} />
+        <WorldMapSvg
+          tiles={state.worldTiles}
+          onTravel={handleTravel}
+          playerLevel={state.characterSheet?.level ?? 0}
+        />
       ) : state.mapTiles.length === 0 ? (
         <p className="map-empty">No map data.</p>
       ) : (
@@ -377,6 +381,11 @@ export function MapPanel() {
             containerWidth={mapContainerW}
             onHover={handleRoomEnter}
             onHoverEnd={handleRoomLeave}
+            playerLevel={state.characterSheet?.level ?? 0}
+            zoneLevelRange={
+              (state.worldTiles.find(t => t.current || t.current === true)?.levelRange)
+              ?? (state.worldTiles.find(t => t.current || t.current === true)?.level_range)
+            }
           />
           {hoveredTile && (
             <RoomTooltip tile={hoveredTile} pos={tooltipPos} />
