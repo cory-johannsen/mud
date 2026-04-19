@@ -31,6 +31,8 @@ type yamlZone struct {
 	TrapProbabilities      *yamlTrapProbabilities `yaml:"trap_probabilities,omitempty"`
 	WorldX                 *int                   `yaml:"world_x,omitempty"`
 	WorldY                 *int                   `yaml:"world_y,omitempty"`
+	MinLevel               int                    `yaml:"min_level,omitempty"`
+	MaxLevel               int                    `yaml:"max_level,omitempty"`
 	ZoneEffects            []RoomEffect           `yaml:"zone_effects,omitempty"`
 	FactionID              string                 `yaml:"faction_id,omitempty"`
 }
@@ -193,6 +195,8 @@ func convertYAMLZone(yz yamlZone) (*Zone, error) {
 		CoverTrapChance:        yz.CoverTrapChance,
 		WorldX:                 yz.WorldX,
 		WorldY:                 yz.WorldY,
+		MinLevel:               yz.MinLevel,
+		MaxLevel:               yz.MaxLevel,
 		ZoneEffects:            yz.ZoneEffects,
 		FactionID:              yz.FactionID,
 	}

@@ -1063,3 +1063,137 @@ func TestLoadZone_Vantucky_AllRoomsReachable(t *testing.T) {
 		)
 	}
 }
+
+// stubNPCLevelRegistry is a test double for NPCLevelRegistry.
+type stubNPCLevelRegistry struct {
+	levels map[string]int
+}
+
+func (s *stubNPCLevelRegistry) TemplateLevel(id string) (int, bool) {
+	lvl, ok := s.levels[id]
+	return lvl, ok
+}
+
+func TestZone_ValidateNPCLevels_PassesWhenAllInRange(t *testing.T) {
+	zone := &Zone{
+		ID:       "test_zone",
+		MinLevel: 3,
+		MaxLevel: 5,
+		Rooms: map[string]*Room{
+			"r1": {
+				Spawns: []RoomSpawnConfig{{Template: "goblin"}},
+			},
+		},
+	}
+	reg := &stubNPCLevelRegistry{levels: map[string]int{"goblin": 4}}
+	err := zone.ValidateNPCLevels(reg)
+	require.NoError(t, err)
+}
+
+func TestZone_ValidateNPCLevels_FailsWhenBelowMin(t *testing.T) {
+	zone := &Zone{
+		ID:       "test_zone",
+		MinLevel: 5,
+		MaxLevel: 8,
+		Rooms: map[string]*Room{
+			"r1": {
+				Spawns: []RoomSpawnConfig{{Template: "weakling"}},
+			},
+		},
+	}
+	reg := &stubNPCLevelRegistry{levels: map[string]int{"weakling": 2}}
+	err := zone.ValidateNPCLevels(reg)
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "weakling")
+}
+
+func TestZone_ValidateNPCLevels_FailsWhenAboveMax(t *testing.T) {
+	zone := &Zone{
+		ID:       "test_zone",
+		MinLevel: 1,
+		MaxLevel: 3,
+		Rooms: map[string]*Room{
+			"r1": {
+				Spawns: []RoomSpawnConfig{{Template: "boss"}},
+			},
+		},
+	}
+	reg := &stubNPCLevelRegistry{levels: map[string]int{"boss": 10}}
+	err := zone.ValidateNPCLevels(reg)
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "boss")
+}
+
+func TestZone_ValidateNPCLevels_SkipsWhenNoRange(t *testing.T) {
+	zone := &Zone{
+		ID:       "test_zone",
+		MinLevel: 0,
+		MaxLevel: 0,
+		Rooms: map[string]*Room{
+			"r1": {
+				Spawns: []RoomSpawnConfig{{Template: "any_npc"}},
+			},
+		},
+	}
+	reg := &stubNPCLevelRegistry{levels: map[string]int{"any_npc": 99}}
+	err := zone.ValidateNPCLevels(reg)
+	require.NoError(t, err)
+}
+
+func TestZone_ValidateNPCLevels_SkipsUnknownTemplate(t *testing.T) {
+	zone := &Zone{
+		ID:       "test_zone",
+		MinLevel: 1,
+		MaxLevel: 3,
+		Rooms: map[string]*Room{
+			"r1": {
+				Spawns: []RoomSpawnConfig{{Template: "unknown_npc"}},
+			},
+		},
+	}
+	reg := &stubNPCLevelRegistry{levels: map[string]int{}}
+	err := zone.ValidateNPCLevels(reg)
+	require.NoError(t, err)
+}
+
+func TestLoadZoneFromBytes_MinMaxLevel_Parsed(t *testing.T) {
+	data := []byte(`
+zone:
+  id: test
+  name: Test Zone
+  description: desc
+  start_room: r1
+  min_level: 2
+  max_level: 5
+  rooms:
+    - id: r1
+      title: Room 1
+      description: A room.
+      map_x: 0
+      map_y: 0
+`)
+	z, err := LoadZoneFromBytes(data)
+	require.NoError(t, err)
+	assert.Equal(t, 2, z.MinLevel)
+	assert.Equal(t, 5, z.MaxLevel)
+}
+
+func TestLoadZoneFromBytes_MinMaxLevel_AbsentIsZero(t *testing.T) {
+	data := []byte(`
+zone:
+  id: test
+  name: Test Zone
+  description: desc
+  start_room: r1
+  rooms:
+    - id: r1
+      title: Room 1
+      description: A room.
+      map_x: 0
+      map_y: 0
+`)
+	z, err := LoadZoneFromBytes(data)
+	require.NoError(t, err)
+	assert.Equal(t, 0, z.MinLevel)
+	assert.Equal(t, 0, z.MaxLevel)
+}

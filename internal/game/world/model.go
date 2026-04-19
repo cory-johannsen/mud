@@ -347,6 +347,12 @@ type Zone struct {
 	// WorldY is the zone's row position on the world map grid. Lower values are further north.
 	// nil means the zone has no world map position and is excluded from the world map.
 	WorldY *int `yaml:"world_y,omitempty"`
+	// MinLevel is the minimum NPC level expected in this zone.
+	// 0 means no minimum enforced.
+	MinLevel int `yaml:"min_level,omitempty"`
+	// MaxLevel is the maximum NPC level expected in this zone.
+	// 0 means no maximum enforced.
+	MaxLevel int `yaml:"max_level,omitempty"`
 	// MaterialPool defines the scavenge yield configuration for this zone.
 	// nil means scavenging yields nothing here (REQ-CRAFT-9).
 	MaterialPool *MaterialPool `yaml:"material_pool,omitempty"`
@@ -354,6 +360,44 @@ type Zone struct {
 	// ZoneEffects defines persistent mental-state auras applied to every room in the zone.
 	// At world load time these are appended to each room's Effects slice.
 	ZoneEffects []RoomEffect `yaml:"zone_effects,omitempty"`
+}
+
+// NPCLevelRegistry is the minimal interface needed to look up NPC template levels.
+//
+// Precondition: id must be non-empty.
+// Postcondition: returns (level, true) if found, (0, false) if not.
+type NPCLevelRegistry interface {
+	TemplateLevel(id string) (int, bool)
+}
+
+// ValidateNPCLevels checks that every NPC spawn template's level falls within
+// [MinLevel, MaxLevel]. Zones with MinLevel == 0 and MaxLevel == 0 are skipped.
+// Templates not found in the registry are silently skipped.
+//
+// Precondition: reg must not be nil.
+// Postcondition: returns nil if all found template levels are in-range, or an
+// error describing the first violation.
+func (z *Zone) ValidateNPCLevels(reg NPCLevelRegistry) error {
+	if z.MinLevel == 0 && z.MaxLevel == 0 {
+		return nil
+	}
+	for roomID, room := range z.Rooms {
+		for _, spawn := range room.Spawns {
+			lvl, ok := reg.TemplateLevel(spawn.Template)
+			if !ok {
+				continue
+			}
+			if z.MinLevel > 0 && lvl < z.MinLevel {
+				return fmt.Errorf("zone %q: room %q: NPC template %q level %d is below zone min_level %d",
+					z.ID, roomID, spawn.Template, lvl, z.MinLevel)
+			}
+			if z.MaxLevel > 0 && lvl > z.MaxLevel {
+				return fmt.Errorf("zone %q: room %q: NPC template %q level %d exceeds zone max_level %d",
+					z.ID, roomID, spawn.Template, lvl, z.MaxLevel)
+			}
+		}
+	}
+	return nil
 }
 
 // ValidateWithConditions checks that every RoomEffect.Track value exists in reg.
