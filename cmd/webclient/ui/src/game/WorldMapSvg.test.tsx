@@ -64,4 +64,63 @@ describe('WorldMapSvg', () => {
     expect(legendText).toContain('dangerous')
     expect(legendText).toContain('Undiscovered')
   })
+
+  it('renders level range text when levelRange is set', () => {
+    const tiles: WorldZoneTile[] = [{
+      zoneId: 'test_zone',
+      zoneName: 'Test Zone',
+      worldX: 0,
+      worldY: 0,
+      discovered: true,
+      current: false,
+      dangerLevel: 'safe',
+      levelRange: '1-3',
+    }]
+    const { container } = render(<WorldMapSvg tiles={tiles} onTravel={vi.fn()} />)
+    expect(container.textContent).toContain('1-3')
+  })
+
+  it('does not render level range text when levelRange is absent', () => {
+    const tiles: WorldZoneTile[] = [{
+      zoneId: 'test_zone',
+      zoneName: 'Test Zone',
+      worldX: 0,
+      worldY: 0,
+      discovered: true,
+      current: false,
+      dangerLevel: 'safe',
+    }]
+    const { container } = render(<WorldMapSvg tiles={tiles} onTravel={vi.fn()} />)
+    const texts = container.querySelectorAll('text')
+    const contents = Array.from(texts).map(t => t.textContent ?? '')
+    expect(contents.every(t => !t.match(/\d+-\d+/))).toBe(true)
+  })
+
+  it('renders zone name on discovered tile', () => {
+    const tiles: WorldZoneTile[] = [{
+      zoneId: 'test_zone',
+      zoneName: 'My Zone',
+      worldX: 0,
+      worldY: 0,
+      discovered: true,
+      current: false,
+      dangerLevel: 'safe',
+    }]
+    const { container } = render(<WorldMapSvg tiles={tiles} onTravel={vi.fn()} />)
+    expect(container.textContent).toContain('My Zone')
+  })
+
+  it('does not render zone name on undiscovered tile', () => {
+    const tiles: WorldZoneTile[] = [{
+      zoneId: 'test_zone',
+      zoneName: 'Hidden Zone',
+      worldX: 0,
+      worldY: 0,
+      discovered: false,
+      current: false,
+      dangerLevel: 'safe',
+    }]
+    const { container } = render(<WorldMapSvg tiles={tiles} onTravel={vi.fn()} />)
+    expect(container.textContent).not.toContain('Hidden Zone')
+  })
 })

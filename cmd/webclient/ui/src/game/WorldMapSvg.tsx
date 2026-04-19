@@ -94,19 +94,38 @@ export function WorldMapSvg({ tiles, onTravel }: WorldMapSvgProps): JSX.Element 
                 stroke={stroke}
                 strokeWidth={strokeWidth}
               />
-              {discovered && (
-                <text
-                  x={rx + ZONE_W / 2}
-                  y={ry + ZONE_H / 2}
-                  textAnchor="middle"
-                  dominantBaseline="middle"
-                  fontSize={10}
-                  fill="#ccc"
-                  clipPath={`url(#clip-${id})`}
-                >
-                  {name}
-                </text>
-              )}
+              {discovered && (() => {
+                const levelRange = tile.levelRange ?? tile.level_range ?? ''
+                const nameY = levelRange ? ry + ZONE_H / 2 - 5 : ry + ZONE_H / 2
+                return (
+                  <>
+                    <text
+                      x={rx + ZONE_W / 2}
+                      y={nameY}
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                      fontSize={10}
+                      fill="#ccc"
+                      clipPath={`url(#clip-${id})`}
+                    >
+                      {name}
+                    </text>
+                    {levelRange && (
+                      <text
+                        x={rx + ZONE_W / 2}
+                        y={nameY + 14}
+                        textAnchor="middle"
+                        dominantBaseline="middle"
+                        fontSize={8}
+                        fill="#888"
+                        clipPath={`url(#clip-${id})`}
+                      >
+                        {levelRange}
+                      </text>
+                    )}
+                  </>
+                )
+              })()}
             </g>
           )
         })}
