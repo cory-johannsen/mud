@@ -7,9 +7,10 @@ zone:
   world_y: 0
   script_dir: content/scripts/zones/ne_portland
   name: Northeast Portland
-  description: The old neighborhoods of Northeast Portland have devolved into a patchwork of bike-courier
-    territories, fortified breweries, and feral art collectives. Alberta Street's galleries now house
-    gangs, while the brewery row on Mississippi has become a warlord's domain.
+  description: The old neighborhoods of Northeast Portland have devolved into a patchwork
+    of bike-courier territories, fortified breweries, and feral art collectives. Alberta
+    Street's galleries now house gangs, while the brewery row on Mississippi has become
+    a warlord's domain.
   start_room: ne_corner_store
   rooms:
   - id: ne_alberta_street
@@ -33,7 +34,7 @@ zone:
       target: ne_williams_corridor
     - direction: north
       target: ne_corner_store
-    map_x: 0
+    map_x: 1
     map_y: 0
     equipment:
     - item_id: zone_map
@@ -62,7 +63,7 @@ zone:
       target: ne_killingsworth
     - direction: west
       target: ne_brewery_compound
-    map_x: -2
+    map_x: -3
     map_y: -2
     spawns:
     - template: brew_warlord
@@ -73,7 +74,8 @@ zone:
       atmosphere: smoke
   - id: ne_mlk_boulevard
     title: MLK Boulevard
-    description: 'Martin Luther King Jr. Boulevard is a wide, exposed corridor of cracked asphalt.
+    description: 'Martin Luther King Jr. Boulevard is a wide, exposed corridor of
+      cracked asphalt.
 
       The openness is dangerous — no cover, long sight lines, and the wind
 
@@ -90,7 +92,7 @@ zone:
       target: ne_hollywood_district
     - direction: west
       target: ne_prescott_street
-    map_x: 4
+    map_x: 5
     map_y: 0
     spawns:
     - template: ne_gang_enforcer
@@ -125,7 +127,8 @@ zone:
       atmosphere: quiet
   - id: ne_hollywood_district
     title: Hollywood District
-    description: 'The old Hollywood Theater''s marquee hangs by a single bolt, its letters
+    description: 'The old Hollywood Theater''s marquee hangs by a single bolt, its
+      letters
 
       scattered across the sidewalk. Scavenger markets have taken over the block,
 
@@ -142,7 +145,7 @@ zone:
       target: ne_i205_onramp
     - direction: northeast
       target: ne_mlk_boulevard
-    map_x: 2
+    map_x: 3
     map_y: 4
     spawns:
     - template: ne_scavenger
@@ -166,7 +169,7 @@ zone:
     exits:
     - direction: north
       target: ne_rose_quarter
-    map_x: -4
+    map_x: -5
     map_y: 4
     spawns:
     - template: ne_gulch_raider
@@ -177,7 +180,8 @@ zone:
       atmosphere: smoke
   - id: ne_alameda_ridge
     title: Alameda Ridge
-    description: 'The highest point in Northeast Portland offers a panoramic view of ruin.
+    description: 'The highest point in Northeast Portland offers a panoramic view
+      of ruin.
 
       Wind batters the exposed hilltop relentlessly. From here you can see
 
@@ -190,7 +194,7 @@ zone:
     exits:
     - direction: west
       target: ne_grant_park
-    map_x: 4
+    map_x: 5
     map_y: 2
     spawns:
     - template: ne_gang_enforcer
@@ -214,7 +218,7 @@ zone:
     exits:
     - direction: northwest
       target: ne_mlk_boulevard
-    map_x: 6
+    map_x: 7
     map_y: 2
     spawns:
     - template: ne_scavenger
@@ -242,7 +246,7 @@ zone:
       target: ne_williams_corridor
     - direction: west
       target: ne_fremont_bridge_east
-    map_x: -2
+    map_x: -3
     map_y: 2
     spawns:
     - template: ne_gang_enforcer
@@ -253,7 +257,8 @@ zone:
       atmosphere: wind
   - id: ne_i205_onramp
     title: I-205 On-Ramp
-    description: 'The crumbling highway on-ramp rises above the neighborhood like a
+    description: 'The crumbling highway on-ramp rises above the neighborhood like
+      a
 
       concrete serpent. Abandoned vehicles choke the lanes, forming a maze
 
@@ -266,7 +271,7 @@ zone:
       target: ne_hollywood_district
     - direction: east
       target: pdx_airport_way_west
-    map_x: 4
+    map_x: 5
     map_y: 4
     spawns:
     - template: ne_scavenger
@@ -292,7 +297,7 @@ zone:
       target: grinders_row
     - direction: west
       target: ne_bike_shop_ruins
-    map_x: 2
+    map_x: 3
     map_y: -2
     spawns:
     - template: bike_courier
@@ -319,7 +324,7 @@ zone:
     - direction: west
       target: cc_front_entrance
       zone: clown_camp
-    map_x: -4
+    map_x: -5
     map_y: 0
     spawns:
     - template: ne_gang_lieutenant
@@ -349,7 +354,7 @@ zone:
       target: ne_mlk_boulevard
     - direction: west
       target: ne_rose_city_market
-    map_x: -2
+    map_x: -3
     map_y: -4
     spawns:
     - template: ne_scavenger
@@ -404,7 +409,7 @@ zone:
     - direction: northwest
       target: sp_parking_lot
       zone: steampdx
-    map_x: 2
+    map_x: 3
     map_y: 6
     spawns:
     - template: bike_courier
@@ -430,7 +435,7 @@ zone:
       target: ne_fremont_street
     - direction: east
       target: ne_alameda_ridge
-    map_x: 2
+    map_x: 3
     map_y: 2
     spawns:
     - template: alberta_drifter
@@ -458,7 +463,7 @@ zone:
       target: ne_sullivans_gulch
     - direction: west
       target: ne_fremont_bridge_east
-    map_x: -4
+    map_x: -5
     map_y: 2
     spawns:
     - template: ne_gang_lieutenant
@@ -485,7 +490,7 @@ zone:
       target: ne_mississippi_ave
     - direction: southeast
       target: ne_williams_corridor
-    map_x: -4
+    map_x: -5
     map_y: -2
     spawns:
     - template: brew_warlord
@@ -514,7 +519,7 @@ zone:
       target: ne_cully_road
     - direction: southwest
       target: ne_williams_corridor
-    map_x: 0
+    map_x: -1
     map_y: -2
     spawns:
     - template: bike_courier
@@ -525,7 +530,8 @@ zone:
       atmosphere: quiet
   - id: ne_williams_corridor
     title: Williams Corridor
-    description: 'Once a gentrified strip of boutiques and brunch spots, Williams Avenue
+    description: 'Once a gentrified strip of boutiques and brunch spots, Williams
+      Avenue
 
       is now a contested corridor between rival factions. The bike lanes
 
@@ -546,7 +552,7 @@ zone:
       target: ne_bike_shop_ruins
     - direction: northwest
       target: ne_brewery_compound
-    map_x: -2
+    map_x: -3
     map_y: 0
     spawns:
     - template: bike_courier
@@ -576,7 +582,7 @@ zone:
       target: ne_alberta_ruins
     - direction: east
       target: ne_mlk_boulevard
-    map_x: 2
+    map_x: 3
     map_y: 0
     spawns:
     - template: ne_scavenger
@@ -606,7 +612,7 @@ zone:
       target: ne_woodlawn_outpost
     - direction: southeast
       target: ne_killingsworth_road
-    map_x: -2
+    map_x: -3
     map_y: -6
     spawns:
     - template: ne_gang_enforcer
@@ -632,7 +638,7 @@ zone:
       target: ne_columbia_blvd
     - direction: north
       target: couve_interstate_bridge_south
-    map_x: -2
+    map_x: -3
     map_y: -8
     spawns:
     - template: ne_gang_enforcer
@@ -643,8 +649,9 @@ zone:
       atmosphere: wind
   - id: ne_corner_store
     title: Corner Store
-    description: A converted convenience store with the shelving pushed to the walls. Locals come here
-      to restock, get patched up, and hear what's going on in the neighborhood.
+    description: A converted convenience store with the shelving pushed to the walls.
+      Locals come here to restock, get patched up, and hear what's going on in the
+      neighborhood.
     danger_level: safe
     exits:
     - direction: south
@@ -798,7 +805,7 @@ zone:
       target: ne_killingsworth
     - direction: northeast
       target: ne_woodlawn_outpost
-    map_x: -4
+    map_x: -5
     map_y: -4
     spawns:
     - template: ne_gang_enforcer
@@ -827,7 +834,7 @@ zone:
       target: ne_rose_quarter
     - direction: east
       target: ne_broadway_bridge
-    map_x: -6
+    map_x: -7
     map_y: 2
     spawns:
     - template: ne_bridge_warden
@@ -853,7 +860,7 @@ zone:
       target: ne_killingsworth
     - direction: northwest
       target: ne_columbia_blvd
-    map_x: 0
+    map_x: -1
     map_y: -4
     spawns:
     - template: bike_courier
@@ -882,7 +889,7 @@ zone:
       target: ne_columbia_blvd
     - direction: southwest
       target: ne_rose_city_market
-    map_x: 0
+    map_x: -1
     map_y: -6
     spawns:
     - template: alberta_drifter
@@ -897,10 +904,10 @@ zone:
   - id: ne_portland_brothel
     title: The Velvet Spoke
     danger_level: safe
-    description: Adjacent to the neutral bunker, through a door painted with an ironic mural of a bicycle
-      wheel. The Velvet Spoke operates with Northeast Portland's characteristic self-awareness — locally
-      owned, community-priced, and entirely earnest about what it offers. Drinks available. Conversation
-      optional.
+    description: Adjacent to the neutral bunker, through a door painted with an ironic
+      mural of a bicycle wheel. The Velvet Spoke operates with Northeast Portland's
+      characteristic self-awareness — locally owned, community-priced, and entirely
+      earnest about what it offers. Drinks available. Conversation optional.
     map_x: 6
     map_y: -6
     exits:
