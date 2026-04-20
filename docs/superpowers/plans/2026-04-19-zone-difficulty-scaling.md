@@ -1448,10 +1448,13 @@ All of these are unique to Rustbucket Ridge. Set each:
 
 `content/npcs/marshal_ironsides.yaml`: `level: 26  max_hp: 226  ac: 19  rob_multiplier: 1.2`
 
-`content/npcs/rustbucket_ridge_slasher.yaml`: `level: 28  max_hp: 248  ac: 19  rob_multiplier: 1.5`
+`content/npcs/rr_field_boss.yaml` (new file): `level: 28  max_hp: 248  ac: 19  rob_multiplier: 1.5`
 
-- [ ] **Step 2: Upgrade big_grizz to L30 boss**
+Note: `rustbucket_ridge_warlord.yaml` does NOT exist. The actual RR boss NPC is `rustbucket_ridge_slasher.yaml` (The Slasher). The Slasher is upgraded to L30 boss in Step 2. Create `rr_field_boss.yaml` as the field boss (Blood Camp Enforcer) at L28.
 
+- [ ] **Step 2: Upgrade rustbucket_ridge_slasher to L30 boss and create rr_field_boss**
+
+In `content/npcs/rustbucket_ridge_slasher.yaml`, set:
 ```yaml
 level: 30
 max_hp: 810
@@ -1459,41 +1462,43 @@ tier: boss
 ac: 24
 rob_multiplier: 2.0
 boss_abilities:
-  - id: bear_hug
-    name: "Bear Hug"
+  - id: ridge_domination
+    name: "Ridge Domination"
     trigger: round_start
     trigger_value: 0
     cooldown: "3m"
     effect:
-      aoe_condition: slowed
-  - id: mountain_roar
-    name: "Mountain Roar"
+      aoe_condition: frightened
+  - id: scrap_barrage
+    name: "Scrap Barrage"
     trigger: hp_pct_below
     trigger_value: 75
     cooldown: "4m"
     effect:
-      aoe_damage_expr: "5d10"
-  - id: berserker_rage
-    name: "Berserker Rage"
+      aoe_damage_expr: "4d10"
+  - id: warlords_iron_will
+    name: "Warlord's Iron Will"
     trigger: hp_pct_below
     trigger_value: 50
-    cooldown: "5m"
+    cooldown: "6m"
     effect:
-      heal_pct: 25
+      heal_pct: 30
 ```
+
+Create `content/npcs/rr_field_boss.yaml` at `level: 28  max_hp: 248  ac: 19  rob_multiplier: 1.2  ai_domain: territory_patrol`. Add one spawn of `rr_field_boss` to a non-boss dangerous room (e.g., `the_barrel_house`) in `content/zones/rustbucket_ridge.yaml`.
 
 - [ ] **Step 3: Update zone metadata and commit**
 
 In `content/zones/rustbucket_ridge.yaml`: `min_level: 20  max_level: 30`. Boss room: `danger_level: all_out_war`. Other rooms: `sketchy` or `dangerous`.
 
 ```bash
-go test ./internal/game/npc/... -run "TestNPCStatFormula_AllTemplatesCompliant/(old_rusty|sparks|whiskey_joe|barrel_house_enforcer|slick_sally|big_grizz|marshal_ironsides|sergeant_mack|rustbucket_ridge_slasher)" -v
+go test ./internal/game/npc/... -run "TestNPCStatFormula_AllTemplatesCompliant/(old_rusty|sparks|whiskey_joe|barrel_house_enforcer|slick_sally|rustbucket_ridge_slasher|marshal_ironsides|sergeant_mack|rr_field_boss)" -v
 ```
 
 Expected: all PASS.
 
 ```bash
-git add content/npcs/old_rusty.yaml content/npcs/sparks.yaml content/npcs/whiskey_joe.yaml content/npcs/barrel_house_enforcer.yaml content/npcs/slick_sally.yaml content/npcs/vera_coldcoin.yaml content/npcs/gail_grinder_graves.yaml content/npcs/tina_wires.yaml content/npcs/dwayne_dawg.yaml content/npcs/jennifer_dawg.yaml content/npcs/wayne_dawg.yaml content/npcs/patch.yaml content/npcs/ellie_mack.yaml content/npcs/clutch.yaml content/npcs/dex.yaml content/npcs/herb.yaml content/npcs/rio_wrench.yaml content/npcs/sergeant_mack.yaml content/npcs/marshal_ironsides.yaml content/npcs/rustbucket_ridge_slasher.yaml content/npcs/big_grizz.yaml content/zones/rustbucket_ridge.yaml
+git add content/npcs/old_rusty.yaml content/npcs/sparks.yaml content/npcs/whiskey_joe.yaml content/npcs/barrel_house_enforcer.yaml content/npcs/slick_sally.yaml content/npcs/vera_coldcoin.yaml content/npcs/gail_grinder_graves.yaml content/npcs/tina_wires.yaml content/npcs/dwayne_dawg.yaml content/npcs/jennifer_dawg.yaml content/npcs/wayne_dawg.yaml content/npcs/patch.yaml content/npcs/ellie_mack.yaml content/npcs/clutch.yaml content/npcs/dex.yaml content/npcs/herb.yaml content/npcs/rio_wrench.yaml content/npcs/sergeant_mack.yaml content/npcs/marshal_ironsides.yaml content/npcs/rustbucket_ridge_slasher.yaml content/npcs/rr_field_boss.yaml content/zones/rustbucket_ridge.yaml
 git commit -m "content(npc): Tier 2 Rustbucket Ridge NPC stat upgrades (REQ-ZDS-1,2,3)"
 ```
 
