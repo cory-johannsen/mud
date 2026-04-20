@@ -1,9 +1,9 @@
 id: brew_warlord
 name: Brew Warlord
 description: A barrel-chested brewer in a stained leather apron, reeking of hops and violence. His arms are scarred from years at the kettles and in the fights.
-level: 3
-max_hp: 38
-ac: 16
+level: 9
+max_hp: 63
+ac: 15
 rob_multiplier: 1.5
 awareness: 7
 ai_domain: brew_warlord_combat

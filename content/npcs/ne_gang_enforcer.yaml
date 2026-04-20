@@ -1,8 +1,8 @@
 id: ne_gang_enforcer
 name: NE Gang Enforcer
 description: A broad-shouldered enforcer in a spray-painted jacket, marking their gang colors across every surface. Carries a sawed-off and does not ask questions first.
-level: 3
-max_hp: 34
+level: 7
+max_hp: 49
 ac: 15
 awareness: 8
 ai_domain: ganger_combat

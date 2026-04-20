@@ -1,8 +1,8 @@
 id: ne_gang_lieutenant
 name: NE Gang Lieutenant
 description: A scarred veteran in spray-painted tactical gear, commanding the gang's western flank. Carries a battle rifle and the authority to use it. The enforcers answer to this one.
-level: 5
-max_hp: 58
+level: 12
+max_hp: 86
 ac: 16
 awareness: 11
 ai_domain: ganger_combat
