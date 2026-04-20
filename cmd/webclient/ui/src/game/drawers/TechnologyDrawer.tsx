@@ -299,17 +299,19 @@ export function TechnologyDrawer({ onClose }: { onClose: () => void }) {
     knownByLevel.get(lvl)!.push(entry)
   }
 
-  // Group prepared slots by techId so that multiple slots for the same tech appear as one
-  // entry with a remaining-use counter rather than as duplicate rows.
+  // Group prepared slots by (techId, techLevel) so that the same tech at different
+  // levels appears as separate entries, each with its own remaining-use counter.
   const preparedGroupMap = new Map<string, { slot: PreparedSlotView; total: number; remaining: number }>()
   for (const p of prepared) {
     const id = p.techId ?? p.tech_id ?? ''
-    const existing = preparedGroupMap.get(id)
+    const lvl = p.techLevel ?? p.tech_level ?? 0
+    const groupKey = `${id}:${lvl}`
+    const existing = preparedGroupMap.get(groupKey)
     if (existing) {
       existing.total++
       if (!p.expended) existing.remaining++
     } else {
-      preparedGroupMap.set(id, { slot: p, total: 1, remaining: p.expended ? 0 : 1 })
+      preparedGroupMap.set(groupKey, { slot: p, total: 1, remaining: p.expended ? 0 : 1 })
     }
   }
   const preparedGroups = [...preparedGroupMap.values()]
@@ -370,7 +372,7 @@ export function TechnologyDrawer({ onClose }: { onClose: () => void }) {
                 <ul style={styles.list}>
                   {preparedGroups.map((g) => (
                     <PreparedItem
-                      key={g.slot.techId ?? g.slot.tech_id ?? g.slot.techName}
+                      key={`${g.slot.techId ?? g.slot.tech_id ?? g.slot.techName}:${g.slot.techLevel ?? g.slot.tech_level ?? 0}`}
                       slot={g.slot}
                       total={g.total}
                       remaining={g.remaining}
