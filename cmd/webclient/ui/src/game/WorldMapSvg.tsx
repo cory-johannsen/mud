@@ -28,6 +28,24 @@ interface TooltipState {
   y: number
 }
 
+// wrapZoneName splits a zone name into up to 2 lines that fit within ZONE_W.
+// At font-size 10 with monospace, ~10 chars fit across 72px.
+export function wrapZoneName(name: string, maxChars = 10): [string, string | null] {
+  if (name.length <= maxChars) return [name, null]
+  const words = name.split(' ')
+  let line1 = ''
+  for (let i = 0; i < words.length; i++) {
+    const attempt = words.slice(0, i + 1).join(' ')
+    if (attempt.length <= maxChars) line1 = attempt
+    else break
+  }
+  if (line1) {
+    const line2 = name.slice(line1.length + 1, line1.length + 1 + maxChars).trim() || null
+    return [line1, line2]
+  }
+  return [name.slice(0, maxChars), name.slice(maxChars, maxChars * 2).trim() || null]
+}
+
 // Tooltip dimensions used for edge-clamping. The tooltip maxWidth is 240px;
 // 160px is a conservative height estimate (adjusts for near-bottom edges).
 const TOOLTIP_W = 256
@@ -251,24 +269,55 @@ export function WorldMapSvg({ tiles, onTravel, playerLevel }: WorldMapSvgProps):
                 strokeWidth={strokeWidth}
               />
               {discovered && (() => {
-                const nameY = levelRange ? ry + ZONE_H / 2 - 5 : ry + ZONE_H / 2
+                const [line1, line2] = wrapZoneName(name)
+                // Vertical layout with ZONE_H=44:
+                // 1-line, no range:  name at center (22)
+                // 2-line, no range:  line1 at 16, line2 at 28
+                // 1-line + range:    name at 14, range at 29
+                // 2-line + range:    line1 at 10, line2 at 22, range at 34
+                const cx = rx + ZONE_W / 2
+                const cy = ry + ZONE_H / 2
+                const nameColor = isEnemy ? '#c07070' : '#ccc'
+                let line1Y: number, line2Y: number | null, rangeY: number | null
+                if (line2 && levelRange) {
+                  line1Y = ry + 10; line2Y = ry + 22; rangeY = ry + 34
+                } else if (line2) {
+                  line1Y = cy - 6; line2Y = cy + 7; rangeY = null
+                } else if (levelRange) {
+                  line1Y = ry + 14; line2Y = null; rangeY = ry + 29
+                } else {
+                  line1Y = cy; line2Y = null; rangeY = null
+                }
                 return (
                   <>
                     <text
-                      x={rx + ZONE_W / 2}
-                      y={nameY}
+                      x={cx}
+                      y={line1Y}
                       textAnchor="middle"
                       dominantBaseline="middle"
                       fontSize={10}
-                      fill={isEnemy ? '#c07070' : '#ccc'}
+                      fill={nameColor}
                       clipPath={`url(#clip-${id})`}
                     >
-                      {name}
+                      {line1}
                     </text>
+                    {line2 && (
+                      <text
+                        x={cx}
+                        y={line2Y!}
+                        textAnchor="middle"
+                        dominantBaseline="middle"
+                        fontSize={10}
+                        fill={nameColor}
+                        clipPath={`url(#clip-${id})`}
+                      >
+                        {line2}
+                      </text>
+                    )}
                     {levelRange && (
                       <text
-                        x={rx + ZONE_W / 2}
-                        y={nameY + 14}
+                        x={cx}
+                        y={rangeY!}
                         textAnchor="middle"
                         dominantBaseline="middle"
                         fontSize={8}

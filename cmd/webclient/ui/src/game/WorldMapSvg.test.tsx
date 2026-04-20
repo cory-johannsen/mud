@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest'
 import fc from 'fast-check'
 import { render, fireEvent } from '@testing-library/react'
-import { WorldMapSvg, computeTooltipPos } from './WorldMapSvg'
+import { WorldMapSvg, computeTooltipPos, wrapZoneName } from './WorldMapSvg'
 import { difficultyBorderColor } from './ZoneMapSvg'
 import type { WorldZoneTile } from '../proto'
 
@@ -444,6 +444,61 @@ describe('computeTooltipPos', () => {
           const { x, y } = computeTooltipPos(cx, cy, container)
           // 256 = TOOLTIP_W, 160 = TOOLTIP_H
           return x >= 0 && x + 256 <= 800 + 256 && y >= 0
+        }
+      )
+    )
+  })
+})
+
+// REQ-WM-WRAP-1: Zone names longer than maxChars MUST be split across 2 lines.
+// REQ-WM-WRAP-2: wrapZoneName MUST break at word boundaries when possible.
+// REQ-WM-WRAP-3: wrapZoneName MUST hard-split when a single word exceeds maxChars.
+describe('wrapZoneName', () => {
+  it('returns [name, null] when name fits on one line', () => {
+    const [l1, l2] = wrapZoneName('Vantucky', 10)
+    expect(l1).toBe('Vantucky')
+    expect(l2).toBeNull()
+  })
+
+  it('breaks at word boundary for a two-word name exceeding maxChars', () => {
+    const [l1, l2] = wrapZoneName('The Couve', 6)
+    expect(l1).toBe('The')
+    expect(l2).toBe('Couve')
+  })
+
+  it('wraps "Downtown Portland" correctly', () => {
+    const [l1, l2] = wrapZoneName('Downtown Portland', 10)
+    expect(l1).toBe('Downtown')
+    expect(l2).toBe('Portland')
+  })
+
+  it('hard-splits a single word longer than maxChars', () => {
+    const [l1, l2] = wrapZoneName('Superlongword', 6)
+    expect(l1).toBe('Superl')
+    expect(l2).toBe('ongwor')
+  })
+
+  it('property: line1 always ≤ maxChars characters', () => {
+    fc.assert(
+      fc.property(
+        fc.string({ minLength: 1, maxLength: 30 }),
+        fc.integer({ min: 4, max: 14 }),
+        (name, max) => {
+          const [l1] = wrapZoneName(name.replace(/\s+/g, ' ').trim() || 'X', max)
+          return l1.length <= max
+        }
+      )
+    )
+  })
+
+  it('property: neither line exceeds maxChars', () => {
+    fc.assert(
+      fc.property(
+        fc.string({ minLength: 1, maxLength: 40 }),
+        fc.integer({ min: 4, max: 16 }),
+        (name, max) => {
+          const [l1, l2] = wrapZoneName(name, max)
+          return l1.length <= max && (l2 === null || l2.length <= max)
         }
       )
     )
