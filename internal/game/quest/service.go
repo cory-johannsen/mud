@@ -296,6 +296,18 @@ func (s *Service) RecordExplore(ctx context.Context, sess SessionState, characte
 	})
 }
 
+// RecordZoneMapUse increments progress for all active use_zone_map objectives
+// whose target_id matches zoneID.
+//
+// Precondition: sess non-nil; zoneID non-empty.
+// Postcondition: matching objectives are incremented (clamped at Quantity); maybeComplete called.
+// Returns completion messages if a quest completed, or nil if none completed.
+func (s *Service) RecordZoneMapUse(ctx context.Context, sess SessionState, characterID int64, zoneID string) ([]string, error) {
+	return s.recordProgress(ctx, sess, characterID, func(obj QuestObjective) bool {
+		return obj.Type == "use_zone_map" && obj.TargetID == zoneID
+	})
+}
+
 // RecordDeliver marks a specific deliver objective as fully complete.
 //
 // Precondition: sess non-nil; questID and objectiveID non-empty.

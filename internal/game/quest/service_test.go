@@ -357,6 +357,75 @@ func TestRecordKillWithResults_ReturnsCompletionResult(t *testing.T) {
 	}
 }
 
+// TestRecordZoneMapUse_CompletesObjective verifies RecordZoneMapUse increments
+// use_zone_map objectives matching the given zoneID and triggers completion.
+func TestRecordZoneMapUse_CompletesObjective(t *testing.T) {
+	def := &quest.QuestDef{
+		ID:    "onboarding_find_zone_map",
+		Title: "Find Your Bearings",
+		Type:  "onboarding",
+		Objectives: []quest.QuestObjective{
+			{ID: "use_zone_map_obj", Type: "use_zone_map", Description: "Use the zone map", TargetID: "felony_flats", Quantity: 1},
+		},
+		Rewards: quest.QuestRewards{XP: 50},
+	}
+	reg := quest.QuestRegistry{"onboarding_find_zone_map": def}
+	repo := newFakeRepo()
+	svc := quest.NewService(reg, repo, nil, nil, nil)
+
+	sess := newFakeSession()
+	sess.activeQuests["onboarding_find_zone_map"] = &quest.ActiveQuest{
+		QuestID:           "onboarding_find_zone_map",
+		ObjectiveProgress: map[string]int{"use_zone_map_obj": 0},
+	}
+
+	msgs, err := svc.RecordZoneMapUse(context.Background(), sess, 42, "felony_flats")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(msgs) == 0 {
+		t.Fatal("expected completion messages, got none")
+	}
+	if _, stillActive := sess.activeQuests["onboarding_find_zone_map"]; stillActive {
+		t.Fatal("quest should be completed and removed from activeQuests")
+	}
+}
+
+// TestRecordZoneMapUse_WrongZone verifies RecordZoneMapUse does not increment
+// progress when the zoneID does not match the objective target_id.
+func TestRecordZoneMapUse_WrongZone(t *testing.T) {
+	def := &quest.QuestDef{
+		ID:    "onboarding_find_zone_map",
+		Title: "Find Your Bearings",
+		Type:  "onboarding",
+		Objectives: []quest.QuestObjective{
+			{ID: "use_zone_map_obj", Type: "use_zone_map", Description: "Use the zone map", TargetID: "felony_flats", Quantity: 1},
+		},
+		Rewards: quest.QuestRewards{XP: 50},
+	}
+	reg := quest.QuestRegistry{"onboarding_find_zone_map": def}
+	repo := newFakeRepo()
+	svc := quest.NewService(reg, repo, nil, nil, nil)
+
+	sess := newFakeSession()
+	sess.activeQuests["onboarding_find_zone_map"] = &quest.ActiveQuest{
+		QuestID:           "onboarding_find_zone_map",
+		ObjectiveProgress: map[string]int{"use_zone_map_obj": 0},
+	}
+
+	msgs, err := svc.RecordZoneMapUse(context.Background(), sess, 42, "downtown")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(msgs) != 0 {
+		t.Fatalf("expected no messages for wrong zone, got %v", msgs)
+	}
+	aq := sess.activeQuests["onboarding_find_zone_map"]
+	if aq.ObjectiveProgress["use_zone_map_obj"] != 0 {
+		t.Fatal("progress should be unchanged for wrong zone")
+	}
+}
+
 // REQ-QC-2: RecordKillWithResults MUST return empty results when no quest completes.
 func TestRecordKillWithResults_EmptyWhenNoCompletion(t *testing.T) {
 	def := &quest.QuestDef{
