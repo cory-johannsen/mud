@@ -1,0 +1,27 @@
+domain:
+  id: ai_machete_shield_combat
+  description: Propagandist. Buffs player defense while delivering political statements.
+
+  tasks:
+    - id: behave
+      description: Root task
+
+  methods:
+    - task: behave
+      id: block_mode
+      precondition: always
+      subtasks: [political_block]
+
+    - task: behave
+      id: speech_mode
+      precondition: always
+      subtasks: [manifesto]
+
+  operators:
+    - id: political_block
+      action: lua_hook
+      ap_cost: 1
+
+    - id: manifesto
+      action: lua_hook
+      ap_cost: 0

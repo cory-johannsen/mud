@@ -1,0 +1,27 @@
+domain:
+  id: ai_gun_shield_combat
+  description: Insurance. Buffs player defense while delivering actuarial commentary.
+
+  tasks:
+    - id: behave
+      description: Root task
+
+  methods:
+    - task: behave
+      id: block_mode
+      precondition: always
+      subtasks: [actuarial_block]
+
+    - task: behave
+      id: odds_mode
+      precondition: always
+      subtasks: [odds]
+
+  operators:
+    - id: actuarial_block
+      action: lua_hook
+      ap_cost: 1
+
+    - id: odds
+      action: lua_hook
+      ap_cost: 0

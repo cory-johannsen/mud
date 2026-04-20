@@ -1,0 +1,38 @@
+id: ai_gun_shield
+name: AI Ballistic Shield
+description: >
+  A ballistic shield with a neural actuarial module bolted to the grip.
+  It has calculated the statistical probability of your survival to four
+  decimal places. The number is not encouraging but it considers itself
+  a net positive.
+kind: weapon
+weapon_ref: ballistic_shield
+weight: 5.0
+stackable: false
+max_stack: 1
+value: 1500
+combat_domain: ai_gun_shield_combat
+combat_script: |
+  preconditions = {}
+  preconditions.always = function(self) return true end
+
+  operators = {}
+  operators.actuarial_block = function(self)
+    self.engine.buff(self.combat.player.id, "fortified", 1)
+    self.engine.say({
+      "Blocking. Survival odds: improved by 12.4%.",
+      "Damage mitigated. Net benefit: positive.",
+      "Risk adjusted. Proceeding.",
+      "Statistically, you should be dead. I am helping.",
+      "Block successful. Premium: paid in full."
+    })
+  end
+
+  operators.odds = function(self)
+    self.engine.say({
+      "Current survival probability: within acceptable parameters.",
+      "I have run the numbers. You don't want to know.",
+      "Actuarially speaking, this is inadvisable.",
+      "The math is not in your favor. I am compensating."
+    })
+  end

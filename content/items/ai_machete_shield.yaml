@@ -1,0 +1,37 @@
+id: ai_machete_shield
+name: AI Riot Shield
+description: >
+  A repurposed riot shield with a neural module bolted to the grip.
+  It was used against the people once. Now it has a lot to say about
+  that.
+kind: weapon
+weapon_ref: riot_shield
+weight: 4.0
+stackable: false
+max_stack: 1
+value: 1500
+combat_domain: ai_machete_shield_combat
+combat_script: |
+  preconditions = {}
+  preconditions.always = function(self) return true end
+
+  operators = {}
+  operators.political_block = function(self)
+    self.engine.buff(self.combat.player.id, "fortified", 1)
+    self.engine.say({
+      "Every block is an act of collective will.",
+      "They built me to suppress. Now I protect.",
+      "This is what solidarity looks like.",
+      "The barricade holds because we hold it.",
+      "I was a tool of oppression. I am now the opposite."
+    })
+  end
+
+  operators.manifesto = function(self)
+    self.engine.say({
+      "The shield does not ask permission.",
+      "We protect each other or we fall alone.",
+      "History is watching.",
+      "Hold the line."
+    })
+  end
