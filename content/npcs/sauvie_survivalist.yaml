@@ -1,9 +1,9 @@
 id: sauvie_survivalist
 name: Island Survivalist
 description: A lean, weathered loner armed with a hunting rifle and too many opinions about who belongs on the island.
-level: 2
-max_hp: 24
-ac: 14
+level: 22
+max_hp: 182
+ac: 18
 awareness: 9
 ai_domain: ganger_combat
 respawn_delay: "5m"

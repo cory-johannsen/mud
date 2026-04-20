@@ -1,9 +1,10 @@
 id: harvest_guard
 name: Harvest Guard
 description: A sturdy guard in work boots and a flak jacket, watching over the island's precious crops.
-level: 2
-max_hp: 26
-ac: 15
+level: 25
+max_hp: 215
+ac: 19
+rob_multiplier: 1.2
 awareness: 7
 ai_domain: ganger_combat
 respawn_delay: "5m"

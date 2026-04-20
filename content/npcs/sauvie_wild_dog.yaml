@@ -1,9 +1,9 @@
 id: sauvie_wild_dog
 name: Wild Dog
 description: A gaunt, feral dog with matted fur and a deep growl, running loose across the island's abandoned fields.
-level: 1
-max_hp: 16
-ac: 13
+level: 20
+max_hp: 160
+ac: 18
 awareness: 10
 ai_domain: scavenger_patrol
 respawn_delay: "5m"

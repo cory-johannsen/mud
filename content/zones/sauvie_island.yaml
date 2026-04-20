@@ -1,8 +1,8 @@
 zone:
   id: sauvie_island
   danger_level: sketchy
-  min_level: 1
-  max_level: 7
+  min_level: 20
+  max_level: 30
   world_x: -2
   world_y: -2
   script_dir: content/scripts/zones/sauvie_island
@@ -349,6 +349,7 @@ zone:
   - id: sauvie_river_dock
     title: River Dock
     boss_room: true
+    danger_level: dangerous
     description: 'A ramshackle dock extends into the Multnomah Channel on barnacle-crusted
 
       pilings. Boats of various sizes are tied off — rowboats, a pontoon

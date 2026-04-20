@@ -6,10 +6,33 @@ description: >
   boat prop blade. Red Moira controls what moves on the Multnomah Channel
   and takes a cut of everything that doesn't move fast enough. The island
   farmers hate her. The pirates worship her. The river fears her.
-level: 7
-max_hp: 82
-ac: 17
+level: 30
+max_hp: 810
+tier: boss
+ac: 24
 rob_multiplier: 2.0
+boss_abilities:
+  - id: queens_command
+    name: "Queen's Command"
+    trigger: round_start
+    trigger_value: 0
+    cooldown: "3m"
+    effect:
+      aoe_condition: frightened
+  - id: river_ambush
+    name: "River Ambush"
+    trigger: hp_pct_below
+    trigger_value: 75
+    cooldown: "4m"
+    effect:
+      aoe_damage_expr: "4d10"
+  - id: pirate_resilience
+    name: "Pirate Resilience"
+    trigger: hp_pct_below
+    trigger_value: 50
+    cooldown: "5m"
+    effect:
+      heal_pct: 25
 awareness: 10
 ai_domain: sauvie_island_pirate_queen_combat
 respawn_delay: "10m"
