@@ -1,0 +1,22 @@
+id: machete_armor_light_quest
+title: Steam Test — Light
+description: >
+  Cipher's armor modifications require a different kind of proof. The
+  Big 3 at SteamPDX are running one of the tightest operations in the
+  city. Take them down and come back.
+giver_npc_id: cipher
+repeatable: false
+prerequisites:
+  - machete_signal_in_static
+objectives:
+  - id: kill_big_3
+    type: kill
+    description: Defeat the Big 3 at SteamPDX
+    target_id: the_big_3
+    quantity: 1
+rewards:
+  xp: 1400
+  credits: 600
+  items:
+    - item_id: ai_machete_armor_light
+      quantity: 1

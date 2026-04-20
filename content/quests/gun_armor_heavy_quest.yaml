@@ -1,0 +1,21 @@
+id: gun_armor_heavy_quest
+title: Steam Test — Heavy
+description: >
+  The heaviest modification Cipher makes. The Big 3 again. They've
+  earned their reputation for a reason.
+giver_npc_id: cipher
+repeatable: false
+prerequisites:
+  - gun_signal_in_static
+objectives:
+  - id: kill_big_3
+    type: kill
+    description: Defeat the Big 3 at SteamPDX
+    target_id: the_big_3
+    quantity: 1
+rewards:
+  xp: 1400
+  credits: 600
+  items:
+    - item_id: ai_gun_armor_heavy
+      quantity: 1

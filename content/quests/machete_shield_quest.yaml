@@ -1,0 +1,22 @@
+id: machete_shield_quest
+title: Jam Session
+description: >
+  Cipher's shield modifications are the rarest thing they make. Papa
+  Wook in Wooklyn guards something Cipher wants. Take him down and
+  Cipher will make it worth your while.
+giver_npc_id: cipher
+repeatable: false
+prerequisites:
+  - machete_signal_in_static
+objectives:
+  - id: kill_papa_wook
+    type: kill
+    description: Defeat Papa Wook in Wooklyn
+    target_id: papa_wook
+    quantity: 1
+rewards:
+  xp: 1600
+  credits: 700
+  items:
+    - item_id: ai_machete_shield
+      quantity: 1
