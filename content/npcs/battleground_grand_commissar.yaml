@@ -6,10 +6,33 @@ description: >
   for six years through sheer force of doctrine and fists. He believes
   every word of the collective's ideology and enforces it without mercy.
   His revolutionary tribunal has sentenced dozens to reeducation.
-level: 6
-max_hp: 80
-ac: 18
+level: 12
+max_hp: 258
+tier: boss
+ac: 21
 rob_multiplier: 2.0
+boss_abilities:
+  - id: harvest_edict
+    name: "Harvest Edict"
+    trigger: round_start
+    trigger_value: 0
+    cooldown: "3m"
+    effect:
+      aoe_condition: frightened
+  - id: collective_strike
+    name: "Collective Strike"
+    trigger: hp_pct_below
+    trigger_value: 75
+    cooldown: "4m"
+    effect:
+      aoe_damage_expr: "2d8"
+  - id: commissars_resolve
+    name: "Commissar's Resolve"
+    trigger: hp_pct_below
+    trigger_value: 50
+    cooldown: "5m"
+    effect:
+      heal_pct: 25
 awareness: 9
 ai_domain: battleground_grand_commissar_combat
 respawn_delay: "10m"

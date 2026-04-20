@@ -1,8 +1,8 @@
 zone:
   id: battleground
   danger_level: all_out_war
-  min_level: 1
-  max_level: 6
+  min_level: 3
+  max_level: 12
   world_x: 4
   world_y: -7
   script_dir: content/scripts/zones/battleground
@@ -753,6 +753,7 @@ zone:
   - id: battle_war_room
     core: true
     boss_room: true
+    danger_level: dangerous
     title: War Room
     description: 'A former bank vault converted into a strategic planning chamber.
 

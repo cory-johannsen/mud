@@ -1,9 +1,9 @@
 id: country_club_sniper
 name: Country Club Sniper
 description: A patient killer perched in a golf cart with a scoped rifle, scanning for trespassers.
-level: 4
-max_hp: 40
-ac: 17
+level: 9
+max_hp: 63
+ac: 15
 awareness: 10
 ai_domain: ganger_combat
 respawn_delay: "5m"

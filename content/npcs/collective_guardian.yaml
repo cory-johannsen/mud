@@ -3,9 +3,9 @@ name: Collective Guardian
 description: >-
   A stern guardian in olive drab, red armband on the left bicep,
   patrolling the collective's perimeter with unwavering purpose.
-level: 3
-max_hp: 34
-ac: 16
+level: 6
+max_hp: 42
+ac: 15
 awareness: 8
 ai_domain: ganger_combat
 respawn_delay: "5m"
