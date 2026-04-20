@@ -380,6 +380,7 @@ export function MapPanel() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+      <CombatNpcModal />
       <div className="map-header">
         <h3>{showWorld ? 'World Map' : 'Zone Map'}</h3>
         {!showWorld && exploreModeLabel && (

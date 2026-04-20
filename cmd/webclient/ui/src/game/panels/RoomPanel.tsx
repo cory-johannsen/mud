@@ -275,10 +275,15 @@ export function RoomPanel() {
                   </li>
                 )
               }
-              // Combat NPC: Name (health) [fighting Target] — clickable to attack
+              // Combat NPC: Name (health) [fighting Target]
+              // Hover or click → ExamineRequest → modal lets player choose to attack or not.
               return (
                 <li key={npc.id ?? npc.name}>
-                  <button className="item-link" onClick={() => sendCommand(`attack ${npc.name}`)}>
+                  <button
+                    className="item-link"
+                    onMouseEnter={() => sendMessage('ExamineRequest', { target: npc.name })}
+                    onClick={() => sendMessage('ExamineRequest', { target: npc.name })}
+                  >
                     {npc.name}
                   </button>{' '}
                   <span style={{ color: '#666', fontSize: '0.75rem' }}>({health})</span>

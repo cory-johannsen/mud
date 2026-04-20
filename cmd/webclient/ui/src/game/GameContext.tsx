@@ -652,18 +652,10 @@ export function GameProvider({ children }: { children: ReactNode }) {
           if (!combatTypes.has(npcType)) {
             // Non-combat NPC: show as modal
             dispatch({ type: 'SET_NPC_VIEW', view: npcViewPayload })
-          } else if (combatRoundRef.current !== null) {
-            // Combat NPC examined during active combat: show combat examine modal.
-            // Use combatRoundRef (not state.combatRound) to avoid stale closure in ws.onmessage.
-            dispatch({ type: 'SET_COMBAT_NPC_VIEW', view: npcViewPayload })
           } else {
-            // Combat NPC outside combat: append to feed
-            const health = nv.healthDescription ?? nv.health_description ?? ''
-            const lines = [
-              `${nv.name ?? 'Unknown'} (level ${nv.level ?? '?'}) — ${health}`,
-              nv.description ?? '',
-            ].filter(Boolean).join('\n')
-            dispatch({ type: 'APPEND_FEED', entry: makeFeedEntry('system', lines) })
+            // Combat NPC: show examine modal whether in combat or not.
+            // This allows players to inspect hostiles before deciding to engage.
+            dispatch({ type: 'SET_COMBAT_NPC_VIEW', view: npcViewPayload })
           }
           break
         }
