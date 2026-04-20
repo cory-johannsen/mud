@@ -97,6 +97,9 @@ func TestNPCStatFormula_AllTemplatesCompliant(t *testing.T) {
 		if tmpl.Level == 0 {
 			continue // non-combat service NPCs without a level
 		}
+		if tmpl.NPCType != "combat" {
+			continue // skip non-combat NPCs (chip_docs, merchants, quest givers, etc.)
+		}
 		tmpl := tmpl
 		t.Run(tmpl.ID, func(t *testing.T) {
 			expHP := baseHP(tmpl.Level) * tierHPMult(tmpl.Tier)
