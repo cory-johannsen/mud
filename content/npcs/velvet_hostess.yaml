@@ -1,11 +1,12 @@
 id: velvet_hostess
 name: Velvet Hostess
 description: The smile doesn't reach the eyes, but the eyes know exactly what they are doing.
-level: 3
-max_hp: 28
-ac: 12
+level: 42
+max_hp: 456
+ac: 20
 awareness: 6
 disposition: neutral
+rob_multiplier: 1.2
 seduction_probability: 0.5
 abilities:
   brutality: 8

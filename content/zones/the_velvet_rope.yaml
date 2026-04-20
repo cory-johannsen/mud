@@ -1,8 +1,8 @@
 zone:
   id: the_velvet_rope
   danger_level: dangerous
-  min_level: 2
-  max_level: 7
+  min_level: 40
+  max_level: 55
   world_x: 3
   world_y: 1
   name: The Velvet Rope
@@ -49,7 +49,7 @@ zone:
       lighting: dim
       atmosphere: exclusive
   - id: tvr_the_buffet
-    danger_level: sketchy
+    danger_level: dangerous
     title: The Buffet
     description: A long table draped in red velvet holds offerings of dubious origin under warming lights.
       Patrons mill about with plates, watching the door. The floors are suspiciously slick. Stairs and
@@ -69,7 +69,7 @@ zone:
       respawn_after: 5m
     boss_room: false
   - id: tvr_play_rooms
-    danger_level: sketchy
+    danger_level: dangerous
     title: The Play Rooms
     description: A central hub connecting the club's various chambers. Curtained doorways in every direction.
       A hostess at a velvet rope manages traffic with a clipboard and a practiced smile. The floor is
@@ -91,7 +91,7 @@ zone:
       respawn_after: 5m
     boss_room: false
   - id: tvr_the_strangers
-    danger_level: sketchy
+    danger_level: dangerous
     title: The Strangers
     description: A dimly lit room with no furniture and no names. Patrons enter as strangers and some
       of them leave that way too. Two figures turn to assess you with professional disinterest that shifts
@@ -107,7 +107,7 @@ zone:
       respawn_after: 5m
     boss_room: false
   - id: tvr_spit_roast
-    danger_level: sketchy
+    danger_level: dangerous
     title: Spit Roast
     description: The name is painted on the door in gold script, which does not make it less alarming.
       Inside, the room is arranged for activities that the furniture suggests but does not explain. Two
@@ -159,7 +159,7 @@ zone:
       respawn_after: 5m
     boss_room: false
   - id: tvr_gangbang_room
-    danger_level: dangerous
+    danger_level: all_out_war
     title: The VIP Chamber
     description: The innermost room. No sign. No clipboard. Just a presence that has been holding court
       here since the club opened and intends to continue doing so. The floor is at its worst here. Everything

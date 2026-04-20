@@ -1,9 +1,10 @@
 id: gangbang
 name: "Gangbang!"
 description: Not a name, a warning. A presence that fills the room with the force of someone who has never once been told no.
-level: 7
-max_hp: 90
-ac: 15
+level: 55
+max_hp: 2115
+ac: 27
+rob_multiplier: 2.0
 awareness: 9
 disposition: hostile
 tier: boss
@@ -14,6 +15,28 @@ abilities:
   reasoning: 10
   savvy: 14
   flair: 20
+boss_abilities:
+  - id: velvet_frenzy
+    name: "Velvet Frenzy"
+    trigger: round_start
+    trigger_value: 0
+    cooldown: "3m"
+    effect:
+      aoe_damage_expr: "7d10"
+  - id: rope_restriction
+    name: "Rope Restriction"
+    trigger: hp_pct_below
+    trigger_value: 75
+    cooldown: "4m"
+    effect:
+      aoe_condition: slowed
+  - id: gangbang_resurgence
+    name: "Gangbang Resurgence"
+    trigger: hp_pct_below
+    trigger_value: 50
+    cooldown: "5m"
+    effect:
+      heal_pct: 25
 loot:
   currency:
     min: 70
@@ -21,7 +44,7 @@ loot:
 taunts:
   - "You have no idea what you just walked into."
   - "Nobody in this room has ever said no to me. You won't be the first."
-  - "I don't move for anyone. Anyone moves for me."
+  - "Nobody moves for anyone. Anyone moves for me."
   - "That look on your face — keep it. I want to remember it."
   - "I've broken people who were twice your size and three times as confident."
   - "The name is a warning. You should've listened to it."
