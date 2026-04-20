@@ -3,9 +3,9 @@ name: Shrimp Gang Enforcer
 npc_type: combat
 faction_id: shrimp_gang_skill_toys_club
 description: A veteran of countless yo-yo competitions, this man radiates a pungent combination of seafood and machine oil. Intricate string calluses cover his fingers. He handles two yo-yos simultaneously without apparent effort, watching you with the calm focus of a professional.
-level: 4
-max_hp: 42
-ac: 14
+level: 26
+max_hp: 226
+ac: 19
 rob_multiplier: 1.2
 awareness: 7
 ai_domain: shrimp_gang_combat

@@ -3,9 +3,9 @@ name: Shrimp Gang Dazzler
 npc_type: combat
 faction_id: shrimp_gang_skill_toys_club
 description: This yo-yo specialist wears mirrored sunglasses indoors and has trained specifically in optical disruption techniques. His yo-yo is painted in concentric hypnotic spirals. He watches you with an unnerving stillness, like he's already calculating the angle of throw.
-level: 3
-max_hp: 30
-ac: 13
+level: 24
+max_hp: 204
+ac: 18
 rob_multiplier: 1.0
 awareness: 9
 ai_domain: shrimp_gang_dazzler_combat

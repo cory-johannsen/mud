@@ -3,14 +3,36 @@ name: The Yo-Yo Master
 npc_type: combat
 faction_id: shrimp_gang_skill_toys_club
 description: An imposing figure in a sequined tracksuit the color of boiled shrimp. The Yo-Yo Master handles three yo-yos simultaneously, their strings weaving patterns of terrifying complexity. The stench of shrimp radiates from him like a sacred aura. His eyes, half-mad with absolute mastery and years of protein shakes made from shrimp powder, lock onto you with the intensity of a man who has dedicated every waking moment to a single, profoundly strange purpose.
-level: 8
-max_hp: 95
-ac: 17
+level: 32
+max_hp: 900
+tier: boss
+ac: 24
 rob_multiplier: 2.0
+boss_abilities:
+  - id: yo_yo_of_doom
+    name: "Yo-Yo of Doom"
+    trigger: round_start
+    trigger_value: 0
+    cooldown: "3m"
+    effect:
+      aoe_damage_expr: "3d10"
+  - id: shrimp_gang_call
+    name: "Shrimp Gang Call"
+    trigger: hp_pct_below
+    trigger_value: 75
+    cooldown: "4m"
+    effect:
+      aoe_condition: frightened
+  - id: yo_yo_resilience
+    name: "Yo-Yo Resilience"
+    trigger: hp_pct_below
+    trigger_value: 50
+    cooldown: "5m"
+    effect:
+      heal_pct: 30
 awareness: 10
 ai_domain: yo_yo_master_combat
 respawn_delay: "30m"
-tier: boss
 
 abilities:
   brutality: 14

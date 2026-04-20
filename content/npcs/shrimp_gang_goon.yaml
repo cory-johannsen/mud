@@ -3,9 +3,9 @@ name: Shrimp Gang Goon
 npc_type: combat
 faction_id: shrimp_gang_skill_toys_club
 description: A pasty, fish-scented man in a tank top with a yo-yo holster on his belt. His eyes have a distant, glazed quality — too many hours staring at spinning objects. He smells powerfully of shrimp and motor oil.
-level: 2
-max_hp: 22
-ac: 13
+level: 22
+max_hp: 182
+ac: 18
 rob_multiplier: 1.0
 awareness: 5
 ai_domain: shrimp_gang_combat
