@@ -1,9 +1,9 @@
 id: hills_armory_warden
 name: Armory Warden
 description: A scarred veteran charged with protecting the Kingdom's weapon stores. The warden carries multiple blades and has the reflexes of someone who has survived more than one assassination attempt on the armory.
-level: 4
-max_hp: 48
-ac: 16
+level: 9
+max_hp: 63
+ac: 15
 awareness: 9
 ai_domain: ganger_combat
 respawn_delay: "5m"

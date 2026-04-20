@@ -1,9 +1,9 @@
 id: intel_guard
 name: Intel Guard
 description: A professional guard in corporate tactical gear, protecting the tech campus perimeter with lethal efficiency.
-level: 3
-max_hp: 34
-ac: 16
+level: 7
+max_hp: 49
+ac: 15
 awareness: 8
 ai_domain: ganger_combat
 respawn_delay: "5m"

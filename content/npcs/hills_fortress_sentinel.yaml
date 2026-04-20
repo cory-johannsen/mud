@@ -1,9 +1,9 @@
 id: hills_fortress_sentinel
 name: Fortress Sentinel
 description: An elite knight of the inner sanctum, armored from helm to boot in layered server-rack plating. These sentinels are chosen for size and absolute loyalty to the Kingdom's core.
-level: 5
-max_hp: 55
-ac: 18
+level: 12
+max_hp: 86
+ac: 16
 awareness: 8
 ai_domain: ganger_combat
 respawn_delay: "5m"

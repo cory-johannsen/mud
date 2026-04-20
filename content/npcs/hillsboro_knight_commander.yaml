@@ -6,10 +6,33 @@ description: >
   She maintains the armory with obsessive precision and personally oversees
   the forging of every weapon issued to the Kingdom's knights. Her blade
   is a sharpened server blade half a meter long, and she knows how to use it.
-level: 7
-max_hp: 85
-ac: 19
+level: 15
+max_hp: 330
+tier: boss
+ac: 22
 rob_multiplier: 2.0
+boss_abilities:
+  - id: silicon_shield
+    name: "Silicon Shield"
+    trigger: round_start
+    trigger_value: 0
+    cooldown: "3m"
+    effect:
+      aoe_condition: slowed
+  - id: knight_charge
+    name: "Knight Charge"
+    trigger: hp_pct_below
+    trigger_value: 75
+    cooldown: "4m"
+    effect:
+      aoe_damage_expr: "2d10"
+  - id: commanders_will
+    name: "Commander's Will"
+    trigger: hp_pct_below
+    trigger_value: 50
+    cooldown: "5m"
+    effect:
+      heal_pct: 25
 awareness: 10
 ai_domain: hillsboro_knight_commander_combat
 respawn_delay: "10m"
