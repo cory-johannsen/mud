@@ -1,9 +1,10 @@
 id: hoa_enforcer
 name: HOA Enforcer
 description: A thick-necked enforcer in a polo shirt, clipboard in one hand and a baton in the other.
-level: 3
-max_hp: 35
-ac: 16
+level: 20
+max_hp: 160
+ac: 18
+rob_multiplier: 1.2
 awareness: 6
 ai_domain: ganger_combat
 respawn_delay: "5m"

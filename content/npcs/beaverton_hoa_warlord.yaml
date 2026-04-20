@@ -7,10 +7,33 @@ description: >
   more violations than anyone else, then had his rivals cited for unauthorized
   personal conduct. He runs the Mall Enforcement Core with bureaucratic
   brutality and a zero-tolerance policy on dissent.
-level: 6
-max_hp: 78
-ac: 18
+level: 25
+max_hp: 645
+tier: boss
+ac: 24
 rob_multiplier: 2.0
+boss_abilities:
+  - id: hoa_decree
+    name: "HOA Decree"
+    trigger: round_start
+    trigger_value: 0
+    cooldown: "3m"
+    effect:
+      aoe_condition: frightened
+  - id: code_enforcement
+    name: "Code Enforcement"
+    trigger: hp_pct_below
+    trigger_value: 75
+    cooldown: "4m"
+    effect:
+      aoe_damage_expr: "4d8"
+  - id: warlord_resilience
+    name: "Warlord Resilience"
+    trigger: hp_pct_below
+    trigger_value: 50
+    cooldown: "5m"
+    effect:
+      heal_pct: 25
 awareness: 9
 ai_domain: beaverton_hoa_warlord_combat
 respawn_delay: "10m"

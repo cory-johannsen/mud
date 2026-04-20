@@ -1,8 +1,8 @@
 zone:
   id: beaverton
   danger_level: sketchy
-  min_level: 1
-  max_level: 6
+  min_level: 16
+  max_level: 25
   world_x: -2
   world_y: 0
   script_dir: content/scripts/zones/beaverton
@@ -613,6 +613,7 @@ zone:
   - id: beav_mall_core
     title: Mall Enforcement Core
     boss_room: true
+    danger_level: dangerous
     description: |
       The reinforced core of the Beaverton Town Center mall serves as the nerve
       center of the Free State's enforcement apparatus. Steel blast doors seal

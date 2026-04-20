@@ -1,9 +1,11 @@
 id: mall_cop_elite
 name: Mall Cop Elite
 description: A heavily armored figure in modified mall security gear, the Segway long abandoned but the authority very much intact.
-level: 3
-max_hp: 34
-ac: 16
+level: 22
+max_hp: 273
+tier: elite
+ac: 20
+rob_multiplier: 1.2
 awareness: 8
 ai_domain: ganger_combat
 respawn_delay: "5m"
