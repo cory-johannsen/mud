@@ -944,9 +944,12 @@ func TestLoadZone_ClownCamp_HasFiveRooms(t *testing.T) {
 	require.NoError(t, err)
 	zone, err := LoadZoneFromBytes(data)
 	require.NoError(t, err)
-	// 7 rooms: cc_front_entrance (added for zone entrance via Interstate Ave), cc_coat_check,
-	// cc_empty_theater, cc_changing_rooms, cc_backstage, cc_the_stage, clown_camp_brothel.
-	assert.Len(t, zone.Rooms, 7, "Clown Camp must have exactly 7 rooms")
+	// 17 rooms: 7 original (cc_front_entrance, cc_coat_check, cc_empty_theater, cc_changing_rooms,
+	// cc_backstage, cc_the_stage, clown_camp_brothel) + 5 QCE territory rooms (cc_qce_entrance,
+	// cc_qce_costume_vault, cc_qce_rehearsal_hall, cc_qce_green_room, cc_qce_throne) +
+	// 5 UMCA territory rooms (cc_umca_gate, cc_umca_armory, cc_umca_rally_grounds,
+	// cc_umca_commissary, cc_umca_war_tent).
+	assert.Len(t, zone.Rooms, 17, "Clown Camp must have exactly 17 rooms")
 	assert.Equal(t, "clown_camp", zone.ID)
 }
 

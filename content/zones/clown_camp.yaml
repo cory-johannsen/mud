@@ -118,20 +118,229 @@ zone:
       respawn_after: 10m
     boss_room: false
   - id: cc_the_stage
-    danger_level: dangerous
+    danger_level: all_out_war
     title: The Stage
     description: Center stage. The house lights blaze on you from the grid above. A single figure stands
       downstage, enormous and grinning, waiting for its cue. The audience seats are all empty. Or they
-      were.
+      were. Faction lines have been drawn across the stage in blood and greasepaint.
     exits:
     - direction: west
       target: cc_backstage
+    - direction: north
+      target: cc_qce_entrance
+    - direction: south
+      target: cc_umca_gate
     map_x: 4
     map_y: 0
     spawns:
     - template: big_top
       count: 1
       respawn_after: 30m
+    - template: jc_fighter
+      count: 2
+      respawn_after: 10m
+    - template: qce_agitator
+      count: 2
+      respawn_after: 10m
+    - template: umca_grunt
+      count: 2
+      respawn_after: 10m
+    boss_room: true
+  - id: cc_qce_entrance
+    danger_level: dangerous
+    title: QCE Territory Entrance
+    description: A curtain of rainbow-painted chain-link marks the boundary of Queer Clowning Experience
+      territory. Sequined banners hang from the rafters. The air smells of greasepaint and something
+      floral. Performers in elaborate costumes eye you with calculated hostility.
+    exits:
+    - direction: east
+      target: cc_the_stage
+    - direction: west
+      target: cc_qce_costume_vault
+    map_x: 3
+    map_y: 2
+    spawns:
+    - template: qce_agitator
+      count: 2
+      respawn_after: 10m
+    boss_room: false
+  - id: cc_qce_costume_vault
+    danger_level: dangerous
+    title: QCE Costume Vault
+    description: Racks of spectacular costumes line the walls — feathered, sequined, and impractical.
+      Several QCE fighters pull gear from the racks, armoring up in ways that defy conventional military
+      logic and somehow work anyway.
+    exits:
+    - direction: east
+      target: cc_qce_entrance
+    - direction: west
+      target: cc_qce_rehearsal_hall
+    map_x: 2
+    map_y: 2
+    spawns:
+    - template: qce_agitator
+      count: 2
+      respawn_after: 10m
+    boss_room: false
+  - id: cc_qce_rehearsal_hall
+    danger_level: dangerous
+    title: QCE Rehearsal Hall
+    description: A mirrored studio where QCE fighters practice combat routines that are equal parts
+      choreography and genuine violence. The thump of music from a hidden speaker system provides
+      an incongruous backdrop.
+    exits:
+    - direction: east
+      target: cc_qce_costume_vault
+    - direction: west
+      target: cc_qce_green_room
+    map_x: 1
+    map_y: 2
+    spawns:
+    - template: qce_drag_bruiser
+      count: 1
+      respawn_after: 10m
+    - template: qce_agitator
+      count: 1
+      respawn_after: 10m
+    boss_room: false
+  - id: cc_qce_green_room
+    danger_level: dangerous
+    title: QCE Green Room
+    description: The inner sanctum before the throne. A lounge filled with QCE elites who watch you
+      with predatory calm. The walls are covered in manifestos, art, and intelligence maps. The QCE
+      Supply Captain runs a shop from a folding table in the corner.
+    exits:
+    - direction: east
+      target: cc_qce_rehearsal_hall
+    - direction: west
+      target: cc_qce_throne
+    map_x: 0
+    map_y: 2
+    spawns:
+    - template: qce_drag_bruiser
+      count: 1
+      respawn_after: 10m
+    - template: qce_merchant
+      count: 1
+      respawn_after: 0s
+    boss_room: false
+  - id: cc_qce_throne
+    danger_level: all_out_war
+    title: The Sequined Throne Room
+    description: The innermost chamber of QCE territory. A towering throne of welded steel and mirror
+      shards dominates the center. The Sequined Ringleader holds court here, flanked by elite guards
+      who move with the practiced precision of performers who have crossed the line from entertainment
+      into something genuinely dangerous.
+    exits:
+    - direction: east
+      target: cc_qce_green_room
+    map_x: -1
+    map_y: 2
+    spawns:
+    - template: qce_ringleader
+      count: 1
+      respawn_after: 72h
+    - template: qce_drag_bruiser
+      count: 2
+      respawn_after: 10m
+    boss_room: true
+  - id: cc_umca_gate
+    danger_level: dangerous
+    title: UMCA Territory Gate
+    description: A fortified checkpoint marks the edge of Unwoke MAGA Clown Army territory. Red-white-and-blue
+      greasepaint decorates every surface. UMCA grunts man the gate with the rigid discipline of soldiers
+      who have decided that clown makeup and military protocol are not mutually exclusive.
+    exits:
+    - direction: west
+      target: cc_the_stage
+    - direction: east
+      target: cc_umca_armory
+    map_x: 5
+    map_y: 2
+    spawns:
+    - template: umca_grunt
+      count: 2
+      respawn_after: 10m
+    boss_room: false
+  - id: cc_umca_armory
+    danger_level: dangerous
+    title: UMCA Armory
+    description: Racks of weapons and ammunition line the walls with obsessive orderliness. Every firearm
+      is cleaned, every blade sharpened, every piece of gear labeled and inventoried. UMCA soldiers
+      perform weapons checks with the focus of people who take this very, very seriously.
+    exits:
+    - direction: west
+      target: cc_umca_gate
+    - direction: east
+      target: cc_umca_rally_grounds
+    map_x: 6
+    map_y: 2
+    spawns:
+    - template: umca_grunt
+      count: 2
+      respawn_after: 10m
+    boss_room: false
+  - id: cc_umca_rally_grounds
+    danger_level: dangerous
+    title: UMCA Rally Grounds
+    description: An open drill yard where UMCA soldiers train in formation. The flag bearer leads exercises
+      with a flag that combines the MAGA aesthetic with circus imagery in ways that should not work but
+      somehow achieve a terrible coherence.
+    exits:
+    - direction: west
+      target: cc_umca_armory
+    - direction: east
+      target: cc_umca_commissary
+    map_x: 7
+    map_y: 2
+    spawns:
+    - template: umca_flag_bearer
+      count: 1
+      respawn_after: 10m
+    - template: umca_grunt
+      count: 1
+      respawn_after: 10m
+    boss_room: false
+  - id: cc_umca_commissary
+    danger_level: dangerous
+    title: UMCA Commissary
+    description: A well-stocked supply depot managed with military precision. The Commissary Officer
+      runs an efficient operation, selling to those who have earned UMCA's trust. Shelves of supplies
+      stand at rigid attention.
+    exits:
+    - direction: west
+      target: cc_umca_rally_grounds
+    - direction: east
+      target: cc_umca_war_tent
+    map_x: 8
+    map_y: 2
+    spawns:
+    - template: umca_flag_bearer
+      count: 1
+      respawn_after: 10m
+    - template: umca_merchant
+      count: 1
+      respawn_after: 0s
+    boss_room: false
+  - id: cc_umca_war_tent
+    danger_level: all_out_war
+    title: The War Tent
+    description: The UMCA command center. Maps cover every surface, marked with territorial claims and
+      tactical assessments. The Commander holds court here, surrounded by elite soldiers who move with
+      the quiet efficiency of people who have turned a joke into a genuine military organization through
+      sheer force of conviction and an alarming amount of discipline.
+    exits:
+    - direction: west
+      target: cc_umca_commissary
+    map_x: 9
+    map_y: 2
+    spawns:
+    - template: umca_commander
+      count: 1
+      respawn_after: 72h
+    - template: umca_flag_bearer
+      count: 2
+      respawn_after: 10m
     boss_room: true
   - id: clown_camp_brothel
     title: The Big Top Boudoir
