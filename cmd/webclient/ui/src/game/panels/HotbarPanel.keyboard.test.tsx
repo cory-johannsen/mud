@@ -16,7 +16,7 @@ function makeSlot(ref: string) {
 
 let mockSendCommand: ReturnType<typeof vi.fn>
 
-function setupGame(slots: object[] = []) {
+function setupGame(slots: object[] = [], choicePrompt: object | null = null) {
   const filledSlots = Array.from({ length: 10 }, (_, i) => slots[i] ?? { kind: 'command', ref: '' })
   mockSendCommand = vi.fn()
   mockUseGame.mockReturnValue({
@@ -24,6 +24,7 @@ function setupGame(slots: object[] = []) {
       hotbarSlots: filledSlots,
       combatRound: null,
       characterInfo: null,
+      choicePrompt,
     },
     sendCommand: mockSendCommand,
     sendMessage: vi.fn(),
@@ -105,5 +106,30 @@ describe('HotbarPanel keyboard shortcuts', () => {
     fireEvent.keyDown(document, { key: 'Enter' })
     fireEvent.keyDown(document, { key: 'ArrowUp' })
     expect(mockSendCommand).not.toHaveBeenCalled()
+  })
+
+  // REQ-HKB-3: When choicePrompt is non-null (FeatureChoiceModal open), hotbar MUST NOT
+  // intercept digit keys — they belong to the modal selection flow.
+  it('does not intercept digit keys when choicePrompt is set (FeatureChoiceModal open)', () => {
+    const prompt = { featureId: 'tech_choice', prompt: 'Choose:', options: ['[shock_wave] Shock Wave'] }
+    setupGame([makeSlot('look')], prompt)
+    render(<HotbarPanel />)
+    fireEvent.keyDown(document, { key: '1' })
+    expect(mockSendCommand).not.toHaveBeenCalled()
+  })
+
+  it('resumes intercepting digit keys after choicePrompt becomes null', () => {
+    const prompt = { featureId: 'tech_choice', prompt: 'Choose:', options: ['[shock_wave] Shock Wave'] }
+    setupGame([makeSlot('look')], prompt)
+    const { unmount } = render(<HotbarPanel />)
+    fireEvent.keyDown(document, { key: '1' })
+    expect(mockSendCommand).not.toHaveBeenCalled()
+    unmount()
+
+    // Re-render with no choicePrompt
+    setupGame([makeSlot('look')], null)
+    render(<HotbarPanel />)
+    fireEvent.keyDown(document, { key: '1' })
+    expect(mockSendCommand).toHaveBeenCalledWith('look')
   })
 })

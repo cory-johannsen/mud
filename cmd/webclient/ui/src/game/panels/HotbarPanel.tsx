@@ -262,7 +262,7 @@ function EditPopup({ slotIndex, slot, onSave, onClear, onCancel }: EditPopupProp
 
 export function HotbarPanel() {
   const { state, sendCommand, sendMessage } = useGame()
-  const { hotbarSlots, combatRound, characterInfo } = state
+  const { hotbarSlots, combatRound, characterInfo, choicePrompt } = state
   const [editingSlot, setEditingSlot] = useState<number | null>(null)
   const [tooltip, setTooltip] = useState<{ slot: HotbarSlot; pos: { x: number; y: number } } | null>(null)
 
@@ -291,12 +291,16 @@ export function HotbarPanel() {
   }
 
   // REQ-HKB-1: Digit keys 1-9 and 0 MUST activate the corresponding hotbar slot regardless
-  // of which UI element has focus, except when a non-prompt input (e.g. EditPopup) is active.
+  // of which UI element has focus, except when a non-prompt input (e.g. EditPopup) is active,
+  // or when the FeatureChoiceModal is open (choicePrompt non-null).
   // REQ-HKB-2: Intercepted keypresses MUST NOT be forwarded to the prompt or the server.
+  // REQ-HKB-3: Hotbar MUST NOT intercept digit keys when choicePrompt is set; those keypresses
+  // belong to the modal selection flow, not the hotbar.
   const activateRef = useRef(activate)
   useEffect(() => { activateRef.current = activate })
   useEffect(() => {
     if (editingSlot !== null) return // EditPopup is open — let it receive key events
+    if (choicePrompt !== null) return // FeatureChoiceModal is open — do not intercept
     function handleKeyDown(e: globalThis.KeyboardEvent) {
       const idx = KEYS.indexOf(e.key)
       if (idx === -1) return
@@ -310,7 +314,7 @@ export function HotbarPanel() {
     }
     document.addEventListener('keydown', handleKeyDown)
     return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [editingSlot])
+  }, [editingSlot, choicePrompt])
 
   function handleSave(slot: number, text: string) {
     sendMessage('HotbarRequest', { action: 'set', slot, text })
