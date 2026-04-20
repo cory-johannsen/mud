@@ -1,0 +1,50 @@
+domain:
+  id: clown_faction_combat
+  description: Combat AI for faction NPCs on The Stage. Prioritizes faction enemies; falls back to player enemies.
+
+  tasks:
+    - id: behave
+      description: Root task — choose faction enemy or player enemy
+    - id: fight_faction_enemy
+      description: Attack the nearest faction-hostile combatant
+    - id: fight_player
+      description: Attack the nearest player enemy
+
+  methods:
+    - task: behave
+      id: faction_enemy_present
+      precondition: has_faction_enemy
+      subtasks: [fight_faction_enemy]
+
+    - task: behave
+      id: player_enemy_present
+      precondition: has_player_enemy
+      subtasks: [fight_player]
+
+    - task: behave
+      id: idle_mode
+      precondition: ""
+      subtasks: [do_pass]
+
+    - task: fight_faction_enemy
+      id: strike_faction_enemy
+      precondition: ""
+      subtasks: [attack_faction_enemy]
+
+    - task: fight_player
+      id: strike_player
+      precondition: ""
+      subtasks: [attack_enemy]
+
+  operators:
+    - id: attack_faction_enemy
+      action: attack
+      target: nearest_faction_enemy
+
+    - id: attack_enemy
+      action: attack
+      target: nearest_enemy
+
+    - id: do_pass
+      action: pass
+      target: ""
