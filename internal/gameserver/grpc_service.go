@@ -9521,14 +9521,23 @@ func (s *GameServiceServer) promptFeatureChoice(
 		}
 
 		if idx < 0 {
-			// Numeric but out of range — log and report invalid selection.
+			// Numeric but out of range — log, notify player, and retry.
 			if s.logger != nil {
 				s.logger.Warn("invalid feature choice selection",
 					zap.String("feature", featureID),
 					zap.String("input", selText),
 				)
 			}
-			break
+			if sendErr := stream.Send(&gamev1.ServerEvent{
+				Payload: &gamev1.ServerEvent_Message{
+					Message: &gamev1.MessageEvent{Content: "Invalid selection, please try again."},
+				},
+			}); sendErr != nil {
+				if s.logger != nil {
+					s.logger.Warn("sending invalid-selection retry feedback", zap.String("feature", featureID), zap.Error(sendErr))
+				}
+			}
+			continue
 		}
 
 		chosen := choices.Options[idx]
@@ -9631,13 +9640,23 @@ func (s *GameServiceServer) promptTechSlotChoice(
 			idx = n - 1
 		}
 		if idx < 0 {
+			// Numeric but out of range — log, notify player, and retry.
 			if s.logger != nil {
 				s.logger.Warn("invalid tech slot choice selection",
 					zap.String("feature", featureID),
 					zap.String("input", selText),
 				)
 			}
-			break
+			if sendErr := stream.Send(&gamev1.ServerEvent{
+				Payload: &gamev1.ServerEvent_Message{
+					Message: &gamev1.MessageEvent{Content: "Invalid selection, please try again."},
+				},
+			}); sendErr != nil {
+				if s.logger != nil {
+					s.logger.Warn("sending invalid-selection retry feedback", zap.String("feature", featureID), zap.Error(sendErr))
+				}
+			}
+			continue
 		}
 		chosen := choices.Options[idx]
 		if sendErr := stream.Send(&gamev1.ServerEvent{
