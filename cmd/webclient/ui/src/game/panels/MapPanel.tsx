@@ -204,13 +204,12 @@ function renderBattleGrid(
 }
 
 export function MapPanel() {
-  const { state, sendMessage, sendCommand } = useGame()
+  const { state, sendMessage, sendCommand, clearCombatNpcView } = useGame()
   const [showWorld, setShowWorld] = useState(false)
   const [hoveredTile, setHoveredTile] = useState<MapTile | null>(null)
   const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 })
   const [stepMode, setStepMode] = useState(false)
-  const [combatHoverName, setCombatHoverName] = useState<string | null>(null)
-  const [combatHoverPos, setCombatHoverPos] = useState({ x: 0, y: 0 })
+  const [_combatHoverName, setCombatHoverName] = useState<string | null>(null)
   const [hoveredCell, setHoveredCell] = useState<{ x: number; y: number } | null>(null)
   const mapContainerRef = useRef<HTMLDivElement>(null)
   const [mapContainerW, setMapContainerW] = useState(REFERENCE_W)
@@ -326,12 +325,14 @@ export function MapPanel() {
               playerName,
               gridWidth,
               gridHeight,
-              (name, _pos, e) => {
-                const rect = (e.currentTarget as Element).getBoundingClientRect()
-                setCombatHoverPos({ x: rect.left, y: rect.bottom })
+              (name, _pos, _e) => {
                 setCombatHoverName(name)
+                sendMessage('ExamineRequest', { target: name })
               },
-              () => setCombatHoverName(null),
+              () => {
+                setCombatHoverName(null)
+                clearCombatNpcView()
+              },
               hoveredCell,
               (x, y) => setHoveredCell({ x, y }),
               () => setHoveredCell(null),
@@ -342,13 +343,6 @@ export function MapPanel() {
               strideCells,
               movementRemaining,
               state.combatRound?.coverObjects ?? state.combatRound?.cover_objects ?? [],
-            )}
-            {combatHoverName && (
-              <RoomTooltip
-                tile={null}
-                pos={combatHoverPos}
-                overrideText={`${combatHoverName} — AP: ${state.combatantAP[combatHoverName]?.remaining ?? '?'}/${state.combatantAP[combatHoverName]?.total ?? '?'}`}
-              />
             )}
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', justifyContent: 'center' }}>
