@@ -1,8 +1,8 @@
 id: couve_militia
 name: Couve Militia
 description: A grizzled Vancouver militia member in surplus camo, fiercely protective of their strip mall territory.
-level: 2
-max_hp: 26
+level: 5
+max_hp: 35
 ac: 15
 awareness: 7
 ai_domain: ganger_combat

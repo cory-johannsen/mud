@@ -1,8 +1,8 @@
 zone:
   id: the_couve
   danger_level: sketchy
-  min_level: 1
-  max_level: 6
+  min_level: 3
+  max_level: 12
   world_x: 0
   world_y: -5
   script_dir: content/scripts/zones/the_couve
@@ -517,6 +517,7 @@ zone:
   - id: couve_vancouver_mall
     title: Vancouver Mall
     boss_room: true
+    danger_level: dangerous
     description: 'The once-thriving Vancouver Mall is now a warlord''s stronghold.
 
       The anchor stores have been converted into armories, granaries, and

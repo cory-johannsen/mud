@@ -1,9 +1,9 @@
 id: couve_gang_enforcer
 name: Gang Enforcer
 description: A heavyset enforcer collecting tribute for one of the Couve's street gangs. A shaved head, brass knuckles, and zero patience.
-level: 2
-max_hp: 28
-ac: 14
+level: 6
+max_hp: 42
+ac: 15
 awareness: 6
 ai_domain: ganger_combat
 respawn_delay: "5m"

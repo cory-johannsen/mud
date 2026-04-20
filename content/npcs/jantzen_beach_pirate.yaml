@@ -1,8 +1,8 @@
 id: jantzen_beach_pirate
 name: Jantzen Beach Pirate
 description: A river pirate in a rain-slicked poncho, cutlass on one hip and a boat hook on the other.
-level: 3
-max_hp: 32
+level: 8
+max_hp: 56
 ac: 15
 awareness: 8
 ai_domain: ganger_combat

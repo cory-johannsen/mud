@@ -6,10 +6,33 @@ description: >
   food court, collecting tribute from every vendor and enforcer group
   from Jantzen Beach to Fourth Plain. He wears salvaged corporate signage
   as improvised plate armor and carries a stop sign mounted on a steel post.
-level: 6
-max_hp: 83
-ac: 18
+level: 12
+max_hp: 258
+tier: boss
+ac: 21
 rob_multiplier: 2.0
+boss_abilities:
+  - id: crossing_control
+    name: "Crossing Control"
+    trigger: round_start
+    trigger_value: 0
+    cooldown: "3m"
+    effect:
+      aoe_condition: slowed
+  - id: border_assault
+    name: "Border Assault"
+    trigger: hp_pct_below
+    trigger_value: 75
+    cooldown: "4m"
+    effect:
+      aoe_damage_expr: "2d8"
+  - id: warlord_authority
+    name: "Warlord Authority"
+    trigger: hp_pct_below
+    trigger_value: 50
+    cooldown: "5m"
+    effect:
+      heal_pct: 25
 awareness: 9
 ai_domain: the_couve_warlord_combat
 respawn_delay: "10m"
