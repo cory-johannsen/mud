@@ -108,15 +108,15 @@ func TestPropertyAttackBonus_PenaltyOnlyIsNonPositive(t *testing.T) {
 	})
 }
 
-func TestPropertyACBonus_AlwaysNonPositive(t *testing.T) {
+func TestPropertyACBonus_PenaltyOnlyIsNonPositive(t *testing.T) {
 	rapid.Check(t, func(t *rapid.T) {
 		penalty := rapid.IntRange(0, 10).Draw(t, "penalty")
 		stacks := rapid.IntRange(1, 4).Draw(t, "stacks")
 		s := condition.NewActiveSet()
-		def := &condition.ConditionDef{ID: "test", Name: "Test", DurationType: "permanent", MaxStacks: 4, ACPenalty: penalty}
+		def := &condition.ConditionDef{ID: "test", Name: "Test", DurationType: "permanent", MaxStacks: 4, ACPenalty: penalty, ACBonus: 0}
 		require.NoError(t, s.Apply("testuid", def, stacks, -1))
 		bonus := condition.ACBonus(s)
-		assert.LessOrEqual(t, bonus, 0, "ACBonus must always be <= 0")
+		assert.LessOrEqual(t, bonus, 0, "ACBonus with only penalties must be <= 0")
 	})
 }
 
