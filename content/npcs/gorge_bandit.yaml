@@ -1,8 +1,8 @@
 id: gorge_bandit
 name: Gorge Bandit
 description: A wiry ambush predator in wind-scoured tactical gear, lurking at road junctions and bridge approaches to shake down travelers.
-level: 2
-max_hp: 20
+level: 4
+max_hp: 30
 ac: 14
 rob_multiplier: 1.2
 awareness: 10

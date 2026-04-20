@@ -1,8 +1,8 @@
 id: gorge_runner
 name: Gorge Runner
 description: A swift-footed runner in wind-resistant gear, carrying messages through the gorge's relentless winds.
-level: 2
-max_hp: 22
+level: 7
+max_hp: 49
 ac: 15
 awareness: 10
 ai_domain: scavenger_patrol

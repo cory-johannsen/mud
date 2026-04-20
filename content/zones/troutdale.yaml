@@ -1,8 +1,8 @@
 zone:
   id: troutdale
   danger_level: sketchy
-  min_level: 1
-  max_level: 6
+  min_level: 3
+  max_level: 12
   world_x: 6
   world_y: 0
   script_dir: content/scripts/zones/troutdale
@@ -247,6 +247,7 @@ zone:
   - id: trout_multnomah_falls
     title: Multnomah Falls
     boss_room: true
+    danger_level: dangerous
     description: 'The great waterfall plunges six hundred feet down the basalt cliff face,
 
       its roar drowning out even the gorge winds. The old Benson Bridge

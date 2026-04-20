@@ -1,9 +1,9 @@
 id: wind_walker
 name: Wind Walker
 description: A mysterious figure who moves through the gorge winds like they aren't there, wrapped in layers of woven grass and leather.
-level: 4
-max_hp: 40
-ac: 16
+level: 9
+max_hp: 63
+ac: 15
 awareness: 11
 ai_domain: scavenger_patrol
 respawn_delay: "5m"
