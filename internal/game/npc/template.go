@@ -234,8 +234,8 @@ func (t *Template) Validate() error {
 	if t.Name == "" {
 		return fmt.Errorf("npc template %q: name must not be empty", t.ID)
 	}
-	if t.Level < 1 {
-		return fmt.Errorf("npc template %q: level must be >= 1", t.ID)
+	if (t.NPCType == "" || t.NPCType == "combat") && t.Level < 1 {
+		return fmt.Errorf("npc template %q: level must be >= 1 for combat NPCs", t.ID)
 	}
 	if t.MaxHP < 1 {
 		return fmt.Errorf("npc template %q: max_hp must be >= 1", t.ID)

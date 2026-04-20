@@ -4,7 +4,7 @@ npc_type: quest_giver
 npc_role: quest_giver
 type: human
 description: "Keeps the dock shack's contract board stocked with jobs for clearing bridge trolls, salvagers, and the gang muscle that claims the island's best ground."
-level: 4
+level: 0
 max_hp: 28
 ac: 11
 awareness: 5

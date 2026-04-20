@@ -387,7 +387,7 @@ func (z *Zone) ValidateNPCLevels(reg NPCLevelRegistry) error {
 			if !ok {
 				continue
 			}
-			if z.MinLevel > 0 && lvl < z.MinLevel {
+			if z.MinLevel > 0 && lvl > 0 && lvl < z.MinLevel {
 				return fmt.Errorf("zone %q: room %q: NPC template %q level %d is below zone min_level %d",
 					z.ID, roomID, spawn.Template, lvl, z.MinLevel)
 			}

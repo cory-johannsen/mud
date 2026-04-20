@@ -6,7 +6,7 @@ description: >
   patching service out of Junker's Dream. Her prices are fair; her bedside manner is not.
 max_hp: 18
 ac: 10
-level: 3
+level: 0
 awareness: 3
 personality: neutral
 healer:

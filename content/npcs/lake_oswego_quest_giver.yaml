@@ -4,7 +4,7 @@ npc_type: quest_giver
 npc_role: quest_giver
 type: human
 description: "Manages the Lake Oswego Nation's enforcement contract board from a corner of the Commons. Every job pays in documented credits and maintains deniability."
-level: 2
+level: 0
 max_hp: 28
 ac: 11
 awareness: 5

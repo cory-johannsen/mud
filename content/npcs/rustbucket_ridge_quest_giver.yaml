@@ -4,7 +4,7 @@ npc_type: quest_giver
 npc_role: quest_giver
 type: human
 description: "Manages the corkboard and keeps track of which jobs are still open. Knows every outstanding contract on the ridge and who owes who."
-level: 3
+level: 0
 max_hp: 22
 ac: 10
 awareness: 5

@@ -6,7 +6,7 @@ description: >
 type: human
 npc_type: fixer
 npc_role: fixer
-level: 3
+level: 0
 max_hp: 22
 ac: 11
 awareness: 8

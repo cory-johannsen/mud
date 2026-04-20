@@ -6,7 +6,7 @@ description: >
   She operates a reinforced strongbox out of a Safe room and speaks exclusively in numbers.
 max_hp: 15
 ac: 10
-level: 3
+level: 0
 awareness: 3
 personality: cowardly
 banker:

@@ -7,7 +7,7 @@ description: >
 type: human
 npc_type: quest_giver
 npc_role: quest_giver
-level: 4
+level: 0
 max_hp: 25
 ac: 11
 awareness: 9

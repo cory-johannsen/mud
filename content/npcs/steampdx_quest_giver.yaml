@@ -4,7 +4,7 @@ npc_type: quest_giver
 npc_role: quest_giver
 type: human
 description: "Manages the back-room contract board between towel changes. Keeps it dry, keeps it current, never asks follow-up questions."
-level: 4
+level: 0
 max_hp: 28
 ac: 11
 awareness: 5

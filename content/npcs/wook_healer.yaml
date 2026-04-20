@@ -7,7 +7,7 @@ description: >
   this for a very long time.
 type: human
 npc_type: healer
-level: 3
+level: 0
 max_hp: 22
 ac: 10
 awareness: 7

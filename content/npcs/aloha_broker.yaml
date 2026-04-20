@@ -2,7 +2,7 @@ id: aloha_broker
 name: Aloha Broker
 npc_type: broker
 description: A smooth-talking trader in a well-patched suit, always ready to make a deal.
-level: 2
+level: 0
 max_hp: 22
 ac: 14
 awareness: 9

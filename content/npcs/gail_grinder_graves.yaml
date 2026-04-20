@@ -3,7 +3,7 @@ name: Gail "Grinder" Graves
 npc_type: quest_giver
 max_hp: 18
 ac: 11
-level: 3
+level: 0
 awareness: 4
 personality: neutral
 respawn_duration: 0s

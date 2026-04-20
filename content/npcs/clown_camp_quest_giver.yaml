@@ -4,7 +4,7 @@ npc_type: quest_giver
 npc_role: quest_giver
 type: human
 description: "A retired clown who now runs the camp's odd-jobs board from the back of the brothel. Wears full face paint. Never smiles."
-level: 4
+level: 0
 max_hp: 28
 ac: 11
 awareness: 5

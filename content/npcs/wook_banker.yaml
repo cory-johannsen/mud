@@ -7,7 +7,7 @@ description: >
 type: human
 npc_type: banker
 npc_role: banker
-level: 3
+level: 0
 max_hp: 22
 ac: 11
 awareness: 7

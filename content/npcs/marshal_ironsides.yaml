@@ -9,7 +9,7 @@ description: >
   and takes no bribes — but she's not looking for a fight either, unless you give her one.
 max_hp: 45
 ac: 16
-level: 5
+level: 0
 awareness: 6
 personality: brave
 guard:

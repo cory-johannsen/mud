@@ -3,7 +3,7 @@ name: "Militia Quartermaster"
 npc_type: quest_giver
 npc_role: quest_giver
 type: human
-level: 3
+level: 0
 max_hp: 22
 ac: 10
 awareness: 5

@@ -4,7 +4,7 @@ npc_type: quest_giver
 npc_role: quest_giver
 type: human
 description: "Posts enforcement contracts at the Tofteville Gate on behalf of the elder council — jobs clearing out the wooks, enforcers, and shamans that drift into hostile territory."
-level: 3
+level: 0
 max_hp: 28
 ac: 11
 awareness: 5

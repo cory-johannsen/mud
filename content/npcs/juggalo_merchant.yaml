@@ -7,7 +7,7 @@ description: >
 type: human
 npc_type: merchant
 npc_role: merchant
-level: 3
+level: 0
 max_hp: 20
 ac: 11
 awareness: 6

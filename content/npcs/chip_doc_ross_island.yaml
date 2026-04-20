@@ -7,7 +7,7 @@ description: >
   chips, asks no questions, and charges accordingly.
 max_hp: 20
 ac: 11
-level: 3
+level: 0
 awareness: 3
 personality: cowardly
 chip_doc:

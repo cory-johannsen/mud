@@ -9,7 +9,7 @@ description: >
   of kit will stop exactly which caliber of round.
 max_hp: 32
 ac: 13
-level: 4
+level: 0
 awareness: 4
 personality: cowardly
 merchant:

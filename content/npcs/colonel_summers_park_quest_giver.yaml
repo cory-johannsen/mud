@@ -4,7 +4,7 @@ npc_type: quest_giver
 npc_role: quest_giver
 type: human
 description: "Posts contracts near the main entrance for anyone willing to push back against the Shrimp Gang's grip on the park grounds."
-level: 4
+level: 0
 max_hp: 28
 ac: 11
 awareness: 5

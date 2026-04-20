@@ -4,7 +4,7 @@ npc_type: quest_giver
 npc_role: quest_giver
 type: human
 description: "Posts jobs on the community board near the Bazaar entrance — enforcement contracts, clearance runs, and bounties for whoever's causing problems this week."
-level: 2
+level: 0
 max_hp: 28
 ac: 11
 awareness: 5

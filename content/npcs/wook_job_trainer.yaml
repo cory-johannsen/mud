@@ -6,7 +6,7 @@ description: >
   navigation, and the deeper arts of living free — for a fair price and no questions.
 type: human
 npc_type: job_trainer
-level: 3
+level: 0
 max_hp: 20
 ac: 10
 awareness: 6

@@ -6,7 +6,7 @@ type: human
 npc_type: merchant
 npc_role: merchant
 disposition: friendly
-level: 3
+level: 0
 max_hp: 28
 ac: 10
 awareness: 10

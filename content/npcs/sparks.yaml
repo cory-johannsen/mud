@@ -3,7 +3,7 @@ name: Sparks
 npc_type: crafter
 max_hp: 14
 ac: 10
-level: 2
+level: 0
 awareness: 3
 personality: neutral
 respawn_duration: 0s

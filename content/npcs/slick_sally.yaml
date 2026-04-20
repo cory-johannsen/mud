@@ -6,7 +6,7 @@ description: >
   consumable a scavenger could need.
 max_hp: 20
 ac: 11
-level: 3
+level: 0
 awareness: 3
 personality: cowardly
 merchant:

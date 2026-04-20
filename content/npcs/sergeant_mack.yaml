@@ -6,7 +6,7 @@ description: >
   Last Stand Lodge with military efficiency.
 max_hp: 40
 ac: 14
-level: 5
+level: 0
 awareness: 4
 personality: cowardly
 merchant:

@@ -6,7 +6,7 @@ description: >
 type: human
 npc_type: healer
 npc_role: healer
-level: 3
+level: 0
 max_hp: 22
 ac: 10
 awareness: 9

@@ -6,7 +6,7 @@ description: >
   The Bottle Shack is his kingdom.
 max_hp: 25
 ac: 10
-level: 2
+level: 0
 awareness: 2
 personality: cowardly
 merchant:

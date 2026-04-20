@@ -8,7 +8,7 @@ description: >
 type: human
 npc_type: chip_doc
 npc_role: chip_doc
-level: 3
+level: 0
 max_hp: 20
 ac: 10
 awareness: 7

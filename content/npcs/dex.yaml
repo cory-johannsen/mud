@@ -3,7 +3,7 @@ name: Dex
 npc_type: fixer
 max_hp: 22
 ac: 12
-level: 4
+level: 0
 awareness: 5
 personality: cowardly
 respawn_duration: 0s

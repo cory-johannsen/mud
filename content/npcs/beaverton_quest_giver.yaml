@@ -4,7 +4,7 @@ npc_type: quest_giver
 npc_role: quest_giver
 type: human
 description: "Keeps the job board at the Free Market stocked with contracts from residents fed up with the HOA's armed enforcers and mall militia."
-level: 3
+level: 0
 max_hp: 28
 ac: 11
 awareness: 5
