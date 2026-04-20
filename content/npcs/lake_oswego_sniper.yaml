@@ -1,0 +1,30 @@
+id: lake_oswego_sniper
+name: Hilltop Sniper
+description: An elite marksman who holds the high ground in Lake Oswego, picking off intruders from fortified positions that have never been successfully rushed.
+level: 50
+max_hp: 900
+tier: elite
+ac: 23
+rob_multiplier: 1.5
+awareness: 12
+ai_domain: territory_patrol
+respawn_delay: "10m"
+abilities:
+  brutality: 16
+  quickness: 20
+  grit: 18
+  reasoning: 16
+  savvy: 14
+  flair: 11
+weapon:
+  - id: sniper_rifle
+    weight: 4
+  - id: combat_knife
+    weight: 1
+armor:
+  - id: tactical_armor
+    weight: 3
+taunts:
+  - "You can't dodge what you don't see coming."
+  - "Thousand-yard stare. About a hundred yards for you."
+  - "Every shot I've taken at this range has connected."

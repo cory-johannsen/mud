@@ -1,0 +1,29 @@
+id: lake_oswego_guard
+name: Country Club Guard
+description: A heavily armed private security contractor protecting Lake Oswego's remaining wealthy enclaves. Well-equipped and utterly merciless.
+level: 45
+max_hp: 510
+ac: 21
+rob_multiplier: 1.5
+awareness: 9
+ai_domain: territory_patrol
+respawn_delay: "5m"
+abilities:
+  brutality: 18
+  quickness: 16
+  grit: 18
+  reasoning: 13
+  savvy: 12
+  flair: 10
+weapon:
+  - id: assault_rifle
+    weight: 3
+  - id: combat_knife
+    weight: 2
+armor:
+  - id: tactical_armor
+    weight: 3
+taunts:
+  - "This property is private. You're trespassing."
+  - "Security clearance required. You don't have it."
+  - "The club pays me very well to make this problem go away."

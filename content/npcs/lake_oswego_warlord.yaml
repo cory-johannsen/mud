@@ -1,0 +1,58 @@
+id: lake_oswego_warlord
+name: The Commandant
+description: >
+  The iron-fisted ruler of Lake Oswego's remaining enclave, a former private
+  military commander who seized the country clubs and golf courses when the
+  collapse came and has held them through systematic brutality ever since.
+  His tactical genius and personal combat capability make him one of the most
+  dangerous individuals in the greater Portland area.
+level: 60
+max_hp: 2430
+tier: boss
+ac: 27
+rob_multiplier: 2.0
+awareness: 14
+ai_domain: lake_oswego_warlord_combat
+respawn_delay: "72h"
+abilities:
+  brutality: 22
+  quickness: 18
+  grit: 22
+  reasoning: 20
+  savvy: 18
+  flair: 14
+weapon:
+  - id: assault_rifle
+    weight: 3
+  - id: combat_knife
+    weight: 2
+armor:
+  - id: tactical_armor
+    weight: 3
+boss_abilities:
+  - id: perimeter_lockdown
+    name: "Perimeter Lockdown"
+    trigger: round_start
+    trigger_value: 0
+    cooldown: "3m"
+    effect:
+      aoe_condition: slowed
+  - id: tactical_barrage
+    name: "Tactical Barrage"
+    trigger: hp_pct_below
+    trigger_value: 75
+    cooldown: "4m"
+    effect:
+      aoe_damage_expr: "6d10"
+  - id: last_resort_protocol
+    name: "Last Resort Protocol"
+    trigger: hp_pct_below
+    trigger_value: 50
+    cooldown: "6m"
+    effect:
+      heal_pct: 20
+taunts:
+  - "You've made a tactical error coming here."
+  - "I've held this position against everything Portland has thrown at me."
+  - "The enclave survives. You won't."
+  - "Tactical analysis: you're outmatched."

@@ -659,7 +659,7 @@ zone:
     map_x: -8
     map_y: 2
     spawns:
-    - template: strip_mall_scav
+    - template: beaverton_scav
       count: 1
       respawn_after: 5m
     properties:

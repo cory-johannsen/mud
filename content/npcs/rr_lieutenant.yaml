@@ -1,0 +1,30 @@
+id: rr_lieutenant
+name: Ridge Lieutenant
+description: A seasoned gang lieutenant who commands a section of Rustbucket Ridge through fear and ruthless efficiency.
+level: 24
+max_hp: 204
+ac: 18
+rob_multiplier: 1.2
+awareness: 8
+ai_domain: territory_patrol
+respawn_delay: "8m"
+abilities:
+  brutality: 18
+  quickness: 14
+  grit: 17
+  reasoning: 12
+  savvy: 11
+  flair: 9
+weapon:
+  - id: sawn_off
+    weight: 2
+  - id: steel_pipe
+    weight: 3
+armor:
+  - id: kevlar_vest
+    weight: 3
+  - id: leather_jacket
+    weight: 1
+taunts:
+  - "Lieutenant means I've already won every fight that matters."
+  - "You're either paying tribute or becoming an example."

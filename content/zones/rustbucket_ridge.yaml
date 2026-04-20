@@ -144,7 +144,7 @@ zone:
     map_x: 2
     map_y: 2
     spawns:
-    - template: scavenger
+    - template: rr_scavenger
       count: 1
       respawn_after: 3m
     properties:
@@ -514,10 +514,10 @@ zone:
     map_x: 0
     map_y: 6
     spawns:
-    - template: ganger
+    - template: rr_ganger
       count: 2
       respawn_after: 3m
-    - template: lieutenant
+    - template: rr_lieutenant
       count: 1
       respawn_after: 5m
     properties:
@@ -553,7 +553,7 @@ zone:
     map_x: 0
     map_y: 8
     spawns:
-    - template: scavenger
+    - template: rr_scavenger
       count: 2
       respawn_after: 3m
     properties:
@@ -625,7 +625,7 @@ zone:
     map_x: 0
     map_y: 10
     spawns:
-    - template: scavenger
+    - template: rr_scavenger
       count: 2
       respawn_after: 3m
     properties:
@@ -700,7 +700,7 @@ zone:
     map_x: 0
     map_y: -4
     spawns:
-    - template: ganger
+    - template: rr_ganger
       count: 1
       respawn_after: 3m
     properties:
@@ -736,7 +736,7 @@ zone:
     map_x: 2
     map_y: -4
     spawns:
-    - template: scavenger
+    - template: rr_scavenger
       count: 2
       respawn_after: 3m
     properties:
@@ -762,7 +762,7 @@ zone:
     map_x: 0
     map_y: -6
     spawns:
-    - template: ganger
+    - template: rr_ganger
       count: 1
       respawn_after: 3m
     properties:
@@ -790,7 +790,7 @@ zone:
     map_x: 2
     map_y: -6
     spawns:
-    - template: scavenger
+    - template: rr_scavenger
       count: 1
       respawn_after: 3m
     properties:
@@ -816,7 +816,7 @@ zone:
     map_x: 4
     map_y: -6
     spawns:
-    - template: scavenger
+    - template: rr_scavenger
       count: 1
       respawn_after: 3m
     properties:
@@ -846,10 +846,10 @@ zone:
     map_x: 2
     map_y: 10
     spawns:
-    - template: ganger
+    - template: rr_ganger
       count: 2
       respawn_after: 3m
-    - template: commissar
+    - template: rr_commissar
       count: 1
       respawn_after: 5m
     properties:
@@ -886,7 +886,7 @@ zone:
     map_x: 4
     map_y: 10
     spawns:
-    - template: scavenger
+    - template: rr_scavenger
       count: 2
       respawn_after: 3m
     properties:
@@ -922,10 +922,10 @@ zone:
     map_x: 2
     map_y: 8
     spawns:
-    - template: ganger
+    - template: rr_ganger
       count: 2
       respawn_after: 3m
-    - template: commissar
+    - template: rr_commissar
       count: 1
       respawn_after: 5m
     properties:
@@ -995,7 +995,7 @@ zone:
     map_x: 4
     map_y: 8
     spawns:
-    - template: scavenger
+    - template: rr_scavenger
       count: 2
       respawn_after: 3m
     properties:
@@ -1033,10 +1033,10 @@ zone:
     map_x: 4
     map_y: 6
     spawns:
-    - template: ganger
+    - template: rr_ganger
       count: 2
       respawn_after: 2m
-    - template: lieutenant
+    - template: rr_lieutenant
       count: 1
       respawn_after: 5m
     properties:
@@ -1073,7 +1073,7 @@ zone:
     map_x: 6
     map_y: 6
     spawns:
-    - template: scavenger
+    - template: rr_scavenger
       count: 2
       respawn_after: 3m
     properties:
@@ -1146,10 +1146,10 @@ zone:
     map_x: 4
     map_y: 4
     spawns:
-    - template: ganger
+    - template: rr_ganger
       count: 2
       respawn_after: 2m
-    - template: commissar
+    - template: rr_commissar
       count: 1
       respawn_after: 5m
     - template: rustbucket_ridge_slasher
