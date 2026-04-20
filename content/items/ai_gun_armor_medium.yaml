@@ -1,0 +1,36 @@
+id: ai_gun_armor_medium
+name: AI Patriot Vest
+description: >
+  A tactical vest with a neural motivator embedded in the chest panel.
+  It believes in what you're doing. It believes very loudly.
+kind: armor
+armor_ref: tactical_vest
+weight: 2.0
+stackable: false
+max_stack: 1
+value: 1500
+combat_domain: ai_gun_armor_medium_combat
+combat_script: |
+  preconditions = {}
+  preconditions.always = function(self) return true end
+
+  operators = {}
+  operators.inspiring_speech = function(self)
+    self.engine.buff(self.combat.player.id, "inspired", 2)
+    self.engine.say({
+      "You are the last line of defense. Act like it.",
+      "Freedom isn't free. Neither is this fight. Pay up.",
+      "They will not take what we have built.",
+      "Stand fast. History is watching.",
+      "This is the moment. This is what we trained for."
+    })
+  end
+
+  operators.rally = function(self)
+    self.engine.say({
+      "Don't you dare give up.",
+      "For everything we believe in.",
+      "They can't have it. Simple.",
+      "Remember why you're here."
+    })
+  end

@@ -1,0 +1,37 @@
+id: ai_gun_armor_light
+name: AI Prepper Jacket
+description: >
+  A leather jacket lined with a neural threat-assessment module.
+  It has already identified three exit routes and is disappointed
+  you haven't used any of them.
+kind: armor
+armor_ref: leather_jacket
+weight: 1.0
+stackable: false
+max_stack: 1
+value: 1500
+combat_domain: ai_gun_armor_light_combat
+combat_script: |
+  preconditions = {}
+  preconditions.always = function(self) return true end
+
+  operators = {}
+  operators.threat_scan = function(self)
+    self.engine.buff(self.combat.player.id, "evasive", 1)
+    self.engine.say({
+      "Exit route: north. Stay mobile.",
+      "Three threats, two exits, one plan. Follow it.",
+      "I've mapped the room. You should be moving.",
+      "Threat level: elevated. Adjust.",
+      "Resource assessment: acceptable. Don't get comfortable."
+    })
+  end
+
+  operators.catalogue = function(self)
+    self.engine.say({
+      "Noting that for the debrief.",
+      "Logged.",
+      "Added to the threat register.",
+      "Supplies: still adequate. Barely."
+    })
+  end

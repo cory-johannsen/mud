@@ -1,0 +1,27 @@
+domain:
+  id: ai_machete_armor_medium_combat
+  description: Saboteur. Debuffs enemy defense, narrates weak points.
+
+  tasks:
+    - id: behave
+      description: Root task
+
+  methods:
+    - task: behave
+      id: sabotage_mode
+      precondition: always
+      subtasks: [expose_weakness]
+
+    - task: behave
+      id: analysis_mode
+      precondition: always
+      subtasks: [analysis]
+
+  operators:
+    - id: expose_weakness
+      action: lua_hook
+      ap_cost: 1
+
+    - id: analysis
+      action: lua_hook
+      ap_cost: 0

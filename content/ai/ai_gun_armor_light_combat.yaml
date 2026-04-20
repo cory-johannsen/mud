@@ -1,0 +1,27 @@
+domain:
+  id: ai_gun_armor_light_combat
+  description: Prepper. Buffs player evasion, catalogues threats obsessively.
+
+  tasks:
+    - id: behave
+      description: Root task
+
+  methods:
+    - task: behave
+      id: scan_mode
+      precondition: always
+      subtasks: [threat_scan]
+
+    - task: behave
+      id: catalogue_mode
+      precondition: always
+      subtasks: [catalogue]
+
+  operators:
+    - id: threat_scan
+      action: lua_hook
+      ap_cost: 1
+
+    - id: catalogue
+      action: lua_hook
+      ap_cost: 0

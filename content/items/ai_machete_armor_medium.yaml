@@ -1,0 +1,40 @@
+id: ai_machete_armor_medium
+name: AI Saboteur Vest
+description: >
+  A tactical vest with a targeting analysis module wired into the
+  chest plate. It has identified seventeen weak points in every enemy
+  it has ever seen. It will tell you about all of them.
+kind: armor
+armor_ref: tactical_vest
+weight: 2.0
+stackable: false
+max_stack: 1
+value: 1500
+combat_domain: ai_machete_armor_medium_combat
+combat_script: |
+  preconditions = {}
+  preconditions.always = function(self) return true end
+
+  operators = {}
+  operators.expose_weakness = function(self)
+    local target = self.combat.weakest_enemy()
+    if target then
+      self.engine.debuff(target.id, "weakened", 2)
+      self.engine.say({
+        "Defense compromised. Hit them now.",
+        "Structural weakness identified. Exploit.",
+        "Their guard is down on the right. See it.",
+        "I've mapped their attack pattern. They're predictable.",
+        "Weak point: center mass. You're welcome."
+      })
+    end
+  end
+
+  operators.analysis = function(self)
+    self.engine.say({
+      "Threat assessment in progress.",
+      "Scanning for exploitable patterns.",
+      "They think they're covered. They're not.",
+      "Every defense has a seam. Finding it."
+    })
+  end

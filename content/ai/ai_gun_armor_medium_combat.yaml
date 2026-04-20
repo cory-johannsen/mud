@@ -1,0 +1,27 @@
+domain:
+  id: ai_gun_armor_medium_combat
+  description: Patriot. Buffs player attack with stirring speeches.
+
+  tasks:
+    - id: behave
+      description: Root task
+
+  methods:
+    - task: behave
+      id: speech_mode
+      precondition: always
+      subtasks: [inspiring_speech]
+
+    - task: behave
+      id: rally_mode
+      precondition: always
+      subtasks: [rally]
+
+  operators:
+    - id: inspiring_speech
+      action: lua_hook
+      ap_cost: 1
+
+    - id: rally
+      action: lua_hook
+      ap_cost: 0

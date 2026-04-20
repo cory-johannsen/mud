@@ -1,0 +1,38 @@
+id: ai_gun_armor_heavy
+name: AI Armory Plate
+description: >
+  Full plate carrier with a damage-logging neural core in the back
+  panel. It has catalogued every dent, scratch, and penetration since
+  activation. It will present you with an itemized report.
+kind: armor
+armor_ref: military_plate
+weight: 3.0
+stackable: false
+max_stack: 1
+value: 1500
+combat_domain: ai_gun_armor_heavy_combat
+combat_script: |
+  preconditions = {}
+  preconditions.always = function(self) return true end
+
+  operators = {}
+  operators.damage_report = function(self)
+    self.state.damage_log = (self.state.damage_log or 0) + 1
+    self.engine.buff(self.combat.player.id, "fortified", 1)
+    self.engine.say({
+      "Incident logged. Repair required.",
+      "Structural integrity: compromised. Continuing.",
+      "Adding that to the maintenance report.",
+      "Damage catalogued. This will cost someone.",
+      "Performance nominal. Repairs overdue."
+    })
+  end
+
+  operators.status = function(self)
+    self.engine.say({
+      "Still operational. Barely.",
+      "Armor integrity: declining.",
+      "I have a very long list of complaints.",
+      "Note for the record: this is not acceptable."
+    })
+  end

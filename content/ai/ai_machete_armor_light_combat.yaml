@@ -1,0 +1,27 @@
+domain:
+  id: ai_machete_armor_light_combat
+  description: Graffiti artist. Running performance commentary, occasional weakness marking.
+
+  tasks:
+    - id: behave
+      description: Root task
+
+  methods:
+    - task: behave
+      id: mark_mode
+      precondition: always
+      subtasks: [mark_weakness]
+
+    - task: behave
+      id: commentary_mode
+      precondition: always
+      subtasks: [running_commentary]
+
+  operators:
+    - id: mark_weakness
+      action: lua_hook
+      ap_cost: 1
+
+    - id: running_commentary
+      action: lua_hook
+      ap_cost: 0

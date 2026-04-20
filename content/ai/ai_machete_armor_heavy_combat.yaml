@@ -1,0 +1,27 @@
+domain:
+  id: ai_machete_armor_heavy_combat
+  description: Fortress. Taunts enemies, announces every hit absorbed.
+
+  tasks:
+    - id: behave
+      description: Root task
+
+  methods:
+    - task: behave
+      id: taunt_mode
+      precondition: always
+      subtasks: [taunt]
+
+    - task: behave
+      id: declare_mode
+      precondition: always
+      subtasks: [declare]
+
+  operators:
+    - id: taunt
+      action: lua_hook
+      ap_cost: 1
+
+    - id: declare
+      action: lua_hook
+      ap_cost: 0

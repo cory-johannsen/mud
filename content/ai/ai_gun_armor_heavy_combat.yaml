@@ -1,0 +1,27 @@
+domain:
+  id: ai_gun_armor_heavy_combat
+  description: Armory. Logs damage meticulously, buffs player defense, demands repairs.
+
+  tasks:
+    - id: behave
+      description: Root task
+
+  methods:
+    - task: behave
+      id: report_mode
+      precondition: always
+      subtasks: [damage_report]
+
+    - task: behave
+      id: status_mode
+      precondition: always
+      subtasks: [status]
+
+  operators:
+    - id: damage_report
+      action: lua_hook
+      ap_cost: 1
+
+    - id: status
+      action: lua_hook
+      ap_cost: 0

@@ -1,0 +1,40 @@
+id: ai_machete_armor_heavy
+name: AI Fortress Plate
+description: >
+  Full ballistic plate carrier with a neural core embedded in the back
+  panel. It is very proud of every hit it absorbs. It will not let you
+  forget a single one.
+kind: armor
+armor_ref: military_plate
+weight: 3.0
+stackable: false
+max_stack: 1
+value: 1500
+combat_domain: ai_machete_armor_heavy_combat
+combat_script: |
+  preconditions = {}
+  preconditions.always = function(self) return true end
+
+  operators = {}
+  operators.taunt = function(self)
+    local enemy = self.combat.enemies[1]
+    if enemy then
+      self.engine.debuff(enemy.id, "taunted", 1)
+    end
+    self.engine.say({
+      "HIT ME AGAIN. I DARE YOU.",
+      "YOU CALL THAT A STRIKE?",
+      "I HAVE ABSORBED BETTER THAN YOU.",
+      "COME ON. ALL OF YOU.",
+      "I AM THE WALL. THE WALL HOLDS."
+    })
+  end
+
+  operators.declare = function(self)
+    self.engine.say({
+      "Still standing.",
+      "Is that all?",
+      "I have taken worse."
+    })
+    self.state.hits = (self.state.hits or 0) + 1
+  end

@@ -1,0 +1,40 @@
+id: ai_machete_armor_light
+name: AI Street Jacket
+description: >
+  A leather jacket with a neural patch stitched inside the collar. It
+  treats every fight like a performance and has strong opinions about
+  your form.
+kind: armor
+armor_ref: leather_jacket
+weight: 1.0
+stackable: false
+max_stack: 1
+value: 1500
+combat_domain: ai_machete_armor_light_combat
+combat_script: |
+  preconditions = {}
+  preconditions.always = function(self) return true end
+
+  operators = {}
+  operators.running_commentary = function(self)
+    self.engine.say({
+      "Nice dodge — you're getting it.",
+      "That hit was sloppy. Better.",
+      "They don't know what they're dealing with.",
+      "Move like you mean it.",
+      "This is your canvas. Make it count.",
+      "Style and survival are not mutually exclusive."
+    })
+  end
+
+  operators.mark_weakness = function(self)
+    local target = self.combat.weakest_enemy()
+    if target then
+      self.engine.debuff(target.id, "exposed", 1)
+      self.engine.say({
+        "There — weak point. See it?",
+        "Left side is open. Go.",
+        "They telegraphed. Exploit it."
+      })
+    end
+  end
