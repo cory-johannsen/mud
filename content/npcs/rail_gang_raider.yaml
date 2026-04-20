@@ -1,9 +1,10 @@
 id: rail_gang_raider
 name: Rail Gang Raider
 description: A lean, scarred raider who calls the old rail yards home. Moves fast along the rusted tracks, ambushing travelers between the junction and the sidings.
-level: 2
-max_hp: 22
-ac: 13
+level: 27
+max_hp: 237
+ac: 19
+rob_multiplier: 1.2
 awareness: 8
 ai_domain: ganger_combat
 respawn_delay: "5m"

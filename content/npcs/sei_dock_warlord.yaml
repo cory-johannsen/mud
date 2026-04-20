@@ -5,10 +5,33 @@ description: >
   He wears salvaged plate armor welded from shipping container panels, and carries
   a crane hook on a length of chain as a weapon. His word is law on the waterfront —
   until someone proves otherwise.
-level: 7
-max_hp: 85
-ac: 18
+level: 35
+max_hp: 1035
+tier: boss
+ac: 25
 rob_multiplier: 2.0
+boss_abilities:
+  - id: dock_lockdown
+    name: "Dock Lockdown"
+    trigger: round_start
+    trigger_value: 0
+    cooldown: "3m"
+    effect:
+      aoe_condition: slowed
+  - id: industrial_barrage
+    name: "Industrial Barrage"
+    trigger: hp_pct_below
+    trigger_value: 75
+    cooldown: "4m"
+    effect:
+      aoe_damage_expr: "5d10"
+  - id: warlord_fortitude
+    name: "Warlord Fortitude"
+    trigger: hp_pct_below
+    trigger_value: 50
+    cooldown: "5m"
+    effect:
+      heal_pct: 25
 awareness: 9
 ai_domain: dock_warlord_combat
 respawn_delay: "10m"

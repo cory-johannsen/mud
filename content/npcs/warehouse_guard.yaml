@@ -1,9 +1,10 @@
 id: warehouse_guard
 name: Warehouse Guard
 description: An armored guard standing before warehouse doors, steel pipe in hand, daring anyone to try getting past.
-level: 3
-max_hp: 35
-ac: 16
+level: 32
+max_hp: 300
+ac: 19
+rob_multiplier: 1.2
 awareness: 8
 ai_domain: ganger_combat
 respawn_delay: "5m"

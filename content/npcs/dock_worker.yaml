@@ -1,9 +1,9 @@
 id: dock_worker
 name: Dock Worker
 description: A broad-shouldered dock worker in a stained coverall, dock hook hanging from a belt loop.
-level: 2
-max_hp: 26
-ac: 14
+level: 25
+max_hp: 215
+ac: 19
 awareness: 6
 ai_domain: ganger_combat
 respawn_delay: "5m"

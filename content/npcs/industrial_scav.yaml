@@ -1,9 +1,9 @@
 id: industrial_scav
 name: Industrial Scavenger
 description: A nimble scavenger in a hard hat and reflective vest, picking through industrial ruins with practiced efficiency.
-level: 1
-max_hp: 15
-ac: 14
+level: 25
+max_hp: 215
+ac: 19
 rob_multiplier: 1.0
 awareness: 9
 ai_domain: industrial_scav_combat

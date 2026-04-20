@@ -1,9 +1,10 @@
 id: chemical_enforcer
 name: Chemical Enforcer
 description: A heavyset enforcer in a patched hazmat suit, gas mask hanging loose around the neck. Works security for whoever controls the chemical plants and tank farms.
-level: 3
-max_hp: 34
-ac: 15
+level: 29
+max_hp: 259
+ac: 19
+rob_multiplier: 1.2
 awareness: 7
 ai_domain: ganger_combat
 respawn_delay: "5m"
