@@ -3,7 +3,7 @@
   npc_type: merchant
   type: human
   description: "Supplies the militia compound from a locked storeroom. Standard-issue goods at standard-issue prices."
-  level: 3
+  level: 0
   max_hp: 20
   ac: 10
   awareness: 3
@@ -58,7 +58,7 @@
   npc_type: healer
   type: human
   description: "The militia's field surgeon. Treats compound members and approved visitors."
-  level: 4
+  level: 0
   max_hp: 22
   ac: 10
   awareness: 4
@@ -73,7 +73,7 @@
   npc_type: job_trainer
   type: human
   description: "Handles combat training and duty assignments within the compound."
-  level: 5
+  level: 0
   max_hp: 40
   ac: 14
   awareness: 6
@@ -95,7 +95,7 @@
   npc_type: banker
   type: human
   description: "Manages the militia's financial reserves. Named for where the ledger is kept."
-  level: 3
+  level: 0
   max_hp: 20
   ac: 10
   awareness: 3
@@ -111,7 +111,7 @@
   npc_type: hireling
   type: human
   description: "Available for hire outside the compound. Trained, motivated, and cheap."
-  level: 3
+  level: 0
   max_hp: 30
   ac: 13
   awareness: 4
@@ -127,7 +127,7 @@
   npc_type: motel_keeper
   type: human
   description: "Manages sleeping quarters inside the compound walls. Strict check-in, strict lights-out. Worth it for the security."
-  level: 2
+  level: 0
   max_hp: 20
   ac: 10
   awareness: 3
@@ -142,7 +142,7 @@
   npc_role: fixer
   type: human
   description: "Runs the pawn shop's informal problem-solving annex. Everything has a price; everything stays in house."
-  level: 5
+  level: 0
   max_hp: 30
   ac: 12
   awareness: 12
@@ -174,7 +174,7 @@
   npc_role: brothel_keeper
   type: human
   description: "Manages the Happy Trails Hideaway from the pawn shop's back room. Trailer park rates, trailer park attitude."
-  level: 3
+  level: 0
   max_hp: 20
   ac: 10
   awareness: 8
@@ -214,7 +214,7 @@
   npc_role: merchant
   type: human
   description: "Operates from the back of the neutral pawn shop. The front inventory is legal; the back inventory is priced higher."
-  level: 4
+  level: 0
   max_hp: 22
   ac: 11
   awareness: 10
@@ -247,7 +247,7 @@
   npc_type: tech_trainer
   type: human
   description: "Runs neural conditioning sessions out of a repurposed shipping container. Her eyes have the unfocused look of someone who sees more than most."
-  level: 5
+  level: 0
   max_hp: 30
   ac: 12
   awareness: 8
@@ -264,7 +264,7 @@
   npc_type: tech_trainer
   type: human
   description: "A doctrine instructor who serves the compound's spiritual needs alongside its tactical ones. His sessions blend ideological fervor with practical augmentation techniques. He believes deeply in what he teaches."
-  level: 5
+  level: 0
   max_hp: 30
   ac: 12
   awareness: 8
@@ -281,7 +281,7 @@
   npc_type: tech_trainer
   type: human
   description: "A former demolitions specialist who pivoted to augmentation after losing two fingers to his own work. Runs technical training sessions with the same methodical precision he applies to disarming charges. Efficient, blunt, results-oriented."
-  level: 5
+  level: 0
   max_hp: 30
   ac: 12
   awareness: 8
@@ -298,7 +298,7 @@
   npc_type: tech_trainer
   type: human
   description: "A compact woman with visible subcutaneous implants running along her forearms. She speaks in measured tones and calibrates bio-synthetic systems with the confidence of someone who has lived in augmented flesh her whole adult life."
-  level: 5
+  level: 0
   max_hp: 30
   ac: 12
   awareness: 8

@@ -4,7 +4,7 @@ npc_type: quest_giver
 npc_role: quest_giver
 type: human
 description: "Posts contracts on the terminal wall — clearance work for squatters, cultists, and raiders who've turned PDX into a no-go zone."
-level: 3
+level: 0
 max_hp: 28
 ac: 11
 awareness: 5

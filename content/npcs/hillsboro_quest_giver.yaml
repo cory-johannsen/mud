@@ -4,7 +4,7 @@ npc_type: quest_giver
 npc_role: quest_giver
 type: human
 description: "Operates quietly from the Keep, posting contracts for anyone willing to push back against the tech barons' silicon serfs and campus guards."
-level: 3
+level: 0
 max_hp: 28
 ac: 11
 awareness: 5

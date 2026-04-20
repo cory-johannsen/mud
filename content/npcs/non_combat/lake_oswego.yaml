@@ -3,7 +3,7 @@
   npc_type: merchant
   type: human
   description: "Sells curated goods from behind a repurposed wine bar. The markup is polite but firm."
-  level: 3
+  level: 0
   max_hp: 20
   ac: 10
   awareness: 3
@@ -34,7 +34,7 @@
   npc_type: healer
   type: human
   description: "A former general practitioner who still insists on proper technique. More expensive than most."
-  level: 4
+  level: 0
   max_hp: 22
   ac: 10
   awareness: 4
@@ -49,7 +49,7 @@
   npc_type: job_trainer
   type: human
   description: "Believes in matching skills to roles. The counseling is unsolicited but surprisingly accurate."
-  level: 3
+  level: 0
   max_hp: 20
   ac: 10
   awareness: 3
@@ -71,7 +71,7 @@
   npc_type: banker
   type: human
   description: "Discreet, professional, and entirely uninterested in where the money came from."
-  level: 3
+  level: 0
   max_hp: 20
   ac: 10
   awareness: 3
@@ -87,7 +87,7 @@
   npc_type: hireling
   type: human
   description: "Trim, quiet, and capable. Available for hire. References provided on request."
-  level: 3
+  level: 0
   max_hp: 28
   ac: 12
   awareness: 4
@@ -103,7 +103,7 @@
   npc_type: motel_keeper
   type: human
   description: "Manages guest quarters in a former lakeside estate. Speaks quietly, prices loudly. The linens are actual linen."
-  level: 2
+  level: 0
   max_hp: 20
   ac: 10
   awareness: 3
@@ -118,7 +118,7 @@
   npc_role: fixer
   type: human
   description: "Manages transactions that the enclave's official ledgers will never reflect. Speaks in euphemisms and charges accordingly."
-  level: 5
+  level: 0
   max_hp: 30
   ac: 12
   awareness: 12
@@ -150,7 +150,7 @@
   npc_role: brothel_keeper
   type: human
   description: "Presides over the Lakehouse Retreat with impeccable manners and absolute discretion. The rates reflect the zip code."
-  level: 3
+  level: 0
   max_hp: 20
   ac: 10
   awareness: 8
@@ -190,7 +190,7 @@
   npc_role: merchant
   type: human
   description: "Moves luxury goods through channels the HOA would disapprove of. Presentation is immaculate; provenance is negotiable."
-  level: 4
+  level: 0
   max_hp: 22
   ac: 11
   awareness: 10

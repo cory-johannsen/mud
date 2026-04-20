@@ -4,7 +4,7 @@
   npc_role: fixer
   type: human
   description: "Sits on the park bench at the entrance and solves problems while watching the yo-yo demonstrations. Has strong opinions about string tension."
-  level: 5
+  level: 0
   max_hp: 30
   ac: 12
   awareness: 12
@@ -36,7 +36,7 @@
   npc_role: brothel_keeper
   type: human
   description: "Operates The Bench from the park entrance, away from the shrimp smell. The services are not skill-toy-related. Prices are park-adjacent."
-  level: 3
+  level: 0
   max_hp: 20
   ac: 10
   awareness: 8
@@ -76,7 +76,7 @@
   npc_role: merchant
   type: human
   description: "Sells from the park entrance, just outside Shrimp Gang territory. Has an arrangement with the gang involving yo-yo string and cash."
-  level: 4
+  level: 0
   max_hp: 22
   ac: 11
   awareness: 10

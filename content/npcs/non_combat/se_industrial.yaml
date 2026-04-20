@@ -3,7 +3,7 @@
   npc_type: merchant
   type: human
   description: "Sells supplies between shifts from a wheeled cart. Knows what every worker needs."
-  level: 2
+  level: 0
   max_hp: 20
   ac: 10
   awareness: 3
@@ -34,7 +34,7 @@
   npc_type: healer
   type: human
   description: "Handles industrial injuries with the speed and competence of long practice."
-  level: 3
+  level: 0
   max_hp: 22
   ac: 10
   awareness: 4
@@ -49,7 +49,7 @@
   npc_type: job_trainer
   type: human
   description: "Manages worker training and job placement for the industrial district. No work without dues."
-  level: 3
+  level: 0
   max_hp: 20
   ac: 10
   awareness: 3
@@ -71,7 +71,7 @@
   npc_type: banker
   type: human
   description: "Handles wage distribution and deposits for the district. Shift workers trust the paymaster."
-  level: 3
+  level: 0
   max_hp: 20
   ac: 10
   awareness: 3
@@ -87,7 +87,7 @@
   npc_type: guard
   type: human
   description: "Enforces break-room rules and zone safety protocols. Takes the job seriously."
-  level: 3
+  level: 0
   max_hp: 32
   ac: 13
   awareness: 5
@@ -102,7 +102,7 @@
   npc_type: hireling
   type: human
   description: "Available on short notice. Reliable in a fight, reliable on a loading dock."
-  level: 2
+  level: 0
   max_hp: 26
   ac: 12
   awareness: 3
@@ -118,7 +118,7 @@
   npc_type: motel_keeper
   type: human
   description: "Manages the break room cots between shifts. The fluorescent lights never fully turn off. You get used to it."
-  level: 2
+  level: 0
   max_hp: 20
   ac: 10
   awareness: 3
@@ -133,7 +133,7 @@
   npc_role: fixer
   type: human
   description: "Controls the unofficial flow of goods through the neutral loading dock. Knows which problems stay on the dock and which ones leave on a truck."
-  level: 5
+  level: 0
   max_hp: 30
   ac: 12
   awareness: 12
@@ -165,7 +165,7 @@
   npc_role: brothel_keeper
   type: human
   description: "Runs the Loading Dock operation from a converted freight office. No windows, no signage, and no memory of who came through."
-  level: 3
+  level: 0
   max_hp: 20
   ac: 10
   awareness: 8
@@ -204,7 +204,7 @@
   npc_role: merchant
   type: human
   description: "Operates from the neutral office with a clipboard that never quite matches the inventory. Shrugs when asked about discrepancies."
-  level: 4
+  level: 0
   max_hp: 22
   ac: 11
   awareness: 10

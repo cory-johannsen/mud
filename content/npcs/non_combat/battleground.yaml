@@ -3,7 +3,7 @@
   npc_type: merchant
   type: human
   description: "Runs the collective's supply counter. Every transaction is recorded in triplicate."
-  level: 3
+  level: 0
   max_hp: 20
   ac: 10
   awareness: 3
@@ -34,7 +34,7 @@
   npc_type: healer
   type: human
   description: "Former army medic. Patches wounds with the efficiency of someone who's done it under fire."
-  level: 4
+  level: 0
   max_hp: 24
   ac: 11
   awareness: 5
@@ -49,7 +49,7 @@
   npc_type: job_trainer
   type: human
   description: "Assigns duties and manages ideological alignment. Will teach the correct skills to the correct comrades."
-  level: 3
+  level: 0
   max_hp: 20
   ac: 10
   awareness: 3
@@ -71,7 +71,7 @@
   npc_type: banker
   type: human
   description: "Manages collective funds. All deposits are voluntary. Withdrawals require paperwork."
-  level: 3
+  level: 0
   max_hp: 20
   ac: 10
   awareness: 3
@@ -87,7 +87,7 @@
   npc_type: guard
   type: human
   description: "Guards the infirmary perimeter. Earnest and alert. Does not accept bribes on principle."
-  level: 3
+  level: 0
   max_hp: 34
   ac: 14
   awareness: 6
@@ -102,7 +102,7 @@
   npc_type: motel_keeper
   type: human
   description: "Manages sleeping quarters in the neutral commons. Militia affiliation checked at the door; inside, everyone's just tired."
-  level: 2
+  level: 0
   max_hp: 20
   ac: 10
   awareness: 3
@@ -117,7 +117,7 @@
   npc_role: fixer
   type: human
   description: "Keeps supply lines running in both directions. Problem-solving is just logistics by another name."
-  level: 5
+  level: 0
   max_hp: 30
   ac: 12
   awareness: 12
@@ -149,7 +149,7 @@
   npc_role: brothel_keeper
   type: human
   description: "Runs the Foxhole with drill-sergeant efficiency. Services are rendered on schedule and the sheets are inspected daily."
-  level: 3
+  level: 0
   max_hp: 20
   ac: 10
   awareness: 8
@@ -189,7 +189,7 @@
   npc_role: merchant
   type: human
   description: "Sells military surplus that somehow ended up outside the collective's inventory. Does not explain how. Will not elaborate."
-  level: 4
+  level: 0
   max_hp: 22
   ac: 11
   awareness: 10

@@ -3,7 +3,7 @@
   npc_type: merchant
   type: human
   description: "Sells goods to everyone passing through. The truck stop is the last chance before the gorge."
-  level: 3
+  level: 0
   max_hp: 20
   ac: 10
   awareness: 3
@@ -34,7 +34,7 @@
   npc_type: healer
   type: human
   description: "Patches up travelers before and after the gorge run. Volume business."
-  level: 3
+  level: 0
   max_hp: 20
   ac: 10
   awareness: 3
@@ -49,7 +49,7 @@
   npc_type: job_trainer
   type: human
   description: "Manages cargo runs and labor contracts out of the truck stop. Has work for anyone passing through."
-  level: 3
+  level: 0
   max_hp: 20
   ac: 10
   awareness: 3
@@ -71,7 +71,7 @@
   npc_type: banker
   type: human
   description: "A regional trust operating from the truck stop. Understands the road economy."
-  level: 3
+  level: 0
   max_hp: 20
   ac: 10
   awareness: 3
@@ -87,7 +87,7 @@
   npc_type: motel_keeper
   type: human
   description: "Runs what's left of the highway motel — half the rooms still intact, the sign still lights up at night. Old habit."
-  level: 2
+  level: 0
   max_hp: 20
   ac: 10
   awareness: 3
@@ -102,7 +102,7 @@
   npc_role: fixer
   type: human
   description: "An old-road operator who knows every stop between here and the gorge. Problems disappear over the horizon on his schedule."
-  level: 5
+  level: 0
   max_hp: 30
   ac: 12
   awareness: 12
@@ -134,7 +134,7 @@
   npc_role: brothel_keeper
   type: human
   description: "Runs the River's Edge Tavern out of the motel's remaining back rooms. Small-town discretion, small-town prices."
-  level: 3
+  level: 0
   max_hp: 20
   ac: 10
   awareness: 8
@@ -174,7 +174,7 @@
   npc_role: merchant
   type: human
   description: "Operates from the truck stop's back booth. Has goods from everywhere the highway goes and no receipts for any of it."
-  level: 4
+  level: 0
   max_hp: 22
   ac: 11
   awareness: 10

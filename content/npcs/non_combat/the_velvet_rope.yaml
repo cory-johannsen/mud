@@ -4,7 +4,7 @@
   npc_role: fixer
   type: human
   description: "Manages the VIP list and a secondary list of problems that need disappearing. Only one list is ever shown to guests."
-  level: 5
+  level: 0
   max_hp: 30
   ac: 12
   awareness: 12
@@ -36,7 +36,7 @@
   npc_role: brothel_keeper
   type: human
   description: "Presides over the VIP Lounge with velvet-gloved authority. Pricing is aspirational. Discretion is guaranteed in writing."
-  level: 3
+  level: 0
   max_hp: 20
   ac: 10
   awareness: 8
@@ -76,7 +76,7 @@
   npc_role: merchant
   type: human
   description: "Handles the club's less-visible supply chain from behind the velvet curtain. Anything the buffet doesn't offer, this person does."
-  level: 4
+  level: 0
   max_hp: 22
   ac: 11
   awareness: 10

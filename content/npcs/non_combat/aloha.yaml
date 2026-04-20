@@ -3,7 +3,7 @@
   npc_type: merchant
   type: human
   description: "A fast-talking trader with a folding table covered in goods from six different factions. She remembers every price."
-  level: 3
+  level: 0
   max_hp: 20
   ac: 10
   awareness: 4
@@ -34,7 +34,7 @@
   npc_type: healer
   type: human
   description: "A compact medic who patches up anyone regardless of faction. Neutrality is the brand."
-  level: 3
+  level: 0
   max_hp: 20
   ac: 10
   awareness: 3
@@ -49,7 +49,7 @@
   npc_type: job_trainer
   type: human
   description: "Manages work placement across the neutral zone. If there's a job worth doing, The Coordinator knows about it."
-  level: 3
+  level: 0
   max_hp: 20
   ac: 10
   awareness: 3
@@ -71,7 +71,7 @@
   npc_type: banker
   type: human
   description: "A soft-spoken man who holds everyone's money with equal disinterest. The zone runs on his credit."
-  level: 3
+  level: 0
   max_hp: 20
   ac: 10
   awareness: 3
@@ -87,7 +87,7 @@
   npc_type: guard
   type: human
   description: "A sentry stationed at the bazaar perimeter. Watches for weapons and raised voices."
-  level: 3
+  level: 0
   max_hp: 32
   ac: 14
   awareness: 5
@@ -102,7 +102,7 @@
   npc_type: fixer
   type: human
   description: "Speaks in euphemisms. Every problem has a price; every price has a solution."
-  level: 3
+  level: 0
   max_hp: 20
   ac: 10
   awareness: 5
@@ -122,7 +122,7 @@
   npc_type: motel_keeper
   type: human
   description: "Rents back rooms above the market stalls. The beds are clean, the noise never fully stops, but the price is fair."
-  level: 2
+  level: 0
   max_hp: 20
   ac: 10
   awareness: 3
@@ -137,7 +137,7 @@
   npc_role: brothel_keeper
   type: human
   description: "Manages the back end of the bazaar strip mall where Room 7 has been repurposed into something the sign outside definitely does not advertise."
-  level: 3
+  level: 0
   max_hp: 20
   ac: 10
   awareness: 8
@@ -177,7 +177,7 @@
   npc_role: merchant
   type: human
   description: "Operates from a shuttered nail salon. The shelves are full, the prices are wrong, and the inventory has no provenance."
-  level: 4
+  level: 0
   max_hp: 22
   ac: 11
   awareness: 10

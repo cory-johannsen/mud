@@ -3,7 +3,7 @@
   npc_type: merchant
   type: human
   description: "Sells salvage and supplies from the dock shack. Everything smells faintly of river."
-  level: 2
+  level: 0
   max_hp: 20
   ac: 10
   awareness: 3
@@ -34,7 +34,7 @@
   npc_type: healer
   type: human
   description: "Trained to patch wounds on a moving deck. Perfectly adequate on solid ground."
-  level: 3
+  level: 0
   max_hp: 20
   ac: 10
   awareness: 3
@@ -49,7 +49,7 @@
   npc_type: job_trainer
   type: human
   description: "Retired river captain who now teaches anyone who's willing to put in the work."
-  level: 4
+  level: 0
   max_hp: 24
   ac: 11
   awareness: 5
@@ -71,7 +71,7 @@
   npc_type: banker
   type: human
   description: "Keeps the island's communal funds in a literal waterproofed chest. Reliable if basic."
-  level: 2
+  level: 0
   max_hp: 20
   ac: 10
   awareness: 3
@@ -87,7 +87,7 @@
   npc_type: hireling
   type: human
   description: "Strong, experienced, and available. Works for day rates plus a meal."
-  level: 3
+  level: 0
   max_hp: 28
   ac: 12
   awareness: 4
@@ -103,7 +103,7 @@
   npc_type: motel_keeper
   type: human
   description: "Rents a cot in the corner of the dock shack. The river noise keeps some people up. Others find it peaceful."
-  level: 2
+  level: 0
   max_hp: 20
   ac: 10
   awareness: 3
@@ -118,7 +118,7 @@
   npc_role: fixer
   type: human
   description: "A long-time island resident who knows every boat, every debt, and every secret that has crossed the river. Discrete as the current."
-  level: 5
+  level: 0
   max_hp: 30
   ac: 12
   awareness: 12
@@ -150,7 +150,7 @@
   npc_role: brothel_keeper
   type: human
   description: "Runs the River Rat Den from an old river shack on the neutral dock. Weathered, pragmatic, and entirely unbothered by judgment."
-  level: 3
+  level: 0
   max_hp: 20
   ac: 10
   awareness: 8
@@ -190,7 +190,7 @@
   npc_role: merchant
   type: human
   description: "Sells goods that came downriver and didn't come with paperwork. The barge is always loaded; the manifest is always blank."
-  level: 4
+  level: 0
   max_hp: 22
   ac: 11
   awareness: 10

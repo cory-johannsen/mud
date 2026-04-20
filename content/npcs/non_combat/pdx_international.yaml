@@ -3,7 +3,7 @@
   npc_type: merchant
   type: human
   description: "Runs the only legitimate goods counter in the terminal. The duty-free signage is ironic."
-  level: 3
+  level: 0
   max_hp: 20
   ac: 10
   awareness: 3
@@ -34,7 +34,7 @@
   npc_type: healer
   type: human
   description: "Stationed at Terminal B. Keeps a defibrillator and a first-aid kit. Busier than expected."
-  level: 3
+  level: 0
   max_hp: 20
   ac: 10
   awareness: 4
@@ -49,7 +49,7 @@
   npc_type: job_trainer
   type: human
   description: "Former airport staff who now manages job routing in and out of the terminal zone."
-  level: 3
+  level: 0
   max_hp: 20
   ac: 10
   awareness: 3
@@ -71,7 +71,7 @@
   npc_type: banker
   type: human
   description: "Still operates behind the old currency exchange counter. The rates have changed considerably."
-  level: 3
+  level: 0
   max_hp: 20
   ac: 10
   awareness: 3
@@ -87,7 +87,7 @@
   npc_type: guard
   type: human
   description: "Still wearing the old badge out of habit. Still checking for contraband out of instinct."
-  level: 3
+  level: 0
   max_hp: 32
   ac: 13
   awareness: 5
@@ -102,7 +102,7 @@
   npc_type: motel_keeper
   type: human
   description: "Manages the last operational terminal hotel. Prices reflect demand, not quality. Knows it."
-  level: 2
+  level: 0
   max_hp: 20
   ac: 10
   awareness: 3
@@ -117,7 +117,7 @@
   npc_role: fixer
   type: human
   description: "Works the neutral terminal's information economy. Lost luggage, missed connections, and wanted problems all handled for a fee."
-  level: 5
+  level: 0
   max_hp: 30
   ac: 12
   awareness: 12
@@ -149,7 +149,7 @@
   npc_role: brothel_keeper
   type: human
   description: "Runs Terminal Comfort from a repurposed airline lounge. Amenities are minimal, rates are maximum, and layovers are never boring."
-  level: 3
+  level: 0
   max_hp: 20
   ac: 10
   awareness: 8
@@ -189,7 +189,7 @@
   npc_role: merchant
   type: human
   description: "Moved into the terminal's former duty-free shop. Goods are duty-free in the sense that no duties apply to anything sold here."
-  level: 4
+  level: 0
   max_hp: 22
   ac: 11
   awareness: 10

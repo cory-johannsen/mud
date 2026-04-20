@@ -3,7 +3,7 @@
   npc_type: merchant
   type: human
   description: "Runs the district's main supply stall from a folding table stacked with salvage and sundries."
-  level: 3
+  level: 0
   max_hp: 20
   ac: 10
   awareness: 4
@@ -34,7 +34,7 @@
   npc_type: healer
   type: human
   description: "Relies on local herbs and clean hands. Slower than a stim pack but cheaper and she doesn't ask questions."
-  level: 3
+  level: 0
   max_hp: 20
   ac: 10
   awareness: 3
@@ -49,7 +49,7 @@
   npc_type: job_trainer
   type: human
   description: "Knows everyone who's hiring in the flats and what it takes to work for them."
-  level: 3
+  level: 0
   max_hp: 20
   ac: 10
   awareness: 3
@@ -71,7 +71,7 @@
   npc_type: banker
   type: human
   description: "Loans at fair rates, banks for a fee. No names required."
-  level: 3
+  level: 0
   max_hp: 20
   ac: 10
   awareness: 3
@@ -87,7 +87,7 @@
   npc_type: fixer
   type: human
   description: "Operates from a back booth in the district. Known by name, not by face."
-  level: 3
+  level: 0
   max_hp: 20
   ac: 10
   awareness: 5
@@ -107,7 +107,7 @@
   npc_type: motel_keeper
   type: human
   description: "Rents floor space in the safe house, three to a room, no questions asked. Bring your own bedroll."
-  level: 2
+  level: 0
   max_hp: 20
   ac: 10
   awareness: 3
@@ -122,7 +122,7 @@
   npc_role: brothel_keeper
   type: human
   description: "Runs the Broken Arrow Lounge from a reinforced back room in the Jade District. Business is cash only, discretion is included."
-  level: 3
+  level: 0
   max_hp: 20
   ac: 10
   awareness: 8
@@ -162,7 +162,7 @@
   npc_role: merchant
   type: human
   description: "Sells what fell off trucks, out of pockets, and through broken windows. Specializes in items that have recently changed ownership."
-  level: 4
+  level: 0
   max_hp: 22
   ac: 11
   awareness: 10

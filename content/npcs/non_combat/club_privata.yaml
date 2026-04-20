@@ -4,7 +4,7 @@
   npc_role: fixer
   type: human
   description: "Manages the club's less-advertised services from the VIP suite. Every membership has a price; every problem has a tier."
-  level: 5
+  level: 0
   max_hp: 30
   ac: 12
   awareness: 12
@@ -36,7 +36,7 @@
   npc_role: brothel_keeper
   type: human
   description: "Manages the Members Suite with the detached professionalism of someone who has seen everything and prices none of it cheaply."
-  level: 3
+  level: 0
   max_hp: 20
   ac: 10
   awareness: 8
@@ -76,7 +76,7 @@
   npc_role: merchant
   type: human
   description: "Handles the club's unofficial supply chain from the coat check. Everything from enhancement compounds to weapons, members only pricing."
-  level: 4
+  level: 0
   max_hp: 22
   ac: 11
   awareness: 10

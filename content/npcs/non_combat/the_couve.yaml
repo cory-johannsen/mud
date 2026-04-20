@@ -3,7 +3,7 @@
   npc_type: merchant
   type: human
   description: "Runs a checkpoint stall at The Crossing. Stocks whatever comes across the bridge."
-  level: 3
+  level: 0
   max_hp: 20
   ac: 10
   awareness: 3
@@ -34,7 +34,7 @@
   npc_type: healer
   type: human
   description: "Faction-aligned but treats anyone at the checkpoint. The Couve values functional allies."
-  level: 3
+  level: 0
   max_hp: 22
   ac: 10
   awareness: 4
@@ -49,7 +49,7 @@
   npc_type: job_trainer
   type: human
   description: "Handles faction recruitment and skill verification at the crossing. Practical and efficient."
-  level: 3
+  level: 0
   max_hp: 20
   ac: 10
   awareness: 4
@@ -71,7 +71,7 @@
   npc_type: banker
   type: human
   description: "Manages currency exchange and deposits at the Washington end. Rates favor the faction."
-  level: 3
+  level: 0
   max_hp: 20
   ac: 10
   awareness: 3
@@ -87,7 +87,7 @@
   npc_type: guard
   type: human
   description: "Controls access at The Crossing. Professional, not aggressive. Trouble is declined at the door."
-  level: 3
+  level: 0
   max_hp: 36
   ac: 15
   awareness: 6
@@ -102,7 +102,7 @@
   npc_type: fixer
   type: human
   description: "Technically a checkpoint official. Practically, the most connected person at the bridge."
-  level: 3
+  level: 0
   max_hp: 20
   ac: 10
   awareness: 6
@@ -122,7 +122,7 @@
   npc_type: motel_keeper
   type: human
   description: "Runs the only beds at the river crossing. Charges by the night, cash only, no exceptions."
-  level: 2
+  level: 0
   max_hp: 20
   ac: 10
   awareness: 3
@@ -137,7 +137,7 @@
   npc_role: brothel_keeper
   type: human
   description: "Manages the Crossroads Lodge from the back room of the neutral diner. Works-class rates for working-class entertainment."
-  level: 3
+  level: 0
   max_hp: 20
   ac: 10
   awareness: 8
@@ -177,7 +177,7 @@
   npc_role: merchant
   type: human
   description: "Handles goods that cross the bridge outside of official channels. The river's a natural border; the rules are more flexible."
-  level: 4
+  level: 0
   max_hp: 22
   ac: 11
   awareness: 10

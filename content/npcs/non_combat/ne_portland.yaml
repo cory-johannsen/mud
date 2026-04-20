@@ -3,7 +3,7 @@
   npc_type: merchant
   type: human
   description: "Runs the corner store from behind a plywood counter. Knows what the neighborhood needs."
-  level: 2
+  level: 0
   max_hp: 20
   ac: 10
   awareness: 3
@@ -34,7 +34,7 @@
   npc_type: healer
   type: human
   description: "Runs a walk-in clinic from the back of the store. Not a doctor, but close enough."
-  level: 3
+  level: 0
   max_hp: 20
   ac: 10
   awareness: 3
@@ -49,7 +49,7 @@
   npc_type: job_trainer
   type: human
   description: "Advocates for community job programs. Has a list of openings and the training to get you ready."
-  level: 2
+  level: 0
   max_hp: 20
   ac: 10
   awareness: 3
@@ -71,7 +71,7 @@
   npc_type: banker
   type: human
   description: "A neighborhood banking cooperative run out of a repurposed ATM vestibule."
-  level: 2
+  level: 0
   max_hp: 20
   ac: 10
   awareness: 3
@@ -87,7 +87,7 @@
   npc_type: motel_keeper
   type: human
   description: "Rents bunks in the reinforced neutral bunker. Not fancy, but you'll wake up in the morning."
-  level: 2
+  level: 0
   max_hp: 20
   ac: 10
   awareness: 3
@@ -102,7 +102,7 @@
   npc_role: fixer
   type: human
   description: "Known only as the Spoke — connects the neighborhood's loose networks of people who need things done quietly."
-  level: 5
+  level: 0
   max_hp: 30
   ac: 12
   awareness: 12
@@ -134,7 +134,7 @@
   npc_role: brothel_keeper
   type: human
   description: "Runs the Velvet Spoke with the earnest irony of a neighborhood that has opinions about everything, including this."
-  level: 3
+  level: 0
   max_hp: 20
   ac: 10
   awareness: 8
@@ -174,7 +174,7 @@
   npc_role: merchant
   type: human
   description: "Sells from the back of the neutral garage. Has a folksy explanation for every item's questionable origin."
-  level: 4
+  level: 0
   max_hp: 22
   ac: 11
   awareness: 10
@@ -207,7 +207,7 @@
   npc_type: tech_trainer
   type: human
   description: "A circuit-burned engineer who drifted into Northeast Portland after the bridges fell. Works from the neutral garage's back bay, surrounded by salvaged oscilloscopes and partially disassembled augmentation rigs. Teaches advanced technical augmentation to anyone who can afford the parts."
-  level: 6
+  level: 0
   max_hp: 35
   ac: 12
   awareness: 9
@@ -224,7 +224,7 @@
   npc_type: tech_trainer
   type: human
   description: "Nobody knows their real name. They operate from the neutral bunker's deepest room, accessible only to those who've proven themselves worth the descent. Neural augmentation at the third tier requires a mind willing to be rebuilt."
-  level: 6
+  level: 0
   max_hp: 35
   ac: 12
   awareness: 10
@@ -241,7 +241,7 @@
   npc_type: tech_trainer
   type: human
   description: "Runs her practice from an old parking lot, teaching bio-synthetic augmentation techniques under open sky. She believes augmentation should work with the body's natural systems, not override them. Her methods are slower and more effective than most."
-  level: 6
+  level: 0
   max_hp: 35
   ac: 12
   awareness: 8
@@ -258,7 +258,7 @@
   npc_type: tech_trainer
   type: human
   description: "A traveling doctrine instructor who stops at the corner store between circuits of the neutral zones. The Lector teaches third-tier fanatic doctrine augmentation with the calm certainty of someone who has never doubted a word they've said."
-  level: 6
+  level: 0
   max_hp: 35
   ac: 12
   awareness: 9

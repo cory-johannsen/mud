@@ -3,7 +3,7 @@
   npc_type: merchant
   type: human
   description: "A wiry figure behind a folding table stacked with whatever fell off the last truck."
-  level: 2
+  level: 0
   max_hp: 20
   ac: 10
   awareness: 3
@@ -34,7 +34,7 @@
   npc_type: healer
   type: human
   description: "Moves like someone who's stitched a lot of wounds in bad light."
-  level: 2
+  level: 0
   max_hp: 20
   ac: 10
   awareness: 3
@@ -49,7 +49,7 @@
   npc_type: job_trainer
   type: human
   description: "A contact who knows who's hiring and what they need."
-  level: 2
+  level: 0
   max_hp: 20
   ac: 10
   awareness: 3
@@ -71,7 +71,7 @@
   npc_type: banker
   type: human
   description: "No questions. No receipts. That's the deal."
-  level: 2
+  level: 0
   max_hp: 20
   ac: 10
   awareness: 3
@@ -87,7 +87,7 @@
   npc_type: guard
   type: human
   description: "Big. Quiet. Watching the door."
-  level: 3
+  level: 0
   max_hp: 36
   ac: 14
   awareness: 5
@@ -102,7 +102,7 @@
   npc_type: fixer
   type: human
   description: "Connects problems with solutions for a modest fee."
-  level: 3
+  level: 0
   max_hp: 20
   ac: 10
   awareness: 5
@@ -122,7 +122,7 @@
   npc_type: motel_keeper
   type: human
   description: "Runs the last functioning hotel in downtown Portland. The rates are steep, the sheets are clean, the door locks work."
-  level: 2
+  level: 0
   max_hp: 20
   ac: 10
   awareness: 3
@@ -137,7 +137,7 @@
   npc_role: brothel_keeper
   type: human
   description: "Operates out of a converted office suite two floors below street level. Discreet, professional, and entirely uninterested in your identity."
-  level: 3
+  level: 0
   max_hp: 20
   ac: 10
   awareness: 8
@@ -177,7 +177,7 @@
   npc_role: merchant
   type: human
   description: "Works the Underground's shadow economy. Goods move without invoices and prices adjust based on how much you need it."
-  level: 4
+  level: 0
   max_hp: 22
   ac: 11
   awareness: 10

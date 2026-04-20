@@ -4,7 +4,7 @@
   npc_role: fixer
   type: human
   description: "Operates from behind the curtain, in the literal and figurative sense. Arranges solutions with theatrical precision and no visible remorse."
-  level: 5
+  level: 0
   max_hp: 30
   ac: 12
   awareness: 12
@@ -36,7 +36,7 @@
   npc_role: brothel_keeper
   type: human
   description: "Runs the Big Top Boudoir from the coat check anteroom. The greasepaint smell never quite goes away but the rates are very affordable."
-  level: 3
+  level: 0
   max_hp: 20
   ac: 10
   awareness: 8
@@ -76,7 +76,7 @@
   npc_role: merchant
   type: human
   description: "Sells prop-trunk contents and salvage from the circus lot. Some of it is circus props. Most of it is not."
-  level: 4
+  level: 0
   max_hp: 22
   ac: 11
   awareness: 10

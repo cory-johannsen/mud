@@ -4,7 +4,7 @@
   npc_role: fixer
   type: human
   description: "Maintains the lockers and maintains a parallel operation for clients who need things cleaned up. Has the keys to everything."
-  level: 5
+  level: 0
   max_hp: 30
   ac: 12
   awareness: 12
@@ -36,7 +36,7 @@
   npc_role: brothel_keeper
   type: human
   description: "Manages the Brass Bed Chamber from the parking lot's converted attendant booth. Steampunk aesthetic, pragmatic operations."
-  level: 3
+  level: 0
   max_hp: 20
   ac: 10
   awareness: 8
@@ -76,7 +76,7 @@
   npc_role: merchant
   type: human
   description: "Provides supplies that the bathhouse officially does not stock and the health department officially does not know about."
-  level: 4
+  level: 0
   max_hp: 22
   ac: 11
   awareness: 10
