@@ -21,6 +21,16 @@ quest_giver:
   quest_ids:
     - machete_field_test
     - gun_field_test
+    - machete_ranged_field_test
+    - gun_melee_field_test
+    - machete_armor_light_quest
+    - machete_armor_medium_quest
+    - machete_armor_heavy_quest
+    - machete_shield_quest
+    - gun_armor_light_quest
+    - gun_armor_medium_quest
+    - gun_armor_heavy_quest
+    - gun_shield_quest
 loot:
   currency:
     min: 0
