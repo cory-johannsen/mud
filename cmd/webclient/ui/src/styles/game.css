@@ -324,6 +324,51 @@ body:has(.game-layout) #root { height: 100%; overflow: hidden; }
   border-radius: 1px;
   transform: rotate(45deg);
 }
+.hotbar-switch-btn {
+  flex: none;
+  padding: 2px 6px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  background: #2a2a2a;
+  border: 1px solid #555;
+  border-right: none;
+  color: #ccc;
+  border-radius: 0;
+  height: 100%;
+  line-height: 1;
+}
+.hotbar-switch-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+.hotbar-indicator {
+  flex: none;
+  font-size: 0.7rem;
+  color: #888;
+  padding: 0 5px;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  border-right: 1px solid #2a2a2a;
+  font-family: monospace;
+}
+.hotbar-new-btn {
+  flex: none;
+  padding: 2px 8px;
+  font-size: 0.7rem;
+  cursor: pointer;
+  background: #1a3a1a;
+  border: none;
+  border-left: 1px solid #4a7a4a;
+  color: #8f8;
+  border-radius: 0;
+  height: 100%;
+  white-space: nowrap;
+  font-family: monospace;
+}
+.hotbar-new-btn:hover {
+  background: #1f4a1f;
+}
 
 /* Input panel */
 .input-form {

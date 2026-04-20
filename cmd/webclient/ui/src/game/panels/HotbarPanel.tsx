@@ -262,7 +262,7 @@ function EditPopup({ slotIndex, slot, onSave, onClear, onCancel }: EditPopupProp
 
 export function HotbarPanel() {
   const { state, sendCommand, sendMessage } = useGame()
-  const { hotbarSlots, combatRound, characterInfo, choicePrompt } = state
+  const { hotbarSlots, combatRound, characterInfo, choicePrompt, activeHotbarIndex, hotbarCount, maxHotbars } = state
   const [editingSlot, setEditingSlot] = useState<number | null>(null)
   const [tooltip, setTooltip] = useState<{ slot: HotbarSlot; pos: { x: number; y: number } } | null>(null)
 
@@ -316,6 +316,41 @@ export function HotbarPanel() {
     return () => document.removeEventListener('keydown', handleKeyDown)
   }, [editingSlot, choicePrompt])
 
+  // REQ-HMB-1: Ctrl+Up MUST cycle to the previous hotbar (wrapping) when hotbarCount > 1.
+  // REQ-HMB-2: Ctrl+Down MUST cycle to the next hotbar (wrapping) when hotbarCount > 1.
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!e.ctrlKey) return
+      if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return
+      if (hotbarCount <= 1) return
+      e.preventDefault()
+      e.stopPropagation()
+      if (e.key === 'ArrowUp') {
+        const target = activeHotbarIndex === 1 ? hotbarCount : activeHotbarIndex - 1
+        sendMessage('HotbarRequest', { action: 'switch', hotbar_index: target })
+      } else {
+        const target = activeHotbarIndex === hotbarCount ? 1 : activeHotbarIndex + 1
+        sendMessage('HotbarRequest', { action: 'switch', hotbar_index: target })
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown, { capture: true })
+    return () => window.removeEventListener('keydown', handleKeyDown, { capture: true })
+  }, [activeHotbarIndex, hotbarCount, sendMessage])
+
+  const switchUp = () => {
+    if (hotbarCount <= 1) return
+    const target = activeHotbarIndex === 1 ? hotbarCount : activeHotbarIndex - 1
+    sendMessage('HotbarRequest', { action: 'switch', hotbar_index: target })
+  }
+  const switchDown = () => {
+    if (hotbarCount <= 1) return
+    const target = activeHotbarIndex === hotbarCount ? 1 : activeHotbarIndex + 1
+    sendMessage('HotbarRequest', { action: 'switch', hotbar_index: target })
+  }
+  const createHotbar = () => {
+    sendMessage('HotbarRequest', { action: 'create' })
+  }
+
   function handleSave(slot: number, text: string) {
     sendMessage('HotbarRequest', { action: 'set', slot, text })
     setEditingSlot(null)
@@ -339,6 +374,21 @@ export function HotbarPanel() {
       )}
       {tooltip && <HotbarTooltip slot={tooltip.slot} pos={tooltip.pos} />}
       <div className="hotbar">
+        <button
+          className="hotbar-switch-btn"
+          onClick={switchUp}
+          disabled={hotbarCount <= 1}
+          title="Previous hotbar (Ctrl+Up)"
+          type="button"
+        >▲</button>
+        <button
+          className="hotbar-switch-btn"
+          onClick={switchDown}
+          disabled={hotbarCount <= 1}
+          title="Next hotbar (Ctrl+Down)"
+          type="button"
+        >▼</button>
+        <span className="hotbar-indicator">{activeHotbarIndex}/{hotbarCount}</span>
         {KEYS.map((key, i) => {
           const slot = hotbarSlots[i] ?? { kind: 'command', ref: '' }
           const label = slotDisplayLabel(slot)
@@ -385,6 +435,14 @@ export function HotbarPanel() {
             </button>
           )
         })}
+        {hotbarCount < maxHotbars && (
+          <button
+            className="hotbar-new-btn"
+            onClick={createHotbar}
+            title="Create new hotbar"
+            type="button"
+          >+ New Hotbar</button>
+        )}
       </div>
     </>
   )
