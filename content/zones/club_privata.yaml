@@ -1,8 +1,8 @@
 zone:
   id: club_privata
   danger_level: dangerous
-  min_level: 2
-  max_level: 8
+  min_level: 40
+  max_level: 55
   world_x: 0
   world_y: -1
   name: Club Privata
@@ -233,7 +233,7 @@ zone:
     map_y: 5
     boss_room: false
   - id: cp_vip_suite
-    danger_level: dangerous
+    danger_level: all_out_war
     title: VIP Suite
     description: A room that does not officially exist on the club's floor plan. The only furniture is
       a single chair occupied by someone who has been waiting for exactly this. This is worse than loud.

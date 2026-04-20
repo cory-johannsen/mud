@@ -1,11 +1,12 @@
 id: club_bouncer
 name: Club Bouncer
 description: Built like a refrigerator, dressed like a valet, with the disposition of neither.
-level: 3
-max_hp: 36
-ac: 14
+level: 44
+max_hp: 492
+ac: 20
 awareness: 7
 disposition: hostile
+rob_multiplier: 1.2
 abilities:
   brutality: 15
   quickness: 10
