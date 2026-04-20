@@ -88,6 +88,9 @@ type GameServerConfig struct {
 	GameClockStart int `mapstructure:"game_clock_start"`
 	// GameTickDuration is how long each game hour lasts in real time.
 	GameTickDuration time.Duration `mapstructure:"game_tick_duration"`
+	// AutoNavStepMs is the delay in milliseconds between auto-navigation steps in the web client.
+	// Minimum 100. Default 1000. (REQ-CNT-2)
+	AutoNavStepMs int `mapstructure:"auto_nav_step_ms"`
 }
 
 // Addr returns the "host:port" gRPC address.
@@ -264,6 +267,9 @@ func validateGameServer(g GameServerConfig) error {
 	if g.GameTickDuration <= 0 {
 		errs = append(errs, fmt.Sprintf("gameserver.game_tick_duration must be positive, got %v", g.GameTickDuration))
 	}
+	if g.AutoNavStepMs != 0 && g.AutoNavStepMs < 100 {
+		errs = append(errs, fmt.Sprintf("gameserver.auto_nav_step_ms must be >= 100, got %d", g.AutoNavStepMs))
+	}
 	if len(errs) > 0 {
 		return fmt.Errorf("%s", strings.Join(errs, "; "))
 	}
@@ -377,6 +383,7 @@ func setDefaults(v *viper.Viper) {
 	v.SetDefault("gameserver.grpc_port", 50051)
 	v.SetDefault("gameserver.game_clock_start", 6)
 	v.SetDefault("gameserver.game_tick_duration", "1m")
+	v.SetDefault("gameserver.auto_nav_step_ms", 1000)
 
 	v.SetDefault("web.port", 0)
 
