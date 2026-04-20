@@ -28,8 +28,12 @@ func AttackBonus(s *ActiveSet) int {
 // subtracts from the total (debuff). For stackable conditions, values are multiplied
 // by the current stack count.
 //
+// Precondition: s may be nil.
 // Postcondition: May be positive when AC bonuses exceed penalties.
 func ACBonus(s *ActiveSet) int {
+	if s == nil {
+		return 0
+	}
 	total := 0
 	for _, ac := range s.conditions {
 		if ac.Def.ACPenalty > 0 {

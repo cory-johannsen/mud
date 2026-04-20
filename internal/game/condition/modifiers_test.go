@@ -113,7 +113,7 @@ func TestPropertyACBonus_PenaltyOnlyIsNonPositive(t *testing.T) {
 		penalty := rapid.IntRange(0, 10).Draw(t, "penalty")
 		stacks := rapid.IntRange(1, 4).Draw(t, "stacks")
 		s := condition.NewActiveSet()
-		def := &condition.ConditionDef{ID: "test", Name: "Test", DurationType: "permanent", MaxStacks: 4, ACPenalty: penalty, ACBonus: 0}
+		def := &condition.ConditionDef{ID: "test", Name: "Test", DurationType: "permanent", MaxStacks: 4, ACPenalty: penalty}
 		require.NoError(t, s.Apply("testuid", def, stacks, -1))
 		bonus := condition.ACBonus(s)
 		assert.LessOrEqual(t, bonus, 0, "ACBonus with only penalties must be <= 0")
@@ -281,12 +281,10 @@ func TestProperty_ForcedActionType_AlwaysValidOrEmpty(t *testing.T) {
 }
 
 func TestACBonus_FortifiedCondition_PlusOne(t *testing.T) {
-	reg := condition.NewRegistry()
 	def := &condition.ConditionDef{
 		ID: "fortified", Name: "Fortified", DurationType: "rounds",
 		MaxStacks: 0, ACBonus: 1,
 	}
-	reg.Register(def)
 	set := condition.NewActiveSet()
 	_ = set.Apply("p1", def, 1, 2)
 	got := condition.ACBonus(set)
