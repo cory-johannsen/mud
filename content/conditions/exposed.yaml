@@ -1,0 +1,24 @@
+id: exposed
+name: Exposed
+description: |
+  A weakness in your defense has been identified and marked. Attackers
+  know exactly where to hit you.
+duration_type: rounds
+max_stacks: 0
+attack_penalty: 0
+attack_bonus: 0
+ac_penalty: 2
+ac_bonus: 0
+speed_penalty: 0
+damage_bonus: 0
+ap_reduction: 0
+skip_turn: false
+skill_penalty: 0
+restrict_actions: []
+prevents_movement: false
+prevents_commands: false
+prevents_targeting: false
+is_mental_condition: false
+lua_on_apply: ""
+lua_on_remove: ""
+lua_on_tick: ""
