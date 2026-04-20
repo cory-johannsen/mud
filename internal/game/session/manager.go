@@ -131,10 +131,12 @@ type PlayerSession struct {
 	FocusPoints int
 	// MaxFocusPoints is the maximum focus points derived at login from active feats + class features (not persisted).
 	MaxFocusPoints int
-	// Hotbar holds the player's 10 persistent hotbar slot assignments.
-	// Index 0 = slot 1 (key "1"), index 9 = slot 10 (key "0").
-	// Loaded from DB at login; written through on any hotbar set/clear command.
-	Hotbar [10]HotbarSlot
+	// Hotbars holds the player's persistent hotbar bars (up to MaxHotbars).
+	// Each bar has 10 slots. Index 0 = key "1", Index 9 = key "0".
+	// Always contains at least 1 bar.
+	Hotbars [][10]HotbarSlot
+	// ActiveHotbarIndex is the 0-based index of the currently displayed bar.
+	ActiveHotbarIndex int
 	// LastCheckRoll is the dice result of the most recent ability check (session-only; 0 = none recorded).
 	LastCheckRoll int
 	// LastCheckDC is the DC of the most recent ability check (session-only).
@@ -544,6 +546,8 @@ func (m *Manager) AddPlayer(opts AddPlayerOptions) (*PlayerSession, error) {
 		},
 		ZoneCircumstanceBonus: make(map[string]int),
 		InitDone:              make(chan struct{}),
+		Hotbars:               [][10]HotbarSlot{{}},
+		ActiveHotbarIndex:     0,
 	}
 
 	sess.Backpack = inventory.NewBackpack(20, 50.0)
