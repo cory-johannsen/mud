@@ -3732,9 +3732,17 @@ func (h *CombatHandler) applyPlanLocked(cbt *combat.Combat, actor *combat.Combat
 		var qa combat.QueuedAction
 		switch a.Action {
 		case "attack":
-			qa = combat.QueuedAction{Type: combat.ActionAttack, Target: a.Target}
+			target := h.resolveFactionTarget(cbt, actor, a.Target)
+			if a.Target == "nearest_faction_enemy" && target == "" {
+				continue // no faction enemy present; no AP deducted
+			}
+			qa = combat.QueuedAction{Type: combat.ActionAttack, Target: target}
 		case "strike":
-			qa = combat.QueuedAction{Type: combat.ActionStrike, Target: a.Target}
+			target := h.resolveFactionTarget(cbt, actor, a.Target)
+			if a.Target == "nearest_faction_enemy" && target == "" {
+				continue // no faction enemy present; no AP deducted
+			}
+			qa = combat.QueuedAction{Type: combat.ActionStrike, Target: target}
 		case "pass":
 			qa = combat.QueuedAction{Type: combat.ActionPass}
 		case "apply_mental_state":
@@ -3957,6 +3965,39 @@ func (h *CombatHandler) applyPlanLocked(cbt *combat.Combat, actor *combat.Combat
 			break // AP budget exhausted
 		}
 	}
+}
+
+// resolveFactionTarget resolves a target selector for NPC-vs-NPC faction combat.
+// If the selector is "nearest_faction_enemy" it selects the lowest-HP living combatant
+// whose FactionID is hostile to actor's faction; returns the combatant's Name.
+// For all other selectors it returns the selector unchanged (already resolved by WorldState).
+//
+// Precondition: cbt and actor must be non-nil.
+// Postcondition: returns "" only when selector is "nearest_faction_enemy" and no valid target exists.
+func (h *CombatHandler) resolveFactionTarget(cbt *combat.Combat, actor *combat.Combatant, selector string) string {
+	if selector != "nearest_faction_enemy" {
+		return selector
+	}
+	if h.factionSvc == nil || actor.FactionID == "" {
+		return ""
+	}
+	var best *combat.Combatant
+	for i := range cbt.Combatants {
+		c := cbt.Combatants[i]
+		if c.ID == actor.ID || c.IsDead() || c.FactionID == "" {
+			continue
+		}
+		if !h.factionSvc.IsHostile(actor.FactionID, c.FactionID) {
+			continue
+		}
+		if best == nil || c.CurrentHP < best.CurrentHP {
+			best = c
+		}
+	}
+	if best == nil {
+		return ""
+	}
+	return best.Name
 }
 
 // resolveAbilityTarget resolves a target selector to a living player UID.
