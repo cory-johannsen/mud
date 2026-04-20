@@ -77,3 +77,55 @@
     zone_id: jerk_off_factory
     base_rate: 0.91
     rate_variance: 0.04
+
+- id: jerk_off_factory_fixer
+  name: "Process Deviation Manager"
+  npc_type: fixer
+  npc_role: fixer
+  type: human
+  description: "Manages process deviations that can't be documented in the standard system. Efficiency is guaranteed. Discretion is included in the base cost."
+  level: 0
+  max_hp: 30
+  ac: 12
+  awareness: 12
+  disposition: neutral
+  personality: cowardly
+  fixer:
+    npc_variance: 1.15
+    max_wanted_level: 4
+    base_costs:
+      1: 150
+      2: 350
+      3: 700
+      4: 1500
+  loot:
+    currency:
+      min: 10
+      max: 50
+
+- id: jerk_off_factory_black_market_merchant
+  name: "Untracked Inventory"
+  npc_type: black_market_merchant
+  npc_role: merchant
+  type: human
+  description: "Manages the JOF's off-books inventory. Everything has been benchmarked against competitors. The prices reflect operational efficiency. The goods do not appear in any audit."
+  level: 0
+  max_hp: 22
+  ac: 11
+  awareness: 10
+  disposition: neutral
+  personality: neutral
+  merchant:
+    merchant_type: black_market
+    sell_margin: 1.5
+    buy_margin: 0.6
+    budget: 500
+    replenish_rate:
+      min_hours: 6
+      max_hours: 12
+      stock_refill: 0
+      budget_refill: 100
+  loot:
+    currency:
+      min: 10
+      max: 50

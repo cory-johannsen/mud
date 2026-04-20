@@ -77,3 +77,55 @@
     zone_id: dick_sucking_factory
     base_rate: 0.91
     rate_variance: 0.04
+
+- id: dick_sucking_factory_fixer
+  name: "Compliance Officer"
+  npc_type: fixer
+  npc_role: fixer
+  type: human
+  description: "The DSF compliance officer handles problems that can't be documented. Off the books, on the clock, for a fee."
+  level: 0
+  max_hp: 30
+  ac: 12
+  awareness: 12
+  disposition: neutral
+  personality: cowardly
+  fixer:
+    npc_variance: 1.15
+    max_wanted_level: 4
+    base_costs:
+      1: 150
+      2: 350
+      3: 700
+      4: 1500
+  loot:
+    currency:
+      min: 10
+      max: 50
+
+- id: dick_sucking_factory_black_market_merchant
+  name: "Off-Ledger Procurement"
+  npc_type: black_market_merchant
+  npc_role: merchant
+  type: human
+  description: "Handles requisitions that don't go through official channels. Everything is in stock. None of it is on the inventory sheet."
+  level: 0
+  max_hp: 22
+  ac: 11
+  awareness: 10
+  disposition: neutral
+  personality: neutral
+  merchant:
+    merchant_type: black_market
+    sell_margin: 1.5
+    buy_margin: 0.6
+    budget: 500
+    replenish_rate:
+      min_hours: 6
+      max_hours: 12
+      stock_refill: 0
+      budget_refill: 100
+  loot:
+    currency:
+      min: 10
+      max: 50

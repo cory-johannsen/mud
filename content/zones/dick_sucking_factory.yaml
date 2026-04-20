@@ -144,6 +144,9 @@ zone:
     - template: dick_sucking_factory_banker
       count: 1
       respawn_after: 0s
+    - template: dick_sucking_factory_fixer
+      count: 1
+      respawn_after: 0s
 
   - id: dsf_hr_dept
     title: Human Resources
@@ -253,3 +256,6 @@ zone:
     - template: dsf_floor_supervisor
       count: 1
       respawn_after: 5m
+    - template: dick_sucking_factory_black_market_merchant
+      count: 1
+      respawn_after: 0s

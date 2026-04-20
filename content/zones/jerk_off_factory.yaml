@@ -74,6 +74,12 @@ zone:
     - template: jerk_off_factory_banker
       count: 1
       respawn_after: 0s
+    - template: jerk_off_factory_fixer
+      count: 1
+      respawn_after: 0s
+    - template: jerk_off_factory_black_market_merchant
+      count: 1
+      respawn_after: 0s
 
   - id: jof_cubicle_farm
     title: Cubicle Farm
