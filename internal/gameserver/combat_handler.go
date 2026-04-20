@@ -455,7 +455,9 @@ func (h *CombatHandler) SetWeatherManager(wm *WeatherManager) {
 // Precondition: reg must not be nil.
 // Postcondition: h.aiItemRegistry is set to reg.
 func (h *CombatHandler) SetAIItemRegistry(reg *ai.ItemDomainRegistry) {
+	h.combatMu.Lock()
 	h.aiItemRegistry = reg
+	h.combatMu.Unlock()
 }
 
 // SetNPCIdleTickInterval sets the idle tick interval used to convert say cooldown
