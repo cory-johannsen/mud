@@ -5,15 +5,16 @@ description: >
   earthier. Beats a drum stick against anything available and regards strangers with
   glazed but calculating eyes. Part musician, part guard dog.
 type: human
-level: 2
-max_hp: 18
-ac: 11
+level: 36
+max_hp: 360
+ac: 20
 awareness: 5
 faction_id: wooks
 disposition: neutral
 attack_verb: "swings a drum stick at"
 ai_domain: wook_combat
 respawn_delay: "5m"
+rob_multiplier: 1.2
 abilities:
   brutality: 10
   grit: 12

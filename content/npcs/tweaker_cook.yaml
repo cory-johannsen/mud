@@ -3,15 +3,16 @@ name: "Tweaker Cook"
 description: >
   An older, methodical tweaker in a stained lab coat, managing the operation with lethal precision.
 type: human
-level: 6
-max_hp: 55
-ac: 14
+level: 42
+max_hp: 456
+ac: 20
 awareness: 10
 faction_id: tweakers
 disposition: hostile
 attack_verb: "sprays a cloud at"
 ai_domain: ganger_combat
 respawn_delay: "10m"
+rob_multiplier: 1.2
 on_hit_substance: tweaker_crystal
 abilities:
   brutality: 12

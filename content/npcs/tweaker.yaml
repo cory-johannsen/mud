@@ -3,15 +3,16 @@ name: Tweaker
 description: >
   A gaunt, manic figure twitching with paranoid energy. Fast, unpredictable, and desperate.
 type: human
-level: 3
-max_hp: 22
-ac: 12
+level: 36
+max_hp: 360
+ac: 20
 awareness: 9
 faction_id: tweakers
 disposition: hostile
 attack_verb: "claws at"
 ai_domain: ganger_combat
 respawn_delay: "5m"
+rob_multiplier: 1.2
 attacks_per_round: 2
 abilities:
   brutality: 10

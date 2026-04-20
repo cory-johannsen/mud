@@ -3,15 +3,16 @@ name: Juggalette
 description: >
   A face-painted Juggalo woman in torn fishnet and ICP merch, arm cocked back with a full Faygo bottle.
 type: human
-level: 4
-max_hp: 35
-ac: 13
+level: 39
+max_hp: 405
+ac: 20
 awareness: 8
 faction_id: juggalos
 disposition: hostile
 attack_verb: "hurls a Faygo bottle at"
 ai_domain: ganger_combat
 respawn_delay: "5m"
+rob_multiplier: 1.2
 on_hit_effect: faygo_splash
 abilities:
   brutality: 12

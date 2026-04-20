@@ -4,9 +4,10 @@ description: >
   An ancient wook elder draped in a robe of living vines and owl feathers, eyes like twin galaxies.
 type: human
 tier: boss
-level: 12
-max_hp: 150
-ac: 16
+level: 50
+max_hp: 1800
+ac: 26
+rob_multiplier: 2.0
 awareness: 14
 faction_id: wooks
 disposition: hostile
@@ -25,27 +26,27 @@ weapon:
     weight: 1
 armor: []
 boss_abilities:
-  - id: eternal_groove
-    name: "Eternal Groove"
+  - id: spiral_vortex
+    name: "Spiral Vortex"
     trigger: round_start
     trigger_value: 0
     cooldown: "3m"
     effect:
-      aoe_damage_expr: "1d4"
-  - id: spore_cloud
-    name: "Spore Cloud"
-    trigger: round_start
-    trigger_value: 0
+      aoe_damage_expr: "5d10"
+  - id: kings_madness
+    name: "King's Madness"
+    trigger: hp_pct_below
+    trigger_value: 75
     cooldown: "4m"
     effect:
       aoe_condition: nausea
-  - id: spiral_vision
-    name: "Spiral Vision"
-    trigger: round_start
-    trigger_value: 0
-    cooldown: "2m"
+  - id: spiral_rebirth
+    name: "Spiral Rebirth"
+    trigger: hp_pct_below
+    trigger_value: 50
+    cooldown: "6m"
     effect:
-      aoe_condition: stunned
+      heal_pct: 30
 loot:
   currency:
     min: 200

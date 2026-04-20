@@ -5,15 +5,16 @@ description: >
   perimeter of the wook encampment. He doesn't ask questions before swinging. The
   dreadlocks don't slow him down one bit.
 type: human
-level: 5
-max_hp: 52
-ac: 15
+level: 46
+max_hp: 528
+ac: 21
 awareness: 7
 faction_id: wooks
 disposition: hostile
 attack_verb: "slams"
 ai_domain: wook_combat
 respawn_delay: "10m"
+rob_multiplier: 1.5
 toughness_rank: trained
 abilities:
   brutality: 17

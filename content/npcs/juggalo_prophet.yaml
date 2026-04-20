@@ -3,15 +3,16 @@ name: "Juggalo Prophet"
 description: >
   An elder Juggalo in full ceremonial face paint and a black robe, reciting the gospel of the Dark Carnival.
 type: human
-level: 7
-max_hp: 72
-ac: 15
+level: 44
+max_hp: 492
+ac: 20
 awareness: 9
 faction_id: juggalos
 disposition: hostile
 attack_verb: "raises a hatchet at"
 ai_domain: juggalo_prophet_combat
 respawn_delay: "10m"
+rob_multiplier: 1.2
 abilities:
   brutality: 16
   quickness: 10

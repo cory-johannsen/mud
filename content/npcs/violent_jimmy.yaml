@@ -4,9 +4,10 @@ description: >
   An enormous face-painted warrior in a velvet robe. The Juggalo boss radiates Dark Carnival authority.
 type: human
 tier: boss
-level: 12
-max_hp: 160
-ac: 18
+level: 50
+max_hp: 1800
+ac: 26
+rob_multiplier: 2.0
 awareness: 11
 faction_id: juggalos
 disposition: hostile
@@ -27,25 +28,25 @@ armor:
   - id: kevlar_vest
     weight: 1
 boss_abilities:
-  - id: faygo_bomb
-    name: "Faygo Bomb"
+  - id: jimmys_rampage
+    name: "Jimmy's Rampage"
     trigger: round_start
     trigger_value: 0
     cooldown: "3m"
     effect:
-      aoe_damage_expr: "2d6"
-  - id: hatchet_dance
-    name: "Hatchet Dance"
-    trigger: round_start
-    trigger_value: 0
-    cooldown: "2m"
+      aoe_damage_expr: "6d10"
+  - id: bloody_fury
+    name: "Bloody Fury"
+    trigger: hp_pct_below
+    trigger_value: 75
+    cooldown: "4m"
     effect:
-      aoe_damage_expr: "1d8"
-  - id: dark_carnival_prayer
-    name: "Dark Carnival Prayer"
+      aoe_condition: frightened
+  - id: violent_surge
+    name: "Violent Surge"
     trigger: hp_pct_below
     trigger_value: 50
-    cooldown: "24h"
+    cooldown: "5m"
     effect:
       heal_pct: 25
 loot:

@@ -3,15 +3,16 @@ name: Juggalo
 description: >
   A face-painted warrior in torn ICP merch, wielding a hatchet with unhinged enthusiasm.
 type: human
-level: 4
-max_hp: 38
-ac: 13
+level: 39
+max_hp: 405
+ac: 20
 awareness: 7
 faction_id: juggalos
 disposition: hostile
 attack_verb: "swings a hatchet at"
 ai_domain: ganger_combat
 respawn_delay: "5m"
+rob_multiplier: 1.2
 abilities:
   brutality: 14
   quickness: 12

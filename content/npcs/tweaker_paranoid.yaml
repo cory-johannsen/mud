@@ -3,15 +3,16 @@ name: "Paranoid Tweaker"
 description: >
   Eyes darting in every direction, this tweaker screams for backup the moment they spot an intruder.
 type: human
-level: 3
-max_hp: 20
-ac: 12
+level: 36
+max_hp: 360
+ac: 20
 awareness: 14
 faction_id: tweakers
 disposition: hostile
 attack_verb: "screams and swings at"
 ai_domain: tweaker_paranoid_combat
 respawn_delay: "5m"
+rob_multiplier: 1.2
 on_hit_condition:
   condition_id: paranoid
   attribute_modifier:

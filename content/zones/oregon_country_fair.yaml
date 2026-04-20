@@ -6,8 +6,8 @@ zone:
     fairgrounds and fight continuously for dominance.
   faction_id: ''
   danger_level: dangerous
-  min_level: 2
-  max_level: 12
+  min_level: 36
+  max_level: 50
   world_x: -2
   world_y: 4
   start_room: ocf_main_gate

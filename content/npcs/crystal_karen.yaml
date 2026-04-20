@@ -4,9 +4,10 @@ description: >
   A brilliant, terrifying woman in a lab coat covered in chemical burns. She runs the operation. She runs everything.
 type: human
 tier: boss
-level: 12
-max_hp: 145
-ac: 17
+level: 50
+max_hp: 1800
+ac: 26
+rob_multiplier: 2.0
 awareness: 13
 faction_id: tweakers
 disposition: hostile
@@ -27,27 +28,27 @@ armor:
   - id: kevlar_vest
     weight: 1
 boss_abilities:
-  - id: paranoid_burst
-    name: "Paranoid Burst"
+  - id: crystal_storm
+    name: "Crystal Storm"
     trigger: round_start
     trigger_value: 0
     cooldown: "3m"
     effect:
-      aoe_condition: fear
-  - id: meth_bomb
-    name: "Meth Bomb"
-    trigger: round_start
-    trigger_value: 0
-    cooldown: "4m"
-    effect:
       aoe_condition: nausea
-  - id: speed_rush
-    name: "Speed Rush"
+  - id: meth_rage
+    name: "Meth Rage"
     trigger: hp_pct_below
     trigger_value: 75
     cooldown: "4m"
     effect:
-      aoe_damage_expr: "2d6"
+      aoe_damage_expr: "6d10"
+  - id: karens_comeback
+    name: "Karen's Comeback"
+    trigger: hp_pct_below
+    trigger_value: 50
+    cooldown: "5m"
+    effect:
+      heal_pct: 25
 loot:
   currency:
     min: 200
