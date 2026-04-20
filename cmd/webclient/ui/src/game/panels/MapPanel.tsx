@@ -5,6 +5,7 @@ import { RoomTooltip } from '../RoomTooltip'
 import { ZoneMapSvg, REFERENCE_W } from '../ZoneMapSvg'
 import { WorldMapSvg } from '../WorldMapSvg'
 import { useAutoNav } from '../useAutoNav'
+import { CombatNpcModal } from '../CombatNpcModal'
 
 const COMPASS_DIRS = [
   ['nw', 'n', 'ne'],
@@ -320,6 +321,7 @@ export function MapPanel() {
 
     return (
       <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+        <CombatNpcModal />
         <div className="map-header">
           <h3>Battle Map</h3>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
