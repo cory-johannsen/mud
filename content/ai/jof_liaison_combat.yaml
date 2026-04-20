@@ -1,0 +1,47 @@
+domain:
+  id: jof_liaison_combat
+  description: JOF regional liaison. Attacks and applies delirium condition.
+
+  tasks:
+    - id: behave
+      description: Root task
+    - id: liaise
+      description: Cross-functional violence
+
+  methods:
+    - task: behave
+      id: combat_mode
+      precondition: in_combat
+      subtasks: [liaise]
+
+    - task: behave
+      id: idle_mode
+      precondition: ""
+      subtasks: [do_pass]
+
+    - task: liaise
+      id: confuse_and_attack
+      precondition: in_combat
+      subtasks: [jof_confuse, attack_enemy]
+
+    - task: liaise
+      id: attack_only
+      precondition: ""
+      subtasks: [attack_enemy]
+
+  operators:
+    - id: attack_enemy
+      action: attack
+      target: nearest_enemy
+
+    - id: jof_confuse
+      action: apply_mental_state
+      track: delirium
+      severity: mild
+      target: nearest_enemy
+      cooldown_rounds: 3
+      ap_cost: 1
+
+    - id: do_pass
+      action: pass
+      target: ""

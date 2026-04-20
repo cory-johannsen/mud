@@ -1,0 +1,47 @@
+domain:
+  id: dsf_hr_combat
+  description: DSF HR representative. Attacks and applies despair condition.
+
+  tasks:
+    - id: behave
+      description: Root task
+    - id: process
+      description: HR processing
+
+  methods:
+    - task: behave
+      id: combat_mode
+      precondition: in_combat
+      subtasks: [process]
+
+    - task: behave
+      id: idle_mode
+      precondition: ""
+      subtasks: [do_pass]
+
+    - task: process
+      id: discipline_and_attack
+      precondition: in_combat
+      subtasks: [hr_discipline, attack_enemy]
+
+    - task: process
+      id: attack_only
+      precondition: ""
+      subtasks: [attack_enemy]
+
+  operators:
+    - id: attack_enemy
+      action: attack
+      target: nearest_enemy
+
+    - id: hr_discipline
+      action: apply_mental_state
+      track: despair
+      severity: mild
+      target: lowest_hp_enemy
+      cooldown_rounds: 3
+      ap_cost: 1
+
+    - id: do_pass
+      action: pass
+      target: ""

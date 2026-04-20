@@ -432,3 +432,40 @@ func TestPlanner_NativePrecondition_HPPctBelow(t *testing.T) {
 		t.Fatalf("expected flee action, got %v", plan)
 	}
 }
+
+func TestDSFAndJOFHTNDomainsLoad(t *testing.T) {
+	_, thisFile, _, _ := runtime.Caller(0)
+	root := thisFile
+	for {
+		if _, err := os.Stat(filepath.Join(root, "go.mod")); err == nil {
+			break
+		}
+		root = filepath.Dir(root)
+	}
+	domains := []string{
+		"dsf_worker_combat",
+		"dsf_hr_combat",
+		"dsf_boss_combat",
+		"jof_worker_combat",
+		"jof_liaison_combat",
+		"jof_boss_combat",
+	}
+	for _, name := range domains {
+		t.Run(name, func(t *testing.T) {
+			path := filepath.Join(root, "content", "ai", name+".yaml")
+			data, err := os.ReadFile(path)
+			if err != nil {
+				t.Fatalf("domain file missing: %s.yaml: %v", name, err)
+			}
+			var wrapper struct {
+				Domain ai.Domain `yaml:"domain"`
+			}
+			if err := yaml.Unmarshal(data, &wrapper); err != nil {
+				t.Fatalf("unmarshal error for %s: %v", name, err)
+			}
+			if wrapper.Domain.ID != name {
+				t.Fatalf("expected domain ID %q, got %q", name, wrapper.Domain.ID)
+			}
+		})
+	}
+}

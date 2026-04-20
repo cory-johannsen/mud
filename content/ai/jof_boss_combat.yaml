@@ -1,0 +1,56 @@
+domain:
+  id: jof_boss_combat
+  description: Joe Crystal. Strikes weakest enemy and applies moderate delirium.
+
+  tasks:
+    - id: behave
+      description: Root task
+    - id: optimize
+      description: Combat optimization
+
+  methods:
+    - task: behave
+      id: combat_mode
+      precondition: in_combat
+      subtasks: [optimize]
+
+    - task: behave
+      id: idle_mode
+      precondition: ""
+      subtasks: [do_pass]
+
+    - task: optimize
+      id: strike_and_confuse
+      precondition: lieutenant_enemy_below_half
+      subtasks: [strike_enemy, jof_boss_confuse]
+
+    - task: optimize
+      id: attack_and_confuse
+      precondition: in_combat
+      subtasks: [attack_enemy, jof_boss_confuse]
+
+    - task: optimize
+      id: attack_only
+      precondition: ""
+      subtasks: [attack_enemy]
+
+  operators:
+    - id: attack_enemy
+      action: attack
+      target: nearest_enemy
+
+    - id: strike_enemy
+      action: strike
+      target: weakest_enemy
+
+    - id: jof_boss_confuse
+      action: apply_mental_state
+      track: delirium
+      severity: moderate
+      target: lowest_hp_enemy
+      cooldown_rounds: 4
+      ap_cost: 2
+
+    - id: do_pass
+      action: pass
+      target: ""

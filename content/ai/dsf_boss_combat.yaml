@@ -1,0 +1,56 @@
+domain:
+  id: dsf_boss_combat
+  description: Will Blunderfield. Strikes weakest enemy and applies moderate despair.
+
+  tasks:
+    - id: behave
+      description: Root task
+    - id: manage
+      description: Executive management
+
+  methods:
+    - task: behave
+      id: combat_mode
+      precondition: in_combat
+      subtasks: [manage]
+
+    - task: behave
+      id: idle_mode
+      precondition: ""
+      subtasks: [do_pass]
+
+    - task: manage
+      id: strike_and_demoralize
+      precondition: lieutenant_enemy_below_half
+      subtasks: [strike_enemy, demoralize]
+
+    - task: manage
+      id: attack_and_demoralize
+      precondition: in_combat
+      subtasks: [attack_enemy, demoralize]
+
+    - task: manage
+      id: attack_only
+      precondition: ""
+      subtasks: [attack_enemy]
+
+  operators:
+    - id: attack_enemy
+      action: attack
+      target: nearest_enemy
+
+    - id: strike_enemy
+      action: strike
+      target: weakest_enemy
+
+    - id: demoralize
+      action: apply_mental_state
+      track: despair
+      severity: moderate
+      target: lowest_hp_enemy
+      cooldown_rounds: 4
+      ap_cost: 2
+
+    - id: do_pass
+      action: pass
+      target: ""

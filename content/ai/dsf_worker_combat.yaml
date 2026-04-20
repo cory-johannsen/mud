@@ -1,0 +1,27 @@
+domain:
+  id: dsf_worker_combat
+  description: Standard DSF worker. Attacks nearest enemy.
+
+  tasks:
+    - id: behave
+      description: Root task
+
+  methods:
+    - task: behave
+      id: combat_mode
+      precondition: in_combat
+      subtasks: [attack_enemy]
+
+    - task: behave
+      id: idle_mode
+      precondition: ""
+      subtasks: [do_pass]
+
+  operators:
+    - id: attack_enemy
+      action: attack
+      target: nearest_enemy
+
+    - id: do_pass
+      action: pass
+      target: ""
