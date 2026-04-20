@@ -66,6 +66,9 @@ function GameLayout() {
     const timer = setTimeout(() => setQuestsFlashing(false), 1200)
     return () => clearTimeout(timer)
   }, [state.questFlashCount])
+  const activeQuestCount = (state.questLogView?.quests ?? []).filter(
+    (q) => (q.status ?? '') === 'active'
+  ).length
   const { defaultLayout: verticalLayout, onLayoutChanged: onVerticalLayoutChanged } = useDefaultLayout({
     id: 'game-vertical',
     storage: localStorage,
@@ -119,7 +122,9 @@ function GameLayout() {
               ].filter(Boolean).join(' ')}
               onClick={() => toggleDrawer(d)}
             >
-              {d.charAt(0).toUpperCase() + d.slice(1)}
+              {d === 'quests' && activeQuestCount > 0
+                ? `Quests (${activeQuestCount})`
+                : d.charAt(0).toUpperCase() + d.slice(1)}
             </button>
           ))}
           <button className="toolbar-btn" onClick={() => setShowHelp(true)}>Help</button>
