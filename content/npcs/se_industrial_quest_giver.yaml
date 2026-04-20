@@ -4,7 +4,7 @@
   npc_role: quest_giver
   type: human
   description: "Posts work orders on the wall of the break room — clearance jobs, sweeps, and bounties for the zone's chronic problems."
-  level: 4
+  level: 0
   max_hp: 28
   ac: 11
   awareness: 5
