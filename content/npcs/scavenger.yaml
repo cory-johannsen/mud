@@ -2,8 +2,8 @@ id: scavenger
 name: Scavenger
 description: A wiry figure in mismatched armor, picking through the rubble with practiced efficiency.
 level: 1
-max_hp: 14
-ac: 12
+max_hp: 12
+ac: 14
 rob_multiplier: 1.0
 awareness: 7
 ai_domain: scavenger_combat

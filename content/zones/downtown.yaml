@@ -2,7 +2,7 @@ zone:
   id: downtown
   danger_level: sketchy
   min_level: 1
-  max_level: 6
+  max_level: 10
   world_x: -1
   world_y: 0
   name: Downtown Portland
@@ -640,6 +640,7 @@ zone:
     title: Main Library Fortress
     core: true
     boss_room: true
+    danger_level: dangerous
     description: 'The central library''s modernist concrete shell is almost perfectly defensible.
 
       A faction has made it their seat — the upper floors are occupied, the entrance

@@ -1,9 +1,9 @@
 id: 82nd_enforcer
 name: 82nd Enforcer
 description: A brutal enforcer who controls a stretch of 82nd Ave. Built like a collapsed overpass, he radiates menace.
-level: 3
-max_hp: 36
-ac: 16
+level: 7
+max_hp: 49
+ac: 15
 awareness: 6
 ai_domain: ganger_combat
 respawn_delay: "5m"
