@@ -121,8 +121,8 @@ type CharacterSaver interface {
 	SaveInstanceCharges(ctx context.Context, characterID int64, instanceID, itemDefID string, charges int, expended bool) error
 	LoadFocusPoints(ctx context.Context, characterID int64) (int, error)
 	SaveFocusPoints(ctx context.Context, characterID int64, focusPoints int) error
-	SaveHotbar(ctx context.Context, characterID int64, slots [10]session.HotbarSlot) error
-	LoadHotbar(ctx context.Context, characterID int64) ([10]session.HotbarSlot, error)
+	SaveHotbars(ctx context.Context, characterID int64, bars [][10]session.HotbarSlot, activeIdx int) error
+	LoadHotbars(ctx context.Context, characterID int64) ([][10]session.HotbarSlot, int, error)
 }
 
 // CharacterSkillsGetter retrieves per-character skill proficiency data.
@@ -351,6 +351,9 @@ type GameServiceServer struct {
 	// pendingTechSlotsRepo persists L2+ pending tech slots awaiting trainer resolution (REQ-TTA-12).
 	// May be nil (pending slot persistence is skipped if not set).
 	pendingTechSlotsRepo PendingTechSlotsRepo
+	// maxHotbars is the maximum number of hotbar pages a player may configure.
+	// Defaults to 4 when not set via SetMaxHotbars. REQ-HB-2.
+	maxHotbars int
 }
 
 // applyArmorTrainingProficiency applies the armor_training feat choice as a real proficiency
@@ -648,6 +651,9 @@ func NewGameServiceServer(
 		// REQ-ZN-9: wire seduceConditions so CombatHandler can process charmed saves at round end.
 		s.combatH.SetSeduceConditions(s.seduceConditions)
 	}
+	if s.maxHotbars <= 0 {
+		s.maxHotbars = 4
+	}
 	return s
 }
 
@@ -785,6 +791,14 @@ func (s *GameServiceServer) SetHealerCapacityRepo(r HealerCapacityRepo) {
 // SetCharSaver sets the character saver (used in tests).
 func (s *GameServiceServer) SetCharSaver(cs CharacterSaver) {
 	s.charSaver = cs
+}
+
+// SetMaxHotbars sets the maximum number of hotbar pages a player may configure.
+// A value <= 0 is ignored; the existing value (default 4) is retained.
+func (s *GameServiceServer) SetMaxHotbars(n int) {
+	if n > 0 {
+		s.maxHotbars = n
+	}
 }
 
 // FeatRegistry returns the feat registry used by this service.
@@ -1491,17 +1505,17 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 	// REQ-DT-6: restore downtime state on reconnect
 	s.restoreDowntimeState(stream.Context(), uid, sess, characterID)
 
-	// Load hotbar from DB (REQ-HB-9, REQ-HB-11).
+	// Load hotbars from DB (REQ-HB-9, REQ-HB-11).
 	if s.charSaver != nil && characterID > 0 {
-		hotbarSlots, hotbarErr := s.charSaver.LoadHotbar(stream.Context(), characterID)
+		hotbarBars, hotbarActiveIdx, hotbarErr := s.charSaver.LoadHotbars(stream.Context(), characterID)
 		if hotbarErr != nil {
-			s.logger.Warn("failed to load hotbar at login",
+			s.logger.Warn("loading hotbars",
 				zap.Int64("character_id", characterID),
 				zap.Error(hotbarErr),
 			)
-		} else {
-			sess.Hotbar = hotbarSlots
 		}
+		sess.Hotbars = hotbarBars
+		sess.ActiveHotbarIndex = hotbarActiveIdx
 	}
 
 	// Broadcast arrival to other players in the room
