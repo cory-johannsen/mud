@@ -6,10 +6,11 @@ description: >
   his position by executing three previous commandants for incompetence.
   He runs sniper qualification from the bunker's firing positions and
   personally reviews every property violation that earns an armed response.
-level: 7
-max_hp: 80
-ac: 18
+level: 60
+max_hp: 2430
+ac: 27
 rob_multiplier: 2.0
+tier: boss
 awareness: 11
 ai_domain: lake_oswego_commandant_combat
 respawn_delay: "10m"
@@ -20,6 +21,28 @@ abilities:
   reasoning: 14
   savvy: 12
   flair: 10
+boss_abilities:
+  - id: commandant_lockdown
+    name: "Commandant Lockdown"
+    trigger: round_start
+    trigger_value: 0
+    cooldown: "3m"
+    effect:
+      aoe_condition: slowed
+  - id: tactical_volley
+    name: "Tactical Volley"
+    trigger: hp_pct_below
+    trigger_value: 75
+    cooldown: "4m"
+    effect:
+      aoe_damage_expr: "8d10"
+  - id: commandants_resolve
+    name: "Commandant's Resolve"
+    trigger: hp_pct_below
+    trigger_value: 50
+    cooldown: "5m"
+    effect:
+      heal_pct: 25
 loot:
   currency:
     min: 110
