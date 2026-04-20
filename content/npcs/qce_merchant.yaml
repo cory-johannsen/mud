@@ -1,0 +1,29 @@
+id: qce_merchant
+name: "QCE Supply Captain"
+description: A non-combat QCE member who sells faction-exclusive supplies to allied visitors.
+npc_type: merchant
+type: human
+level: 48
+max_hp: 200
+ac: 11
+disposition: friendly
+faction_id: queer_clowning_experience
+respawn_delay: "0s"
+abilities:
+  brutality: 10
+  quickness: 12
+  grit: 12
+  reasoning: 14
+  savvy: 16
+  flair: 18
+merchant:
+  merchant_type: general
+  sell_margin: 1.30
+  buy_margin: 0.35
+  budget: 1000
+  inventory: []
+  replenish_rate:
+    min_hours: 12
+    max_hours: 24
+    stock_refill: 1
+    budget_refill: 200

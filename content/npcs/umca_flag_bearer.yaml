@@ -1,0 +1,33 @@
+id: umca_flag_bearer
+name: "UMCA Flag Bearer"
+description: An elite UMCA soldier who carries the faction banner and provides tactical support to nearby UMCA allies.
+level: 51
+max_hp: 932
+ac: 23
+tier: elite
+faction_id: unwoke_maga_clown_army
+ai_domain: clown_faction_combat
+respawn_delay: "10m"
+rob_multiplier: 1.5
+awareness: 9
+abilities:
+  brutality: 19
+  quickness: 16
+  grit: 20
+  reasoning: 11
+  savvy: 12
+  flair: 12
+weapon:
+  - id: assault_rifle
+    weight: 2
+  - id: combat_knife
+    weight: 2
+armor:
+  - id: kevlar_vest
+    weight: 3
+  - id: leather_jacket
+    weight: 1
+taunts:
+  - "Rally to the flag! UMCA moves as one!"
+  - "The flag never falls while I stand."
+  - "Your surrender is accepted. In advance."

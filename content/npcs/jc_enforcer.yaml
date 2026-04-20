@@ -1,0 +1,33 @@
+id: jc_enforcer
+name: "Just Clownin' Enforcer"
+description: An elite enforcer of the Just Clownin' faction who can apply a disorienting face-paint debuff mid-combat.
+level: 52
+max_hp: 963
+ac: 23
+tier: elite
+faction_id: just_clownin
+ai_domain: clown_faction_combat
+respawn_delay: "10m"
+rob_multiplier: 1.5
+awareness: 9
+abilities:
+  brutality: 20
+  quickness: 17
+  grit: 20
+  reasoning: 12
+  savvy: 13
+  flair: 16
+weapon:
+  - id: rebar_club
+    weight: 2
+  - id: stun_baton
+    weight: 3
+armor:
+  - id: kevlar_vest
+    weight: 3
+  - id: leather_jacket
+    weight: 1
+taunts:
+  - "You'll look better in paint."
+  - "We run the show. The whole show."
+  - "Face paint hides a lot. Scars included."

@@ -1,0 +1,31 @@
+id: qce_drag_bruiser
+name: "QCE Drag Bruiser"
+description: A heavily built QCE elite who throws area-of-effect disruptions for combat chaos.
+level: 51
+max_hp: 932
+ac: 23
+tier: elite
+faction_id: queer_clowning_experience
+ai_domain: clown_faction_combat
+respawn_delay: "10m"
+rob_multiplier: 1.5
+awareness: 10
+abilities:
+  brutality: 20
+  quickness: 15
+  grit: 22
+  reasoning: 12
+  savvy: 13
+  flair: 20
+weapon:
+  - id: combat_shotgun
+    weight: 3
+  - id: steel_pipe
+    weight: 2
+armor:
+  - id: kevlar_vest
+    weight: 3
+taunts:
+  - "Too sparkly for you to handle."
+  - "Glitter doesn't wash out. Neither do we."
+  - "High heels. Higher stakes."

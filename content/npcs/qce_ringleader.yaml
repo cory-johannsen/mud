@@ -1,0 +1,34 @@
+id: qce_ringleader
+name: "The Sequined Ringleader"
+description: >
+  The leader of The Queer Clowning Experience, a towering figure in six-inch heels
+  and a sequined ringmaster's coat who commands the throne room of QCE territory
+  with theatrical cruelty and impressive combat ability.
+level: 60
+max_hp: 2430
+tier: boss
+ac: 27
+faction_id: queer_clowning_experience
+ai_domain: territory_patrol
+respawn_delay: "72h"
+rob_multiplier: 2.0
+awareness: 12
+abilities:
+  brutality: 20
+  quickness: 20
+  grit: 22
+  reasoning: 18
+  savvy: 18
+  flair: 24
+weapon:
+  - id: vibroblade
+    weight: 3
+  - id: combat_knife
+    weight: 1
+armor:
+  - id: tactical_vest
+    weight: 3
+taunts:
+  - "Darling, this is MY stage."
+  - "You came all this way just to lose to sequins?"
+  - "QCE has never lost a fight. We're not starting today."

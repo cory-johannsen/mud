@@ -1,0 +1,31 @@
+id: jc_fighter
+name: "Just Clownin' Fighter"
+description: A mid-tier goon of the Just Clownin' faction, armed with improvised melee weapons and a deeply unnerving paint-streaked grin.
+level: 47
+max_hp: 546
+ac: 21
+tier: elite
+faction_id: just_clownin
+ai_domain: clown_faction_combat
+respawn_delay: "10m"
+rob_multiplier: 1.5
+awareness: 8
+abilities:
+  brutality: 18
+  quickness: 16
+  grit: 18
+  reasoning: 10
+  savvy: 11
+  flair: 14
+weapon:
+  - id: rebar_club
+    weight: 3
+  - id: spiked_knuckles
+    weight: 2
+armor:
+  - id: kevlar_vest
+    weight: 3
+taunts:
+  - "The stage belongs to Just Clownin'. Always has."
+  - "You picked the wrong clown to fight."
+  - "Every night ends the same. With us."

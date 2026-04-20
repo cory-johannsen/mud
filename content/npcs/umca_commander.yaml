@@ -1,0 +1,34 @@
+id: umca_commander
+name: "The UMCA Commander"
+description: >
+  The supreme commander of The Unwoke MAGA Clown Army, who runs operations from
+  The War Tent with military discipline and a face painted in red-white-and-blue
+  greasepaint.
+level: 60
+max_hp: 2430
+tier: boss
+ac: 27
+faction_id: unwoke_maga_clown_army
+ai_domain: territory_patrol
+respawn_delay: "72h"
+rob_multiplier: 2.0
+awareness: 12
+abilities:
+  brutality: 22
+  quickness: 16
+  grit: 22
+  reasoning: 18
+  savvy: 16
+  flair: 12
+weapon:
+  - id: assault_rifle
+    weight: 3
+  - id: combat_knife
+    weight: 2
+armor:
+  - id: tactical_vest
+    weight: 3
+taunts:
+  - "UMCA has never been defeated. Today is no exception."
+  - "Order. Discipline. Victory. In that order."
+  - "The movement doesn't stop for one lost fight."

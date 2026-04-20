@@ -1,0 +1,29 @@
+id: umca_merchant
+name: "UMCA Commissary Officer"
+description: A non-combat UMCA member managing the commissary and selling faction-exclusive supplies to allied visitors.
+npc_type: merchant
+type: human
+level: 48
+max_hp: 200
+ac: 11
+disposition: friendly
+faction_id: unwoke_maga_clown_army
+respawn_delay: "0s"
+abilities:
+  brutality: 12
+  quickness: 11
+  grit: 14
+  reasoning: 14
+  savvy: 14
+  flair: 10
+merchant:
+  merchant_type: general
+  sell_margin: 1.30
+  buy_margin: 0.35
+  budget: 1000
+  inventory: []
+  replenish_rate:
+    min_hours: 12
+    max_hours: 24
+    stock_refill: 1
+    budget_refill: 200

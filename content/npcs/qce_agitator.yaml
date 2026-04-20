@@ -1,0 +1,30 @@
+id: qce_agitator
+name: "QCE Agitator"
+description: A fast-moving fighter from The Queer Clowning Experience, maximizing disruption and harassment over raw power.
+level: 46
+max_hp: 528
+ac: 21
+faction_id: queer_clowning_experience
+ai_domain: clown_faction_combat
+respawn_delay: "10m"
+rob_multiplier: 1.5
+awareness: 9
+abilities:
+  brutality: 15
+  quickness: 20
+  grit: 16
+  reasoning: 12
+  savvy: 14
+  flair: 18
+weapon:
+  - id: cheap_blade
+    weight: 3
+  - id: spiked_knuckles
+    weight: 2
+armor:
+  - id: leather_jacket
+    weight: 3
+taunts:
+  - "The rainbow flag flies over this stage."
+  - "You can't suppress what's already liberated."
+  - "QCE doesn't negotiate."

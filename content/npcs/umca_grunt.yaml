@@ -1,0 +1,30 @@
+id: umca_grunt
+name: "UMCA Grunt"
+description: A rank-and-file soldier of The Unwoke MAGA Clown Army, armed with ranged weapons and unwavering conviction.
+level: 46
+max_hp: 528
+ac: 21
+faction_id: unwoke_maga_clown_army
+ai_domain: clown_faction_combat
+respawn_delay: "10m"
+rob_multiplier: 1.5
+awareness: 8
+abilities:
+  brutality: 17
+  quickness: 16
+  grit: 18
+  reasoning: 10
+  savvy: 11
+  flair: 10
+weapon:
+  - id: assault_rifle
+    weight: 3
+  - id: combat_knife
+    weight: 1
+armor:
+  - id: kevlar_vest
+    weight: 3
+taunts:
+  - "This is MAGA territory. Back off."
+  - "We don't clown around. Much."
+  - "UMCA never retreats."
