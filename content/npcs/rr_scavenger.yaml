@@ -1,9 +1,9 @@
 id: rr_scavenger
 name: Ridge Scavenger
 description: A survivor who's picked over every scrap of Rustbucket Ridge twice over. Desperate and fast with a blade.
-level: 20
-max_hp: 160
-ac: 18
+level: 2
+max_hp: 18
+ac: 13
 rob_multiplier: 1.2
 awareness: 5
 ai_domain: ganger_npc_combat
