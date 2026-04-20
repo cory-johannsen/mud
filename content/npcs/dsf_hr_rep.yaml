@@ -6,7 +6,7 @@ description: >
   your threat assessment to the onboarding checklist.
 level: 31
 max_hp: 300
-ac: 22
+ac: 19
 rob_multiplier: 1.3
 awareness: 10
 faction_id: dick_sucking_factory
