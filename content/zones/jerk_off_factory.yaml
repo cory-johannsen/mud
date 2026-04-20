@@ -1,0 +1,262 @@
+zone:
+  id: jerk_off_factory
+  danger_level: dangerous
+  min_level: 25
+  max_level: 35
+  world_x: 3
+  world_y: 2
+  name: The Jerk Off Factory
+  description: >
+    A post-collapse industrial facility that has achieved perfect
+    operational efficiency by eliminating everything that interfered
+    with it, including mercy. The JOF runs on metrics, targets, and
+    an unshakeable belief that every problem is a process problem.
+    The floors are clean. The lines are straight. The body count is
+    within acceptable parameters.
+  start_room: jof_lobby
+  rooms:
+  - id: jof_lobby
+    title: Lobby
+    danger_level: dangerous
+    description: >
+      The lobby's visitor management system is operational. The system
+      now includes a weapons check, a threat assessment, and an
+      efficiency rating for the check-in process itself. You have been
+      assessed as below standard. The consultants at the desk have
+      been notified.
+    exits:
+    - direction: west
+      target: sei_pipe_yard
+      zone: se_industrial
+    - direction: east
+      target: jof_cubicle_farm
+    - direction: south
+      target: dmz_east_gate
+      zone: the_dmz
+    map_x: 0
+    map_y: 0
+    spawns:
+    - template: jof_efficiency_consultant
+      count: 2
+      respawn_after: 5m
+    equipment:
+    - item_id: zone_map
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      script: zone_map_use
+      description: Zone Map
+
+  - id: jof_break_room
+    title: Break Room
+    danger_level: safe
+    description: >
+      The JOF break room operates on a scheduled rotation. Breaks are
+      twelve minutes. The coffee is measured to the milliliter. The
+      vending machine has been restocked with items approved by the
+      nutrition optimization committee. Someone has written "HELP" on
+      the whiteboard. It has been there for eight months.
+    exits:
+    - direction: east
+      target: jof_lobby
+    map_x: -2
+    map_y: 0
+    spawns:
+    - template: jerk_off_factory_quest_giver
+      count: 1
+      respawn_after: 0s
+    - template: jerk_off_factory_merchant
+      count: 1
+      respawn_after: 0s
+    - template: jerk_off_factory_healer
+      count: 1
+      respawn_after: 0s
+    - template: jerk_off_factory_job_trainer
+      count: 1
+      respawn_after: 0s
+    - template: jerk_off_factory_banker
+      count: 1
+      respawn_after: 0s
+
+  - id: jof_cubicle_farm
+    title: Cubicle Farm
+    danger_level: dangerous
+    description: >
+      A grid of cubicles maintained with geometric precision. Each
+      workstation is identical. Each occupant is armed. The motivational
+      posters have been updated — "EFFICIENCY IS SURVIVAL" and "YOUR
+      PERFORMANCE IS BEING MONITORED. SO ARE YOU." Consultants track
+      your movement through the farm with clipboards and rifles.
+    exits:
+    - direction: west
+      target: jof_lobby
+    - direction: east
+      target: jof_efficiency_floor
+    - direction: north
+      target: jof_meeting_room
+    - direction: south
+      target: jof_qa_dept
+    map_x: 2
+    map_y: 0
+    spawns:
+    - template: jof_efficiency_consultant
+      count: 2
+      respawn_after: 5m
+    - template: jof_qa_officer
+      count: 1
+      respawn_after: 8m
+
+  - id: jof_efficiency_floor
+    title: Efficiency Floor
+    danger_level: dangerous
+    description: >
+      The production floor runs on a six-sigma process that has been
+      updated for current operational requirements. Every motion is
+      optimized. Every second is tracked. Regional liaisons move
+      between stations with the controlled urgency of people who have
+      internalized the stopwatch as a worldview.
+    exits:
+    - direction: west
+      target: jof_cubicle_farm
+    - direction: east
+      target: jof_rd_lab
+    - direction: north
+      target: jof_supply_closet
+    map_x: 4
+    map_y: 0
+    spawns:
+    - template: jof_regional_liaison
+      count: 2
+      respawn_after: 5m
+    - template: jof_efficiency_consultant
+      count: 1
+      respawn_after: 5m
+
+  - id: jof_rd_lab
+    title: R&D Lab
+    danger_level: dangerous
+    description: >
+      Research and Development has pivoted. The whiteboards still have
+      equations on them. The equations have changed. Crystal charging
+      research dominates the back wall in dense notation that suggests
+      someone very smart is working on something you do not want to
+      understand. The researchers are armed.
+    exits:
+    - direction: west
+      target: jof_efficiency_floor
+    - direction: north
+      target: jof_board_room
+    map_x: 6
+    map_y: 0
+    spawns:
+    - template: jof_qa_officer
+      count: 2
+      respawn_after: 8m
+    - template: jof_regional_liaison
+      count: 1
+      respawn_after: 5m
+
+  - id: jof_supply_closet
+    title: Supply Closet
+    danger_level: all_out_war
+    description: >
+      The supply closet is labeled SUPPLY CLOSET. It is not a supply
+      closet. The regional liaisons use it for ambushes and consider
+      it a highly efficient use of available real estate. The shelves
+      have been cleared to make room for the ambush. There is one
+      shelf left. It holds spare clipboards.
+    exits:
+    - direction: south
+      target: jof_efficiency_floor
+    map_x: 4
+    map_y: 2
+    spawns:
+    - template: jof_regional_liaison
+      count: 3
+      respawn_after: 5m
+
+  - id: jof_meeting_room
+    title: Meeting Room
+    danger_level: dangerous
+    description: >
+      The meeting room has a table, chairs, a whiteboard, and a
+      standing agenda that has not changed since the collapse. The
+      agenda items are: objectives, blockers, and escalations. You
+      are currently on the agenda under escalations.
+    exits:
+    - direction: south
+      target: jof_cubicle_farm
+    - direction: east
+      target: jof_board_room
+    map_x: 2
+    map_y: 2
+
+  - id: jof_qa_dept
+    title: Quality Assurance
+    danger_level: all_out_war
+    description: >
+      QA occupies a fortified section of the factory floor. Every
+      product and every person entering this section is tested. The
+      testing process has a zero percent false-positive rate and a
+      100 percent resolution rate. Officers process assessments with
+      thoroughness and automatic weapons.
+    exits:
+    - direction: north
+      target: jof_cubicle_farm
+    - direction: east
+      target: jof_crystals_office
+    map_x: 2
+    map_y: -2
+    spawns:
+    - template: jof_qa_officer
+      count: 3
+      respawn_after: 8m
+
+  - id: jof_board_room
+    title: Board Room
+    danger_level: all_out_war
+    description: >
+      The board room table seats twenty. Ten seats are filled. The
+      other ten belonged to regional leads whose regions no longer
+      exist. Their nameplates remain. The board meeting is in session.
+      It has been in session since 2021. The agenda item is you.
+    exits:
+    - direction: west
+      target: jof_meeting_room
+    - direction: south
+      target: jof_crystals_office
+    map_x: 6
+    map_y: 2
+    spawns:
+    - template: jof_regional_liaison
+      count: 2
+      respawn_after: 5m
+    - template: jof_qa_officer
+      count: 1
+      respawn_after: 8m
+
+  - id: jof_crystals_office
+    title: "Crystal's Office"
+    danger_level: all_out_war
+    core: true
+    boss_room: true
+    description: >
+      Joe Crystal's office contains a desk, a chair, a stopwatch, and
+      nothing that does not serve a purpose. The stopwatch is running.
+      It has been running since he clocked in on January 14th, 2019.
+      Joe is standing when you enter. He was expecting you at 14:32.
+      It is 14:34. He has already noted the inefficiency.
+    exits:
+    - direction: north
+      target: jof_board_room
+    - direction: west
+      target: jof_qa_dept
+    map_x: 6
+    map_y: -2
+    spawns:
+    - template: joe_crystal
+      count: 1
+      respawn_after: 24h
+    - template: jof_qa_officer
+      count: 1
+      respawn_after: 8m
