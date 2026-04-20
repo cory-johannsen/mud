@@ -5,9 +5,11 @@ import { LoginPage } from './pages/LoginPage'
 import { CharactersPage } from './pages/CharactersPage'
 import { GamePage } from './pages/GamePage'
 import { AdminPage } from './pages/AdminPage'
+import { AssetPackProvider } from './AssetPackContext'
 
 export default function App() {
   return (
+    <AssetPackProvider>
     <BrowserRouter>
       <AuthProvider>
         <Routes>
@@ -40,5 +42,6 @@ export default function App() {
         </Routes>
       </AuthProvider>
     </BrowserRouter>
+    </AssetPackProvider>
   )
 }

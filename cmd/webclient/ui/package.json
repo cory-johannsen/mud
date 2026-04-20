@@ -13,7 +13,9 @@
   "dependencies": {
     "@bufbuild/protobuf": "^2.2.2",
     "@connectrpc/connect": "^2.0.0",
+    "fflate": "^0.8.2",
     "jwt-decode": "^4.0.0",
+    "pixi.js": "^8.18.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-resizable-panels": "^4.9.0",
