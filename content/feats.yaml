@@ -87,7 +87,7 @@ feats:
     pf2e: canny_acumen
     active: false
     activate_text: ""
-    description: "Increase your proficiency rank in Fortitude, Reflex, Will, or Perception."
+    description: "Harden a weak point; increase your proficiency rank in Toughness, Hustle, or Savvy saves."
 
   - id: light_step
     name: Light Step
