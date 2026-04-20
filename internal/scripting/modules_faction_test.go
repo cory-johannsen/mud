@@ -51,6 +51,45 @@ end
 	assert.EqualValues(t, 1, result, "should return exactly 1 faction enemy (the QCE NPC)")
 }
 
+// TestGetFactionEnemies_AlreadyInCombatStillIncluded verifies that a hostile-faction
+// combatant already in combat with uid is still returned (REQ-CCF-2c).
+func TestGetFactionEnemies_AlreadyInCombatStillIncluded(t *testing.T) {
+	mgr, _ := newTestManager(t)
+
+	actorUID := "jc-1"
+	qceUID := "qce-1"
+
+	mgr.GetEntityRoom = func(uid string) string { return "room-stage" }
+	mgr.GetCombatantsInRoom = func(roomID string) []*scripting.CombatantInfo {
+		return []*scripting.CombatantInfo{
+			{UID: actorUID, Kind: "npc", HP: 200, MaxHP: 546, FactionID: "just_clownin"},
+			{UID: qceUID, Kind: "npc", HP: 100, MaxHP: 528, FactionID: "queer_clowning_experience"},
+		}
+	}
+	mgr.GetFactionHostiles = func(factionID string) []string {
+		if factionID == "just_clownin" {
+			return []string{"queer_clowning_experience"}
+		}
+		return nil
+	}
+
+	luaSrc := `
+function count_faction_enemies(uid)
+  local enemies = engine.combat.get_faction_enemies(uid)
+  local count = 0
+  for _ in pairs(enemies) do count = count + 1 end
+  return count
+end
+`
+	dir := writeTempLua(t, "faction_already_in_combat_test.lua", luaSrc)
+	zoneID := "modtest_faction_" + t.Name()
+	require.NoError(t, mgr.LoadZone(zoneID, dir, 0))
+
+	result, err := mgr.CallHook(zoneID, "count_faction_enemies", lua.LString(actorUID))
+	require.NoError(t, err)
+	assert.EqualValues(t, 1, result, "hostile already in combat must still appear in get_faction_enemies")
+}
+
 // TestGetFactionEnemies_NoFactionReturnsEmpty verifies that an NPC with no faction
 // always returns an empty table (REQ-CCF-2b).
 func TestGetFactionEnemies_NoFactionReturnsEmpty(t *testing.T) {
