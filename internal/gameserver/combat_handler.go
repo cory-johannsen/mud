@@ -4206,6 +4206,7 @@ func coverObjectsForRoom(room *world.Room) []*gamev1.CoverObjectPosition {
 		y := yStart[i%len(yStart)]
 		positions = append(positions, &gamev1.CoverObjectPosition{
 			ItemId:    eq.ItemID,
+			Name:      eq.Description,
 			CoverTier: eq.CoverTier,
 			X:         int32(x),
 			Y:         int32(y),

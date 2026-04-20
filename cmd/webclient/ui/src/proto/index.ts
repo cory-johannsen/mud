@@ -617,6 +617,16 @@ export interface CombatEvent {
   flanking?: boolean
 }
 
+export interface CoverObjectPosition {
+  itemId?: string
+  item_id?: string
+  name?: string
+  x?: number
+  y?: number
+  coverTier?: string
+  cover_tier?: string
+}
+
 export interface RoundStartEvent {
   round?: number
   actionsPerTurn?: number
@@ -629,6 +639,8 @@ export interface RoundStartEvent {
   grid_width?: number
   gridHeight?: number
   grid_height?: number
+  coverObjects?: CoverObjectPosition[]
+  cover_objects?: CoverObjectPosition[]
 }
 
 export interface RoundEndEvent {

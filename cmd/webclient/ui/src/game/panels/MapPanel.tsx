@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { useGame } from '../GameContext'
-import type { MapTile } from '../../proto'
+import type { MapTile, CoverObjectPosition } from '../../proto'
 import { RoomTooltip } from '../RoomTooltip'
 import { ZoneMapSvg, REFERENCE_W } from '../ZoneMapSvg'
 import { WorldMapSvg } from '../WorldMapSvg'
@@ -59,6 +59,12 @@ export function cellMoveCost(
   return 0
 }
 
+const COVER_TIER_COLORS: Record<string, string> = {
+  lesser: '#3a2a10',
+  standard: '#4a3218',
+  greater: '#5c3e1e',
+}
+
 function renderBattleGrid(
   combatPositions: Record<string, { x: number; y: number }>,
   playerName: string,
@@ -75,6 +81,7 @@ function renderBattleGrid(
   playerY: number,
   strideCells: number,
   movementRemaining: number,
+  coverObjects: CoverObjectPosition[],
 ): JSX.Element {
   const rawCell = Math.floor(320 / Math.max(gridWidth, gridHeight))
   const CELL_PX = Math.max(12, Math.min(32, rawCell))
@@ -84,14 +91,23 @@ function renderBattleGrid(
     occupants[`${pos.x},${pos.y}`] = name
   }
 
+  const coverMap: Record<string, CoverObjectPosition> = {}
+  for (const co of coverObjects) {
+    const cx = co.x ?? 0
+    const cy = co.y ?? 0
+    coverMap[`${cx},${cy}`] = co
+  }
+
   const cells: JSX.Element[] = []
   for (let y = 0; y < gridHeight; y++) {
     for (let x = 0; x < gridWidth; x++) {
       const name = occupants[`${x},${y}`] ?? ''
       const isPlayer = name === playerName
       const isEnemy = name !== '' && !isPlayer
+      const cover = coverMap[`${x},${y}`]
+      const isCover = cover !== undefined && name === ''
 
-      const moveCost = (name === '' && playerX >= 0)
+      const moveCost = (name === '' && !isCover && playerX >= 0)
         ? cellMoveCost(playerX, playerY, x, y, strideCells, movementRemaining)
         : 0
 
@@ -100,6 +116,9 @@ function renderBattleGrid(
         bg = '#1a3a6b'
       } else if (isEnemy) {
         bg = '#6b1a1a'
+      } else if (isCover) {
+        const tier = cover.coverTier ?? cover.cover_tier ?? 'lesser'
+        bg = COVER_TIER_COLORS[tier] ?? COVER_TIER_COLORS.lesser
       } else if (moveCost === 1) {
         bg = '#0d3b0d'
       } else if (moveCost === 2) {
@@ -115,10 +134,24 @@ function renderBattleGrid(
 
       const cursor = moveCost > 0 || isEnemy ? 'pointer' : 'default'
 
-      const token = name ? name[0].toUpperCase() : ''
+      let token: string
+      if (name) {
+        token = name[0].toUpperCase()
+      } else if (isCover) {
+        const tier = cover.coverTier ?? cover.cover_tier ?? 'lesser'
+        token = tier === 'greater' ? '▓' : tier === 'standard' ? '▒' : '░'
+      } else {
+        token = ''
+      }
+
+      const coverTitle = isCover
+        ? `${cover.name ?? cover.itemId ?? cover.item_id ?? 'Cover'} (${cover.coverTier ?? cover.cover_tier ?? 'lesser'})`
+        : undefined
+
       cells.push(
         <div
           key={`${x},${y}`}
+          title={coverTitle}
           style={{
             width: CELL_PX,
             height: CELL_PX,
@@ -128,7 +161,7 @@ function renderBattleGrid(
             alignItems: 'center',
             justifyContent: 'center',
             fontSize: '0.75rem',
-            color: isPlayer ? '#7bb8ff' : isEnemy ? '#ff7b7b' : '#555',
+            color: isPlayer ? '#7bb8ff' : isEnemy ? '#ff7b7b' : isCover ? '#c8a060' : '#555',
             fontWeight: 'bold',
             cursor,
             flexShrink: 0,
@@ -308,6 +341,7 @@ export function MapPanel() {
               playerPos?.y ?? -1,
               strideCells,
               movementRemaining,
+              state.combatRound?.coverObjects ?? state.combatRound?.cover_objects ?? [],
             )}
             {combatHoverName && (
               <RoomTooltip
