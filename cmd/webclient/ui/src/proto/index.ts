@@ -403,6 +403,7 @@ export interface MapTile {
   zone_exits?: ZoneExitInfo[]
   sameZoneExitTargets?: SameZoneExitTarget[]
   same_zone_exit_targets?: SameZoneExitTarget[]
+  explored?: boolean  // true if the player has physically entered this room (REQ-CNT-1)
 }
 
 export interface WorldZoneTile {
@@ -426,6 +427,11 @@ export interface MapResponse {
   tiles?: MapTile[]
   worldTiles?: WorldZoneTile[]
   zoneName?: string
+}
+
+export interface GameConfig {
+  autoNavStepMs?: number
+  auto_nav_step_ms?: number
 }
 
 export interface HealerView {
@@ -787,4 +793,5 @@ export type ServerEvent =
   | { type: 'QuestGiverView'; payload: QuestGiverView }
   | { type: 'QuestLogView'; payload: QuestLogView }
   | { type: 'QuestCompleteEvent'; payload: QuestCompleteEvent }
+  | { type: 'GameConfig'; payload: GameConfig }
   | { type: string; payload: unknown }
