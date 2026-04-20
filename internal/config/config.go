@@ -105,6 +105,12 @@ type WeatherConfig struct {
 	ContentFile string `mapstructure:"content_file"`
 }
 
+// HotbarConfig holds hotbar layout settings.
+type HotbarConfig struct {
+	// MaxHotbars is the maximum number of hotbars a player may configure.
+	MaxHotbars int `mapstructure:"max_hotbars"`
+}
+
 // WebConfig holds HTTP web server settings.
 type WebConfig struct {
 	// Port is the TCP port for the web HTTP server. Default: 0 (disabled). Set to 0 to disable.
@@ -140,6 +146,7 @@ type Config struct {
 	GameServer GameServerConfig `mapstructure:"gameserver"`
 	Web        WebConfig        `mapstructure:"web"`
 	Weather    WeatherConfig    `mapstructure:"weather"`
+	Hotbar     HotbarConfig     `mapstructure:"hotbar"`
 }
 
 // Validate checks all configuration invariants.
@@ -375,4 +382,6 @@ func setDefaults(v *viper.Viper) {
 
 	v.SetDefault("weather.chance_per_tick", 0.05)
 	v.SetDefault("weather.content_file", "content/weather.yaml")
+
+	v.SetDefault("hotbar.max_hotbars", 4)
 }
