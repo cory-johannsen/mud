@@ -1,8 +1,8 @@
 zone:
   id: aloha
   danger_level: safe
-  min_level: 2
-  max_level: 5
+  min_level: 16
+  max_level: 22
   world_x: -4
   world_y: 2
   script_dir: content/scripts/zones/aloha
@@ -525,6 +525,7 @@ zone:
   - id: aloha_scrap_yard
     title: Scrap Yard
     boss_room: true
+    danger_level: dangerous
     description: 'Mountains of twisted metal, shattered appliances, and stripped
 
       vehicles fill an open lot surrounded by razor wire. Scavengers

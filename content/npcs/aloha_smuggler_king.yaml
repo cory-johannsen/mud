@@ -5,10 +5,33 @@ description: >
   trade through a combination of cunning, ruthlessness, and an uncanny ability
   to make problems disappear. He operates from the scrap yard's depths, surrounded
   by loyal enforcers and crates of contraband. His knife is always within reach.
-level: 5
-max_hp: 72
-ac: 17
+level: 22
+max_hp: 546
+tier: boss
+ac: 23
 rob_multiplier: 2.0
+boss_abilities:
+  - id: smugglers_gambit
+    name: "Smuggler's Gambit"
+    trigger: round_start
+    trigger_value: 0
+    cooldown: "3m"
+    effect:
+      aoe_condition: slowed
+  - id: contraband_barrage
+    name: "Contraband Barrage"
+    trigger: hp_pct_below
+    trigger_value: 75
+    cooldown: "4m"
+    effect:
+      aoe_damage_expr: "3d10"
+  - id: kings_escape
+    name: "King's Escape"
+    trigger: hp_pct_below
+    trigger_value: 50
+    cooldown: "5m"
+    effect:
+      heal_pct: 25
 awareness: 10
 ai_domain: aloha_smuggler_king_combat
 respawn_delay: "10m"

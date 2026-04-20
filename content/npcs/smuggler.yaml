@@ -1,9 +1,9 @@
 id: smuggler
 name: Smuggler
 description: A shifty figure in a long coat, pockets bulging with goods of questionable origin.
-level: 2
-max_hp: 20
-ac: 14
+level: 16
+max_hp: 120
+ac: 17
 awareness: 7
 ai_domain: scavenger_patrol
 respawn_delay: "5m"
