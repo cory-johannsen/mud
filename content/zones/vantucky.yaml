@@ -1,8 +1,8 @@
 zone:
   id: vantucky
   danger_level: sketchy
-  min_level: 1
-  max_level: 7
+  min_level: 16
+  max_level: 25
   world_x: 2
   world_y: -5
   script_dir: content/scripts/zones/vantucky
@@ -819,6 +819,7 @@ zone:
   - id: vantucky_ammo_depot
     title: Ammo Depot
     boss_room: true
+    danger_level: dangerous
     description: 'A fortified storage building behind the shooting range serves as the
 
       militia''s ammunition depot. The cinderblock walls are reinforced with

@@ -6,9 +6,10 @@ description: >
   Pegboard lines the whole left side — helmets, vests, gloves, boots, every piece
   tagged with condition and price. She knows every dent. She'll sell you what
   stops bullets, not what looks good.
-max_hp: 22
-ac: 12
-level: 3
+max_hp: 160
+ac: 18
+level: 20
+rob_multiplier: 1.2
 awareness: 4
 personality: neutral
 merchant:
