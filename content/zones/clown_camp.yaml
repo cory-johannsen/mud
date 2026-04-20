@@ -1,7 +1,7 @@
 zone:
   id: clown_camp
   danger_level: dangerous
-  min_level: 2
+  min_level: 45
   max_level: 60
   world_x: 1
   world_y: -1
@@ -22,7 +22,7 @@ zone:
     cooldown_minutes: 5
   rooms:
   - id: cc_front_entrance
-    danger_level: sketchy
+    danger_level: dangerous
     title: Front Entrance
     description: The circus lot entrance is marked by a rusted chain-link gate hung with deflated balloons
       and waterlogged banners. A hand-painted sign reads WELCOME TO THE SHOW in letters that have bled

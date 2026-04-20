@@ -2,11 +2,12 @@ id: clown_mime
 faction_id: just_clownin
 name: Clown Mime
 description: A silent, white-faced figure that moves with unsettling grace and speed.
-level: 2
-max_hp: 22
-ac: 12
+level: 45
+max_hp: 510
+ac: 21
 awareness: 7
 disposition: hostile
+rob_multiplier: 1.5
 abilities:
   brutality: 10
   quickness: 14

@@ -2,11 +2,12 @@ id: clown
 faction_id: just_clownin
 name: Clown
 description: A face-painted horror in a tattered costume, grinning with too many teeth.
-level: 3
-max_hp: 30
-ac: 13
+level: 48
+max_hp: 564
+ac: 21
 awareness: 6
 disposition: hostile
+rob_multiplier: 1.5
 abilities:
   brutality: 13
   quickness: 11

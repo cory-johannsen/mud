@@ -2,9 +2,10 @@ id: big_top
 faction_id: just_clownin
 name: "Big Top"
 description: The ringleader. A towering nightmare of paint and polyester, wielding a comically oversized mallet that is not at all funny.
-level: 6
-max_hp: 80
-ac: 16
+level: 60
+max_hp: 2430
+ac: 27
+rob_multiplier: 2.0
 awareness: 8
 disposition: hostile
 tier: boss
@@ -15,6 +16,28 @@ abilities:
   reasoning: 10
   savvy: 10
   flair: 18
+boss_abilities:
+  - id: big_top_spectacle
+    name: "Big Top Spectacle"
+    trigger: round_start
+    trigger_value: 0
+    cooldown: "3m"
+    effect:
+      aoe_condition: nausea
+  - id: clown_carnage
+    name: "Clown Carnage"
+    trigger: hp_pct_below
+    trigger_value: 75
+    cooldown: "4m"
+    effect:
+      aoe_damage_expr: "8d10"
+  - id: big_tops_encore
+    name: "Big Top's Encore"
+    trigger: hp_pct_below
+    trigger_value: 50
+    cooldown: "6m"
+    effect:
+      heal_pct: 25
 loot:
   currency:
     min: 50

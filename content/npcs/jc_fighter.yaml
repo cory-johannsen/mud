@@ -2,8 +2,8 @@ id: jc_fighter
 name: "Just Clownin' Fighter"
 description: A mid-tier goon of the Just Clownin' faction, armed with improvised melee weapons and a deeply unnerving paint-streaked grin.
 level: 47
-max_hp: 546
-ac: 21
+max_hp: 819
+ac: 23
 tier: elite
 faction_id: just_clownin
 ai_domain: clown_faction_combat

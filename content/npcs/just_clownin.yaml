@@ -7,10 +7,10 @@ description: >
   and grime, a tailcoat stitched from a dozen different fabrics, a top hat
   crowned with a severed rubber hand. He doesn't just perform violence — he
   choreographs it. Every clown in the camp takes their cues from him.
-level: 7
-max_hp: 90
-ac: 15
-rob_multiplier: 2.0
+level: 53
+max_hp: 663
+ac: 21
+rob_multiplier: 1.5
 awareness: 10
 respawn_delay: "10m"
 disposition: hostile
