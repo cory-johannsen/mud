@@ -1,0 +1,32 @@
+id: unwoke_maga_clown_army
+name: "The Unwoke MAGA Clown Army"
+zone_id: clown_camp
+hostile_factions:
+  - just_clownin
+  - queer_clowning_experience
+tiers:
+  - id: curious
+    label: "Curious"
+    min_rep: 0
+    price_discount: 0.0
+  - id: initiate
+    label: "Initiate"
+    min_rep: 100
+    price_discount: 0.05
+  - id: clown
+    label: "Clown"
+    min_rep: 500
+    price_discount: 0.10
+  - id: ringleader
+    label: "Ringleader"
+    min_rep: 2000
+    price_discount: 0.20
+rep_sources:
+  - source: kill_just_clownin
+    rep_per_level: 8
+    cap_per_kill: 40
+    cap_below_tier: clown
+  - source: kill_queer_clowning_experience
+    rep_per_level: 8
+    cap_per_kill: 40
+    cap_below_tier: clown
