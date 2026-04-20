@@ -354,6 +354,9 @@ type GameServiceServer struct {
 	// maxHotbars is the maximum number of hotbar pages a player may configure.
 	// Defaults to 4 when not set via SetMaxHotbars. REQ-HB-2.
 	maxHotbars int
+	// autoNavStepMs is the delay in milliseconds between auto-navigation steps sent to the web client.
+	// Defaults to 1000 when not set via SetAutoNavStepMs. (REQ-CNT-2)
+	autoNavStepMs int
 }
 
 // applyArmorTrainingProficiency applies the armor_training feat choice as a real proficiency
@@ -679,6 +682,9 @@ func NewGameServiceServer(
 	if s.maxHotbars <= 0 {
 		s.maxHotbars = 4
 	}
+	if s.autoNavStepMs < 100 {
+		s.autoNavStepMs = 1000
+	}
 	return s
 }
 
@@ -823,6 +829,14 @@ func (s *GameServiceServer) SetCharSaver(cs CharacterSaver) {
 func (s *GameServiceServer) SetMaxHotbars(n int) {
 	if n > 0 {
 		s.maxHotbars = n
+	}
+}
+
+// SetAutoNavStepMs sets the auto-navigation step delay in milliseconds.
+// Precondition: ms must be >= 100. If ms < 100, it is clamped to 1000.
+func (s *GameServiceServer) SetAutoNavStepMs(ms int) {
+	if ms >= 100 {
+		s.autoNavStepMs = ms
 	}
 }
 
@@ -2068,6 +2082,17 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 	// REQ-HB-12: web client renders the hotbar row on receipt of this event.
 	if err := stream.Send(s.hotbarUpdateEvent(sess)); err != nil {
 		s.logger.Warn("failed to send initial hotbar update", zap.Error(err))
+	}
+
+	// Send game config so the web client receives server-side configuration. (REQ-CNT-2)
+	if err := stream.Send(&gamev1.ServerEvent{
+		Payload: &gamev1.ServerEvent_GameConfig{
+			GameConfig: &gamev1.GameConfig{
+				AutoNavStepMs: int32(s.autoNavStepMs),
+			},
+		},
+	}); err != nil {
+		s.logger.Warn("failed to send game config", zap.Error(err))
 	}
 
 	// Wrap the stream in a mutex-protected sender so that forwardEvents,
@@ -7346,6 +7371,7 @@ func (s *GameServiceServer) handleMap(uid string, req *gamev1.MapRequest) (*game
 			PoiNpcs:               poiNpcs,
 			ZoneExits:             zoneExits,
 			SameZoneExitTargets:   sameZoneExitTargets,
+			Explored:              sess.ExploredCache[zoneID][roomID],
 		})
 	}
 	return &gamev1.ServerEvent{

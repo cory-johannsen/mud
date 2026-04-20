@@ -756,6 +756,76 @@ func TestHandleMap_ExploredRoom_ShowsDangerAndPOIs(t *testing.T) {
 	require.NotEmpty(t, tile.DangerLevel, "explored room must reveal danger level (BUG-27)")
 }
 
+// TestHandleMap_ExploredTrue verifies that a room in ExploredCache is marked explored=true
+// on the returned MapTile.
+//
+// Precondition: Room is in both AutomapCache and ExploredCache.
+// Postcondition: MapTile.Explored == true.
+func TestHandleMap_ExploredTrue(t *testing.T) {
+	wMgr, sMgr := newWorldAndSessionWithDiscovery("zone1", "room1")
+	sess, ok := sMgr.GetPlayer("uid1")
+	require.True(t, ok)
+	if sess.ExploredCache == nil {
+		sess.ExploredCache = make(map[string]map[string]bool)
+	}
+	sess.ExploredCache["zone1"] = map[string]bool{"room1": true}
+
+	s := &GameServiceServer{sessions: sMgr, world: wMgr}
+	resp, err := s.handleMap("uid1", &gamev1.MapRequest{})
+	require.NoError(t, err)
+	require.Len(t, resp.GetMap().GetTiles(), 1)
+	require.True(t, resp.GetMap().GetTiles()[0].Explored)
+}
+
+// TestHandleMap_ExploredFalse verifies that a room in AutomapCache but NOT ExploredCache
+// is marked explored=false on the returned MapTile.
+//
+// Precondition: Room is in AutomapCache only (discovered via map item, not physically visited).
+// Postcondition: MapTile.Explored == false.
+func TestHandleMap_ExploredFalse(t *testing.T) {
+	wMgr, sMgr := newWorldAndSessionWithDiscovery("zone1", "room1")
+	// ExploredCache intentionally left empty.
+
+	s := &GameServiceServer{sessions: sMgr, world: wMgr}
+	resp, err := s.handleMap("uid1", &gamev1.MapRequest{})
+	require.NoError(t, err)
+	require.Len(t, resp.GetMap().GetTiles(), 1)
+	require.False(t, resp.GetMap().GetTiles()[0].Explored)
+}
+
+// TestProperty_HandleMap_ExploredAlwaysSubsetOfAutomap verifies that every explored room
+// is also in the discovered set (AutomapCache superset invariant).
+//
+// Precondition: ExploredCache is always a subset of AutomapCache.
+// Postcondition: For all tiles, if Explored==true then the room was in AutomapCache.
+func TestProperty_HandleMap_ExploredAlwaysSubsetOfAutomap(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		zoneID := "zone1"
+		roomID := "room1"
+		wMgr, sMgr := newWorldAndSessionWithDiscovery(zoneID, roomID)
+		sess, ok := sMgr.GetPlayer("uid1")
+		require.True(rt, ok)
+
+		isExplored := rapid.Bool().Draw(rt, "isExplored")
+		if isExplored {
+			if sess.ExploredCache == nil {
+				sess.ExploredCache = make(map[string]map[string]bool)
+			}
+			sess.ExploredCache[zoneID] = map[string]bool{roomID: true}
+		}
+
+		s := &GameServiceServer{sessions: sMgr, world: wMgr}
+		resp, err := s.handleMap("uid1", &gamev1.MapRequest{})
+		require.NoError(rt, err)
+		for _, tile := range resp.GetMap().GetTiles() {
+			if tile.Explored {
+				require.True(rt, sess.AutomapCache[zoneID][tile.RoomId],
+					"explored tile must be in AutomapCache")
+			}
+		}
+	})
+}
+
 // TestHandleMap_DangerLevelShownAfterExploring_PreDiscoveredRoom verifies that a room
 // pre-loaded into AutomapCache (e.g. via zone reveal) shows its danger level on the map
 // after the player physically enters it and ExploredCache is updated.

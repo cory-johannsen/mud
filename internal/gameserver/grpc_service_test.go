@@ -202,14 +202,18 @@ func joinWorld(t *testing.T, stream gamev1.GameService_SessionClient, uid, usern
 	})
 	require.NoError(t, err)
 
-	// The server sends exactly two events on join:
+	// The server sends exactly three events on join:
 	//   1. RoomView (initial room state)
 	//   2. HotbarUpdateEvent (initial hotbar state for REQ-HB-12)
-	// Consume both so callers start with a clean stream.
+	//   3. GameConfig (server-side client configuration, REQ-CNT-2)
+	// Consume all three so callers start with a clean stream.
 	resp, err := stream.Recv()
 	require.NoError(t, err)
 	roomView := resp.GetRoomView()
 	require.NotNil(t, roomView, "expected RoomView as first event after join")
+
+	_, err = stream.Recv()
+	require.NoError(t, err)
 
 	_, err = stream.Recv()
 	require.NoError(t, err)

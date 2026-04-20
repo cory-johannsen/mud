@@ -185,6 +185,11 @@ func main() {
 		app.GRPCService.SetWorldEditor(worldEditor)
 	}
 
+	// Wire auto-navigation step delay from config (REQ-CNT-2).
+	if cfg.GameServer.AutoNavStepMs >= 100 {
+		app.GRPCService.SetAutoNavStepMs(cfg.GameServer.AutoNavStepMs)
+	}
+
 	// Start game clock.
 	stopClock := gameClock.Start()
 	defer stopClock()

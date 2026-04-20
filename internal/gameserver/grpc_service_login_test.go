@@ -271,6 +271,7 @@ func TestSession_Cleanup_SavesWeaponPresetsAndEquipment(t *testing.T) {
 
 	joinWorldWithCharID(t, stream, "u1", "Alice", 42)
 	drainHotbarEvent(t, stream)
+	drainGameConfigEvent(t, stream)
 
 	// Quit to trigger cleanupPlayer via the deferred call in Session.
 	err = stream.Send(&gamev1.ClientMessage{
@@ -905,6 +906,17 @@ func drainHotbarEvent(t *testing.T, stream gamev1.GameService_SessionClient) {
 	resp, err := stream.Recv()
 	require.NoError(t, err, "expected HotbarUpdateEvent after RoomView")
 	require.NotNil(t, resp.GetHotbarUpdate(), "expected HotbarUpdateEvent after RoomView; got other event type")
+}
+
+// drainGameConfigEvent receives one event from stream and asserts it is a GameConfig event.
+//
+// Precondition: stream must have a GameConfig event pending as the next message (REQ-CNT-2).
+// Postcondition: The GameConfig event is consumed; t.Fatal is called if it is not present.
+func drainGameConfigEvent(t *testing.T, stream gamev1.GameService_SessionClient) {
+	t.Helper()
+	resp, err := stream.Recv()
+	require.NoError(t, err, "expected GameConfig after HotbarUpdateEvent")
+	require.NotNil(t, resp.GetGameConfig(), "expected GameConfig after HotbarUpdateEvent; got other event type")
 }
 
 // mockCharSaverWithLoginHotbar embeds mockCharSaverFull and overrides LoadHotbars to return
