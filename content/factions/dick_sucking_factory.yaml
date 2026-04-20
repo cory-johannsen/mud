@@ -1,0 +1,24 @@
+id: dick_sucking_factory
+name: The Dick Sucking Factory
+zone_id: dick_sucking_factory
+hostile_factions:
+  - jerk_off_factory
+tiers:
+  - id: visitor
+    label: "Visitor"
+    min_rep: 0
+    price_discount: 0.0
+  - id: contractor
+    label: "Contractor"
+    min_rep: 10
+    price_discount: 0.05
+  - id: associate
+    label: "Associate"
+    min_rep: 25
+    price_discount: 0.15
+  - id: employee
+    label: "Employee"
+    min_rep: 50
+    price_discount: 0.25
+exclusive_items: []
+gated_rooms: []

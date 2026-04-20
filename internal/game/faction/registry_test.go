@@ -3,9 +3,11 @@ package faction_test
 import (
 	"os"
 	"path/filepath"
+	"runtime"
 	"testing"
 
 	"github.com/cory-johannsen/mud/internal/game/faction"
+	"github.com/stretchr/testify/require"
 )
 
 func writeFactionYAML(t *testing.T, dir, filename, content string) {
@@ -209,4 +211,25 @@ func TestFactionRegistry_Validate_GatedRoomUnownedZone(t *testing.T) {
 	if err := reg.Validate(zoneIDs, roomIDs, itemIDs, roomZoneIDs, zoneOwners); err == nil {
 		t.Fatal("expected error for gated room in zone with no faction owner")
 	}
+}
+
+func TestDSFAndJOFFactionsLoad(t *testing.T) {
+	root := func() string {
+		_, thisFile, _, _ := runtime.Caller(0)
+		dir := filepath.Dir(thisFile)
+		for {
+			if _, err := os.Stat(filepath.Join(dir, "go.mod")); err == nil {
+				return dir
+			}
+			dir = filepath.Dir(dir)
+		}
+	}()
+	reg, err := faction.LoadFactions(filepath.Join(root, "content", "factions"))
+	require.NoError(t, err)
+	dsf, ok := reg["dick_sucking_factory"]
+	require.True(t, ok, "dick_sucking_factory faction must be registered")
+	jof, ok := reg["jerk_off_factory"]
+	require.True(t, ok, "jerk_off_factory faction must be registered")
+	require.Contains(t, dsf.HostileFactions, "jerk_off_factory")
+	require.Contains(t, jof.HostileFactions, "dick_sucking_factory")
 }

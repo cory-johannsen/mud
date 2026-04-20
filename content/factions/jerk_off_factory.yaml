@@ -1,0 +1,24 @@
+id: jerk_off_factory
+name: The Jerk Off Factory
+zone_id: jerk_off_factory
+hostile_factions:
+  - dick_sucking_factory
+tiers:
+  - id: visitor
+    label: "Visitor"
+    min_rep: 0
+    price_discount: 0.0
+  - id: temp
+    label: "Temp Worker"
+    min_rep: 10
+    price_discount: 0.05
+  - id: associate
+    label: "Associate"
+    min_rep: 25
+    price_discount: 0.15
+  - id: full_time
+    label: "Full-Time Employee"
+    min_rep: 50
+    price_discount: 0.25
+exclusive_items: []
+gated_rooms: []
