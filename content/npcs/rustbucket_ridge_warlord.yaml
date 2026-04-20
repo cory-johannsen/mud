@@ -1,0 +1,82 @@
+id: rustbucket_ridge_warlord
+name: Iron Duke Salvage
+description: >
+  The undisputed ruler of Rustbucket Ridge, Iron Duke Salvage built his empire
+  from scrap metal and raw violence. A former heavy equipment operator, he
+  wears a welded suit of industrial plate and swings a pneumatic-assisted
+  maul that can punch through vehicle doors. Every piece of scrap on the ridge
+  passes through his hands. He enforces tribute with methodical brutality
+  and has never lost a territorial dispute — because he doesn't leave
+  survivors to contest the outcome.
+level: 30
+max_hp: 810
+tier: boss
+ac: 24
+rob_multiplier: 2.0
+boss_abilities:
+  - id: ridge_domination
+    name: "Ridge Domination"
+    trigger: round_start
+    trigger_value: 0
+    cooldown: "3m"
+    effect:
+      aoe_condition: frightened
+  - id: scrap_barrage
+    name: "Scrap Barrage"
+    trigger: hp_pct_below
+    trigger_value: 75
+    cooldown: "4m"
+    effect:
+      aoe_damage_expr: "4d10"
+  - id: warlords_iron_will
+    name: "Warlord's Iron Will"
+    trigger: hp_pct_below
+    trigger_value: 50
+    cooldown: "6m"
+    effect:
+      heal_pct: 30
+awareness: 12
+ai_domain: rustbucket_ridge_warlord_combat
+respawn_delay: "15m"
+abilities:
+  brutality: 20
+  quickness: 10
+  grit: 20
+  reasoning: 12
+  savvy: 11
+  flair: 10
+weapon:
+  - id: rebar_club
+    weight: 3
+  - id: steel_pipe
+    weight: 2
+armor:
+  - id: kevlar_vest
+    weight: 3
+  - id: tactical_vest
+    weight: 2
+loot:
+  currency:
+    min: 200
+    max: 500
+  items:
+    - item: scrap_metal
+      chance: 0.8
+      min_qty: 4
+      max_qty: 8
+    - item: medkit
+      chance: 0.5
+      min_qty: 1
+      max_qty: 3
+    - item: kevlar_vest
+      chance: 0.3
+      min_qty: 1
+      max_qty: 1
+taunts:
+  - "The Ridge is mine. Every scrap, every life on it."
+  - "I've crushed harder people than you with one hand."
+  - "Iron Duke doesn't negotiate. Iron Duke eliminates."
+  - "You came for the warlord? Here I am. Enjoy what's left of your life."
+  - "The scrapyard has swallowed entire crews. You're next."
+  - "Every piece of metal on this ridge has my name on it. So do you."
+  - "I built this empire from nothing. I'll add your bones to the foundation."

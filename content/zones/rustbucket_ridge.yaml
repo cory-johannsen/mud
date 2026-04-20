@@ -1,8 +1,8 @@
 zone:
   id: rustbucket_ridge
   danger_level: sketchy
-  min_level: 1
-  max_level: 7
+  min_level: 20
+  max_level: 30
   world_x: 3
   world_y: 0
   script_dir: content/scripts/zones/rustbucket_ridge
@@ -1135,6 +1135,7 @@ zone:
     title: The Slasher's Den
     core: true
     boss_room: true
+    danger_level: dangerous
     description: This trailer belongs to Grit, a former gang leader who's turned Shiv Way into his personal turf. Grit's trailer
       is heavily fortified, with armed guards often lurking outside. It's a hub for illegal dealings, weapon sales, and brawls.
       Inside, the trailer is filled with loot from years of crime, and Grit runs the show with an iron fist.
@@ -1155,6 +1156,9 @@ zone:
     - template: rustbucket_ridge_slasher
       count: 1
       respawn_after: 10m
+    - template: rustbucket_ridge_warlord
+      count: 1
+      respawn_after: 15m
     properties:
       area: shiv_way
     equipment:

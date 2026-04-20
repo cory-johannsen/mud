@@ -1,0 +1,50 @@
+id: rr_field_boss
+name: Ridge Field Boss
+description: A battle-hardened enforcer who patrols the Rustbucket Ridge territories, collecting tribute and eliminating threats to the warlord's grip on the scrapyard empire.
+level: 28
+max_hp: 248
+ac: 19
+rob_multiplier: 1.2
+awareness: 9
+ai_domain: territory_patrol
+respawn_delay: "8m"
+abilities:
+  brutality: 17
+  quickness: 13
+  grit: 17
+  reasoning: 11
+  savvy: 12
+  flair: 9
+weapon:
+  - id: rebar_club
+    weight: 3
+  - id: ganger_pistol
+    weight: 2
+  - id: combat_knife
+    weight: 1
+armor:
+  - id: kevlar_vest
+    weight: 3
+  - id: tactical_vest
+    weight: 2
+loot:
+  currency:
+    min: 80
+    max: 220
+  items:
+    - item: scrap_metal
+      chance: 0.6
+      min_qty: 2
+      max_qty: 4
+    - item: medkit
+      chance: 0.35
+      min_qty: 1
+      max_qty: 2
+taunts:
+  - "Field boss means I'm the last thing standing between you and the warlord."
+  - "The Ridge has eyes everywhere. I'm the fist."
+  - "You wandered into patrol territory. That's a fatal mistake."
+  - "Every inch of this ridge is spoken for. You're standing on my inch."
+  - "I've put down bigger crews than you before lunch."
+  - "The scrapyard remembers everyone who's tried this. None of them left."
+  - "Pay tribute or pay in blood. The Ridge always collects."
