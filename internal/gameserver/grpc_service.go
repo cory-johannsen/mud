@@ -6470,14 +6470,12 @@ func (s *GameServiceServer) handleChar(uid string) (*gamev1.ServerEvent, error) 
 					techDesc := ""
 					techFX := ""
 					techShortName := ""
-					var techLevel int32
 					if s.techRegistry != nil {
 						if def, ok := s.techRegistry.Get(slot.TechID); ok {
 							techName = def.Name
 							techDesc = def.Description
 							techFX = technology.FormatEffectsSummary(def)
 							techShortName = def.ShortName
-							techLevel = int32(def.Level)
 						}
 					}
 					view.PreparedSlots = append(view.PreparedSlots, &gamev1.PreparedSlotView{
@@ -6487,7 +6485,7 @@ func (s *GameServiceServer) handleChar(uid string) (*gamev1.ServerEvent, error) 
 						Description:    techDesc,
 						EffectsSummary: techFX,
 						ShortName:      techShortName,
-						TechLevel:      techLevel,
+						TechLevel:      int32(lvl), // lvl is the slot level (map key), not def.Level
 					})
 				}
 			}
