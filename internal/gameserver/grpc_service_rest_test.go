@@ -329,11 +329,11 @@ func (f *fakeCharSaver) LoadJobs(_ context.Context, _ int64) (map[string]int, st
 }
 func (f *fakeCharSaver) LoadFocusPoints(_ context.Context, _ int64) (int, error) { return 0, nil }
 func (f *fakeCharSaver) SaveFocusPoints(_ context.Context, _ int64, _ int) error { return nil }
-func (f *fakeCharSaver) SaveHotbar(_ context.Context, _ int64, _ [10]session.HotbarSlot) error {
+func (f *fakeCharSaver) SaveHotbars(_ context.Context, _ int64, _ [][10]session.HotbarSlot, _ int) error {
 	return nil
 }
-func (f *fakeCharSaver) LoadHotbar(_ context.Context, _ int64) ([10]session.HotbarSlot, error) {
-	return [10]session.HotbarSlot{}, nil
+func (f *fakeCharSaver) LoadHotbars(_ context.Context, _ int64) ([][10]session.HotbarSlot, int, error) {
+	return [][10]session.HotbarSlot{{}}, 0, nil
 }
 
 // REQ-LR1/LR2 (property): For any CurrentHP in [0, MaxHP], after rest,

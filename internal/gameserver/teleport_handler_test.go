@@ -86,11 +86,11 @@ func (m *mockCharSaver) LoadJobs(_ context.Context, _ int64) (map[string]int, st
 }
 func (m *mockCharSaver) LoadFocusPoints(_ context.Context, _ int64) (int, error) { return 0, nil }
 func (m *mockCharSaver) SaveFocusPoints(_ context.Context, _ int64, _ int) error { return nil }
-func (m *mockCharSaver) SaveHotbar(_ context.Context, _ int64, _ [10]session.HotbarSlot) error {
+func (m *mockCharSaver) SaveHotbars(_ context.Context, _ int64, _ [][10]session.HotbarSlot, _ int) error {
 	return nil
 }
-func (m *mockCharSaver) LoadHotbar(_ context.Context, _ int64) ([10]session.HotbarSlot, error) {
-	return [10]session.HotbarSlot{}, nil
+func (m *mockCharSaver) LoadHotbars(_ context.Context, _ int64) ([][10]session.HotbarSlot, int, error) {
+	return [][10]session.HotbarSlot{{}}, 0, nil
 }
 
 func TestHandleTeleport_AdminSuccess(t *testing.T) {

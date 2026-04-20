@@ -26,11 +26,11 @@ func (f *focusFakeCharSaver) SaveFocusPoints(_ context.Context, characterID int6
 	f.saveFocusPointsCalls = append(f.saveFocusPointsCalls, saveFocusPointsCall{characterID, fp})
 	return nil
 }
-func (f *focusFakeCharSaver) SaveHotbar(_ context.Context, _ int64, _ [10]session.HotbarSlot) error {
+func (f *focusFakeCharSaver) SaveHotbars(_ context.Context, _ int64, _ [][10]session.HotbarSlot, _ int) error {
 	return nil
 }
-func (f *focusFakeCharSaver) LoadHotbar(_ context.Context, _ int64) ([10]session.HotbarSlot, error) {
-	return [10]session.HotbarSlot{}, nil
+func (f *focusFakeCharSaver) LoadHotbars(_ context.Context, _ int64) ([][10]session.HotbarSlot, int, error) {
+	return [][10]session.HotbarSlot{{}}, 0, nil
 }
 
 // fakeInnateRepoFocus is a minimal innate-tech repo stub for FP tests.

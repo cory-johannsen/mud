@@ -86,11 +86,11 @@ func (m *heroPointCharSaver) LoadJobs(_ context.Context, _ int64) (map[string]in
 }
 func (m *heroPointCharSaver) LoadFocusPoints(_ context.Context, _ int64) (int, error) { return 0, nil }
 func (m *heroPointCharSaver) SaveFocusPoints(_ context.Context, _ int64, _ int) error { return nil }
-func (m *heroPointCharSaver) SaveHotbar(_ context.Context, _ int64, _ [10]session.HotbarSlot) error {
+func (m *heroPointCharSaver) SaveHotbars(_ context.Context, _ int64, _ [][10]session.HotbarSlot, _ int) error {
 	return nil
 }
-func (m *heroPointCharSaver) LoadHotbar(_ context.Context, _ int64) ([10]session.HotbarSlot, error) {
-	return [10]session.HotbarSlot{}, nil
+func (m *heroPointCharSaver) LoadHotbars(_ context.Context, _ int64) ([][10]session.HotbarSlot, int, error) {
+	return [][10]session.HotbarSlot{{}}, 0, nil
 }
 
 // TestHandleGrant_XP_LevelUp_AwardsHeroPoint verifies that when granting XP causes

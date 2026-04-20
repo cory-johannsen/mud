@@ -835,11 +835,11 @@ func (r *recordingCharSaver) LoadJobs(_ context.Context, _ int64) (map[string]in
 }
 func (r *recordingCharSaver) LoadFocusPoints(_ context.Context, _ int64) (int, error) { return 0, nil }
 func (r *recordingCharSaver) SaveFocusPoints(_ context.Context, _ int64, _ int) error { return nil }
-func (r *recordingCharSaver) SaveHotbar(_ context.Context, _ int64, _ [10]session.HotbarSlot) error {
+func (r *recordingCharSaver) SaveHotbars(_ context.Context, _ int64, _ [][10]session.HotbarSlot, _ int) error {
 	return nil
 }
-func (r *recordingCharSaver) LoadHotbar(_ context.Context, _ int64) ([10]session.HotbarSlot, error) {
-	return [10]session.HotbarSlot{}, nil
+func (r *recordingCharSaver) LoadHotbars(_ context.Context, _ int64) ([][10]session.HotbarSlot, int, error) {
+	return [][10]session.HotbarSlot{{}}, 0, nil
 }
 
 // REQ-NPC-BUY-6: After a successful equipment purchase, SaveInventory MUST have been called exactly once

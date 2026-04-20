@@ -2,6 +2,7 @@ package gameserver
 
 import (
 	"context"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -17,24 +18,60 @@ import (
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 )
 
-// hotbarCharSaver is a CharacterSaver test double that records SaveHotbar calls.
+// hotbarCharSaver is a CharacterSaver test double that records SaveHotbars calls.
 type hotbarCharSaver struct {
 	fakeCharSaver // embed the rest_test.go stub for all other methods
-	saved   map[int64][10]session.HotbarSlot
-	loadErr error
+	saved      map[int64][][10]session.HotbarSlot
+	savedIdx   map[int64]int
+	loadErr    error
 }
 
 func newHotbarCharSaver() *hotbarCharSaver {
-	return &hotbarCharSaver{saved: make(map[int64][10]session.HotbarSlot)}
+	return &hotbarCharSaver{
+		saved:    make(map[int64][][10]session.HotbarSlot),
+		savedIdx: make(map[int64]int),
+	}
 }
 
-func (h *hotbarCharSaver) SaveHotbar(_ context.Context, characterID int64, slots [10]session.HotbarSlot) error {
-	h.saved[characterID] = slots
+func (h *hotbarCharSaver) SaveHotbars(_ context.Context, characterID int64, bars [][10]session.HotbarSlot, activeIdx int) error {
+	h.saved[characterID] = bars
+	h.savedIdx[characterID] = activeIdx
 	return nil
 }
 
-func (h *hotbarCharSaver) LoadHotbar(_ context.Context, _ int64) ([10]session.HotbarSlot, error) {
-	return [10]session.HotbarSlot{}, h.loadErr
+func (h *hotbarCharSaver) LoadHotbars(_ context.Context, _ int64) ([][10]session.HotbarSlot, int, error) {
+	return [][10]session.HotbarSlot{{}}, 0, h.loadErr
+}
+
+// newTestHotbarServer returns a configured GameServiceServer, the player session pointer,
+// and the uid string. maxHotbars sets the server's multi-bar limit.
+//
+// Precondition: t is non-nil; maxHotbars >= 1.
+// Postcondition: Server has one player with uid "hotbar-test-uid" and one empty hotbar.
+func newTestHotbarServer(t testing.TB, maxHotbars int) (*GameServiceServer, *session.PlayerSession, string) {
+	t.Helper()
+	sessMgr := session.NewManager()
+	svc := testMinimalService(t.(*testing.T), sessMgr)
+	svc.SetCharSaver(newHotbarCharSaver())
+	svc.maxHotbars = maxHotbars
+
+	uid := "hotbar-test-uid"
+	_, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID:         uid,
+		Username:    "tester",
+		CharName:    "Tester",
+		CharacterID: 42,
+		RoomID:      "room_a",
+		Role:        "player",
+	})
+	if err != nil {
+		t.(*testing.T).Fatalf("AddPlayer: %v", err)
+	}
+	sess, ok := sessMgr.GetPlayer(uid)
+	if !ok {
+		t.(*testing.T).Fatal("GetPlayer returned false")
+	}
+	return svc, sess, uid
 }
 
 func testHotbarService(t *testing.T) (*GameServiceServer, *session.Manager, string) {
@@ -42,6 +79,7 @@ func testHotbarService(t *testing.T) (*GameServiceServer, *session.Manager, stri
 	sessMgr := session.NewManager()
 	svc := testMinimalService(t, sessMgr)
 	svc.SetCharSaver(newHotbarCharSaver())
+	svc.maxHotbars = 4
 
 	uid := "hotbar-test-uid"
 	_, err := sessMgr.AddPlayer(session.AddPlayerOptions{
@@ -56,6 +94,20 @@ func testHotbarService(t *testing.T) (*GameServiceServer, *session.Manager, stri
 	return svc, sessMgr, uid
 }
 
+// extractMessage extracts the text content from a ServerEvent MessageEvent payload.
+//
+// Precondition: ev may be nil.
+// Postcondition: Returns "" for nil events or events without a message payload.
+func extractMessage(ev *gamev1.ServerEvent) string {
+	if ev == nil {
+		return ""
+	}
+	if m := ev.GetMessage(); m != nil {
+		return m.GetContent()
+	}
+	return ""
+}
+
 // REQ-HB-3: set valid slot 1 returns confirmation MessageEvent and writes command slot.
 func TestHandleHotbar_SetSlot1(t *testing.T) {
 	svc, _, uid := testHotbarService(t)
@@ -67,7 +119,7 @@ func TestHandleHotbar_SetSlot1(t *testing.T) {
 
 	sess, ok := svc.sessions.GetPlayer(uid)
 	require.True(t, ok)
-	assert.Equal(t, "look", sess.Hotbar[0].ActivationCommand())
+	assert.Equal(t, "look", sess.Hotbars[0][0].ActivationCommand())
 }
 
 // REQ-HB-3: set slot 10 (boundary) returns confirmation MessageEvent.
@@ -81,7 +133,7 @@ func TestHandleHotbar_SetSlot10(t *testing.T) {
 
 	sess, ok := svc.sessions.GetPlayer(uid)
 	require.True(t, ok)
-	assert.Equal(t, "status", sess.Hotbar[9].ActivationCommand())
+	assert.Equal(t, "status", sess.Hotbars[0][9].ActivationCommand())
 }
 
 // REQ-HB-3: set out-of-range slot (0) returns error message with no side effect.
@@ -101,21 +153,21 @@ func TestHandleHotbar_SetOutOfRangeHigh(t *testing.T) {
 
 	sess, ok := svc.sessions.GetPlayer(uid)
 	require.True(t, ok)
-	assert.Equal(t, [10]session.HotbarSlot{}, sess.Hotbar)
+	assert.Equal(t, [10]session.HotbarSlot{}, sess.Hotbars[0])
 }
 
 // REQ-HB-4: clear valid slot returns confirmation MessageEvent.
 func TestHandleHotbar_ClearSlot(t *testing.T) {
 	svc, _, uid := testHotbarService(t)
 	sess, _ := svc.sessions.GetPlayer(uid)
-	sess.Hotbar[2] = session.CommandSlot("heal")
+	sess.Hotbars[0][2] = session.CommandSlot("heal")
 
 	evt, err := svc.handleHotbar(uid, &gamev1.HotbarRequest{Action: "clear", Slot: 3})
 	require.NoError(t, err)
 	require.NotNil(t, evt)
 
 	assert.Equal(t, "Slot 3 cleared.", evt.GetMessage().GetContent(), "clear must return confirmation MessageEvent")
-	assert.True(t, sess.Hotbar[2].IsEmpty())
+	assert.True(t, sess.Hotbars[0][2].IsEmpty())
 }
 
 // REQ-HB-4: clear out-of-range slot returns error message.
@@ -130,8 +182,8 @@ func TestHandleHotbar_ClearOutOfRange(t *testing.T) {
 func TestHandleHotbar_Show(t *testing.T) {
 	svc, _, uid := testHotbarService(t)
 	sess, _ := svc.sessions.GetPlayer(uid)
-	sess.Hotbar[0] = session.CommandSlot("look")
-	sess.Hotbar[9] = session.CommandSlot("status")
+	sess.Hotbars[0][0] = session.CommandSlot("look")
+	sess.Hotbars[0][9] = session.CommandSlot("status")
 
 	evt, err := svc.handleHotbar(uid, &gamev1.HotbarRequest{Action: "show"})
 	require.NoError(t, err)
@@ -147,12 +199,13 @@ func TestHandleHotbar_SetSendsUpdateEvent(t *testing.T) {
 	assert.True(t, isMessage, "handleHotbar set should return a MessageEvent (HotbarUpdateEvent is pushed via entity)")
 }
 
-// REQ-HB-TS-1: SaveHotbar called with updated slots on set.
+// REQ-HB-TS-1: SaveHotbars called with updated slots on set.
 func TestHandleHotbar_PersistsOnSet(t *testing.T) {
 	sessMgr := session.NewManager()
 	svc := testMinimalService(t, sessMgr)
 	saver := newHotbarCharSaver()
 	svc.SetCharSaver(saver)
+	svc.maxHotbars = 4
 
 	uid := "persist-test"
 	_, err := sessMgr.AddPlayer(session.AddPlayerOptions{
@@ -169,16 +222,17 @@ func TestHandleHotbar_PersistsOnSet(t *testing.T) {
 	require.NoError(t, err)
 
 	saved, ok := saver.saved[42]
-	require.True(t, ok, "SaveHotbar must be called with characterID 42")
-	assert.Equal(t, "attack goblin", saved[4].ActivationCommand())
+	require.True(t, ok, "SaveHotbars must be called with characterID 42")
+	assert.Equal(t, "attack goblin", saved[0][4].ActivationCommand())
 }
 
-// REQ-HB-TS-1: SaveHotbar called after clear.
+// REQ-HB-TS-1: SaveHotbars called after clear.
 func TestHandleHotbar_PersistsOnClear(t *testing.T) {
 	sessMgr := session.NewManager()
 	svc := testMinimalService(t, sessMgr)
 	saver := newHotbarCharSaver()
 	svc.SetCharSaver(saver)
+	svc.maxHotbars = 4
 
 	uid := "clear-persist-test"
 	_, err := sessMgr.AddPlayer(session.AddPlayerOptions{
@@ -192,14 +246,14 @@ func TestHandleHotbar_PersistsOnClear(t *testing.T) {
 	require.NoError(t, err)
 
 	sess, _ := sessMgr.GetPlayer(uid)
-	sess.Hotbar[2] = session.CommandSlot("heal")
+	sess.Hotbars[0][2] = session.CommandSlot("heal")
 
 	_, err = svc.handleHotbar(uid, &gamev1.HotbarRequest{Action: "clear", Slot: 3})
 	require.NoError(t, err)
 
 	saved, ok := saver.saved[55]
-	require.True(t, ok, "SaveHotbar must be called after clear")
-	assert.True(t, saved[2].IsEmpty())
+	require.True(t, ok, "SaveHotbars must be called after clear")
+	assert.True(t, saved[0][2].IsEmpty())
 }
 
 // REQ-HB-TS-2: kind+ref creates a typed feat slot and returns confirmation MessageEvent; HotbarUpdateEvent is pushed via entity.
@@ -211,8 +265,8 @@ func TestHandleHotbar_SetTypedFeatSlot(t *testing.T) {
 
 	sess, ok := svc.sessions.GetPlayer(uid)
 	require.True(t, ok)
-	assert.Equal(t, session.HotbarSlot{Kind: session.HotbarSlotKindFeat, Ref: "power_strike"}, sess.Hotbar[1])
-	assert.Equal(t, "use power_strike", sess.Hotbar[1].ActivationCommand())
+	assert.Equal(t, session.HotbarSlot{Kind: session.HotbarSlotKindFeat, Ref: "power_strike"}, sess.Hotbars[0][1])
+	assert.Equal(t, "use power_strike", sess.Hotbars[0][1].ActivationCommand())
 
 	assert.Equal(t, "Slot 2 set.", evt.GetMessage().GetContent(), "set must return confirmation MessageEvent")
 }
@@ -339,7 +393,7 @@ func TestHotbarUpdateEvent_FeatSlot_PopulatesUseCounts(t *testing.T) {
 
 	sess, ok := sessMgr.GetPlayer(uid)
 	require.True(t, ok)
-	sess.Hotbar[0] = session.HotbarSlot{Kind: session.HotbarSlotKindFeat, Ref: featID}
+	sess.Hotbars[0][0] = session.HotbarSlot{Kind: session.HotbarSlotKindFeat, Ref: featID}
 	sess.ActiveFeatUses = map[string]int{featID: 1}
 
 	evt := svc.hotbarUpdateEvent(sess)
@@ -383,7 +437,7 @@ func TestHotbarUpdateEvent_UnlimitedFeat_ZeroMaxUses(t *testing.T) {
 
 	sess, ok := sessMgr.GetPlayer(uid)
 	require.True(t, ok)
-	sess.Hotbar[0] = session.HotbarSlot{Kind: session.HotbarSlotKindFeat, Ref: featID}
+	sess.Hotbars[0][0] = session.HotbarSlot{Kind: session.HotbarSlotKindFeat, Ref: featID}
 
 	evt := svc.hotbarUpdateEvent(sess)
 	require.NotNil(t, evt)
@@ -414,7 +468,7 @@ func TestHotbarUpdateEvent_CommandSlot_ZeroUseCounts(t *testing.T) {
 
 	sess, ok := sessMgr.GetPlayer(uid)
 	require.True(t, ok)
-	sess.Hotbar[3] = session.CommandSlot("look")
+	sess.Hotbars[0][3] = session.CommandSlot("look")
 
 	evt := svc.hotbarUpdateEvent(sess)
 	require.NotNil(t, evt)
@@ -462,7 +516,7 @@ func TestHotbarUpdateEvent_InnateTechSlot_PopulatesUseCounts(t *testing.T) {
 
 	sess, ok := sessMgr.GetPlayer(uid)
 	require.True(t, ok)
-	sess.Hotbar[0] = session.HotbarSlot{Kind: session.HotbarSlotKindTechnology, Ref: techID}
+	sess.Hotbars[0][0] = session.HotbarSlot{Kind: session.HotbarSlotKindTechnology, Ref: techID}
 	sess.InnateTechs = map[string]*session.InnateSlot{
 		techID: {MaxUses: 3, UsesRemaining: 1},
 	}
@@ -499,7 +553,7 @@ func TestHotbarUpdateEvent_PreparedTechSlot_PopulatesUseCounts(t *testing.T) {
 
 	sess, ok := sessMgr.GetPlayer(uid)
 	require.True(t, ok)
-	sess.Hotbar[0] = session.HotbarSlot{Kind: session.HotbarSlotKindTechnology, Ref: techID}
+	sess.Hotbars[0][0] = session.HotbarSlot{Kind: session.HotbarSlotKindTechnology, Ref: techID}
 	// 3 total slots for techID: 2 not expended, 1 expended.
 	sess.InnateTechs = nil
 	sess.PreparedTechs = map[int][]*session.PreparedSlot{
@@ -541,7 +595,7 @@ func TestHotbarUpdateEvent_KnownTechSlot_PopulatesUseCounts(t *testing.T) {
 
 	sess, ok := sessMgr.GetPlayer(uid)
 	require.True(t, ok)
-	sess.Hotbar[0] = session.HotbarSlot{Kind: session.HotbarSlotKindTechnology, Ref: techID}
+	sess.Hotbars[0][0] = session.HotbarSlot{Kind: session.HotbarSlotKindTechnology, Ref: techID}
 	sess.InnateTechs = nil
 	// PreparedTechs must be non-nil but empty so the code enters the else-if branch
 	// and falls through to the spontaneous pool lookup (total == 0 → spontaneous path).
@@ -589,7 +643,7 @@ func TestPropertyHotbarUpdateEvent_CommandConsumable_ZeroMaxUses(t *testing.T) {
 
 		sess, ok := sessMgr.GetPlayer(uid)
 		require.True(rt, ok)
-		sess.Hotbar[0] = session.HotbarSlot{Kind: kind, Ref: ref}
+		sess.Hotbars[0][0] = session.HotbarSlot{Kind: kind, Ref: ref}
 
 		evt := svc.hotbarUpdateEvent(sess)
 		require.NotNil(rt, evt)
@@ -629,7 +683,7 @@ func TestHandleUse_FeatWithLimitedUses_PushesHotbarUpdateEvent(t *testing.T) {
 	// Simulate 2 uses remaining before activation.
 	sess.ActiveFeatUses = map[string]int{featID: 2}
 	// Slot 0 assigned to this feat.
-	sess.Hotbar[0] = session.HotbarSlot{Kind: session.HotbarSlotKindFeat, Ref: featID}
+	sess.Hotbars[0][0] = session.HotbarSlot{Kind: session.HotbarSlotKindFeat, Ref: featID}
 
 	// Drain any pre-existing events from the entity.
 	for {
@@ -699,7 +753,7 @@ func TestApplyFullLongRest_PushesHotbarUpdateEvent(t *testing.T) {
 	// All uses exhausted before rest.
 	sess.ActiveFeatUses = map[string]int{featID: 0}
 	// Slot 0 assigned to this feat.
-	sess.Hotbar[0] = session.HotbarSlot{Kind: session.HotbarSlotKindFeat, Ref: featID}
+	sess.Hotbars[0][0] = session.HotbarSlot{Kind: session.HotbarSlotKindFeat, Ref: featID}
 
 	// Provide a minimal job so applyFullLongRestCtx reaches the hotbarUpdateEvent push.
 	job := &ruleset.Job{
@@ -774,6 +828,107 @@ func TestPropertyHandleHotbar_SetValidSlot(t *testing.T) {
 
 		sess, ok := svc.sessions.GetPlayer(uid)
 		require.True(t, ok)
-		require.Equal(t, text, sess.Hotbar[slot-1].ActivationCommand())
+		require.Equal(t, text, sess.Hotbars[0][slot-1].ActivationCommand())
+	})
+}
+
+// REQ-HB-MB-1: "create" appends a new empty bar and switches to it.
+//
+// Precondition: Server has one bar; maxHotbars=4.
+// Postcondition: Hotbars has 2 entries; ActiveHotbarIndex==1.
+func TestHandleHotbar_Create_AddsBar(t *testing.T) {
+	svc, sess, uid := newTestHotbarServer(t, 4)
+	if len(sess.Hotbars) != 1 {
+		t.Fatalf("expected 1 bar initially, got %d", len(sess.Hotbars))
+	}
+	ev, err := svc.handleHotbar(uid, &gamev1.HotbarRequest{Action: "create"})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	_ = ev
+	if len(sess.Hotbars) != 2 {
+		t.Fatalf("expected 2 bars after create, got %d", len(sess.Hotbars))
+	}
+	if sess.ActiveHotbarIndex != 1 {
+		t.Fatalf("expected ActiveHotbarIndex=1 after create, got %d", sess.ActiveHotbarIndex)
+	}
+}
+
+// REQ-HB-MB-2: "create" returns a limit message when maxHotbars is reached.
+//
+// Precondition: Hotbars already at limit (maxHotbars=2, len=2).
+// Postcondition: Hotbars count unchanged; returned event contains "limit" text.
+func TestHandleHotbar_Create_EnforcesLimit(t *testing.T) {
+	svc, sess, uid := newTestHotbarServer(t, 2)
+	sess.Hotbars = [][10]session.HotbarSlot{{}, {}} // already at limit
+	ev, err := svc.handleHotbar(uid, &gamev1.HotbarRequest{Action: "create"})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(sess.Hotbars) != 2 {
+		t.Fatalf("expected bars unchanged at limit, got %d", len(sess.Hotbars))
+	}
+	msg := extractMessage(ev)
+	if !strings.Contains(msg, "limit") && !strings.Contains(msg, "Hotbar limit") {
+		t.Fatalf("expected limit message, got %q", msg)
+	}
+}
+
+// REQ-HB-MB-3: "switch" updates ActiveHotbarIndex to target bar (1-based).
+//
+// Precondition: Hotbars has 2 entries; HotbarIndex=2 (1-based).
+// Postcondition: ActiveHotbarIndex==1 (0-based).
+func TestHandleHotbar_Switch_ChangesIndex(t *testing.T) {
+	svc, sess, uid := newTestHotbarServer(t, 4)
+	sess.Hotbars = [][10]session.HotbarSlot{{}, {}}
+	sess.ActiveHotbarIndex = 0
+	_, err := svc.handleHotbar(uid, &gamev1.HotbarRequest{Action: "switch", HotbarIndex: 2})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if sess.ActiveHotbarIndex != 1 {
+		t.Fatalf("expected ActiveHotbarIndex=1, got %d", sess.ActiveHotbarIndex)
+	}
+}
+
+// REQ-HB-MB-4: "switch" with out-of-range HotbarIndex does not change ActiveHotbarIndex.
+//
+// Precondition: Hotbars has 1 entry; HotbarIndex=5 (1-based, out of range).
+// Postcondition: ActiveHotbarIndex unchanged at 0; event contains error message.
+func TestHandleHotbar_Switch_OutOfRange(t *testing.T) {
+	svc, sess, uid := newTestHotbarServer(t, 4)
+	_, err := svc.handleHotbar(uid, &gamev1.HotbarRequest{Action: "switch", HotbarIndex: 5})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if sess.ActiveHotbarIndex != 0 {
+		t.Fatalf("expected ActiveHotbarIndex unchanged at 0, got %d", sess.ActiveHotbarIndex)
+	}
+}
+
+// REQ-HB-MB-5 (property): after any sequence of create and switch operations,
+// ActiveHotbarIndex is always within [0, len(Hotbars)-1].
+func TestProperty_Hotbar_ActiveIndexAlwaysValid(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		svc, sess, uid := newTestHotbarServer(t, 4)
+		ops := rapid.SliceOfN(rapid.IntRange(0, 5), 1, 20).Draw(rt, "ops")
+		for _, op := range ops {
+			switch op % 3 {
+			case 0: // create
+				_, _ = svc.handleHotbar(uid, &gamev1.HotbarRequest{Action: "create"})
+			case 1: // switch to next bar (wrapping)
+				target := sess.ActiveHotbarIndex
+				if len(sess.Hotbars) > 1 {
+					target = (target + 1) % len(sess.Hotbars)
+				}
+				_, _ = svc.handleHotbar(uid, &gamev1.HotbarRequest{Action: "switch", HotbarIndex: int32(target + 1)})
+			case 2: // switch to random index (may be out of range)
+				targetIdx := rapid.IntRange(0, 10).Draw(rt, "idx")
+				_, _ = svc.handleHotbar(uid, &gamev1.HotbarRequest{Action: "switch", HotbarIndex: int32(targetIdx)})
+			}
+			if sess.ActiveHotbarIndex < 0 || sess.ActiveHotbarIndex >= len(sess.Hotbars) {
+				rt.Fatalf("ActiveHotbarIndex %d out of range [0, %d)", sess.ActiveHotbarIndex, len(sess.Hotbars))
+			}
+		}
 	})
 }

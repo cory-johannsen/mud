@@ -133,11 +133,11 @@ func (m *mockCharSaverFull) LoadJobs(_ context.Context, _ int64) (map[string]int
 }
 func (m *mockCharSaverFull) LoadFocusPoints(_ context.Context, _ int64) (int, error) { return 0, nil }
 func (m *mockCharSaverFull) SaveFocusPoints(_ context.Context, _ int64, _ int) error { return nil }
-func (m *mockCharSaverFull) SaveHotbar(_ context.Context, _ int64, _ [10]session.HotbarSlot) error {
+func (m *mockCharSaverFull) SaveHotbars(_ context.Context, _ int64, _ [][10]session.HotbarSlot, _ int) error {
 	return nil
 }
-func (m *mockCharSaverFull) LoadHotbar(_ context.Context, _ int64) ([10]session.HotbarSlot, error) {
-	return [10]session.HotbarSlot{}, nil
+func (m *mockCharSaverFull) LoadHotbars(_ context.Context, _ int64) ([][10]session.HotbarSlot, int, error) {
+	return [][10]session.HotbarSlot{{}}, 0, nil
 }
 
 // testGRPCServerWithSaverFull starts an in-process gRPC server using the supplied
@@ -907,18 +907,18 @@ func drainHotbarEvent(t *testing.T, stream gamev1.GameService_SessionClient) {
 	require.NotNil(t, resp.GetHotbarUpdate(), "expected HotbarUpdateEvent after RoomView; got other event type")
 }
 
-// mockCharSaverWithLoginHotbar embeds mockCharSaverFull and overrides LoadHotbar to return
+// mockCharSaverWithLoginHotbar embeds mockCharSaverFull and overrides LoadHotbars to return
 // a pre-populated hotbar array. Used to test the login-path hotbar event ordering.
 type mockCharSaverWithLoginHotbar struct {
 	mockCharSaverFull
 	hotbar [10]session.HotbarSlot
 }
 
-func (m *mockCharSaverWithLoginHotbar) LoadHotbar(_ context.Context, _ int64) ([10]session.HotbarSlot, error) {
-	return m.hotbar, nil
+func (m *mockCharSaverWithLoginHotbar) LoadHotbars(_ context.Context, _ int64) ([][10]session.HotbarSlot, int, error) {
+	return [][10]session.HotbarSlot{m.hotbar}, 0, nil
 }
 
-func (m *mockCharSaverWithLoginHotbar) SaveHotbar(_ context.Context, _ int64, _ [10]session.HotbarSlot) error {
+func (m *mockCharSaverWithLoginHotbar) SaveHotbars(_ context.Context, _ int64, _ [][10]session.HotbarSlot, _ int) error {
 	return nil
 }
 

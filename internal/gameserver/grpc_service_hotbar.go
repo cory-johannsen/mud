@@ -11,15 +11,18 @@ import (
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 )
 
-// handleHotbar processes hotbar commands: set, clear, show.
+// handleHotbar processes hotbar commands: set, clear, show, create, switch.
 // For "set" with kind+ref, creates a typed slot. For "set" with text only,
 // creates a command slot (backward compatibility with telnet hotbar command).
 //
 // Precondition: uid identifies a connected player; req is non-nil.
-// Postcondition: On "set"/"clear", sess.Hotbar updated, SaveHotbar called, HotbarUpdateEvent pushed
+// Postcondition: On "set"/"clear", sess.Hotbars[ActiveHotbarIndex] updated, SaveHotbars called,
 //
-//	via entity (for web client refresh), and a confirmation MessageEvent returned (for telnet feedback).
+//	HotbarUpdateEvent pushed via entity (for web client refresh), and a confirmation
+//	MessageEvent returned (for telnet feedback).
 //	On "show", per-slot MessageEvents pushed to entity; nil returned.
+//	On "create", a new empty bar is appended and ActiveHotbarIndex updated; nil returned at limit.
+//	On "switch", ActiveHotbarIndex updated; nil returned on success, message on out-of-range.
 //	On out-of-range slot or empty set payload, MessageEvent returned with no side effects.
 func (s *GameServiceServer) handleHotbar(uid string, req *gamev1.HotbarRequest) (*gamev1.ServerEvent, error) {
 	sess, ok := s.sessions.GetPlayer(uid)
@@ -37,10 +40,10 @@ func (s *GameServiceServer) handleHotbar(uid string, req *gamev1.HotbarRequest) 
 		if slot.IsEmpty() {
 			return messageEvent("Nothing to set: provide text or kind+ref."), nil
 		}
-		sess.Hotbar[idx] = slot
+		sess.Hotbars[sess.ActiveHotbarIndex][idx] = slot
 		if s.charSaver != nil && sess.CharacterID > 0 {
-			if err := s.charSaver.SaveHotbar(context.Background(), sess.CharacterID, sess.Hotbar); err != nil {
-				s.logger.Warn("SaveHotbar failed", zap.String("uid", uid), zap.Error(err))
+			if err := s.charSaver.SaveHotbars(context.Background(), sess.CharacterID, sess.Hotbars, sess.ActiveHotbarIndex); err != nil {
+				s.logger.Warn("SaveHotbars failed", zap.String("uid", uid), zap.Error(err))
 			}
 		}
 		// Push HotbarUpdateEvent so web client hotbar refreshes; return confirmation message
@@ -53,10 +56,10 @@ func (s *GameServiceServer) handleHotbar(uid string, req *gamev1.HotbarRequest) 
 			return messageEvent("Slot out of range (1-10)."), nil
 		}
 		idx := int(req.Slot) - 1
-		sess.Hotbar[idx] = session.HotbarSlot{}
+		sess.Hotbars[sess.ActiveHotbarIndex][idx] = session.HotbarSlot{}
 		if s.charSaver != nil && sess.CharacterID > 0 {
-			if err := s.charSaver.SaveHotbar(context.Background(), sess.CharacterID, sess.Hotbar); err != nil {
-				s.logger.Warn("SaveHotbar failed", zap.String("uid", uid), zap.Error(err))
+			if err := s.charSaver.SaveHotbars(context.Background(), sess.CharacterID, sess.Hotbars, sess.ActiveHotbarIndex); err != nil {
+				s.logger.Warn("SaveHotbars failed", zap.String("uid", uid), zap.Error(err))
 			}
 		}
 		// Push HotbarUpdateEvent so web client hotbar refreshes; return confirmation message
@@ -65,14 +68,48 @@ func (s *GameServiceServer) handleHotbar(uid string, req *gamev1.HotbarRequest) 
 		return messageEvent(fmt.Sprintf("Slot %d cleared.", req.Slot)), nil
 
 	case "show":
+		activeBar := sess.Hotbars[sess.ActiveHotbarIndex]
 		for i := 0; i < 10; i++ {
 			slotNum := i + 1
 			display := "---"
-			if cmd := sess.Hotbar[i].ActivationCommand(); cmd != "" {
+			if cmd := activeBar[i].ActivationCommand(); cmd != "" {
 				display = cmd
 			}
 			s.pushMessageToUID(uid, fmt.Sprintf("[%d] %s", slotNum, display))
 		}
+		return nil, nil
+
+	case "create":
+		maxHotbars := s.maxHotbars
+		if maxHotbars <= 0 {
+			maxHotbars = 4
+		}
+		if len(sess.Hotbars) >= maxHotbars {
+			return messageEvent(fmt.Sprintf("Hotbar limit reached (max %d).", maxHotbars)), nil
+		}
+		sess.Hotbars = append(sess.Hotbars, [10]session.HotbarSlot{})
+		sess.ActiveHotbarIndex = len(sess.Hotbars) - 1
+		if s.charSaver != nil && sess.CharacterID > 0 {
+			if err := s.charSaver.SaveHotbars(context.Background(), sess.CharacterID, sess.Hotbars, sess.ActiveHotbarIndex); err != nil {
+				s.logger.Warn("SaveHotbars failed", zap.String("uid", uid), zap.Error(err))
+			}
+		}
+		s.pushEventToUID(uid, s.hotbarUpdateEvent(sess))
+		return nil, nil
+
+	case "switch":
+		// HotbarIndex is 1-based; 0 means "current" (no-op on index, just refresh).
+		targetIdx := int(req.HotbarIndex) - 1
+		if targetIdx < 0 || targetIdx >= len(sess.Hotbars) {
+			return messageEvent("Invalid hotbar index."), nil
+		}
+		sess.ActiveHotbarIndex = targetIdx
+		if s.charSaver != nil && sess.CharacterID > 0 {
+			if err := s.charSaver.SaveHotbars(context.Background(), sess.CharacterID, sess.Hotbars, sess.ActiveHotbarIndex); err != nil {
+				s.logger.Warn("SaveHotbars failed", zap.String("uid", uid), zap.Error(err))
+			}
+		}
+		s.pushEventToUID(uid, s.hotbarUpdateEvent(sess))
 		return nil, nil
 
 	default:
@@ -95,13 +132,16 @@ func buildHotbarSlot(req *gamev1.HotbarRequest) session.HotbarSlot {
 	return session.HotbarSlot{}
 }
 
-// hotbarUpdateEvent builds a HotbarUpdateEvent for the player's current hotbar.
+// hotbarUpdateEvent builds a HotbarUpdateEvent for the player's current active hotbar.
 // Resolves display_name, description, and use-count fields from registries and session state.
 //
-// Postcondition: Returns a non-nil ServerEvent with exactly 10 HotbarSlot entries.
+// Postcondition: Returns a non-nil ServerEvent with exactly 10 HotbarSlot entries and
+//
+//	multi-bar metadata (ActiveHotbarIndex, HotbarCount, MaxHotbars).
 func (s *GameServiceServer) hotbarUpdateEvent(sess *session.PlayerSession) *gamev1.ServerEvent {
+	activeBar := sess.Hotbars[sess.ActiveHotbarIndex]
 	protoSlots := make([]*gamev1.HotbarSlot, 10)
-	for i, sl := range sess.Hotbar {
+	for i, sl := range activeBar {
 		ps := &gamev1.HotbarSlot{Kind: sl.Kind, Ref: sl.Ref}
 		if !sl.IsEmpty() {
 			ps.DisplayName, ps.Description = s.resolveHotbarSlotDisplay(sl)
@@ -110,9 +150,18 @@ func (s *GameServiceServer) hotbarUpdateEvent(sess *session.PlayerSession) *game
 		}
 		protoSlots[i] = ps
 	}
+	maxHotbars := int32(s.maxHotbars)
+	if maxHotbars <= 0 {
+		maxHotbars = 4
+	}
 	return &gamev1.ServerEvent{
 		Payload: &gamev1.ServerEvent_HotbarUpdate{
-			HotbarUpdate: &gamev1.HotbarUpdateEvent{Slots: protoSlots},
+			HotbarUpdate: &gamev1.HotbarUpdateEvent{
+				Slots:             protoSlots,
+				ActiveHotbarIndex: int32(sess.ActiveHotbarIndex + 1), // 1-based for client
+				HotbarCount:       int32(len(sess.Hotbars)),
+				MaxHotbars:        maxHotbars,
+			},
 		},
 	}
 }

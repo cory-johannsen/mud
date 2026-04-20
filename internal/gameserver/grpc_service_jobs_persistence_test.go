@@ -40,11 +40,11 @@ func (j *jobsCharSaver) LoadJobs(_ context.Context, _ int64) (map[string]int, st
 }
 func (j *jobsCharSaver) LoadFocusPoints(_ context.Context, _ int64) (int, error) { return 0, nil }
 func (j *jobsCharSaver) SaveFocusPoints(_ context.Context, _ int64, _ int) error { return nil }
-func (j *jobsCharSaver) SaveHotbar(_ context.Context, _ int64, _ [10]session.HotbarSlot) error {
+func (j *jobsCharSaver) SaveHotbars(_ context.Context, _ int64, _ [][10]session.HotbarSlot, _ int) error {
 	return nil
 }
-func (j *jobsCharSaver) LoadHotbar(_ context.Context, _ int64) ([10]session.HotbarSlot, error) {
-	return [10]session.HotbarSlot{}, nil
+func (j *jobsCharSaver) LoadHotbars(_ context.Context, _ int64) ([][10]session.HotbarSlot, int, error) {
+	return [][10]session.HotbarSlot{{}}, 0, nil
 }
 
 // REQ-JOB-PERSIST-1: SaveJobs is called after handleTrainJob succeeds.
