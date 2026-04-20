@@ -8,10 +8,10 @@ description: >
   passes through his hands. He enforces tribute with methodical brutality
   and has never lost a territorial dispute — because he doesn't leave
   survivors to contest the outcome.
-level: 30
-max_hp: 810
+level: 7
+max_hp: 180
 tier: boss
-ac: 24
+ac: 20
 rob_multiplier: 2.0
 boss_abilities:
   - id: ridge_domination
