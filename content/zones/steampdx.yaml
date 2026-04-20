@@ -1,8 +1,8 @@
 zone:
   id: steampdx
   danger_level: dangerous
-  min_level: 3
-  max_level: 7
+  min_level: 40
+  max_level: 55
   world_x: 0
   world_y: -2
   name: SteamPDX
@@ -132,7 +132,7 @@ zone:
       respawn_after: 5m
     boss_room: false
   - id: sp_glory_hole
-    danger_level: dangerous
+    danger_level: all_out_war
     title: The Glory Hole
     description: A low-ceilinged alcove at the deepest point of the facility. Three men of extraordinary
       size occupy every corner. They are not pleased to have company unless company was invited. You were

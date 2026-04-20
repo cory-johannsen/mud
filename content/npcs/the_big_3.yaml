@@ -1,9 +1,10 @@
 id: the_big_3
 name: The Big 3
 description: Three interconnected titans who move and fight as one organism, a hydra of bad decisions and raw power.
-level: 7
-max_hp: 100
-ac: 17
+level: 55
+max_hp: 2115
+ac: 27
+rob_multiplier: 2.0
 awareness: 9
 gender: male
 disposition: hostile
@@ -15,6 +16,28 @@ abilities:
   reasoning: 10
   savvy: 12
   flair: 14
+boss_abilities:
+  - id: triple_threat
+    name: "Triple Threat"
+    trigger: round_start
+    trigger_value: 0
+    cooldown: "3m"
+    effect:
+      aoe_damage_expr: "7d10"
+  - id: steam_surge
+    name: "Steam Surge"
+    trigger: hp_pct_below
+    trigger_value: 75
+    cooldown: "4m"
+    effect:
+      aoe_condition: nausea
+  - id: big_3_resilience
+    name: "Big 3 Resilience"
+    trigger: hp_pct_below
+    trigger_value: 50
+    cooldown: "5m"
+    effect:
+      heal_pct: 25
 loot:
   currency:
     min: 80

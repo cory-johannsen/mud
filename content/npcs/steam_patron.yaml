@@ -1,12 +1,13 @@
 id: steam_patron
 name: Steam Patron
 description: A heavyset man wrapped in a towel, looking for connection in all the wrong ways.
-level: 3
-max_hp: 30
-ac: 12
+level: 40
+max_hp: 420
+ac: 20
 awareness: 5
 gender: male
 disposition: neutral
+rob_multiplier: 1.2
 seduction_probability: 0.3
 seduction_gender: male
 abilities:

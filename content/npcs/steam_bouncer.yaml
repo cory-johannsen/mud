@@ -1,12 +1,13 @@
 id: steam_bouncer
 name: Steam Bouncer
 description: A broad-shouldered man in a polo shirt who has very strong opinions about who belongs here.
-level: 4
-max_hp: 45
-ac: 15
+level: 44
+max_hp: 492
+ac: 20
 awareness: 7
 gender: male
 disposition: hostile
+rob_multiplier: 1.2
 abilities:
   brutality: 16
   quickness: 10
