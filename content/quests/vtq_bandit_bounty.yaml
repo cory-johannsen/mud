@@ -1,7 +1,7 @@
 id: vtq_bandit_bounty
-title: Highway Bandit Bounty
+title: Scavenger Bounty
 description: >
-  Highway bandits are taxing every crew that tries to move through I-84.
+  Scavengers are picking through every supply cache on the highway.
   Three of them, dead. That's the job.
 giver_npc_id: vantucky_quest_giver
 repeatable: true
@@ -9,8 +9,8 @@ cooldown: 24h
 objectives:
   - id: kill_bandits
     type: kill
-    description: Kill 3 highway bandits
-    target_id: highway_bandit
+    description: Kill 3 Vantucky scavengers
+    target_id: vantucky_scavenger
     quantity: 3
 rewards:
   xp: 200
