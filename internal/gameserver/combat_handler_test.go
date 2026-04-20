@@ -58,7 +58,7 @@ func makeCombatHandlerWithDice(t *testing.T, src dice.Source, broadcastFn func(r
 	engine := combat.NewEngine()
 	npcMgr := npc.NewManager()
 	sessMgr := session.NewManager()
-	return NewCombatHandler(engine, npcMgr, sessMgr, roller, broadcastFn, testRoundDuration, makeTestConditionRegistry(), nil, nil, nil, nil, nil, nil, nil)
+	return NewCombatHandler(engine, npcMgr, sessMgr, roller, broadcastFn, testRoundDuration, makeTestConditionRegistry(), nil, nil, nil, nil, nil, nil, nil, nil)
 }
 
 const testRoundDuration = 200 * time.Millisecond
@@ -96,7 +96,7 @@ func makeCombatHandler(t *testing.T, broadcastFn func(roomID string, events []*g
 	engine := combat.NewEngine()
 	npcMgr := npc.NewManager()
 	sessMgr := session.NewManager()
-	return NewCombatHandler(engine, npcMgr, sessMgr, roller, broadcastFn, testRoundDuration, makeTestConditionRegistry(), nil, nil, nil, nil, nil, nil, nil)
+	return NewCombatHandler(engine, npcMgr, sessMgr, roller, broadcastFn, testRoundDuration, makeTestConditionRegistry(), nil, nil, nil, nil, nil, nil, nil, nil)
 }
 
 // spawnTestNPC creates and registers a live NPC instance in roomID.
@@ -681,7 +681,7 @@ func makeCombatHandlerWithRegistry(t *testing.T, reg *inventory.Registry, broadc
 	engine := combat.NewEngine()
 	npcMgr := npc.NewManager()
 	sessMgr := session.NewManager()
-	return NewCombatHandler(engine, npcMgr, sessMgr, roller, broadcastFn, testRoundDuration, makeTestConditionRegistry(), nil, nil, reg, nil, nil, nil, nil)
+	return NewCombatHandler(engine, npcMgr, sessMgr, roller, broadcastFn, testRoundDuration, makeTestConditionRegistry(), nil, nil, reg, nil, nil, nil, nil, nil)
 }
 
 // TestStartCombatLocked_NilRegistry_ACIsTenPlusDex verifies that when invRegistry
@@ -1711,7 +1711,7 @@ func makeCombatHandlerGrab(t *testing.T, broadcastFn func(roomID string, events 
 	engine := combat.NewEngine()
 	npcMgr := npc.NewManager()
 	sessMgr := session.NewManager()
-	return NewCombatHandler(engine, npcMgr, sessMgr, roller, broadcastFn, testRoundDuration, makeTestConditionRegistryWithGrabbed(), nil, nil, nil, nil, nil, nil, nil)
+	return NewCombatHandler(engine, npcMgr, sessMgr, roller, broadcastFn, testRoundDuration, makeTestConditionRegistryWithGrabbed(), nil, nil, nil, nil, nil, nil, nil, nil)
 }
 
 // TestCombatHandler_ApplyCombatCondition_NoSession verifies that ApplyCombatCondition

@@ -69,6 +69,7 @@ func makeRespawnHandler(
 		respawnTestRoundDuration,
 		makeRespawnTestConditionRegistry(),
 		nil, nil, nil, nil,
+		nil,
 		respawnMgr,
 		nil, // floorMgr
 		nil, // mentalStateMgr

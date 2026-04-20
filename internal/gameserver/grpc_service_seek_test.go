@@ -25,7 +25,7 @@ func newSeekSvcWithCombat(t *testing.T, roller *dice.Roller) (*GameServiceServer
 	combatHandler := NewCombatHandler(
 		combat.NewEngine(), npcMgr, sessMgr, roller,
 		func(_ string, _ []*gamev1.CombatEvent) {},
-		testRoundDuration, condReg, nil, nil, nil, nil, nil, nil, nil,
+		testRoundDuration, condReg, nil, nil, nil, nil, nil, nil, nil, nil,
 	)
 	svc := newTestGameServiceServer(
 		worldMgr, sessMgr,

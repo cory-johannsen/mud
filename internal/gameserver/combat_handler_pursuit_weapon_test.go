@@ -57,7 +57,7 @@ func TestStartPursuitCombatLocked_LoadoutFallback_FromSession(t *testing.T) {
 		engine, npcMgr, sessMgr, roller,
 		func(_ string, _ []*gamev1.CombatEvent) {},
 		testRoundDuration, makeTestConditionRegistry(), wm, nil, nil, aiReg,
-		nil, nil, nil,
+		nil, nil, nil, nil,
 	)
 
 	uid := "pursuit-weapon-player"

@@ -40,7 +40,7 @@ func makePositionBroadcastHandler(
 		engine, npcMgr, sessMgr, roller, broadcastFn,
 		200*time.Millisecond,
 		reg,
-		nil, nil, nil, nil, nil, nil, nil,
+		nil, nil, nil, nil, nil, nil, nil, nil,
 	)
 	return h, npcMgr, sessMgr
 }

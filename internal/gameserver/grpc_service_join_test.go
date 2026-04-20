@@ -24,7 +24,7 @@ func newJoinSvc(t *testing.T) (*GameServiceServer, *session.Manager, *CombatHand
 	combatHandler := NewCombatHandler(
 		combat.NewEngine(), npcMgr, sessMgr, nil,
 		func(_ string, _ []*gamev1.CombatEvent) {},
-		testRoundDuration, makeTestConditionRegistry(), nil, nil, nil, nil, nil, nil, nil,
+		testRoundDuration, makeTestConditionRegistry(), nil, nil, nil, nil, nil, nil, nil, nil,
 	)
 	svc := newTestGameServiceServer(
 		worldMgr, sessMgr,

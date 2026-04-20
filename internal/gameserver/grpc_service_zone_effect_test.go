@@ -36,7 +36,7 @@ func newZoneEffectCombatHandler(t *testing.T, diceVal int, effect world.RoomEffe
 	ch := NewCombatHandler(
 		combat.NewEngine(), npcMgr, sessMgr, roller,
 		func(_ string, _ []*gamev1.CombatEvent) {},
-		testRoundDuration, makeTestConditionRegistry(), worldMgr, nil, nil, nil, nil, nil, mentalMgr,
+		testRoundDuration, makeTestConditionRegistry(), worldMgr, nil, nil, nil, nil, nil, nil, mentalMgr,
 	)
 	return ch, sessMgr, npcMgr
 }
@@ -205,7 +205,7 @@ func TestZoneEffect_Combat_MentalStateMgrNil_NoPanic(t *testing.T) {
 	ch := NewCombatHandler(
 		combat.NewEngine(), npcMgr, sessMgr, roller,
 		func(_ string, _ []*gamev1.CombatEvent) {},
-		testRoundDuration, makeTestConditionRegistry(), worldMgr, nil, nil, nil, nil, nil, nil,
+		testRoundDuration, makeTestConditionRegistry(), worldMgr, nil, nil, nil, nil, nil, nil, nil,
 	)
 
 	tmpl := &npc.Template{ID: "rat", Name: "Rat", MaxHP: 10, AC: 10, Level: 1}
@@ -251,7 +251,7 @@ func TestZoneEffect_Combat_CooldownDecrement_ReachesZero(t *testing.T) {
 	ch := NewCombatHandler(
 		combat.NewEngine(), npcMgr, sessMgr, roller,
 		func(_ string, _ []*gamev1.CombatEvent) {},
-		testRoundDuration, makeTestConditionRegistry(), worldMgr, nil, nil, nil, nil, nil, mentalMgr,
+		testRoundDuration, makeTestConditionRegistry(), worldMgr, nil, nil, nil, nil, nil, nil, mentalMgr,
 	)
 
 	tmpl := &npc.Template{ID: "rat", Name: "Rat", MaxHP: 10, AC: 10, Level: 1}
@@ -307,7 +307,7 @@ func TestZoneEffect_Combat_CrossRoom_CooldownDecrement(t *testing.T) {
 	ch := NewCombatHandler(
 		combat.NewEngine(), npcMgr, sessMgr, roller,
 		func(_ string, _ []*gamev1.CombatEvent) {},
-		testRoundDuration, makeTestConditionRegistry(), worldMgr, nil, nil, nil, nil, nil, mentalMgr,
+		testRoundDuration, makeTestConditionRegistry(), worldMgr, nil, nil, nil, nil, nil, nil, mentalMgr,
 	)
 
 	tmpl := &npc.Template{ID: "rat", Name: "Rat", MaxHP: 10, AC: 10, Level: 1}
@@ -403,7 +403,7 @@ func newMentalStateSvc(t *testing.T, diceVal int) (*GameServiceServer, *session.
 	combatHandler := NewCombatHandler(
 		combat.NewEngine(), npcMgr, sessMgr, roller,
 		func(_ string, _ []*gamev1.CombatEvent) {},
-		testRoundDuration, condReg, worldMgr, nil, nil, nil, nil, nil, mentalMgr,
+		testRoundDuration, condReg, worldMgr, nil, nil, nil, nil, nil, nil, mentalMgr,
 	)
 	svc := newTestGameServiceServer(
 		worldMgr, sessMgr,

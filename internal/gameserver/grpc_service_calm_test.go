@@ -30,7 +30,7 @@ func newCalmSvc(t *testing.T, mentalMgr *mentalstate.Manager, roller *dice.Rolle
 	combatHandler := NewCombatHandler(
 		combat.NewEngine(), npcMgr, sessMgr, roller,
 		func(_ string, _ []*gamev1.CombatEvent) {},
-		testRoundDuration, condReg, nil, nil, nil, nil, nil, nil, mentalMgr,
+		testRoundDuration, condReg, nil, nil, nil, nil, nil, nil, nil, mentalMgr,
 	)
 	svc := newTestGameServiceServer(
 		worldMgr, sessMgr,

@@ -66,7 +66,7 @@ func makePropFleeHandler(t *testing.T) (*CombatHandler, *world.Manager) {
 		func(_ string, _ []*gamev1.CombatEvent) {},
 		testRoundDuration,
 		makeTestConditionRegistry(),
-		wm, nil, nil, nil, nil, nil, nil,
+		wm, nil, nil, nil, nil, nil, nil, nil,
 	)
 	return h, wm
 }
@@ -94,7 +94,7 @@ func TestProperty_InitiateNPCCombat_AggressiveNPCEngages(t *testing.T) {
 			func(_ string, _ []*gamev1.CombatEvent) {},
 			testRoundDuration,
 			makeTestConditionRegistry(),
-			nil, nil, nil, nil, nil, nil, nil,
+			nil, nil, nil, nil, nil, nil, nil, nil,
 		)
 
 		tmpl := &npc.Template{

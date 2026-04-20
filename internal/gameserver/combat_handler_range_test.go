@@ -67,7 +67,7 @@ func TestCombatRound_RangeShownAtRoundStart(t *testing.T) {
 		combat.NewEngine(), npcMgr, sessMgr, roller,
 		broadcastFn,
 		testRoundDuration, makeTestConditionRegistry(),
-		nil, nil, nil, nil, nil, nil, nil,
+		nil, nil, nil, nil, nil, nil, nil, nil,
 	)
 
 	// Start combat — Attack initialises the combat instance with player at

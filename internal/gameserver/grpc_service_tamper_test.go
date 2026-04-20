@@ -52,7 +52,7 @@ func TestTamper_AppliesConditionToFoeInCombat(t *testing.T) {
 	combatHandler := NewCombatHandler(
 		combat.NewEngine(), npcMgr, sessMgr, roller,
 		func(_ string, _ []*gamev1.CombatEvent) {},
-		testRoundDuration, condReg, worldMgr, nil, nil, nil, nil, nil, nil,
+		testRoundDuration, condReg, worldMgr, nil, nil, nil, nil, nil, nil, nil,
 	)
 
 	svc := newTestGameServiceServer(

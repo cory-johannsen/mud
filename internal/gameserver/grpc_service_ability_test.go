@@ -38,6 +38,7 @@ func makeAbilityCombatHandler(t *testing.T, broadcastFn func(string, []*gamev1.C
 		nil, // scriptMgr
 		nil, // invRegistry
 		aiReg,
+		nil, // aiItemRegistry
 		nil, // respawnMgr
 		nil, // floorMgr
 		mentalMgr,

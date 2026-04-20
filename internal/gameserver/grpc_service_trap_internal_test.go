@@ -503,7 +503,7 @@ func TestCheckConsumableTraps_MultipleOverlapping_AllFire(t *testing.T) {
 		combat.NewEngine(), npcMgr, sessMgr, roller,
 		func(_ string, _ []*gamev1.CombatEvent) {},
 		testRoundDuration, makeTestConditionRegistry(),
-		nil, nil, nil, nil, nil, nil, nil,
+		nil, nil, nil, nil, nil, nil, nil, nil,
 	)
 	trapMgr := trap.NewTrapManager()
 	mineTmpl := &trap.TrapTemplate{
@@ -570,7 +570,7 @@ func TestCheckConsumableTraps_BlastRadius_DisarmsAfterFiring(t *testing.T) {
 		combat.NewEngine(), npcMgr, sessMgr, roller,
 		func(_ string, _ []*gamev1.CombatEvent) {},
 		testRoundDuration, makeTestConditionRegistry(),
-		nil, nil, nil, nil, nil, nil, nil,
+		nil, nil, nil, nil, nil, nil, nil, nil,
 	)
 	trapMgr := trap.NewTrapManager()
 	mineTmpl := &trap.TrapTemplate{

@@ -63,7 +63,7 @@ func makeCoverObjectsHandler(
 		engine, npcMgr, sessMgr, roller, broadcastFn,
 		200*time.Millisecond,
 		reg,
-		wm, nil, nil, nil, nil, nil, nil,
+		wm, nil, nil, nil, nil, nil, nil, nil,
 	)
 
 	var mu sync.Mutex

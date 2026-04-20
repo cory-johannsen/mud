@@ -29,7 +29,7 @@ func newSeductionTestCombatHandler(t *testing.T, npcMgr *npc.Manager) *CombatHan
 	return NewCombatHandler(
 		nil, npcMgr, sessMgr, nil,
 		func(_ string, _ []*gamev1.CombatEvent) {},
-		0, condReg, nil, nil, nil, nil, nil, nil, nil,
+		0, condReg, nil, nil, nil, nil, nil, nil, nil, nil,
 	)
 }
 
@@ -98,7 +98,7 @@ func TestNPCSeduction_HighFlair_PlayerSeduced(t *testing.T) {
 	h := NewCombatHandler(
 		nil, mgr, sessMgr, nil,
 		func(_ string, _ []*gamev1.CombatEvent) {},
-		0, condReg, nil, nil, nil, nil, nil, nil, nil,
+		0, condReg, nil, nil, nil, nil, nil, nil, nil, nil,
 	)
 
 	result := h.ResolveNPCSeductionContest(inst, "player1", 8, seducedDef, condSet, 20, 1)
@@ -142,7 +142,7 @@ func TestNPCSeduction_LowFlair_NPCBecomesHostile(t *testing.T) {
 	h := NewCombatHandler(
 		nil, mgr, sessMgr, nil,
 		func(_ string, _ []*gamev1.CombatEvent) {},
-		0, nil, nil, nil, nil, nil, nil, nil, nil,
+		0, nil, nil, nil, nil, nil, nil, nil, nil, nil,
 	)
 
 	result := h.ResolveNPCSeductionContest(inst, "player1", 18, seducedDef, condSet, 1, 20)
@@ -188,7 +188,7 @@ func TestProperty_NPCSeduction_HighFlairAlwaysSeduces(t *testing.T) {
 		h := NewCombatHandler(
 			nil, mgr, session.NewManager(), nil,
 			func(_ string, _ []*gamev1.CombatEvent) {},
-			0, nil, nil, nil, nil, nil, nil, nil, nil,
+			0, nil, nil, nil, nil, nil, nil, nil, nil, nil,
 		)
 
 		result := h.ResolveNPCSeductionContest(inst, "player1", playerSavvy, seducedDef, condSet, 20, 1)

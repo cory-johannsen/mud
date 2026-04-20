@@ -23,7 +23,7 @@ func newMinimalCombatHandler(t *testing.T) *CombatHandler {
 	return NewCombatHandler(
 		combat.NewEngine(), npc.NewManager(), sessMgr, roller,
 		func(_ string, _ []*gamev1.CombatEvent) {},
-		testRoundDuration, makeTestConditionRegistry(), nil, nil, nil, nil, nil, nil, nil,
+		testRoundDuration, makeTestConditionRegistry(), nil, nil, nil, nil, nil, nil, nil, nil,
 	)
 }
 
@@ -99,7 +99,7 @@ func TestProperty_Split_Currency_EqualShare(t *testing.T) {
 		h := NewCombatHandler(
 			combat.NewEngine(), npc.NewManager(), sessMgr, roller,
 			func(_ string, _ []*gamev1.CombatEvent) {},
-			testRoundDuration, makeTestConditionRegistry(), nil, nil, nil, nil, nil, nil, nil,
+			testRoundDuration, makeTestConditionRegistry(), nil, nil, nil, nil, nil, nil, nil, nil,
 		)
 
 		h.distributeCurrencyLocked(context.Background(), participants, totalCurrency)

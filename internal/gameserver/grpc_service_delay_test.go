@@ -24,7 +24,7 @@ func newDelaySvcWithCombat(t *testing.T, roller *dice.Roller) (*GameServiceServe
 	combatHandler := NewCombatHandler(
 		combat.NewEngine(), npcMgr, sessMgr, roller,
 		func(_ string, _ []*gamev1.CombatEvent) {},
-		testRoundDuration, makeTestConditionRegistry(), nil, nil, nil, nil, nil, nil, nil,
+		testRoundDuration, makeTestConditionRegistry(), nil, nil, nil, nil, nil, nil, nil, nil,
 	)
 	svc := newTestGameServiceServer(
 		worldMgr, sessMgr,

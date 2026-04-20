@@ -71,7 +71,7 @@ func makeSafeRoomCombatHandler(t *testing.T, sessMgr *session.Manager) *CombatHa
 		combat.NewEngine(), npc.NewManager(), sessMgr, roller,
 		func(_ string, _ []*gamev1.CombatEvent) {},
 		200*time.Millisecond, makeTestConditionRegistry(),
-		nil, nil, nil, nil, nil, nil, nil,
+		nil, nil, nil, nil, nil, nil, nil, nil,
 	)
 }
 

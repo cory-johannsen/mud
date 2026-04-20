@@ -70,6 +70,9 @@ type ContentDeps struct {
 	TechRegistry         *technology.Registry
 	CondRegistry         *condition.Registry
 	AIRegistry           *ai.Registry
+	// AIItemRegistry holds HTN domains for AI item combat behavior.
+	// Separate from AIRegistry (NPC domains). May be nil — AI item phase is skipped.
+	AIItemRegistry       *ai.ItemDomainRegistry
 	AllSkills            []*ruleset.Skill
 	AllFeats             []*ruleset.Feat
 	ClassFeatures        []*ruleset.ClassFeature

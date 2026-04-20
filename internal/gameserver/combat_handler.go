@@ -64,6 +64,7 @@ type CombatHandler struct {
 	scriptMgr     *scripting.Manager
 	invRegistry   *inventory.Registry
 	aiRegistry    *ai.Registry
+	aiItemRegistry *ai.ItemDomainRegistry
 	respawnMgr    *npc.RespawnManager
 	floorMgr      *inventory.FloorManager
 	onCombatEndFn      func(roomID string)                            // optional; called after combat ends; may be nil
@@ -162,6 +163,7 @@ func NewCombatHandler(
 	scriptMgr *scripting.Manager,
 	invRegistry *inventory.Registry,
 	aiRegistry *ai.Registry,
+	aiItemRegistry *ai.ItemDomainRegistry,
 	respawnMgr     *npc.RespawnManager,
 	floorMgr       *inventory.FloorManager,
 	mentalStateMgr *mentalstate.Manager,
@@ -177,7 +179,8 @@ func NewCombatHandler(
 		worldMgr:      worldMgr,
 		scriptMgr:     scriptMgr,
 		invRegistry:   invRegistry,
-		aiRegistry:    aiRegistry,
+		aiRegistry:     aiRegistry,
+		aiItemRegistry: aiItemRegistry,
 		respawnMgr:     respawnMgr,
 		floorMgr:       floorMgr,
 		mentalStateMgr: mentalStateMgr,

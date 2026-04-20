@@ -67,7 +67,7 @@ func newWrathSvc(t *testing.T, feats []*ruleset.Feat) (*GameServiceServer, *sess
 	combatHandler := NewCombatHandler(
 		combat.NewEngine(), npcMgr, sessMgr, roller,
 		func(_ string, _ []*gamev1.CombatEvent) {},
-		testRoundDuration, condReg, nil, nil, nil, nil, nil, nil, mentalMgr,
+		testRoundDuration, condReg, nil, nil, nil, nil, nil, nil, nil, mentalMgr,
 	)
 	featIDs := make([]string, len(feats))
 	for i, f := range feats {

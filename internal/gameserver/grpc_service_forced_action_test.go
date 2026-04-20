@@ -31,7 +31,7 @@ func makeForcedActionHandler(t *testing.T, mentalMgr *mentalstate.Manager) (*Com
 	h := NewCombatHandler(
 		engine, npcMgr, sessMgr, roller, broadcastFn,
 		10*time.Second, makeTestConditionRegistry(),
-		nil, nil, nil, nil, nil, nil, mentalMgr,
+		nil, nil, nil, nil, nil, nil, nil, mentalMgr,
 	)
 	return h, npcMgr, sessMgr
 }

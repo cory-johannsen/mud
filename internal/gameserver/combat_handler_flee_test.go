@@ -54,7 +54,7 @@ func makeFleeHandler(t *testing.T, broadcastFn func(string, []*gamev1.CombatEven
 		engine, npcMgr, sessMgr, roller,
 		broadcastFn, testRoundDuration,
 		makeTestConditionRegistry(), wm, nil, nil, aiReg,
-		nil, nil, nil,
+		nil, nil, nil, nil,
 	)
 	return h, wm
 }
@@ -84,7 +84,7 @@ func makeFleeHandlerNoExits(t *testing.T, broadcastFn func(string, []*gamev1.Com
 		engine, npcMgr, sessMgr, roller,
 		broadcastFn, testRoundDuration,
 		makeTestConditionRegistry(), wm, nil, nil, aiReg,
-		nil, nil, nil,
+		nil, nil, nil, nil,
 	)
 }
 

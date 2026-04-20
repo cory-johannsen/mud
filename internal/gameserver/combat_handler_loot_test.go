@@ -75,6 +75,7 @@ func makeLootHandlerWithRegistry(
 		lootTestRoundDuration,
 		makeRespawnTestConditionRegistry(),
 		nil, nil, invRegistry, nil,
+		nil,
 		respawnMgr,
 		floorMgr,
 		nil, // mentalStateMgr

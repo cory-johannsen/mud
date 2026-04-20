@@ -99,6 +99,7 @@ func makeHTNCombatHandler(t *testing.T, broadcastFn func(string, []*gamev1.Comba
 		nil, // scriptMgr
 		nil, // invRegistry
 		aiReg,
+		nil, // aiItemRegistry
 		nil, // respawnMgr
 		nil, // floorMgr
 		nil, // mentalStateMgr

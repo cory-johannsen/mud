@@ -97,7 +97,7 @@ func NewCombatHandlerProvider(
 	if roundDuration <= 0 {
 		roundDuration = 6 * time.Second
 	}
-	h := NewCombatHandler(combatEngine, npcMgr, sessMgr, diceRoller, nil, roundDuration, condRegistry, worldMgr, scriptMgr, invRegistry, aiRegistry, respawnMgr, floorMgr, mentalMgr)
+	h := NewCombatHandler(combatEngine, npcMgr, sessMgr, diceRoller, nil, roundDuration, condRegistry, worldMgr, scriptMgr, invRegistry, aiRegistry, nil, respawnMgr, floorMgr, mentalMgr)
 	h.SetLogger(logger)
 	return h
 }

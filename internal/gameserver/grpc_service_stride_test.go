@@ -60,7 +60,7 @@ func newStrideSvcWithCombat(t *testing.T) (*GameServiceServer, *session.Manager,
 	combatHandler := NewCombatHandler(
 		combat.NewEngine(), npcMgr, sessMgr, roller,
 		func(_ string, _ []*gamev1.CombatEvent) {},
-		testRoundDuration, makeTestConditionRegistry(), nil, nil, nil, nil, nil, nil, nil,
+		testRoundDuration, makeTestConditionRegistry(), nil, nil, nil, nil, nil, nil, nil, nil,
 	)
 	svc := newTestGameServiceServer(
 		worldMgr, sessMgr,
@@ -306,7 +306,7 @@ func newStrideSvcWithCombatAndRegistry(t *testing.T, reg *inventory.Registry) (*
 	combatHandler := NewCombatHandler(
 		combat.NewEngine(), npcMgr, sessMgr, roller,
 		func(_ string, _ []*gamev1.CombatEvent) {},
-		testRoundDuration, makeTestConditionRegistry(), nil, nil, reg, nil, nil, nil, nil,
+		testRoundDuration, makeTestConditionRegistry(), nil, nil, reg, nil, nil, nil, nil, nil,
 	)
 	svc := newTestGameServiceServer(
 		worldMgr, sessMgr,

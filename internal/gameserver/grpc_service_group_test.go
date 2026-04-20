@@ -24,7 +24,7 @@ func newGroupSvc(t *testing.T) (*GameServiceServer, *session.Manager) {
 	combatHandler := NewCombatHandler(
 		combat.NewEngine(), npcMgr, sessMgr, nil,
 		func(_ string, _ []*gamev1.CombatEvent) {},
-		testRoundDuration, makeTestConditionRegistry(), nil, nil, nil, nil, nil, nil, nil,
+		testRoundDuration, makeTestConditionRegistry(), nil, nil, nil, nil, nil, nil, nil, nil,
 	)
 	svc := newTestGameServiceServer(
 		worldMgr, sessMgr,

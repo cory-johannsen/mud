@@ -26,7 +26,7 @@ func newNonCombatCombatHandler(t *testing.T, npcMgr *npc.Manager) (*CombatHandle
 	h := NewCombatHandler(
 		combat.NewEngine(), npcMgr, sessMgr, roller,
 		func(_ string, _ []*gamev1.CombatEvent) {},
-		testRoundDuration, condReg, nil, nil, nil, nil, nil, nil, nil,
+		testRoundDuration, condReg, nil, nil, nil, nil, nil, nil, nil, nil,
 	)
 	return h, sessMgr
 }

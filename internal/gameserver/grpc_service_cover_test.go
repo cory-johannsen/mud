@@ -120,7 +120,7 @@ func newCoverSvcWithCombatTB(t *testing.T, worldMgr *world.Manager, sessMgr *ses
 	combatHandler := NewCombatHandler(
 		combat.NewEngine(), npcMgr, sessMgr, roller,
 		func(_ string, _ []*gamev1.CombatEvent) {},
-		testRoundDuration, condReg, worldMgr, nil, nil, nil, nil, nil, nil,
+		testRoundDuration, condReg, worldMgr, nil, nil, nil, nil, nil, nil, nil,
 	)
 	svc := newTestGameServiceServer(
 		worldMgr, sessMgr,
@@ -463,7 +463,7 @@ func TestHandleTakeCover_InCombat_SpendAP(t *testing.T) {
 	combatHandler := NewCombatHandler(
 		combat.NewEngine(), npcMgr, sessMgr, roller,
 		func(_ string, _ []*gamev1.CombatEvent) {},
-		testRoundDuration, condReg, nil, nil, nil, nil, nil, nil, nil,
+		testRoundDuration, condReg, nil, nil, nil, nil, nil, nil, nil, nil,
 	)
 	svc := newTestGameServiceServer(
 		worldMgr, sessMgr,
@@ -540,7 +540,7 @@ func newCombatSvcWithCover(t *testing.T, worldMgr *world.Manager, sessMgr *sessi
 	combatHandler := NewCombatHandler(
 		combat.NewEngine(), npcMgr, sessMgr, roller,
 		func(_ string, _ []*gamev1.CombatEvent) {},
-		testRoundDuration, condReg, nil, nil, nil, nil, nil, nil, nil,
+		testRoundDuration, condReg, nil, nil, nil, nil, nil, nil, nil, nil,
 	)
 	svc := newTestGameServiceServer(
 		worldMgr, sessMgr,
@@ -625,7 +625,7 @@ func TestStrideRemovesCoverCondition(t *testing.T) {
 		combatHandler := NewCombatHandler(
 			combat.NewEngine(), npcMgr, sessMgr, roller,
 			func(_ string, _ []*gamev1.CombatEvent) {},
-			testRoundDuration, condReg, nil, nil, nil, nil, nil, nil, nil,
+			testRoundDuration, condReg, nil, nil, nil, nil, nil, nil, nil, nil,
 		)
 		svc := newTestGameServiceServer(
 			worldMgr, sessMgr,
@@ -688,7 +688,7 @@ func TestStepRemovesCoverCondition(t *testing.T) {
 		combatHandler := NewCombatHandler(
 			combat.NewEngine(), npcMgr, sessMgr, roller,
 			func(_ string, _ []*gamev1.CombatEvent) {},
-			testRoundDuration, condReg, nil, nil, nil, nil, nil, nil, nil,
+			testRoundDuration, condReg, nil, nil, nil, nil, nil, nil, nil, nil,
 		)
 		svc := newTestGameServiceServer(
 			worldMgr, sessMgr,
@@ -752,7 +752,7 @@ func TestTumbleSuccessRemovesCoverCondition(t *testing.T) {
 		combatHandler := NewCombatHandler(
 			combat.NewEngine(), npcMgr, sessMgr, roller,
 			func(_ string, _ []*gamev1.CombatEvent) {},
-			testRoundDuration, condReg, nil, nil, nil, nil, nil, nil, nil,
+			testRoundDuration, condReg, nil, nil, nil, nil, nil, nil, nil, nil,
 		)
 		svc := newTestGameServiceServer(
 			worldMgr, sessMgr,

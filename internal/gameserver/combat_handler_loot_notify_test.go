@@ -52,6 +52,7 @@ func makeLootNotifyHandler(
 		reg,
 		nil,
 		nil,
+		nil,
 		floorMgr,
 		nil,
 	)

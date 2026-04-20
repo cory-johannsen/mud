@@ -39,7 +39,7 @@ func TestBuildPlayerCombatant_LoadoutFallback_FromSession(t *testing.T) {
 	combatHandler := NewCombatHandler(
 		engine, npcMgr, sessMgr, roller,
 		func(_ string, _ []*gamev1.CombatEvent) {},
-		testRoundDuration, makeTestConditionRegistry(), nil, nil, nil, nil, nil, nil, nil,
+		testRoundDuration, makeTestConditionRegistry(), nil, nil, nil, nil, nil, nil, nil, nil,
 	)
 
 	uid := "lf_player"
@@ -113,7 +113,7 @@ func TestBuildPlayerCombatant_LoadoutFallback_NilLoadoutSet(t *testing.T) {
 	combatHandler := NewCombatHandler(
 		engine, npcMgr, sessMgr, roller,
 		func(_ string, _ []*gamev1.CombatEvent) {},
-		testRoundDuration, makeTestConditionRegistry(), nil, nil, nil, nil, nil, nil, nil,
+		testRoundDuration, makeTestConditionRegistry(), nil, nil, nil, nil, nil, nil, nil, nil,
 	)
 
 	uid := "lf_nil_player"

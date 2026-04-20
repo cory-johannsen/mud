@@ -75,7 +75,7 @@ func newOverpowerSvc(t *testing.T) (*GameServiceServer, *session.Manager, *npc.M
 	combatHandler := NewCombatHandler(
 		combat.NewEngine(), npcMgr, sessMgr, roller,
 		func(_ string, _ []*gamev1.CombatEvent) {},
-		200*time.Millisecond, condReg, nil, nil, nil, nil, nil, nil, nil,
+		200*time.Millisecond, condReg, nil, nil, nil, nil, nil, nil, nil, nil,
 	)
 	svc := newTestGameServiceServer(
 		worldMgr, sessMgr,
