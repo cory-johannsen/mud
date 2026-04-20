@@ -1,0 +1,27 @@
+id: cipher
+name: Cipher
+npc_type: quest_giver
+npc_role: quest_giver
+type: human
+description: >
+  A slight figure hunched over a workbench covered in circuit boards and
+  stripped weapon receivers. They don't look up when you enter. Whatever
+  they're soldering, it's more interesting than you are. For now.
+level: 0
+max_hp: 22
+ac: 10
+awareness: 5
+disposition: neutral
+personality: neutral
+quest_giver:
+  placeholder_dialog:
+    - "The modification takes weeks. The components aren't cheap. Prove yourself first."
+    - "I don't do walk-ins. You were referred. That means something. Barely."
+    - "I've been waiting for someone worth the components. Maybe that's you."
+  quest_ids:
+    - machete_field_test
+    - gun_field_test
+loot:
+  currency:
+    min: 0
+    max: 0
