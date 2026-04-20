@@ -5020,6 +5020,30 @@ func (h *CombatHandler) ActiveCombatForPlayer(uid string) *combat.Combat {
 	return cbt
 }
 
+// RemovePlayerFromCombat removes uid from any active combat in roomID.
+// If no living players remain after removal, the combat timer is stopped and
+// the combat is ended. This is used by handleTravel to clean up pursuit
+// combats when a player warps away after fleeing (issue #215).
+//
+// Precondition: uid and roomID must be non-empty.
+// Postcondition: If an active combat existed for roomID, uid is removed from it.
+//
+//	If no living players remain, the combat is fully terminated.
+func (h *CombatHandler) RemovePlayerFromCombat(uid, roomID string) {
+	h.combatMu.Lock()
+	defer h.combatMu.Unlock()
+	cbt, ok := h.engine.GetCombat(roomID)
+	if !ok {
+		return
+	}
+	h.removeCombatant(cbt, uid)
+	if !cbt.HasLivingPlayers() {
+		h.stopTimerLocked(roomID)
+		h.engine.EndCombat(roomID)
+		h.clearCoweringNPCsLocked(roomID)
+	}
+}
+
 // DisarmNPC clears the weapon from the NPC combatant identified by npcInstID
 // in the active combat for the room where uid is fighting.
 // Returns the weapon item ID that was cleared (empty string if NPC was already unarmed).

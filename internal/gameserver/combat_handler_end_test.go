@@ -7,6 +7,7 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/combat"
 	"github.com/cory-johannsen/mud/internal/game/session"
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
+	"pgregory.net/rapid"
 )
 
 // TestCombatEnd_PlayerStatusResetToIdle verifies that after combat ends
@@ -231,6 +232,80 @@ func TestCombatEnd_DisconnectedPlayerDoesNotBlockCombatEnd(t *testing.T) {
 	if _, stillActive := h.engine.GetCombat(roomID); stillActive {
 		t.Errorf("BUG-32: combat engine still has active combat for room after all NPCs dead")
 	}
+}
+
+// TestRemovePlayerFromCombat_StopsTimerWhenNoPlayersRemain verifies that when the
+// last player is removed from a room's combat via RemovePlayerFromCombat, the
+// round timer is stopped and the combat engine no longer has an active combat for
+// that room.
+//
+// This exercises the fix for issue #215: pursuit combat fires indefinitely after
+// a player warps away (handleTravel) following a flee.
+//
+// Precondition: Player is in an active combat room with a running timer.
+// Postcondition: After RemovePlayerFromCombat, IsRoomInCombat returns false.
+func TestRemovePlayerFromCombat_StopsTimerWhenNoPlayersRemain(t *testing.T) {
+	broadcastFn := func(_ string, _ []*gamev1.CombatEvent) {}
+	h := makeCombatHandler(t, broadcastFn)
+	const roomID = "room-pursuit-215"
+
+	inst := spawnTestNPC(t, h.npcMgr, roomID)
+	addTestPlayer(t, h.sessions, "player-215", roomID)
+
+	if _, err := h.Attack("player-215", inst.Name()); err != nil {
+		t.Fatalf("Attack: %v", err)
+	}
+	// Timer is now running; cancel it so the round does not auto-resolve in the
+	// background during the test, then re-start it to simulate a live pursuit.
+	h.cancelTimer(roomID)
+	h.combatMu.Lock()
+	h.startTimerLocked(roomID)
+	h.combatMu.Unlock()
+
+	if !h.IsRoomInCombat(roomID) {
+		t.Fatal("precondition: expected IsRoomInCombat == true")
+	}
+
+	// Simulate the player's Status already being idle (post-flee) and then
+	// calling handleTravel, which invokes RemovePlayerFromCombat.
+	h.RemovePlayerFromCombat("player-215", roomID)
+
+	if h.IsRoomInCombat(roomID) {
+		t.Errorf("issue #215: expected IsRoomInCombat == false after RemovePlayerFromCombat; timer still running")
+	}
+	if _, active := h.engine.GetCombat(roomID); active {
+		t.Errorf("issue #215: combat engine still has active combat for room after last player removed")
+	}
+}
+
+// TestProperty_RemovePlayerFromCombat_NeverErrors verifies that RemovePlayerFromCombat
+// never panics or returns a data race regardless of room state.
+//
+// Postcondition: Call always completes without panic across arbitrary room IDs.
+func TestProperty_RemovePlayerFromCombat_NeverErrors(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		broadcastFn := func(_ string, _ []*gamev1.CombatEvent) {}
+		h := makeCombatHandler(t, broadcastFn)
+
+		roomID := rapid.StringMatching(`[a-z]{1,8}`).Draw(rt, "roomID")
+		uid := rapid.StringMatching(`[a-z]{1,8}`).Draw(rt, "uid")
+
+		// RemovePlayerFromCombat must not panic regardless of whether
+		// the player or combat exists.
+		h.RemovePlayerFromCombat(uid, roomID)
+
+		// Additionally exercise the case where combat is active.
+		inst := spawnTestNPC(t, h.npcMgr, "prop-room")
+		addTestPlayer(t, h.sessions, "prop-uid", "prop-room")
+		if _, err := h.Attack("prop-uid", inst.Name()); err != nil {
+			rt.Fatalf("Attack: %v", err)
+		}
+		h.cancelTimer("prop-room")
+		h.RemovePlayerFromCombat("prop-uid", "prop-room")
+		if h.IsRoomInCombat("prop-room") {
+			rt.Errorf("property: expected IsRoomInCombat == false after last player removed")
+		}
+	})
 }
 
 // TestCombatEnd_StaleSessionReplacedOnReconnect verifies that when a player

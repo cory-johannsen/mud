@@ -70,6 +70,14 @@ func (s *GameServiceServer) handleTravel(uid string, req *gamev1.TravelRequest) 
 		return messageEvent("That zone is unreachable right now."), nil
 	}
 
+	// REQ-WM-22a: clean up any pursuit combat in the player's current room.
+	// After fleeing, the player's status returns to idle but a pursuit combat
+	// timer may still be running in the original room (issue #215). Force-remove
+	// the player from it so the timer does not fire indefinitely.
+	if s.combatH != nil {
+		s.combatH.RemovePlayerFromCombat(uid, sess.RoomID)
+	}
+
 	oldRoomID, err := s.sessions.MovePlayer(uid, destRoom.ID)
 	if err != nil {
 		return nil, fmt.Errorf("handleTravel MovePlayer: %w", err)
