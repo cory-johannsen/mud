@@ -119,6 +119,7 @@ export interface GameState {
   choicePrompt: ChoicePrompt | null
   jobGrants: JobGrantsResponse | null
   questFlashCount: number
+  autoNavStepMs: number  // step delay for click-to-travel (REQ-CNT-2)
 }
 
 type Action =
@@ -160,6 +161,7 @@ type Action =
   | { type: 'CLEAR_CHOICE_PROMPT' }
   | { type: 'SET_JOB_GRANTS'; grants: JobGrantsResponse | null }
   | { type: 'QUEST_ADDED' }
+  | { type: 'SET_AUTO_NAV_STEP_MS'; ms: number }
 
 export function reducer(state: GameState, action: Action): GameState {
   switch (action.type) {
@@ -264,6 +266,8 @@ export function reducer(state: GameState, action: Action): GameState {
       return { ...state, jobGrants: action.grants }
     case 'QUEST_ADDED':
       return { ...state, questFlashCount: state.questFlashCount + 1 }
+    case 'SET_AUTO_NAV_STEP_MS':
+      return { ...state, autoNavStepMs: action.ms }
     case 'APPEND_FEED': {
       const updated = [...state.feedEntries, action.entry]
       return {
@@ -315,6 +319,7 @@ export const initialState: GameState = {
   choicePrompt: null,
   jobGrants: null,
   questFlashCount: 0,
+  autoNavStepMs: 1000,
 }
 
 interface GameContextValue {
@@ -333,6 +338,7 @@ interface GameContextValue {
   dismissQuestComplete: () => void
   clearLoadout: () => void
   clearChoicePrompt: () => void
+  appendMessage: (text: string) => void
 }
 
 const GameContext = createContext<GameContextValue | null>(null)
@@ -727,6 +733,14 @@ export function GameProvider({ children }: { children: ReactNode }) {
           })
           break
         }
+        case 'GameConfig': {
+          const gc = payload as { autoNavStepMs?: number; auto_nav_step_ms?: number }
+          const ms = gc.autoNavStepMs ?? gc.auto_nav_step_ms ?? 1000
+          if (ms >= 100) {
+            dispatch({ type: 'SET_AUTO_NAV_STEP_MS', ms })
+          }
+          break
+        }
         case 'ErrorEvent': {
           const err = payload as { message?: string }
           dispatch({
@@ -814,8 +828,12 @@ export function GameProvider({ children }: { children: ReactNode }) {
     dispatch({ type: 'CLEAR_CHOICE_PROMPT' })
   }, [])
 
+  const appendMessage = useCallback((text: string) => {
+    dispatch({ type: 'APPEND_FEED', entry: makeFeedEntry('system', text) })
+  }, [])
+
   return (
-    <GameContext.Provider value={{ state, sendMessage, sendCommand, clearShop, clearHealer, clearTrainer, clearTechTrainer, clearFixer, clearRestView, clearNpcView, clearCombatNpcView, clearQuestGiverView, dismissQuestComplete, clearLoadout, clearChoicePrompt }}>
+    <GameContext.Provider value={{ state, sendMessage, sendCommand, clearShop, clearHealer, clearTrainer, clearTechTrainer, clearFixer, clearRestView, clearNpcView, clearCombatNpcView, clearQuestGiverView, dismissQuestComplete, clearLoadout, clearChoicePrompt, appendMessage }}>
       {children}
     </GameContext.Provider>
   )
