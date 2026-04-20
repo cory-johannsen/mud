@@ -4,6 +4,7 @@ import type { MapTile, CoverObjectPosition } from '../../proto'
 import { RoomTooltip } from '../RoomTooltip'
 import { ZoneMapSvg, REFERENCE_W } from '../ZoneMapSvg'
 import { WorldMapSvg } from '../WorldMapSvg'
+import { useAutoNav } from '../useAutoNav'
 
 const COMPASS_DIRS = [
   ['nw', 'n', 'ne'],
@@ -204,7 +205,7 @@ function renderBattleGrid(
 }
 
 export function MapPanel() {
-  const { state, sendMessage, sendCommand } = useGame()
+  const { state, sendMessage, sendCommand, appendMessage } = useGame()
   const [showWorld, setShowWorld] = useState(false)
   const [hoveredTile, setHoveredTile] = useState<MapTile | null>(null)
   const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 })
@@ -226,21 +227,31 @@ export function MapPanel() {
     return () => ro.disconnect()
   }, [])
 
+  const currentRoomId = state.roomView?.roomId ?? ''
+
+  const autoNav = useAutoNav(
+    state.mapTiles,
+    currentRoomId,
+    state.autoNavStepMs,
+    (direction) => sendMessage('MoveRequest', { direction }),
+    (roomName) => appendMessage(`No explored path to ${roomName}.`),
+  )
+
   // REQ-MAP-TRAVEL-1: Auto-switch back to zone map when travel completes.
   // When the room ID changes while the world map is showing, the player has
   // fast-travelled to a new zone — switch back to zone view automatically.
   // showWorld is included in deps so the closure always sees the current value;
   // omitting it causes a stale closure where showWorld reads as false even after
   // the user has switched to world view.
-  const currentRoomId = state.roomView?.roomId ?? null
+  const currentRoomIdOrNull = state.roomView?.roomId ?? null
   useEffect(() => {
-    if (showWorld && currentRoomId !== null && currentRoomId !== prevRoomIdRef.current) {
+    if (showWorld && currentRoomIdOrNull !== null && currentRoomIdOrNull !== prevRoomIdRef.current) {
       setShowWorld(false)
       sendMessage('MapRequest', { view: 'zone' })
     }
-    prevRoomIdRef.current = currentRoomId
+    prevRoomIdRef.current = currentRoomIdOrNull
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentRoomId, showWorld])
+  }, [currentRoomIdOrNull, showWorld])
 
   const handleRoomEnter = useCallback((tile: MapTile, e: React.MouseEvent) => {
     const rect = (e.currentTarget as Element).getBoundingClientRect()
@@ -257,6 +268,7 @@ export function MapPanel() {
   }
 
   function switchToWorld() {
+    autoNav.cancel()
     setShowWorld(true)
     sendMessage('MapRequest', { view: 'world' })
   }
@@ -413,6 +425,8 @@ export function MapPanel() {
               (state.worldTiles.find(t => !!t.current)?.levelRange)
               ?? (state.worldTiles.find(t => !!t.current)?.level_range)
             }
+            onTileClick={autoNav.start}
+            destinationRoomId={autoNav.destinationRoomId}
           />
           {hoveredTile && (
             <RoomTooltip tile={hoveredTile} pos={tooltipPos} />

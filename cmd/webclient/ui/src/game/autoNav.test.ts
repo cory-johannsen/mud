@@ -102,7 +102,7 @@ describe('findPath property tests', () => {
           fc.integer({ min: 0, max: n - 1 }),
         )
       ),
-      ([n, ids, fromIdx, toIdx]) => {
+      ([_n, ids, fromIdx, toIdx]) => {
         const tiles = makeChain(ids)
         const path = findPath(tiles, ids[fromIdx], ids[toIdx])
         if (fromIdx === toIdx) return path !== null && path.length === 0
