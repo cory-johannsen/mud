@@ -2,7 +2,7 @@ zone:
   id: felony_flats
   danger_level: dangerous
   min_level: 1
-  max_level: 6
+  max_level: 10
   world_x: 4
   world_y: 2
   script_dir: content/scripts/zones/felony_flats
@@ -776,6 +776,7 @@ zone:
   - id: flats_enforcer_den
     core: true
     boss_room: true
+    danger_level: dangerous
     title: Enforcer Den
     description: 'A fortified storefront with steel-plate shutters and a reinforced
 

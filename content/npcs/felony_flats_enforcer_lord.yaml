@@ -6,10 +6,33 @@ description: >
   of old scars, and his arms bear the mark of every crew he's ever put down.
   He enforces the block's protection racket with practiced efficiency,
   collecting tribute from the crack houses and motels alike.
-level: 6
-max_hp: 82
-ac: 18
+level: 10
+max_hp: 210
+tier: boss
+ac: 21
 rob_multiplier: 2.0
+boss_abilities:
+  - id: gang_dominance
+    name: "Gang Dominance"
+    trigger: round_start
+    trigger_value: 0
+    cooldown: "3m"
+    effect:
+      aoe_condition: frightened
+  - id: shank_volley
+    name: "Shank Volley"
+    trigger: hp_pct_below
+    trigger_value: 75
+    cooldown: "4m"
+    effect:
+      aoe_damage_expr: "2d6"
+  - id: territorial_rage
+    name: "Territorial Rage"
+    trigger: hp_pct_below
+    trigger_value: 50
+    cooldown: "5m"
+    effect:
+      heal_pct: 25
 awareness: 9
 ai_domain: felony_flats_enforcer_lord_combat
 respawn_delay: "10m"

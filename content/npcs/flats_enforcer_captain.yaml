@@ -1,8 +1,9 @@
 id: flats_enforcer_captain
 name: Enforcer Captain
 description: The veteran who runs the Enforcer Den. Scarred, deliberate, and dangerous. Commands the block's crew with practiced authority and shows no hesitation when violence is required.
-level: 5
-max_hp: 52
+level: 8
+max_hp: 84
+tier: elite
 ac: 17
 awareness: 7
 ai_domain: ganger_combat
