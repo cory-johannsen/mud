@@ -98,6 +98,9 @@ export interface GameState {
   combatantHp: Record<string, CombatantHp>
   combatantAP: Record<string, CombatantAP>
   hotbarSlots: HotbarSlot[]
+  activeHotbarIndex: number
+  hotbarCount: number
+  maxHotbars: number
   timeOfDay: TimeOfDayEvent | null
   activeWeather: string | null
   activeWeatherDescription: string | null
@@ -135,7 +138,7 @@ type Action =
   | { type: 'CLEAR_COMBATANT_HP' }
   | { type: 'UPDATE_COMBATANT_AP'; name: string; remaining: number; total: number; movementRemaining?: number }
   | { type: 'CLEAR_COMBATANT_AP' }
-  | { type: 'SET_HOTBAR'; slots: HotbarSlot[] }
+  | { type: 'SET_HOTBAR'; slots: HotbarSlot[]; activeHotbarIndex: number; hotbarCount: number; maxHotbars: number }
   | { type: 'SET_TIME_OF_DAY'; tod: TimeOfDayEvent }
   | { type: 'SET_ACTIVE_WEATHER'; weather: string | null; description: string | null }
   | { type: 'UPDATE_PLAYER_HP'; current: number; max: number }
@@ -209,7 +212,13 @@ export function reducer(state: GameState, action: Action): GameState {
     case 'CLEAR_COMBATANT_AP':
       return { ...state, combatantAP: {} }
     case 'SET_HOTBAR':
-      return { ...state, hotbarSlots: action.slots }
+      return {
+        ...state,
+        hotbarSlots: action.slots,
+        activeHotbarIndex: action.activeHotbarIndex,
+        hotbarCount: action.hotbarCount,
+        maxHotbars: action.maxHotbars,
+      }
     case 'UPDATE_PLAYER_HP':
       return {
         ...state,
@@ -285,6 +294,9 @@ export const initialState: GameState = {
   combatantHp: {},
   combatantAP: {},
   hotbarSlots: Array(10).fill({ kind: 'command', ref: '' }) as HotbarSlot[],
+  activeHotbarIndex: 1,
+  hotbarCount: 1,
+  maxHotbars: 4,
   timeOfDay: null,
   activeWeather: null,
   activeWeatherDescription: null,
@@ -589,11 +601,22 @@ export function GameProvider({ children }: { children: ReactNode }) {
           break
         }
         case 'HotbarUpdate': {
-          const hu = payload as { slots?: HotbarSlot[] }
-          const slots = Array.isArray(hu.slots)
+          const hu = payload as {
+            slots?: HotbarSlot[]
+            active_hotbar_index?: number
+            hotbar_count?: number
+            max_hotbars?: number
+          }
+          const slots = hu.slots && hu.slots.length > 0
             ? hu.slots
             : (Array(10).fill({ kind: 'command', ref: '' }) as HotbarSlot[])
-          dispatch({ type: 'SET_HOTBAR', slots })
+          dispatch({
+            type: 'SET_HOTBAR',
+            slots,
+            activeHotbarIndex: hu.active_hotbar_index ?? 1,
+            hotbarCount: hu.hotbar_count ?? 1,
+            maxHotbars: hu.max_hotbars ?? 4,
+          })
           break
         }
         case 'UseResponse': {
