@@ -1,7 +1,7 @@
 zone:
   id: the_dmz
   danger_level: all_out_war
-  min_level: 30
+  min_level: 25
   max_level: 35
   world_x: 2
   world_y: 2
