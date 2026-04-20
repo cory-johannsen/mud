@@ -1,0 +1,35 @@
+id: dsf_floor_supervisor
+name: Floor Supervisor
+description: >
+  A DSF floor supervisor in a hard hat and a clip-on tie, holding a
+  clipboard that has been modified to fire staples at high velocity.
+  They have not met their quarterly targets and are taking it personally.
+level: 27
+max_hp: 240
+ac: 20
+rob_multiplier: 1.0
+awareness: 8
+faction_id: dick_sucking_factory
+disposition: hostile
+ai_domain: dsf_worker_combat
+attack_verb: "clips with their modified clipboard"
+taunts:
+  - "You're not on the visitor log. This is a compliance issue."
+  - "I have KPIs to meet. You're an obstacle to my KPIs."
+  - "This is a safety violation AND a trespassing incident."
+  - "I'm going to need you to fill out an incident report. After."
+  - "Per my last memo, unauthorized personnel are to be removed by force."
+loot:
+  currency:
+    min: 15
+    max: 50
+weapon:
+  - id: stun_baton
+    weight: 2
+  - id: combat_knife
+    weight: 1
+armor:
+  - id: tactical_vest
+    weight: 2
+  - id: leather_jacket
+    weight: 1

@@ -1,0 +1,40 @@
+id: dsf_middle_manager
+name: Middle Manager
+description: >
+  A DSF middle manager in a rumpled button-down shirt, carrying a
+  laminated org chart as a weapon. They have been middle management
+  since before the collapse and see no reason to stop now.
+level: 29
+max_hp: 270
+ac: 21
+rob_multiplier: 1.2
+awareness: 9
+faction_id: dick_sucking_factory
+disposition: hostile
+ai_domain: dsf_worker_combat
+attack_verb: "strikes with their laminated org chart"
+taunts:
+  - "I will escalate this to my supervisor. After I deal with you."
+  - "You don't understand the chain of command here."
+  - "This is highly irregular and I will be noting it in my report."
+  - "Per our operational guidelines, you are to be terminated. Effective immediately."
+  - "I've survived three restructurings. You're not a challenge."
+loot:
+  currency:
+    min: 25
+    max: 75
+  items:
+    - item: circuit_board
+      chance: 0.25
+      min_qty: 1
+      max_qty: 2
+weapon:
+  - id: vibroblade
+    weight: 2
+  - id: stun_baton
+    weight: 1
+armor:
+  - id: tactical_vest
+    weight: 3
+  - id: kevlar_vest
+    weight: 1

@@ -2,6 +2,9 @@ package npc_test
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
+	"runtime"
 	"testing"
 	"time"
 
@@ -1397,6 +1400,62 @@ func TestEachZoneHasShieldMerchant(t *testing.T) {
 				return
 			}
 			t.Errorf("zone %q: no merchant sells a shield (checked %q and %q)", z.zone, z.primary, z.bm)
+		})
+	}
+}
+
+func TestDSFNPCTemplatesLoad(t *testing.T) {
+	_, thisFile, _, _ := runtime.Caller(0)
+	root := thisFile
+	for {
+		if _, err := os.Stat(filepath.Join(root, "go.mod")); err == nil {
+			break
+		}
+		root = filepath.Dir(root)
+	}
+	templates := []string{
+		"dsf_floor_supervisor",
+		"dsf_middle_manager",
+		"dsf_hr_rep",
+		"will_blunderfield",
+	}
+	for _, name := range templates {
+		t.Run(name, func(t *testing.T) {
+			path := filepath.Join(root, "content", "npcs", name+".yaml")
+			data, err := os.ReadFile(path)
+			require.NoError(t, err, "NPC file missing: %s.yaml", name)
+			var tmpl npc.Template
+			require.NoError(t, yaml.Unmarshal(data, &tmpl), "invalid YAML: %s.yaml", name)
+			require.Equal(t, name, tmpl.ID, "ID mismatch in %s.yaml", name)
+			require.Equal(t, "dick_sucking_factory", tmpl.FactionID, "wrong faction_id in %s.yaml", name)
+		})
+	}
+}
+
+func TestJOFNPCTemplatesLoad(t *testing.T) {
+	_, thisFile, _, _ := runtime.Caller(0)
+	root := thisFile
+	for {
+		if _, err := os.Stat(filepath.Join(root, "go.mod")); err == nil {
+			break
+		}
+		root = filepath.Dir(root)
+	}
+	templates := []string{
+		"jof_efficiency_consultant",
+		"jof_qa_officer",
+		"jof_regional_liaison",
+		"joe_crystal",
+	}
+	for _, name := range templates {
+		t.Run(name, func(t *testing.T) {
+			path := filepath.Join(root, "content", "npcs", name+".yaml")
+			data, err := os.ReadFile(path)
+			require.NoError(t, err, "NPC file missing: %s.yaml", name)
+			var tmpl npc.Template
+			require.NoError(t, yaml.Unmarshal(data, &tmpl), "invalid YAML: %s.yaml", name)
+			require.Equal(t, name, tmpl.ID, "ID mismatch in %s.yaml", name)
+			require.Equal(t, "jerk_off_factory", tmpl.FactionID, "wrong faction_id in %s.yaml", name)
 		})
 	}
 }

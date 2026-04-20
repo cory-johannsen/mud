@@ -1,0 +1,35 @@
+id: dsf_hr_rep
+name: HR Representative
+description: >
+  A DSF HR representative in a blazer that was professional before the
+  collapse. They carry a personnel file on everyone and have added
+  your threat assessment to the onboarding checklist.
+level: 31
+max_hp: 300
+ac: 22
+rob_multiplier: 1.3
+awareness: 10
+faction_id: dick_sucking_factory
+disposition: hostile
+ai_domain: dsf_hr_combat
+attack_verb: "files a grievance against"
+taunts:
+  - "Your behavior is a violation of our code of conduct."
+  - "I've already documented this incident. Three copies."
+  - "We have a zero-tolerance policy on unauthorized entry."
+  - "This is going in your permanent record."
+  - "I have terminated employees for less. Much less."
+loot:
+  currency:
+    min: 35
+    max: 100
+weapon:
+  - id: assault_rifle
+    weight: 2
+  - id: vibroblade
+    weight: 1
+armor:
+  - id: kevlar_vest
+    weight: 3
+  - id: tactical_vest
+    weight: 1

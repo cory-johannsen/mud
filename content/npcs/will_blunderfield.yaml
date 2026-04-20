@@ -1,0 +1,78 @@
+id: will_blunderfield
+name: Will Blunderfield
+description: >
+  The Chief Chugging Officer of the Dick Sucking Factory, Will Blunderfield
+  has held his position through four hostile takeover attempts, two
+  restructurings, the collapse of civilization, and a merger that nobody
+  talks about. He carries a presentation remote and considers it his
+  most lethal weapon. He is not wrong.
+type: human
+gender: male
+tier: boss
+level: 35
+max_hp: 1240
+ac: 25
+rob_multiplier: 2.0
+awareness: 11
+faction_id: dick_sucking_factory
+disposition: hostile
+attack_verb: "leverages synergistic force against"
+ai_domain: dsf_boss_combat
+respawn_delay: "24h"
+toughness_rank: expert
+hustle_rank: trained
+cool_rank: expert
+abilities:
+  brutality: 16
+  grit: 18
+  quickness: 14
+  reasoning: 20
+  savvy: 18
+  flair: 16
+weapon:
+  - id: stun_baton
+    weight: 1
+armor:
+  - id: military_plate
+    weight: 1
+boss_abilities:
+  - id: performance_review
+    name: "Performance Review"
+    trigger: round_start
+    trigger_value: 0
+    cooldown: "3m"
+    effect:
+      aoe_condition: demoralized
+  - id: budget_cut
+    name: "Budget Cut"
+    trigger: hp_pct_below
+    trigger_value: 75
+    cooldown: "4m"
+    effect:
+      aoe_damage_expr: "4d8"
+  - id: synergy_strike
+    name: "Synergy Strike"
+    trigger: hp_pct_below
+    trigger_value: 50
+    cooldown: "5m"
+    effect:
+      aoe_damage_expr: "6d10"
+taunts:
+  - "I've been Chief Chugging Officer for eleven years. You are a Q3 problem."
+  - "Your performance metrics are unacceptable."
+  - "This is a hostile work environment. I created it."
+  - "Per the org chart, I am at the top. You are not on it."
+  - "I will circle back to your defeat in the post-mortem."
+loot:
+  currency:
+    min: 150
+    max: 400
+  items:
+    - item: military_plate
+      chance: 0.6
+      min_qty: 1
+      max_qty: 1
+    - item: circuit_board
+      chance: 0.9
+      min_qty: 2
+      max_qty: 5
