@@ -1,0 +1,20 @@
+id: machete_signal_in_static
+title: Signal in the Static
+description: >
+  Word's going around that someone in The Velvet Rope has been pulling
+  neural chips out of salvage and wiring them into weapons. Nobody knows
+  who. Nobody knows how to find them. That's the point. Prove you're
+  serious and the signal gets clearer.
+giver_npc_id: rustbucket_ridge_quest_giver
+repeatable: false
+prerequisites:
+  - rustbucket_ridge_slasher_takedown
+objectives:
+  - id: find_cipher
+    type: explore
+    description: Find the rogue AI technician in The Velvet Rope
+    target_id: the_velvet_rope_brothel
+    quantity: 1
+rewards:
+  xp: 800
+  credits: 0

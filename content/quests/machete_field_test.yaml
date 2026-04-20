@@ -1,0 +1,23 @@
+id: machete_field_test
+title: Field Test
+description: >
+  Cipher doesn't give these things away. The modification takes weeks and
+  the components aren't cheap. But they have a standing arrangement: prove
+  you can operate at this tier, and the next one is yours. The VIP Chamber
+  is where you prove it.
+giver_npc_id: cipher
+repeatable: false
+prerequisites:
+  - machete_signal_in_static
+objectives:
+  - id: kill_vip_boss
+    type: kill
+    description: Kill the VIP in the VIP Chamber
+    target_id: gangbang
+    quantity: 1
+rewards:
+  xp: 1200
+  credits: 500
+  items:
+    - item_id: ai_chainsaw
+      quantity: 1
