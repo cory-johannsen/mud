@@ -1,0 +1,255 @@
+zone:
+  id: dick_sucking_factory
+  danger_level: dangerous
+  min_level: 25
+  max_level: 35
+  world_x: 1
+  world_y: 2
+  name: The Dick Sucking Factory
+  description: >
+    A repurposed industrial facility that survived the collapse with its
+    org chart intact. The DSF operates with the same bureaucratic
+    precision it always did, with the addition of firearms and a
+    general willingness to apply disciplinary procedures by force. The
+    smell of industrial lubricant and printer toner has never fully left.
+  start_room: dsf_reception
+  rooms:
+  - id: dsf_reception
+    title: Reception
+    danger_level: dangerous
+    description: >
+      The reception desk is still manned. The receptionist has been
+      replaced by a floor supervisor who considers visitor management
+      part of their remit. The sign-in sheet has a new column: threat
+      level. You have been assessed.
+    exits:
+    - direction: east
+      target: sei_pipe_yard
+      zone: se_industrial
+    - direction: west
+      target: dsf_open_office
+    map_x: 0
+    map_y: 0
+    spawns:
+    - template: dsf_floor_supervisor
+      count: 2
+      respawn_after: 5m
+
+  - id: dsf_open_office
+    title: Open Plan Office
+    danger_level: dangerous
+    description: >
+      Rows of desks stretch toward the far wall, each neatly maintained
+      despite the bullet holes. Motivational posters line the walls —
+      "SYNERGY IS SURVIVAL" and "THERE IS NO I IN TEAM, ONLY IN
+      TERMINATED." Middle managers patrol the aisles with clipboards
+      and sidearms.
+    exits:
+    - direction: east
+      target: dsf_reception
+    - direction: west
+      target: dsf_production
+    - direction: north
+      target: dsf_break_room
+    - direction: south
+      target: dsf_hr_dept
+    map_x: -2
+    map_y: 0
+    spawns:
+    - template: dsf_middle_manager
+      count: 2
+      respawn_after: 5m
+    - template: dsf_floor_supervisor
+      count: 1
+      respawn_after: 5m
+
+  - id: dsf_production
+    title: Production Floor
+    danger_level: dangerous
+    description: >
+      The factory floor hums with machinery that has been repurposed in
+      ways the original designers did not intend. Workers in hard hats
+      move between stations with the same efficiency they always had,
+      handling materials that have changed considerably since the collapse.
+      The output metrics are posted by the door. They are meeting targets.
+    exits:
+    - direction: east
+      target: dsf_open_office
+    - direction: west
+      target: dsf_qc_dept
+    - direction: north
+      target: dsf_server_room
+    map_x: -4
+    map_y: 0
+    spawns:
+    - template: dsf_floor_supervisor
+      count: 3
+      respawn_after: 5m
+
+  - id: dsf_qc_dept
+    title: Quality Control
+    danger_level: dangerous
+    description: >
+      The QC department has maintained rigorous standards. Every product
+      is tested. Every process is documented. Every unauthorized visitor
+      is logged, assessed, and addressed per established protocol.
+      The protocol has been updated to include lethal force as a standard
+      resolution pathway.
+    exits:
+    - direction: east
+      target: dsf_production
+    - direction: south
+      target: dsf_loading_bay
+    map_x: -6
+    map_y: 0
+    spawns:
+    - template: dsf_middle_manager
+      count: 2
+      respawn_after: 5m
+    - template: dsf_hr_rep
+      count: 1
+      respawn_after: 8m
+
+  - id: dsf_break_room
+    title: Break Room
+    danger_level: safe
+    description: >
+      A break room that has been maintained with institutional care.
+      The coffee machine still works. Someone has kept the microwave
+      clean. A whiteboard lists the current employee of the month.
+      The winner has been the same person for eleven months. Nobody
+      mentions this.
+    exits:
+    - direction: south
+      target: dsf_open_office
+    map_x: -2
+    map_y: 2
+    equipment:
+    - item_id: zone_map
+      max_count: 1
+      respawn_after: 0s
+      immovable: true
+      script: zone_map_use
+      description: Zone Map
+    spawns:
+    - template: dick_sucking_factory_merchant
+      count: 1
+      respawn_after: 0s
+    - template: dick_sucking_factory_healer
+      count: 1
+      respawn_after: 0s
+    - template: dick_sucking_factory_job_trainer
+      count: 1
+      respawn_after: 0s
+    - template: dick_sucking_factory_banker
+      count: 1
+      respawn_after: 0s
+
+  - id: dsf_hr_dept
+    title: Human Resources
+    danger_level: all_out_war
+    description: >
+      HR has always been the most dangerous department. This has not
+      changed. The open-door policy has been replaced with a reinforced
+      security door policy. HR representatives sit behind bulletproof
+      glass and process disciplinary actions with bureaucratic precision
+      and fully automatic weapons.
+    exits:
+    - direction: north
+      target: dsf_open_office
+    - direction: west
+      target: dsf_exec_suite
+    map_x: -2
+    map_y: -2
+    spawns:
+    - template: dsf_hr_rep
+      count: 3
+      respawn_after: 8m
+
+  - id: dsf_loading_bay
+    title: Loading Bay
+    danger_level: dangerous
+    description: >
+      The loading bay is where product leaves the factory and where
+      sorties depart for the DMZ. Industrial shelving holds product
+      in labeled containers. Forklifts have been modified for offensive
+      operations. The dock doors face east toward contested territory.
+    exits:
+    - direction: north
+      target: dsf_qc_dept
+    - direction: east
+      target: dmz_west_gate
+      zone: the_dmz
+    map_x: -6
+    map_y: -2
+    spawns:
+    - template: dsf_floor_supervisor
+      count: 2
+      respawn_after: 5m
+
+  - id: dsf_exec_suite
+    title: Executive Suite
+    danger_level: all_out_war
+    description: >
+      The executive suite occupies the factory's highest floor, overlooking
+      the production floor through glass that has been reinforced but not
+      replaced after the bullet holes. Executive assistants operate with
+      extreme competence and extreme hostility. Corner offices line the
+      far wall. One is larger than the others.
+    exits:
+    - direction: east
+      target: dsf_hr_dept
+    - direction: west
+      target: dsf_corner_office
+    map_x: -4
+    map_y: -2
+    spawns:
+    - template: dsf_hr_rep
+      count: 2
+      respawn_after: 8m
+    - template: dsf_middle_manager
+      count: 1
+      respawn_after: 5m
+
+  - id: dsf_corner_office
+    title: "The Corner Office"
+    danger_level: all_out_war
+    core: true
+    boss_room: true
+    description: >
+      Will Blunderfield's corner office has two windows, a view of the
+      production floor, and a desk that survived the collapse because
+      it was built from something heavier than the collapse. The org
+      chart on the wall is color-coded and current. Will's name is at
+      the top, in red, in a font that communicates authority. He is at
+      his desk. He has been expecting you since Q2.
+    exits:
+    - direction: east
+      target: dsf_exec_suite
+    map_x: -6
+    map_y: -4
+    spawns:
+    - template: will_blunderfield
+      count: 1
+      respawn_after: 24h
+    - template: dsf_hr_rep
+      count: 1
+      respawn_after: 8m
+
+  - id: dsf_server_room
+    title: Server Room
+    danger_level: dangerous
+    description: >
+      Cold, humming, and blue-lit. The servers that ran the factory's
+      operations before the collapse have been repurposed for something
+      nobody on the floor will discuss. The temperature is kept precisely
+      regulated. The data is kept precisely classified.
+    exits:
+    - direction: south
+      target: dsf_production
+    map_x: -4
+    map_y: 2
+    spawns:
+    - template: dsf_floor_supervisor
+      count: 1
+      respawn_after: 5m
