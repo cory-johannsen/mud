@@ -1,8 +1,8 @@
 zone:
   id: vantucky
   danger_level: sketchy
-  min_level: 16
-  max_level: 25
+  min_level: 1
+  max_level: 7
   world_x: 2
   world_y: -5
   script_dir: content/scripts/zones/vantucky

@@ -1,9 +1,9 @@
 id: vantucky_scavenger
 name: Vantucky Scavenger
 description: A wiry figure in a patchwork coat, face half-hidden behind a dust mask and cracked goggles. Moves fast and low, picking through debris with practiced efficiency and no mercy for anyone who gets in the way.
-level: 18
-max_hp: 140
-ac: 17
+level: 2
+max_hp: 18
+ac: 14
 awareness: 8
 ai_domain: ganger_combat
 respawn_delay: "5m"

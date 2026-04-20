@@ -7,10 +7,10 @@ description: >
   He drills his compound guards daily and views anyone outside the militia
   as a potential enemy. The ammo depot is his inner sanctum, and he defends
   it with everything he has.
-level: 25
-max_hp: 645
+level: 7
+max_hp: 147
 tier: boss
-ac: 24
+ac: 20
 rob_multiplier: 2.0
 boss_abilities:
   - id: militia_rally
