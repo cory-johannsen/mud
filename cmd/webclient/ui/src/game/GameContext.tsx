@@ -357,6 +357,9 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const unmountedRef = useRef(false)
   const lastRoomIdRef = useRef<string | null>(null)
   const hasConnectedRef = useRef(false)
+  // combatRoundRef always holds the latest combatRound so ws.onmessage (stale closure) can check it.
+  const combatRoundRef = useRef(state.combatRound)
+  combatRoundRef.current = state.combatRound
 
   const sendMessage = useCallback((type: string, payload: object) => {
     const frame = JSON.stringify({ type, payload })
@@ -649,8 +652,9 @@ export function GameProvider({ children }: { children: ReactNode }) {
           if (!combatTypes.has(npcType)) {
             // Non-combat NPC: show as modal
             dispatch({ type: 'SET_NPC_VIEW', view: npcViewPayload })
-          } else if (state.combatRound !== null) {
-            // Combat NPC examined during active combat: show combat examine modal
+          } else if (combatRoundRef.current !== null) {
+            // Combat NPC examined during active combat: show combat examine modal.
+            // Use combatRoundRef (not state.combatRound) to avoid stale closure in ws.onmessage.
             dispatch({ type: 'SET_COMBAT_NPC_VIEW', view: npcViewPayload })
           } else {
             // Combat NPC outside combat: append to feed
