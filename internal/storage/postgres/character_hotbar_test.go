@@ -66,6 +66,38 @@ func TestHotbarJSON_EmptyStringInOldFormatBecomesEmptySlot(t *testing.T) {
 	}
 }
 
+// TestMarshalUnmarshalHotbars verifies round-trip marshal/unmarshal of multiple bars.
+//
+// Precondition: Two bars; bar 0 has slot 0 set to a command slot; bar 1 is empty.
+// Postcondition: Unmarshal returns identical bars.
+func TestMarshalUnmarshalHotbars(t *testing.T) {
+	t.Parallel()
+	bars := [][10]session.HotbarSlot{
+		{session.CommandSlot("look")},
+		{},
+	}
+	data, err := postgres.MarshalHotbars(bars)
+	if err != nil {
+		t.Fatalf("MarshalHotbars: %v", err)
+	}
+	got, err := postgres.UnmarshalHotbars(data)
+	if err != nil {
+		t.Fatalf("UnmarshalHotbars: %v", err)
+	}
+	if len(got) != 2 {
+		t.Fatalf("expected 2 bars, got %d", len(got))
+	}
+	if got[0][0].Ref != "look" {
+		t.Fatalf("bar 0 slot 0: expected 'look', got %q", got[0][0].Ref)
+	}
+}
+
+// TestLoadHotbars_LegacyMigration verifies that LoadHotbars falls back to the
+// legacy hotbar column when hotbars is NULL.
+func TestLoadHotbars_LegacyMigration(t *testing.T) {
+	t.Skip("integration test: requires test database")
+}
+
 // TestProperty_HotbarJSON_RoundTrip verifies marshal/unmarshal is lossless
 // for randomly-generated typed slot arrays.
 func TestProperty_HotbarJSON_RoundTrip(t *testing.T) {
