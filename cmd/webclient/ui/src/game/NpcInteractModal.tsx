@@ -432,6 +432,66 @@ function BankerModal({
   )
 }
 
+// ---------- Hire Modal (hireling NPC) ----------
+
+function HireModal({
+  view,
+  onClose,
+}: {
+  view: { name: string; description: string; npcType: string; level: number; health: string }
+  onClose: () => void
+}) {
+  const { sendMessage } = useGame()
+
+  function handleHire() {
+    sendMessage('HireRequest', { npc_name: view.name })
+    onClose()
+  }
+
+  return (
+    <div style={styles.overlay} onClick={onClose}>
+      <div style={{ ...styles.modal, maxWidth: '480px' }} onClick={(e) => e.stopPropagation()}>
+        <div style={styles.header}>
+          <div style={styles.headerLeft}>
+            <h3 style={styles.title}>{view.name}</h3>
+            <span style={styles.npcTypeBadge}>Hireling</span>
+          </div>
+          <button style={styles.closeBtn} onClick={onClose} type="button">✕</button>
+        </div>
+        <div style={styles.body}>
+          {view.description && <p style={styles.desc}>{view.description}</p>}
+          <div style={styles.infoRow}>
+            <span style={styles.infoLabel}>Level</span>
+            <span style={styles.infoValue}>{view.level}</span>
+          </div>
+          {view.health && (
+            <div style={styles.infoRow}>
+              <span style={styles.infoLabel}>Condition</span>
+              <span style={styles.infoValue}>{view.health}</span>
+            </div>
+          )}
+          <div style={{ ...styles.actions, marginTop: '0.75rem' }}>
+            <button
+              style={{ ...styles.actionBtn, ...styles.actionBtnGreen }}
+              onClick={handleHire}
+              type="button"
+            >
+              Hire
+            </button>
+            <button
+              style={{ ...styles.actionBtn, background: '#444' }}
+              onClick={onClose}
+              type="button"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ---------- Generic NPC Modal ----------
 
 const NPC_TYPE_LABELS: Record<string, string> = {
@@ -574,6 +634,9 @@ export function NpcInteractModal() {
   if (state.npcView) {
     if (state.npcView.npcType === 'banker') {
       return <BankerModal view={state.npcView} onClose={clearNpcView} />
+    }
+    if (state.npcView.npcType === 'hireling') {
+      return <HireModal view={state.npcView} onClose={clearNpcView} />
     }
     return <GenericNpcModal view={state.npcView} onClose={clearNpcView} />
   }
