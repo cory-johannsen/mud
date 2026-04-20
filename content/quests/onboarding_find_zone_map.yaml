@@ -1,0 +1,23 @@
+id: onboarding_find_zone_map
+title: "Find Your Bearings"
+description: >
+  You've been dropped into Felony Flats with nothing but instinct and the
+  clothes on your back. Every survivor in this district knows one thing:
+  you need a map. There's a district terminal on 82nd Avenue that has a
+  zone map. Find it and figure out how to use it.
+type: onboarding
+repeatable: false
+objectives:
+  - id: explore_map_room
+    type: explore
+    description: Locate the zone map terminal on 82nd Avenue
+    target_id: flats_82nd_ave
+    quantity: 1
+  - id: use_zone_map
+    type: use_zone_map
+    description: Use the zone map terminal
+    target_id: felony_flats
+    quantity: 1
+rewards:
+  xp: 50
+  credits: 0
