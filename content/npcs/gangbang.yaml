@@ -41,6 +41,15 @@ loot:
   currency:
     min: 70
     max: 180
+  items:
+    - item: ai_chainsaw
+      chance: 0.05
+      min_qty: 1
+      max_qty: 1
+    - item: ai_ak47
+      chance: 0.05
+      min_qty: 1
+      max_qty: 1
 taunts:
   - "You have no idea what you just walked into."
   - "Nobody in this room has ever said no to me. You won't be the first."
