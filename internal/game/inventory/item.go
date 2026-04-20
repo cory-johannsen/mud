@@ -88,6 +88,12 @@ type ItemDef struct {
 	AppliesTo []string `yaml:"applies_to,omitempty"`
 	// Tags is an optional list of content labels for this item (e.g., "fire_material", "camping_gear").
 	Tags []string `yaml:"tags,omitempty"`
+	// CombatDomain is the HTN domain ID that drives this item's combat behavior.
+	// An empty string means the item is not an AI item.
+	CombatDomain string `yaml:"combat_domain,omitempty"`
+	// CombatScript is the Lua source that defines operator implementations and
+	// precondition hooks for the named HTN domain.
+	CombatScript string `yaml:"combat_script,omitempty"`
 }
 
 // HasTag returns true if item has the given tag in its Tags slice.

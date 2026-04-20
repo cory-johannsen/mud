@@ -20,6 +20,9 @@ type ItemInstance struct {
 	Expended         bool // true when ChargesRemaining == 0 and the item uses expend semantics
 	AffixedMaterials          []string // each entry: "<material_id>:<grade_id>"
 	MaterialMaxDurabilityBonus int     // sum of Carbide Alloy grade bonuses; 0 if none
+	// CombatScriptState holds per-encounter Lua state for AI items.
+	// Initialized as nil; set to an empty map at combat start; cleared at combat end.
+	CombatScriptState map[string]interface{}
 }
 
 // Backpack is a container with slot and weight limits.
@@ -226,6 +229,22 @@ func (b *Backpack) TotalWeight(reg *Registry) float64 {
 // Precondition: instanceID is non-empty.
 // Postcondition: returned pointer is into the backing slice; mutations are visible immediately.
 func (b *Backpack) GetByInstanceID(instanceID string) *ItemInstance {
+	for i := range b.items {
+		if b.items[i].InstanceID == instanceID {
+			return &b.items[i]
+		}
+	}
+	return nil
+}
+
+// MutableItem returns a pointer to the ItemInstance with the given InstanceID,
+// or nil if not found. The pointer is valid for the lifetime of this Backpack
+// (the underlying slice must not be reallocated while the pointer is held —
+// do not Add or Remove items while holding this pointer).
+//
+// Precondition: instanceID must be non-empty.
+// Postcondition: Returns a pointer into the items slice, or nil when not found.
+func (b *Backpack) MutableItem(instanceID string) *ItemInstance {
 	for i := range b.items {
 		if b.items[i].InstanceID == instanceID {
 			return &b.items[i]
