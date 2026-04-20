@@ -1,0 +1,35 @@
+id: jof_efficiency_consultant
+name: Efficiency Consultant
+description: >
+  A JOF efficiency consultant with a stopwatch and a clipboard covered
+  in throughput charts. They have optimized every process in the factory
+  and are currently optimizing the process of removing you.
+level: 27
+max_hp: 235
+ac: 20
+rob_multiplier: 1.0
+awareness: 9
+faction_id: jerk_off_factory
+disposition: hostile
+ai_domain: jof_worker_combat
+attack_verb: "optimizes their attack against"
+taunts:
+  - "Your movement patterns are inefficient. I've noted three improvements."
+  - "Time is a resource. You're wasting mine."
+  - "I've benchmarked this encounter. You're below average."
+  - "Inefficiency is the enemy. You are also the enemy."
+  - "Per my analysis, you have a 12% chance of surviving this interaction."
+loot:
+  currency:
+    min: 15
+    max: 50
+weapon:
+  - id: stun_baton
+    weight: 2
+  - id: combat_knife
+    weight: 1
+armor:
+  - id: tactical_vest
+    weight: 2
+  - id: leather_jacket
+    weight: 1

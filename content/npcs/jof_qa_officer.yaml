@@ -1,0 +1,40 @@
+id: jof_qa_officer
+name: Quality Assurance Officer
+description: >
+  A JOF QA officer in a white coat carrying a checklist that has been
+  laminated for durability. Nothing meets their standards. Nothing ever
+  will. They have found seventeen defects in you already.
+level: 29
+max_hp: 265
+ac: 20
+rob_multiplier: 1.2
+awareness: 10
+faction_id: jerk_off_factory
+disposition: hostile
+ai_domain: jof_worker_combat
+attack_verb: "files a defect report on"
+taunts:
+  - "You fail to meet our minimum quality standards."
+  - "I've documented seventeen deficiencies in your approach."
+  - "This does not meet spec. Neither do you."
+  - "Rejected. Return to sender."
+  - "My checklist has a line for this. It says 'unacceptable'."
+loot:
+  currency:
+    min: 25
+    max: 75
+  items:
+    - item: circuit_board
+      chance: 0.2
+      min_qty: 1
+      max_qty: 2
+weapon:
+  - id: vibroblade
+    weight: 2
+  - id: stun_baton
+    weight: 1
+armor:
+  - id: tactical_vest
+    weight: 3
+  - id: kevlar_vest
+    weight: 1

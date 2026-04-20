@@ -1,0 +1,36 @@
+id: jof_regional_liaison
+name: Regional Liaison
+description: >
+  A JOF regional liaison in a rumpled suit that was pressed this morning
+  despite everything. They coordinate between departments and regions
+  that no longer exist and have adapted this skill to coordinating
+  violence with impressive efficiency.
+level: 31
+max_hp: 295
+ac: 20
+rob_multiplier: 1.3
+awareness: 10
+faction_id: jerk_off_factory
+disposition: hostile
+ai_domain: jof_liaison_combat
+attack_verb: "liaises their fist into"
+taunts:
+  - "I coordinate across seventeen regions. Twelve still exist."
+  - "My role is cross-functional. So is my approach to threats."
+  - "I've aligned stakeholders against worse than you."
+  - "This has been escalated to my level. My level handles it directly."
+  - "Regional liaison means I solve problems. You are a problem."
+loot:
+  currency:
+    min: 35
+    max: 100
+weapon:
+  - id: assault_rifle
+    weight: 2
+  - id: vibroblade
+    weight: 1
+armor:
+  - id: kevlar_vest
+    weight: 3
+  - id: tactical_vest
+    weight: 1

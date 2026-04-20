@@ -1,0 +1,78 @@
+id: joe_crystal
+name: Joe Crystal
+description: >
+  The Chief Crystal Charging Officer of the Jerk Off Factory, Joe Crystal
+  runs the most efficient operation in post-collapse Portland and never
+  lets anyone forget it. He speaks exclusively in KPIs and has not
+  taken a day off since 2019. The stopwatch around his neck is not
+  decorative. Nothing about Joe Crystal is decorative.
+type: human
+gender: male
+tier: boss
+level: 35
+max_hp: 1050
+ac: 24
+rob_multiplier: 2.0
+awareness: 12
+faction_id: jerk_off_factory
+disposition: hostile
+attack_verb: "optimizes the elimination of"
+ai_domain: jof_boss_combat
+respawn_delay: "24h"
+toughness_rank: trained
+hustle_rank: expert
+cool_rank: expert
+abilities:
+  brutality: 14
+  grit: 16
+  quickness: 20
+  reasoning: 20
+  savvy: 18
+  flair: 12
+weapon:
+  - id: vibroblade
+    weight: 1
+armor:
+  - id: military_plate
+    weight: 1
+boss_abilities:
+  - id: time_is_money
+    name: "Time is Money"
+    trigger: round_start
+    trigger_value: 0
+    cooldown: "3m"
+    effect:
+      aoe_damage_expr: "3d6"
+  - id: crystal_clarity
+    name: "Crystal Clarity"
+    trigger: hp_pct_below
+    trigger_value: 75
+    cooldown: "4m"
+    effect:
+      aoe_condition: confused
+  - id: efficiency_drive
+    name: "Efficiency Drive"
+    trigger: hp_pct_below
+    trigger_value: 50
+    cooldown: "5m"
+    effect:
+      aoe_damage_expr: "5d10"
+taunts:
+  - "I've processed your threat assessment. The result is suboptimal. For you."
+  - "Every second you spend here is a second the factory loses productivity."
+  - "My throughput is 340% above baseline. Yours is not."
+  - "Inefficiency is eliminated at the JOF. You are being eliminated."
+  - "Crystal charging targets met. You are not a target I will miss."
+loot:
+  currency:
+    min: 150
+    max: 400
+  items:
+    - item: military_plate
+      chance: 0.6
+      min_qty: 1
+      max_qty: 1
+    - item: circuit_board
+      chance: 0.9
+      min_qty: 2
+      max_qty: 5
