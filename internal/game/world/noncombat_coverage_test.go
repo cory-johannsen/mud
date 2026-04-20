@@ -338,6 +338,44 @@ func TestNewSafeRoomDescriptions(t *testing.T) {
 	}
 }
 
+func TestDMZ_MutualHostility(t *testing.T) {
+	type factionDef struct {
+		ID              string   `yaml:"id"`
+		HostileFactions []string `yaml:"hostile_factions"`
+	}
+
+	root := repoRoot(t)
+	factionsDir := filepath.Join(root, "content", "factions")
+
+	loadFaction := func(id string) factionDef {
+		t.Helper()
+		data, err := os.ReadFile(filepath.Join(factionsDir, id+".yaml"))
+		require.NoError(t, err, "faction file %q must exist", id)
+		var def factionDef
+		require.NoError(t, yaml.Unmarshal(data, &def))
+		return def
+	}
+
+	dsf := loadFaction("dick_sucking_factory")
+	jof := loadFaction("jerk_off_factory")
+
+	dsfHostile := false
+	for _, h := range dsf.HostileFactions {
+		if h == "jerk_off_factory" {
+			dsfHostile = true
+		}
+	}
+	require.True(t, dsfHostile, "dick_sucking_factory must list jerk_off_factory as hostile (REQ-DSF-11c)")
+
+	jofHostile := false
+	for _, h := range jof.HostileFactions {
+		if h == "dick_sucking_factory" {
+			jofHostile = true
+		}
+	}
+	require.True(t, jofHostile, "jerk_off_factory must list dick_sucking_factory as hostile (REQ-DSF-11c)")
+}
+
 func TestPipeYard_HasDSFAndJOFExits(t *testing.T) {
 	root := repoRoot(t)
 	data, err := os.ReadFile(filepath.Join(root, "content", "zones", "se_industrial.yaml"))
