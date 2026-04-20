@@ -334,6 +334,17 @@ func main() {
 				}
 			}
 			logger.Info("loaded AI domains", zap.Int("count", len(domains)))
+
+			// Register item AI domains into a separate ItemDomainRegistry.
+			// We register all loaded domains — only those referenced by items will actually be used.
+			aiItemReg := ai.NewItemDomainRegistry()
+			for _, domain := range domains {
+				if err := aiItemReg.Register(domain); err != nil {
+					// Ignore duplicate registrations — domain already registered.
+					_ = err
+				}
+			}
+			app.CombatHandler.SetAIItemRegistry(aiItemReg)
 		}
 	}
 

@@ -450,6 +450,14 @@ func (h *CombatHandler) SetWeatherManager(wm *WeatherManager) {
 	h.weatherMgr = wm
 }
 
+// SetAIItemRegistry wires the ItemDomainRegistry used by the AI item phase (REQ-AIE-3).
+//
+// Precondition: reg must not be nil.
+// Postcondition: h.aiItemRegistry is set to reg.
+func (h *CombatHandler) SetAIItemRegistry(reg *ai.ItemDomainRegistry) {
+	h.aiItemRegistry = reg
+}
+
 // SetNPCIdleTickInterval sets the idle tick interval used to convert say cooldown
 // durations to tick counts. REQ-NB-2.
 //
@@ -1616,6 +1624,15 @@ func (h *CombatHandler) Flee(uid string) ([]*gamev1.CombatEvent, bool, error) {
 		h.stopTimerLocked(origRoomID)
 		h.engine.EndCombat(origRoomID)
 		h.clearCoweringNPCsLocked(origRoomID)
+		// Clear AI item combat states on combat end via flee (REQ-AIE-2).
+		for _, c := range cbt.Combatants {
+			if c.Kind != combat.KindPlayer {
+				continue
+			}
+			if fleeSess, ok := h.sessions.GetPlayer(c.ID); ok {
+				h.clearAIItemCombatStates(fleeSess)
+			}
+		}
 		if h.onCombatEndFn != nil {
 			fn := h.onCombatEndFn
 			rid := origRoomID
@@ -2631,6 +2648,15 @@ func (h *CombatHandler) resolveAndAdvanceLocked(roomID string, cbt *combat.Comba
 		h.stopTimerLocked(roomID)
 		h.engine.EndCombat(roomID)
 		h.clearCoweringNPCsLocked(roomID)
+		// Clear AI item combat states on combat end (REQ-AIE-2).
+		for _, c := range cbt.Combatants {
+			if c.Kind != combat.KindPlayer {
+				continue
+			}
+			if sess, ok := h.sessions.GetPlayer(c.ID); ok {
+				h.clearAIItemCombatStates(sess)
+			}
+		}
 		// Collect downed player UIDs for respawn before releasing the lock.
 		var downedUIDs []string
 		if !cbt.HasLivingNPCs() {
@@ -2724,6 +2750,9 @@ func (h *CombatHandler) resolveAndAdvanceLocked(roomID string, cbt *combat.Comba
 		}
 		playerSess.BankedAP = 0
 	}
+
+	// REQ-AIE-3 + REQ-AIE-4: run AI item phase — items contribute AP then act.
+	aiItemEvents := h.runAIItemPhaseLocked(cbt)
 
 	// BUG-31: Send per-player AP notification BEFORE auto-queue consumes AP.
 	for _, c := range cbt.Combatants {
@@ -2831,6 +2860,7 @@ func (h *CombatHandler) resolveAndAdvanceLocked(roomID string, cbt *combat.Comba
 	roundStartEvents = append(roundStartEvents, condCombatEvents...)
 	roundStartEvents = append(roundStartEvents, drowningEvents...)
 	roundStartEvents = append(roundStartEvents, hazardEvents...)
+	roundStartEvents = append(roundStartEvents, aiItemEvents...)
 	h.broadcastFn(roomID, roundStartEvents)
 
 	// Broadcast RoundStartEvent with InitialPositions so the frontend can activate/update combat mode (REQ-IMR-19).
