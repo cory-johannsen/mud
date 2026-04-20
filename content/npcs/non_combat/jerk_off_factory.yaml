@@ -1,0 +1,79 @@
+- id: jerk_off_factory_merchant
+  name: "Inventory Management"
+  npc_type: merchant
+  type: human
+  description: "Runs the JOF break room supply system with optimized inventory levels and data-driven replenishment cycles."
+  level: 0
+  max_hp: 20
+  ac: 10
+  awareness: 3
+  disposition: neutral
+  personality: neutral
+  merchant:
+    merchant_type: general
+    sell_margin: 1.25
+    buy_margin: 0.45
+    budget: 900
+    inventory:
+      - item_id: stim_pack
+        base_price: 45
+        init_stock: 5
+        max_stock: 10
+      - item_id: circuit_board
+        base_price: 80
+        init_stock: 3
+        max_stock: 6
+    replenish_rate:
+      min_hours: 6
+      max_hours: 10
+      stock_refill: 1
+      budget_refill: 180
+
+- id: jerk_off_factory_healer
+  name: "Wellness Optimization"
+  npc_type: healer
+  type: human
+  description: "The JOF wellness optimization officer measures recovery efficiency with a stopwatch. Fast healing is billable; slow healing is a performance issue."
+  level: 0
+  max_hp: 22
+  ac: 10
+  awareness: 4
+  disposition: neutral
+  personality: neutral
+  healer:
+    price_per_hp: 4
+    daily_capacity: 100
+
+- id: jerk_off_factory_job_trainer
+  name: "Skills Development"
+  npc_type: job_trainer
+  type: human
+  description: "Offers skills development programs benchmarked against industry standards. Your current skill level has been assessed. The assessment was not encouraging."
+  level: 0
+  max_hp: 20
+  ac: 10
+  awareness: 3
+  disposition: neutral
+  personality: neutral
+  job_trainer:
+    offered_jobs:
+      - job_id: scavenger
+        training_cost: 120
+        prerequisites:
+          min_level: 1
+
+- id: jerk_off_factory_banker
+  name: "Financial Services"
+  npc_type: banker
+  type: human
+  description: "Manages the JOF employee financial services program. Has run a cost-benefit analysis on your creditworthiness. Has concerns."
+  level: 0
+  max_hp: 20
+  ac: 10
+  awareness: 3
+  disposition: neutral
+  personality: neutral
+  banker:
+    zone_id: jerk_off_factory
+    base_rate: 0.91
+    rate_variance: 0.04

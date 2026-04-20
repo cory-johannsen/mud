@@ -1,0 +1,79 @@
+- id: dick_sucking_factory_merchant
+  name: "Supply Requisitions"
+  npc_type: merchant
+  type: human
+  description: "Manages the break room supply cabinet with bureaucratic precision. Technically this is not a store. Technically."
+  level: 0
+  max_hp: 20
+  ac: 10
+  awareness: 3
+  disposition: neutral
+  personality: neutral
+  merchant:
+    merchant_type: general
+    sell_margin: 1.25
+    buy_margin: 0.45
+    budget: 900
+    inventory:
+      - item_id: stim_pack
+        base_price: 45
+        init_stock: 5
+        max_stock: 10
+      - item_id: scrap_metal
+        base_price: 20
+        init_stock: 5
+        max_stock: 10
+    replenish_rate:
+      min_hours: 6
+      max_hours: 10
+      stock_refill: 1
+      budget_refill: 180
+
+- id: dick_sucking_factory_healer
+  name: "Occupational Health"
+  npc_type: healer
+  type: human
+  description: "The DSF occupational health officer patches wounds with the same clinical detachment they apply to everything else. Forms in triplicate required."
+  level: 0
+  max_hp: 22
+  ac: 10
+  awareness: 4
+  disposition: neutral
+  personality: neutral
+  healer:
+    price_per_hp: 4
+    daily_capacity: 100
+
+- id: dick_sucking_factory_job_trainer
+  name: "Professional Development"
+  npc_type: job_trainer
+  type: human
+  description: "Runs mandatory professional development sessions. Attendance is not optional. Neither is improvement."
+  level: 0
+  max_hp: 20
+  ac: 10
+  awareness: 3
+  disposition: neutral
+  personality: neutral
+  job_trainer:
+    offered_jobs:
+      - job_id: scavenger
+        training_cost: 120
+        prerequisites:
+          min_level: 1
+
+- id: dick_sucking_factory_banker
+  name: "Payroll"
+  npc_type: banker
+  type: human
+  description: "Handles payroll and financial services from the server room. Has questions about where you got that money."
+  level: 0
+  max_hp: 20
+  ac: 10
+  awareness: 3
+  disposition: neutral
+  personality: neutral
+  banker:
+    zone_id: dick_sucking_factory
+    base_rate: 0.91
+    rate_variance: 0.04

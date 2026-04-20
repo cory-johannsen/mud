@@ -68,6 +68,7 @@ func TestAllZonesHaveRequiredNPCTypes(t *testing.T) {
 		"hillsboro", "lake_oswego", "ne_portland", "pdx_international",
 		"ross_island", "rustbucket_ridge", "sauvie_island", "se_industrial",
 		"the_couve", "troutdale", "vantucky",
+		"dick_sucking_factory", "jerk_off_factory",
 	}
 	required := []string{"merchant", "healer", "job_trainer", "banker"}
 	root := repoRoot(t)
@@ -97,6 +98,7 @@ func TestNonCombatNPCTemplateIDs(t *testing.T) {
 		"hillsboro", "lake_oswego", "ne_portland", "pdx_international",
 		"ross_island", "rustbucket_ridge", "sauvie_island", "se_industrial",
 		"the_couve", "troutdale", "vantucky",
+		"dick_sucking_factory", "jerk_off_factory",
 	}
 	root := repoRoot(t)
 	for _, zoneID := range zones {
