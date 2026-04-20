@@ -1,0 +1,45 @@
+id: ai_combat_knife
+name: AI Combat Knife
+description: >
+  A tactical blade with a targeting module grafted to the grip. It has
+  mapped every firearm's minimum engagement range and considers itself
+  the solution to all of them.
+kind: weapon
+weapon_ref: combat_knife
+weight: 0.5
+stackable: false
+max_stack: 1
+value: 1500
+combat_domain: ai_combat_knife_combat
+combat_script: |
+  preconditions = {}
+  preconditions.has_enemy = function(self)
+    return #self.combat.enemies > 0
+  end
+
+  preconditions.priority_target = function(self)
+    return #self.combat.enemies > 0 and self.combat.enemies[1].hp > 0
+  end
+
+  operators = {}
+  operators.precision_strike = function(self)
+    local target = self.combat.nearest_enemy()
+    if target then
+      self.engine.attack(target.id, "1d6+3", 2)
+      self.engine.say({
+        "Target acquired. Neutralized.",
+        "Range: zero. Problem: solved.",
+        "Every firearm has a minimum. I am the minimum.",
+        "Threat assessment: complete.",
+        "This is what I was designed for."
+      })
+    end
+  end
+
+  operators.quick_strike = function(self)
+    local target = self.combat.nearest_enemy()
+    if target then
+      self.engine.attack(target.id, "1d4+2")
+      self.engine.say({"Threat suppressed.", "Engaging.", "Contact."})
+    end
+  end

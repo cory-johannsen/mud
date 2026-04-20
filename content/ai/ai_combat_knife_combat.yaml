@@ -1,0 +1,32 @@
+domain:
+  id: ai_combat_knife_combat
+  description: Cold tactician. Precision strikes, covers range minimums.
+
+  tasks:
+    - id: behave
+      description: Root task
+
+  methods:
+    - task: behave
+      id: precision_mode
+      precondition: priority_target
+      subtasks: [precision_strike]
+
+    - task: behave
+      id: quick_mode
+      precondition: has_enemy
+      subtasks: [quick_strike]
+
+    - task: behave
+      id: idle_mode
+      precondition: ""
+      subtasks: [quick_strike]
+
+  operators:
+    - id: precision_strike
+      action: lua_hook
+      ap_cost: 2
+
+    - id: quick_strike
+      action: lua_hook
+      ap_cost: 1
