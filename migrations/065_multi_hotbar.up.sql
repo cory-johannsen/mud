@@ -1,0 +1,3 @@
+ALTER TABLE characters
+  ADD COLUMN IF NOT EXISTS hotbars          TEXT,
+  ADD COLUMN IF NOT EXISTS active_hotbar_idx INTEGER NOT NULL DEFAULT 0;
