@@ -279,3 +279,18 @@ func TestProperty_ForcedActionType_AlwaysValidOrEmpty(t *testing.T) {
 		assert.True(t, valid, "ForcedActionType returned unexpected value %q", got)
 	})
 }
+
+func TestACBonus_FortifiedCondition_PlusOne(t *testing.T) {
+	reg := condition.NewRegistry()
+	def := &condition.ConditionDef{
+		ID: "fortified", Name: "Fortified", DurationType: "rounds",
+		MaxStacks: 0, ACBonus: 1,
+	}
+	reg.Register(def)
+	set := condition.NewActiveSet()
+	_ = set.Apply("p1", def, 1, 2)
+	got := condition.ACBonus(set)
+	if got != 1 {
+		t.Fatalf("ACBonus with fortified: want 1, got %d", got)
+	}
+}

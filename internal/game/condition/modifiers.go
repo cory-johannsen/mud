@@ -24,14 +24,19 @@ func AttackBonus(s *ActiveSet) int {
 }
 
 // ACBonus returns the net AC modifier from all active conditions.
-// For stackable conditions, the penalty is multiplied by the current stack count.
+// Positive ACBonus on a condition adds to the total (buff); positive ACPenalty
+// subtracts from the total (debuff). For stackable conditions, values are multiplied
+// by the current stack count.
 //
-// Postcondition: Returns <= 0.
+// Postcondition: May be positive when AC bonuses exceed penalties.
 func ACBonus(s *ActiveSet) int {
 	total := 0
 	for _, ac := range s.conditions {
 		if ac.Def.ACPenalty > 0 {
 			total -= ac.Def.ACPenalty * ac.Stacks
+		}
+		if ac.Def.ACBonus > 0 {
+			total += ac.Def.ACBonus * ac.Stacks
 		}
 	}
 	return total

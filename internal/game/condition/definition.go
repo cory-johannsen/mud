@@ -21,6 +21,7 @@ type ConditionDef struct {
 	AttackPenalty   int      `yaml:"attack_penalty"`
 	AttackBonus     int      `yaml:"attack_bonus"`   // positive = bonus to attack rolls
 	ACPenalty       int      `yaml:"ac_penalty"`
+	ACBonus         int      `yaml:"ac_bonus,omitempty"`  // positive = bonus to AC (buff)
 	SpeedPenalty    int      `yaml:"speed_penalty"`
 	DamageBonus     int      `yaml:"damage_bonus"`   // positive = bonus to damage rolls
 	ReflexBonus     int      `yaml:"reflex_bonus"`   // positive = bonus to Reflex saves
