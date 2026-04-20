@@ -18,6 +18,7 @@ quest_giver:
     - vtq_scavenger_drive
     - vtq_bandit_bounty
     - vtq_gang_enforcer_takedown
+    - gun_signal_in_static
 loot:
   currency:
     min: 0

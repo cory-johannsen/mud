@@ -27,6 +27,7 @@ quest_giver:
     - rrq_rail_gang_bounty
     - rrq_barrel_house_cleanup
     - rrq_take_down_big_grizz
+    - machete_signal_in_static
 loot:
   currency:
     min: 0
