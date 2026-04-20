@@ -7,10 +7,33 @@ description: >
   the sky gods and backs it up with a brutal talent for violence. He sits
   atop the control tower, interpreting cargo law and sending his cultists
   to enforce it across the tarmac.
-level: 7
-max_hp: 80
-ac: 18
+level: 15
+max_hp: 330
+tier: boss
+ac: 22
 rob_multiplier: 2.0
+boss_abilities:
+  - id: terminal_lockdown
+    name: "Terminal Lockdown"
+    trigger: round_start
+    trigger_value: 0
+    cooldown: "3m"
+    effect:
+      aoe_condition: slowed
+  - id: cargo_barrage
+    name: "Cargo Barrage"
+    trigger: hp_pct_below
+    trigger_value: 75
+    cooldown: "4m"
+    effect:
+      aoe_damage_expr: "2d10"
+  - id: steward_resilience
+    name: "Steward Resilience"
+    trigger: hp_pct_below
+    trigger_value: 50
+    cooldown: "5m"
+    effect:
+      heal_pct: 25
 awareness: 10
 ai_domain: pdx_high_steward_combat
 respawn_delay: "10m"

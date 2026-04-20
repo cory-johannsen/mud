@@ -1,8 +1,8 @@
 id: cargo_cultist
 name: Cargo Cultist
 description: A wild-eyed zealot in a tattered flight attendant uniform, preaching that the planes will fly again.
-level: 3
-max_hp: 30
+level: 7
+max_hp: 49
 ac: 15
 rob_multiplier: 1.0
 awareness: 7

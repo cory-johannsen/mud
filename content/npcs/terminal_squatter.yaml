@@ -1,9 +1,9 @@
 id: terminal_squatter
 name: Terminal Squatter
 description: A gaunt figure huddled in a sleeping bag between rows of airport seats, surviving on whatever the terminal provides.
-level: 1
-max_hp: 16
-ac: 13
+level: 5
+max_hp: 35
+ac: 15
 rob_multiplier: 1.0
 awareness: 7
 ai_domain: terminal_squatter_combat

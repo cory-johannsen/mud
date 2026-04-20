@@ -1,8 +1,8 @@
 zone:
   id: pdx_international
   danger_level: sketchy
-  min_level: 1
-  max_level: 7
+  min_level: 5
+  max_level: 15
   world_x: 2
   world_y: -3
   script_dir: content/scripts/zones/pdx_international
@@ -451,7 +451,7 @@ zone:
   - id: pdx_control_tower
     title: Control Tower
     boss_room: true
-    danger_level: sketchy
+    danger_level: dangerous
     description: 'The air traffic control tower rises above the airport like a
 
       concrete lighthouse. The climb up the interior stairwell is

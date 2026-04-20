@@ -1,9 +1,9 @@
 id: tarmac_raider
 name: Tarmac Raider
 description: A brutal raider in improvised armor made from aircraft fuselage, wielding a propeller blade as a weapon.
-level: 4
-max_hp: 44
-ac: 17
+level: 12
+max_hp: 86
+ac: 16
 rob_multiplier: 1.0
 awareness: 8
 ai_domain: tarmac_raider_combat

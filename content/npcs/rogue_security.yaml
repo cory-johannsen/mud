@@ -6,9 +6,9 @@ description: >
   badge is still pinned to a chest rig cobbled together from tactical gear
   and salvage. Eyes dart between exits — old training mixed with new
   paranoia. The taser is long dead, but the baton and the attitude remain.
-max_hp: 28
-ac: 14
-level: 3
+max_hp: 70
+ac: 16
+level: 10
 awareness: 5
 personality: aggressive
 loot_table: security_gear
