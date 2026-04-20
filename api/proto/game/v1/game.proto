@@ -1603,18 +1603,22 @@ message HotbarSlot {
 // For typed (UI-driven) assignment, set kind+ref and leave text empty.
 // For legacy command-text assignment (telnet hotbar command), set text and leave kind/ref empty.
 message HotbarRequest {
-  string action = 1;  // "set", "clear", "show"
-  int32  slot   = 2;  // 1–10 for set/clear; ignored for show
-  string text   = 3;  // backward-compat: non-empty for command-kind "set" via telnet
-  string kind   = 4;  // typed kind for UI-driven set
-  string ref    = 5;  // typed ref for UI-driven set
+  string action        = 1;  // "set", "clear", "show"
+  int32  slot          = 2;  // 1–10 for set/clear; ignored for show
+  string text          = 3;  // backward-compat: non-empty for command-kind "set" via telnet
+  string kind          = 4;  // typed kind for UI-driven set
+  string ref           = 5;  // typed ref for UI-driven set
+  int32  hotbar_index  = 9;  // 1-based target bar; 0 = current active (default)
 }
 
 // HotbarUpdateEvent pushes the player's full 10-slot hotbar to the client.
 message HotbarUpdateEvent {
   // Always exactly 10 entries; slots[0] = slot 1, slots[9] = slot 10.
   // An empty HotbarSlot (kind="", ref="") means unassigned.
-  repeated HotbarSlot slots = 1;
+  repeated HotbarSlot slots               = 1;
+  int32               active_hotbar_index = 2;  // 1-based index of the currently active bar
+  int32               hotbar_count        = 3;  // total number of bars the player has unlocked
+  int32               max_hotbars         = 4;  // maximum bars available to the player
 }
 
 // DowntimeRequest dispatches downtime subcommands: list, cancel, or an activity alias with optional args.

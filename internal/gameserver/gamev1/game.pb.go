@@ -8882,19 +8882,20 @@ func (x *MapTile) GetSameZoneExitTargets() []*SameZoneExitTarget {
 
 // WorldZoneTile represents one zone on the world map.
 type WorldZoneTile struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	ZoneId        string                 `protobuf:"bytes,1,opt,name=zone_id,json=zoneId,proto3" json:"zone_id,omitempty"`
-	ZoneName      string                 `protobuf:"bytes,2,opt,name=zone_name,json=zoneName,proto3" json:"zone_name,omitempty"`
-	WorldX        int32                  `protobuf:"varint,3,opt,name=world_x,json=worldX,proto3" json:"world_x,omitempty"`
-	WorldY        int32                  `protobuf:"varint,4,opt,name=world_y,json=worldY,proto3" json:"world_y,omitempty"`
-	Discovered    bool                   `protobuf:"varint,5,opt,name=discovered,proto3" json:"discovered,omitempty"`
-	Current       bool                   `protobuf:"varint,6,opt,name=current,proto3" json:"current,omitempty"`
-	DangerLevel   string                 `protobuf:"bytes,7,opt,name=danger_level,json=dangerLevel,proto3" json:"danger_level,omitempty"`
-	LevelRange    string                 `protobuf:"bytes,8,opt,name=level_range,json=levelRange,proto3" json:"level_range,omitempty"`
-	Enemy         bool                   `protobuf:"varint,9,opt,name=enemy,proto3" json:"enemy,omitempty"`             // true if this zone is enemy territory for the current player's team
-	Description   string                 `protobuf:"bytes,10,opt,name=description,proto3" json:"description,omitempty"` // zone flavor text shown in hover tooltip
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	ZoneId           string                 `protobuf:"bytes,1,opt,name=zone_id,json=zoneId,proto3" json:"zone_id,omitempty"`
+	ZoneName         string                 `protobuf:"bytes,2,opt,name=zone_name,json=zoneName,proto3" json:"zone_name,omitempty"`
+	WorldX           int32                  `protobuf:"varint,3,opt,name=world_x,json=worldX,proto3" json:"world_x,omitempty"`
+	WorldY           int32                  `protobuf:"varint,4,opt,name=world_y,json=worldY,proto3" json:"world_y,omitempty"`
+	Discovered       bool                   `protobuf:"varint,5,opt,name=discovered,proto3" json:"discovered,omitempty"`
+	Current          bool                   `protobuf:"varint,6,opt,name=current,proto3" json:"current,omitempty"`
+	DangerLevel      string                 `protobuf:"bytes,7,opt,name=danger_level,json=dangerLevel,proto3" json:"danger_level,omitempty"`
+	LevelRange       string                 `protobuf:"bytes,8,opt,name=level_range,json=levelRange,proto3" json:"level_range,omitempty"`
+	Enemy            bool                   `protobuf:"varint,9,opt,name=enemy,proto3" json:"enemy,omitempty"`                                                 // true if this zone is enemy territory for the current player's team
+	Description      string                 `protobuf:"bytes,10,opt,name=description,proto3" json:"description,omitempty"`                                     // zone flavor text shown in hover tooltip
+	ConnectedZoneIds []string               `protobuf:"bytes,11,rep,name=connected_zone_ids,json=connectedZoneIds,proto3" json:"connected_zone_ids,omitempty"` // IDs of zones directly connected via zone exits
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
 }
 
 func (x *WorldZoneTile) Reset() {
@@ -8995,6 +8996,13 @@ func (x *WorldZoneTile) GetDescription() string {
 		return x.Description
 	}
 	return ""
+}
+
+func (x *WorldZoneTile) GetConnectedZoneIds() []string {
+	if x != nil {
+		return x.ConnectedZoneIds
+	}
+	return nil
 }
 
 // MapResponse is returned by the server with discovered tiles for the current zone
@@ -15033,11 +15041,12 @@ func (x *HotbarSlot) GetDamageSummary() string {
 // For legacy command-text assignment (telnet hotbar command), set text and leave kind/ref empty.
 type HotbarRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Action        string                 `protobuf:"bytes,1,opt,name=action,proto3" json:"action,omitempty"` // "set", "clear", "show"
-	Slot          int32                  `protobuf:"varint,2,opt,name=slot,proto3" json:"slot,omitempty"`    // 1–10 for set/clear; ignored for show
-	Text          string                 `protobuf:"bytes,3,opt,name=text,proto3" json:"text,omitempty"`     // backward-compat: non-empty for command-kind "set" via telnet
-	Kind          string                 `protobuf:"bytes,4,opt,name=kind,proto3" json:"kind,omitempty"`     // typed kind for UI-driven set
-	Ref           string                 `protobuf:"bytes,5,opt,name=ref,proto3" json:"ref,omitempty"`       // typed ref for UI-driven set
+	Action        string                 `protobuf:"bytes,1,opt,name=action,proto3" json:"action,omitempty"`                               // "set", "clear", "show"
+	Slot          int32                  `protobuf:"varint,2,opt,name=slot,proto3" json:"slot,omitempty"`                                  // 1–10 for set/clear; ignored for show
+	Text          string                 `protobuf:"bytes,3,opt,name=text,proto3" json:"text,omitempty"`                                   // backward-compat: non-empty for command-kind "set" via telnet
+	Kind          string                 `protobuf:"bytes,4,opt,name=kind,proto3" json:"kind,omitempty"`                                   // typed kind for UI-driven set
+	Ref           string                 `protobuf:"bytes,5,opt,name=ref,proto3" json:"ref,omitempty"`                                     // typed ref for UI-driven set
+	HotbarIndex   int32                  `protobuf:"varint,9,opt,name=hotbar_index,json=hotbarIndex,proto3" json:"hotbar_index,omitempty"` // 1-based target bar; 0 = current active (default)
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -15107,14 +15116,24 @@ func (x *HotbarRequest) GetRef() string {
 	return ""
 }
 
+func (x *HotbarRequest) GetHotbarIndex() int32 {
+	if x != nil {
+		return x.HotbarIndex
+	}
+	return 0
+}
+
 // HotbarUpdateEvent pushes the player's full 10-slot hotbar to the client.
 type HotbarUpdateEvent struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Always exactly 10 entries; slots[0] = slot 1, slots[9] = slot 10.
 	// An empty HotbarSlot (kind="", ref="") means unassigned.
-	Slots         []*HotbarSlot `protobuf:"bytes,1,rep,name=slots,proto3" json:"slots,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	Slots             []*HotbarSlot `protobuf:"bytes,1,rep,name=slots,proto3" json:"slots,omitempty"`
+	ActiveHotbarIndex int32         `protobuf:"varint,2,opt,name=active_hotbar_index,json=activeHotbarIndex,proto3" json:"active_hotbar_index,omitempty"` // 1-based index of the currently active bar
+	HotbarCount       int32         `protobuf:"varint,3,opt,name=hotbar_count,json=hotbarCount,proto3" json:"hotbar_count,omitempty"`                     // total number of bars the player has unlocked
+	MaxHotbars        int32         `protobuf:"varint,4,opt,name=max_hotbars,json=maxHotbars,proto3" json:"max_hotbars,omitempty"`                        // maximum bars available to the player
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
 }
 
 func (x *HotbarUpdateEvent) Reset() {
@@ -15152,6 +15171,27 @@ func (x *HotbarUpdateEvent) GetSlots() []*HotbarSlot {
 		return x.Slots
 	}
 	return nil
+}
+
+func (x *HotbarUpdateEvent) GetActiveHotbarIndex() int32 {
+	if x != nil {
+		return x.ActiveHotbarIndex
+	}
+	return 0
+}
+
+func (x *HotbarUpdateEvent) GetHotbarCount() int32 {
+	if x != nil {
+		return x.HotbarCount
+	}
+	return 0
+}
+
+func (x *HotbarUpdateEvent) GetMaxHotbars() int32 {
+	if x != nil {
+		return x.MaxHotbars
+	}
+	return 0
 }
 
 // DowntimeRequest dispatches downtime subcommands: list, cancel, or an activity alias with optional args.
@@ -17804,7 +17844,7 @@ const file_game_v1_game_proto_rawDesc = "" +
 	" \x03(\v2\x13.game.v1.PoiWithNpcR\apoiNpcs\x124\n" +
 	"\n" +
 	"zone_exits\x18\v \x03(\v2\x15.game.v1.ZoneExitInfoR\tzoneExits\x12P\n" +
-	"\x16same_zone_exit_targets\x18\f \x03(\v2\x1b.game.v1.SameZoneExitTargetR\x13sameZoneExitTargets\"\xad\x02\n" +
+	"\x16same_zone_exit_targets\x18\f \x03(\v2\x1b.game.v1.SameZoneExitTargetR\x13sameZoneExitTargets\"\xdb\x02\n" +
 	"\rWorldZoneTile\x12\x17\n" +
 	"\azone_id\x18\x01 \x01(\tR\x06zoneId\x12\x1b\n" +
 	"\tzone_name\x18\x02 \x01(\tR\bzoneName\x12\x17\n" +
@@ -17819,7 +17859,8 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"levelRange\x12\x14\n" +
 	"\x05enemy\x18\t \x01(\bR\x05enemy\x12 \n" +
 	"\vdescription\x18\n" +
-	" \x01(\tR\vdescription\"n\n" +
+	" \x01(\tR\vdescription\x12,\n" +
+	"\x12connected_zone_ids\x18\v \x03(\tR\x10connectedZoneIds\"n\n" +
 	"\vMapResponse\x12&\n" +
 	"\x05tiles\x18\x01 \x03(\v2\x10.game.v1.MapTileR\x05tiles\x127\n" +
 	"\vworld_tiles\x18\x02 \x03(\v2\x16.game.v1.WorldZoneTileR\n" +
@@ -18265,15 +18306,20 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\bmax_uses\x18\x06 \x01(\x05R\amaxUses\x12-\n" +
 	"\x12recharge_condition\x18\a \x01(\tR\x11rechargeCondition\x12\x17\n" +
 	"\aap_cost\x18\b \x01(\x05R\x06apCost\x12%\n" +
-	"\x0edamage_summary\x18\t \x01(\tR\rdamageSummary\"u\n" +
+	"\x0edamage_summary\x18\t \x01(\tR\rdamageSummary\"\x98\x01\n" +
 	"\rHotbarRequest\x12\x16\n" +
 	"\x06action\x18\x01 \x01(\tR\x06action\x12\x12\n" +
 	"\x04slot\x18\x02 \x01(\x05R\x04slot\x12\x12\n" +
 	"\x04text\x18\x03 \x01(\tR\x04text\x12\x12\n" +
 	"\x04kind\x18\x04 \x01(\tR\x04kind\x12\x10\n" +
-	"\x03ref\x18\x05 \x01(\tR\x03ref\">\n" +
+	"\x03ref\x18\x05 \x01(\tR\x03ref\x12!\n" +
+	"\fhotbar_index\x18\t \x01(\x05R\vhotbarIndex\"\xb2\x01\n" +
 	"\x11HotbarUpdateEvent\x12)\n" +
-	"\x05slots\x18\x01 \x03(\v2\x13.game.v1.HotbarSlotR\x05slots\"E\n" +
+	"\x05slots\x18\x01 \x03(\v2\x13.game.v1.HotbarSlotR\x05slots\x12.\n" +
+	"\x13active_hotbar_index\x18\x02 \x01(\x05R\x11activeHotbarIndex\x12!\n" +
+	"\fhotbar_count\x18\x03 \x01(\x05R\vhotbarCount\x12\x1f\n" +
+	"\vmax_hotbars\x18\x04 \x01(\x05R\n" +
+	"maxHotbars\"E\n" +
 	"\x0fDowntimeRequest\x12\x1e\n" +
 	"\n" +
 	"subcommand\x18\x01 \x01(\tR\n" +
