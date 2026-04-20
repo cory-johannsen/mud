@@ -12281,7 +12281,7 @@ func (s *GameServiceServer) issueOnboardingQuest(ctx context.Context, uid string
 		return
 	}
 	if title != "" {
-		s.pushMessageToUID(uid, fmt.Sprintf("New quest added to your quest log: %s", title))
+		s.pushMessageToUID(uid, "New quest: Find Your Bearings — locate the district map terminal on 82nd Avenue.")
 	}
 }
 

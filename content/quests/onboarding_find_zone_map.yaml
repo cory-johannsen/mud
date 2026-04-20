@@ -6,6 +6,7 @@ description: >
   you need a map. There's a district terminal on 82nd Avenue that has a
   zone map. Find it and figure out how to use it.
 type: onboarding
+auto_complete: true
 repeatable: false
 objectives:
   - id: explore_map_room
