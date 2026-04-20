@@ -51,8 +51,8 @@ func LoadFromDir(dir string) (QuestRegistry, error) {
 // Postcondition: Returns a fatal error if any reference is unresolvable.
 func (r QuestRegistry) CrossValidate(npcIDs, itemIDs, roomIDs map[string]bool) error {
 	for _, def := range r {
-		// Skip NPC check for find_trainer quests — they have no giver NPC.
-		if def.Type != "find_trainer" && !npcIDs[def.GiverNPCID] {
+		// Skip NPC check for find_trainer and onboarding quests — they have no giver NPC.
+		if def.Type != "find_trainer" && def.Type != "onboarding" && !npcIDs[def.GiverNPCID] {
 			return fmt.Errorf("quest %q: GiverNPCID %q not found in NPC registry", def.ID, def.GiverNPCID)
 		}
 		for _, prereq := range def.Prerequisites {
@@ -81,6 +81,8 @@ func (r QuestRegistry) CrossValidate(npcIDs, itemIDs, roomIDs map[string]bool) e
 				if !itemIDs[obj.ItemID] {
 					return fmt.Errorf("quest %q objective %q: deliver ItemID %q not in item registry", def.ID, obj.ID, obj.ItemID)
 				}
+			case "use_zone_map":
+				// TargetID is a zone ID — not validated against roomIDs or npcIDs.
 			}
 		}
 	}

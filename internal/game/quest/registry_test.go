@@ -109,6 +109,50 @@ func TestQuestRegistry_CrossValidate_Valid(t *testing.T) {
 	}
 }
 
+// TestCrossValidate_OnboardingQuestNoNPC verifies onboarding quests pass CrossValidate without a matching NPC.
+func TestCrossValidate_OnboardingQuestNoNPC(t *testing.T) {
+	reg := quest.QuestRegistry{
+		"onboarding_find_zone_map": &quest.QuestDef{
+			ID:    "onboarding_find_zone_map",
+			Title: "Find Your Bearings",
+			Type:  "onboarding",
+			Objectives: []quest.QuestObjective{
+				{ID: "explore_map_room", Type: "explore", Description: "Locate the terminal", TargetID: "flats_82nd_ave", Quantity: 1},
+				{ID: "use_zone_map", Type: "use_zone_map", Description: "Use the zone map", TargetID: "felony_flats", Quantity: 1},
+			},
+			Rewards: quest.QuestRewards{XP: 50},
+		},
+	}
+	npcIDs := map[string]bool{}
+	itemIDs := map[string]bool{}
+	roomIDs := map[string]bool{"flats_82nd_ave": true}
+	if err := reg.CrossValidate(npcIDs, itemIDs, roomIDs); err != nil {
+		t.Fatalf("unexpected error for onboarding CrossValidate: %v", err)
+	}
+}
+
+// TestCrossValidate_UseZoneMapTargetNotValidated verifies use_zone_map target_id is not validated against roomIDs.
+func TestCrossValidate_UseZoneMapTargetNotValidated(t *testing.T) {
+	reg := quest.QuestRegistry{
+		"onboarding_find_zone_map": &quest.QuestDef{
+			ID:    "onboarding_find_zone_map",
+			Title: "Find Your Bearings",
+			Type:  "onboarding",
+			Objectives: []quest.QuestObjective{
+				{ID: "explore_map_room", Type: "explore", Description: "Locate the terminal", TargetID: "flats_82nd_ave", Quantity: 1},
+				{ID: "use_zone_map_obj", Type: "use_zone_map", Description: "Use the zone map", TargetID: "felony_flats", Quantity: 1},
+			},
+			Rewards: quest.QuestRewards{XP: 50},
+		},
+	}
+	npcIDs := map[string]bool{}
+	itemIDs := map[string]bool{}
+	roomIDs := map[string]bool{"flats_82nd_ave": true} // "felony_flats" intentionally absent
+	if err := reg.CrossValidate(npcIDs, itemIDs, roomIDs); err != nil {
+		t.Fatalf("unexpected CrossValidate error: %v", err)
+	}
+}
+
 // TestLoadFromDir_AllZoneQuests verifies that all zone quests and find-trainer quests
 // load successfully from content/quests.
 //
