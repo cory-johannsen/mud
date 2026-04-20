@@ -197,7 +197,7 @@ zone:
     map_x: 2
     map_y: 4
     spawns:
-    - template: highway_bandit
+    - template: vantucky_scavenger
       count: 2
       respawn_after: 5m
     properties:
@@ -279,7 +279,7 @@ zone:
     map_x: 4
     map_y: -2
     spawns:
-    - template: compound_guard
+    - template: vantucky_militiaman
       count: 2
       respawn_after: 5m
     properties:
@@ -326,7 +326,7 @@ zone:
     map_x: 6
     map_y: -2
     spawns:
-    - template: compound_guard
+    - template: vantucky_militiaman
       count: 2
       respawn_after: 5m
     properties:
@@ -455,7 +455,7 @@ zone:
     map_x: 4
     map_y: 4
     spawns:
-    - template: highway_bandit
+    - template: vantucky_scavenger
       count: 1
       respawn_after: 5m
     properties:
@@ -627,7 +627,7 @@ zone:
     map_x: 6
     map_y: -4
     spawns:
-    - template: compound_guard
+    - template: vantucky_militiaman
       count: 1
       respawn_after: 5m
     properties:
@@ -717,7 +717,7 @@ zone:
     map_x: 2
     map_y: -4
     spawns:
-    - template: highway_bandit
+    - template: vantucky_scavenger
       count: 1
       respawn_after: 5m
     properties:
@@ -758,7 +758,7 @@ zone:
     map_x: 0
     map_y: 4
     spawns:
-    - template: highway_bandit
+    - template: vantucky_scavenger
       count: 2
       respawn_after: 5m
     properties:
@@ -841,7 +841,7 @@ zone:
     map_x: 8
     map_y: 2
     spawns:
-    - template: compound_guard
+    - template: vantucky_militiaman
       count: 1
       respawn_after: 5m
     - template: vantucky_militia_commander
@@ -1153,7 +1153,7 @@ zone:
     map_x: 8
     map_y: 4
     spawns:
-    - template: highway_bandit
+    - template: vantucky_scavenger
       count: 1
       respawn_after: 5m
     - template: vantucky_scavenger
@@ -1197,7 +1197,7 @@ zone:
     map_x: 6
     map_y: -6
     spawns:
-    - template: highway_bandit
+    - template: vantucky_scavenger
       count: 1
       respawn_after: 5m
     properties:
@@ -1237,7 +1237,7 @@ zone:
     - template: vantucky_scavenger
       count: 1
       respawn_after: 5m
-    - template: highway_bandit
+    - template: vantucky_scavenger
       count: 1
       respawn_after: 5m
     properties:
