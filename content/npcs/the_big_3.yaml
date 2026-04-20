@@ -42,3 +42,28 @@ loot:
   currency:
     min: 80
     max: 200
+  items:
+    - item: ai_machete_armor_light
+      chance: 0.05
+      min_qty: 1
+      max_qty: 1
+    - item: ai_machete_armor_medium
+      chance: 0.05
+      min_qty: 1
+      max_qty: 1
+    - item: ai_machete_armor_heavy
+      chance: 0.05
+      min_qty: 1
+      max_qty: 1
+    - item: ai_gun_armor_light
+      chance: 0.05
+      min_qty: 1
+      max_qty: 1
+    - item: ai_gun_armor_medium
+      chance: 0.05
+      min_qty: 1
+      max_qty: 1
+    - item: ai_gun_armor_heavy
+      chance: 0.05
+      min_qty: 1
+      max_qty: 1

@@ -50,6 +50,14 @@ loot:
       chance: 0.05
       min_qty: 1
       max_qty: 1
+    - item: ai_sawn_off
+      chance: 0.05
+      min_qty: 1
+      max_qty: 1
+    - item: ai_combat_knife
+      chance: 0.05
+      min_qty: 1
+      max_qty: 1
 taunts:
   - "You have no idea what you just walked into."
   - "Nobody in this room has ever said no to me. You won't be the first."
