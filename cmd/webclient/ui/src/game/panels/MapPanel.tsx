@@ -204,7 +204,7 @@ function renderBattleGrid(
 }
 
 export function MapPanel() {
-  const { state, sendMessage, sendCommand, clearCombatNpcView } = useGame()
+  const { state, sendMessage, sendCommand } = useGame()
   const [showWorld, setShowWorld] = useState(false)
   const [hoveredTile, setHoveredTile] = useState<MapTile | null>(null)
   const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 })
@@ -331,7 +331,6 @@ export function MapPanel() {
               },
               () => {
                 setCombatHoverName(null)
-                clearCombatNpcView()
               },
               hoveredCell,
               (x, y) => setHoveredCell({ x, y }),
