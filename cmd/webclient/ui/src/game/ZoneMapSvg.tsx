@@ -100,6 +100,10 @@ interface ZoneMapSvgProps {
   // playerLevel and zoneLevelRange enable difficulty-relative border color coding.
   playerLevel?: number
   zoneLevelRange?: string
+  // onTileClick fires when the user clicks an explored, non-current tile.
+  onTileClick?: (tile: MapTile) => void
+  // destinationRoomId highlights the target tile with a blue border.
+  destinationRoomId?: string | null
 }
 
 function clipId(tile: MapTile): string {
@@ -130,7 +134,7 @@ function wrapRoomName(name: string, maxChars = 10): [string, string | null] {
   return [name.slice(0, maxChars), name.slice(maxChars, maxChars * 2).trim() || null]
 }
 
-export function ZoneMapSvg({ tiles, onHover, onHoverEnd, containerWidth, playerLevel, zoneLevelRange }: ZoneMapSvgProps): JSX.Element {
+export function ZoneMapSvg({ tiles, onHover, onHoverEnd, containerWidth, playerLevel, zoneLevelRange, onTileClick, destinationRoomId }: ZoneMapSvgProps): JSX.Element {
   if (tiles.length === 0) {
     return <p style={{ color: '#666', fontFamily: 'monospace', padding: '0.5rem' }}>No map data.</p>
   }
@@ -286,11 +290,15 @@ export function ZoneMapSvg({ tiles, onHover, onHoverEnd, containerWidth, playerL
     const fill = DANGER_FILLS[dangerKey] ?? '#1e1e2e'
     const isCurrent = tile.current ?? false
     const isBoss = tile.bossRoom ?? tile.boss ?? false
+    const isExplored = tile.explored ?? false
+    const isDestination = destinationRoomId != null && tile.roomId === destinationRoomId
     const diffColor = (!isCurrent && !isBoss)
       ? (difficultyBorderColor(zoneLevelRange, playerLevel ?? 0) ?? '#333')
       : '#333'
-    const stroke = isCurrent ? '#f0c040' : isBoss ? '#cc4444' : diffColor
-    const strokeWidth = isCurrent || isBoss ? 2 : 1
+    const stroke = isDestination ? '#4a9eff' : isCurrent ? '#f0c040' : isBoss ? '#cc4444' : diffColor
+    const strokeWidth = isDestination || isCurrent || isBoss ? 2 : 1
+    const isClickable = isExplored && !isCurrent && onTileClick != null
+    const cursor = isClickable ? 'pointer' : 'default'
     const name = tile.roomName ?? ''
     const id = clipId(tile)
     const [line1, line2] = wrapRoomName(name)
@@ -305,8 +313,10 @@ export function ZoneMapSvg({ tiles, onHover, onHoverEnd, containerWidth, playerL
           width={cellW} height={cellH}
           rx={4}
           fill={fill} stroke={stroke} strokeWidth={strokeWidth}
+          style={{ cursor }}
           onMouseEnter={onHover ? e => onHover(tile, e) : undefined}
           onMouseLeave={onHoverEnd}
+          onClick={isClickable ? () => onTileClick!(tile) : undefined}
         />
         {line2 ? (
           <text fontSize={9} fill="#ccc" pointerEvents="none" clipPath={`url(#${id})`}>
