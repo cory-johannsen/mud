@@ -369,6 +369,7 @@ message ServerEvent {
     QuestLogView         quest_log_view         = 39;
     QuestCompleteEvent   quest_complete          = 40;
     TechTrainerView      tech_trainer_view       = 41;
+    GameConfig          game_config             = 42;
   }
 }
 
@@ -891,6 +892,7 @@ message MapTile {
     repeated PoiWithNpc poi_npcs = 10; // NPC-backed POIs with display names; non-NPC POIs (equipment, map, cover) are absent. Every poi_id here appears in pois.
     repeated ZoneExitInfo zone_exits = 11; // zone-crossing exits from this room
     repeated SameZoneExitTarget same_zone_exit_targets = 12; // same-zone exits with target room IDs for connector rendering
+    bool   explored      = 13; // true if the player has physically entered this room (REQ-CNT-1)
 }
 
 // WorldZoneTile represents one zone on the world map.
@@ -906,6 +908,11 @@ message WorldZoneTile {
     bool   enemy        = 9;  // true if this zone is enemy territory for the current player's team
     string description  = 10; // zone flavor text shown in hover tooltip
     repeated string connected_zone_ids = 11; // IDs of zones directly connected via zone exits
+}
+
+// GameConfig delivers server-side client configuration at session start. (REQ-CNT-2)
+message GameConfig {
+  int32 auto_nav_step_ms = 1; // delay between auto-navigation steps in milliseconds; default 1000
 }
 
 // MapResponse is returned by the server with discovered tiles for the current zone
