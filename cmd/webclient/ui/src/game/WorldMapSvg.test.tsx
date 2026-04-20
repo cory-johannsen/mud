@@ -251,6 +251,128 @@ describe('WorldMapSvg', () => {
       fireEvent.mouseLeave(g)
       expect(queryByRole('tooltip')).toBeNull()
     })
+
+    // REQ-WM-CONN-1: Tooltip MUST list connected discovered zones by name.
+    // REQ-WM-CONN-2: Tooltip MUST show direction indicator (N/S/E/W) when inferrable.
+    // REQ-WM-CONN-3: Tooltip MUST NOT reveal undiscovered connected zones.
+    // REQ-WM-CONN-4: Tooltip MUST NOT show connections section when no discovered connections exist.
+
+    it('shows connected zone names in tooltip', () => {
+      const zoneA: WorldZoneTile = {
+        zoneId: 'zone_a', zoneName: 'Alpha Zone',
+        worldX: 0, worldY: 0,
+        discovered: true, current: true, dangerLevel: 'safe',
+        connectedZoneIds: ['zone_b'],
+      }
+      const zoneB: WorldZoneTile = {
+        zoneId: 'zone_b', zoneName: 'Beta Zone',
+        worldX: 1, worldY: 0,
+        discovered: true, current: false, dangerLevel: 'safe',
+      }
+      const { container, getByRole } = render(
+        <WorldMapSvg tiles={[zoneA, zoneB]} onTravel={vi.fn()} />
+      )
+      const gs = container.querySelectorAll('svg g')
+      fireEvent.mouseEnter(gs[0]!)
+      const tooltip = getByRole('tooltip')
+      expect(tooltip.textContent).toContain('Beta Zone')
+    })
+
+    it('shows direction (E) for an east-connected zone', () => {
+      const zoneA: WorldZoneTile = {
+        zoneId: 'zone_a', zoneName: 'Alpha Zone',
+        worldX: 0, worldY: 0,
+        discovered: true, current: true, dangerLevel: 'safe',
+        connectedZoneIds: ['zone_b'],
+      }
+      const zoneB: WorldZoneTile = {
+        zoneId: 'zone_b', zoneName: 'Beta Zone',
+        worldX: 1, worldY: 0,
+        discovered: true, current: false, dangerLevel: 'safe',
+      }
+      const { container, getByRole } = render(
+        <WorldMapSvg tiles={[zoneA, zoneB]} onTravel={vi.fn()} />
+      )
+      const gs = container.querySelectorAll('svg g')
+      fireEvent.mouseEnter(gs[0]!)
+      const tooltip = getByRole('tooltip')
+      expect(tooltip.textContent).toContain('E')
+    })
+
+    it('shows direction (N) for a north-connected zone (lower worldY)', () => {
+      const zoneA: WorldZoneTile = {
+        zoneId: 'zone_a', zoneName: 'Alpha Zone',
+        worldX: 0, worldY: 0,
+        discovered: true, current: true, dangerLevel: 'safe',
+        connectedZoneIds: ['zone_n'],
+      }
+      const zoneN: WorldZoneTile = {
+        zoneId: 'zone_n', zoneName: 'North Zone',
+        worldX: 0, worldY: -1,
+        discovered: true, current: false, dangerLevel: 'safe',
+      }
+      const { container, getByRole } = render(
+        <WorldMapSvg tiles={[zoneA, zoneN]} onTravel={vi.fn()} />
+      )
+      const gs = container.querySelectorAll('svg g')
+      // The tile with worldY=0 is rendered after worldY=-1 (lower worldY sorts first)
+      // Find the tile for zone_a (worldY=0, second in sorted order)
+      const gList = Array.from(gs)
+      // Hover over zone_a — it's the second g element (sorted by worldY ascending)
+      fireEvent.mouseEnter(gList[1]!)
+      const tooltip = getByRole('tooltip')
+      expect(tooltip.textContent).toContain('North Zone')
+      expect(tooltip.textContent).toContain('N')
+    })
+
+    it('does not show undiscovered connected zones in tooltip', () => {
+      const zoneA: WorldZoneTile = {
+        zoneId: 'zone_a', zoneName: 'Alpha Zone',
+        worldX: 0, worldY: 0,
+        discovered: true, current: true, dangerLevel: 'safe',
+        connectedZoneIds: ['zone_hidden'],
+      }
+      const zoneHidden: WorldZoneTile = {
+        zoneId: 'zone_hidden', zoneName: 'Secret Zone',
+        worldX: 1, worldY: 0,
+        discovered: false, current: false,
+      }
+      const { container, getByRole } = render(
+        <WorldMapSvg tiles={[zoneA, zoneHidden]} onTravel={vi.fn()} />
+      )
+      fireEvent.mouseEnter(container.querySelector('svg g')!)
+      const tooltip = getByRole('tooltip')
+      expect(tooltip.textContent).not.toContain('Secret Zone')
+    })
+
+    it('shows no connections section when all connections are undiscovered', () => {
+      const zoneA: WorldZoneTile = {
+        zoneId: 'zone_a', zoneName: 'Alpha Zone',
+        worldX: 0, worldY: 0,
+        discovered: true, current: true, dangerLevel: 'safe',
+        connectedZoneIds: ['zone_hidden'],
+      }
+      const zoneHidden: WorldZoneTile = {
+        zoneId: 'zone_hidden',
+        worldX: 1, worldY: 0,
+        discovered: false, current: false,
+      }
+      const { container, getByRole } = render(
+        <WorldMapSvg tiles={[zoneA, zoneHidden]} onTravel={vi.fn()} />
+      )
+      fireEvent.mouseEnter(container.querySelector('svg g')!)
+      const tooltip = getByRole('tooltip')
+      expect(tooltip.textContent).not.toContain('Connections')
+    })
+
+    it('shows no connections section when connectedZoneIds is empty', () => {
+      const { container, getByRole } = render(
+        <WorldMapSvg tiles={[DISCOVERED_ZONE]} onTravel={vi.fn()} />
+      )
+      fireEvent.mouseEnter(container.querySelector('svg g')!)
+      const tooltip = getByRole('tooltip')
+      expect(tooltip.textContent).not.toContain('Connections')
+    })
   })
 })
 

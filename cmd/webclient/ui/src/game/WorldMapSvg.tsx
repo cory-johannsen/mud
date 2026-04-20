@@ -71,6 +71,23 @@ export function computeTooltipPos(
   return { x, y }
 }
 
+// zoneDirection returns a compass direction label from zone A to zone B based on
+// their world grid positions. Returns null for diagonal or same-position connections.
+export function zoneDirection(
+  ax: number, ay: number,
+  bx: number, by: number,
+): string | null {
+  const dx = bx - ax
+  const dy = by - ay
+  if (dx === 0 && dy === 0) return null
+  if (dx === 0) return dy < 0 ? 'N' : 'S'
+  if (dy === 0) return dx > 0 ? 'E' : 'W'
+  // Diagonal: return compound direction
+  const ns = dy < 0 ? 'N' : 'S'
+  const ew = dx > 0 ? 'E' : 'W'
+  return `${ns}${ew}`
+}
+
 interface WorldMapSvgProps {
   tiles: WorldZoneTile[]
   onTravel: (zoneId: string) => void
@@ -350,7 +367,7 @@ export function WorldMapSvg({ tiles, onTravel, playerLevel }: WorldMapSvgProps):
       </svg>
 
       {tooltip && (
-        <ZoneTooltip tooltip={tooltip} />
+        <ZoneTooltip tooltip={tooltip} tiles={tiles} />
       )}
 
       <div style={{
@@ -419,13 +436,27 @@ const DANGER_COLORS: Record<string, string> = {
   deadly: '#c03030',
 }
 
-function ZoneTooltip({ tooltip }: { tooltip: TooltipState }): JSX.Element {
+function ZoneTooltip({ tooltip, tiles }: { tooltip: TooltipState; tiles: WorldZoneTile[] }): JSX.Element {
   const { tile, x, y } = tooltip
   const danger = tile.dangerLevel ?? tile.danger_level ?? ''
   const levelRange = tile.levelRange ?? tile.level_range ?? ''
   const description = tile.description ?? ''
   const isEnemy = tile.enemy ?? false
   const discovered = tile.discovered ?? false
+
+  // Build list of discovered connected zones with inferred direction.
+  const tileByZoneId = new Map(tiles.map(t => [t.zoneId ?? '', t]))
+  const connectedIds = tile.connectedZoneIds ?? tile.connected_zone_ids ?? []
+  const connections = connectedIds
+    .map(id => tileByZoneId.get(id))
+    .filter((t): t is WorldZoneTile => !!t && (t.discovered ?? false))
+    .map(t => ({
+      name: t.zoneName ?? t.zoneId ?? '',
+      dir: zoneDirection(
+        tile.worldX ?? 0, tile.worldY ?? 0,
+        t.worldX ?? 0, t.worldY ?? 0,
+      ),
+    }))
 
   return (
     <div
@@ -479,6 +510,16 @@ function ZoneTooltip({ tooltip }: { tooltip: TooltipState }): JSX.Element {
           {description && (
             <div style={{ color: '#999', marginTop: '0.35rem', lineHeight: 1.4, borderTop: '1px solid #333', paddingTop: '0.35rem' }}>
               {description}
+            </div>
+          )}
+          {connections.length > 0 && (
+            <div style={{ marginTop: '0.35rem', borderTop: '1px solid #333', paddingTop: '0.35rem' }}>
+              <div style={{ color: '#888', fontSize: '0.68rem', marginBottom: '0.2rem' }}>Connections</div>
+              {connections.map((c, i) => (
+                <div key={i} style={{ color: '#bbb', fontSize: '0.72rem' }}>
+                  {'→ '}{c.name}{c.dir ? ` (${c.dir})` : ''}
+                </div>
+              ))}
             </div>
           )}
         </>
