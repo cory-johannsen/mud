@@ -1,0 +1,161 @@
+zone:
+  id: the_dmz
+  danger_level: all_out_war
+  min_level: 30
+  max_level: 35
+  world_x: 2
+  world_y: 2
+  name: The DMZ
+  description: >
+    The contested buffer zone between the Dick Sucking Factory and the
+    Jerk Off Factory. Neither side controls it. Both sides send sorties
+    through it. The ground is covered in shredded memos, overturned
+    office furniture, and motivational posters that have been used as
+    cover. The vending machines have bullet holes. Both factions have
+    been trying to destroy them for three years. The machines are
+    still running.
+  start_room: dmz_west_gate
+  rooms:
+  - id: dmz_west_gate
+    title: West Gate (DSF Side)
+    danger_level: all_out_war
+    description: >
+      The western entry to the DMZ from the DSF loading bay. DSF
+      floor supervisors have established a forward position here
+      behind overturned filing cabinets. The filing cabinets are
+      labeled. The labels are still legible.
+    exits:
+    - direction: west
+      target: dsf_loading_bay
+      zone: dick_sucking_factory
+    - direction: east
+      target: dmz_memo_fields
+    map_x: 0
+    map_y: 0
+    spawns:
+    - template: dsf_floor_supervisor
+      count: 2
+      respawn_after: 5m
+    - template: jof_efficiency_consultant
+      count: 1
+      respawn_after: 5m
+
+  - id: dmz_memo_fields
+    title: The Memo Fields
+    danger_level: all_out_war
+    description: >
+      Thousands of memos cover the ground here, dispersed from the
+      original memo exchange that started the war. They are not
+      legible at a distance. Up close, they are mostly about parking.
+      Both sides have used them as camouflage. Neither side has read
+      them.
+    exits:
+    - direction: west
+      target: dmz_west_gate
+    - direction: east
+      target: dmz_vending_row
+    - direction: north
+      target: dmz_overpass
+    map_x: 2
+    map_y: 0
+    spawns:
+    - template: dsf_middle_manager
+      count: 1
+      respawn_after: 5m
+    - template: jof_efficiency_consultant
+      count: 1
+      respawn_after: 5m
+
+  - id: dmz_vending_row
+    title: Vending Machine Row
+    danger_level: all_out_war
+    description: >
+      A row of five vending machines stand in the center of the DMZ,
+      untouched by mutual agreement and constant fire. They are fully
+      operational. Nobody uses them during active sorties. Between
+      sorties, both sides use them constantly. The agreement on the
+      vending machines is the only agreement both sides have honored
+      for three years.
+    exits:
+    - direction: west
+      target: dmz_memo_fields
+    - direction: east
+      target: dmz_no_mans_land
+    map_x: 4
+    map_y: 0
+    spawns:
+    - template: dsf_floor_supervisor
+      count: 1
+      respawn_after: 5m
+    - template: jof_qa_officer
+      count: 1
+      respawn_after: 8m
+
+  - id: dmz_no_mans_land
+    title: No Man's Land
+    danger_level: all_out_war
+    description: >
+      The central DMZ. No faction controls this ground. Both factions
+      contest it continuously. Office chairs, printer cartridges,
+      and a whiteboard reading "Q4 OBJECTIVES" have been used as
+      fortifications. The whiteboard has taken three direct hits.
+      Q4 objectives remain partially visible. They are ambitious.
+    exits:
+    - direction: west
+      target: dmz_vending_row
+    - direction: east
+      target: dmz_east_gate
+    map_x: 6
+    map_y: 0
+    spawns:
+    - template: dsf_hr_rep
+      count: 1
+      respawn_after: 8m
+    - template: jof_regional_liaison
+      count: 1
+      respawn_after: 5m
+
+  - id: dmz_overpass
+    title: The Overpass
+    danger_level: all_out_war
+    description: >
+      A loading overpass provides elevated line-of-sight across the
+      DMZ. Both factions contest the overpass continuously. Whoever
+      holds it controls the high ground. Currently, nobody holds it.
+      The previous occupants are still there, in a sense.
+    exits:
+    - direction: south
+      target: dmz_memo_fields
+    map_x: 2
+    map_y: 2
+    spawns:
+    - template: dsf_middle_manager
+      count: 1
+      respawn_after: 5m
+    - template: jof_efficiency_consultant
+      count: 2
+      respawn_after: 5m
+
+  - id: dmz_east_gate
+    title: East Gate (JOF Side)
+    danger_level: all_out_war
+    description: >
+      The eastern entry to the DMZ from the JOF lobby. JOF efficiency
+      consultants have established a forward position here. Their
+      fortifications have been assessed for structural efficiency.
+      The assessment was positive. The fortifications are good.
+    exits:
+    - direction: east
+      target: jof_lobby
+      zone: jerk_off_factory
+    - direction: west
+      target: dmz_no_mans_land
+    map_x: 8
+    map_y: 0
+    spawns:
+    - template: jof_efficiency_consultant
+      count: 2
+      respawn_after: 5m
+    - template: dsf_floor_supervisor
+      count: 1
+      respawn_after: 5m

@@ -36,6 +36,7 @@ func TestAllZonesHaveAtLeastOneSafeRoom(t *testing.T) {
 		"steampdx":        true,
 		"the_velvet_rope": true,
 		"club_privata":    true,
+		"the_dmz":         true,
 	}
 	zonesDir := filepath.Join(repoRoot(t), "content", "zones")
 	entries, err := os.ReadDir(zonesDir)
