@@ -1,0 +1,48 @@
+id: ai_chainsaw
+name: AI Chainsaw
+description: >
+  A salvaged power tool with a neural interface spliced into the grip. It has
+  opinions. Loud ones. It really wants to be used.
+kind: weapon
+weapon_ref: chainsaw
+weight: 3.0
+stackable: false
+max_stack: 1
+value: 1500
+combat_domain: ai_chainsaw_combat
+combat_script: |
+  preconditions = {}
+  preconditions.has_enemy = function(self)
+    return #self.combat.enemies > 0
+  end
+
+  preconditions.frenzy_active = function(self)
+    return (self.state.kills or 0) >= 2
+  end
+
+  operators = {}
+  operators.overkill_strike = function(self)
+    local target = self.combat.weakest_enemy()
+    if target then
+      self.engine.attack(target.id, "2d6+4", 2)
+      if target.hp <= 0 then
+        self.state.kills = (self.state.kills or 0) + 1
+      end
+      self.engine.say({"I CAN'T STOP!", "RAAAH!", "GIVE ME EVERYTHING!", "DO IT AGAIN!"})
+    end
+  end
+
+  operators.attack_weakest = function(self)
+    local target = self.combat.weakest_enemy()
+    if target then
+      self.engine.attack(target.id, "1d6+2")
+      if target.hp <= 0 then
+        self.state.kills = (self.state.kills or 0) + 1
+      end
+      self.engine.say({"YES!", "MORE!", "BLOOD!", "KEEP GOING!"})
+    end
+  end
+
+  operators.say_hungry = function(self)
+    self.engine.say({"Feed me...", "Who's next?", "I can smell them.", "Let me at them."})
+  end

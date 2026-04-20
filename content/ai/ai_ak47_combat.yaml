@@ -1,0 +1,32 @@
+domain:
+  id: ai_ak47_combat
+  description: Paranoid conspiracy theorist. Burst attack + fear debuff + monologue.
+
+  tasks:
+    - id: behave
+      description: Root task — theorize or suppress
+
+  methods:
+    - task: behave
+      id: full_sequence
+      precondition: enough_ap_for_full_sequence
+      subtasks: [burst_and_theorize]
+
+    - task: behave
+      id: quick_mode
+      precondition: has_enemy
+      subtasks: [quick_shot]
+
+    - task: behave
+      id: idle_mode
+      precondition: ""
+      subtasks: [quick_shot]
+
+  operators:
+    - id: burst_and_theorize
+      action: lua_hook
+      ap_cost: 3
+
+    - id: quick_shot
+      action: lua_hook
+      ap_cost: 1

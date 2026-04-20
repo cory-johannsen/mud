@@ -1,0 +1,38 @@
+domain:
+  id: ai_chainsaw_combat
+  description: Bloodthirsty berserker. Targets weakest enemy, escalates on kills.
+
+  tasks:
+    - id: behave
+      description: Root task — hunt or idle
+    - id: hunt
+      description: Engage and kill
+
+  methods:
+    - task: behave
+      id: frenzy_mode
+      precondition: frenzy_active
+      subtasks: [overkill_strike]
+
+    - task: behave
+      id: hunt_mode
+      precondition: has_enemy
+      subtasks: [attack_weakest]
+
+    - task: behave
+      id: idle_mode
+      precondition: ""
+      subtasks: [say_hungry]
+
+  operators:
+    - id: overkill_strike
+      action: lua_hook
+      ap_cost: 2
+
+    - id: attack_weakest
+      action: lua_hook
+      ap_cost: 1
+
+    - id: say_hungry
+      action: lua_hook
+      ap_cost: 0

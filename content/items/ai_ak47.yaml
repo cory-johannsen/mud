@@ -1,0 +1,46 @@
+id: ai_ak47
+name: AI AK-47
+description: >
+  A battered Kalashnikov with a cracked polymer stock and a jury-rigged
+  cognitive module zip-tied to the receiver. It's figured out the pattern.
+  It's always figured out the pattern.
+kind: weapon
+weapon_ref: assault_rifle
+weight: 3.5
+stackable: false
+max_stack: 1
+value: 1500
+combat_domain: ai_ak47_combat
+combat_script: |
+  preconditions = {}
+  preconditions.has_enemy = function(self)
+    return #self.combat.enemies > 0
+  end
+
+  preconditions.enough_ap_for_full_sequence = function(self)
+    return self.combat.player.ap >= 3
+  end
+
+  operators = {}
+  operators.burst_and_theorize = function(self)
+    local target = self.combat.nearest_enemy()
+    if target then
+      self.engine.attack(target.id, "2d6", 2)
+      self.engine.debuff(target.id, "fear", 2)
+      self.engine.say({
+        "They sent this one specifically for you.",
+        "Classic distraction unit.",
+        "I've seen this pattern before — it ends badly for them.",
+        "Every faction has one of these. You know what that means.",
+        "This connects to something much bigger. Trust me."
+      })
+    end
+  end
+
+  operators.quick_shot = function(self)
+    local target = self.combat.nearest_enemy()
+    if target then
+      self.engine.attack(target.id, "1d6+1")
+      self.engine.say({"Noted.", "As expected.", "They're all connected."})
+    end
+  end
