@@ -1,8 +1,8 @@
 zone:
   id: ross_island
   danger_level: dangerous
-  min_level: 2
-  max_level: 7
+  min_level: 22
+  max_level: 32
   world_x: 0
   world_y: 2
   script_dir: content/scripts/zones/ross_island
@@ -403,6 +403,7 @@ zone:
   - id: ross_gravel_pit
     title: Gravel Pit
     boss_room: true
+    danger_level: dangerous
     description: 'The massive excavation is a world unto itself. Terraced walls
 
       of grey stone and compacted earth rise on all sides. At the

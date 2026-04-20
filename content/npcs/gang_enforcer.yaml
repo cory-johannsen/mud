@@ -1,9 +1,10 @@
 id: gang_enforcer
 name: Gang Enforcer
 description: A heavily armed gang member patrolling territory lines with a chip on their shoulder and a shotgun to back it up. They shoot first and don't bother with questions.
-level: 4
-max_hp: 40
-ac: 15
+level: 27
+max_hp: 237
+ac: 19
+rob_multiplier: 1.2
 awareness: 7
 ai_domain: territory_patrol
 respawn_delay: "5m"

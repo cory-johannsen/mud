@@ -1,9 +1,9 @@
 id: ross_salvager
 name: River Salvager
 description: A wiry scavenger with a bolt-action rifle slung over one shoulder and a belt full of stolen tools. They work the island's shores for scrap and tolerate no witnesses.
-level: 3
-max_hp: 28
-ac: 14
+level: 22
+max_hp: 182
+ac: 18
 awareness: 8
 ai_domain: scavenger_patrol
 respawn_delay: "5m"

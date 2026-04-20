@@ -7,10 +7,33 @@ description: >
   through terror and tribute, collecting a cut of every load hauled up
   the switchback road. His great-coat is stained with gravel dust and
   the evidence of past confrontations.
-level: 7
-max_hp: 88
-ac: 18
+level: 32
+max_hp: 900
+tier: boss
+ac: 24
 rob_multiplier: 2.0
+boss_abilities:
+  - id: pit_sovereignty
+    name: "Pit Sovereignty"
+    trigger: round_start
+    trigger_value: 0
+    cooldown: "3m"
+    effect:
+      aoe_condition: frightened
+  - id: gravel_barrage
+    name: "Gravel Barrage"
+    trigger: hp_pct_below
+    trigger_value: 75
+    cooldown: "4m"
+    effect:
+      aoe_damage_expr: "4d10"
+  - id: kings_endurance
+    name: "King's Endurance"
+    trigger: hp_pct_below
+    trigger_value: 50
+    cooldown: "5m"
+    effect:
+      heal_pct: 25
 awareness: 9
 ai_domain: ross_island_pit_king_combat
 respawn_delay: "10m"

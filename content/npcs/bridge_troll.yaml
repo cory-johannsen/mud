@@ -1,10 +1,10 @@
 id: bridge_troll
 name: Bridge Troll
 description: A massive brute stationed at the bridge, demanding tolls from anyone foolish enough to cross.
-level: 3
-max_hp: 36
-ac: 16
-rob_multiplier: 1.5
+level: 25
+max_hp: 215
+ac: 19
+rob_multiplier: 1.2
 awareness: 7
 ai_domain: bridge_troll_combat
 respawn_delay: "5m"

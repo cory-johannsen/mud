@@ -1,9 +1,9 @@
 id: island_hermit
 name: Island Hermit
 description: A reclusive figure in ragged layers, watching from the undergrowth with unsettling intensity.
-level: 2
-max_hp: 20
-ac: 14
+level: 22
+max_hp: 182
+ac: 18
 awareness: 10
 ai_domain: scavenger_patrol
 respawn_delay: "5m"

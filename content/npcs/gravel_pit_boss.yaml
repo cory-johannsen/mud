@@ -1,10 +1,10 @@
 id: gravel_pit_boss
 name: Gravel Pit Boss
 description: The self-proclaimed king of the gravel pit, built like the machinery he oversees, ruling through brute force and intimidation.
-level: 4
-max_hp: 48
-ac: 17
-rob_multiplier: 1.5
+level: 30
+max_hp: 270
+ac: 19
+rob_multiplier: 1.2
 awareness: 8
 ai_domain: gravel_pit_boss_combat
 respawn_delay: "5m"
