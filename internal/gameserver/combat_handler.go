@@ -1218,6 +1218,7 @@ func (h *CombatHandler) JoinPendingNPCCombat(inst *npc.Instance, pendingRoomID s
 		WeaponName:  npcWeaponName,
 		AttackVerb:  inst.AttackVerb,
 		SpeedFt:     inst.SpeedFt,
+		FactionID:   inst.FactionID,
 	}
 	combat.RollInitiative([]*combat.Combatant{npcCbt}, h.dice.Src())
 	// Assign NPC on right edge, stacked vertically from center.
@@ -1392,6 +1393,39 @@ func (h *CombatHandler) GetCombatant(uid, targetID string) (*combat.Combatant, b
 		}
 	}
 	return nil, false
+}
+
+// GetCombatantsInRoom returns a slice of scripting.CombatantInfo for all participants
+// in the active combat in roomID. Returns nil when no combat is active in roomID.
+//
+// Precondition: roomID must be non-empty.
+// Postcondition: Returns nil when no combat is active; otherwise returns a non-nil slice.
+func (h *CombatHandler) GetCombatantsInRoom(roomID string) []*scripting.CombatantInfo {
+	h.combatMu.RLock()
+	defer h.combatMu.RUnlock()
+
+	cbt, ok := h.engine.GetCombat(roomID)
+	if !ok {
+		return nil
+	}
+
+	out := make([]*scripting.CombatantInfo, 0, len(cbt.Combatants))
+	for _, c := range cbt.Combatants {
+		kind := "npc"
+		if c.Kind == combat.KindPlayer {
+			kind = "player"
+		}
+		out = append(out, &scripting.CombatantInfo{
+			UID:       c.ID,
+			Name:      c.Name,
+			HP:        c.CurrentHP,
+			MaxHP:     c.MaxHP,
+			AC:        c.AC,
+			Kind:      kind,
+			FactionID: c.FactionID,
+		})
+	}
+	return out
 }
 
 // GetCombatConditionSet returns the condition ActiveSet for targetID from the active combat
@@ -1762,6 +1796,7 @@ func (h *CombatHandler) startPursuitCombatLocked(playerSess *session.PlayerSessi
 			WeaponName:  npcWeaponName,
 			AttackVerb:  inst.AttackVerb,
 			SpeedFt:     inst.SpeedFt,
+			FactionID:   inst.FactionID,
 			// NPC starts on the right edge, stacked vertically from center.
 			GridX: 19,
 			GridY: 10 + i,
@@ -2957,6 +2992,7 @@ func (h *CombatHandler) startCombatLocked(sess *session.PlayerSession, inst *npc
 		WeaponName:  npcWeaponName,
 		AttackVerb:  inst.AttackVerb,
 		SpeedFt:     inst.SpeedFt,
+		FactionID:   inst.FactionID,
 	}
 
 	combatants := []*combat.Combatant{playerCbt, npcCbt}

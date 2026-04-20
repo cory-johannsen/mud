@@ -28,6 +28,8 @@ type CombatantInfo struct {
 	Conditions []string
 	// Kind is "player" or "npc" — used by Lua to distinguish combatant types.
 	Kind string
+	// FactionID is the faction this combatant belongs to; empty for players and faction-less NPCs.
+	FactionID string
 }
 
 // RoomInfo is a snapshot of a room passed to Lua callbacks.
@@ -85,6 +87,12 @@ type Manager struct {
 	// RevealZoneMap bulk-reveals all rooms in zoneID for the player identified by uid.
 	// Injected after construction; nil = no-op.
 	RevealZoneMap func(uid, zoneID string)
+
+	// GetFactionHostiles returns the list of faction IDs hostile to factionID.
+	// Injected after construction; nil = treat all factions as non-hostile.
+	// Precondition: factionID must be non-empty.
+	// Postcondition: Returns nil or an empty slice when no hostile factions are defined.
+	GetFactionHostiles func(factionID string) []string
 }
 
 // dispatchHook resets the instruction budget, looks up hook in zs.L, then calls

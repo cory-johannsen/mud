@@ -627,6 +627,7 @@ func NewGameServiceServer(
 	s.WireCoverCrossfireTrap()
 	s.WireConsumableTrapTrigger()
 	s.wireRevealZone()
+	s.wireScriptMgrCombatCallbacks()
 	// Initialize drawback engine for situational trigger evaluation (REQ-JD-10).
 	s.drawbackEngine = drawback.NewEngine(s.condRegistry)
 	// REQ-JD-10: Wire on_take_damage_in_one_hit_above_threshold drawback trigger into CombatHandler.
@@ -7360,6 +7361,30 @@ func (s *GameServiceServer) wireRevealZone() {
 			if err := s.automapRepo.BulkInsert(context.Background(), sess.CharacterID, zoneID, roomIDs, false); err != nil {
 				s.logger.Warn("reveal_zone: bulk insert automap", zap.Error(err))
 			}
+		}
+	}
+}
+
+// wireScriptMgrCombatCallbacks wires the engine.combat.* Lua callbacks that depend on
+// the combat engine and faction registry into the script manager.
+//
+// Precondition: Must be called after s.scriptMgr, s.combatH, and s.factionRegistry are initialized.
+// Postcondition: GetCombatantsInRoom and GetFactionHostiles are set on s.scriptMgr when non-nil.
+func (s *GameServiceServer) wireScriptMgrCombatCallbacks() {
+	if s.scriptMgr == nil {
+		return
+	}
+	if s.combatH != nil {
+		s.scriptMgr.GetCombatantsInRoom = s.combatH.GetCombatantsInRoom
+	}
+	if s.factionRegistry != nil {
+		reg := *s.factionRegistry
+		s.scriptMgr.GetFactionHostiles = func(factionID string) []string {
+			def, ok := reg[factionID]
+			if !ok {
+				return nil
+			}
+			return def.HostileFactions
 		}
 	}
 }

@@ -143,6 +143,9 @@ type Combatant struct {
 	// AttackVerb is the verb used in combat attack narratives (e.g. "bites", "shoots").
 	// Empty string means the default verb ("attacks") will be used.
 	AttackVerb string
+	// FactionID is the faction this combatant belongs to; empty for players and faction-less NPCs.
+	// Used by the Lua scripting layer for faction-aware targeting (e.g. get_faction_enemies).
+	FactionID string
 }
 
 // SpeedSquares returns the number of grid squares this combatant may move per stride action.

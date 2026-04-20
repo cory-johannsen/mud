@@ -83,7 +83,7 @@ func (m *Manager) newDiceModule(L *lua.LState) *lua.LTable {
 // combatantToTable converts a CombatantInfo snapshot to a Lua table.
 //
 // Precondition: L and c must be non-nil.
-// Postcondition: Returned table has uid, name, hp, max_hp, ac, kind, conditions fields.
+// Postcondition: Returned table has uid, name, hp, max_hp, ac, kind, faction_id, conditions fields.
 func combatantToTable(L *lua.LState, c *CombatantInfo) *lua.LTable {
 	tbl := L.NewTable()
 	L.SetField(tbl, "uid", lua.LString(c.UID))
@@ -92,6 +92,7 @@ func combatantToTable(L *lua.LState, c *CombatantInfo) *lua.LTable {
 	L.SetField(tbl, "max_hp", lua.LNumber(c.MaxHP))
 	L.SetField(tbl, "ac", lua.LNumber(c.AC))
 	L.SetField(tbl, "kind", lua.LString(c.Kind))
+	L.SetField(tbl, "faction_id", lua.LString(c.FactionID))
 	conds := L.NewTable()
 	for i, cond := range c.Conditions {
 		L.RawSetInt(conds, i+1, lua.LString(cond))
@@ -349,6 +350,59 @@ func (m *Manager) newCombatModule(L *lua.LState) *lua.LTable {
 			}
 		}
 		L.Push(lua.LNumber(count))
+		return 1
+	}))
+	// get_faction_enemies returns a Lua table of CombatantInfo tables for all combatants
+	// in the caller's room whose faction is hostile to the caller's faction.
+	// Returns an empty table when the caller has no faction, GetFactionHostiles is nil,
+	// or no hostile combatants are present.
+	//
+	// Precondition: arg 1 must be the caller's UID string.
+	// Postcondition: Returns a non-nil Lua table (may be empty).
+	L.SetField(t, "get_faction_enemies", L.NewFunction(func(L *lua.LState) int {
+		uid := L.CheckString(1)
+		if m.GetFactionHostiles == nil {
+			L.Push(L.NewTable())
+			return 1
+		}
+		all := roomCombatants(uid)
+		if all == nil {
+			L.Push(L.NewTable())
+			return 1
+		}
+
+		selfFactionID := ""
+		for _, c := range all {
+			if c.UID == uid {
+				selfFactionID = c.FactionID
+				break
+			}
+		}
+		if selfFactionID == "" {
+			L.Push(L.NewTable())
+			return 1
+		}
+
+		hostileFactions := m.GetFactionHostiles(selfFactionID)
+		if len(hostileFactions) == 0 {
+			L.Push(L.NewTable())
+			return 1
+		}
+
+		hostile := make(map[string]bool, len(hostileFactions))
+		for _, hf := range hostileFactions {
+			hostile[hf] = true
+		}
+
+		result := L.NewTable()
+		idx := 1
+		for _, c := range all {
+			if c.UID != uid && hostile[c.FactionID] {
+				L.RawSetInt(result, idx, combatantToTable(L, c))
+				idx++
+			}
+		}
+		L.Push(result)
 		return 1
 	}))
 	L.SetField(t, "initiate", L.NewFunction(func(L *lua.LState) int {
