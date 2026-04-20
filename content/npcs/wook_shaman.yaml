@@ -5,15 +5,16 @@ description: >
   with bones, crystals, and dried fungi. His staff leaves a faint haze in the air
   wherever he walks. Those who linger too long report visions for days.
 type: human
-level: 4
-max_hp: 28
-ac: 12
+level: 40
+max_hp: 420
+ac: 20
 awareness: 7
 faction_id: wooks
 disposition: hostile
 attack_verb: "exhales a cloud at"
 ai_domain: wook_shaman_combat
 respawn_delay: "10m"
+rob_multiplier: 1.2
 abilities:
   brutality: 9
   grit: 13

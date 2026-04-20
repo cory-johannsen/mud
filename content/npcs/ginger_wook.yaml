@@ -5,15 +5,16 @@ description: >
   through the crowd like smoke, dispensing good vibes and sharper elbows than
   you'd expect. Don't mistake her warmth for weakness.
 type: human
-level: 2
-max_hp: 16
-ac: 11
+level: 36
+max_hp: 360
+ac: 20
 awareness: 6
 faction_id: wooks
 disposition: neutral
 attack_verb: "blows a kiss at"
 ai_domain: ginger_wook_combat
 respawn_delay: "5m"
+rob_multiplier: 1.2
 abilities:
   brutality: 8
   grit: 10

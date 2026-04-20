@@ -6,8 +6,8 @@ zone:
     compost, patchouli, and mycelium.
   faction_id: wooks
   danger_level: sketchy
-  min_level: 2
-  max_level: 10
+  min_level: 36
+  max_level: 48
   world_x: -2
   world_y: 5
   start_room: tofteville_gate
@@ -148,7 +148,7 @@ zone:
       with measured curiosity.
 
       '
-    danger_level: sketchy
+    danger_level: dangerous
     ambient_substance: wook_spore
     map_x: 0
     map_y: -4
@@ -177,7 +177,7 @@ zone:
       disperses. Wooks circle slowly, chanting.
 
       '
-    danger_level: sketchy
+    danger_level: dangerous
     ambient_substance: wook_spore
     map_x: -2
     map_y: -4
@@ -201,7 +201,7 @@ zone:
       conducting some kind of cleansing ceremony. The smell is brackish and herbal.
 
       '
-    danger_level: sketchy
+    danger_level: dangerous
     ambient_substance: wook_spore
     map_x: -2
     map_y: -6
@@ -224,7 +224,7 @@ zone:
       The platform reeks of motor oil, patchouli, and something sweeter.
 
       '
-    danger_level: sketchy
+    danger_level: dangerous
     ambient_substance: wook_spore
     map_x: -4
     map_y: -4
@@ -247,7 +247,7 @@ zone:
       rings, dreadlocks flying. The bass frequencies are felt as much as heard.
 
       '
-    danger_level: sketchy
+    danger_level: dangerous
     ambient_substance: wook_spore
     map_x: -3
     map_y: -2
@@ -272,7 +272,7 @@ zone:
       a gauntlet of gentle sound. The trees thicken ahead.
 
       '
-    danger_level: sketchy
+    danger_level: dangerous
     ambient_substance: wook_spore
     map_x: 2
     map_y: -4
@@ -296,7 +296,7 @@ zone:
       hand-drawn maps of the compound. The path curves south toward the flume.
 
       '
-    danger_level: sketchy
+    danger_level: dangerous
     ambient_substance: wook_spore
     map_x: 4
     map_y: -4
@@ -321,7 +321,7 @@ zone:
       The drop below is dark and loud. You can ride or walk the maintenance catwalk.
 
       '
-    danger_level: sketchy
+    danger_level: dangerous
     ambient_substance: wook_spore
     map_x: 4
     map_y: -6
@@ -343,7 +343,7 @@ zone:
       credit. The splash pool has been converted into a meditation bath.
 
       '
-    danger_level: sketchy
+    danger_level: dangerous
     ambient_substance: wook_spore
     map_x: 4
     map_y: -8
@@ -365,7 +365,7 @@ zone:
       those who proceed deeper into the compound without invitation.
 
       '
-    danger_level: sketchy
+    danger_level: dangerous
     ambient_substance: wook_spore
     map_x: 4
     map_y: -10
@@ -390,7 +390,7 @@ zone:
       of fermentation drifts from the west.
 
       '
-    danger_level: sketchy
+    danger_level: dangerous
     ambient_substance: wook_spore
     map_x: 2
     map_y: -10
@@ -412,7 +412,7 @@ zone:
       it sample their products continuously. The smell alone could alter your consciousness.
 
       '
-    danger_level: sketchy
+    danger_level: dangerous
     ambient_substance: wook_spore
     map_x: 0
     map_y: -10
@@ -434,7 +434,7 @@ zone:
       recordings burned to disc. A Wook behind the counter eyes your credits with interest.
 
       '
-    danger_level: sketchy
+    danger_level: dangerous
     ambient_substance: wook_spore
     map_x: -2
     map_y: -10
@@ -461,7 +461,7 @@ zone:
       wide. The peak looms above.
 
       '
-    danger_level: sketchy
+    danger_level: dangerous
     ambient_substance: wook_spore
     map_x: -4
     map_y: -10
@@ -486,7 +486,7 @@ zone:
       bioluminescent pigments that glow faintly. The sound of drums echoes from both ends.
 
       '
-    danger_level: sketchy
+    danger_level: dangerous
     ambient_substance: wook_spore
     map_x: 2
     map_y: -6
@@ -513,7 +513,7 @@ zone:
       swaying slightly.
 
       '
-    danger_level: sketchy
+    danger_level: dangerous
     ambient_substance: wook_spore
     map_x: -2
     map_y: -8

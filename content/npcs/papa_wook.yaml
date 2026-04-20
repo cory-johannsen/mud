@@ -9,9 +9,10 @@ description: >
 type: human
 gender: male
 tier: boss
-level: 10
-max_hp: 120
-ac: 16
+level: 48
+max_hp: 1692
+ac: 26
+rob_multiplier: 2.0
 awareness: 9
 faction_id: wooks
 disposition: hostile
@@ -42,13 +43,20 @@ boss_abilities:
     cooldown: "4m"
     effect:
       aoe_condition: nausea
+  - id: grove_renewal
+    name: "Grove Renewal"
+    trigger: hp_pct_below
+    trigger_value: 75
+    cooldown: "5m"
+    effect:
+      heal_pct: 25
   - id: eternal_groove_drain
     name: "The Eternal Groove"
     trigger: hp_pct_below
     trigger_value: 50
     cooldown: "6m"
     effect:
-      aoe_damage_expr: "1d6"
+      aoe_damage_expr: "6d10"
 loot:
   currency:
     min: 200
