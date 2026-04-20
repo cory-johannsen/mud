@@ -3,7 +3,7 @@ zone:
   danger_level: sketchy
   min_level: 1
   max_level: 6
-  world_x: 0
+  world_x: -1
   world_y: 0
   name: Downtown Portland
   description: The shattered remains of Portland's urban core, where rain-slicked rubble and rusting infrastructure

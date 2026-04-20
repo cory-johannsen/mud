@@ -8,8 +8,8 @@ zone:
   danger_level: sketchy
   min_level: 2
   max_level: 10
-  world_x: -1
-  world_y: 1
+  world_x: -2
+  world_y: 5
   start_room: tofteville_gate
   rooms:
   - id: tofteville_gate

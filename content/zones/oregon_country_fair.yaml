@@ -9,7 +9,7 @@ zone:
   min_level: 2
   max_level: 12
   world_x: -2
-  world_y: 1
+  world_y: 4
   start_room: ocf_main_gate
   rooms:
   - id: ocf_main_gate

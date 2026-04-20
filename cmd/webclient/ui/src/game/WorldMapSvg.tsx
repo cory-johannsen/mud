@@ -84,9 +84,38 @@ export function WorldMapSvg({ tiles, onTravel, playerLevel }: WorldMapSvgProps):
   // Build a lookup map from zoneId to tile for connection rendering.
   const tileByZoneId = new Map(tiles.map(t => [t.zoneId ?? '', t]))
 
+  // Connector color palette — cycles through distinct colors so overlapping connections
+  // remain visually distinguishable, matching zone map behavior.
+  const CONNECTOR_COLORS = [
+    '#6688bb', // blue-grey
+    '#88bb66', // green-grey
+    '#bb8866', // amber
+    '#66bbbb', // teal
+    '#bb6688', // pink
+    '#bbbb66', // yellow-green
+    '#8866bb', // purple
+    '#66bb88', // mint
+  ]
+
+  // edgePoint returns the border point of a zone rect facing toward (towardX, towardY).
+  // Using edge-based endpoints means connections exit from the cell face rather than
+  // the center, so cells rendered on top of connectors hide only the interior portion.
+  function edgePoint(rx: number, ry: number, toward: { x: number; y: number }): { x: number; y: number } {
+    const cx = rx + ZONE_W / 2
+    const cy = ry + ZONE_H / 2
+    const dx = toward.x - cx
+    const dy = toward.y - cy
+    if (Math.abs(dx) * ZONE_H >= Math.abs(dy) * ZONE_W) {
+      return { x: dx > 0 ? rx + ZONE_W : rx, y: cy }
+    } else {
+      return { x: cx, y: dy > 0 ? ry + ZONE_H : ry }
+    }
+  }
+
   // Build zone connection lines. Each connection is drawn once (dedup by sorted pair key).
   const drawnConnections = new Set<string>()
   const connectionLines: JSX.Element[] = []
+  let colorIdx = 0
   for (const tile of tiles) {
     const connections = tile.connectedZoneIds ?? tile.connected_zone_ids ?? []
     const ax = tile.worldX ?? 0
@@ -102,13 +131,43 @@ export function WorldMapSvg({ tiles, onTravel, playerLevel }: WorldMapSvgProps):
       const pairKey = `${ka}-${kb}`
       if (drawnConnections.has(pairKey)) continue
       drawnConnections.add(pairKey)
-      const x1 = px(ax) + ZONE_W / 2
-      const y1 = py(ay) + ZONE_H / 2
-      const x2 = px(bx) + ZONE_W / 2
-      const y2 = py(by) + ZONE_H / 2
+
+      const color = CONNECTOR_COLORS[colorIdx % CONNECTOR_COLORS.length]
+      colorIdx++
+
+      const bCX = px(bx) + ZONE_W / 2
+      const bCY = py(by) + ZONE_H / 2
+      const aCX = px(ax) + ZONE_W / 2
+      const aCY = py(ay) + ZONE_H / 2
+      const dep = edgePoint(px(ax), py(ay), { x: bCX, y: bCY })
+      const arr = edgePoint(px(bx), py(by), { x: aCX, y: aCY })
+
+      // Adjacent connections (≤1 step apart in both axes) use a straight line.
+      // Non-adjacent use a Bézier arc offset perpendicular to the path so the curve
+      // routes through the gap area and visually clears any intermediate cells.
+      const aNX = normX.get(ax) ?? 0
+      const aNY = normY.get(ay) ?? 0
+      const bNX = normX.get(bx) ?? 0
+      const bNY = normY.get(by) ?? 0
+      const isAdjacent = Math.abs(aNX - bNX) <= 1 && Math.abs(aNY - bNY) <= 1
+
+      let pathD: string
+      if (isAdjacent) {
+        pathD = `M ${dep.x} ${dep.y} L ${arr.x} ${arr.y}`
+      } else {
+        const midX = (dep.x + arr.x) / 2
+        const midY = (dep.y + arr.y) / 2
+        const lineX = arr.x - dep.x
+        const lineY = arr.y - dep.y
+        const len = Math.sqrt(lineX * lineX + lineY * lineY) || 1
+        const perpX = lineY / len
+        const perpY = -lineX / len
+        const arcOffset = Math.max(STEP, STEP_H) * 0.75
+        pathD = `M ${dep.x} ${dep.y} Q ${midX + perpX * arcOffset} ${midY + perpY * arcOffset} ${arr.x} ${arr.y}`
+      }
+
       connectionLines.push(
-        <line key={pairKey} x1={x1} y1={y1} x2={x2} y2={y2}
-          stroke="#5577aa" strokeWidth={1.5} opacity={0.6} />
+        <path key={pairKey} d={pathD} stroke={color} strokeWidth={1.5} fill="none" />
       )
     }
   }

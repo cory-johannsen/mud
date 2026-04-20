@@ -3,7 +3,7 @@ zone:
   danger_level: dangerous
   min_level: 2
   max_level: 7
-  world_x: 2
+  world_x: 1
   world_y: -1
   name: Clown Camp
   description: A derelict circus lot on the eastern edge of the city, festering with something that used

@@ -269,9 +269,10 @@ describe('WorldMapSvg zone connections', () => {
       connectedZoneIds: ['zone_a'],
     }
     const { container } = render(<WorldMapSvg tiles={[tileA, tileB]} onTravel={vi.fn()} />)
-    const lines = container.querySelectorAll('svg line')
-    // Exactly one connection line drawn (deduped from bidirectional data)
-    expect(lines.length).toBe(1)
+    // Connections are now <path> elements (supports both straight lines and Bézier arcs)
+    const paths = container.querySelectorAll('svg path')
+    // Exactly one connection path drawn (deduped from bidirectional data)
+    expect(paths.length).toBe(1)
   })
 
   it('deduplicates connections from both ends', () => {
@@ -294,17 +295,17 @@ describe('WorldMapSvg zone connections', () => {
       connectedZoneIds: ['zone_a'],
     }
     const { container } = render(<WorldMapSvg tiles={[tileA, tileB, tileC]} onTravel={vi.fn()} />)
-    const lines = container.querySelectorAll('svg line')
-    // A-B and A-C: exactly 2 lines
-    expect(lines.length).toBe(2)
+    const paths = container.querySelectorAll('svg path')
+    // A-B and A-C: exactly 2 paths
+    expect(paths.length).toBe(2)
   })
 
-  it('renders no lines when no connections exist', () => {
+  it('renders no connection paths when no connections exist', () => {
     const { container } = render(
       <WorldMapSvg tiles={[CURRENT_ZONE, DISCOVERED_ZONE, UNDISCOVERED_ZONE]} onTravel={vi.fn()} />
     )
-    const lines = container.querySelectorAll('svg line')
-    expect(lines.length).toBe(0)
+    const paths = container.querySelectorAll('svg path')
+    expect(paths.length).toBe(0)
   })
 })
 

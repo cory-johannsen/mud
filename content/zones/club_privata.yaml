@@ -3,7 +3,7 @@ zone:
   danger_level: dangerous
   min_level: 2
   max_level: 8
-  world_x: 1
+  world_x: 0
   world_y: -1
   name: Club Privata
   description: A three-floor members-only venue south of Rustbucket Ridge where the music is loud enough
