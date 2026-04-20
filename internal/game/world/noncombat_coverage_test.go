@@ -337,3 +337,24 @@ func TestNewSafeRoomDescriptions(t *testing.T) {
 			"room %q description mismatch (REQ-NCNAZ-3)", c.roomID)
 	}
 }
+
+func TestPipeYard_HasDSFAndJOFExits(t *testing.T) {
+	root := repoRoot(t)
+	data, err := os.ReadFile(filepath.Join(root, "content", "zones", "se_industrial.yaml"))
+	require.NoError(t, err)
+	zone, err := LoadZoneFromBytes(data)
+	require.NoError(t, err)
+
+	room, ok := zone.Rooms["sei_pipe_yard"]
+	require.True(t, ok, "room sei_pipe_yard not found in se_industrial zone")
+
+	exitsByDir := make(map[string]string)
+	for _, exit := range room.Exits {
+		exitsByDir[string(exit.Direction)] = exit.TargetRoom
+	}
+
+	require.Equal(t, "dsf_reception", exitsByDir["west"],
+		"sei_pipe_yard must have a west exit targeting dsf_reception")
+	require.Equal(t, "jof_lobby", exitsByDir["east"],
+		"sei_pipe_yard must have an east exit targeting jof_lobby")
+}

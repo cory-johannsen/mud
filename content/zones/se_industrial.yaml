@@ -411,6 +411,12 @@ zone:
       target: sei_crane_yard
     - direction: south
       target: sei_transformer_station
+    - direction: west
+      target: dsf_reception
+      zone: dick_sucking_factory
+    - direction: east
+      target: jof_lobby
+      zone: jerk_off_factory
     map_x: -2
     map_y: 4
     danger_level: dangerous
