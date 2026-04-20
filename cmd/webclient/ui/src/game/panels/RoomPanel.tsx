@@ -3,6 +3,38 @@ import { useGame } from '../GameContext'
 import { RoomTooltip } from '../RoomTooltip'
 import type { ExitInfo, MapTile } from '../../proto'
 
+interface NpcHoverTooltipProps {
+  name: string
+  description: string
+  health: string
+  level: number
+  pos: { x: number; y: number }
+}
+
+function NpcHoverTooltip({ name, description, health, level, pos }: NpcHoverTooltipProps) {
+  return (
+    <div style={{
+      position: 'fixed',
+      left: pos.x + 12,
+      top: pos.y + 8,
+      background: '#1a1a1a',
+      border: '1px solid #444',
+      borderRadius: 4,
+      padding: '6px 10px',
+      zIndex: 9999,
+      maxWidth: 260,
+      fontSize: '0.8rem',
+      color: '#ccc',
+      pointerEvents: 'none',
+    }}>
+      <div style={{ color: '#f88', fontWeight: 'bold', marginBottom: 2 }}>{name}</div>
+      {level > 0 && <div style={{ color: '#888', fontSize: '0.75rem' }}>Level {level}</div>}
+      {health && <div style={{ color: '#aaa', fontSize: '0.75rem' }}>Health: {health}</div>}
+      {description && <div style={{ marginTop: 4, color: '#bbb', lineHeight: 1.4 }}>{description}</div>}
+    </div>
+  )
+}
+
 const TRADITION_TAG_LABELS: Record<string, string> = {
   technical:        'Technical',
   bio_synthetic:    'Biosynthetic',
@@ -35,10 +67,11 @@ function npcTypeTag(npcType: string, tradition?: string): string {
 
 
 export function RoomPanel() {
-  const { state, sendMessage, sendCommand } = useGame()
+  const { state, sendMessage, sendCommand, setExamineIntent, clearHoverNpcView } = useGame()
   const room = state.roomView
   const inCombat = state.combatRound !== null
   const [tooltip, setTooltip] = useState<{ tile: MapTile; pos: { x: number; y: number } } | null>(null)
+  const [npcHoverPos, setNpcHoverPos] = useState<{ x: number; y: number } | null>(null)
 
   function tileForExit(ex: ExitInfo): MapTile | null {
     if (ex.targetRoomId) {
@@ -276,18 +309,43 @@ export function RoomPanel() {
                 )
               }
               // Combat NPC: Name (health) [fighting Target]
-              // Hover or click → ExamineRequest → modal lets player choose to attack or not.
+              // Hover → ExamineRequest → tooltip (examine output); Click → ExamineRequest → modal.
               return (
-                <li key={npc.id ?? npc.name}>
+                <li key={npc.id ?? npc.name} style={{ position: 'relative' }}>
                   <button
                     className="item-link"
-                    onMouseEnter={() => sendMessage('ExamineRequest', { target: npc.name })}
-                    onClick={() => sendMessage('ExamineRequest', { target: npc.name })}
+                    onMouseEnter={(e) => {
+                      setNpcHoverPos({ x: e.clientX, y: e.clientY })
+                      setExamineIntent('hover')
+                      sendMessage('ExamineRequest', { target: npc.name })
+                    }}
+                    onMouseMove={(e) => {
+                      setNpcHoverPos({ x: e.clientX, y: e.clientY })
+                    }}
+                    onMouseLeave={() => {
+                      setNpcHoverPos(null)
+                      clearHoverNpcView()
+                    }}
+                    onClick={() => {
+                      setNpcHoverPos(null)
+                      clearHoverNpcView()
+                      setExamineIntent('click')
+                      sendMessage('ExamineRequest', { target: npc.name })
+                    }}
                   >
                     {npc.name}
                   </button>{' '}
                   <span style={{ color: '#666', fontSize: '0.75rem' }}>({health})</span>
                   {fightingTarget && <span style={{ color: '#f66' }}> fighting {fightingTarget}</span>}
+                  {npcHoverPos && state.hoverNpcView?.name === npc.name && (
+                    <NpcHoverTooltip
+                      name={state.hoverNpcView.name}
+                      description={state.hoverNpcView.description}
+                      health={state.hoverNpcView.health}
+                      level={state.hoverNpcView.level}
+                      pos={npcHoverPos}
+                    />
+                  )}
                 </li>
               )
             })}

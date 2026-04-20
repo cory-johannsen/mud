@@ -112,6 +112,7 @@ export interface GameState {
   restView: import('../proto').RestView | null
   npcView: { name: string; description: string; npcType: string; level: number; health: string } | null
   combatNpcView: { name: string; description: string; npcType: string; level: number; health: string } | null
+  hoverNpcView: { name: string; description: string; npcType: string; level: number; health: string } | null
   questGiverView: import('../proto').QuestGiverView | null
   questLogView: import('../proto').QuestLogView | null
   questCompleteQueue: import('../proto').QuestCompleteEvent[]
@@ -152,6 +153,7 @@ type Action =
   | { type: 'SET_REST_VIEW'; view: import('../proto').RestView | null }
   | { type: 'SET_NPC_VIEW'; view: { name: string; description: string; npcType: string; level: number; health: string } | null }
   | { type: 'SET_COMBAT_NPC_VIEW'; view: { name: string; description: string; npcType: string; level: number; health: string } | null }
+  | { type: 'SET_HOVER_NPC_VIEW'; view: { name: string; description: string; npcType: string; level: number; health: string } | null }
   | { type: 'SET_QUEST_GIVER_VIEW'; view: import('../proto').QuestGiverView | null }
   | { type: 'SET_QUEST_LOG_VIEW'; view: import('../proto').QuestLogView | null }
   | { type: 'ENQUEUE_QUEST_COMPLETE'; event: import('../proto').QuestCompleteEvent }
@@ -248,6 +250,8 @@ export function reducer(state: GameState, action: Action): GameState {
       return { ...state, npcView: action.view }
     case 'SET_COMBAT_NPC_VIEW':
       return { ...state, combatNpcView: action.view }
+    case 'SET_HOVER_NPC_VIEW':
+      return { ...state, hoverNpcView: action.view }
     case 'SET_QUEST_GIVER_VIEW':
       return { ...state, questGiverView: action.view }
     case 'SET_QUEST_LOG_VIEW':
@@ -312,6 +316,7 @@ export const initialState: GameState = {
   restView: null,
   npcView: null,
   combatNpcView: null,
+  hoverNpcView: null,
   questGiverView: null,
   questLogView: null,
   questCompleteQueue: [],
@@ -334,6 +339,8 @@ interface GameContextValue {
   clearRestView: () => void
   clearNpcView: () => void
   clearCombatNpcView: () => void
+  clearHoverNpcView: () => void
+  setExamineIntent: (intent: 'hover' | 'click') => void
   clearQuestGiverView: () => void
   dismissQuestComplete: () => void
   clearLoadout: () => void
@@ -360,6 +367,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
   // combatRoundRef always holds the latest combatRound so ws.onmessage (stale closure) can check it.
   const combatRoundRef = useRef(state.combatRound)
   combatRoundRef.current = state.combatRound
+  // examineIntentRef tracks whether the last ExamineRequest was for hover (tooltip) or click (modal).
+  const examineIntentRef = useRef<'hover' | 'click'>('hover')
 
   const sendMessage = useCallback((type: string, payload: object) => {
     const frame = JSON.stringify({ type, payload })
@@ -653,9 +662,14 @@ export function GameProvider({ children }: { children: ReactNode }) {
             // Non-combat NPC: show as modal
             dispatch({ type: 'SET_NPC_VIEW', view: npcViewPayload })
           } else {
-            // Combat NPC: show examine modal whether in combat or not.
-            // This allows players to inspect hostiles before deciding to engage.
-            dispatch({ type: 'SET_COMBAT_NPC_VIEW', view: npcViewPayload })
+            // Combat NPC: route by intent — hover shows tooltip, click shows modal.
+            const intent = examineIntentRef.current
+            examineIntentRef.current = 'hover' // reset to safe default
+            if (intent === 'click') {
+              dispatch({ type: 'SET_COMBAT_NPC_VIEW', view: npcViewPayload })
+            } else {
+              dispatch({ type: 'SET_HOVER_NPC_VIEW', view: npcViewPayload })
+            }
           }
           break
         }
@@ -809,6 +823,14 @@ export function GameProvider({ children }: { children: ReactNode }) {
     dispatch({ type: 'SET_COMBAT_NPC_VIEW', view: null })
   }, [])
 
+  const clearHoverNpcView = useCallback(() => {
+    dispatch({ type: 'SET_HOVER_NPC_VIEW', view: null })
+  }, [])
+
+  const setExamineIntent = useCallback((intent: 'hover' | 'click') => {
+    examineIntentRef.current = intent
+  }, [])
+
   const clearQuestGiverView = useCallback(() => {
     dispatch({ type: 'SET_QUEST_GIVER_VIEW', view: null })
   }, [])
@@ -829,7 +851,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   }, [])
 
   return (
-    <GameContext.Provider value={{ state, sendMessage, sendCommand, clearShop, clearHealer, clearTrainer, clearTechTrainer, clearFixer, clearRestView, clearNpcView, clearCombatNpcView, clearQuestGiverView, dismissQuestComplete, clearLoadout, clearChoicePrompt, appendMessage }}>
+    <GameContext.Provider value={{ state, sendMessage, sendCommand, clearShop, clearHealer, clearTrainer, clearTechTrainer, clearFixer, clearRestView, clearNpcView, clearCombatNpcView, clearHoverNpcView, setExamineIntent, clearQuestGiverView, dismissQuestComplete, clearLoadout, clearChoicePrompt, appendMessage }}>
       {children}
     </GameContext.Provider>
   )
