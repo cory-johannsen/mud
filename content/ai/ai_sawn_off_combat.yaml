@@ -1,0 +1,32 @@
+domain:
+  id: ai_sawn_off_combat
+  description: Working-class revolutionary. Targets weakest enemy, close-range devastation.
+
+  tasks:
+    - id: behave
+      description: Root task
+
+  methods:
+    - task: behave
+      id: full_blast
+      precondition: enough_ap
+      subtasks: [revolutionary_blast]
+
+    - task: behave
+      id: quick_mode
+      precondition: has_enemy
+      subtasks: [quick_shot]
+
+    - task: behave
+      id: idle_mode
+      precondition: ""
+      subtasks: [quick_shot]
+
+  operators:
+    - id: revolutionary_blast
+      action: lua_hook
+      ap_cost: 2
+
+    - id: quick_shot
+      action: lua_hook
+      ap_cost: 1

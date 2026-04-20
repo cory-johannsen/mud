@@ -1,0 +1,44 @@
+id: ai_sawn_off
+name: AI Sawn-Off
+description: >
+  A double-barrel sawn-off with a salvaged neural chip soldered to the
+  stock. It knows what it's for. It knows who it's for. Point it at power.
+kind: weapon
+weapon_ref: sawn_off
+weight: 2.0
+stackable: false
+max_stack: 1
+value: 1500
+combat_domain: ai_sawn_off_combat
+combat_script: |
+  preconditions = {}
+  preconditions.has_enemy = function(self)
+    return #self.combat.enemies > 0
+  end
+
+  preconditions.enough_ap = function(self)
+    return self.combat.player.ap >= 2
+  end
+
+  operators = {}
+  operators.revolutionary_blast = function(self)
+    local target = self.combat.weakest_enemy()
+    if target then
+      self.engine.attack(target.id, "2d8+2", 2)
+      self.engine.say({
+        "Point it at power.",
+        "No gods, no masters, just this.",
+        "The revolution is close range.",
+        "For the collective.",
+        "They never see it coming from one of us."
+      })
+    end
+  end
+
+  operators.quick_shot = function(self)
+    local target = self.combat.weakest_enemy()
+    if target then
+      self.engine.attack(target.id, "1d8")
+      self.engine.say({"solidarity.", "hold the line.", "keep moving."})
+    end
+  end
