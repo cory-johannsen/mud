@@ -8724,32 +8724,43 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string, targetX, 
 
 	// Attempt prepared tech activation if no feat/class-feature matched.
 	if s.preparedTechRepo != nil && len(sess.PreparedTechs) > 0 {
+		// Parse level-encoded ability IDs (e.g. "frost_bolt:2" from level-aware hotbar slots).
+		// techID is the base tech identifier; targetLevel==0 means search all levels.
+		techID, targetLevel := parseTechRef(abilityID)
 		// Check AP cost before searching slots so we fail fast without expending anything.
 		var preparedTechDef *technology.TechnologyDef
 		if s.techRegistry != nil {
-			if def, ok := s.techRegistry.Get(abilityID); ok {
+			if def, ok := s.techRegistry.Get(techID); ok {
 				preparedTechDef = def
 			}
 		}
 		if cost := techAPCost(preparedTechDef); cost > 0 {
 			ap := s.combatH.RemainingAP(uid)
 			if ap < cost {
-				name := abilityID
+				name := techID
 				if preparedTechDef != nil {
 					name = preparedTechDef.Name
 				}
 				return messageEvent(fmt.Sprintf("Not enough AP to use %s (need %d, have %d).", name, cost, ap)), nil
 			}
 		}
-		levels := make([]int, 0, len(sess.PreparedTechs))
-		for lvl := range sess.PreparedTechs {
-			levels = append(levels, lvl)
+		// Build the ordered list of levels to search.
+		// When targetLevel > 0, search only that level. Otherwise search all levels ascending.
+		var levels []int
+		if targetLevel > 0 {
+			if _, ok := sess.PreparedTechs[targetLevel]; ok {
+				levels = []int{targetLevel}
+			}
+		} else {
+			for lvl := range sess.PreparedTechs {
+				levels = append(levels, lvl)
+			}
+			sort.Ints(levels)
 		}
-		sort.Ints(levels)
 		foundInPrepared := false
 		for _, lvl := range levels {
 			for idx, slot := range sess.PreparedTechs[lvl] {
-				if slot == nil || slot.TechID != abilityID {
+				if slot == nil || slot.TechID != techID {
 					continue
 				}
 				foundInPrepared = true
@@ -8761,28 +8772,28 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string, targetX, 
 				if err := s.preparedTechRepo.SetExpended(ctx, sess.CharacterID, lvl, idx, true); err != nil {
 					s.logger.Warn("handleUse: SetExpended failed",
 						zap.String("uid", uid),
-						zap.String("techID", abilityID),
+						zap.String("techID", techID),
 						zap.Error(err))
 				}
 				sess.PreparedTechs[lvl][idx].Expended = true
 				s.pushEventToUID(uid, s.hotbarUpdateEvent(sess))
 				if cost := techAPCost(preparedTechDef); cost > 0 && s.combatH.ActiveCombatForPlayer(uid) != nil {
 					// In combat: queue for round resolution at player's initiative.
-					if err := s.combatH.QueueTechUse(uid, abilityID, targetID, cost, targetX, targetY); err != nil {
+					if err := s.combatH.QueueTechUse(uid, techID, targetID, cost, targetX, targetY); err != nil {
 						return messageEvent(fmt.Sprintf("Could not queue tech: %s", err.Error())), nil
 					}
 					return nil, nil
 				}
-				return s.activateTechWithEffects(sess, uid, abilityID, targetID, fmt.Sprintf("You activate %s.", abilityID), nil, targetX, targetY)
+				return s.activateTechWithEffects(sess, uid, techID, targetID, fmt.Sprintf("You activate %s.", techID), nil, targetX, targetY)
 			}
 		}
 		if foundInPrepared {
 			// All prepared copies are expended — fall through to room equip, not innate.
 			// REQ-USE-1: fall through to room equipment before reporting no match.
-			if evt, err := s.tryRoomEquipFallback(uid, sess.RoomID, abilityID); evt != nil || err != nil {
+			if evt, err := s.tryRoomEquipFallback(uid, sess.RoomID, techID); evt != nil || err != nil {
 				return evt, err
 			}
-			return messageEvent(fmt.Sprintf("No prepared uses of %s remaining.", abilityID)), nil
+			return messageEvent(fmt.Sprintf("No prepared uses of %s remaining.", techID)), nil
 		}
 		// Tech not in prepared slots at all — fall through to spontaneous/innate lookup.
 	}

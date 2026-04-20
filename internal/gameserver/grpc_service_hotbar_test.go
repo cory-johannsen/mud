@@ -2,6 +2,7 @@ package gameserver
 
 import (
 	"context"
+	"fmt"
 	"strings"
 	"testing"
 
@@ -929,6 +930,44 @@ func TestProperty_Hotbar_ActiveIndexAlwaysValid(t *testing.T) {
 			if sess.ActiveHotbarIndex < 0 || sess.ActiveHotbarIndex >= len(sess.Hotbars) {
 				rt.Fatalf("ActiveHotbarIndex %d out of range [0, %d)", sess.ActiveHotbarIndex, len(sess.Hotbars))
 			}
+		}
+	})
+}
+
+// TestParseTechRef verifies that parseTechRef decodes plain and level-encoded refs correctly.
+func TestParseTechRef(t *testing.T) {
+	tests := []struct {
+		ref     string
+		wantID  string
+		wantLvl int
+	}{
+		{"frost_bolt", "frost_bolt", 0},
+		{"frost_bolt:2", "frost_bolt", 2},
+		{"frost_bolt:0", "frost_bolt:0", 0}, // level 0 is not a valid encoding — ref returned as-is
+		{"a:b:3", "a:b", 3},               // last colon used
+		{"no_colon", "no_colon", 0},
+		{"tech:notanumber", "tech:notanumber", 0},
+	}
+	for _, tt := range tests {
+		id, lvl := parseTechRef(tt.ref)
+		assert.Equal(t, tt.wantID, id, "techID for ref=%q", tt.ref)
+		assert.Equal(t, tt.wantLvl, lvl, "level for ref=%q", tt.ref)
+	}
+}
+
+// TestProperty_ParseTechRef_RoundTrip verifies that encoding level > 0 as "id:level" always
+// round-trips through parseTechRef correctly.
+func TestProperty_ParseTechRef_RoundTrip(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		id := rapid.StringMatching(`[a-z][a-z0-9_]{0,19}`).Draw(rt, "id")
+		level := rapid.IntRange(1, 10).Draw(rt, "level")
+		encoded := fmt.Sprintf("%s:%d", id, level)
+		gotID, gotLevel := parseTechRef(encoded)
+		if gotID != id {
+			rt.Fatalf("got techID=%q, want %q (encoded=%q)", gotID, id, encoded)
+		}
+		if gotLevel != level {
+			rt.Fatalf("got level=%d, want %d (encoded=%q)", gotLevel, level, encoded)
 		}
 	})
 }

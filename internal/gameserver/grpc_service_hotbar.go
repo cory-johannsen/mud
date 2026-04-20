@@ -3,6 +3,8 @@ package gameserver
 import (
 	"context"
 	"fmt"
+	"strconv"
+	"strings"
 
 	"go.uber.org/zap"
 
@@ -10,6 +12,21 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/technology"
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 )
+
+// parseTechRef decodes a hotbar slot ref for technology slots.
+// Refs are plain tech IDs ("frost_bolt") or level-encoded ("frost_bolt:2").
+// Returns techID and level; level==0 means any level (backward compatibility).
+//
+// Precondition: ref is non-empty.
+// Postcondition: techID is non-empty; level>=0.
+func parseTechRef(ref string) (techID string, level int) {
+	if i := strings.LastIndex(ref, ":"); i >= 0 {
+		if lvl, err := strconv.Atoi(ref[i+1:]); err == nil && lvl > 0 {
+			return ref[:i], lvl
+		}
+	}
+	return ref, 0
+}
 
 // handleHotbar processes hotbar commands: set, clear, show, create, switch.
 // For "set" with kind+ref, creates a typed slot. For "set" with text only,
@@ -179,7 +196,8 @@ func (s *GameServiceServer) resolveHotbarSlotTechInfo(slot session.HotbarSlot) (
 		if s.techRegistry == nil {
 			return 0, ""
 		}
-		tech, ok := s.techRegistry.Get(slot.Ref)
+		techID, _ := parseTechRef(slot.Ref)
+		tech, ok := s.techRegistry.Get(techID)
 		if !ok {
 			return 0, ""
 		}
@@ -264,14 +282,15 @@ func (s *GameServiceServer) resolveHotbarSlotUseState(sess *session.PlayerSessio
 			}
 		}
 	case session.HotbarSlotKindTechnology:
+		techID, techLevel := parseTechRef(slot.Ref)
 		if s.techRegistry != nil {
-			if techDef, ok := s.techRegistry.Get(slot.Ref); ok {
+			if techDef, ok := s.techRegistry.Get(techID); ok {
 				rechargeCondition = techDef.RechargeCondition
 			}
 		}
 		// Innate tech: look up by tech ID.
 		// MaxUses == 0 means unlimited; sentinel -1 signals the client to show ∞.
-		if innate, ok := sess.InnateTechs[slot.Ref]; ok {
+		if innate, ok := sess.InnateTechs[techID]; ok {
 			if innate.MaxUses == 0 {
 				maxUses = -1
 				usesRemaining = -1
@@ -280,14 +299,28 @@ func (s *GameServiceServer) resolveHotbarSlotUseState(sess *session.PlayerSessio
 				usesRemaining = int32(innate.UsesRemaining)
 			}
 		} else if sess.PreparedTechs != nil {
-			// Prepared tech: count non-expended slots for this tech ID.
+			// Prepared tech: count non-expended slots for this tech ID at the specific level.
+			// If techLevel==0 (legacy slot without level), count across all levels.
 			var total, remaining int32
-			for _, pslots := range sess.PreparedTechs {
-				for _, ps := range pslots {
-					if ps != nil && ps.TechID == slot.Ref {
+			if techLevel > 0 {
+				// Level-encoded ref: count only slots at the specific level.
+				for _, ps := range sess.PreparedTechs[techLevel] {
+					if ps != nil && ps.TechID == techID {
 						total++
 						if !ps.Expended {
 							remaining++
+						}
+					}
+				}
+			} else {
+				// Legacy ref (no level): count across all levels.
+				for _, pslots := range sess.PreparedTechs {
+					for _, ps := range pslots {
+						if ps != nil && ps.TechID == techID {
+							total++
+							if !ps.Expended {
+								remaining++
+							}
 						}
 					}
 				}
@@ -299,7 +332,7 @@ func (s *GameServiceServer) resolveHotbarSlotUseState(sess *session.PlayerSessio
 				// Spontaneous tech: find pool level from KnownTechs.
 				for lvl, techIDs := range sess.KnownTechs {
 					for _, tid := range techIDs {
-						if tid == slot.Ref {
+						if tid == techID {
 							if pool, ok := sess.SpontaneousUsePools[lvl]; ok && pool.Max > 0 {
 								maxUses = int32(pool.Max)
 								usesRemaining = int32(pool.Remaining)
@@ -329,10 +362,14 @@ func (s *GameServiceServer) resolveHotbarSlotDisplay(slot session.HotbarSlot) (d
 		}
 	case session.HotbarSlotKindTechnology:
 		if s.techRegistry != nil {
-			if tech, ok := s.techRegistry.Get(slot.Ref); ok {
+			techID, level := parseTechRef(slot.Ref)
+			if tech, ok := s.techRegistry.Get(techID); ok {
 				name := tech.Name
 				if tech.ShortName != "" {
 					name = tech.ShortName
+				}
+				if level > 0 {
+					name = fmt.Sprintf("%s (L%d)", name, level)
 				}
 				return name, tech.Description
 			}

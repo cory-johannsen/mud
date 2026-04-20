@@ -78,7 +78,9 @@ function PreparedItem({
   const exhausted = remaining === 0
 
   function handlePick(s: number) {
-    sendMessage('HotbarRequest', { action: 'set', slot: s, kind: 'technology', ref: techId })
+    // Encode tech level in the ref so the server targets the specific prepared slot.
+    const ref = level > 0 ? `${techId}:${level}` : techId
+    sendMessage('HotbarRequest', { action: 'set', slot: s, kind: 'technology', ref })
     setPicking(false)
   }
 
