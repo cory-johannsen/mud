@@ -1,9 +1,9 @@
 id: ne_scavenger
 name: NE Scavenger
 description: A gaunt figure in patched canvas, hauling a duffel bag of salvage. Eyes sunken but alert, always looking for unattended resources — or unattended people.
-level: 2
-max_hp: 18
-ac: 14
+level: 5
+max_hp: 35
+ac: 15
 awareness: 7
 ai_domain: scavenger_patrol
 respawn_delay: "5m"
