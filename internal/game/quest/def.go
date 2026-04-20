@@ -6,7 +6,7 @@ import (
 )
 
 var validObjectiveTypes = map[string]bool{
-	"kill": true, "fetch": true, "explore": true, "deliver": true,
+	"kill": true, "fetch": true, "explore": true, "deliver": true, "use_zone_map": true,
 }
 
 type QuestRewardItem struct {
@@ -50,12 +50,15 @@ func (d QuestDef) Validate() error {
 	if d.Title == "" {
 		return fmt.Errorf("quest %q: Title must not be empty", d.ID)
 	}
-	// find_trainer quests have no NPC giver and no objectives — skip those checks.
+	// find_trainer quests have no NPC giver and no objectives — skip all checks.
 	if d.Type == "find_trainer" {
 		return nil
 	}
-	if d.GiverNPCID == "" {
-		return fmt.Errorf("quest %q: GiverNPCID must not be empty", d.ID)
+	// onboarding quests have no NPC giver but DO have objectives.
+	if d.Type != "onboarding" {
+		if d.GiverNPCID == "" {
+			return fmt.Errorf("quest %q: GiverNPCID must not be empty", d.ID)
+		}
 	}
 	if len(d.Objectives) == 0 {
 		return fmt.Errorf("quest %q: Objectives must not be empty", d.ID)

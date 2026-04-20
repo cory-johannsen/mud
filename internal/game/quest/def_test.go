@@ -123,6 +123,51 @@ func TestQuestDef_FindTrainer_CrossValidate_SkipsNPCCheck(t *testing.T) {
 	}
 }
 
+// TestValidate_UseZoneMapObjective verifies use_zone_map objective type passes Validate.
+func TestValidate_UseZoneMapObjective(t *testing.T) {
+	def := quest.QuestDef{
+		ID:         "test_use_zone_map",
+		Title:      "Test Quest",
+		GiverNPCID: "some_npc",
+		Repeatable: false,
+		Objectives: []quest.QuestObjective{
+			{
+				ID:          "use_map_obj",
+				Type:        "use_zone_map",
+				Description: "Use the zone map",
+				TargetID:    "felony_flats",
+				Quantity:    1,
+			},
+		},
+		Rewards: quest.QuestRewards{XP: 50},
+	}
+	if err := def.Validate(); err != nil {
+		t.Fatalf("unexpected error for use_zone_map objective: %v", err)
+	}
+}
+
+// TestValidate_OnboardingQuestNoGiver verifies onboarding quests pass Validate without GiverNPCID.
+func TestValidate_OnboardingQuestNoGiver(t *testing.T) {
+	def := quest.QuestDef{
+		ID:    "onboarding_test",
+		Title: "Onboarding Quest",
+		Type:  "onboarding",
+		Objectives: []quest.QuestObjective{
+			{
+				ID:          "obj1",
+				Type:        "use_zone_map",
+				Description: "Use the zone map",
+				TargetID:    "felony_flats",
+				Quantity:    1,
+			},
+		},
+		Rewards: quest.QuestRewards{XP: 50},
+	}
+	if err := def.Validate(); err != nil {
+		t.Fatalf("unexpected error for onboarding quest with no giver: %v", err)
+	}
+}
+
 func TestQuestDef_Validate_Property(t *testing.T) {
 	rapid.Check(t, func(rt *rapid.T) {
 		qty := rapid.IntRange(1, 100).Draw(rt, "qty")
