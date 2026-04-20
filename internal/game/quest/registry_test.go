@@ -180,6 +180,7 @@ func TestLoadFromDir_AllZoneQuests(t *testing.T) {
 		"find_neural_trainer_ne_portland",
 		"find_biosynthetic_trainer_ne_portland",
 		"find_fanatic_trainer_ne_portland",
+		"onboarding_find_zone_map",
 	}
 	for _, id := range want {
 		if reg[id] == nil {
