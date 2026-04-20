@@ -403,7 +403,7 @@ zone:
   - id: ross_gravel_pit
     title: Gravel Pit
     boss_room: true
-    danger_level: dangerous
+    danger_level: all_out_war
     description: 'The massive excavation is a world unto itself. Terraced walls
 
       of grey stone and compacted earth rise on all sides. At the
@@ -422,7 +422,6 @@ zone:
       target: ross_crane_platform
     - direction: east
       target: ross_lagoon
-    danger_level: dangerous
     map_x: -10
     map_y: 4
     spawns:

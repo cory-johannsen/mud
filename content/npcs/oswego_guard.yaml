@@ -2,8 +2,8 @@ id: oswego_guard
 name: Oswego Guard
 description: A uniformed guard in pressed khakis and body armor, patrolling with practiced efficiency.
 level: 2
-max_hp: 28
-ac: 15
+max_hp: 18
+ac: 14
 awareness: 8
 ai_domain: scavenger_patrol
 respawn_delay: "5m"

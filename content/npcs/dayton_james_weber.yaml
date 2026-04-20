@@ -10,8 +10,8 @@ description: >
 type: human
 gender: male
 level: 10
-max_hp: 160
-ac: 17
+max_hp: 210
+ac: 21
 awareness: 12
 tier: boss
 npc_type: combat

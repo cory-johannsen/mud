@@ -349,7 +349,7 @@ zone:
   - id: sauvie_river_dock
     title: River Dock
     boss_room: true
-    danger_level: dangerous
+    danger_level: all_out_war
     description: 'A ramshackle dock extends into the Multnomah Channel on barnacle-crusted
 
       pilings. Boats of various sizes are tied off — rowboats, a pontoon
@@ -359,7 +359,6 @@ zone:
       Cargo nets hang from a hand-cranked crane. The current is strong here.
 
       '
-    danger_level: sketchy
     exits:
     - direction: south
       target: sauvie_collins_beach

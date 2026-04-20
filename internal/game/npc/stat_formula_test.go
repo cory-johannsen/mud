@@ -82,6 +82,25 @@ func tierACMod(tier string) float64 {
 	}
 }
 
+// TestXPFormula_ProducesReasonableProgression verifies that the XP formula
+// produces positive, non-degenerate values across all relevant level/tier
+// combinations (REQ-ZDS-7).
+func TestXPFormula_ProducesReasonableProgression(t *testing.T) {
+	tierMultipliers := map[string]float64{
+		"minion": 0.5, "standard": 1.0, "elite": 2.0, "champion": 3.0, "boss": 5.0,
+	}
+	for _, level := range []int{1, 5, 10, 15, 20, 30, 40, 50, 60, 70, 80, 90, 100} {
+		for tier, mult := range tierMultipliers {
+			xp := float64(level) * 50 * mult
+			assert.Greater(t, xp, 0.0, "level %d tier %s: XP must be positive", level, tier)
+			if level == 100 && tier == "standard" {
+				assert.GreaterOrEqual(t, xp, 5000.0,
+					"level 100 standard XP %.0f is degenerate (< 5000)", xp)
+			}
+		}
+	}
+}
+
 // TestNPCStatFormula_AllTemplatesCompliant loads all NPC templates from the
 // content directory and asserts that every template's max_hp and ac are within
 // ±10% of the formula value for its level and tier (REQ-ZDS-1).

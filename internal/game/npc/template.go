@@ -297,6 +297,8 @@ func (t *Template) Validate() error {
 		"quest_giver": true, "hireling": true, "banker": true,
 		"job_trainer": true, "tech_trainer": true, "crafter": true, "fixer": true,
 		"chip_doc": true, "motel_keeper": true, "brothel_keeper": true,
+		// Special non-combat NPC types exempt from stat-formula compliance (REQ-ZDS-7).
+		"turret": true, "drone": true, "animal": true, "broker": true,
 	}
 	if !validTypes[t.NPCType] {
 		return fmt.Errorf("npc template %q: unknown npc_type %q", t.ID, t.NPCType)

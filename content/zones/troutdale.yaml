@@ -247,7 +247,7 @@ zone:
   - id: trout_multnomah_falls
     title: Multnomah Falls
     boss_room: true
-    danger_level: dangerous
+    danger_level: all_out_war
     description: 'The great waterfall plunges six hundred feet down the basalt cliff face,
 
       its roar drowning out even the gorge winds. The old Benson Bridge
@@ -259,7 +259,6 @@ zone:
       The mist is constant and cold.
 
       '
-    danger_level: sketchy
     exits:
     - direction: west
       target: trout_wind_tunnel

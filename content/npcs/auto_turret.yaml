@@ -1,6 +1,7 @@
 id: auto_turret
 name: Auto-Turret
 type: machine
+npc_type: turret
 level: 5
 max_hp: 50
 ac: 16

@@ -2,8 +2,8 @@ id: motel_raider
 name: Motel Raider
 description: A violent squatter who claims motel rooms by force. His eyes are wild and his knuckles are scarred.
 level: 2
-max_hp: 26
-ac: 15
+max_hp: 18
+ac: 14
 rob_multiplier: 1.0
 awareness: 6
 ai_domain: motel_raider_combat

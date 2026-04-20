@@ -2,8 +2,8 @@ id: big_grizz
 name: Big Grizz
 description: A mountain of a man with arms like industrial pistons and a face that's absorbed more punches than most fighters throw in a lifetime. He runs The Keg Hole with iron fists and doesn't need a weapon to make his point—though he keeps a length of rebar behind the bar just in case.
 level: 4
-max_hp: 50
-ac: 15
+max_hp: 88
+ac: 19
 awareness: 7
 tier: boss
 ai_domain: territory_patrol

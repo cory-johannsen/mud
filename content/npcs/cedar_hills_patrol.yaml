@@ -1,12 +1,15 @@
 id: cedar_hills_patrol
 name: Cedar Hills Patrol
 description: A young recruit in a clean uniform, nervously checking their patrol route with a walkie-talkie that may or may not work.
+npc_type: guard
 level: 1
 max_hp: 18
 ac: 14
 awareness: 9
 ai_domain: scavenger_patrol
 respawn_delay: "5m"
+guard:
+  wanted_threshold: 1
 abilities:
   brutality: 10
   quickness: 14

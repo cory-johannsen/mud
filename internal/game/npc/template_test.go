@@ -670,6 +670,8 @@ func TestProperty_AllExistingNPCTemplatesStillLoad(t *testing.T) {
 		"job_trainer": true, "crafter": true, "fixer": true,
 		"chip_doc": true, "motel_keeper": true, "brothel_keeper": true,
 		"tech_trainer": true,
+		// Special non-combat NPC types exempt from stat-formula compliance (REQ-ZDS-7).
+		"turret": true, "drone": true, "animal": true, "broker": true,
 	}
 	templates, err := npc.LoadTemplates("../../../content/npcs")
 	require.NoError(t, err, "all existing NPC templates must still load after Validate() changes")

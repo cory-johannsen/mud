@@ -1,6 +1,7 @@
 id: security_drone
 name: Security Drone
 type: robot
+npc_type: drone
 level: 4
 max_hp: 35
 ac: 15

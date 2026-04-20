@@ -517,7 +517,7 @@ zone:
   - id: couve_vancouver_mall
     title: Vancouver Mall
     boss_room: true
-    danger_level: dangerous
+    danger_level: all_out_war
     description: 'The once-thriving Vancouver Mall is now a warlord''s stronghold.
 
       The anchor stores have been converted into armories, granaries, and
@@ -531,7 +531,6 @@ zone:
       recirculating murky rainwater in an endless loop.
 
       '
-    danger_level: sketchy
     exits:
     - direction: west
       target: couve_strip_mall_east

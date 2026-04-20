@@ -819,7 +819,7 @@ zone:
   - id: vantucky_ammo_depot
     title: Ammo Depot
     boss_room: true
-    danger_level: dangerous
+    danger_level: all_out_war
     description: 'A fortified storage building behind the shooting range serves as the
 
       militia''s ammunition depot. The cinderblock walls are reinforced with
@@ -831,7 +831,6 @@ zone:
       in a water-stained ledger.
 
       '
-    danger_level: sketchy
     exits:
     - direction: north
       target: vantucky_shooting_range

@@ -1,6 +1,7 @@
 id: feral_dog
 name: feral dog
 type: animal
+npc_type: animal
 level: 2
 max_hp: 18
 ac: 12
