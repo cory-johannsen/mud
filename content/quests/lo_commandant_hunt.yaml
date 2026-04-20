@@ -11,7 +11,7 @@ objectives:
   - id: kill_commandant
     type: kill
     description: Kill Commandant Prescott
-    target_id: lake_oswego_commandant
+    target_id: lake_oswego_warlord
     quantity: 1
 rewards:
   xp: 500
