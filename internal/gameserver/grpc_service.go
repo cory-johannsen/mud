@@ -533,6 +533,30 @@ func NewGameServiceServer(
 	if content.FactionConfig != nil {
 		s.factionConfig = content.FactionConfig
 	}
+	// REQ-CCF-3: wire faction combat initiation on NPC respawn placement.
+	if s.respawnMgr != nil && s.factionRegistry != nil {
+		reg := *s.factionRegistry
+		s.respawnMgr.AfterPlace = func(inst *npc.Instance, roomID string) {
+			checkFactionInitiation(
+				inst, roomID,
+				func(rID string) []*npc.Instance { return s.npcMgr.InstancesInRoom(rID) },
+				func(rID string) *world.Room {
+					r, _ := s.world.GetRoom(rID)
+					return r
+				},
+				func(factionID string) []string {
+					def := reg.ByID(factionID)
+					if def == nil {
+						return nil
+					}
+					return def.HostileFactions
+				},
+				func(attacker, target *npc.Instance, room *world.Room) {
+					s.initiateNPCFactionCombat(attacker, target, roomID)
+				},
+			)
+		}
+	}
 	if storage.QuestRepo != nil {
 		// xpSvc is nil at construction time; wired later via SetXPService → SetQuestXPAwarder.
 		s.questSvc = quest.NewService(content.QuestRegistry, storage.QuestRepo, nil, s.invRegistry, s.charSaver)

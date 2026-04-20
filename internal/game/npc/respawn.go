@@ -47,6 +47,9 @@ type RespawnManager struct {
 	zoneRooms map[string][]*world.Room
 	// roomToZone maps roomID → zoneID. REQ-NB-38.
 	roomToZone map[string]string
+	// AfterPlace, if non-nil, is called each time an NPC is successfully placed by
+	// Tick. Used to trigger faction-aware combat initiation (REQ-CCF-3).
+	AfterPlace func(inst *Instance, roomID string)
 }
 
 // NewRespawnManager creates a RespawnManager from room spawn configs and a template map.
@@ -246,6 +249,9 @@ func (r *RespawnManager) Tick(now time.Time, mgr *Manager) {
 					}
 				}
 			}
+		}
+		if inst != nil && r.AfterPlace != nil {
+			r.AfterPlace(inst, e.roomID)
 		}
 	}
 }
