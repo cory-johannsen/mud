@@ -78,7 +78,7 @@ function idbGetAllKeys(db: IDBDatabase): Promise<string[]> {
 // ─── SHA-256 verification ─────────────────────────────────────────────────────
 
 async function verifySha256(data: Uint8Array, expectedHex: string): Promise<boolean> {
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data)
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data as Uint8Array<ArrayBuffer>)
   const hashArray = Array.from(new Uint8Array(hashBuffer))
   const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
   return hashHex === expectedHex.trim()
@@ -93,7 +93,7 @@ async function loadTexturesFromIDB(db: IDBDatabase): Promise<PixiTextureMap> {
     if (key === '__tiles_config__') continue
     const data = await idbGet(db, key)
     if (data) {
-      const blob = new Blob([data])
+      const blob = new Blob([data as Uint8Array<ArrayBuffer>])
       const url = URL.createObjectURL(blob)
       map.set(key, url)
     }
@@ -287,7 +287,7 @@ export function AssetPackProvider({ children }: { children: ReactNode }) {
           // Not valid JSON tiles config
         }
       } else {
-        const blob = new Blob([data])
+        const blob = new Blob([data as Uint8Array<ArrayBuffer>])
         const url = URL.createObjectURL(blob)
         map.set(filename, url)
       }
