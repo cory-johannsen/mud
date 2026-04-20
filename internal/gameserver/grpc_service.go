@@ -1326,6 +1326,9 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 							zap.Int64("character_id", characterID),
 							zap.Error(grantErr),
 						)
+					} else {
+						// Issue onboarding quest for new characters.
+						s.issueOnboardingQuest(stream.Context(), uid, sess)
 					}
 				}
 			}
@@ -7386,6 +7389,20 @@ func (s *GameServiceServer) wireRevealZone() {
 				s.logger.Warn("reveal_zone: bulk insert automap", zap.Error(err))
 			}
 		}
+		// Record zone map use for quest progress.
+		if s.questSvc != nil && sess.CharacterID > 0 {
+			msgs, err := s.questSvc.RecordZoneMapUse(context.Background(), sess, sess.CharacterID, zoneID)
+			if err != nil {
+				s.logger.Warn("reveal_zone: RecordZoneMapUse failed",
+					zap.String("uid", uid),
+					zap.String("zone_id", zoneID),
+					zap.Error(err),
+				)
+			}
+			for _, msg := range msgs {
+				s.pushMessageToUID(uid, msg)
+			}
+		}
 	}
 }
 
@@ -12234,6 +12251,37 @@ func (s *GameServiceServer) issueTechTrainerQuests(
 				s.pushMessageToUID(sess.UID, fmt.Sprintf("New quest added to your quest log: %s", title))
 			}
 		}
+	}
+}
+
+// issueOnboardingQuest auto-grants the onboarding_find_zone_map quest for a new character.
+//
+// Precondition: sess non-nil; uid non-empty.
+// Postcondition: If quest not already active/completed, it is accepted and a console message sent.
+// Errors are logged at Warn and do not abort the caller.
+func (s *GameServiceServer) issueOnboardingQuest(ctx context.Context, uid string, sess *session.PlayerSession) {
+	if s.questSvc == nil || sess.CharacterID <= 0 {
+		return
+	}
+	const questID = "onboarding_find_zone_map"
+	// Skip if already active or completed (migration edge case).
+	if _, active := sess.GetActiveQuests()[questID]; active {
+		return
+	}
+	if _, done := sess.GetCompletedQuests()[questID]; done {
+		return
+	}
+	title, _, err := s.questSvc.Accept(ctx, sess, sess.CharacterID, questID)
+	if err != nil {
+		s.logger.Warn("issueOnboardingQuest: Accept failed",
+			zap.String("uid", uid),
+			zap.String("quest_id", questID),
+			zap.Error(err),
+		)
+		return
+	}
+	if title != "" {
+		s.pushMessageToUID(uid, fmt.Sprintf("New quest added to your quest log: %s", title))
 	}
 }
 
