@@ -31,7 +31,7 @@ func TestAIItemPhase_OperatorConsumesAP(t *testing.T) {
 	script := `
 operators = {}
 operators.attack_weakest = function(self)
-  self.engine.attack(self.combat.enemies[1].id, "1d6", 1)
+  self.engine.attack(self.combat.enemies[1].id, "1d6", 0)
 end
 `
 	ap := 3
@@ -70,7 +70,7 @@ func TestAIItemPhase_MultipleAPAction(t *testing.T) {
 	script := `
 operators = {}
 operators.overkill_strike = function(self)
-  self.engine.attack(self.combat.enemies[1].id, "2d6+4", 2)
+  self.engine.attack(self.combat.enemies[1].id, "2d6+4", 0)
 end
 `
 	ap := 3

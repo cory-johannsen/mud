@@ -125,12 +125,12 @@ func (p *ItemPlanner) Execute(
 			continue
 		}
 
-		// Gate on AP availability before executing (REQ-AIE-4d, REQ-AIE-5).
+		// Spend AP before executing (REQ-AIE-4d, REQ-AIE-5).
 		// APCost == 0 means the operator is free (e.g., say actions).
-		// The actual AP deduction is handled by the Lua operator via self.engine primitives.
-		// We only gate here to prevent execution when the pool is already insufficient.
-		if op.APCost > 0 && cbs.GetAP() < op.APCost {
-			return nil // AP exhausted; item turn ends immediately
+		if op.APCost > 0 {
+			if !cbs.SpendAP(op.APCost) {
+				return nil // AP exhausted; item turn ends immediately
+			}
 		}
 
 		// Call operators.<id>(self).
@@ -223,16 +223,25 @@ func (p *ItemPlanner) buildCombatTable(L *lua.LState, snap ItemCombatSnapshot) *
 			L.Push(lua.LNil)
 			return 1
 		}
-		worst := &enemies[0]
+		var worst *ItemEnemySnapshot
 		for i := range enemies {
 			e := &enemies[i]
-			if e.MaxHP > 0 && worst.MaxHP > 0 {
-				eRatio := float64(e.HP) / float64(e.MaxHP)
-				wRatio := float64(worst.HP) / float64(worst.MaxHP)
-				if eRatio < wRatio {
-					worst = e
-				}
+			if e.MaxHP <= 0 {
+				continue // skip zero-MaxHP enemies
 			}
+			if worst == nil {
+				worst = e
+				continue
+			}
+			eRatio := float64(e.HP) / float64(e.MaxHP)
+			wRatio := float64(worst.HP) / float64(worst.MaxHP)
+			if eRatio < wRatio {
+				worst = e
+			}
+		}
+		if worst == nil {
+			// All enemies have MaxHP <= 0; fall back to first enemy.
+			worst = &enemies[0]
 		}
 		eT := L.NewTable()
 		L.SetField(eT, "id", lua.LString(worst.ID))
