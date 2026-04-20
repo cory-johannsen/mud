@@ -388,6 +388,23 @@ func TestPlanner_NativePrecondition_NotInCombat_FallsThrough(t *testing.T) {
 	}
 }
 
+func TestDomain_Validate_LuaHookAction_Valid(t *testing.T) {
+	d := &ai.Domain{
+		ID:    "item_test",
+		Tasks: []*ai.Task{{ID: "behave"}},
+		Methods: []*ai.Method{{
+			TaskID:       "behave",
+			ID:           "act",
+			Precondition: "",
+			Subtasks:     []string{"do_thing"},
+		}},
+		Operators: []*ai.Operator{{ID: "do_thing", Action: "lua_hook", APCost: 1}},
+	}
+	if err := d.Validate(); err != nil {
+		t.Fatalf("expected lua_hook to be valid, got error: %v", err)
+	}
+}
+
 func TestPlanner_NativePrecondition_HPPctBelow(t *testing.T) {
 	d := &ai.Domain{
 		ID:    "test",

@@ -107,6 +107,7 @@ func (d *Domain) Validate() error {
 		"attack": true, "strike": true, "pass": true, "flee": true,
 		"apply_mental_state": true, "move_random": true, "say": true,
 		"call_for_help": true, "target_weakest": true,
+		"lua_hook": true, // AI item operator — Lua function in CombatScript
 	}
 	for _, op := range d.Operators {
 		if op.ID == "" || op.Action == "" {
