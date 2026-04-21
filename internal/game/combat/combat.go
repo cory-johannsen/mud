@@ -295,6 +295,34 @@ func CellOccupied(cbt *Combat, actorID string, x, y int) bool {
 	return false
 }
 
+// CellBlockedByCover reports whether a cover object occupies grid position
+// (x, y). Destroyed cover objects are removed from cbt.CoverObjects by the
+// combat handler and therefore no longer block.
+//
+// Precondition: cbt must not be nil.
+// Postcondition: Returns true iff any entry in cbt.CoverObjects has
+// GridX == x && GridY == y.
+func CellBlockedByCover(cbt *Combat, x, y int) bool {
+	for _, co := range cbt.CoverObjects {
+		if co.GridX == x && co.GridY == y {
+			return true
+		}
+	}
+	return false
+}
+
+// CellBlocked reports whether grid position (x, y) is unavailable for the
+// given actor — either because another living combatant is there or because
+// a cover object occupies the tile. Cover blocks movement for both players
+// and NPCs until it is destroyed (GH #227).
+//
+// Precondition: cbt must not be nil.
+// Postcondition: Returns true iff CellOccupied(cbt, actorID, x, y) or
+// CellBlockedByCover(cbt, x, y).
+func CellBlocked(cbt *Combat, actorID string, x, y int) bool {
+	return CellOccupied(cbt, actorID, x, y) || CellBlockedByCover(cbt, x, y)
+}
+
 // IsFlanked reports whether target is flanked by the given attackers.
 // A target is flanked when at least two attackers are in opposite quadrants:
 // both row and column differ by ≥1 in opposite directions relative to the target.

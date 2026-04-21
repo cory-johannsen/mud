@@ -1907,6 +1907,14 @@ func (h *CombatHandler) startPursuitCombatLocked(playerSess *session.PlayerSessi
 	}
 	playerSess.Status = int32(2) // in combat
 
+	// GH #227: populate grid-positional cover objects so stride/step/move
+	// handlers treat them as movement-blocking cells until destroyed.
+	if h.worldMgr != nil {
+		if room, ok := h.worldMgr.GetRoom(playerSess.RoomID); ok {
+			cbt.CoverObjects = computeCoverObjects(room)
+		}
+	}
+
 	// Copy pre-existing session conditions (e.g. weather effects) into the combat set.
 	if playerSess.Conditions != nil && cbt.Conditions[playerSess.UID] != nil {
 		playerSess.Conditions.CopyTo(cbt.Conditions[playerSess.UID], playerSess.UID)
@@ -1992,13 +2000,10 @@ func (h *CombatHandler) startPursuitCombatLocked(playerSess *session.PlayerSessi
 				HpMax:       int32(c.MaxHP),
 			})
 		}
-		// Collect cover objects from room equipment to populate the combat map.
-		var coverObjects []*gamev1.CoverObjectPosition
-		if h.worldMgr != nil {
-			if room, ok := h.worldMgr.GetRoom(playerSess.RoomID); ok {
-				coverObjects = coverObjectsForRoom(room)
-			}
-		}
+		// GH #227: read cover positions from the combat's live model so the
+		// client sees the same set the server uses for movement-blocking and
+		// any destructions applied this round are already reflected.
+		coverObjects := coverObjectsToProto(cbt.CoverObjects)
 
 		h.roundStartBroadcastFn(playerSess.RoomID, &gamev1.RoundStartEvent{
 			Round:            int32(cbt.Round),
@@ -2354,6 +2359,15 @@ func (h *CombatHandler) resolveAndAdvanceLocked(roomID string, cbt *combat.Comba
 					}
 				}
 			}
+			// GH #227: remove the destroyed cover from the movement-blocking
+			// cover list so NPCs and players can now traverse the tile.
+			filtered := cbt.CoverObjects[:0]
+			for _, co := range cbt.CoverObjects {
+				if co.EquipmentID != equipID {
+					filtered = append(filtered, co)
+				}
+			}
+			cbt.CoverObjects = filtered
 		}
 		return destroyed
 	}
@@ -3119,6 +3133,14 @@ func (h *CombatHandler) startCombatLocked(sess *session.PlayerSession, inst *npc
 	}
 	sess.Status = int32(2) // gamev1.CombatStatus_COMBAT_STATUS_IN_COMBAT
 
+	// GH #227: populate grid-positional cover objects from the room so movement
+	// resolvers can treat them as blocking cells until destroyed.
+	if h.worldMgr != nil {
+		if room, ok := h.worldMgr.GetRoom(sess.RoomID); ok {
+			cbt.CoverObjects = computeCoverObjects(room)
+		}
+	}
+
 	// Copy pre-existing session conditions (e.g. weather effects) into the combat set.
 	if sess.Conditions != nil && cbt.Conditions[sess.UID] != nil {
 		sess.Conditions.CopyTo(cbt.Conditions[sess.UID], sess.UID)
@@ -3316,13 +3338,9 @@ func (h *CombatHandler) startCombatLocked(sess *session.PlayerSession, inst *npc
 				HpMax:       int32(c.MaxHP),
 			})
 		}
-		// Collect cover objects from room equipment to populate the combat map.
-		var coverObjects []*gamev1.CoverObjectPosition
-		if h.worldMgr != nil {
-			if room, ok := h.worldMgr.GetRoom(sess.RoomID); ok {
-				coverObjects = coverObjectsForRoom(room)
-			}
-		}
+		// GH #227: broadcast the live cover positions so client and server stay
+		// in sync as cover is destroyed during combat.
+		coverObjects := coverObjectsToProto(cbt.CoverObjects)
 
 		h.roundStartBroadcastFn(sess.RoomID, &gamev1.RoundStartEvent{
 			Round:            int32(cbt.Round),
@@ -4323,15 +4341,17 @@ func bestCoverInRoom(room *world.Room) (world.RoomEquipmentConfig, string) {
 // coverObjectsForRoom returns all cover-bearing equipment in the room as
 // CoverObjectPosition protos, with assigned 20×20 grid positions.
 //
-// Cover objects are placed in the centre columns (x=8–11) of the 20×20 grid,
+// Cover objects are placed in the centre columns (x=9–10) of the 20×20 grid,
 // spread vertically so they don't overlap each other or the default combatant
-// positions (player at y=10, NPC at y=10).
+// row.
 //
 // Precondition: room must not be nil.
-// Postcondition: Returns one CoverObjectPosition per room equipment item with a
+// Postcondition: Returns one combat.CoverObject per room equipment item with a
 // non-empty CoverTier. Returns nil if no cover items are present.
-func coverObjectsForRoom(room *world.Room) []*gamev1.CoverObjectPosition {
-	// Collect all items that carry cover.
+func computeCoverObjects(room *world.Room) []combat.CoverObject {
+	if room == nil {
+		return nil
+	}
 	var items []world.RoomEquipmentConfig
 	for _, eq := range room.Equipment {
 		if eq.CoverTier != "" {
@@ -4341,27 +4361,45 @@ func coverObjectsForRoom(room *world.Room) []*gamev1.CoverObjectPosition {
 	if len(items) == 0 {
 		return nil
 	}
-
-	// Fixed midfield X positions, alternating two columns.
 	xPositions := []int{9, 10}
-	// Spread y positions: start at row 4, step 4 rows, so up to 5 objects fit
-	// without overlapping the default combatant row (y=10 is avoided by starting at 4
-	// and stepping to 8, 12, 16 — row 12 is the closest to 10 but still distinct).
 	yStart := []int{4, 16, 8, 12, 2, 18, 6, 14}
-
-	positions := make([]*gamev1.CoverObjectPosition, 0, len(items))
+	out := make([]combat.CoverObject, 0, len(items))
 	for i, eq := range items {
-		x := xPositions[i%len(xPositions)]
-		y := yStart[i%len(yStart)]
-		positions = append(positions, &gamev1.CoverObjectPosition{
-			ItemId:    eq.ItemID,
-			Name:      eq.Description,
-			CoverTier: eq.CoverTier,
-			X:         int32(x),
-			Y:         int32(y),
+		out = append(out, combat.CoverObject{
+			EquipmentID: eq.ItemID,
+			Name:        eq.Description,
+			Tier:        eq.CoverTier,
+			GridX:       xPositions[i%len(xPositions)],
+			GridY:       yStart[i%len(yStart)],
 		})
 	}
-	return positions
+	return out
+}
+
+// coverObjectsToProto converts []combat.CoverObject → []*gamev1.CoverObjectPosition
+// for transmission to the client.
+func coverObjectsToProto(cos []combat.CoverObject) []*gamev1.CoverObjectPosition {
+	if len(cos) == 0 {
+		return nil
+	}
+	out := make([]*gamev1.CoverObjectPosition, 0, len(cos))
+	for _, co := range cos {
+		out = append(out, &gamev1.CoverObjectPosition{
+			ItemId:    co.EquipmentID,
+			Name:      co.Name,
+			CoverTier: co.Tier,
+			X:         int32(co.GridX),
+			Y:         int32(co.GridY),
+		})
+	}
+	return out
+}
+
+// coverObjectsForRoom is a legacy wrapper returning CoverObjectPosition for
+// callers that do not have an active Combat reference. Prefer the
+// cbt.CoverObjects + coverObjectsToProto pathway when in combat.
+func coverObjectsForRoom(room *world.Room) []*gamev1.CoverObjectPosition {
+	return coverObjectsToProto(computeCoverObjects(room))
 }
 
 // zoneIDForRoom looks up the zone ID for a room via the world manager.

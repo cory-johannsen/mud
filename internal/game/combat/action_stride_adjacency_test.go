@@ -117,6 +117,81 @@ func TestStride_NoOverlap_CompassDirection(t *testing.T) {
 	assert.Equal(t, beforeY, player.GridY, "player must not move onto an occupied cell")
 }
 
+// TestCellBlockedByCover_TrueWhenCoverAtCell verifies GH #227: a cell with a
+// cover object is reported blocked.
+func TestCellBlockedByCover_TrueWhenCoverAtCell(t *testing.T) {
+	cbt, _, _ := makeAdjacentStrideCombat(t, 0, 10, 10, 10)
+	cbt.CoverObjects = []combat.CoverObject{
+		{EquipmentID: "crate-1", Tier: "standard", GridX: 5, GridY: 10},
+	}
+	assert.True(t, combat.CellBlockedByCover(cbt, 5, 10),
+		"cell containing cover must be reported blocked")
+	assert.False(t, combat.CellBlockedByCover(cbt, 6, 10),
+		"cell not containing cover must not be reported blocked")
+}
+
+// TestCellBlocked_CombinesCombatantAndCover verifies GH #227: CellBlocked
+// composes the combatant-occupancy check with the cover-occupancy check.
+func TestCellBlocked_CombinesCombatantAndCover(t *testing.T) {
+	cbt, _, _ := makeAdjacentStrideCombat(t, 0, 10, 10, 10)
+	cbt.CoverObjects = []combat.CoverObject{
+		{EquipmentID: "crate-1", Tier: "standard", GridX: 5, GridY: 10},
+	}
+	// NPC at (10,10).
+	assert.True(t, combat.CellBlocked(cbt, "p1", 10, 10),
+		"cell with opposing combatant must block")
+	assert.True(t, combat.CellBlocked(cbt, "p1", 5, 10),
+		"cell with cover must block")
+	assert.False(t, combat.CellBlocked(cbt, "p1", 2, 10),
+		"empty cell must not block")
+}
+
+// TestStride_Cover_BlocksNPCMovement verifies GH #227: an NPC striding toward
+// the player through a cover-occupied cell stops at the cover and does not
+// pass through.
+//
+// Precondition: player at (0,10), NPC at (9,10), cover at (5,10).
+// Postcondition: NPC ends at (6,10) — one cell east of the cover, having
+// stopped when it encountered the blocking tile.
+func TestStride_Cover_BlocksNPCMovement(t *testing.T) {
+	cbt, _, npc := makeAdjacentStrideCombat(t, 0, 10, 9, 10)
+	cbt.CoverObjects = []combat.CoverObject{
+		{EquipmentID: "barrier-1", Tier: "standard", GridX: 5, GridY: 10},
+	}
+
+	_ = cbt.StartRound(3)
+	_ = cbt.QueueAction("p1", combat.QueuedAction{Type: combat.ActionPass})
+	_ = cbt.QueueAction("n1", combat.QueuedAction{Type: combat.ActionStride, Direction: "toward"})
+	resolveAdjacentRound(cbt)
+
+	assert.Equal(t, 6, npc.GridX,
+		"NPC must stop one cell east of the cover at (5,10) — got GridX=%d", npc.GridX)
+	assert.Equal(t, 10, npc.GridY)
+}
+
+// TestStride_Cover_DestroyedTileIsTraversable verifies GH #227: after the
+// cover object is removed from cbt.CoverObjects (simulating destruction),
+// the NPC can pass through the previously-blocked cell.
+func TestStride_Cover_DestroyedTileIsTraversable(t *testing.T) {
+	cbt, _, npc := makeAdjacentStrideCombat(t, 0, 10, 9, 10)
+	cbt.CoverObjects = []combat.CoverObject{
+		{EquipmentID: "barrier-1", Tier: "standard", GridX: 5, GridY: 10},
+	}
+	// Simulate destruction: drop the cover.
+	cbt.CoverObjects = nil
+
+	_ = cbt.StartRound(3)
+	_ = cbt.QueueAction("p1", combat.QueuedAction{Type: combat.ActionPass})
+	_ = cbt.QueueAction("n1", combat.QueuedAction{Type: combat.ActionStride, Direction: "toward"})
+	resolveAdjacentRound(cbt)
+
+	// With speed 5, NPC at (9,10) striding toward player at (0,10) walks
+	// 5 cells west → (4,10). Nothing blocks now that cover is gone.
+	assert.Equal(t, 4, npc.GridX,
+		"NPC must traverse the previously-blocked cell once cover is destroyed")
+	assert.Equal(t, 10, npc.GridY)
+}
+
 // TestCellOccupied_TrueWhenOtherCombatantPresent verifies that CellOccupied returns true
 // when a living combatant other than actorID occupies the given cell.
 //

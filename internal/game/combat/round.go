@@ -588,8 +588,9 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 					if newX == actor.GridX && newY == actor.GridY {
 						break
 					}
-					// REQ-STRIDE-NOOVERLAP: Do not move onto a cell occupied by another living combatant.
-					if CellOccupied(cbt, actor.ID, newX, newY) {
+					// REQ-STRIDE-NOOVERLAP: Do not move onto a cell occupied by
+					// another living combatant or a cover object (GH #227).
+					if CellBlocked(cbt, actor.ID, newX, newY) {
 						break
 					}
 					actor.GridX = newX

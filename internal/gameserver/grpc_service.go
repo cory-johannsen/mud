@@ -10734,7 +10734,8 @@ func (s *GameServiceServer) handleStride(uid string, req *gamev1.StrideRequest) 
 			break
 		}
 		// REQ-STRIDE-NOOVERLAP: Do not move onto a cell occupied by another living combatant.
-		if combat.CellOccupied(cbt, uid, newX, newY) {
+		// GH #227: cover objects block movement until destroyed.
+		if combat.CellBlocked(cbt, uid, newX, newY) {
 			break
 		}
 		combatant.GridX = newX
@@ -11016,7 +11017,8 @@ func (s *GameServiceServer) handleBrutalCharge(uid, targetID string) (*gamev1.Se
 			if newX == oldX && newY == oldY {
 				break
 			}
-			if combat.CellOccupied(cbt, uid, newX, newY) {
+			// GH #227: cover objects block movement until destroyed.
+			if combat.CellBlocked(cbt, uid, newX, newY) {
 				break
 			}
 			combatant.GridX = newX
@@ -11164,7 +11166,8 @@ func (s *GameServiceServer) handleStep(uid string, req *gamev1.StepRequest) (*ga
 		newY = height - 1
 	}
 	// REQ-STEP-NOOVERLAP: Do not move onto a cell occupied by another living combatant.
-	if combat.CellOccupied(cbt, uid, newX, newY) {
+	// GH #227: cover objects block movement until destroyed.
+	if combat.CellBlocked(cbt, uid, newX, newY) {
 		newX = combatant.GridX
 		newY = combatant.GridY
 	}
@@ -11276,7 +11279,8 @@ func (s *GameServiceServer) handleTumble(uid string, req *gamev1.TumbleRequest) 
 			newY = height - 1
 		}
 		// REQ-TUMBLE-NOOVERLAP: Do not land on a cell occupied by another living combatant.
-		if combat.CellOccupied(cbt, uid, newX, newY) {
+		// GH #227: cover objects block movement until destroyed.
+		if combat.CellBlocked(cbt, uid, newX, newY) {
 			newX = combatant.GridX
 			newY = combatant.GridY
 		}

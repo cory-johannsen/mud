@@ -48,6 +48,26 @@ type Combat struct {
 	GridWidth int
 	// GridHeight is the number of rows in the combat grid. Default: 10.
 	GridHeight int
+	// CoverObjects are grid-positional cover objects present in this combat
+	// (GH #227). Cover blocks movement through its cell until destroyed; the
+	// combat handler populates this slice at StartCombat from the room's
+	// equipment and removes entries when cover HP reaches zero.
+	CoverObjects []CoverObject
+}
+
+// CoverObject is a cover item placed on the combat grid. It blocks movement
+// through its cell until destroyed.
+type CoverObject struct {
+	// EquipmentID is the world.RoomEquipmentConfig.ItemID of the underlying
+	// cover item. Used to tie destruction events back to the world state.
+	EquipmentID string
+	// Name is the display name of the cover (may be empty).
+	Name string
+	// Tier is one of "lesser", "standard", or "greater".
+	Tier string
+	// GridX / GridY are the 0-based cell this cover occupies.
+	GridX int
+	GridY int
 }
 
 // RoundConditionEvent records a condition applied or removed during round startup.
