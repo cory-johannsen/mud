@@ -1,5 +1,6 @@
 import { useGame } from './GameContext'
 import type { QuestEntryView } from '../proto'
+import { difficultyBorderColor } from './ZoneMapSvg'
 
 const STATUS_STYLES: Record<string, React.CSSProperties> = {
   available:  { color: '#8d4', background: '#1a2a1a', border: '1px solid #4a6a2a' },
@@ -11,9 +12,11 @@ const STATUS_STYLES: Record<string, React.CSSProperties> = {
 function QuestEntry({
   quest,
   onAccept,
+  playerLevel,
 }: {
   quest: QuestEntryView
   onAccept: (questId: string) => void
+  playerLevel: number
 }): JSX.Element {
   const id = quest.questId ?? quest.quest_id ?? ''
   const status = quest.status ?? 'available'
@@ -21,6 +24,10 @@ function QuestEntry({
   const objectives = quest.objectives ?? []
   const xp = quest.xpReward ?? quest.xp_reward ?? 0
   const credits = quest.creditsReward ?? quest.credits_reward ?? 0
+  const levelRange = quest.levelRange ?? quest.level_range ?? ''
+  // GH #239: color the quest card border by enemy-level difficulty relative
+  // to the player's level, reusing the zone-map difficulty palette.
+  const difficultyColor = difficultyBorderColor(levelRange || undefined, playerLevel)
 
   return (
     <div style={{
@@ -28,18 +35,36 @@ function QuestEntry({
       borderRadius: 4,
       padding: '0.5rem 0.65rem',
       ...statusStyle,
+      ...(difficultyColor ? { borderColor: difficultyColor, borderWidth: 2, borderStyle: 'solid' } : {}),
     }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.2rem' }}>
         <span style={{ fontWeight: 'bold', fontSize: '0.9rem', color: '#e0c060' }}>{quest.title ?? id}</span>
-        <span style={{
-          fontSize: '0.65rem',
-          textTransform: 'uppercase',
-          letterSpacing: '0.06em',
-          padding: '0.1rem 0.3rem',
-          borderRadius: 3,
-          background: 'rgba(0,0,0,0.3)',
-          color: statusStyle.color,
-        }}>{status}</span>
+        <span style={{ display: 'flex', gap: '0.35rem', alignItems: 'center' }}>
+          {levelRange && (
+            <span
+              data-testid="quest-level-range"
+              style={{
+                fontSize: '0.65rem',
+                textTransform: 'uppercase',
+                letterSpacing: '0.06em',
+                padding: '0.1rem 0.3rem',
+                borderRadius: 3,
+                background: 'rgba(0,0,0,0.3)',
+                color: difficultyColor ?? '#aaa',
+                border: difficultyColor ? `1px solid ${difficultyColor}` : '1px solid #333',
+              }}
+            >Lv {levelRange}</span>
+          )}
+          <span style={{
+            fontSize: '0.65rem',
+            textTransform: 'uppercase',
+            letterSpacing: '0.06em',
+            padding: '0.1rem 0.3rem',
+            borderRadius: 3,
+            background: 'rgba(0,0,0,0.3)',
+            color: statusStyle.color,
+          }}>{status}</span>
+        </span>
       </div>
       {quest.description && (
         <p style={{ margin: '0 0 0.3rem', fontSize: '0.78rem', color: '#bbb', lineHeight: 1.4 }}>{quest.description}</p>
@@ -92,6 +117,7 @@ export function QuestGiverModal(): JSX.Element | null {
 
   const npcName = view.npcName ?? view.npc_name ?? 'Quest Giver'
   const quests = view.quests ?? []
+  const playerLevel = state.characterInfo?.level ?? 0
 
   function handleAccept(questId: string) {
     sendMessage('TalkRequest', { npc_name: npcName, args: `accept ${questId}` })
@@ -142,6 +168,7 @@ export function QuestGiverModal(): JSX.Element | null {
               key={q.questId ?? q.quest_id}
               quest={q}
               onAccept={handleAccept}
+              playerLevel={playerLevel}
             />
           ))
         )}

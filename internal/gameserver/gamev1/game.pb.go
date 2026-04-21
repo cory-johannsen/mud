@@ -7866,6 +7866,11 @@ type QuestEntryView struct {
 	CreditsReward int32                  `protobuf:"varint,5,opt,name=credits_reward,json=creditsReward,proto3" json:"credits_reward,omitempty"`
 	Objectives    []*QuestObjectiveView  `protobuf:"bytes,6,rep,name=objectives,proto3" json:"objectives,omitempty"`
 	Status        string                 `protobuf:"bytes,7,opt,name=status,proto3" json:"status,omitempty"` // "available" | "active" | "completed" | "locked"
+	// level_range is the enemy level range across all kill-type objectives,
+	// formatted as "N-M" (e.g. "12-15") or a single number "N" when min==max.
+	// Empty string when the quest has no kill objectives or no target levels
+	// can be resolved (GH #239).
+	LevelRange    string `protobuf:"bytes,8,opt,name=level_range,json=levelRange,proto3" json:"level_range,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -7945,6 +7950,13 @@ func (x *QuestEntryView) GetObjectives() []*QuestObjectiveView {
 func (x *QuestEntryView) GetStatus() string {
 	if x != nil {
 		return x.Status
+	}
+	return ""
+}
+
+func (x *QuestEntryView) GetLevelRange() string {
+	if x != nil {
+		return x.LevelRange
 	}
 	return ""
 }
@@ -17836,7 +17848,7 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12 \n" +
 	"\vdescription\x18\x02 \x01(\tR\vdescription\x12\x18\n" +
 	"\acurrent\x18\x03 \x01(\x05R\acurrent\x12\x1a\n" +
-	"\brequired\x18\x04 \x01(\x05R\brequired\"\xfc\x01\n" +
+	"\brequired\x18\x04 \x01(\x05R\brequired\"\x9d\x02\n" +
 	"\x0eQuestEntryView\x12\x19\n" +
 	"\bquest_id\x18\x01 \x01(\tR\aquestId\x12\x14\n" +
 	"\x05title\x18\x02 \x01(\tR\x05title\x12 \n" +
@@ -17846,7 +17858,9 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\n" +
 	"objectives\x18\x06 \x03(\v2\x1b.game.v1.QuestObjectiveViewR\n" +
 	"objectives\x12\x16\n" +
-	"\x06status\x18\a \x01(\tR\x06status\"\x84\x01\n" +
+	"\x06status\x18\a \x01(\tR\x06status\x12\x1f\n" +
+	"\vlevel_range\x18\b \x01(\tR\n" +
+	"levelRange\"\x84\x01\n" +
 	"\x0eQuestGiverView\x12\x19\n" +
 	"\bnpc_name\x18\x01 \x01(\tR\anpcName\x12&\n" +
 	"\x0fnpc_instance_id\x18\x02 \x01(\tR\rnpcInstanceId\x12/\n" +

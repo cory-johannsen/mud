@@ -305,6 +305,9 @@ export interface QuestEntryView {
   credits_reward?: number
   objectives?: QuestObjectiveView[]
   status?: string // "available" | "active" | "completed" | "locked"
+  // GH #239: enemy level range across kill-type objectives ("N-M" or "N").
+  levelRange?: string
+  level_range?: string
 }
 
 export interface QuestGiverView {

@@ -6,6 +6,7 @@
 import { useEffect } from 'react'
 import { useGame } from '../GameContext'
 import type { QuestEntryView, QuestObjectiveView } from '../../proto'
+import { difficultyBorderColor } from '../ZoneMapSvg'
 
 function ObjectiveRow({ obj }: { obj: QuestObjectiveView }) {
   const current = obj.current ?? 0
@@ -32,28 +33,52 @@ function ObjectiveRow({ obj }: { obj: QuestObjectiveView }) {
   )
 }
 
-function QuestCard({ quest }: { quest: QuestEntryView }) {
+function QuestCard({ quest, playerLevel }: { quest: QuestEntryView; playerLevel: number }) {
   const title = quest.title ?? quest.questId ?? quest.quest_id ?? '(unknown)'
   const xp = quest.xpReward ?? quest.xp_reward ?? 0
   const credits = quest.creditsReward ?? quest.credits_reward ?? 0
   const objectives = quest.objectives ?? []
   const allDone = objectives.length > 0 && objectives.every(o => (o.current ?? 0) >= (o.required ?? 1))
+  const levelRange = quest.levelRange ?? quest.level_range ?? ''
+  // GH #239: color the quest card border by enemy-level difficulty vs the
+  // player's level, matching the zone-map palette.
+  const difficultyColor = difficultyBorderColor(levelRange || undefined, playerLevel)
+
+  const defaultBorder = allDone ? '#4a6a2a' : '#1e2a3a'
+  const borderColor = difficultyColor ?? defaultBorder
 
   return (
     <div style={{
       marginBottom: '0.75rem',
       background: '#0f1420',
-      border: `1px solid ${allDone ? '#4a6a2a' : '#1e2a3a'}`,
+      border: `${difficultyColor ? 2 : 1}px solid ${borderColor}`,
       borderRadius: 4,
       padding: '0.6rem 0.75rem',
     }}>
       <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
         <span style={{ fontWeight: 'bold', fontSize: '0.88rem', color: '#e0c060' }}>{title}</span>
-        {allDone && (
-          <span style={{ fontSize: '0.65rem', color: '#8d4', background: '#1a2a1a', border: '1px solid #4a6a2a', borderRadius: 3, padding: '0.05rem 0.3rem', marginLeft: '0.5rem' }}>
-            READY TO TURN IN
-          </span>
-        )}
+        <span style={{ display: 'flex', gap: '0.35rem', alignItems: 'center' }}>
+          {levelRange && (
+            <span
+              data-testid="quest-level-range"
+              style={{
+                fontSize: '0.65rem',
+                textTransform: 'uppercase',
+                letterSpacing: '0.06em',
+                padding: '0.05rem 0.3rem',
+                borderRadius: 3,
+                background: 'rgba(0,0,0,0.3)',
+                color: difficultyColor ?? '#aaa',
+                border: difficultyColor ? `1px solid ${difficultyColor}` : '1px solid #333',
+              }}
+            >Lv {levelRange}</span>
+          )}
+          {allDone && (
+            <span style={{ fontSize: '0.65rem', color: '#8d4', background: '#1a2a1a', border: '1px solid #4a6a2a', borderRadius: 3, padding: '0.05rem 0.3rem' }}>
+              READY TO TURN IN
+            </span>
+          )}
+        </span>
       </div>
       {quest.description && (
         <p style={{ margin: '0 0 0.4rem', fontSize: '0.77rem', color: '#999', lineHeight: 1.4 }}>{quest.description}</p>
@@ -82,6 +107,7 @@ export function QuestsDrawer({ onClose }: { onClose: () => void }) {
 
   const questLogView = state.questLogView
   const quests = questLogView?.quests ?? null
+  const playerLevel = state.characterInfo?.level ?? 0
 
   return (
     <div style={{ fontFamily: 'monospace', color: '#ccc' }}>
@@ -106,7 +132,7 @@ export function QuestsDrawer({ onClose }: { onClose: () => void }) {
       {quests !== null && quests.length > 0 && (
         <div>
           {quests.map(q => (
-            <QuestCard key={q.questId ?? q.quest_id} quest={q} />
+            <QuestCard key={q.questId ?? q.quest_id} quest={q} playerLevel={playerLevel} />
           ))}
         </div>
       )}

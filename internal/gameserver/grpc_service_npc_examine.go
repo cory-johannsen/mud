@@ -251,6 +251,7 @@ func (s *GameServiceServer) buildQuestGiverView(uid string, inst *npc.Instance) 
 				XpReward:      int32(def.Rewards.XP),
 				CreditsReward: int32(def.Rewards.Credits),
 				Status:        status,
+				LevelRange:    questLevelRange(def, s.npcMgr),
 			}
 			for _, obj := range def.Objectives {
 				progress := 0

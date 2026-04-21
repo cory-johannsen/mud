@@ -783,6 +783,11 @@ message QuestEntryView {
   int32  credits_reward       = 5;
   repeated QuestObjectiveView objectives = 6;
   string status               = 7; // "available" | "active" | "completed" | "locked"
+  // level_range is the enemy level range across all kill-type objectives,
+  // formatted as "N-M" (e.g. "12-15") or a single number "N" when min==max.
+  // Empty string when the quest has no kill objectives or no target levels
+  // can be resolved (GH #239).
+  string level_range          = 8;
 }
 
 // QuestGiverView delivers all quests offered by a quest giver NPC.

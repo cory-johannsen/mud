@@ -17,6 +17,42 @@ import (
 // the quests feature is fully implemented for their faction.
 const stubQuestGiverMessage = "I've got work for you, but the time isn't right yet."
 
+// questLevelRange returns a compact "N-M" (or "N") string describing the
+// enemy level range of a quest's kill objectives (GH #239). Returns "" when
+// the quest has no kill objectives or no target levels can be resolved.
+//
+// Precondition: def must not be nil; npcMgr may be nil (returns "" in that case).
+// Postcondition: returns "" or a non-empty string of the form "N" or "N-M"
+// with N <= M.
+func questLevelRange(def *questpkg.QuestDef, npcMgr *npc.Manager) string {
+	if def == nil || npcMgr == nil {
+		return ""
+	}
+	minLvl, maxLvl := -1, -1
+	for _, obj := range def.Objectives {
+		if obj.Type != "kill" || obj.TargetID == "" {
+			continue
+		}
+		lvl, ok := npcMgr.TemplateLevel(obj.TargetID)
+		if !ok || lvl <= 0 {
+			continue
+		}
+		if minLvl < 0 || lvl < minLvl {
+			minLvl = lvl
+		}
+		if maxLvl < 0 || lvl > maxLvl {
+			maxLvl = lvl
+		}
+	}
+	if minLvl < 0 {
+		return ""
+	}
+	if minLvl == maxLvl {
+		return fmt.Sprintf("%d", minLvl)
+	}
+	return fmt.Sprintf("%d-%d", minLvl, maxLvl)
+}
+
 // HandleQuestGiverInteract is a no-op handler for quest giver NPC interactions.
 // It returns the stub message for all quest giver types until the quests
 // feature is fully implemented.
@@ -248,6 +284,7 @@ func (s *GameServiceServer) handleQuestLog(uid string) (*gamev1.ServerEvent, err
 			XpReward:      int32(def.Rewards.XP),
 			CreditsReward: int32(def.Rewards.Credits),
 			Status:        "active",
+			LevelRange:    questLevelRange(def, s.npcMgr),
 		}
 		for _, obj := range def.Objectives {
 			progress := 0
