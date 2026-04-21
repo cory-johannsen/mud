@@ -52,3 +52,34 @@
 - SYSREQ-4: Agents MUST reference the documents in `/docs/architecture/`
 - SYSREQ-5: Agents MUST use `vendor/pf2e-data` as the primary source of truth for PF2E rules, and MUST consult the `foundry-vtt-mcp` MCP server only as a secondary source.
 - SYSREQ-6: Before any task that requires PF2E rules data, agents MUST verify that `vendor/pf2e-data` exists. If it is missing, agents MUST clone it with: `git clone --filter=blob:none --branch v13-dev https://github.com/foundryvtt/pf2e vendor/pf2e-data`
+
+## 6. Named Agent Behaviors
+
+- BEHAVIOR-1: Every session MUST assume at least one of the four named behaviors: `reporter`, `specifier`, `planner`, or `implementer`.
+- BEHAVIOR-2: A session MAY combine multiple named behaviors, but each active behavior MUST fully satisfy its own requirements.
+- BEHAVIOR-3: `reporter` agents MUST accept issue reports from the user and record them as GitHub issues.
+- BEHAVIOR-4: `reporter` agents MUST maintain the kanban board, including label, state, and column placement for every issue they touch.
+- BEHAVIOR-5: `specifier` agents MUST transition `To Do` feature issues to `Spec` by producing a complete specification document under `docs/superpowers/specs/YYYY-MM-DD-<slug>.md`.
+- BEHAVIOR-6: `specifier` agents MUST commit the specification and link its path in the issue body before the issue is treated as being in `Spec` status.
+- BEHAVIOR-7: `planner` agents MUST produce implementation plans for issues in `Spec` status and MUST store them at `docs/superpowers/plans/YYYY-MM-DD-<slug>.md`.
+- BEHAVIOR-8: `planner` agents MUST use the `Monitor` tool to watch for issues entering `Spec` status and MUST automatically generate plans for them.
+- BEHAVIOR-9: `planner` agents MUST commit the plan and link its path in the issue body before transitioning the issue to `In Progress`.
+- BEHAVIOR-10: `implementer` agents MUST fix bugs and implement planned issues, producing committed and deployed changes.
+- BEHAVIOR-11: `implementer` agents MUST use the `Monitor` tool to watch for bugs in `To Do` status and MUST automatically fix them.
+- BEHAVIOR-12: `implementer` agents MUST use the `Monitor` tool to watch for issues in `Planned` status and MUST automatically execute their plans.
+- BEHAVIOR-13: `implementer` agents MUST process work serially and MUST NOT work on more than one issue at a time.
+- BEHAVIOR-14: `implementer` agents MUST complete each issue end-to-end (implement, test, commit, deploy, verify) before selecting the next issue.
+- BEHAVIOR-15: `implementer` agents MUST prioritize bug issues over feature issues whenever both are available for work.
+
+## 7. Behavior Watch Command Contract
+
+- WATCH-1: `planner` and `implementer` agents MUST implement their Monitor-driven watch loops by launching a background shell process and attaching the `Monitor` tool to its stdout.
+- WATCH-2: Watch processes MUST poll GitHub Issues via `gh` at an interval of 60 seconds unless overridden by the user.
+- WATCH-3: Watch processes MUST emit exactly one line to stdout per detected issue transition, formatted as `<ISO-8601-timestamp>\t<behavior>\t<event>\t<issue-number>\t<title>`.
+- WATCH-4: The `<event>` field MUST be one of `spec-ready`, `plan-ready`, `bug-open`, or `planned-ready`.
+- WATCH-5: `planner` watch processes MUST emit `spec-ready` events for issues in `Spec` status that have a linked spec path but no linked plan path.
+- WATCH-6: `implementer` watch processes MUST emit `bug-open` events for `To Do` issues labeled `bug`, and `planned-ready` events for issues in `Planned` status.
+- WATCH-7: Watch processes MUST deduplicate events by issue number within a single run and MUST NOT re-emit an event until the issue leaves and re-enters the triggering state.
+- WATCH-8: Watch processes MUST write their stdout stream to a log file under `/tmp/mud-watch-<behavior>-<pid>.log` in addition to emitting to the Monitor stream, enabling resumption after session loss.
+- WATCH-9: Agents MUST treat each Monitor-delivered line as a discrete work item and MUST acknowledge it by updating the corresponding GitHub issue state before processing the next line.
+- WATCH-10: `implementer` watch processes MUST order queued events bugs-before-features and MUST emit bug events ahead of any pending feature events within the same polling cycle.
