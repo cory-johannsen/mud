@@ -76,6 +76,11 @@ func ResolveTechEffects(
 	querier RoomQuerier,
 ) []string {
 	if len(targets) == 0 {
+		// Attack/save techs require a target — emit feedback rather than silently returning nothing.
+		// No-roll (resolution "none" or "") techs apply on_apply to self/utility effects.
+		if tech.Resolution == "attack" || tech.Resolution == "save" {
+			return []string{"No valid target."}
+		}
 		return applyEffects(sess, tech.Effects.OnApply, nil, cbt, condRegistry, src, querier)
 	}
 

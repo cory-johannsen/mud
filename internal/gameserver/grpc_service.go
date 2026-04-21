@@ -9227,6 +9227,28 @@ func (s *GameServiceServer) activateTechWithEffects(sess *session.PlayerSession,
 			}
 		} else if target != nil {
 			techTargets = []*combat.Combatant{target}
+		} else if (techDef.Resolution == "" || techDef.Resolution == "none") &&
+			techDef.Targets == technology.TargetsSingle && cbt != nil {
+			// No-roll single-target tech (e.g. multi_round_kinetic_volley): resolveUseTarget
+			// skips resolution for resolution:"none", but on_apply damage effects require an NPC target.
+			// Find the default target from active combat.
+			if targetID == "" {
+				for _, c := range cbt.Combatants {
+					if c.Kind == combat.KindNPC && !c.IsDead() {
+						techTargets = []*combat.Combatant{c}
+						break
+					}
+				}
+			} else {
+				lower := strings.ToLower(targetID)
+				for _, c := range cbt.Combatants {
+					if c.Kind == combat.KindNPC && !c.IsDead() &&
+						strings.HasPrefix(strings.ToLower(c.Name), lower) {
+						techTargets = []*combat.Combatant{c}
+						break
+					}
+				}
+			}
 		}
 	}
 
@@ -9274,8 +9296,11 @@ func (s *GameServiceServer) activateTechWithEffectsWithCombat(sess *session.Play
 				techTargets = append(techTargets, c)
 			}
 		}
-	} else if techDef.Targets != "self" && techDef.Resolution != "" && techDef.Resolution != "none" && cbt != nil {
-		// Single-target attack or save: find the named target or default to first living NPC.
+	} else if techDef.Targets != "self" && techDef.Targets != technology.TargetsAllEnemies &&
+		techDef.Targets != technology.TargetsAllAllies && techDef.Targets != technology.TargetsZone && cbt != nil {
+		// Single-target attack, save, or no-roll (resolution none/""): find the named target or
+		// default to first living NPC. Includes resolution:"none" techs (e.g. kinetic volley) that
+		// still require an NPC target for damage application.
 		if targetID == "" {
 			for _, c := range cbt.Combatants {
 				if c.Kind == combat.KindNPC && !c.IsDead() {

@@ -427,6 +427,113 @@ func TestResolveTechEffects_AttackHit_NoEffects_EmitsStandaloneLabel(t *testing.
 	assert.Contains(t, msgs[0], "enemy", "hit message must name the target")
 }
 
+// REQ-TER-MRKV: multi_round_kinetic_volley — resolution:"none", on_apply 1d4+1 force damage.
+// When a target is provided, the damage MUST be applied. Regression test for issue #218.
+func TestResolveTechEffects_MultiRoundKineticVolley_OnApplyDamagesTarget(t *testing.T) {
+	sess := &session.PlayerSession{UID: "p1"}
+	target := makeTarget("drone", 30, 30, 10)
+	tech := &technology.TechnologyDef{
+		ID:         "multi_round_kinetic_volley",
+		Resolution: "none",
+		Targets:    technology.TargetsSingle,
+		Effects: technology.TieredEffects{
+			OnApply: []technology.TechEffect{
+				{Type: technology.EffectDamage, Dice: "1d4+1", DamageType: "force"},
+			},
+		},
+	}
+	// src.Intn(4) returns 3 → roll=4; total=4+1=5 force damage.
+	src := &deterministicSrc{val: 3}
+
+	msgs := ResolveTechEffects(sess, tech, []*combat.Combatant{target}, nil, nil, src, nil)
+
+	require.NotEmpty(t, msgs, "on_apply damage must produce a non-empty message")
+	assert.Less(t, target.CurrentHP, 30, "target must take damage")
+	assert.Contains(t, msgs[0], "force", "message must mention damage type")
+}
+
+// REQ-TER-TPF: thermal_plasma_fist — resolution:"attack", on_hit 2d8 fire / on_crit_hit 4d8 fire.
+// When a target is provided and the attack hits, the damage MUST be applied. Regression for issue #218.
+func TestResolveTechEffects_ThermalPlasmaFist_OnHitDamagesTarget(t *testing.T) {
+	sess := &session.PlayerSession{UID: "p1", Level: 1}
+	sess.Abilities.Quickness = 14 // +2 mod; techAttackMod = 0 + 2 = 2
+	// AC=10: roll=11+2=13 vs AC=10 → hit (Success).
+	target := makeTarget("ganger", 30, 30, 10)
+	tech := &technology.TechnologyDef{
+		ID:         "thermal_plasma_fist",
+		Resolution: "attack",
+		Tradition:  technology.TraditionTechnical,
+		Targets:    technology.TargetsSingle,
+		Effects: technology.TieredEffects{
+			OnHit: []technology.TechEffect{
+				{Type: technology.EffectDamage, Dice: "2d8", DamageType: "fire"},
+			},
+			OnCritHit: []technology.TechEffect{
+				{Type: technology.EffectDamage, Dice: "4d8", DamageType: "fire"},
+			},
+		},
+	}
+	// src.Intn(20) returns 10 → roll=11; total=11+2=13 vs AC=10 → Success (hit).
+	src := &deterministicSrc{val: 10}
+
+	msgs := ResolveTechEffects(sess, tech, []*combat.Combatant{target}, nil, nil, src, nil)
+
+	require.NotEmpty(t, msgs, "on_hit damage must produce a non-empty message")
+	assert.Less(t, target.CurrentHP, 30, "target must take fire damage on hit")
+	assert.Contains(t, msgs[0], "fire", "message must mention fire damage type")
+}
+
+// REQ-TER-TPF-NOTGT: When an attack tech has no targets, ResolveTechEffects MUST return
+// a "No valid target." message rather than silently returning nothing. Regression for issue #218.
+func TestResolveTechEffects_AttackTech_NoTargets_ReturnsNoValidTarget(t *testing.T) {
+	sess := &session.PlayerSession{UID: "p1", Level: 1}
+	tech := &technology.TechnologyDef{
+		ID:         "thermal_plasma_fist",
+		Resolution: "attack",
+		Tradition:  technology.TraditionTechnical,
+		Targets:    technology.TargetsSingle,
+		Effects: technology.TieredEffects{
+			OnHit: []technology.TechEffect{
+				{Type: technology.EffectDamage, Dice: "2d8", DamageType: "fire"},
+			},
+		},
+	}
+	src := &deterministicSrc{val: 10}
+
+	msgs := ResolveTechEffects(sess, tech, nil, nil, nil, src, nil)
+
+	require.Len(t, msgs, 1, "must return exactly one message when no targets")
+	assert.Equal(t, "No valid target.", msgs[0], "message must be 'No valid target.'")
+}
+
+// REQ-TER-MRKV-PROP (property): multi_round_kinetic_volley on_apply damage always within 1d4+1 bounds.
+func TestProperty_ResolveTechEffects_MultiRoundKineticVolley_DamageWithinBounds(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		sess := &session.PlayerSession{UID: "p1"}
+		initialHP := rapid.IntRange(50, 200).Draw(rt, "hp")
+		target := makeTarget("drone", initialHP, initialHP, 10)
+		tech := &technology.TechnologyDef{
+			ID:         "multi_round_kinetic_volley",
+			Resolution: "none",
+			Targets:    technology.TargetsSingle,
+			Effects: technology.TieredEffects{
+				OnApply: []technology.TechEffect{
+					{Type: technology.EffectDamage, Dice: "1d4", Amount: 1, DamageType: "force"},
+				},
+			},
+		}
+		src := &deterministicSrc{val: rapid.IntRange(0, 3).Draw(rt, "roll")}
+
+		before := target.CurrentHP
+		ResolveTechEffects(sess, tech, []*combat.Combatant{target}, nil, nil, src, nil)
+		dmg := before - target.CurrentHP
+
+		// 1d4+1: min=2, max=5
+		assert.GreaterOrEqual(rt, dmg, 2, "damage must be at least 2 (1d4+1 minimum)")
+		assert.LessOrEqual(rt, dmg, 5, "damage must be at most 5 (1d4+1 maximum)")
+	})
+}
+
 func genCreatureInfo(t *rapid.T) CreatureInfo {
 	return CreatureInfo{
 		Name:   rapid.StringN(1, 20, -1).Draw(t, "name"),
