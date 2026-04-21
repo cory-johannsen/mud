@@ -1408,6 +1408,66 @@ func (h *CombatHandler) GetCombatant(uid, targetID string) (*combat.Combatant, b
 	return nil, false
 }
 
+// FindNPCInCombat returns the NPC instance whose name has targetName as a case-insensitive
+// prefix, from the active combat in roomID. Returns nil when no combat is active in roomID
+// or no NPC combatant matches.
+//
+// Precondition: roomID and targetName must be non-empty.
+// Postcondition: Returns nil when no matching living NPC combatant is found.
+func (h *CombatHandler) FindNPCInCombat(roomID, targetName string) *npc.Instance {
+	h.combatMu.RLock()
+	cbt, ok := h.engine.GetCombat(roomID)
+	h.combatMu.RUnlock()
+	if !ok {
+		return nil
+	}
+
+	lower := strings.ToLower(targetName)
+	for _, c := range cbt.Combatants {
+		if c.Kind != combat.KindNPC || c.IsDead() {
+			continue
+		}
+		if strings.HasPrefix(strings.ToLower(c.Name), lower) {
+			if inst, found := h.npcMgr.Get(c.ID); found {
+				return inst
+			}
+		}
+	}
+	return nil
+}
+
+// ApplyConditionToNPC applies condID to the NPC combatant identified by npcInstID in the
+// active combat in roomID. The condition is applied both to the combat Conditions map (for
+// in-round modifier evaluation) and to the npc.Instance.Conditions field (for persistence
+// across round boundaries and non-combat access).
+//
+// Precondition: roomID, npcInstID, and condID must be non-empty; stacks >= 1; duration == -1 for permanent.
+// Postcondition: Returns nil on success, or a descriptive error.
+func (h *CombatHandler) ApplyConditionToNPC(roomID, npcInstID, condID string, stacks, duration int) error {
+	h.combatMu.Lock()
+	defer h.combatMu.Unlock()
+
+	cbt, ok := h.engine.GetCombat(roomID)
+	if !ok {
+		return fmt.Errorf("no active combat in room %q", roomID)
+	}
+	if err := cbt.ApplyCondition(npcInstID, condID, stacks, duration); err != nil {
+		return fmt.Errorf("applying condition %q to NPC %q: %w", condID, npcInstID, err)
+	}
+
+	// Mirror the applied condition to the instance-level Conditions so non-combat code
+	// can inspect active conditions on the NPC without access to the combat state.
+	if inst, found := h.npcMgr.Get(npcInstID); found && inst.Conditions != nil {
+		for _, ac := range cbt.GetConditions(npcInstID) {
+			if ac.Def.ID == condID {
+				_ = inst.Conditions.Apply(npcInstID, ac.Def, stacks, duration)
+				break
+			}
+		}
+	}
+	return nil
+}
+
 // GetCombatantsInRoom returns a slice of scripting.CombatantInfo for all participants
 // in the active combat in roomID. Returns nil when no combat is active in roomID.
 //

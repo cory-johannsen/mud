@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/cory-johannsen/mud/internal/game/combat"
+	"github.com/cory-johannsen/mud/internal/game/condition"
 	"github.com/cory-johannsen/mud/internal/game/ruleset"
 	"github.com/cory-johannsen/mud/internal/game/skillcheck"
 	"github.com/cory-johannsen/mud/internal/game/xp"
@@ -189,6 +190,10 @@ type Instance struct {
 	// Taunts is a list of combat taunts copied from the template at spawn.
 	// On each combat turn there is a 25% chance one is broadcast to the room.
 	Taunts []string
+	// Conditions tracks conditions applied to this NPC instance.
+	// Initialized at spawn. Conditions applied in combat are reflected here and
+	// in the combat engine's Conditions map for the same instance ID.
+	Conditions *condition.ActiveSet
 }
 
 // HasTag reports whether the given tag is present in the instance's tag list.
@@ -351,6 +356,7 @@ func NewInstanceWithResolver(id string, tmpl *Template, roomID string, armorACBo
 			return roomID
 		}(),
 	}
+	inst.Conditions = condition.NewActiveSet()
 	if tmpl.Roving != nil {
 		inst.RovingRouteDir = 1
 		inst.RovingRouteIndex = 0

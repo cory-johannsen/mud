@@ -249,9 +249,16 @@ func (h *ActionHandler) resolveConditionEffect(ctx context.Context, sess *sessio
 		if err := sess.Conditions.Apply(sess.UID, def, 1, -1); err != nil {
 			return fmt.Errorf("applying condition %q: %w", effect.ConditionID, err)
 		}
+	case "target":
+		npcInst := h.combatH.FindNPCInCombat(sess.RoomID, target)
+		if npcInst == nil {
+			return fmt.Errorf("no NPC target %q found in active combat for ability %q", target, feature.ID)
+		}
+		if err := h.combatH.ApplyConditionToNPC(sess.RoomID, npcInst.ID, effect.ConditionID, 1, -1); err != nil {
+			return fmt.Errorf("applying condition %q to target %q: %w", effect.ConditionID, target, err)
+		}
 	default:
-		// NPC condition targeting is not yet supported; NPC instances do not carry an ActiveSet.
-		return fmt.Errorf("condition targeting non-self entities is not yet supported for ability %q", feature.ID)
+		return fmt.Errorf("unsupported condition target %q for ability %q", effect.Target, feature.ID)
 	}
 
 	text := firstOf(feature.ActivateText, fmt.Sprintf("You use %s.", feature.Name))
