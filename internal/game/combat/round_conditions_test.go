@@ -87,6 +87,59 @@ func TestResolveRound_PlayerZeroHP_DyingStacksIncludeWounded(t *testing.T) {
 	assert.Equal(t, 3, cbt.DyingStacks("p1"), "dying stacks must be 1 + wounded(2) = 3")
 }
 
+// TestResolveRound_FlatFooted_CritApplied_PersistsThroughNPCAction verifies
+// GH #228: flat_footed applied mid-round without a "combat_start" source tag
+// MUST persist through the target NPC's own action resolution in the same
+// round, so subsequent attackers in the round benefit from the -2 AC.
+//
+// Precondition: n1 has flat_footed with default source; n1 queues ActionPass.
+// Postcondition: After ResolveRound, n1 still has flat_footed.
+func TestResolveRound_FlatFooted_CritApplied_PersistsThroughNPCAction(t *testing.T) {
+	cbt := makeCombatForRoundConditions(t)
+	_ = cbt.StartRoundWithSrc(3, &fixedSrc{val: 0})
+	require.NoError(t, cbt.ApplyCondition("n1", "flat_footed", 1, 1))
+	require.NoError(t, cbt.QueueAction("p1", combat.QueuedAction{Type: combat.ActionPass}))
+	require.NoError(t, cbt.QueueAction("n1", combat.QueuedAction{Type: combat.ActionPass}))
+	_ = combat.ResolveRound(cbt, &fixedSrc{val: 0}, nil, nil)
+	assert.True(t, cbt.HasCondition("n1", "flat_footed"),
+		"mid-round flat_footed (no combat_start source) must persist through the NPC's own action")
+}
+
+// TestResolveRound_FlatFooted_CombatStart_ClearedAfterNPCAction verifies that
+// flat_footed tagged with Source="combat_start" (the sucker-punch window) IS
+// cleared from the NPC after their first action resolves in the round.
+//
+// Precondition: n1 has flat_footed (duration -1) with Source "combat_start";
+// n1 queues ActionPass.
+// Postcondition: After ResolveRound, n1 no longer has flat_footed.
+func TestResolveRound_FlatFooted_CombatStart_ClearedAfterNPCAction(t *testing.T) {
+	cbt := makeCombatForRoundConditions(t)
+	_ = cbt.StartRoundWithSrc(3, &fixedSrc{val: 0})
+	require.NoError(t, cbt.ApplyCondition("n1", "flat_footed", 1, -1))
+	cbt.Conditions["n1"].SetSource("flat_footed", "combat_start")
+	require.NoError(t, cbt.QueueAction("p1", combat.QueuedAction{Type: combat.ActionPass}))
+	require.NoError(t, cbt.QueueAction("n1", combat.QueuedAction{Type: combat.ActionPass}))
+	_ = combat.ResolveRound(cbt, &fixedSrc{val: 0}, nil, nil)
+	assert.False(t, cbt.HasCondition("n1", "flat_footed"),
+		"combat_start flat_footed must be cleared after the NPC's first action")
+}
+
+// TestStartRoundWithSrc_FlatFooted_CritApplied_ExpiresAtRoundStart verifies
+// that mid-round flat_footed (duration 1, default source) is expired by Tick
+// at the start of the next round — the "until target's next turn" semantic.
+//
+// Precondition: n1 has flat_footed (duration 1) with default source.
+// Postcondition: After StartRoundWithSrc bumps the round, n1 no longer has
+// flat_footed.
+func TestStartRoundWithSrc_FlatFooted_CritApplied_ExpiresAtRoundStart(t *testing.T) {
+	cbt := makeCombatForRoundConditions(t)
+	_ = cbt.StartRoundWithSrc(3, &fixedSrc{val: 0})
+	require.NoError(t, cbt.ApplyCondition("n1", "flat_footed", 1, 1))
+	_ = cbt.StartRoundWithSrc(3, &fixedSrc{val: 0})
+	assert.False(t, cbt.HasCondition("n1", "flat_footed"),
+		"flat_footed with duration=1 must be expired by Tick at the next round start")
+}
+
 func TestResolveRound_AttackModifiers_ProneReducesRoll(t *testing.T) {
 	cbt := makeCombatForRoundConditions(t)
 	_ = cbt.StartRoundWithSrc(3, &fixedSrc{val: 0})

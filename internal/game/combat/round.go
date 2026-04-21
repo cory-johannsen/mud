@@ -605,8 +605,12 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 					ActorName:  actor.Name,
 					Narrative:  fmt.Sprintf("%s passes.", actor.Name),
 				})
-				// Clear flat_footed from NPC combatants after their first action resolves.
-				if actor.Kind == KindNPC && cbt.Conditions[actor.ID] != nil {
+				// Clear combat-start flat_footed from NPC combatants after their first
+				// action resolves (sucker_punch window). Mid-round flat_footed (crit,
+				// Feint) has no "combat_start" source and is expired by Tick at the
+				// start of the target's next round, not here.
+				if actor.Kind == KindNPC && cbt.Conditions[actor.ID] != nil &&
+					cbt.Conditions[actor.ID].Source("flat_footed") == "combat_start" {
 					cbt.Conditions[actor.ID].Remove(actor.ID, "flat_footed")
 				}
 
@@ -669,7 +673,8 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 							ActorName:  actor.Name,
 							Narrative:  fmt.Sprintf("%s swings but %s is out of melee range.", actor.Name, target.Name),
 						})
-						if actor.Kind == KindNPC && cbt.Conditions[actor.ID] != nil {
+						if actor.Kind == KindNPC && cbt.Conditions[actor.ID] != nil &&
+							cbt.Conditions[actor.ID].Source("flat_footed") == "combat_start" {
 							cbt.Conditions[actor.ID].Remove(actor.ID, "flat_footed")
 						}
 						continue
@@ -683,7 +688,8 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 							ActorName:  actor.Name,
 							Narrative:  fmt.Sprintf("%s fires but %s is at extreme range.", actor.Name, target.Name),
 						})
-						if actor.Kind == KindNPC && cbt.Conditions[actor.ID] != nil {
+						if actor.Kind == KindNPC && cbt.Conditions[actor.ID] != nil &&
+							cbt.Conditions[actor.ID].Source("flat_footed") == "combat_start" {
 							cbt.Conditions[actor.ID].Remove(actor.ID, "flat_footed")
 						}
 						continue
@@ -833,8 +839,12 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 						_ = eq.Magazine.Consume(1)
 					}
 				}
-				// Clear flat_footed from NPC combatants after their first action resolves.
-				if actor.Kind == KindNPC && cbt.Conditions[actor.ID] != nil {
+				// Clear combat-start flat_footed from NPC combatants after their first
+				// action resolves (sucker_punch window). Mid-round flat_footed (crit,
+				// Feint) has no "combat_start" source and is expired by Tick at the
+				// start of the target's next round, not here.
+				if actor.Kind == KindNPC && cbt.Conditions[actor.ID] != nil &&
+					cbt.Conditions[actor.ID].Source("flat_footed") == "combat_start" {
 					cbt.Conditions[actor.ID].Remove(actor.ID, "flat_footed")
 				}
 
@@ -960,8 +970,12 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 					ActorName:    actor.Name,
 					Narrative:    narrative1,
 				})
-				// Clear flat_footed from NPC combatants after their first action resolves.
-				if actor.Kind == KindNPC && cbt.Conditions[actor.ID] != nil {
+				// Clear combat-start flat_footed from NPC combatants after their first
+				// action resolves (sucker_punch window). Mid-round flat_footed (crit,
+				// Feint) has no "combat_start" source and is expired by Tick at the
+				// start of the target's next round, not here.
+				if actor.Kind == KindNPC && cbt.Conditions[actor.ID] != nil &&
+					cbt.Conditions[actor.ID].Source("flat_footed") == "combat_start" {
 					cbt.Conditions[actor.ID].Remove(actor.ID, "flat_footed")
 				}
 

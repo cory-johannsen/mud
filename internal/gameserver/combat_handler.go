@@ -1909,7 +1909,8 @@ func (h *CombatHandler) startPursuitCombatLocked(playerSess *session.PlayerSessi
 	}
 
 	// Apply flat_footed to all pursuing NPC combatants at combat start — same
-	// pattern as startCombatLocked.
+	// pattern as startCombatLocked. Source="combat_start" + duration=-1 so the
+	// inline clear (not Tick) removes it after the NPC's first action.
 	if h.condRegistry != nil {
 		if def, ok := h.condRegistry.Get("flat_footed"); ok {
 			for _, npcCbt := range cbt.Combatants {
@@ -1919,7 +1920,8 @@ func (h *CombatHandler) startPursuitCombatLocked(playerSess *session.PlayerSessi
 				if cbt.Conditions[npcCbt.ID] == nil {
 					cbt.Conditions[npcCbt.ID] = condition.NewActiveSet()
 				}
-				_ = cbt.Conditions[npcCbt.ID].Apply(npcCbt.ID, def, 1, 1)
+				_ = cbt.Conditions[npcCbt.ID].Apply(npcCbt.ID, def, 1, -1)
+				cbt.Conditions[npcCbt.ID].SetSource("flat_footed", "combat_start")
 			}
 		}
 	}
@@ -3186,12 +3188,17 @@ func (h *CombatHandler) startCombatLocked(sess *session.PlayerSession, inst *npc
 	}
 
 	// Apply flat_footed to all NPC combatants at combat start (sucker_punch window).
+	// Duration is -1 so Tick leaves it alone; the per-round inline clear in ResolveRound
+	// removes it after the NPC's first action. The Source tag distinguishes this from
+	// mid-round flat_footed (e.g. crit success or Feint), which must persist until the
+	// target's next turn and be cleared by Tick, not by the inline sweep.
 	if h.condRegistry != nil {
 		if def, ok := h.condRegistry.Get("flat_footed"); ok {
 			if cbt.Conditions[npcCbt.ID] == nil {
 				cbt.Conditions[npcCbt.ID] = condition.NewActiveSet()
 			}
-			_ = cbt.Conditions[npcCbt.ID].Apply(npcCbt.ID, def, 1, 1)
+			_ = cbt.Conditions[npcCbt.ID].Apply(npcCbt.ID, def, 1, -1)
+			cbt.Conditions[npcCbt.ID].SetSource("flat_footed", "combat_start")
 		}
 	}
 

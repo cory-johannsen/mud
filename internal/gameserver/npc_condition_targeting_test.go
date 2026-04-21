@@ -137,6 +137,10 @@ func TestApplyConditionToNPC_AttackModReducedInRound(t *testing.T) {
 	condSet := cbt.Conditions[inst.ID]
 	require.NotNil(t, condSet)
 
+	// Isolate frightened: drop combat-start flat_footed (sucker_punch window)
+	// so this assertion reflects only frightened's contribution.
+	condSet.Remove(inst.ID, "flat_footed")
+
 	npcCbt.AttackMod = condition.AttackBonus(condSet)
 	npcCbt.ACMod = condition.ACBonus(condSet)
 

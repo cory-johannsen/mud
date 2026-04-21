@@ -99,6 +99,29 @@ func (s *ActiveSet) Apply(uid string, def *ConditionDef, stacks, duration int) e
 	return nil
 }
 
+// SetSource tags the given condition with a source string. No-op if the
+// condition is not present.
+//
+// Precondition: s must not be nil.
+// Postcondition: if Has(id) was true, Source(id) equals source.
+func (s *ActiveSet) SetSource(id, source string) {
+	if ac, ok := s.conditions[id]; ok {
+		ac.Source = source
+	}
+}
+
+// Source returns the Source tag for the given condition, or "" if the
+// condition is not present or was applied without a source tag.
+//
+// Precondition: s must not be nil.
+// Postcondition: Returns the Source string; empty if unset or id absent.
+func (s *ActiveSet) Source(id string) string {
+	if ac, ok := s.conditions[id]; ok {
+		return ac.Source
+	}
+	return ""
+}
+
 // Remove deletes the condition with the given ID from the set.
 // If the condition is not present, Remove is a no-op.
 //

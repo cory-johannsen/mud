@@ -2,7 +2,7 @@ id: flat_footed
 name: Flat-Footed
 description: |
   You are caught off guard, suffering -2 AC until the start of your next turn.
-duration_type: round
+duration_type: rounds
 max_stacks: 0
 attack_penalty: 0
 ac_penalty: 2
