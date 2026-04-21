@@ -16,18 +16,28 @@ function makeSlot(ref: string) {
 
 let mockSendCommand: ReturnType<typeof vi.fn>
 
-function setupGame(slots: object[] = [], choicePrompt: object | null = null) {
+let mockSendMessage: ReturnType<typeof vi.fn>
+
+function setupGame(
+  slots: object[] = [],
+  choicePrompt: object | null = null,
+  multiBar: { activeHotbarIndex?: number; hotbarCount?: number; maxHotbars?: number } = {},
+) {
   const filledSlots = Array.from({ length: 10 }, (_, i) => slots[i] ?? { kind: 'command', ref: '' })
   mockSendCommand = vi.fn()
+  mockSendMessage = vi.fn()
   mockUseGame.mockReturnValue({
     state: {
       hotbarSlots: filledSlots,
       combatRound: null,
       characterInfo: null,
       choicePrompt,
+      activeHotbarIndex: multiBar.activeHotbarIndex ?? 1,
+      hotbarCount: multiBar.hotbarCount ?? 1,
+      maxHotbars: multiBar.maxHotbars ?? 4,
     },
     sendCommand: mockSendCommand,
-    sendMessage: vi.fn(),
+    sendMessage: mockSendMessage,
   })
 }
 
@@ -116,6 +126,38 @@ describe('HotbarPanel keyboard shortcuts', () => {
     render(<HotbarPanel />)
     fireEvent.keyDown(document, { key: '1' })
     expect(mockSendCommand).not.toHaveBeenCalled()
+  })
+
+  // GH #229: Ctrl+Up/Down with only one hotbar but maxHotbars > 1 MUST send a
+  // "create" HotbarRequest so the user gets a second hotbar instead of a silent
+  // no-op (the previous behavior left the switch control looking broken).
+  it('Ctrl+ArrowDown with one hotbar and maxHotbars > 1 requests create', () => {
+    setupGame([], null, { activeHotbarIndex: 1, hotbarCount: 1, maxHotbars: 4 })
+    render(<HotbarPanel />)
+    fireEvent.keyDown(window, { key: 'ArrowDown', ctrlKey: true })
+    expect(mockSendMessage).toHaveBeenCalledWith('HotbarRequest', { action: 'create' })
+  })
+
+  it('Ctrl+ArrowUp with one hotbar and maxHotbars > 1 requests create', () => {
+    setupGame([], null, { activeHotbarIndex: 1, hotbarCount: 1, maxHotbars: 4 })
+    render(<HotbarPanel />)
+    fireEvent.keyDown(window, { key: 'ArrowUp', ctrlKey: true })
+    expect(mockSendMessage).toHaveBeenCalledWith('HotbarRequest', { action: 'create' })
+  })
+
+  it('Ctrl+ArrowDown with maxHotbars == 1 does nothing', () => {
+    setupGame([], null, { activeHotbarIndex: 1, hotbarCount: 1, maxHotbars: 1 })
+    render(<HotbarPanel />)
+    fireEvent.keyDown(window, { key: 'ArrowDown', ctrlKey: true })
+    expect(mockSendMessage).not.toHaveBeenCalled()
+  })
+
+  it('Ctrl+ArrowDown with two hotbars switches to the next (no create)', () => {
+    setupGame([], null, { activeHotbarIndex: 1, hotbarCount: 2, maxHotbars: 4 })
+    render(<HotbarPanel />)
+    fireEvent.keyDown(window, { key: 'ArrowDown', ctrlKey: true })
+    expect(mockSendMessage).toHaveBeenCalledWith('HotbarRequest', { action: 'switch', hotbar_index: 2 })
+    expect(mockSendMessage).not.toHaveBeenCalledWith('HotbarRequest', { action: 'create' })
   })
 
   it('resumes intercepting digit keys after choicePrompt becomes null', () => {

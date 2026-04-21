@@ -318,13 +318,22 @@ export function HotbarPanel() {
 
   // REQ-HMB-1: Ctrl+Up MUST cycle to the previous hotbar (wrapping) when hotbarCount > 1.
   // REQ-HMB-2: Ctrl+Down MUST cycle to the next hotbar (wrapping) when hotbarCount > 1.
+  // GH #229: when only one hotbar exists, Ctrl+Up/Down or the switch buttons
+  // auto-create a new hotbar (up to maxHotbars) instead of silently no-op'ing,
+  // so the control never appears broken.
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!e.ctrlKey) return
       if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return
-      if (hotbarCount <= 1) return
+      if (maxHotbars <= 1) return
       e.preventDefault()
       e.stopPropagation()
+      if (hotbarCount <= 1) {
+        if (hotbarCount < maxHotbars) {
+          sendMessage('HotbarRequest', { action: 'create' })
+        }
+        return
+      }
       if (e.key === 'ArrowUp') {
         const target = activeHotbarIndex === 1 ? hotbarCount : activeHotbarIndex - 1
         sendMessage('HotbarRequest', { action: 'switch', hotbar_index: target })
@@ -335,15 +344,25 @@ export function HotbarPanel() {
     }
     window.addEventListener('keydown', handleKeyDown, { capture: true })
     return () => window.removeEventListener('keydown', handleKeyDown, { capture: true })
-  }, [activeHotbarIndex, hotbarCount, sendMessage])
+  }, [activeHotbarIndex, hotbarCount, maxHotbars, sendMessage])
 
   const switchUp = () => {
-    if (hotbarCount <= 1) return
+    if (hotbarCount <= 1) {
+      if (hotbarCount < maxHotbars) {
+        sendMessage('HotbarRequest', { action: 'create' })
+      }
+      return
+    }
     const target = activeHotbarIndex === 1 ? hotbarCount : activeHotbarIndex - 1
     sendMessage('HotbarRequest', { action: 'switch', hotbar_index: target })
   }
   const switchDown = () => {
-    if (hotbarCount <= 1) return
+    if (hotbarCount <= 1) {
+      if (hotbarCount < maxHotbars) {
+        sendMessage('HotbarRequest', { action: 'create' })
+      }
+      return
+    }
     const target = activeHotbarIndex === hotbarCount ? 1 : activeHotbarIndex + 1
     sendMessage('HotbarRequest', { action: 'switch', hotbar_index: target })
   }
@@ -377,14 +396,14 @@ export function HotbarPanel() {
         <button
           className="hotbar-switch-btn"
           onClick={switchUp}
-          disabled={hotbarCount <= 1}
+          disabled={maxHotbars <= 1}
           title="Previous hotbar (Ctrl+Up)"
           type="button"
         >▲</button>
         <button
           className="hotbar-switch-btn"
           onClick={switchDown}
-          disabled={hotbarCount <= 1}
+          disabled={maxHotbars <= 1}
           title="Next hotbar (Ctrl+Down)"
           type="button"
         >▼</button>
