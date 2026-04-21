@@ -266,22 +266,23 @@ export function HotbarPanel() {
   const [editingSlot, setEditingSlot] = useState<number | null>(null)
   const [tooltip, setTooltip] = useState<{ slot: HotbarSlot; pos: { x: number; y: number } } | null>(null)
 
-  // GH #235: rapid clicks on the switch buttons / Ctrl+Up/Down fire `create`
-  // faster than the server can respond, so the stale `hotbarCount=1` state
-  // kept triggering create until the server hit its `max` limit and returned
-  // "Hotbar limit reached". A ref-backed flag is set synchronously so the
-  // second click in the same sync tick sees the pending create and short-
-  // circuits. The ref is cleared when a HotbarUpdate bumps hotbarCount so
-  // later legitimate creates can fire again.
+  // GH #235 / GH #237: dedupe rapid `create` requests so cycling past the
+  // current hotbar's end doesn't spam the server (which would eventually
+  // reply "Hotbar limit reached"). The earlier #235 fix gated on a ref that
+  // only cleared when HotbarUpdate bumped hotbarCount above 1, which wedged
+  // the Create button whenever the expected bump didn't arrive (GH #237).
+  // This is a time-based gate: after a create is sent the ref stays true
+  // for a short window (300ms) and then auto-clears, guaranteeing the
+  // button recovers regardless of server response.
   const pendingCreateRef = useRef(false)
-  useEffect(() => {
-    if (hotbarCount > 1) pendingCreateRef.current = false
-  }, [hotbarCount])
   function requestCreateOnce() {
     if (pendingCreateRef.current) return
     if (hotbarCount >= maxHotbars) return
     pendingCreateRef.current = true
     sendMessage('HotbarRequest', { action: 'create' })
+    setTimeout(() => {
+      pendingCreateRef.current = false
+    }, 300)
   }
 
   function activate(idx: number) {
