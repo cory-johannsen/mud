@@ -162,7 +162,10 @@ func (c *Combat) StartRoundWithSrc(actionsPerRound int, src Source) []RoundCondi
 		cbt.AttackMod = 0
 	}
 
-	// Reset action queues with stunned AP reduction
+	// Reset action queues with stunned AP reduction and prone stand-up cost.
+	// Prone combatants pay 1 AP at round start and then stand (the condition is
+	// cleared), matching the intent recorded in prone.yaml and the critical-miss
+	// narrative applied in round.go.
 	c.ActionQueues = make(map[string]*ActionQueue)
 	for _, cbt := range c.Combatants {
 		if cbt.IsDead() {
@@ -171,6 +174,21 @@ func (c *Combat) StartRoundWithSrc(actionsPerRound int, src Source) []RoundCondi
 		ap := actionsPerRound
 		s := c.Conditions[cbt.ID]
 		reduction := condition.StunnedAPReduction(s) + condition.APReduction(s)
+
+		if s.Has("prone") {
+			reduction++
+			s.Remove(cbt.ID, "prone")
+			name := "Prone"
+			if def, ok := c.condRegistry.Get("prone"); ok && def != nil {
+				name = def.Name
+			}
+			events = append(events, RoundConditionEvent{
+				UID: cbt.ID, Name: cbt.Name,
+				ConditionID: "prone", CondName: name,
+				Applied: false,
+			})
+		}
+
 		ap -= reduction
 		if ap < 0 {
 			ap = 0

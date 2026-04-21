@@ -203,3 +203,109 @@ func TestProperty_StartRound_AlwaysResetsACModAndAttackMod(t *testing.T) {
 		}
 	})
 }
+
+// TestStartRoundWithSrc_ProneDeductsOneAP verifies that a combatant starting a
+// round while prone pays 1 AP as the stand-up cost, matching the Prone condition
+// specification (prone.yaml) and the critical-miss narrative in round.go.
+//
+// Precondition: p1 is prone when StartRoundWithSrc is called with 3 AP.
+// Postcondition: p1's ActionQueue has 3 - 1 = 2 AP remaining.
+func TestStartRoundWithSrc_ProneDeductsOneAP(t *testing.T) {
+	_, cbt := makeCombatWithConditions(t)
+	require.NoError(t, cbt.ApplyCondition("p1", "prone", 1, -1))
+	_ = cbt.StartRoundWithSrc(3, &fixedSrc{val: 0})
+	q, ok := cbt.ActionQueues["p1"]
+	require.True(t, ok)
+	assert.Equal(t, 2, q.RemainingPoints(), "3 AP - 1 stand-up = 2 remaining")
+}
+
+// TestStartRoundWithSrc_ProneClearsCondition verifies that once the stand-up AP
+// cost is paid, the prone condition is removed from the combatant so they act
+// upright for the remainder of the round.
+//
+// Precondition: p1 is prone when StartRoundWithSrc is called.
+// Postcondition: p1 no longer has the prone condition.
+func TestStartRoundWithSrc_ProneClearsCondition(t *testing.T) {
+	_, cbt := makeCombatWithConditions(t)
+	require.NoError(t, cbt.ApplyCondition("p1", "prone", 1, -1))
+	_ = cbt.StartRoundWithSrc(3, &fixedSrc{val: 0})
+	assert.False(t, cbt.HasCondition("p1", "prone"),
+		"prone must be cleared after paying the round-start stand-up cost")
+}
+
+// TestStartRoundWithSrc_ProneEmitsRemovalEvent verifies that standing up from
+// prone at round start produces a RoundConditionEvent with Applied=false so
+// clients render the stand-up narrative.
+//
+// Postcondition: events contain a removal entry for the "prone" condition on p1.
+func TestStartRoundWithSrc_ProneEmitsRemovalEvent(t *testing.T) {
+	_, cbt := makeCombatWithConditions(t)
+	require.NoError(t, cbt.ApplyCondition("p1", "prone", 1, -1))
+	events := cbt.StartRoundWithSrc(3, &fixedSrc{val: 0})
+
+	found := false
+	for _, ev := range events {
+		if ev.UID == "p1" && ev.ConditionID == "prone" && !ev.Applied {
+			found = true
+			break
+		}
+	}
+	assert.True(t, found,
+		"expected prone removal event for p1 after round-start stand-up; got %+v", events)
+}
+
+// TestStartRoundWithSrc_NotProne_NoDeduction verifies that combatants without
+// the prone condition receive the full actions-per-round AP allotment.
+//
+// Postcondition: p1 is not prone; p1's ActionQueue has actionsPerRound remaining.
+func TestStartRoundWithSrc_NotProne_NoDeduction(t *testing.T) {
+	_, cbt := makeCombatWithConditions(t)
+	_ = cbt.StartRoundWithSrc(3, &fixedSrc{val: 0})
+	q, ok := cbt.ActionQueues["p1"]
+	require.True(t, ok)
+	assert.Equal(t, 3, q.RemainingPoints(), "no prone, no stand-up cost")
+}
+
+// TestStartRoundWithSrc_ProneAndStunnedStackAP verifies that the prone stand-up
+// cost composes additively with stunned AP reduction.
+//
+// Precondition: p1 has both prone (1 AP) and stunned (2 stacks, 2 AP reduction).
+// Postcondition: p1's ActionQueue has 4 - 1 - 2 = 1 AP remaining; prone cleared;
+// stunned retained (stunned is ticked, not cleared, by the stand-up logic).
+func TestStartRoundWithSrc_ProneAndStunnedStackAP(t *testing.T) {
+	_, cbt := makeCombatWithConditions(t)
+	require.NoError(t, cbt.ApplyCondition("p1", "prone", 1, -1))
+	require.NoError(t, cbt.ApplyCondition("p1", "stunned", 2, 2))
+	_ = cbt.StartRoundWithSrc(4, &fixedSrc{val: 0})
+	q, ok := cbt.ActionQueues["p1"]
+	require.True(t, ok)
+	assert.Equal(t, 1, q.RemainingPoints(), "4 AP - 1 prone - 2 stunned = 1 remaining")
+	assert.False(t, cbt.HasCondition("p1", "prone"), "prone cleared after stand-up")
+}
+
+// TestProperty_ProneStandUp_APNeverNegative verifies that no combination of
+// prone + stunned stacks produces a negative AP balance; AP is clamped to 0.
+//
+// Postcondition: For any actionsPerRound in [0,5] and stunned stacks in [0,3],
+// the resulting ActionQueue RemainingPoints is >= 0.
+func TestProperty_ProneStandUp_APNeverNegative(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		actionsPerRound := rapid.IntRange(0, 5).Draw(rt, "ap")
+		stunStacks := rapid.IntRange(0, 3).Draw(rt, "stun")
+		applyProne := rapid.Bool().Draw(rt, "prone")
+
+		_, cbt := makeCombatWithConditions(t)
+		if applyProne {
+			require.NoError(rt, cbt.ApplyCondition("p1", "prone", 1, -1))
+		}
+		if stunStacks > 0 {
+			require.NoError(rt, cbt.ApplyCondition("p1", "stunned", stunStacks, 2))
+		}
+
+		_ = cbt.StartRoundWithSrc(actionsPerRound, &fixedSrc{val: 0})
+		q, ok := cbt.ActionQueues["p1"]
+		require.True(rt, ok)
+		assert.GreaterOrEqual(rt, q.RemainingPoints(), 0,
+			"AP must never be negative regardless of condition stacks")
+	})
+}
