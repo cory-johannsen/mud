@@ -117,8 +117,12 @@ func ResolveTechEffectsWithHeighten(
 			outcome := combat.ResolveSave(tech.SaveType, target, tech.SaveDC, src)
 			tier, label = selectSaveTier(tech.Effects, outcome, target.Name)
 		case "attack":
-			outcome := resolveAttackRoll(sess, tech, target, src)
+			outcome, roll, total := resolveAttackRollWithTotal(sess, tech, target, src)
 			tier, label = selectAttackTier(tech.Effects, outcome, target.Name)
+			// GH #226: include raw roll, total, and target AC in the label so
+			// players see what happened mechanically, matching the detail level
+			// of weapon attack narratives.
+			label = annotateAttackLabel(label, roll, total, target.AC)
 		default: // "none" or ""
 			tier = tech.Effects.OnApply
 			label = ""
@@ -186,9 +190,36 @@ func selectAttackTier(effects technology.TieredEffects, outcome combat.Outcome, 
 // resolveAttackRoll resolves an attack roll for tech vs target.
 // Formula: 1d20 + techAttackMod(sess, tech) vs target.AC.
 func resolveAttackRoll(sess *session.PlayerSession, tech *technology.TechnologyDef, target *combat.Combatant, src combat.Source) combat.Outcome {
+	outcome, _, _ := resolveAttackRollWithTotal(sess, tech, target, src)
+	return outcome
+}
+
+// resolveAttackRollWithTotal is resolveAttackRoll but also returns the raw d20
+// roll and the post-modifier total, so callers can display roll details to
+// the player (GH #226).
+//
+// Postcondition: roll in [1,20]; total = roll + techAttackMod(sess, tech).
+func resolveAttackRollWithTotal(sess *session.PlayerSession, tech *technology.TechnologyDef, target *combat.Combatant, src combat.Source) (combat.Outcome, int, int) {
 	roll := src.Intn(20) + 1
 	total := roll + techAttackMod(sess, tech)
-	return combat.OutcomeFor(total, target.AC)
+	return combat.OutcomeFor(total, target.AC), roll, total
+}
+
+// annotateAttackLabel appends the raw d20 roll, post-modifier total, and
+// target AC to an attack-outcome label (GH #226). The annotation format is
+// " (rolled N, total=M vs AC=A)" with punctuation preserved at the original
+// label end: a label ending in ": " receives the annotation before the colon,
+// a label ending in "." receives it before the period.
+func annotateAttackLabel(label string, roll, total, ac int) string {
+	ann := fmt.Sprintf(" (rolled %d, total=%d vs AC %d)", roll, total, ac)
+	switch {
+	case strings.HasSuffix(label, ": "):
+		return strings.TrimSuffix(label, ": ") + ann + ": "
+	case strings.HasSuffix(label, "."):
+		return strings.TrimSuffix(label, ".") + ann + "."
+	default:
+		return label + ann
+	}
 }
 
 // techAttackMod returns the tech attack bonus for the given session and tech tradition.

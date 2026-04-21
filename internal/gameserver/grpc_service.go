@@ -8797,14 +8797,18 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string, targetX, 
 						heightenDelta = 0
 					}
 				}
+				techDisplay := techID
+				if preparedTechDef != nil && preparedTechDef.Name != "" {
+					techDisplay = preparedTechDef.Name
+				}
 				if cost := techAPCost(preparedTechDef); cost > 0 && s.combatH.ActiveCombatForPlayer(uid) != nil {
 					// In combat: queue for round resolution at player's initiative.
-					if err := s.combatH.QueueTechUse(uid, techID, targetID, cost, targetX, targetY); err != nil {
+					if err := s.combatH.QueueTechUse(uid, techID, techDisplay, targetID, cost, targetX, targetY); err != nil {
 						return messageEvent(fmt.Sprintf("Could not queue tech: %s", err.Error())), nil
 					}
 					return nil, nil
 				}
-				return s.activateTechWithEffectsAndHeighten(sess, uid, techID, targetID, fmt.Sprintf("You activate %s.", techID), nil, targetX, targetY, heightenDelta)
+				return s.activateTechWithEffectsAndHeighten(sess, uid, techID, targetID, fmt.Sprintf("You activate %s.", techDisplay), nil, targetX, targetY, heightenDelta)
 			}
 		}
 		if foundInPrepared {
@@ -8875,14 +8879,20 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string, targetX, 
 		pool.Remaining--
 		sess.SpontaneousUsePools[foundLevel] = pool
 		s.pushEventToUID(uid, s.hotbarUpdateEvent(sess))
+		spontaneousDisplay := abilityID
+		if s.techRegistry != nil {
+			if def, ok := s.techRegistry.Get(abilityID); ok && def.Name != "" {
+				spontaneousDisplay = def.Name
+			}
+		}
 		if cost > 0 && s.combatH.ActiveCombatForPlayer(uid) != nil {
 			// In combat: queue for round resolution at player's initiative.
-			if err := s.combatH.QueueTechUse(uid, abilityID, targetID, cost, targetX, targetY); err != nil {
+			if err := s.combatH.QueueTechUse(uid, abilityID, spontaneousDisplay, targetID, cost, targetX, targetY); err != nil {
 				return messageEvent(fmt.Sprintf("Could not queue tech: %s", err.Error())), nil
 			}
 			return nil, nil
 		}
-		return s.activateTechWithEffects(sess, uid, abilityID, targetID, fmt.Sprintf("You activate %s. (%d uses remaining at level %d.)", abilityID, pool.Remaining, foundLevel), nil, targetX, targetY)
+		return s.activateTechWithEffects(sess, uid, abilityID, targetID, fmt.Sprintf("You activate %s. (%d uses remaining at level %d.)", spontaneousDisplay, pool.Remaining, foundLevel), nil, targetX, targetY)
 	}
 // innateCheck is the target for goto from the spontaneous path when the tech is not
 // found in KnownTechs. This allows innate techs to be checked even when the player
@@ -8912,7 +8922,7 @@ innateCheck:
 				if ap < innateTechDef.ActionCost {
 					return messageEvent(fmt.Sprintf("Not enough AP to use %s (need %d, have %d).", innateTechDef.Name, innateTechDef.ActionCost, ap)), nil
 				}
-				if err := s.combatH.QueueTechUse(uid, innateTechBaseID, targetID, innateTechDef.ActionCost, targetX, targetY); err != nil {
+				if err := s.combatH.QueueTechUse(uid, innateTechBaseID, innateTechDef.Name, targetID, innateTechDef.ActionCost, targetX, targetY); err != nil {
 					return messageEvent(fmt.Sprintf("Could not queue tech: %s", err.Error())), nil
 				}
 				return nil, nil

@@ -620,6 +620,77 @@ func TestResolveTechEffects_NoProjectiles_SingleRoll(t *testing.T) {
 		"non-projectile message must not mention projectile count")
 }
 
+// TestResolveTechEffects_AttackLabel_IncludesRollAndAC verifies GH #226: the
+// attack-outcome label contains the raw d20 roll, the post-modifier total,
+// and the target AC, so players see the roll mechanics instead of just
+// "Hit X" / "Missed X".
+func TestResolveTechEffects_AttackLabel_IncludesRollAndAC(t *testing.T) {
+	sess := &session.PlayerSession{UID: "p1", Level: 1}
+	sess.CurrentHP = 20
+	sess.MaxHP = 20
+	target := makeTarget("Ridge Scavenger A", 30, 30, 14)
+
+	tech := makeAttackTech(
+		[]technology.TechEffect{
+			{Type: technology.EffectDamage, Dice: "1d6", DamageType: "force"},
+		},
+		nil,
+	)
+	src := &deterministicSrc{val: 18} // roll = 19, guaranteed hit vs AC 14
+
+	msgs := ResolveTechEffects(sess, tech, []*combat.Combatant{target}, nil, nil, src, nil)
+	require.NotEmpty(t, msgs)
+	assert.Contains(t, msgs[0], "rolled 19", "label must include the raw d20 roll")
+	assert.Contains(t, msgs[0], "AC 14", "label must include the target AC")
+	assert.Contains(t, msgs[0], "Ridge Scavenger A", "label must include the target name")
+}
+
+// TestResolveTechEffects_MissLabel_IncludesRollAndAC verifies GH #226: the
+// miss label also contains roll details so players can tell by how much the
+// attack failed.
+func TestResolveTechEffects_MissLabel_IncludesRollAndAC(t *testing.T) {
+	sess := &session.PlayerSession{UID: "p1", Level: 1}
+	sess.CurrentHP = 20
+	sess.MaxHP = 20
+	target := makeTarget("Ridge Scavenger A", 30, 30, 25)
+
+	tech := makeAttackTech(
+		[]technology.TechEffect{
+			{Type: technology.EffectDamage, Dice: "1d6", DamageType: "force"},
+		},
+		nil,
+	)
+	src := &deterministicSrc{val: 0} // roll = 1, guaranteed miss vs AC 25
+
+	msgs := ResolveTechEffects(sess, tech, []*combat.Combatant{target}, nil, nil, src, nil)
+	require.NotEmpty(t, msgs)
+	assert.Contains(t, msgs[0], "rolled 1", "miss label must include the raw d20 roll")
+	assert.Contains(t, msgs[0], "AC 25", "miss label must include the target AC")
+	assert.Contains(t, msgs[0], "Missed", "miss label must say Missed")
+}
+
+// TestAnnotateAttackLabel_PreservesPunctuation verifies that annotation keeps
+// the trailing ":", "." or no-punctuation form of the original label intact.
+func TestAnnotateAttackLabel_PreservesPunctuation(t *testing.T) {
+	cases := []struct {
+		label string
+		want  string
+	}{
+		{"Hit Grunt: ", "Hit Grunt (rolled 15, total=17 vs AC 14): "},
+		{"Missed Grunt.", "Missed Grunt (rolled 3, total=5 vs AC 14)."},
+		{"Something", "Something (rolled 15, total=17 vs AC 14)"},
+	}
+	for _, c := range cases {
+		got := annotateAttackLabel(c.label, 15, 17, 14)
+		// The values 15/17/14 are static across cases except the miss case,
+		// so compute expected per-case:
+		if c.label == "Missed Grunt." {
+			got = annotateAttackLabel(c.label, 3, 5, 14)
+		}
+		assert.Equal(t, c.want, got, "annotateAttackLabel(%q)", c.label)
+	}
+}
+
 func genCreatureInfo(t *rapid.T) CreatureInfo {
 	return CreatureInfo{
 		Name:   rapid.StringN(1, 20, -1).Draw(t, "name"),

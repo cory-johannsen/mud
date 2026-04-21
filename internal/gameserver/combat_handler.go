@@ -826,7 +826,7 @@ func (h *CombatHandler) SetTechUseResolverFn(fn func(uid, techID, targetID strin
 // cost >= 0.
 // Postcondition: Returns nil on success; the player receives a "queued" confirmation message.
 // Returns an error if the player is not in combat or has insufficient AP.
-func (h *CombatHandler) QueueTechUse(uid, techID, targetID string, cost int, targetX, targetY int32) error {
+func (h *CombatHandler) QueueTechUse(uid, techID, techName, targetID string, cost int, targetX, targetY int32) error {
 	sess, ok := h.sessions.GetPlayer(uid)
 	if !ok {
 		return fmt.Errorf("player %q not found", uid)
@@ -852,7 +852,11 @@ func (h *CombatHandler) QueueTechUse(uid, techID, targetID string, cost int, tar
 		return err
 	}
 
-	h.pushMessageToUID(uid, fmt.Sprintf("%s queued for round resolution.%s", techID, h.formatAPRemaining(uid, cbt)))
+	display := techName
+	if display == "" {
+		display = techID
+	}
+	h.pushMessageToUID(uid, fmt.Sprintf("%s queued for round resolution.%s", display, h.formatAPRemaining(uid, cbt)))
 
 	if cbt.AllActionsSubmitted() {
 		h.stopTimerLocked(sess.RoomID)
