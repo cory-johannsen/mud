@@ -347,6 +347,69 @@ func TestHandleRest_RestoresInnateSlots(t *testing.T) {
 	assert.Equal(t, 1, sess.InnateTechs["acid_spit"].UsesRemaining, "session slot must be restored")
 }
 
+// REQ-INN7: use <tech>:<level> (level-encoded hotbar ref) resolves to the base tech ID for
+// innate tech lookup. The level suffix must be stripped before querying InnateTechs.
+func TestHandleUse_InnateTech_LevelSuffix_StripBeforeLookup(t *testing.T) {
+	repo := &innateRepoForGrpcTest{slots: map[string]*session.InnateSlot{
+		"multi_round_kinetic_volley": {MaxUses: 3, UsesRemaining: 3},
+	}}
+	svc, uid := innateTestService(t, repo)
+
+	sess, ok := svc.sessions.GetPlayer(uid)
+	require.True(t, ok)
+	sess.InnateTechs = map[string]*session.InnateSlot{
+		"multi_round_kinetic_volley": {MaxUses: 3, UsesRemaining: 3},
+	}
+
+	// Hotbar sends the level-suffixed ref; must not fail with "don't have innate tech".
+	evt, err := svc.handleUse(uid, "multi_round_kinetic_volley:2", "", 0, 0)
+	require.NoError(t, err)
+	require.NotNil(t, evt)
+
+	msg := evt.GetMessage().GetContent()
+	assert.NotContains(t, msg, "don't have innate tech", "level-suffixed ref must not fail innate lookup")
+	assert.Contains(t, msg, "multi_round_kinetic_volley", "expected activation message containing base tech ID")
+	assert.Contains(t, repo.decremented, "multi_round_kinetic_volley", "Decrement must be called with base ID")
+}
+
+// Property: use <tech>:<level> always behaves identically to use <tech> for innate techs.
+func TestProperty_InnateTech_LevelSuffix_AlwaysMatchesBaseLookup(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		maxUses := rapid.IntRange(1, 10).Draw(rt, "maxUses")
+		usesRemaining := rapid.IntRange(1, maxUses).Draw(rt, "usesRemaining")
+		level := rapid.IntRange(1, 5).Draw(rt, "level")
+
+		repo := &innateRepoForGrpcTest{slots: map[string]*session.InnateSlot{
+			"test_tech": {MaxUses: maxUses, UsesRemaining: usesRemaining},
+		}}
+		svc, uid := innateTestService(t, repo)
+		sess, ok := svc.sessions.GetPlayer(uid)
+		if !ok {
+			rt.Skip()
+		}
+		sess.InnateTechs = map[string]*session.InnateSlot{
+			"test_tech": {MaxUses: maxUses, UsesRemaining: usesRemaining},
+		}
+
+		levelRef := fmt.Sprintf("test_tech:%d", level)
+		evt, err := svc.handleUse(uid, levelRef, "", 0, 0)
+		if err != nil {
+			rt.Fatalf("handleUse failed for level-suffixed ref %q: %v", levelRef, err)
+		}
+		if evt == nil {
+			rt.Fatal("handleUse returned nil event")
+		}
+
+		msg := evt.GetMessage().GetContent()
+		if strings.Contains(msg, "don't have innate tech") {
+			rt.Errorf("level-suffixed ref %q triggered innate lookup failure: %q", levelRef, msg)
+		}
+		if len(repo.decremented) != 1 || repo.decremented[0] != "test_tech" {
+			rt.Errorf("expected Decrement called once for test_tech, got: %v", repo.decremented)
+		}
+	})
+}
+
 // REQ-CRX6: use <tech> is blocked for reaction-bearing techs.
 func TestHandleUse_ReactionTech_BlocksActivation(t *testing.T) {
 	repo := &innateRepoForGrpcTest{slots: map[string]*session.InnateSlot{

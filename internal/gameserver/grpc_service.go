@@ -8871,11 +8871,14 @@ innateCheck:
 	// Innate tech activation. Innate techs with action_cost 0 fire immediately (cantrip parity);
 	// innate techs with action_cost > 0 queue for round resolution in combat, same as other techs.
 	if s.innateTechRepo != nil {
-		if slot, ok := sess.InnateTechs[abilityID]; ok {
+		// Parse level-encoded ability IDs (e.g. "multi_round_kinetic_volley:2") so that the
+		// base tech ID is used for the InnateTechs map lookup. InnateTechs is keyed by base ID only.
+		innateTechBaseID, _ := parseTechRef(abilityID)
+		if slot, ok := sess.InnateTechs[innateTechBaseID]; ok {
 			// Look up tech def once — used for reaction check, action cost, and display name.
 			var innateTechDef *technology.TechnologyDef
 			if s.techRegistry != nil {
-				if def, ok2 := s.techRegistry.Get(abilityID); ok2 {
+				if def, ok2 := s.techRegistry.Get(innateTechBaseID); ok2 {
 					innateTechDef = def
 				}
 			}
@@ -8889,34 +8892,34 @@ innateCheck:
 				if ap < innateTechDef.ActionCost {
 					return messageEvent(fmt.Sprintf("Not enough AP to use %s (need %d, have %d).", innateTechDef.Name, innateTechDef.ActionCost, ap)), nil
 				}
-				if err := s.combatH.QueueTechUse(uid, abilityID, targetID, innateTechDef.ActionCost, targetX, targetY); err != nil {
+				if err := s.combatH.QueueTechUse(uid, innateTechBaseID, targetID, innateTechDef.ActionCost, targetX, targetY); err != nil {
 					return messageEvent(fmt.Sprintf("Could not queue tech: %s", err.Error())), nil
 				}
 				return nil, nil
 			}
 			if slot.MaxUses != 0 && slot.UsesRemaining <= 0 {
-				return messageEvent(fmt.Sprintf("No uses of %s remaining.", abilityID)), nil
+				return messageEvent(fmt.Sprintf("No uses of %s remaining.", innateTechBaseID)), nil
 			}
-			name := abilityID
+			name := innateTechBaseID
 			if innateTechDef != nil {
 				name = innateTechDef.Name
 			}
 			if slot.MaxUses != 0 {
-				if err := s.innateTechRepo.Decrement(ctx, sess.CharacterID, abilityID); err != nil {
-					return nil, fmt.Errorf("handleUse: decrement innate %s: %w", abilityID, err)
+				if err := s.innateTechRepo.Decrement(ctx, sess.CharacterID, innateTechBaseID); err != nil {
+					return nil, fmt.Errorf("handleUse: decrement innate %s: %w", innateTechBaseID, err)
 				}
 				slot.UsesRemaining--
-				sess.InnateTechs[abilityID] = slot
+				sess.InnateTechs[innateTechBaseID] = slot
 				s.pushEventToUID(uid, s.hotbarUpdateEvent(sess))
-				return s.activateTechWithEffects(sess, uid, abilityID, targetID, fmt.Sprintf("You activate %s. (%d uses remaining.)", name, slot.UsesRemaining), nil, targetX, targetY)
+				return s.activateTechWithEffects(sess, uid, innateTechBaseID, targetID, fmt.Sprintf("You activate %s. (%d uses remaining.)", name, slot.UsesRemaining), nil, targetX, targetY)
 			}
-			return s.activateTechWithEffects(sess, uid, abilityID, targetID, fmt.Sprintf("You activate %s.", name), nil, targetX, targetY)
+			return s.activateTechWithEffects(sess, uid, innateTechBaseID, targetID, fmt.Sprintf("You activate %s.", name), nil, targetX, targetY)
 		}
 		// REQ-USE-1: fall through to room equipment before reporting no match.
 		if evt, err := s.tryRoomEquipFallback(uid, sess.RoomID, abilityID); evt != nil || err != nil {
 			return evt, err
 		}
-		return messageEvent(fmt.Sprintf("You don't have innate tech %s.", abilityID)), nil
+		return messageEvent(fmt.Sprintf("You don't have innate tech %s.", innateTechBaseID)), nil
 	}
 	// REQ-USE-1: fall through to room equipment when no feat/ability matched.
 	if evt, err := s.tryRoomEquipFallback(uid, sess.RoomID, abilityID); evt != nil || err != nil {
