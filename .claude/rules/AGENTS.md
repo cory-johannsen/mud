@@ -74,7 +74,7 @@
 ## 7. Behavior Watch Command Contract
 
 - WATCH-1: `planner` and `implementer` agents MUST implement their Monitor-driven watch loops by launching a background shell process and attaching the `Monitor` tool to its stdout.
-- WATCH-2: Watch processes MUST poll GitHub Issues via `gh` at an interval of 60 seconds unless overridden by the user.
+- WATCH-2: Watch processes MUST poll GitHub Issues via `gh` at an interval of 600 seconds unless overridden by the user. A shorter interval MUST NOT be used without an explicit GraphQL rate-budget analysis, since `gh project item-list` costs roughly 50-100 GraphQL points per call and the 5000-point hourly budget is shared with all other `gh` invocations in the session.
 - WATCH-3: Watch processes MUST emit exactly one line to stdout per detected issue transition, formatted as `<ISO-8601-timestamp>\t<behavior>\t<event>\t<issue-number>\t<title>`.
 - WATCH-4: The `<event>` field MUST be one of `spec-ready`, `plan-ready`, `bug-open`, or `planned-ready`.
 - WATCH-5: `planner` watch processes MUST emit `spec-ready` events for issues in `Spec` status that have a linked spec path but no linked plan path.

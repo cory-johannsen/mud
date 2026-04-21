@@ -4,7 +4,7 @@ set -euo pipefail
 BEHAVIOR="implementer"
 OWNER="cory-johannsen"
 PROJECT_NUMBER="1"
-INTERVAL="${WATCH_INTERVAL:-60}"
+INTERVAL="${WATCH_INTERVAL:-600}"
 LOG="/tmp/mud-watch-${BEHAVIOR}-$$.log"
 
 echo "# watch-implementer pid=$$ started $(date -u +%Y-%m-%dT%H:%M:%SZ) log=$LOG interval=${INTERVAL}s" >&2
@@ -21,7 +21,7 @@ emit() {
 
 poll_once() {
   local json
-  if ! json=$(gh project item-list "$PROJECT_NUMBER" --owner "$OWNER" --format json --limit 300 2>/dev/null); then
+  if ! json=$(gh project item-list "$PROJECT_NUMBER" --owner "$OWNER" --format json --limit 100 2>/dev/null); then
     echo "# $(date -u +%Y-%m-%dT%H:%M:%SZ) poll failed" >> "$LOG"
     return 0
   fi
