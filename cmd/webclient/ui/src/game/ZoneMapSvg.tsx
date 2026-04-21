@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import type { MapTile, SameZoneExitTarget } from '../proto'
 
 const BASE_CELL_W = 52
@@ -135,6 +136,9 @@ function wrapRoomName(name: string, maxChars = 10): [string, string | null] {
 }
 
 export function ZoneMapSvg({ tiles, onHover, onHoverEnd, containerWidth, playerLevel, zoneLevelRange, onTileClick, destinationRoomId }: ZoneMapSvgProps): JSX.Element {
+  // GH #240: track which tile (if any) the mouse is currently over so we can
+  // show a clearer auto-travel affordance than just the pointer cursor.
+  const [hoveredRoomId, setHoveredRoomId] = useState<string | null>(null)
   if (tiles.length === 0) {
     return <p style={{ color: '#666', fontFamily: 'monospace', padding: '0.5rem' }}>No map data.</p>
   }
@@ -295,10 +299,15 @@ export function ZoneMapSvg({ tiles, onHover, onHoverEnd, containerWidth, playerL
     const diffColor = (!isCurrent && !isBoss)
       ? (difficultyBorderColor(zoneLevelRange, playerLevel ?? 0) ?? '#333')
       : '#333'
-    const stroke = isDestination ? '#4a9eff' : isCurrent ? '#f0c040' : isBoss ? '#cc4444' : diffColor
-    const strokeWidth = isDestination || isCurrent || isBoss ? 2 : 1
     const isClickable = isExplored && !isCurrent && onTileClick != null
     const cursor = isClickable ? 'pointer' : 'default'
+    // GH #240: when an auto-travelable tile is hovered, brighten its outline
+    // so the player gets an unmistakable visual cue beyond the cursor change.
+    const isHoverTarget = isClickable && hoveredRoomId != null && hoveredRoomId === (tile.roomId ?? '')
+    const stroke = isHoverTarget
+      ? '#ffd860'
+      : isDestination ? '#4a9eff' : isCurrent ? '#f0c040' : isBoss ? '#cc4444' : diffColor
+    const strokeWidth = isHoverTarget || isDestination || isCurrent || isBoss ? 2 : 1
     const name = tile.roomName ?? ''
     const id = clipId(tile)
     const [line1, line2] = wrapRoomName(name)
@@ -314,10 +323,20 @@ export function ZoneMapSvg({ tiles, onHover, onHoverEnd, containerWidth, playerL
           rx={4}
           fill={fill} stroke={stroke} strokeWidth={strokeWidth}
           style={{ cursor }}
-          onMouseEnter={onHover ? e => onHover(tile, e) : undefined}
-          onMouseLeave={onHoverEnd}
+          onMouseEnter={(e) => {
+            if (isClickable) setHoveredRoomId(tile.roomId ?? null)
+            if (onHover) onHover(tile, e)
+          }}
+          onMouseLeave={() => {
+            setHoveredRoomId(null)
+            onHoverEnd?.()
+          }}
           onClick={isClickable ? () => onTileClick!(tile) : undefined}
-        />
+        >
+          {isClickable && (
+            <title>Click to auto-travel to {name || 'this room'}</title>
+          )}
+        </rect>
         {line2 ? (
           <text fontSize={9} fill="#ccc" pointerEvents="none" clipPath={`url(#${id})`}>
             <tspan x={rx + cellW / 2} y={textMidY - lineH / 2} textAnchor="middle" dominantBaseline="middle">
