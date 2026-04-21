@@ -4,7 +4,7 @@ zone:
   min_level: 22
   max_level: 32
   world_x: 2
-  world_y: 3
+  world_y: 2
   name: Colonel Summers Park
   description: A neighborhood park that has been completely taken over by the Shrimp Gang Skill Toys Club. The air is thick with the pervasive, inescapable smell of boiled shrimp — not rotting, exactly, but concentrated past the point of comfort. Elaborate yo-yo demonstrations happen at all hours. The gang controls entry and exit. Nobody who didn't come for yo-yos leaves happy.
   start_room: csp_main_entrance

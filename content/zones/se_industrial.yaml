@@ -4,7 +4,7 @@ zone:
   min_level: 25
   max_level: 35
   world_x: 2
-  world_y: 2
+  world_y: 1
   script_dir: content/scripts/zones/se_industrial
   name: Southeast Industrial
   description: Portland's industrial underbelly — a maze of rusting warehouses, abandoned docks, and skeletal cranes. Rain

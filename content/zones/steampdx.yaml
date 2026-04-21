@@ -3,7 +3,7 @@ zone:
   danger_level: dangerous
   min_level: 40
   max_level: 80
-  world_x: 0
+  world_x: 1
   world_y: -2
   name: SteamPDX
   description: A men's bathhouse south of downtown, notorious for its hostile door policy and even more
