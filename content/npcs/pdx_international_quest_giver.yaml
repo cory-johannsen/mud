@@ -19,6 +19,7 @@ quest_giver:
     - pdx_squatter_sweep
     - pdx_cultist_bounty
     - pdx_tarmac_raider_hunt
+    - pdx_high_steward_takedown
 loot:
   currency:
     min: 0
