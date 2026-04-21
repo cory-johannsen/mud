@@ -8787,6 +8787,16 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string, targetX, 
 				}
 				sess.PreparedTechs[lvl][idx].Expended = true
 				s.pushEventToUID(uid, s.hotbarUpdateEvent(sess))
+				// GH #224: heighten delta = slot level - tech native level, clamped
+				// to >= 0. preparedTechDef may be nil when the tech registry is
+				// unavailable in tests; treat delta as 0 in that case.
+				heightenDelta := 0
+				if preparedTechDef != nil {
+					heightenDelta = lvl - preparedTechDef.Level
+					if heightenDelta < 0 {
+						heightenDelta = 0
+					}
+				}
 				if cost := techAPCost(preparedTechDef); cost > 0 && s.combatH.ActiveCombatForPlayer(uid) != nil {
 					// In combat: queue for round resolution at player's initiative.
 					if err := s.combatH.QueueTechUse(uid, techID, targetID, cost, targetX, targetY); err != nil {
@@ -8794,7 +8804,7 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string, targetX, 
 					}
 					return nil, nil
 				}
-				return s.activateTechWithEffects(sess, uid, techID, targetID, fmt.Sprintf("You activate %s.", techID), nil, targetX, targetY)
+				return s.activateTechWithEffectsAndHeighten(sess, uid, techID, targetID, fmt.Sprintf("You activate %s.", techID), nil, targetX, targetY, heightenDelta)
 			}
 		}
 		if foundInPrepared {
@@ -9191,6 +9201,14 @@ func (s *GameServiceServer) resolveUseTarget(uid, targetID string, tech *technol
 //   - If s.techRegistry is nil or the tech is not registered, falls back to fallbackMsg.
 //   - Returns a non-nil ServerEvent on success.
 func (s *GameServiceServer) activateTechWithEffects(sess *session.PlayerSession, uid, abilityID, targetID, fallbackMsg string, querier RoomQuerier, targetX, targetY int32) (*gamev1.ServerEvent, error) {
+	return s.activateTechWithEffectsAndHeighten(sess, uid, abilityID, targetID, fallbackMsg, querier, targetX, targetY, 0)
+}
+
+// activateTechWithEffectsAndHeighten is activateTechWithEffects plus a
+// heighten delta (slotLevel - techLevel). The delta propagates through
+// ResolveTechEffectsWithHeighten so damage effects with Projectiles > 0
+// scale up by one projectile per heighten level (GH #224).
+func (s *GameServiceServer) activateTechWithEffectsAndHeighten(sess *session.PlayerSession, uid, abilityID, targetID, fallbackMsg string, querier RoomQuerier, targetX, targetY int32, heightenDelta int) (*gamev1.ServerEvent, error) {
 	if s.techRegistry == nil {
 		return messageEvent(fallbackMsg), nil
 	}
@@ -9262,7 +9280,7 @@ func (s *GameServiceServer) activateTechWithEffects(sess *session.PlayerSession,
 		}
 	}
 
-	msgs := ResolveTechEffects(sess, techDef, techTargets, cbt, s.condRegistry, globalRandSrc{}, querier)
+	msgs := ResolveTechEffectsWithHeighten(sess, techDef, techTargets, cbt, s.condRegistry, globalRandSrc{}, querier, heightenDelta)
 	return messageEvent(strings.Join(msgs, "\n")), nil
 }
 

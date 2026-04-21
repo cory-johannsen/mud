@@ -108,6 +108,10 @@ type TechEffect struct {
 	Resource   string `yaml:"resource,omitempty"`    // drain: "hp" | "ap"
 	Persistent bool    `yaml:"persistent,omitempty"`  // damage persists each round (PF2E persistent damage)
 	Multiplier float64 `yaml:"multiplier,omitempty"` // damage multiplier (e.g. 0.5 for basic save half-damage)
+	// Projectiles, when > 0, resolves the damage effect as that many independent
+	// rolls (Magic Missile-style). Heighten delta is added to this count at
+	// activation time. Zero or unset resolves as a single roll (existing behavior).
+	Projectiles int `yaml:"projectiles,omitempty"`
 
 	// condition
 	ConditionID string `yaml:"condition_id,omitempty"`

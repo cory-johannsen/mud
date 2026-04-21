@@ -54,18 +54,8 @@ func (a diceSrcAdapter) Intn(n int) int { return a.src.Intn(n) }
 // human-readable result messages (one per target). Does not expend uses — the caller
 // has already done that.
 //
-// Preconditions:
-//   - sess must be non-nil.
-//   - tech must be non-nil.
-//   - targets is empty for self/utility/no-roll; one entry for single; all enemies for area.
-//   - cbt may be nil when not in combat; condition effects are silently skipped when nil.
-//   - condRegistry may be nil; condition effects are silently skipped when nil.
-//   - src must be non-nil (satisfies combat.Source: Intn method).
-//
-// Postconditions:
-//   - Returns zero or more non-empty messages.
-//   - target.CurrentHP and sess.CurrentHP never go below 0.
-//   - sess.CurrentHP never exceeds sess.MaxHP.
+// Equivalent to ResolveTechEffectsWithHeighten(..., 0) — callers that do not
+// track heighten delta should use this function.
 func ResolveTechEffects(
 	sess *session.PlayerSession,
 	tech *technology.TechnologyDef,
@@ -75,13 +65,46 @@ func ResolveTechEffects(
 	src combat.Source,
 	querier RoomQuerier,
 ) []string {
+	return ResolveTechEffectsWithHeighten(sess, tech, targets, cbt, condRegistry, src, querier, 0)
+}
+
+// ResolveTechEffectsWithHeighten is ResolveTechEffects plus a heightenDelta
+// (slotLevel - techLevel, clamped to >= 0). The delta is applied to effect
+// types that scale with heighten — currently the `projectiles` field on damage
+// effects (GH #224): each additional level adds one more independent projectile
+// roll.
+//
+// Preconditions:
+//   - sess must be non-nil.
+//   - tech must be non-nil.
+//   - targets is empty for self/utility/no-roll; one entry for single; all enemies for area.
+//   - cbt may be nil when not in combat; condition effects are silently skipped when nil.
+//   - condRegistry may be nil; condition effects are silently skipped when nil.
+//   - src must be non-nil (satisfies combat.Source: Intn method).
+//   - heightenDelta must be >= 0; negative values are treated as 0.
+//
+// Postconditions:
+//   - Returns zero or more non-empty messages.
+//   - target.CurrentHP and sess.CurrentHP never go below 0.
+//   - sess.CurrentHP never exceeds sess.MaxHP.
+func ResolveTechEffectsWithHeighten(
+	sess *session.PlayerSession,
+	tech *technology.TechnologyDef,
+	targets []*combat.Combatant,
+	cbt *combat.Combat,
+	condRegistry *condition.Registry,
+	src combat.Source,
+	querier RoomQuerier,
+	heightenDelta int,
+) []string {
+	if heightenDelta < 0 {
+		heightenDelta = 0
+	}
 	if len(targets) == 0 {
-		// Attack/save techs require a target — emit feedback rather than silently returning nothing.
-		// No-roll (resolution "none" or "") techs apply on_apply to self/utility effects.
 		if tech.Resolution == "attack" || tech.Resolution == "save" {
 			return []string{"No valid target."}
 		}
-		return applyEffects(sess, tech.Effects.OnApply, nil, cbt, condRegistry, src, querier)
+		return applyEffects(sess, tech.Effects.OnApply, nil, cbt, condRegistry, src, querier, heightenDelta)
 	}
 
 	var msgs []string
@@ -101,11 +124,8 @@ func ResolveTechEffects(
 			label = ""
 		}
 
-		effectMsgs := applyEffects(sess, tier, target, cbt, condRegistry, src, querier)
+		effectMsgs := applyEffects(sess, tier, target, cbt, condRegistry, src, querier, heightenDelta)
 		if len(effectMsgs) == 0 && label != "" {
-			// No effects to prefix — emit the label as a standalone message.
-			// Strip trailing ": " (used as a prefix when effects follow) and
-			// ensure the message ends with a period.
 			standalone := strings.TrimSuffix(label, ": ")
 			if !strings.HasSuffix(standalone, ".") {
 				standalone += "."
@@ -212,10 +232,11 @@ func applyEffects(
 	condRegistry *condition.Registry,
 	src combat.Source,
 	querier RoomQuerier,
+	heightenDelta int,
 ) []string {
 	var msgs []string
 	for _, e := range effects {
-		msg := applyEffect(sess, e, target, cbt, condRegistry, src, querier)
+		msg := applyEffect(sess, e, target, cbt, condRegistry, src, querier, heightenDelta)
 		if msg != "" {
 			msgs = append(msgs, msg)
 		}
@@ -232,11 +253,30 @@ func applyEffect(
 	condRegistry *condition.Registry,
 	src combat.Source,
 	querier RoomQuerier,
+	heightenDelta int,
 ) string {
 	switch e.Type {
 	case technology.EffectDamage:
 		if target == nil {
 			return ""
+		}
+		// GH #224: Magic Missile-style multi-projectile resolution. When
+		// Projectiles > 0, roll the damage expression independently for each
+		// projectile and sum. Heighten delta adds one projectile per level.
+		if e.Projectiles > 0 {
+			shots := e.Projectiles + heightenDelta
+			if shots < 1 {
+				shots = 1
+			}
+			total := 0
+			for i := 0; i < shots; i++ {
+				total += rollAmount(e.Dice, e.Amount, src)
+			}
+			target.CurrentHP -= total
+			if target.CurrentHP < 0 {
+				target.CurrentHP = 0
+			}
+			return fmt.Sprintf("%d %s damage across %d projectiles.", total, e.DamageType, shots)
 		}
 		dmg := rollAmount(e.Dice, e.Amount, src)
 		target.CurrentHP -= dmg

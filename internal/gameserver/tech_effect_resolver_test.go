@@ -534,6 +534,92 @@ func TestProperty_ResolveTechEffects_MultiRoundKineticVolley_DamageWithinBounds(
 	})
 }
 
+// TestResolveTechEffects_ProjectilesMultipleRolls verifies GH #224: when a
+// damage effect has Projectiles > 0, the resolver performs independent damage
+// rolls per projectile and sums them. The deterministic dice source returns
+// "n-1" for Intn(n), so a 1d4+1 roll always yields 4+1=5; three projectiles
+// therefore produce exactly 15 damage.
+func TestResolveTechEffects_ProjectilesMultipleRolls(t *testing.T) {
+	sess := &session.PlayerSession{UID: "p1"}
+	sess.CurrentHP = 20
+	sess.MaxHP = 20
+	target := makeTarget("npc1", 100, 100, 12)
+
+	tech := &technology.TechnologyDef{
+		ID:         "mrkv",
+		Name:       "Multi-Round Kinetic Volley",
+		Resolution: "none",
+		Effects: technology.TieredEffects{
+			OnApply: []technology.TechEffect{
+				{Type: technology.EffectDamage, Dice: "1d4+1", DamageType: "force", Projectiles: 3},
+			},
+		},
+	}
+	src := &deterministicSrc{val: 99}
+
+	msgs := ResolveTechEffects(sess, tech, []*combat.Combatant{target}, nil, nil, src, nil)
+	require.NotEmpty(t, msgs)
+	assert.Equal(t, 100-15, target.CurrentHP,
+		"three projectiles of 1d4+1 at max roll must deal 15 total damage")
+	assert.Contains(t, msgs[0], "projectiles",
+		"projectile message must mention projectile count")
+}
+
+// TestResolveTechEffects_ProjectilesScaleWithHeighten verifies GH #224: the
+// heighten delta adds one projectile per level (Magic Missile pattern). With
+// Projectiles=3 + heightenDelta=2 we expect 5 projectiles = 25 damage.
+func TestResolveTechEffects_ProjectilesScaleWithHeighten(t *testing.T) {
+	sess := &session.PlayerSession{UID: "p1"}
+	sess.CurrentHP = 20
+	sess.MaxHP = 20
+	target := makeTarget("npc1", 100, 100, 12)
+
+	tech := &technology.TechnologyDef{
+		ID:         "mrkv",
+		Name:       "Multi-Round Kinetic Volley",
+		Resolution: "none",
+		Effects: technology.TieredEffects{
+			OnApply: []technology.TechEffect{
+				{Type: technology.EffectDamage, Dice: "1d4+1", DamageType: "force", Projectiles: 3},
+			},
+		},
+	}
+	src := &deterministicSrc{val: 99}
+
+	msgs := ResolveTechEffectsWithHeighten(sess, tech, []*combat.Combatant{target}, nil, nil, src, nil, 2)
+	require.NotEmpty(t, msgs)
+	assert.Equal(t, 100-25, target.CurrentHP,
+		"heighten delta +2 must add two projectiles (5 total × 5 = 25)")
+}
+
+// TestResolveTechEffects_NoProjectiles_SingleRoll verifies that damage effects
+// without Projectiles field unchanged behavior — a single dice roll.
+func TestResolveTechEffects_NoProjectiles_SingleRoll(t *testing.T) {
+	sess := &session.PlayerSession{UID: "p1"}
+	sess.CurrentHP = 20
+	sess.MaxHP = 20
+	target := makeTarget("npc1", 100, 100, 12)
+
+	tech := &technology.TechnologyDef{
+		ID:         "simple",
+		Name:       "Simple Damage",
+		Resolution: "none",
+		Effects: technology.TieredEffects{
+			OnApply: []technology.TechEffect{
+				{Type: technology.EffectDamage, Dice: "1d4+1", DamageType: "force"},
+			},
+		},
+	}
+	src := &deterministicSrc{val: 99}
+
+	msgs := ResolveTechEffectsWithHeighten(sess, tech, []*combat.Combatant{target}, nil, nil, src, nil, 5)
+	require.NotEmpty(t, msgs)
+	assert.Equal(t, 100-5, target.CurrentHP,
+		"without Projectiles, heighten delta has no effect on damage roll count")
+	assert.NotContains(t, msgs[0], "projectiles",
+		"non-projectile message must not mention projectile count")
+}
+
 func genCreatureInfo(t *rapid.T) CreatureInfo {
 	return CreatureInfo{
 		Name:   rapid.StringN(1, 20, -1).Draw(t, "name"),
