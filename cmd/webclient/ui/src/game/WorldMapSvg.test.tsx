@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest'
 import fc from 'fast-check'
 import { render, fireEvent } from '@testing-library/react'
-import { WorldMapSvg, computeTooltipPos, wrapZoneName } from './WorldMapSvg'
+import { WorldMapSvg, computeTooltipPos, wrapZoneName, segmentIntersectsRect } from './WorldMapSvg'
 import { difficultyBorderColor } from './ZoneMapSvg'
 import type { WorldZoneTile } from '../proto'
 
@@ -621,6 +621,51 @@ describe('wrapZoneName', () => {
         (name, max) => {
           const [l1, l2] = wrapZoneName(name, max)
           return l1.length <= max && (l2 === null || l2.length <= max)
+        }
+      )
+    )
+  })
+})
+
+// GH #230: segmentIntersectsRect is used to decide whether a straight
+// world-map connector would pass through another zone's rectangle and
+// therefore needs to be drawn as an arc instead.
+describe('segmentIntersectsRect', () => {
+  it('returns true when the segment passes through the rectangle interior', () => {
+    expect(segmentIntersectsRect(0, 5, 20, 5, 5, 0, 15, 10)).toBe(true)
+  })
+
+  it('returns false when the segment runs parallel and outside the rectangle', () => {
+    expect(segmentIntersectsRect(0, 20, 20, 20, 5, 0, 15, 10)).toBe(false)
+  })
+
+  it('returns true when one endpoint is inside the rectangle', () => {
+    expect(segmentIntersectsRect(10, 5, 100, 100, 5, 0, 15, 10)).toBe(true)
+  })
+
+  it('returns false when both endpoints are on the same outside side', () => {
+    expect(segmentIntersectsRect(-10, 0, -5, 10, 0, 0, 10, 10)).toBe(false)
+  })
+
+  it('returns true when the segment grazes the rectangle edge', () => {
+    expect(segmentIntersectsRect(0, 0, 20, 0, 5, 0, 15, 10)).toBe(true)
+  })
+
+  it('returns false when the segment stops short of the rectangle', () => {
+    expect(segmentIntersectsRect(0, 5, 4, 5, 5, 0, 15, 10)).toBe(false)
+  })
+
+  it('property: swapping endpoints does not change the result', () => {
+    fc.assert(
+      fc.property(
+        fc.integer({ min: -50, max: 50 }),
+        fc.integer({ min: -50, max: 50 }),
+        fc.integer({ min: -50, max: 50 }),
+        fc.integer({ min: -50, max: 50 }),
+        (x1, y1, x2, y2) => {
+          const a = segmentIntersectsRect(x1, y1, x2, y2, 0, 0, 10, 10)
+          const b = segmentIntersectsRect(x2, y2, x1, y1, 0, 0, 10, 10)
+          return a === b
         }
       )
     )

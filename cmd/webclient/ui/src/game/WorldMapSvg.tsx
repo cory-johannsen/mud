@@ -71,6 +71,46 @@ export function computeTooltipPos(
   return { x, y }
 }
 
+// segmentIntersectsRect returns true when the line segment (x1,y1)-(x2,y2)
+// has any point inside or on the boundary of the axis-aligned rectangle
+// whose left/top/right/bottom edges are at (left, top, right, bottom).
+// Uses the Liang–Barsky algorithm for robust segment-vs-AABB clipping.
+//
+// GH #230: used to decide whether a straight world-map connector would
+// pass through another zone node's rectangle (and therefore needs to be
+// drawn as an arc instead).
+export function segmentIntersectsRect(
+  x1: number, y1: number,
+  x2: number, y2: number,
+  left: number, top: number, right: number, bottom: number,
+): boolean {
+  const dx = x2 - x1
+  const dy = y2 - y1
+  let tMin = 0
+  let tMax = 1
+  const checks: [number, number][] = [
+    [-dx, x1 - left],
+    [dx, right - x1],
+    [-dy, y1 - top],
+    [dy, bottom - y1],
+  ]
+  for (const [p, q] of checks) {
+    if (p === 0) {
+      if (q < 0) return false
+      continue
+    }
+    const t = q / p
+    if (p < 0) {
+      if (t > tMax) return false
+      if (t > tMin) tMin = t
+    } else {
+      if (t < tMin) return false
+      if (t < tMax) tMax = t
+    }
+  }
+  return true
+}
+
 // zoneDirection returns a compass direction label from zone A to zone B based on
 // their world grid positions. Returns null for diagonal or same-position connections.
 export function zoneDirection(
@@ -177,17 +217,35 @@ export function WorldMapSvg({ tiles, onTravel, playerLevel }: WorldMapSvgProps):
       const dep = edgePoint(px(ax), py(ay), { x: bCX, y: bCY })
       const arr = edgePoint(px(bx), py(by), { x: aCX, y: aCY })
 
-      // Adjacent connections (≤1 step apart in both axes) use a straight line.
-      // Non-adjacent use a Bézier arc offset perpendicular to the path so the curve
-      // routes through the gap area and visually clears any intermediate cells.
-      const aNX = normX.get(ax) ?? 0
-      const aNY = normY.get(ay) ?? 0
-      const bNX = normX.get(bx) ?? 0
-      const bNY = normY.get(by) ?? 0
-      const isAdjacent = Math.abs(aNX - bNX) <= 1 && Math.abs(aNY - bNY) <= 1
+      // GH #230: prefer straight connectors. A straight line is only
+      // replaced by an arc when the segment would pass through another zone
+      // node (i.e. some tile other than A or B has its rectangle intersected
+      // by the segment). Adjacency in normalized grid units is no longer the
+      // criterion — many distant-looking pairs still have a clear straight
+      // path and should draw as a straight line.
+      const segmentHitsZone = (): boolean => {
+        for (const other of tiles) {
+          const ox = other.worldX ?? 0
+          const oy = other.worldY ?? 0
+          if ((ox === ax && oy === ay) || (ox === bx && oy === by)) continue
+          const rx = px(ox)
+          const ry = py(oy)
+          // Inflate the rectangle by a small margin so a segment that grazes
+          // the edge still counts as a conflict.
+          const margin = 2
+          const left = rx - margin
+          const right = rx + ZONE_W + margin
+          const top = ry - margin
+          const bottom = ry + ZONE_H + margin
+          if (segmentIntersectsRect(dep.x, dep.y, arr.x, arr.y, left, top, right, bottom)) {
+            return true
+          }
+        }
+        return false
+      }
 
       let pathD: string
-      if (isAdjacent) {
+      if (!segmentHitsZone()) {
         pathD = `M ${dep.x} ${dep.y} L ${arr.x} ${arr.y}`
       } else {
         const midX = (dep.x + arr.x) / 2
