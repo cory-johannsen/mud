@@ -140,6 +140,86 @@ func TestStartRoundWithSrc_FlatFooted_CritApplied_ExpiresAtRoundStart(t *testing
 		"flat_footed with duration=1 must be expired by Tick at the next round start")
 }
 
+// TestResolveRound_CrossAction_MAP_SecondAttackAt5 verifies GH #232: a second
+// Attack action in the same round receives the -5 Multiple Attack Penalty.
+//
+// Precondition: p1 queues two ActionAttack against the same target in one round.
+// Postcondition: second attack's AttackTotal is exactly 5 less than the first.
+func TestResolveRound_CrossAction_MAP_SecondAttackAt5(t *testing.T) {
+	cbt := makeCombatForRoundConditions(t)
+	_ = cbt.StartRoundWithSrc(3, &fixedSrc{val: 0})
+	require.NoError(t, cbt.QueueAction("p1", combat.QueuedAction{Type: combat.ActionAttack, Target: "Ganger"}))
+	require.NoError(t, cbt.QueueAction("p1", combat.QueuedAction{Type: combat.ActionAttack, Target: "Ganger"}))
+	require.NoError(t, cbt.QueueAction("n1", combat.QueuedAction{Type: combat.ActionPass}))
+	events := combat.ResolveRound(cbt, &fixedSrc{val: 5}, nil, nil)
+	var first, second *combat.RoundEvent
+	for i := range events {
+		if events[i].AttackResult != nil && events[i].ActorID == "p1" {
+			if first == nil {
+				first = &events[i]
+			} else if second == nil {
+				second = &events[i]
+				break
+			}
+		}
+	}
+	require.NotNil(t, first, "first attack event must be present")
+	require.NotNil(t, second, "second attack event must be present")
+	assert.Equal(t, first.AttackResult.AttackTotal-5, second.AttackResult.AttackTotal,
+		"second Attack in the same round must apply the -5 MAP penalty")
+}
+
+// TestResolveRound_CrossAction_MAP_ThirdAttackAt10 verifies GH #232: the third
+// attack action in the same round receives the -10 MAP penalty.
+func TestResolveRound_CrossAction_MAP_ThirdAttackAt10(t *testing.T) {
+	cbt := makeCombatForRoundConditions(t)
+	_ = cbt.StartRoundWithSrc(3, &fixedSrc{val: 0})
+	require.NoError(t, cbt.QueueAction("p1", combat.QueuedAction{Type: combat.ActionAttack, Target: "Ganger"}))
+	require.NoError(t, cbt.QueueAction("p1", combat.QueuedAction{Type: combat.ActionAttack, Target: "Ganger"}))
+	require.NoError(t, cbt.QueueAction("p1", combat.QueuedAction{Type: combat.ActionAttack, Target: "Ganger"}))
+	require.NoError(t, cbt.QueueAction("n1", combat.QueuedAction{Type: combat.ActionPass}))
+	events := combat.ResolveRound(cbt, &fixedSrc{val: 5}, nil, nil)
+	var attackTotals []int
+	for i := range events {
+		if events[i].AttackResult != nil && events[i].ActorID == "p1" {
+			attackTotals = append(attackTotals, events[i].AttackResult.AttackTotal)
+		}
+	}
+	require.Len(t, attackTotals, 3, "expected three attack events")
+	assert.Equal(t, attackTotals[0]-5, attackTotals[1],
+		"second Attack total must be first - 5")
+	assert.Equal(t, attackTotals[0]-10, attackTotals[2],
+		"third Attack total must be first - 10 (MAP capped at -10)")
+}
+
+// TestResolveRound_CrossAction_MAP_ResetsAtRoundStart verifies that the per-
+// round AttacksMadeThisRound counter is cleared by StartRoundWithSrc so the
+// MAP penalty does not carry across rounds.
+func TestResolveRound_CrossAction_MAP_ResetsAtRoundStart(t *testing.T) {
+	cbt := makeCombatForRoundConditions(t)
+	_ = cbt.StartRoundWithSrc(3, &fixedSrc{val: 0})
+	require.NoError(t, cbt.QueueAction("p1", combat.QueuedAction{Type: combat.ActionAttack, Target: "Ganger"}))
+	require.NoError(t, cbt.QueueAction("p1", combat.QueuedAction{Type: combat.ActionAttack, Target: "Ganger"}))
+	require.NoError(t, cbt.QueueAction("n1", combat.QueuedAction{Type: combat.ActionPass}))
+	_ = combat.ResolveRound(cbt, &fixedSrc{val: 5}, nil, nil)
+
+	// New round — counter should reset to 0.
+	_ = cbt.StartRoundWithSrc(3, &fixedSrc{val: 0})
+	require.NoError(t, cbt.QueueAction("p1", combat.QueuedAction{Type: combat.ActionAttack, Target: "Ganger"}))
+	require.NoError(t, cbt.QueueAction("n1", combat.QueuedAction{Type: combat.ActionPass}))
+	events := combat.ResolveRound(cbt, &fixedSrc{val: 5}, nil, nil)
+	for i := range events {
+		if events[i].AttackResult != nil && events[i].ActorID == "p1" {
+			// The very first attack of a round has no MAP: its total equals the
+			// first-attack total from the prior round (11 = d20(6) + mods(5)).
+			assert.Equal(t, 11, events[i].AttackResult.AttackTotal,
+				"MAP counter must reset at round start")
+			return
+		}
+	}
+	t.Fatal("no attack event produced in the second round")
+}
+
 func TestResolveRound_AttackModifiers_ProneReducesRoll(t *testing.T) {
 	cbt := makeCombatForRoundConditions(t)
 	_ = cbt.StartRoundWithSrc(3, &fixedSrc{val: 0})

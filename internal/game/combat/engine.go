@@ -160,6 +160,7 @@ func (c *Combat) StartRoundWithSrc(actionsPerRound int, src Source) []RoundCondi
 		}
 		cbt.ACMod = 0
 		cbt.AttackMod = 0
+		cbt.AttacksMadeThisRound = 0
 	}
 
 	// Reset action queues with stunned AP reduction and prone stand-up cost.

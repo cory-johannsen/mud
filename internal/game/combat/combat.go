@@ -143,6 +143,12 @@ type Combatant struct {
 	// AttackVerb is the verb used in combat attack narratives (e.g. "bites", "shoots").
 	// Empty string means the default verb ("attacks") will be used.
 	AttackVerb string
+	// AttacksMadeThisRound counts attack rolls resolved for this combatant in the
+	// current round, used to compute the cross-action Multiple Attack Penalty
+	// (MAP). Reset to 0 in StartRoundWithSrc. Each ResolveAttack-producing action
+	// (Attack, Strike, FireBurst, FireAutomatic) increments this counter once per
+	// attack roll. The MAP penalty for the next attack is -5 * min(AttacksMadeThisRound, 2).
+	AttacksMadeThisRound int
 	// FactionID is the faction this combatant belongs to; empty for players and faction-less NPCs.
 	// Used by the Lua scripting layer for faction-aware targeting (e.g. get_faction_enemies).
 	FactionID string

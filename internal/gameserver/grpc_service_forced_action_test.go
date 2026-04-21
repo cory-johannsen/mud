@@ -177,8 +177,12 @@ func TestForcedAction_NoCondition_NormalBehavior(t *testing.T) {
 	q := cbt.ActionQueues["u_forced"]
 	require.NotNil(t, q)
 	actions := q.QueuedActions()
-	require.Len(t, actions, 1)
+	// GH #232: auto-queue now fills remaining AP with default attacks.
+	require.GreaterOrEqual(t, len(actions), 1, "at least one action must be auto-queued")
 	assert.Equal(t, npc1Name, actions[0].Target)
+	for i, a := range actions {
+		assert.Equal(t, npc1Name, a.Target, "auto-queued action %d must target the alive NPC", i)
+	}
 }
 
 func TestProperty_ForcedAction_AlwaysTargetsAliveCombatant(t *testing.T) {

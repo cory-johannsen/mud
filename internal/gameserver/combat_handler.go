@@ -3570,24 +3570,67 @@ func (h *CombatHandler) autoQueuePlayersLocked(cbt *combat.Combat) {
 			action = "pass"
 		}
 
-		var qa combat.QueuedAction
-		switch action {
-		case "attack":
-			qa = combat.QueuedAction{Type: combat.ActionAttack, Target: targetName}
-		case "strike":
-			qa = combat.QueuedAction{Type: combat.ActionStrike, Target: targetName}
-		default:
-			qa = combat.QueuedAction{Type: combat.ActionPass}
+		// GH #232: auto-queue enough default actions to exhaust the player's
+		// remaining AP. MAP is applied at ResolveRound time via the per-round
+		// AttacksMadeThisRound counter on Combatant.
+		var queued int
+		for {
+			remaining := q.RemainingPoints()
+			if remaining <= 0 {
+				break
+			}
+			// Recompute queued AP cost from the current queue (may include prior
+			// manual submissions). Break when adding another default action would
+			// exceed what AP can pay for.
+			var qa combat.QueuedAction
+			switch action {
+			case "attack":
+				qa = combat.QueuedAction{Type: combat.ActionAttack, Target: targetName}
+			case "strike":
+				if remaining < combat.ActionStrike.Cost() {
+					// Not enough AP for a strike; fall back to a single attack.
+					qa = combat.QueuedAction{Type: combat.ActionAttack, Target: targetName}
+				} else {
+					qa = combat.QueuedAction{Type: combat.ActionStrike, Target: targetName}
+				}
+			default:
+				qa = combat.QueuedAction{Type: combat.ActionPass}
+			}
+			cost := qa.Type.Cost()
+			if cost == 0 && qa.Type == combat.ActionPass {
+				// Pass exhausts the turn — queue once and stop.
+				if err := cbt.QueueAction(c.ID, qa); err == nil {
+					queued++
+				}
+				break
+			}
+			if cost > remaining {
+				break
+			}
+			if err := cbt.QueueAction(c.ID, qa); err != nil {
+				break
+			}
+			queued++
+			if targetName == "" {
+				// No valid target resolved — a lone default without a target is
+				// effectively a pass; queue once and stop to avoid infinite loops.
+				break
+			}
 		}
 
-		if err := cbt.QueueAction(c.ID, qa); err != nil {
+		if queued == 0 {
 			continue
 		}
 
-		// Notify player of the auto-queued action.
+		// Notify player of the auto-queued action(s).
 		narrative := fmt.Sprintf("[Auto] Your default action: %s", action)
 		if targetName != "" && action != "pass" {
-			narrative = fmt.Sprintf("[Auto] Your default action: %s → %s", action, targetName)
+			if queued == 1 {
+				narrative = fmt.Sprintf("[Auto] Your default action: %s → %s", action, targetName)
+			} else {
+				narrative = fmt.Sprintf("[Auto] Your default action: %s → %s (%d queued to spend remaining AP)",
+					action, targetName, queued)
+			}
 		}
 		notifyEvt := &gamev1.ServerEvent{
 			Payload: &gamev1.ServerEvent_Message{

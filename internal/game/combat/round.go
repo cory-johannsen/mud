@@ -353,6 +353,24 @@ func applyConditionIfAllowed(cbt *Combat, uid, condID string, stacks, duration i
 	return true
 }
 
+// mapPenaltyFor returns the Multiple Attack Penalty for the Nth attack in a
+// round, where attacksMade is the count of prior attack rolls this combatant
+// has already resolved this round (0 for the first attack, 1 for the second,
+// etc). PF2e MAP is -5 for the 2nd attack, -10 for the 3rd and beyond.
+//
+// Postcondition: returns 0 when attacksMade <= 0; -5 when attacksMade == 1;
+// -10 when attacksMade >= 2.
+func mapPenaltyFor(attacksMade int) int {
+	switch {
+	case attacksMade <= 0:
+		return 0
+	case attacksMade == 1:
+		return -5
+	default:
+		return -10
+	}
+}
+
 // applyAttackConditions applies conditions triggered by an attack result:
 //   - CritFailure: attacker gains prone (permanent, -2 to attacks)
 //   - CritSuccess: target gains flat_footed (1 round)
@@ -727,6 +745,9 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 				r.AttackTotal += atkBonus
 				r.AttackTotal += acBonus
 				r.AttackTotal += actor.InitiativeBonus
+				// GH #232: cross-action Multiple Attack Penalty.
+				r.AttackTotal += mapPenaltyFor(actor.AttacksMadeThisRound)
+				actor.AttacksMadeThisRound++
 				if flanked {
 					r.AttackTotal += 2
 				}
@@ -889,6 +910,10 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 				r1.AttackTotal += atkBonus1
 				r1.AttackTotal += acBonus1
 				r1.AttackTotal += actor.InitiativeBonus
+				// GH #232: cross-action MAP. Within a Strike the first attack uses
+				// the counter value at entry; the second uses the incremented value.
+				r1.AttackTotal += mapPenaltyFor(actor.AttacksMadeThisRound)
+				actor.AttacksMadeThisRound++
 				effectiveAC1 := target.AC + target.InitiativeBonus
 				r1.AttackTotal = hookAttackRoll(cbt, actor, target, r1.AttackTotal)
 				r1.Outcome = OutcomeFor(r1.AttackTotal, effectiveAC1)
@@ -995,11 +1020,16 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 				r2.AttackTotal += atkBonus2
 				r2.AttackTotal += acBonus2
 				r2.AttackTotal += actor.InitiativeBonus
-				r2.AttackTotal -= 5
+				// GH #232: cross-action MAP. The counter now reflects the first
+				// strike, so this attack picks up -5 (or -10 if there were prior
+				// attack actions this round).
+				mapBonus2 := mapPenaltyFor(actor.AttacksMadeThisRound)
+				r2.AttackTotal += mapBonus2
+				actor.AttacksMadeThisRound++
 				// REQ-BUG121: snap_shot waives the MAP penalty when the first strike missed.
 				if (r1.Outcome == Failure || r1.Outcome == CritFailure) && cbt.sessionGetter != nil {
 					if ps, ok := cbt.sessionGetter(actor.ID); ok && ps.PassiveFeats["snap_shot"] {
-						r2.AttackTotal += 5
+						r2.AttackTotal -= mapBonus2
 					}
 				}
 				effectiveAC2 := target.AC + target.InitiativeBonus
@@ -1192,6 +1222,9 @@ func resolveFireBurst(cbt *Combat, actor *Combatant, qa QueuedAction, src Source
 		result.AttackTotal = hookAttackRoll(cbt, actor, target, result.AttackTotal)
 		acBonus := condition.ACBonus(cbt.Conditions[target.ID])
 		result.AttackTotal += acBonus
+		// GH #232: each burst shot counts toward cross-action MAP.
+		result.AttackTotal += mapPenaltyFor(actor.AttacksMadeThisRound)
+		actor.AttacksMadeThisRound++
 		effectiveAC := target.AC + target.InitiativeBonus
 		result.Outcome = OutcomeFor(result.AttackTotal, effectiveAC)
 		// Crossfire degradation: burst shot missed but would have hit without cover penalty.
@@ -1295,6 +1328,9 @@ func resolveFireAutomatic(cbt *Combat, actor *Combatant, qa QueuedAction, src So
 		result.AttackTotal = hookAttackRoll(cbt, actor, target, result.AttackTotal)
 		acBonus := condition.ACBonus(cbt.Conditions[target.ID])
 		result.AttackTotal += acBonus
+		// GH #232: each automatic-fire shot counts toward cross-action MAP.
+		result.AttackTotal += mapPenaltyFor(actor.AttacksMadeThisRound)
+		actor.AttacksMadeThisRound++
 		effectiveAC := target.AC + target.InitiativeBonus
 		result.Outcome = OutcomeFor(result.AttackTotal, effectiveAC)
 		// Crossfire degradation: automatic shot missed but would have hit without cover penalty.

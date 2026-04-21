@@ -354,9 +354,21 @@ func TestAutoQueuePlayers_Property(t *testing.T) {
 				rt.Errorf("player with existing actions: count changed: before=%d after=%d", beforeCount, afterCount)
 			}
 		} else {
-			// Player had no actions: auto-queue must add exactly one action.
-			if afterCount != 1 {
-				rt.Errorf("unsubmitted player should have exactly 1 action after autoQueuePlayersLocked, got %d", afterCount)
+			// GH #232: auto-queue exhausts remaining AP with default actions.
+			// attack=1 AP → 3 actions, strike=2 AP → 1 strike + 1 attack = 2 actions,
+			// pass=0 AP but submits the queue → exactly 1 action.
+			var wantMin int
+			switch defaultAction {
+			case "attack":
+				wantMin = 3
+			case "strike":
+				wantMin = 2
+			case "pass":
+				wantMin = 1
+			}
+			if afterCount < wantMin {
+				rt.Errorf("unsubmitted player with default %q should have at least %d actions after autoQueuePlayersLocked, got %d",
+					defaultAction, wantMin, afterCount)
 			}
 		}
 	})
