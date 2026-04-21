@@ -78,6 +78,10 @@ class_features:
     activate_text: "You raise your voice and all eyes snap to you."
     condition_id: command_attention_active
     description: "Grant allies within earshot +1 attack and damage rolls for the current encounter."
+    effect:
+      type: condition
+      target: self
+      condition_id: command_attention_active
 
   - id: fast_talk
     name: Fast Talk
@@ -262,6 +266,11 @@ class_features:
     action_cost: 1
     activate_text: "You throw a rapid flurry of blows."
     description: "Make two unarmed strikes as a single action with only a -1 penalty to each."
+    effect:
+      type: damage
+      target: target
+      amount: "2d4"
+      damage_type: bludgeoning
 
   - id: resilience
     name: Resilience
@@ -371,6 +380,11 @@ class_features:
     aoe_radius: 30
     activate_text: "You break into a full sprint before anyone can react."
     description: "Once per encounter, before your first turn begins, move up to your speed and make one melee or ranged attack."
+    effect:
+      type: damage
+      target: target
+      amount: "1d6"
+      damage_type: bludgeoning
 
   - id: boarding_action
     name: Boarding Action
@@ -598,6 +612,10 @@ class_features:
     action_cost: 1
     activate_text: "You create a perfect distraction at exactly the right moment."
     description: "Once per encounter, force one enemy to waste their next action pursuing a false lead."
+    effect:
+      type: condition
+      target: target
+      condition_id: delirium_confused
 
   - id: unreadable
     name: Unreadable
@@ -645,6 +663,10 @@ class_features:
     aoe_radius: 15
     activate_text: "You invoke fire and damnation against your enemies."
     description: "Once per encounter, make a single Intimidate check against all enemies within 20 ft simultaneously."
+    effect:
+      type: condition
+      target: target
+      condition_id: frightened
 
   - id: read_the_signs
     name: Read the Signs
@@ -703,6 +725,10 @@ class_features:
     aoe_radius: 30
     activate_text: "You turn on the charm and command the room."
     description: "Once per encounter, make an opposed Perform check to distract all enemies within 30 ft for 1 round."
+    effect:
+      type: condition
+      target: target
+      condition_id: flat_footed
 
   - id: mesmerize
     name: Mesmerize
@@ -713,6 +739,10 @@ class_features:
     action_cost: 2
     activate_text: "You fix them with a look that stops them cold."
     description: "Once per encounter, one humanoid must succeed on a Will save or be fascinated for 1 round."
+    effect:
+      type: condition
+      target: target
+      condition_id: flat_footed
 
   - id: make_an_example
     name: Make an Example
@@ -724,6 +754,10 @@ class_features:
     aoe_radius: 15
     activate_text: "You make absolutely clear what happens to people who don't comply."
     description: "Intimidate a target; on success they take no hostile action against you for 24 hours."
+    effect:
+      type: condition
+      target: target
+      condition_id: frightened
 
   - id: trust_fund
     name: Trust Fund
@@ -800,6 +834,10 @@ class_features:
     action_cost: 1
     activate_text: "You say exactly the wrong thing to exactly the right people."
     description: "Your provocations cause NPCs to redirect their hostility toward each other rather than you for 1 scene."
+    effect:
+      type: condition
+      target: target
+      condition_id: delirium_confused
 
   # nerd jobs
   - id: divine_insight
@@ -931,6 +969,10 @@ class_features:
     aoe_radius: 15
     activate_text: "You speak with absolute conviction and leave no room for doubt."
     description: "Once per day, one NPC who fails a Will save becomes a devoted follower for 24 hours."
+    effect:
+      type: condition
+      target: target
+      condition_id: charmed
 
   - id: defensive_driving
     name: Defensive Driving
@@ -987,6 +1029,9 @@ class_features:
     action_cost: 2
     activate_text: "You administer emergency trauma care."
     description: "Restore 2d8 + your Medicine modifier HP to a creature as a single action; usable once per target per day."
+    effect:
+      type: heal
+      amount: "2d8"
 
   - id: evasive_maneuvers
     name: Evasive Maneuvers
@@ -997,6 +1042,10 @@ class_features:
     action_cost: 1
     activate_text: "You throw the controls into a hard bank."
     description: "Once per encounter, avoid one attack targeting your vehicle by succeeding on a Piloting check vs. the attack roll."
+    effect:
+      type: condition
+      target: self
+      condition_id: evasive
 
   - id: always_be_closing
     name: Always Be Closing
