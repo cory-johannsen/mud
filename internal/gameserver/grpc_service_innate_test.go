@@ -119,7 +119,9 @@ func TestHandleUse_InnateExhausted_ReturnsNoUsesMessage(t *testing.T) {
 	assert.Empty(t, repo.decremented, "Decrement must not be called when exhausted")
 }
 
-// REQ-INN3: use <tech> not in innate techs → "You don't have innate tech <tech>."
+// REQ-INN3: use <tech> not in prepared / known / innate slots → descriptive
+// message (the previous "don't have innate tech" wording was misleading when
+// the tech was granted via an archetype pool but not yet prepared — GH #236).
 func TestHandleUse_InnateNotKnown_ReturnsNotKnownMessage(t *testing.T) {
 	repo := &innateRepoForGrpcTest{slots: map[string]*session.InnateSlot{}}
 	svc, uid := innateTestService(t, repo)
@@ -133,7 +135,10 @@ func TestHandleUse_InnateNotKnown_ReturnsNotKnownMessage(t *testing.T) {
 	require.NotNil(t, evt)
 
 	msg := evt.GetMessage().GetContent()
-	assert.Contains(t, msg, "don't have innate tech acid_spit")
+	assert.Contains(t, msg, "acid_spit",
+		"error message must mention the tech id or name")
+	assert.Contains(t, msg, "prepared or available",
+		"error message must explain the tech isn't prepared/available (GH #236)")
 }
 
 // REQ-INN4: use <tech> unlimited (MaxUses=0) → activation message; Decrement NOT called.

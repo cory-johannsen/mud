@@ -8949,7 +8949,21 @@ innateCheck:
 		if evt, err := s.tryRoomEquipFallback(uid, sess.RoomID, abilityID); evt != nil || err != nil {
 			return evt, err
 		}
-		return messageEvent(fmt.Sprintf("You don't have innate tech %s.", innateTechBaseID)), nil
+		// GH #236: the tech may exist in the registry (e.g. granted via an
+		// archetype pool) but not yet in prepared / known / innate slots on
+		// this character. Emit a descriptive message rather than the
+		// misleading "you don't have innate tech" wording, which implied the
+		// tech was missing entirely.
+		if s.techRegistry != nil {
+			if def, ok := s.techRegistry.Get(innateTechBaseID); ok && def != nil {
+				name := def.Name
+				if name == "" {
+					name = innateTechBaseID
+				}
+				return messageEvent(fmt.Sprintf("You don't have %s prepared or available. Prepare it from your tech pool or select it as an innate first.", name)), nil
+			}
+		}
+		return messageEvent(fmt.Sprintf("You don't have %s prepared or available.", innateTechBaseID)), nil
 	}
 	// REQ-USE-1: fall through to room equipment when no feat/ability matched.
 	if evt, err := s.tryRoomEquipFallback(uid, sess.RoomID, abilityID); evt != nil || err != nil {
