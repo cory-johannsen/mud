@@ -46,13 +46,20 @@ func overpowerFeatDef() *ruleset.Feat {
 	}
 }
 
-// overpowerCondReg returns a condition registry containing brutal_surge_active.
+// overpowerCondReg returns a condition registry containing brutal_surge_active
+// and overpower_committed.
 func overpowerCondReg() *condition.Registry {
 	reg := condition.NewRegistry()
 	reg.Register(&condition.ConditionDef{
 		ID:           overpowerCondID,
 		Name:         "Brutal Surge Active",
 		DurationType: "encounter",
+	})
+	reg.Register(&condition.ConditionDef{
+		ID:              "overpower_committed",
+		Name:            "Overpower Committed",
+		DurationType:    "rounds",
+		RestrictActions: []string{"attack", "strike"},
 	})
 	return reg
 }
@@ -231,6 +238,68 @@ func TestHandleUse_Overpower_OffHandOccupied_IsRejected(t *testing.T) {
 
 	apAfter := apRemainingForPlayer(combatH, uid, overpowerRoom)
 	assert.Equal(t, apBefore, apAfter, "AP must not be spent when Overpower is rejected")
+}
+
+// TestHandleAttack_AfterOverpower_Rejected verifies GH #231: after using
+// Overpower, further handleAttack calls in the same round return a message
+// event rejecting the attack, so the player cannot queue additional attacks.
+//
+// Precondition: Player is in combat with 3 AP and empty off-hand; uses Overpower.
+// Postcondition: Subsequent handleAttack returns a MessageEvent whose content
+// mentions "committed"; the attack is not queued.
+func TestHandleAttack_AfterOverpower_Rejected(t *testing.T) {
+	const uid = "u_op_block_attack"
+	svc, sessMgr, npcMgr, combatH := newOverpowerSvc(t)
+
+	sess := addOverpowerPlayer(t, sessMgr, uid)
+	spawnOverpowerNPC(t, npcMgr, overpowerRoom, "GruntBlock")
+
+	_, err := combatH.Attack(uid, "GruntBlock")
+	require.NoError(t, err)
+	combatH.cancelTimer(overpowerRoom)
+	sess.Status = statusInCombat
+
+	// Activate Overpower. The initial Attack queued by combatH.Attack consumed 1
+	// AP, Overpower consumes 2 more -> player now at 0 AP and has
+	// overpower_committed active.
+	_, err = svc.handleUse(uid, overpowerFeatID, "", -1, -1)
+	require.NoError(t, err)
+	require.True(t, svc.overpowerCommitted(uid),
+		"player must have overpower_committed after using Overpower")
+
+	evt, err := svc.handleAttack(uid, &gamev1.AttackRequest{Target: "GruntBlock"})
+	require.NoError(t, err)
+	require.NotNil(t, evt, "handleAttack must return an event")
+	msg := evt.GetMessage()
+	require.NotNil(t, msg, "expected Message event rejecting the attack")
+	assert.Contains(t, msg.Content, "committed",
+		"rejection message must mention that attacks are committed (GH #231)")
+}
+
+// TestHandleStrike_AfterOverpower_Rejected is the Strike counterpart of
+// TestHandleAttack_AfterOverpower_Rejected.
+func TestHandleStrike_AfterOverpower_Rejected(t *testing.T) {
+	const uid = "u_op_block_strike"
+	svc, sessMgr, npcMgr, combatH := newOverpowerSvc(t)
+
+	sess := addOverpowerPlayer(t, sessMgr, uid)
+	spawnOverpowerNPC(t, npcMgr, overpowerRoom, "GruntBlockS")
+
+	_, err := combatH.Attack(uid, "GruntBlockS")
+	require.NoError(t, err)
+	combatH.cancelTimer(overpowerRoom)
+	sess.Status = statusInCombat
+
+	_, err = svc.handleUse(uid, overpowerFeatID, "", -1, -1)
+	require.NoError(t, err)
+
+	evt, err := svc.handleStrike(uid, &gamev1.StrikeRequest{Target: "GruntBlockS"})
+	require.NoError(t, err)
+	require.NotNil(t, evt, "handleStrike must return an event")
+	msg := evt.GetMessage()
+	require.NotNil(t, msg, "expected Message event rejecting the strike")
+	assert.Contains(t, msg.Content, "committed",
+		"rejection message must mention that attacks are committed (GH #231)")
 }
 
 // TestProperty_Overpower_EmptyOffHand_AlwaysConsumesAP is a property-based companion to

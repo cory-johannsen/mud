@@ -3706,6 +3706,11 @@ func (s *GameServiceServer) handleAttack(uid string, req *gamev1.AttackRequest) 
 	if sess, ok := s.sessions.GetPlayer(uid); ok && sess.Conditions != nil && sess.Conditions.Has("submerged") {
 		return messageEvent("You are submerged underwater and cannot attack. Swim or Escape to surface."), nil
 	}
+	// GH #231: after Overpower, further attack actions are blocked until the
+	// player's next turn (overpower_committed condition, rounds=1).
+	if s.overpowerCommitted(uid) {
+		return messageEvent("You've committed your attacks this round to the Overpower strike."), nil
+	}
 
 	// Safe-room and danger-level enforcement.
 	if sess, ok := s.sessions.GetPlayer(uid); ok {
@@ -3850,6 +3855,11 @@ func (s *GameServiceServer) handlePass(uid string) (*gamev1.ServerEvent, error) 
 }
 
 func (s *GameServiceServer) handleStrike(uid string, req *gamev1.StrikeRequest) (*gamev1.ServerEvent, error) {
+	// GH #231: after Overpower, further attack actions are blocked until the
+	// player's next turn.
+	if s.overpowerCommitted(uid) {
+		return messageEvent("You've committed your attacks this round to the Overpower strike."), nil
+	}
 	events, err := s.combatH.Strike(uid, req.GetTarget())
 	if err != nil {
 		return nil, err
@@ -11640,6 +11650,31 @@ func (s *GameServiceServer) handleWrath(uid string) (*gamev1.ServerEvent, error)
 	return messageEvent("Fury overtakes you. You stop holding back."), nil
 }
 
+// overpowerCommitted reports whether the given player has the
+// overpower_committed condition active on their combatant or session — true
+// when Overpower was used this round and further attacks are blocked.
+//
+// Precondition: none.
+// Postcondition: returns true iff overpower_committed is present on the
+// player's combat condition set (preferred) or their session condition set.
+func (s *GameServiceServer) overpowerCommitted(uid string) bool {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return false
+	}
+	if s.combatH != nil {
+		if cbt := s.combatH.ActiveCombatForPlayer(uid); cbt != nil {
+			if set := cbt.Conditions[sess.UID]; set != nil && set.Has("overpower_committed") {
+				return true
+			}
+		}
+	}
+	if sess.Conditions != nil && sess.Conditions.Has("overpower_committed") {
+		return true
+	}
+	return false
+}
+
 // handleOverpower activates the Overpower feat, applying the brutal_surge_active condition.
 //
 // REQ-60-1: Overpower costs 2 AP when activated during combat.
@@ -11674,31 +11709,37 @@ func (s *GameServiceServer) handleOverpower(uid string) (*gamev1.ServerEvent, er
 		return errorEvent(err.Error()), nil
 	}
 
-	// Apply brutal_surge_active to self (combat condition set preferred).
+	// Apply brutal_surge_active (encounter-long +dmg/-AC buff) and
+	// overpower_committed (GH #231: blocks further attack/strike actions until
+	// the start of the player's next turn).
 	if s.condRegistry != nil {
-		if def, ok := s.condRegistry.Get("brutal_surge_active"); ok {
-			var cbt *combat.Combat
-			if s.combatH != nil {
-				cbt = s.combatH.ActiveCombatForPlayer(uid)
+		var cbt *combat.Combat
+		if s.combatH != nil {
+			cbt = s.combatH.ActiveCombatForPlayer(uid)
+		}
+		applyCondition := func(id string, duration int) {
+			def, ok := s.condRegistry.Get(id)
+			if !ok {
+				return
 			}
 			if cbt != nil {
 				if applySet := cbt.Conditions[sess.UID]; applySet != nil {
-					if err := applySet.Apply(sess.UID, def, 1, -1); err != nil {
-						s.logger.Warn("handleOverpower: failed to apply brutal_surge_active",
-							zap.String("uid", uid),
-							zap.Error(err),
-						)
+					if err := applySet.Apply(sess.UID, def, 1, duration); err != nil {
+						s.logger.Warn("handleOverpower: failed to apply condition",
+							zap.String("uid", uid), zap.String("cond", id), zap.Error(err))
 					}
+					return
 				}
-			} else if sess.Conditions != nil {
-				if err := sess.Conditions.Apply(sess.UID, def, 1, -1); err != nil {
-					s.logger.Warn("handleOverpower: failed to apply brutal_surge_active (session)",
-						zap.String("uid", uid),
-						zap.Error(err),
-					)
+			}
+			if sess.Conditions != nil {
+				if err := sess.Conditions.Apply(sess.UID, def, 1, duration); err != nil {
+					s.logger.Warn("handleOverpower: failed to apply condition (session)",
+						zap.String("uid", uid), zap.String("cond", id), zap.Error(err))
 				}
 			}
 		}
+		applyCondition("brutal_surge_active", -1)
+		applyCondition("overpower_committed", 1)
 	}
 	return messageEvent("You put everything into it."), nil
 }
