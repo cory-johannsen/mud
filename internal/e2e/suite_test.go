@@ -129,26 +129,89 @@ func stopSubprocess(proc *exec.Cmd) {
 	}
 }
 
-// startSubprocess starts a subprocess and drains its stderr asynchronously.
+// stderrRingBuffer is a goroutine-safe fixed-capacity ring of the most
+// recent stderr lines produced by a subprocess. It is used to surface a
+// subprocess's actual error output when the harness gives up waiting for
+// it (GH #234).
+type stderrRingBuffer struct {
+	mu       sync.Mutex
+	capacity int
+	lines    []string
+}
+
+func newStderrRingBuffer(capacity int) *stderrRingBuffer {
+	return &stderrRingBuffer{capacity: capacity}
+}
+
+func (r *stderrRingBuffer) append(line string) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	if len(r.lines) >= r.capacity {
+		r.lines = r.lines[1:]
+	}
+	r.lines = append(r.lines, line)
+}
+
+// Snapshot returns a joined copy of the lines currently in the buffer.
+func (r *stderrRingBuffer) Snapshot() string {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	if len(r.lines) == 0 {
+		return ""
+	}
+	buf := make([]byte, 0, len(r.lines)*80)
+	for i, ln := range r.lines {
+		if i > 0 {
+			buf = append(buf, '\n')
+		}
+		buf = append(buf, ln...)
+	}
+	return string(buf)
+}
+
+// startSubprocess starts a subprocess and captures its stderr into a ring
+// buffer so the last N lines are available to diagnose failures (GH #234).
 //
-// Postcondition: process is running; caller must call stopSubprocess on cleanup.
-func startSubprocess(name, bin string, args []string, env []string) (*exec.Cmd, error) {
+// Postcondition: process is running; stderrBuf.Snapshot() returns the most
+// recent stderr lines; caller must call stopSubprocess on cleanup.
+func startSubprocess(name, bin string, args []string, env []string) (*exec.Cmd, *stderrRingBuffer, error) {
 	cmd := exec.Command(bin, args...)
 	cmd.Env = append(os.Environ(), env...)
 	stderr, err := cmd.StderrPipe()
 	if err != nil {
-		return nil, fmt.Errorf("%s stderr pipe: %w", name, err)
+		return nil, nil, fmt.Errorf("%s stderr pipe: %w", name, err)
 	}
 	if err := cmd.Start(); err != nil {
-		return nil, fmt.Errorf("starting %s: %w", name, err)
+		return nil, nil, fmt.Errorf("starting %s: %w", name, err)
 	}
+	buf := newStderrRingBuffer(100)
 	go func() {
 		s := bufio.NewScanner(stderr)
 		for s.Scan() {
-			_ = s.Text()
+			buf.append(s.Text())
 		}
 	}()
-	return cmd, nil
+	return cmd, buf, nil
+}
+
+// splitLines returns s split on newlines without trailing empties. Used to
+// count captured stderr lines for diagnostic messages (GH #234).
+func splitLines(s string) []string {
+	if s == "" {
+		return nil
+	}
+	out := []string{}
+	start := 0
+	for i := 0; i < len(s); i++ {
+		if s[i] == '\n' {
+			out = append(out, s[start:i])
+			start = i + 1
+		}
+	}
+	if start < len(s) {
+		out = append(out, s[start:])
+	}
+	return out
 }
 
 // pollPort dials addr every 200ms until it accepts or deadline elapses (REQ-ITS-2).
@@ -330,8 +393,18 @@ func runMain(m *testing.M) int {
 	}
 
 	// Step 6: Start gameserver.
-	fmt.Fprintf(os.Stderr, "e2e: starting gameserver on :%d...\n", grpcPort)
-	gsProc, err := startSubprocess("gameserver", gameserverBin, []string{
+	// GH #234: the readiness timeout is configurable via MUD_E2E_READY_TIMEOUT
+	// so slower machines (or cold content loads) do not spuriously fail.
+	// Defaults to 60s, up from the previous hardcoded 30s that was too tight
+	// for the ~40 content directories loaded at boot.
+	readyTimeout := 60 * time.Second
+	if raw := os.Getenv("MUD_E2E_READY_TIMEOUT"); raw != "" {
+		if parsed, err := time.ParseDuration(raw); err == nil && parsed > 0 {
+			readyTimeout = parsed
+		}
+	}
+	fmt.Fprintf(os.Stderr, "e2e: starting gameserver on :%d (ready timeout: %s)...\n", grpcPort, readyTimeout)
+	gsProc, gsStderr, err := startSubprocess("gameserver", gameserverBin, []string{
 		"-config", cfgFile,
 		"-zones", filepath.Join(root, "content/zones"),
 		"-npcs-dir", filepath.Join(root, "content/npcs"),
@@ -362,6 +435,7 @@ func runMain(m *testing.M) int {
 		"-materials-file", filepath.Join(root, "content/materials.yaml"),
 		"-recipes-dir", filepath.Join(root, "content/recipes"),
 		"-downtime-queue-limits", filepath.Join(root, "content/downtime_queue_limits.yaml"),
+		"-quests-dir", filepath.Join(root, "content/quests"),
 	}, nil)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "e2e: starting gameserver: %v\n", err)
@@ -370,14 +444,19 @@ func runMain(m *testing.M) int {
 	defer stopSubprocess(gsProc)
 
 	gsAddr := fmt.Sprintf("127.0.0.1:%d", grpcPort)
-	if err := pollPort(gsAddr, 30*time.Second); err != nil {
-		fmt.Fprintf(os.Stderr, "e2e: gameserver not ready: %v\n", err)
+	if err := pollPort(gsAddr, readyTimeout); err != nil {
+		if tail := gsStderr.Snapshot(); tail != "" {
+			fmt.Fprintf(os.Stderr, "e2e: gameserver not ready: %v\ngameserver stderr (last %d lines):\n%s\n",
+				err, len(splitLines(tail)), tail)
+		} else {
+			fmt.Fprintf(os.Stderr, "e2e: gameserver not ready: %v (no stderr output captured)\n", err)
+		}
 		return 1
 	}
 
 	// Step 7: Start frontend.
 	fmt.Fprintf(os.Stderr, "e2e: starting frontend on :%d (headless :%d)...\n", frontendPort, headlessPort)
-	feProc, err := startSubprocess("frontend", frontendBin, []string{
+	feProc, feStderr, err := startSubprocess("frontend", frontendBin, []string{
 		"-config", cfgFile,
 		"-regions", filepath.Join(root, "content/regions"),
 		"-teams", filepath.Join(root, "content/teams"),
@@ -393,8 +472,13 @@ func runMain(m *testing.M) int {
 	}
 	defer stopSubprocess(feProc)
 
-	if err := pollPort(e2eState.HeadlessAddr, 30*time.Second); err != nil {
-		fmt.Fprintf(os.Stderr, "e2e: headless port not ready: %v\n", err)
+	if err := pollPort(e2eState.HeadlessAddr, readyTimeout); err != nil {
+		if tail := feStderr.Snapshot(); tail != "" {
+			fmt.Fprintf(os.Stderr, "e2e: headless port not ready: %v\nfrontend stderr (last %d lines):\n%s\n",
+				err, len(splitLines(tail)), tail)
+		} else {
+			fmt.Fprintf(os.Stderr, "e2e: headless port not ready: %v (no stderr output captured)\n", err)
+		}
 		return 1
 	}
 
