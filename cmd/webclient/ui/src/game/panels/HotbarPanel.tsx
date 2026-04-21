@@ -266,6 +266,24 @@ export function HotbarPanel() {
   const [editingSlot, setEditingSlot] = useState<number | null>(null)
   const [tooltip, setTooltip] = useState<{ slot: HotbarSlot; pos: { x: number; y: number } } | null>(null)
 
+  // GH #235: rapid clicks on the switch buttons / Ctrl+Up/Down fire `create`
+  // faster than the server can respond, so the stale `hotbarCount=1` state
+  // kept triggering create until the server hit its `max` limit and returned
+  // "Hotbar limit reached". A ref-backed flag is set synchronously so the
+  // second click in the same sync tick sees the pending create and short-
+  // circuits. The ref is cleared when a HotbarUpdate bumps hotbarCount so
+  // later legitimate creates can fire again.
+  const pendingCreateRef = useRef(false)
+  useEffect(() => {
+    if (hotbarCount > 1) pendingCreateRef.current = false
+  }, [hotbarCount])
+  function requestCreateOnce() {
+    if (pendingCreateRef.current) return
+    if (hotbarCount >= maxHotbars) return
+    pendingCreateRef.current = true
+    sendMessage('HotbarRequest', { action: 'create' })
+  }
+
   function activate(idx: number) {
     const slot = hotbarSlots[idx]
     if (!slot?.ref) return
@@ -329,9 +347,7 @@ export function HotbarPanel() {
       e.preventDefault()
       e.stopPropagation()
       if (hotbarCount <= 1) {
-        if (hotbarCount < maxHotbars) {
-          sendMessage('HotbarRequest', { action: 'create' })
-        }
+        requestCreateOnce()
         return
       }
       if (e.key === 'ArrowUp') {
@@ -348,9 +364,7 @@ export function HotbarPanel() {
 
   const switchUp = () => {
     if (hotbarCount <= 1) {
-      if (hotbarCount < maxHotbars) {
-        sendMessage('HotbarRequest', { action: 'create' })
-      }
+      requestCreateOnce()
       return
     }
     const target = activeHotbarIndex === 1 ? hotbarCount : activeHotbarIndex - 1
@@ -358,16 +372,14 @@ export function HotbarPanel() {
   }
   const switchDown = () => {
     if (hotbarCount <= 1) {
-      if (hotbarCount < maxHotbars) {
-        sendMessage('HotbarRequest', { action: 'create' })
-      }
+      requestCreateOnce()
       return
     }
     const target = activeHotbarIndex === hotbarCount ? 1 : activeHotbarIndex + 1
     sendMessage('HotbarRequest', { action: 'switch', hotbar_index: target })
   }
   const createHotbar = () => {
-    sendMessage('HotbarRequest', { action: 'create' })
+    requestCreateOnce()
   }
 
   function handleSave(slot: number, text: string) {

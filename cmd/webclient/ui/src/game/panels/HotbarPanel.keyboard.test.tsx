@@ -160,6 +160,46 @@ describe('HotbarPanel keyboard shortcuts', () => {
     expect(mockSendMessage).not.toHaveBeenCalledWith('HotbarRequest', { action: 'create' })
   })
 
+  // GH #235: rapid clicks on the switch buttons when hotbarCount=1 previously
+  // fired one create per click, so before the server HotbarUpdate arrived the
+  // client would send many creates in quick succession and the server would
+  // eventually reply with "Hotbar limit reached (max N)". With the
+  // pendingCreate guard, only the first click fires a create; subsequent
+  // clicks are ignored until hotbarCount increases.
+  it('rapid Ctrl+ArrowDown at hotbarCount=1 sends exactly one create', () => {
+    setupGame([], null, { activeHotbarIndex: 1, hotbarCount: 1, maxHotbars: 4 })
+    render(<HotbarPanel />)
+    fireEvent.keyDown(window, { key: 'ArrowDown', ctrlKey: true })
+    fireEvent.keyDown(window, { key: 'ArrowDown', ctrlKey: true })
+    fireEvent.keyDown(window, { key: 'ArrowDown', ctrlKey: true })
+    fireEvent.keyDown(window, { key: 'ArrowDown', ctrlKey: true })
+    const creates = mockSendMessage.mock.calls.filter(
+      ([topic, payload]) => topic === 'HotbarRequest' && (payload as { action: string }).action === 'create',
+    )
+    expect(creates.length).toBe(1)
+  })
+
+  // GH #235: cycling past the last hotbar at hotbarCount == maxHotbars must
+  // wrap to 1 — no create, no server "limit reached" error.
+  it('Ctrl+ArrowDown at hotbarCount=maxHotbars wraps to 1 (no create)', () => {
+    setupGame([], null, { activeHotbarIndex: 4, hotbarCount: 4, maxHotbars: 4 })
+    render(<HotbarPanel />)
+    fireEvent.keyDown(window, { key: 'ArrowDown', ctrlKey: true })
+    expect(mockSendMessage).toHaveBeenCalledWith('HotbarRequest', { action: 'switch', hotbar_index: 1 })
+    const creates = mockSendMessage.mock.calls.filter(
+      ([topic, payload]) => topic === 'HotbarRequest' && (payload as { action: string }).action === 'create',
+    )
+    expect(creates.length).toBe(0)
+  })
+
+  // GH #235: same wrap guarantee for the reverse direction.
+  it('Ctrl+ArrowUp at activeHotbarIndex=1 wraps to the last hotbar', () => {
+    setupGame([], null, { activeHotbarIndex: 1, hotbarCount: 4, maxHotbars: 4 })
+    render(<HotbarPanel />)
+    fireEvent.keyDown(window, { key: 'ArrowUp', ctrlKey: true })
+    expect(mockSendMessage).toHaveBeenCalledWith('HotbarRequest', { action: 'switch', hotbar_index: 4 })
+  })
+
   it('resumes intercepting digit keys after choicePrompt becomes null', () => {
     const prompt = { featureId: 'tech_choice', prompt: 'Choose:', options: ['[shock_wave] Shock Wave'] }
     setupGame([makeSlot('look')], prompt)
