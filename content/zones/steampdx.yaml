@@ -2,7 +2,7 @@ zone:
   id: steampdx
   danger_level: dangerous
   min_level: 40
-  max_level: 55
+  max_level: 80
   world_x: 0
   world_y: -2
   name: SteamPDX

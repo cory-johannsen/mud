@@ -2,7 +2,7 @@ zone:
   id: club_privata
   danger_level: dangerous
   min_level: 40
-  max_level: 55
+  max_level: 80
   world_x: 0
   world_y: -1
   name: Club Privata

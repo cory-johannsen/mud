@@ -2,7 +2,7 @@ zone:
   id: lake_oswego
   danger_level: dangerous
   min_level: 45
-  max_level: 60
+  max_level: 90
   world_x: 0
   world_y: 4
   script_dir: content/scripts/zones/lake_oswego

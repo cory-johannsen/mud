@@ -7,7 +7,7 @@ zone:
   faction_id: wooks
   danger_level: sketchy
   min_level: 36
-  max_level: 48
+  max_level: 70
   world_x: -2
   world_y: 5
   start_room: tofteville_gate

@@ -7,7 +7,7 @@ zone:
   faction_id: ''
   danger_level: dangerous
   min_level: 36
-  max_level: 50
+  max_level: 70
   world_x: -2
   world_y: 4
   start_room: ocf_main_gate
