@@ -308,11 +308,29 @@ func (s *GameServiceServer) doTrainTech(
 		if sess.PreparedTechs == nil {
 			sess.PreparedTechs = make(map[int][]*session.PreparedSlot)
 		}
-		idx := len(sess.PreparedTechs[matched.techLevel])
-		sess.PreparedTechs[matched.techLevel] = append(
-			sess.PreparedTechs[matched.techLevel],
-			&session.PreparedSlot{TechID: techID},
-		)
+		// Find the next available slot index: reuse a nil gap if present, otherwise append.
+		// This is necessary because BackfillLevelUpTechnologies may delete/rearrange slots,
+		// leaving nil entries in the in-memory slice (padded by GetAll). Using len() on a
+		// nil-padded slice produces an inflated index that does not survive a DB reload.
+		slots := sess.PreparedTechs[matched.techLevel]
+		idx := len(slots) // default: append at end
+		reusingGap := false
+		for i, s := range slots {
+			if s == nil {
+				idx = i
+				reusingGap = true
+				break
+			}
+		}
+		newSlot := &session.PreparedSlot{TechID: techID}
+		if reusingGap {
+			sess.PreparedTechs[matched.techLevel][idx] = newSlot
+		} else {
+			sess.PreparedTechs[matched.techLevel] = append(
+				sess.PreparedTechs[matched.techLevel],
+				newSlot,
+			)
+		}
 		// Persist prepared slot to DB.
 		if s.preparedTechRepo != nil && sess.CharacterID > 0 {
 			if err := s.preparedTechRepo.Set(ctx, sess.CharacterID, matched.techLevel, idx, techID); err != nil {

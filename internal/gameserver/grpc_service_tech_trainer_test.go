@@ -404,3 +404,88 @@ func TestProperty_DoTrainTech_WizardKnownTechsNeverEmpty(t *testing.T) {
 		}
 	})
 }
+
+// TestHandleTrainTech_NilGapSlotReuse verifies that when PreparedTechs for a level contains
+// nil gaps (from BackfillLevelUpTechnologies deletions, as loaded by GetAll), the trainer
+// reuses the first nil gap slot index rather than appending at len().
+//
+// Precondition: sess.PreparedTechs[2] = [slotA, nil, slotC] (gap at index 1).
+// Postcondition: The new tech is placed at index 1 (the gap), not index 3.
+// REQ-GS-NilGap-1: Trainer MUST reuse the first nil gap in PreparedTechs when assigning a slot.
+// REQ-GS-NilGap-2: The assigned slot index MUST correspond to a real DB row that survives reload.
+func TestHandleTrainTech_NilGapSlotReuse(t *testing.T) {
+	svc, uid, trainerName := newTechTrainerTestServer(t)
+	sess, _ := svc.sessions.GetPlayer(uid)
+
+	// Pre-populate level-2 slots with a nil gap at index 1, simulating sparse DB load.
+	slotA := &session.PreparedSlot{TechID: "existing_tech_a"}
+	slotC := &session.PreparedSlot{TechID: "existing_tech_c"}
+	sess.PreparedTechs[2] = []*session.PreparedSlot{slotA, nil, slotC}
+
+	evt, err := svc.handleTrainTech(uid, trainerName, "neural_strike")
+	require.NoError(t, err)
+	require.NotNil(t, evt)
+	msg := evt.GetMessage().GetContent()
+	assert.NotEmpty(t, msg, "success message must be non-empty")
+
+	slots := sess.PreparedTechs[2]
+	// Slice must not grow beyond 3 (gap was reused, not appended).
+	require.Len(t, slots, 3,
+		"REQ-GS-NilGap-1: slice must not grow when a nil gap is reused")
+	// The gap at index 1 must now hold the newly trained tech.
+	require.NotNil(t, slots[1],
+		"REQ-GS-NilGap-1: nil gap at index 1 must be filled by new tech")
+	assert.Equal(t, "neural_strike", slots[1].TechID,
+		"REQ-GS-NilGap-1: neural_strike must occupy the reused nil gap at index 1")
+	// Original slots must be untouched.
+	assert.Equal(t, "existing_tech_a", slots[0].TechID,
+		"REQ-GS-NilGap-2: slot 0 must be unchanged")
+	assert.Equal(t, "existing_tech_c", slots[2].TechID,
+		"REQ-GS-NilGap-2: slot 2 must be unchanged")
+}
+
+// TestProperty_HandleTrainTech_NilGapSlotIndexNeverExceedsLen verifies the property that
+// when nil gaps exist, the assigned slot index is always within the existing slice bounds
+// (i.e., always < len(slots) before training), never equal to len().
+//
+// Precondition: PreparedTechs[2] has at least one nil entry before training.
+// Postcondition: The new tech's index is always < pre-training slice length.
+func TestProperty_HandleTrainTech_NilGapSlotIndexNeverExceedsLen(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		svc, uid, trainerName := newTechTrainerTestServer(t)
+		sess, _ := svc.sessions.GetPlayer(uid)
+
+		// Build a slice of length 2 or 3 with the first element non-nil and rest nil.
+		slotLen := rapid.IntRange(2, 4).Draw(rt, "slotLen")
+		slots := make([]*session.PreparedSlot, slotLen)
+		slots[0] = &session.PreparedSlot{TechID: "placeholder"}
+		// slots[1..] remain nil — guaranteed gap
+		sess.PreparedTechs[2] = slots
+		preLenLevel2 := len(sess.PreparedTechs[2])
+
+		evt, err := svc.handleTrainTech(uid, trainerName, "neural_strike")
+		if err != nil {
+			rt.Fatalf("unexpected error: %v", err)
+		}
+		if evt == nil {
+			rt.Fatalf("expected non-nil event")
+		}
+
+		afterSlots := sess.PreparedTechs[2]
+		// Slice must not grow beyond the pre-training length.
+		if len(afterSlots) > preLenLevel2 {
+			rt.Fatalf("REQ-GS-NilGap-1: slice grew from %d to %d despite nil gap being available",
+				preLenLevel2, len(afterSlots))
+		}
+		// The new tech must appear in the slice.
+		found := false
+		for _, s := range afterSlots {
+			if s != nil && s.TechID == "neural_strike" {
+				found = true
+			}
+		}
+		if !found {
+			rt.Fatalf("REQ-GS-NilGap-1: neural_strike not found in prepared slots after training")
+		}
+	})
+}
