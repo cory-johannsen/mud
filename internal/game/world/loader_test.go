@@ -903,20 +903,20 @@ zone:
 // with non-nil WorldX and WorldY fields matching the design spec coordinates.
 func TestLoader_ZoneWorldCoords(t *testing.T) {
 	expected := map[string][2]int{
-		"battleground":      {4, -6},
-		"the_couve":         {0, -4},
-		"vantucky":          {2, -4},
+		"battleground":      {4, -7},
+		"the_couve":         {0, -5},
+		"vantucky":          {2, -5},
 		"sauvie_island":     {-2, -2},
-		"pdx_international": {2, -2},
+		"pdx_international": {2, -3},
 		"hillsboro":         {-4, 0},
 		"beaverton":         {-2, 0},
-		"downtown":          {0, 0},
+		"downtown":          {-1, 0},
 		"ne_portland":       {2, 0},
-		"rustbucket_ridge":  {4, 0},
+		"rustbucket_ridge":  {3, 0},
 		"troutdale":         {6, 0},
 		"aloha":             {-4, 2},
 		"ross_island":       {0, 2},
-		"se_industrial":     {2, 2},
+		"se_industrial":     {2, 1},
 		"felony_flats":      {4, 2},
 		"lake_oswego":       {0, 4},
 	}

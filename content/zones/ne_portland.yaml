@@ -779,7 +779,7 @@ zone:
       target: ne_alberta_street
     - direction: southwest
       target: ne_prescott_street
-    map_x: 4
+    map_x: 5
     map_y: -2
     spawns:
     - template: ne_scavenger

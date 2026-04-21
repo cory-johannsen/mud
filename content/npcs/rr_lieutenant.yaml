@@ -2,6 +2,7 @@ id: rr_lieutenant
 name: Ridge Lieutenant
 description: A seasoned gang lieutenant who commands a section of Rustbucket Ridge through fear and ruthless efficiency.
 level: 7
+tier: elite
 max_hp: 72
 ac: 16
 rob_multiplier: 1.2
