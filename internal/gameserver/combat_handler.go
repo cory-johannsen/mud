@@ -2375,11 +2375,17 @@ func (h *CombatHandler) resolveAndAdvanceLocked(roomID string, cbt *combat.Comba
 		return destroyed
 	}
 	// Build a per-round dispatch wrapper: for each player in this combat, call their stored ReactionFn.
-	reactionFn := reaction.ReactionCallback(func(uid string, trigger reaction.ReactionTriggerType, ctx reaction.ReactionContext) (bool, error) {
+	reactionFn := reaction.ReactionCallback(func(
+		ctx context.Context,
+		uid string,
+		trigger reaction.ReactionTriggerType,
+		rctx reaction.ReactionContext,
+		candidates []reaction.PlayerReaction,
+	) (bool, *reaction.PlayerReaction, error) {
 		if sess, ok := h.sessions.GetPlayer(uid); ok && sess.ReactionFn != nil {
-			return sess.ReactionFn(uid, trigger, ctx)
+			return sess.ReactionFn(ctx, uid, trigger, rctx, candidates)
 		}
-		return false, nil
+		return false, nil, nil
 	})
 	roundEvents := combat.ResolveRound(cbt, h.dice.Src(), targetUpdater, reactionFn, coverDegrader)
 

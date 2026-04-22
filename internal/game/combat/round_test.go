@@ -1,6 +1,7 @@
 package combat_test
 
 import (
+	"context"
 	"strings"
 	"testing"
 
@@ -872,11 +873,17 @@ func TestResolveRound_ReactionFn_CalledOnDamageTaken(t *testing.T) {
 	}
 
 	called := false
-	fn := reaction.ReactionCallback(func(uid string, trigger reaction.ReactionTriggerType, ctx reaction.ReactionContext) (bool, error) {
+	fn := reaction.ReactionCallback(func(
+		_ context.Context,
+		uid string,
+		trigger reaction.ReactionTriggerType,
+		_ reaction.ReactionContext,
+		_ []reaction.PlayerReaction,
+	) (bool, *reaction.PlayerReaction, error) {
 		if uid == "p1" && trigger == reaction.TriggerOnDamageTaken {
 			called = true
 		}
-		return false, nil
+		return false, nil, nil
 	})
 
 	_ = combat.ResolveRound(cbt, src, noopUpdater, fn)

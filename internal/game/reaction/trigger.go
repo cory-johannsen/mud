@@ -2,6 +2,8 @@
 // reaction definitions, and the callback interface for interactive prompting.
 package reaction
 
+import "context"
+
 // ReactionTriggerType identifies the combat event that can fire a reaction.
 type ReactionTriggerType string
 
@@ -84,7 +86,16 @@ type ReactionContext struct {
 }
 
 // ReactionCallback is invoked at trigger fire points during round resolution.
-// uid is the player who might spend their reaction.
-// Returns (true, nil) if the reaction was spent; (false, nil) if skipped or unavailable.
-// A nil ReactionCallback MUST be treated as a no-op.
-type ReactionCallback func(uid string, trigger ReactionTriggerType, ctx ReactionContext) (spent bool, err error)
+// ctx carries the deadline for the interactive prompt (context.WithTimeout applied by the resolver).
+// uid is the combatant who may spend their reaction.
+// candidates is the slice of eligible reactions the player may choose from (never nil, may be empty).
+// Returns (true, chosen, nil) when the reaction is spent; (false, nil, nil) when declined or
+// unavailable; (false, nil, err) on non-deadline error (budget is refunded by caller).
+// A nil ReactionCallback MUST be treated as a no-op returning (false, nil, nil).
+type ReactionCallback func(
+	ctx context.Context,
+	uid string,
+	trigger ReactionTriggerType,
+	rctx ReactionContext,
+	candidates []PlayerReaction,
+) (spent bool, chosen *PlayerReaction, err error)

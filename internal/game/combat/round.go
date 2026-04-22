@@ -1,6 +1,7 @@
 package combat
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
@@ -497,11 +498,11 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 	if len(coverDegraderArgs) > 0 && coverDegraderArgs[0] != nil {
 		coverDegrader = coverDegraderArgs[0]
 	}
-	fireReaction := func(uid string, trigger reaction.ReactionTriggerType, ctx reaction.ReactionContext) {
+	fireReaction := func(uid string, trigger reaction.ReactionTriggerType, rctx reaction.ReactionContext) {
 		if reactionFn == nil {
 			return
 		}
-		_, _ = reactionFn(uid, trigger, ctx)
+		_, _, _ = reactionFn(context.Background(), uid, trigger, rctx, nil)
 	}
 
 	var events []RoundEvent

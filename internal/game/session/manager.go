@@ -213,7 +213,10 @@ type PlayerSession struct {
 	// Initialised to NewReactionRegistry() at session creation.
 	Reactions *reaction.ReactionRegistry
 	// ReactionFn is the per-session reaction callback, set by the session handler after login.
-	// Captures the player's gRPC stream for interactive prompting.
+	// Captures the player's gRPC stream for interactive prompting. Signature:
+	// func(ctx context.Context, uid string, trigger reaction.ReactionTriggerType,
+	//      rctx reaction.ReactionContext, candidates []reaction.PlayerReaction)
+	//      (spent bool, chosen *reaction.PlayerReaction, err error).
 	ReactionFn reaction.ReactionCallback
 	// ReadiedTrigger is the trigger alias this player is waiting for ("enemy_enters",
 	// "enemy_attacks_me", "ally_attacked"). Empty string means no readied action this round.

@@ -1,6 +1,7 @@
 package gameserver
 
 import (
+	"context"
 	"fmt"
 	"math/rand"
 
@@ -248,9 +249,15 @@ func (s *GameServiceServer) buildReactionCallback(
 	uid string,
 	sess *session.PlayerSession,
 ) reaction.ReactionCallback {
-	return func(triggerUID string, trigger reaction.ReactionTriggerType, ctx reaction.ReactionContext) (bool, error) {
+	return func(
+		_ context.Context,
+		triggerUID string,
+		trigger reaction.ReactionTriggerType,
+		rctx reaction.ReactionContext,
+		_ []reaction.PlayerReaction,
+	) (bool, *reaction.PlayerReaction, error) {
 		if triggerUID != uid {
-			return false, nil
+			return false, nil, nil
 		}
 		// Fire readied action if trigger matches.
 		if sess.ReadiedTrigger != "" && matchesReadyTrigger(sess.ReadiedTrigger, trigger) {
@@ -258,14 +265,14 @@ func (s *GameServiceServer) buildReactionCallback(
 			clearReadiedAction(sess)
 		}
 		if sess.ReactionsRemaining <= 0 {
-			return false, nil
+			return false, nil, nil
 		}
 		pr := sess.Reactions.Get(uid, trigger)
 		if pr == nil {
-			return false, nil
+			return false, nil, nil
 		}
 		if !CheckReactionRequirement(sess, pr.Def.Requirement) {
-			return false, nil
+			return false, nil, nil
 		}
 
 		// Auto-fire the reaction — never block combat with a modal prompt.
@@ -275,19 +282,19 @@ func (s *GameServiceServer) buildReactionCallback(
 			desc = string(trigger)
 		}
 		damageBeforeEffect := 0
-		if ctx.DamagePending != nil {
-			damageBeforeEffect = *ctx.DamagePending
+		if rctx.DamagePending != nil {
+			damageBeforeEffect = *rctx.DamagePending
 		}
-		// ctx is passed by value but DamagePending and SaveOutcome are pointers into the caller's
+		// rctx is passed by value but DamagePending and SaveOutcome are pointers into the caller's
 		// data. ApplyReactionEffect mutates through these pointers, so effects propagate to the
 		// caller.
-		ApplyReactionEffect(sess, pr.Def.Effect, &ctx)
+		ApplyReactionEffect(sess, pr.Def.Effect, &rctx)
 
 		switch pr.Def.Effect.Type {
 		case reaction.ReactionEffectReduceDamage:
-			if ctx.DamagePending != nil {
-				blocked := damageBeforeEffect - *ctx.DamagePending
-				if *ctx.DamagePending <= 0 {
+			if rctx.DamagePending != nil {
+				blocked := damageBeforeEffect - *rctx.DamagePending
+				if *rctx.DamagePending <= 0 {
 					s.pushMessageToUID(uid, fmt.Sprintf("Reaction — %s triggered (%s): fully blocked the attack.", pr.FeatName, desc))
 				} else {
 					s.pushMessageToUID(uid, fmt.Sprintf("Reaction — %s triggered (%s): blocked %d damage.", pr.FeatName, desc, blocked))
@@ -298,6 +305,6 @@ func (s *GameServiceServer) buildReactionCallback(
 		default:
 			s.pushMessageToUID(uid, fmt.Sprintf("Reaction — %s triggered (%s).", pr.FeatName, desc))
 		}
-		return true, nil
+		return true, pr, nil
 	}
 }
