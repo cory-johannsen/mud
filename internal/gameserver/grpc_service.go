@@ -6405,26 +6405,29 @@ func (s *GameServiceServer) handleChar(uid string) (*gamev1.ServerEvent, error) 
 			if preset.MainHand != nil {
 				def := preset.MainHand.Def
 				view.MainHand = def.Name
-				profRank := sess.Proficiencies[def.ProficiencyCategory]
+				// GH #241: resolve the effective proficiency rank via the
+				// weapon-category fallback chain (jobs grant e.g. simple_weapons;
+				// weapons declare simple_melee/martial_melee).
+				profRank, _ := resolveWeaponProficiency(sess.Proficiencies, def.ProficiencyCategory)
 				profBonus := combat.CombatProficiencyBonus(weaponLevel, profRank)
 				atkBonus := brutalityMod + profBonus + def.Bonus
 				view.MainHandAttackBonus = signedInt(atkBonus)
 				view.MainHandDamage = weaponDamageString(def.DamageDice, brutalityMod+def.Bonus, def.IsMelee())
 				view.MainHandAbilityBonus = int32(brutalityMod)
 				view.MainHandProfBonus = int32(profBonus)
-				view.MainHandProfRank = string(profRank)
+				view.MainHandProfRank = profRank
 			}
 			if preset.OffHand != nil {
 				def := preset.OffHand.Def
 				view.OffHand = def.Name
-				profRank := sess.Proficiencies[def.ProficiencyCategory]
+				profRank, _ := resolveWeaponProficiency(sess.Proficiencies, def.ProficiencyCategory)
 				profBonus := combat.CombatProficiencyBonus(weaponLevel, profRank)
 				atkBonus := brutalityMod + profBonus + def.Bonus
 				view.OffHandAttackBonus = signedInt(atkBonus)
 				view.OffHandDamage = weaponDamageString(def.DamageDice, brutalityMod+def.Bonus, def.IsMelee())
 				view.OffHandAbilityBonus = int32(brutalityMod)
 				view.OffHandProfBonus = int32(profBonus)
-				view.OffHandProfRank = string(profRank)
+				view.OffHandProfRank = profRank
 			}
 		}
 	}

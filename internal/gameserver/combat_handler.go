@@ -1823,10 +1823,13 @@ func (h *CombatHandler) startPursuitCombatLocked(playerSess *session.PlayerSessi
 	}
 
 	// Weapon proficiency rank and damage type — same pattern as startCombatLocked.
+	// GH #241: use resolveWeaponProficiency so broader grants (simple_weapons,
+	// martial_weapons) apply to the specific weapon category declared on the
+	// weapon def.
 	weaponProfRank := "untrained"
 	if playerCbt.Loadout != nil && playerCbt.Loadout.MainHand != nil && playerCbt.Loadout.MainHand.Def != nil {
 		cat := playerCbt.Loadout.MainHand.Def.ProficiencyCategory
-		if r, ok := playerSess.Proficiencies[cat]; ok {
+		if r, _ := resolveWeaponProficiency(playerSess.Proficiencies, cat); r != "" {
 			weaponProfRank = r
 		}
 	}
@@ -3025,10 +3028,13 @@ func buildPlayerCombatant(sess *session.PlayerSession, h *CombatHandler) *combat
 	}
 
 	// Determine weapon proficiency rank from equipped main-hand weapon.
+	// GH #241: resolveWeaponProficiency applies the category-hierarchy
+	// fallback (simple_melee → simple_weapons, martial_melee → martial_weapons
+	// → simple_weapons) so broader job grants apply to specific weapon types.
 	weaponProfRank := "untrained"
 	if playerCbt.Loadout != nil && playerCbt.Loadout.MainHand != nil && playerCbt.Loadout.MainHand.Def != nil {
 		cat := playerCbt.Loadout.MainHand.Def.ProficiencyCategory
-		if r, ok := sess.Proficiencies[cat]; ok {
+		if r, _ := resolveWeaponProficiency(sess.Proficiencies, cat); r != "" {
 			weaponProfRank = r
 		}
 	}
