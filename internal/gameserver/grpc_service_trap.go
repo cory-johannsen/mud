@@ -379,6 +379,7 @@ func (s *GameServiceServer) checkEnemyEntersReadyTrigger(roomID, movedCombatantI
 		if p.RoomID != roomID || p.ReadiedTrigger != "enemy_enters" || p.ReactionFn == nil {
 			continue
 		}
+		// TODO(#244 Task 9): thread the resolver's ctx and filtered candidates instead of Background/nil.
 		_, _, _ = p.ReactionFn(context.Background(), p.UID, reaction.TriggerOnEnemyEntersRoom, rctx, nil)
 	}
 }

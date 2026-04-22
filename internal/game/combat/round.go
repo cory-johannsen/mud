@@ -502,6 +502,8 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 		if reactionFn == nil {
 			return
 		}
+		// TODO(#244 Task 9): replace context.Background() with the resolver-scoped ctx,
+		// pass the filtered candidates slice, and act on chosen/err instead of discarding.
 		_, _, _ = reactionFn(context.Background(), uid, trigger, rctx, nil)
 	}
 

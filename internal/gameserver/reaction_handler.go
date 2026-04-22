@@ -250,12 +250,14 @@ func (s *GameServiceServer) buildReactionCallback(
 	sess *session.PlayerSession,
 ) reaction.ReactionCallback {
 	return func(
-		_ context.Context,
+		ctx context.Context,
 		triggerUID string,
 		trigger reaction.ReactionTriggerType,
 		rctx reaction.ReactionContext,
 		_ []reaction.PlayerReaction,
 	) (bool, *reaction.PlayerReaction, error) {
+		// TODO(#244 Task 9): pass ctx to ApplyReactionEffect so the reaction prompt respects the resolver's deadline.
+		_ = ctx
 		if triggerUID != uid {
 			return false, nil, nil
 		}
