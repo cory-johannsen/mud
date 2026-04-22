@@ -34,8 +34,11 @@ func (b *Budget) Refund() {
 	}
 }
 
-// Reset sets Max = max and Spent = 0.
-func (b *Budget) Reset(max int) {
-	b.Max = max
+// Reset sets Max = n (clamped to 0 if negative) and Spent = 0.
+func (b *Budget) Reset(n int) {
+	if n < 0 {
+		n = 0
+	}
+	b.Max = n
 	b.Spent = 0
 }

@@ -38,7 +38,9 @@ func TestProperty_Budget_TrySpendIdempotentAtMax(t *testing.T) {
 		b := &reaction.Budget{}
 		b.Reset(max)
 		for i := 0; i < max; i++ {
-			b.TrySpend()
+			if !b.TrySpend() {
+				t.Fatalf("TrySpend returned false before reaching max (i=%d, Spent=%d, Max=%d)", i, b.Spent, b.Max)
+			}
 		}
 		for i := 0; i < 5; i++ {
 			if b.TrySpend() {
@@ -64,8 +66,18 @@ func TestProperty_Budget_RemainingConsistency(t *testing.T) {
 		max := rapid.IntRange(0, 10).Draw(t, "max")
 		b := &reaction.Budget{}
 		b.Reset(max)
-		if b.Remaining() != b.Max-b.Spent {
-			t.Fatalf("Remaining() = %d, want Max-Spent = %d", b.Remaining(), b.Max-b.Spent)
+		ops := rapid.SliceOfN(rapid.IntRange(0, 1), 0, 20).Draw(t, "ops")
+		for _, op := range ops {
+			switch op {
+			case 0:
+				b.TrySpend()
+			case 1:
+				b.Refund()
+			}
+			if b.Remaining() != b.Max-b.Spent {
+				t.Fatalf("Remaining() = %d, want Max-Spent = %d (Max=%d Spent=%d)",
+					b.Remaining(), b.Max-b.Spent, b.Max, b.Spent)
+			}
 		}
 	})
 }
