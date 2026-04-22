@@ -14,4 +14,10 @@ quest_giver:
     - "I don't ask where you've been, you don't ask where I send you. We clear?"
     - "Every piece of scrap in this yard has a story. Most of 'em end badly."
     - "The Grinder name wasn't earned by sitting still. Neither was mine."
-  quest_ids: []
+  # GH #243: Gail serves Rustbucket Ridge as a secondary quest giver alongside
+  # rustbucket_ridge_quest_giver. She offers the rail-gang bounty and the
+  # scavenger-sweep — both fit her "I send you somewhere, no questions asked"
+  # flavor and level band.
+  quest_ids:
+    - rrq_rail_gang_bounty
+    - rrq_scavenger_sweep
