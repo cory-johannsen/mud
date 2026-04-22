@@ -240,3 +240,30 @@ func TestProperty_StartCombat_ParticipantsCountEqualsPlayerCount(t *testing.T) {
 		require.Equal(rt, wantCount, len(cbt.Participants), "Participants count must equal player count")
 	})
 }
+
+// TestStartRound_ReactionBudgetReset verifies that StartRound resets (and initialises) the
+// ReactionBudget for every living combatant to the base max of 1 with Spent=0 (REACTION-14).
+func TestStartRound_ReactionBudgetReset(t *testing.T) {
+	cbt := makeTwoCombatantCombat(t)
+	cbt.StartRound(3)
+
+	var player *combat.Combatant
+	for _, c := range cbt.Combatants {
+		if c.Kind == combat.KindPlayer {
+			player = c
+			break
+		}
+	}
+	if player == nil {
+		t.Fatal("no player combatant found")
+	}
+	if player.ReactionBudget == nil {
+		t.Fatal("ReactionBudget should be set after StartRound")
+	}
+	if player.ReactionBudget.Max != 1 {
+		t.Fatalf("ReactionBudget.Max = %d, want 1", player.ReactionBudget.Max)
+	}
+	if player.ReactionBudget.Spent != 0 {
+		t.Fatalf("ReactionBudget.Spent = %d, want 0", player.ReactionBudget.Spent)
+	}
+}

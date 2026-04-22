@@ -7,6 +7,7 @@ import (
 
 	"github.com/cory-johannsen/mud/internal/game/condition"
 	"github.com/cory-johannsen/mud/internal/game/inventory"
+	"github.com/cory-johannsen/mud/internal/game/reaction"
 	"github.com/cory-johannsen/mud/internal/game/session"
 	"github.com/cory-johannsen/mud/internal/scripting"
 )
@@ -53,6 +54,9 @@ type Combat struct {
 	// combat handler populates this slice at StartCombat from the room's
 	// equipment and removes entries when cover HP reaches zero.
 	CoverObjects []CoverObject
+	// ReadyRegistry holds pending Ready entries for the current round.
+	// Populated by QueueAction(ActionReady); consumed by ResolveRound.
+	ReadyRegistry *reaction.ReadyRegistry
 }
 
 // CoverObject is a cover item placed on the combat grid. It blocks movement
@@ -93,6 +97,26 @@ func (c *Combat) StartRound(actionsPerRound int) []RoundConditionEvent {
 // Precondition: src must not be nil; actionsPerRound >= 0.
 func (c *Combat) StartRoundWithSrc(actionsPerRound int, src Source) []RoundConditionEvent {
 	c.Round++
+
+	// Expire ready entries from the previous round (REACTION-17).
+	if c.ReadyRegistry != nil {
+		c.ReadyRegistry.ExpireRound(c.Round - 1)
+	}
+
+	// Reset (or initialise) reaction budget for each living combatant (REACTION-14).
+	for _, cbt := range c.Combatants {
+		if cbt.IsDead() {
+			continue
+		}
+		const baseMax = 1 // REACTION-14: all combatants get exactly 1 base reaction.
+		// Sum BonusReactions from active feats is applied by the gameserver layer
+		// (it has the feat registry); this package applies the base only.
+		if cbt.ReactionBudget == nil {
+			cbt.ReactionBudget = &reaction.Budget{}
+		}
+		cbt.ReactionBudget.Reset(baseMax)
+	}
+
 	var events []RoundConditionEvent
 
 	for _, cbt := range c.Combatants {
@@ -453,14 +477,15 @@ func (e *Engine) StartCombat(roomID string, combatants []*Combatant, condRegistr
 	sortByInitiativeDesc(sorted)
 
 	cbt := &Combat{
-		RoomID:       roomID,
-		Combatants:   sorted,
-		ActionQueues: make(map[string]*ActionQueue),
-		Conditions:   make(map[string]*condition.ActiveSet),
-		DamageDealt:  make(map[string]int),
-		condRegistry: condRegistry,
-		scriptMgr:    scriptMgr,
-		zoneID:       zoneID,
+		RoomID:        roomID,
+		Combatants:    sorted,
+		ActionQueues:  make(map[string]*ActionQueue),
+		Conditions:    make(map[string]*condition.ActiveSet),
+		DamageDealt:   make(map[string]int),
+		condRegistry:  condRegistry,
+		scriptMgr:     scriptMgr,
+		zoneID:        zoneID,
+		ReadyRegistry: reaction.NewReadyRegistry(),
 	}
 	cbt.GridWidth = 20
 	cbt.GridHeight = 20
