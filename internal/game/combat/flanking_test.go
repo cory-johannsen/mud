@@ -59,7 +59,7 @@ func TestFlanking_AttackRollBonusApplied(t *testing.T) {
 	require.NoError(t, err, "QueueAction ally must succeed")
 
 	// Use a fixed random source that always rolls 10 (d20=10).
-	events := combat.ResolveRound(cbt, fixedSrc{val: 10}, nil, nil)
+	events := combat.ResolveRound(cbt, fixedSrc{val: 10}, nil, nil, 0)
 
 	// Find the attack event.
 	var atkEvent *combat.RoundEvent
@@ -89,7 +89,7 @@ func TestFlanking_NoBonus_WhenNotFlanked(t *testing.T) {
 	err = cbt.QueueAction("player2", combat.QueuedAction{Type: combat.ActionPass})
 	require.NoError(t, err, "QueueAction ally must succeed")
 
-	events := combat.ResolveRound(cbt, fixedSrc{val: 10}, nil, nil)
+	events := combat.ResolveRound(cbt, fixedSrc{val: 10}, nil, nil, 0)
 
 	var atkEvent *combat.RoundEvent
 	for i := range events {

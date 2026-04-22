@@ -143,6 +143,20 @@ type CombatHandler struct {
 	// cbt is the active Combat, passed directly to avoid re-acquiring combatMu inside the callback.
 	// May be nil; tech effects are skipped when nil.
 	techUseResolverFn func(uid, techID, targetID string, targetX, targetY int32, cbt *combat.Combat)
+	// reactionPromptTimeout bounds the interactive reaction callback (GH #244 REACTION-13).
+	// Non-positive values are treated as combat.DefaultReactionTimeout by ResolveRound.
+	// Wired in via SetReactionPromptTimeout from GameServerConfig.ReactionPromptTimeout.
+	reactionPromptTimeout time.Duration
+}
+
+// SetReactionPromptTimeout wires the reaction prompt timeout from
+// config.GameServerConfig.ReactionPromptTimeout into the combat handler.
+// Non-positive values fall back to combat.DefaultReactionTimeout at call time.
+//
+// Precondition: none.
+// Postcondition: Subsequent ResolveRound calls use d to bound reaction prompts.
+func (h *CombatHandler) SetReactionPromptTimeout(d time.Duration) {
+	h.reactionPromptTimeout = d
 }
 
 // NewCombatHandler creates a CombatHandler with a round timer and broadcast function.
@@ -388,18 +402,27 @@ func (h *CombatHandler) SetAPUpdateBroadcastFn(fn func(roomID string, evt *gamev
 // broadcastAPUpdate emits an APUpdateEvent for the given combatant to all players in their room.
 // No-op if apUpdateBroadcastFn is nil.
 //
+// c may be nil; when non-nil and c.ReactionBudget is non-nil the reaction_max and
+// reaction_spent fields are populated from the combatant's ReactionBudget so clients
+// can render a reactions-remaining badge alongside the AP display (#244 Task 15).
+//
 // Precondition: roomID and name are non-empty; remaining >= 0; total >= 0; movementAPRemaining >= 0.
 // Postcondition: APUpdateEvent is delivered to all sessions in roomID via apUpdateBroadcastFn.
-func (h *CombatHandler) broadcastAPUpdate(roomID, name string, remaining, total, movementAPRemaining int) {
+func (h *CombatHandler) broadcastAPUpdate(roomID, name string, remaining, total, movementAPRemaining int, c *combat.Combatant) {
 	if h.apUpdateBroadcastFn == nil {
 		return
 	}
-	h.apUpdateBroadcastFn(roomID, &gamev1.APUpdateEvent{
+	evt := &gamev1.APUpdateEvent{
 		Name:                name,
 		ApRemaining:         int32(remaining),
 		ApTotal:             int32(total),
 		MovementApRemaining: int32(movementAPRemaining),
-	})
+	}
+	if c != nil && c.ReactionBudget != nil {
+		evt.ReactionMax = int32(c.ReactionBudget.Max)
+		evt.ReactionSpent = int32(c.ReactionBudget.Spent)
+	}
+	h.apUpdateBroadcastFn(roomID, evt)
 }
 
 // SetOnCoverHit registers a callback that fires when an attack misses due to cover.
@@ -953,7 +976,7 @@ func (h *CombatHandler) SpendAP(uid string, cost int) error {
 	if err := q.DeductAP(cost); err != nil {
 		return err
 	}
-	h.broadcastAPUpdate(sess.RoomID, sess.CharName, q.RemainingPoints(), q.MaxPoints, combat.MaxMovementAP-q.MovementAPSpent())
+	h.broadcastAPUpdate(sess.RoomID, sess.CharName, q.RemainingPoints(), q.MaxPoints, combat.MaxMovementAP-q.MovementAPSpent(), cbt.GetCombatant(uid))
 	return nil
 }
 
@@ -983,7 +1006,7 @@ func (h *CombatHandler) SpendMovementAP(uid string, cost int) error {
 	if err := q.DeductMovementAP(cost); err != nil {
 		return err
 	}
-	h.broadcastAPUpdate(sess.RoomID, sess.CharName, q.RemainingPoints(), q.MaxPoints, combat.MaxMovementAP-q.MovementAPSpent())
+	h.broadcastAPUpdate(sess.RoomID, sess.CharName, q.RemainingPoints(), q.MaxPoints, combat.MaxMovementAP-q.MovementAPSpent(), cbt.GetCombatant(uid))
 	return nil
 }
 
@@ -2375,13 +2398,19 @@ func (h *CombatHandler) resolveAndAdvanceLocked(roomID string, cbt *combat.Comba
 		return destroyed
 	}
 	// Build a per-round dispatch wrapper: for each player in this combat, call their stored ReactionFn.
-	reactionFn := reaction.ReactionCallback(func(uid string, trigger reaction.ReactionTriggerType, ctx reaction.ReactionContext) (bool, error) {
+	reactionFn := reaction.ReactionCallback(func(
+		ctx context.Context,
+		uid string,
+		trigger reaction.ReactionTriggerType,
+		rctx reaction.ReactionContext,
+		candidates []reaction.PlayerReaction,
+	) (bool, *reaction.PlayerReaction, error) {
 		if sess, ok := h.sessions.GetPlayer(uid); ok && sess.ReactionFn != nil {
-			return sess.ReactionFn(uid, trigger, ctx)
+			return sess.ReactionFn(ctx, uid, trigger, rctx, candidates)
 		}
-		return false, nil
+		return false, nil, nil
 	})
-	roundEvents := combat.ResolveRound(cbt, h.dice.Src(), targetUpdater, reactionFn, coverDegrader)
+	roundEvents := combat.ResolveRound(cbt, h.dice.Src(), targetUpdater, reactionFn, h.reactionPromptTimeout, coverDegrader)
 
 	// REQ-JD-10: Fire on_take_damage_in_one_hit_above_threshold drawback trigger for players
 	// that received ≥50% of their max HP in a single hit this round.
@@ -2795,7 +2824,7 @@ func (h *CombatHandler) resolveAndAdvanceLocked(roomID string, cbt *combat.Comba
 			continue
 		}
 		if q, qOK := cbt.ActionQueues[c.ID]; qOK {
-			h.broadcastAPUpdate(roomID, c.Name, q.RemainingPoints(), q.MaxPoints, combat.MaxMovementAP)
+			h.broadcastAPUpdate(roomID, c.Name, q.RemainingPoints(), q.MaxPoints, combat.MaxMovementAP, c)
 		}
 	}
 

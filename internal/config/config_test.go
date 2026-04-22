@@ -334,3 +334,38 @@ func TestTelnetConfig_HeadlessPort_CanBeSet(t *testing.T) {
 	assert.Equal(t, 4002, cfg.Telnet.HeadlessPort)
 	assert.NoError(t, cfg.Validate(), "HeadlessPort 4002 must be valid")
 }
+
+func TestGameServerConfig_ReactionPromptTimeoutDefaults(t *testing.T) {
+	cfg := GameServerConfig{}
+	cfg.ValidateReactionPromptTimeout()
+	if cfg.ReactionPromptTimeout != DefaultReactionPromptTimeout {
+		t.Fatalf("zero value should default to %v, got %v",
+			DefaultReactionPromptTimeout, cfg.ReactionPromptTimeout)
+	}
+}
+
+func TestGameServerConfig_ReactionPromptTimeoutClampLow(t *testing.T) {
+	cfg := GameServerConfig{ReactionPromptTimeout: 100 * time.Millisecond}
+	cfg.ValidateReactionPromptTimeout()
+	if cfg.ReactionPromptTimeout != DefaultReactionPromptTimeout {
+		t.Fatalf("below-min value should clamp to default %v, got %v",
+			DefaultReactionPromptTimeout, cfg.ReactionPromptTimeout)
+	}
+}
+
+func TestGameServerConfig_ReactionPromptTimeoutClampHigh(t *testing.T) {
+	cfg := GameServerConfig{ReactionPromptTimeout: 60 * time.Second}
+	cfg.ValidateReactionPromptTimeout()
+	if cfg.ReactionPromptTimeout != DefaultReactionPromptTimeout {
+		t.Fatalf("above-max value should clamp to default %v, got %v",
+			DefaultReactionPromptTimeout, cfg.ReactionPromptTimeout)
+	}
+}
+
+func TestGameServerConfig_ReactionPromptTimeoutValidInRange(t *testing.T) {
+	cfg := GameServerConfig{ReactionPromptTimeout: 5 * time.Second}
+	cfg.ValidateReactionPromptTimeout()
+	if cfg.ReactionPromptTimeout != 5*time.Second {
+		t.Fatalf("in-range value should be unchanged, got %v", cfg.ReactionPromptTimeout)
+	}
+}

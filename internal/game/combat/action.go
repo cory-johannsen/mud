@@ -1,6 +1,10 @@
 package combat
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/cory-johannsen/mud/internal/game/reaction"
+)
 
 // ActionType identifies what a combatant intends to do on their turn.
 // The zero value (ActionUnknown) is intentionally invalid.
@@ -21,6 +25,7 @@ const (
 	ActionCoverDestroy                    // informational: cover object destroyed
 	ActionAid                             // costs 2 AP; aid an ally
 	ActionUseTech                         // costs AbilityCost AP; activate a technology during round resolution
+	ActionReady                           // costs 2 AP; prepares one 1-AP action bound to a trigger
 )
 
 // Cost returns the action point cost for the ActionType.
@@ -51,6 +56,8 @@ func (a ActionType) Cost() int {
 		return 2
 	case ActionUseTech:
 		return 0 // cost comes from QueuedAction.AbilityCost
+	case ActionReady:
+		return 2
 	default:
 		// ActionUnknown and any unrecognized values have cost 0.
 		return 0
@@ -84,6 +91,8 @@ func (a ActionType) String() string {
 		return "aid"
 	case ActionUseTech:
 		return "use_tech"
+	case ActionReady:
+		return "ready"
 	default:
 		return "unknown"
 	}
@@ -100,6 +109,10 @@ type QueuedAction struct {
 	AbilityCost int    // for ActionUseAbility and ActionUseTech; AP cost
 	TargetX     int32  // for ActionUseTech AoE burst center; -1 means unset
 	TargetY     int32  // for ActionUseTech AoE burst center; -1 means unset
+	// Ready fields — only meaningful when Type == ActionReady.
+	ReadyTrigger    reaction.ReactionTriggerType // trigger that fires the prepared action
+	ReadyAction     *QueuedAction                // the 1-AP action to execute on trigger
+	ReadyTriggerTgt string                       // optional: restrict to a specific source UID
 }
 
 // MaxMovementAP is the maximum action points a combatant may spend on movement
@@ -199,6 +212,29 @@ func NewActionQueue(uid string, actionsPerRound int) *ActionQueue {
 func (q *ActionQueue) Enqueue(a QueuedAction) error {
 	if a.Type == ActionUnknown {
 		return fmt.Errorf("invalid action type: ActionUnknown is not a valid action")
+	}
+	if a.Type == ActionReady {
+		if a.ReadyAction == nil {
+			return fmt.Errorf("ActionReady requires a non-nil ReadyAction")
+		}
+		if !reaction.AllowedReadyTriggers[a.ReadyTrigger] {
+			return fmt.Errorf("ActionReady: trigger %q is not in the allowed trigger menu", a.ReadyTrigger)
+		}
+		preparedTypeStr := a.ReadyAction.Type.String()
+		if !reaction.AllowedReadyActionTypes[preparedTypeStr] {
+			return fmt.Errorf("ActionReady: prepared action type %q is not in the allowed whitelist", preparedTypeStr)
+		}
+		if (a.ReadyAction.Type == ActionUseAbility || a.ReadyAction.Type == ActionUseTech) &&
+			a.ReadyAction.AbilityCost != 1 {
+			return fmt.Errorf("ActionReady: prepared %s must have AbilityCost == 1, got %d",
+				preparedTypeStr, a.ReadyAction.AbilityCost)
+		}
+		if 2 > q.remaining {
+			return fmt.Errorf("insufficient AP: need 2, have %d", q.remaining)
+		}
+		q.actions = append(q.actions, a)
+		q.remaining -= 2
+		return nil
 	}
 	cost := a.Type.Cost()
 	if a.Type == ActionUseAbility || a.Type == ActionUseTech {

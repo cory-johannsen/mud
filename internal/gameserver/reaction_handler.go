@@ -1,13 +1,39 @@
 package gameserver
 
 import (
+	"context"
+	"crypto/rand"
+	"encoding/hex"
 	"fmt"
-	"math/rand"
+	mrand "math/rand"
+	"time"
+
+	"google.golang.org/protobuf/proto"
 
 	"github.com/cory-johannsen/mud/internal/game/combat"
 	"github.com/cory-johannsen/mud/internal/game/reaction"
 	"github.com/cory-johannsen/mud/internal/game/session"
+	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 )
+
+// pushServerEventToUID marshals evt and pushes it onto the player's entity
+// stream, mirroring (*CombatHandler).pushMessageToUID but for any
+// ServerEvent oneof. Returns true iff the event was successfully enqueued;
+// false means the player session or entity was unreachable.
+func (s *GameServiceServer) pushServerEventToUID(uid string, evt *gamev1.ServerEvent) bool {
+	if s == nil || s.sessions == nil || evt == nil {
+		return false
+	}
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok || sess == nil || sess.Entity == nil {
+		return false
+	}
+	data, err := proto.Marshal(evt)
+	if err != nil {
+		return false
+	}
+	return sess.Entity.Push(data) == nil
+}
 
 // triggerDescriptions provides human-readable descriptions for each trigger type.
 var triggerDescriptions = map[reaction.ReactionTriggerType]string{
@@ -68,7 +94,7 @@ func ApplyReactionEffect(sess *session.PlayerSession, effect reaction.ReactionEf
 		}
 		// Reroll: generate new outcome in [0,3]. Keep the better (lower) value.
 		// 0=CritSuccess, 1=Success, 2=Failure, 3=CritFailure.
-		reroll := rand.Intn(4)
+		reroll := mrand.Intn(4)
 		if reroll < *ctx.SaveOutcome {
 			*ctx.SaveOutcome = reroll
 		}
@@ -239,65 +265,174 @@ func executeReadiedAction(s *GameServiceServer, uid string, sess *session.Player
 	}
 }
 
+// newPromptID returns an opaque unique identifier for a reaction prompt.
+// Uses crypto/rand for non-predictability (prevents a client from spoofing
+// prompt IDs to unblock other players' callbacks).
+//
+// Postcondition: returns a non-empty string on success. On read failure a
+// timestamp-based fallback is used so the callback cannot wedge on randomness
+// exhaustion.
+func newPromptID() string {
+	var b [12]byte
+	if _, err := rand.Read(b[:]); err != nil {
+		return fmt.Sprintf("rxn-%d", time.Now().UnixNano())
+	}
+	return "rxn-" + hex.EncodeToString(b[:])
+}
+
 // buildReactionCallback constructs the ReactionCallback for a player session.
 //
 // Precondition: uid and sess must not be nil.
-// Postcondition: Returns a ReactionCallback that fires automatically without blocking
-// combat flow. The player receives a console notification describing what fired.
+// Postcondition: Returns a ReactionCallback that, when candidates is non-empty,
+// emits a ReactionPromptEvent over the player's gRPC stream and blocks until
+// either (a) the player responds with a ReactionResponse (routed via
+// reactionPromptHub) or (b) the caller's ctx fires. On response, the chosen
+// reaction is applied via ApplyReactionEffect; on deadline or decline the
+// callback returns (false, nil, nil).
 func (s *GameServiceServer) buildReactionCallback(
 	uid string,
 	sess *session.PlayerSession,
 ) reaction.ReactionCallback {
-	return func(triggerUID string, trigger reaction.ReactionTriggerType, ctx reaction.ReactionContext) (bool, error) {
+	return func(
+		ctx context.Context,
+		triggerUID string,
+		trigger reaction.ReactionTriggerType,
+		rctx reaction.ReactionContext,
+		candidates []reaction.PlayerReaction,
+	) (bool, *reaction.PlayerReaction, error) {
 		if triggerUID != uid {
-			return false, nil
+			return false, nil, nil
 		}
-		// Fire readied action if trigger matches.
+		// Fire readied action if trigger matches (no prompt required).
 		if sess.ReadiedTrigger != "" && matchesReadyTrigger(sess.ReadiedTrigger, trigger) {
 			executeReadiedAction(s, uid, sess)
 			clearReadiedAction(sess)
 		}
 		if sess.ReactionsRemaining <= 0 {
-			return false, nil
+			return false, nil, nil
 		}
-		pr := sess.Reactions.Get(uid, trigger)
-		if pr == nil {
-			return false, nil
+		// Requirement-filter candidates: the registry's pre-filter accepts all
+		// entries and defers requirement checks to this callback.
+		valid := make([]reaction.PlayerReaction, 0, len(candidates))
+		for _, c := range candidates {
+			if CheckReactionRequirement(sess, c.Def.Requirement) {
+				valid = append(valid, c)
+			}
 		}
-		if !CheckReactionRequirement(sess, pr.Def.Requirement) {
-			return false, nil
+		if len(valid) == 0 {
+			return false, nil, nil
 		}
 
-		// Auto-fire the reaction — never block combat with a modal prompt.
+		chosen := s.promptReaction(ctx, uid, valid)
+		if chosen == nil {
+			return false, nil, nil
+		}
+
 		sess.ReactionsRemaining--
 		desc, ok := triggerDescriptions[trigger]
 		if !ok {
 			desc = string(trigger)
 		}
 		damageBeforeEffect := 0
-		if ctx.DamagePending != nil {
-			damageBeforeEffect = *ctx.DamagePending
+		if rctx.DamagePending != nil {
+			damageBeforeEffect = *rctx.DamagePending
 		}
-		// ctx is passed by value but DamagePending and SaveOutcome are pointers into the caller's
+		// rctx is passed by value but DamagePending and SaveOutcome are pointers into the caller's
 		// data. ApplyReactionEffect mutates through these pointers, so effects propagate to the
 		// caller.
-		ApplyReactionEffect(sess, pr.Def.Effect, &ctx)
+		ApplyReactionEffect(sess, chosen.Def.Effect, &rctx)
 
-		switch pr.Def.Effect.Type {
+		switch chosen.Def.Effect.Type {
 		case reaction.ReactionEffectReduceDamage:
-			if ctx.DamagePending != nil {
-				blocked := damageBeforeEffect - *ctx.DamagePending
-				if *ctx.DamagePending <= 0 {
-					s.pushMessageToUID(uid, fmt.Sprintf("Reaction — %s triggered (%s): fully blocked the attack.", pr.FeatName, desc))
+			if rctx.DamagePending != nil {
+				blocked := damageBeforeEffect - *rctx.DamagePending
+				if *rctx.DamagePending <= 0 {
+					s.pushMessageToUID(uid, fmt.Sprintf("Reaction — %s triggered (%s): fully blocked the attack.", chosen.FeatName, desc))
 				} else {
-					s.pushMessageToUID(uid, fmt.Sprintf("Reaction — %s triggered (%s): blocked %d damage.", pr.FeatName, desc, blocked))
+					s.pushMessageToUID(uid, fmt.Sprintf("Reaction — %s triggered (%s): blocked %d damage.", chosen.FeatName, desc, blocked))
 				}
 			}
 		case reaction.ReactionEffectRerollSave:
-			s.pushMessageToUID(uid, fmt.Sprintf("Reaction — %s triggered (%s): saving throw rerolled, keeping better result.", pr.FeatName, desc))
+			s.pushMessageToUID(uid, fmt.Sprintf("Reaction — %s triggered (%s): saving throw rerolled, keeping better result.", chosen.FeatName, desc))
 		default:
-			s.pushMessageToUID(uid, fmt.Sprintf("Reaction — %s triggered (%s).", pr.FeatName, desc))
+			s.pushMessageToUID(uid, fmt.Sprintf("Reaction — %s triggered (%s).", chosen.FeatName, desc))
 		}
-		return true, nil
+		// chosen already points at a PlayerReaction copy owned by
+		// promptReaction; pass it back as the caller's chosen candidate.
+		return true, chosen, nil
+	}
+}
+
+// promptReaction sends a ReactionPromptEvent to uid's session stream and
+// blocks until a matching ReactionResponse is delivered via reactionPromptHub
+// or ctx fires. Returns the chosen PlayerReaction or nil for skip/timeout.
+//
+// Precondition: candidates must be non-empty. The first candidate whose Feat
+// matches the client's chosen option ID is returned.
+// Postcondition: the hub entry for the allocated prompt_id is always
+// Unregistered before return.
+func (s *GameServiceServer) promptReaction(
+	ctx context.Context,
+	uid string,
+	candidates []reaction.PlayerReaction,
+) *reaction.PlayerReaction {
+	if s.reactionPromptHub == nil {
+		// No hub (tests may construct a bare server). Safe fallback: auto-fire
+		// the first candidate, preserving the pre-#244-T13 behaviour.
+		c := candidates[0]
+		return &c
+	}
+
+	promptID := newPromptID()
+	ch := s.reactionPromptHub.Register(promptID)
+	defer s.reactionPromptHub.Unregister(promptID)
+
+	// Build the option list from valid candidates.
+	opts := make([]*gamev1.ReactionPromptOption, 0, len(candidates))
+	for _, c := range candidates {
+		opts = append(opts, &gamev1.ReactionPromptOption{
+			Id:    c.Feat,
+			Label: c.FeatName,
+		})
+	}
+
+	timeout := s.reactionPromptTimeout
+	if timeout <= 0 {
+		// Fallback: honour the ctx deadline via select; use a visible default
+		// so the client can render a countdown bar even if the server forgot
+		// to call SetReactionPromptTimeout.
+		timeout = 3 * time.Second
+	}
+	deadline := time.Now().Add(timeout).UnixMilli()
+
+	event := &gamev1.ServerEvent{
+		Payload: &gamev1.ServerEvent_ReactionPrompt{
+			ReactionPrompt: &gamev1.ReactionPromptEvent{
+				PromptId:       promptID,
+				DeadlineUnixMs: deadline,
+				Options:        opts,
+			},
+		},
+	}
+	if !s.pushServerEventToUID(uid, event) {
+		// Could not deliver the prompt (player disconnected, entity missing).
+		// Return nil so the caller refunds the reaction budget.
+		return nil
+	}
+
+	select {
+	case <-ctx.Done():
+		return nil
+	case resp := <-ch:
+		if resp == nil || resp.GetChosen() == "" {
+			return nil
+		}
+		for i := range candidates {
+			if candidates[i].Feat == resp.GetChosen() {
+				c := candidates[i]
+				return &c
+			}
+		}
+		return nil
 	}
 }

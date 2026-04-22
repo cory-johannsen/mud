@@ -5,7 +5,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, act } from '@testing-library/react'
 import fc from 'fast-check'
-import { CombatBanner } from './CombatBanner'
+import { CombatBanner, ReactionBadge } from './CombatBanner'
 import type { GameState } from './GameContext'
 import { initialState } from './GameContext'
 
@@ -242,5 +242,46 @@ describe('CombatBanner — round countdown timer bar', () => {
         }
       )
     )
+  })
+})
+
+// REQ-244-TASK15-1: ReactionBadge renders "R: <remaining>" when Max == 1 and no reactions spent.
+// REQ-244-TASK15-2: ReactionBadge renders with strike-through when the budget is exhausted
+//   (remaining == 0), signalling the player has no reactions left this round.
+describe('ReactionBadge — reaction budget display (GH #244 Task 15)', () => {
+  beforeEach(() => {
+    vi.useRealTimers() // this suite does not rely on fake timers
+  })
+
+  it('renders "R: 1" when reactionMax=1 and no reactions spent (REQ-244-TASK15-1)', () => {
+    render(<ReactionBadge reactionMax={1} reactionSpent={0} />)
+    const badge = screen.getByTestId('reaction-badge')
+    expect(badge.textContent).toBe('R: 1')
+    // Not exhausted: no strike-through.
+    expect(badge.getAttribute('style') ?? '').not.toContain('line-through')
+    expect(badge.className).not.toContain('combat-reaction-exhausted')
+    // Tooltip reflects max reactions per round.
+    expect(badge.getAttribute('title')).toBe('1 reaction per round')
+  })
+
+  it('renders with strike-through / muted styling when exhausted (REQ-244-TASK15-2)', () => {
+    render(<ReactionBadge reactionMax={1} reactionSpent={1} />)
+    const badge = screen.getByTestId('reaction-badge')
+    expect(badge.textContent).toBe('R: 0')
+    const style = badge.getAttribute('style') ?? ''
+    expect(style).toContain('line-through')
+    expect(badge.className).toContain('combat-reaction-exhausted')
+  })
+
+  it('renders "R: 1/2" fraction when reactionMax > 1 (BonusReactions path)', () => {
+    render(<ReactionBadge reactionMax={2} reactionSpent={1} />)
+    const badge = screen.getByTestId('reaction-badge')
+    expect(badge.textContent).toBe('R: 1/2')
+    expect(badge.getAttribute('title')).toBe('2 reactions per round')
+  })
+
+  it('does not render when reactionMax is 0 (budget not initialised)', () => {
+    const { container } = render(<ReactionBadge reactionMax={0} reactionSpent={0} />)
+    expect(container.querySelector('[data-testid="reaction-badge"]')).toBeNull()
   })
 })

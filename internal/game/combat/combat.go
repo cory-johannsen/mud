@@ -1,7 +1,10 @@
 // Package combat implements the PvE combat engine for Gunchete.
 package combat
 
-import "github.com/cory-johannsen/mud/internal/game/inventory"
+import (
+	"github.com/cory-johannsen/mud/internal/game/inventory"
+	"github.com/cory-johannsen/mud/internal/game/reaction"
+)
 
 // MaxCombatRange is the maximum engagement distance in feet.
 // Legacy value retained for ranged weapon checks. On the 10×10 grid the actual
@@ -152,6 +155,9 @@ type Combatant struct {
 	// FactionID is the faction this combatant belongs to; empty for players and faction-less NPCs.
 	// Used by the Lua scripting layer for faction-aware targeting (e.g. get_faction_enemies).
 	FactionID string
+	// ReactionBudget tracks this combatant's per-round reaction spending.
+	// Nil before the first StartRound call. Reset by StartRoundWithSrc each round.
+	ReactionBudget *reaction.Budget
 }
 
 // SpeedSquares returns the number of grid squares this combatant may move per stride action.

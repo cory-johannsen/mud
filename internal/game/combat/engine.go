@@ -7,6 +7,7 @@ import (
 
 	"github.com/cory-johannsen/mud/internal/game/condition"
 	"github.com/cory-johannsen/mud/internal/game/inventory"
+	"github.com/cory-johannsen/mud/internal/game/reaction"
 	"github.com/cory-johannsen/mud/internal/game/session"
 	"github.com/cory-johannsen/mud/internal/scripting"
 )
@@ -53,6 +54,9 @@ type Combat struct {
 	// combat handler populates this slice at StartCombat from the room's
 	// equipment and removes entries when cover HP reaches zero.
 	CoverObjects []CoverObject
+	// ReadyRegistry holds pending Ready entries for the current round.
+	// Populated by QueueAction(ActionReady); consumed by ResolveRound.
+	ReadyRegistry *reaction.ReadyRegistry
 }
 
 // CoverObject is a cover item placed on the combat grid. It blocks movement
@@ -93,6 +97,26 @@ func (c *Combat) StartRound(actionsPerRound int) []RoundConditionEvent {
 // Precondition: src must not be nil; actionsPerRound >= 0.
 func (c *Combat) StartRoundWithSrc(actionsPerRound int, src Source) []RoundConditionEvent {
 	c.Round++
+
+	// Expire ready entries from the previous round (REACTION-17).
+	if c.ReadyRegistry != nil {
+		c.ReadyRegistry.ExpireRound(c.Round - 1)
+	}
+
+	// Reset (or initialise) reaction budget for each living combatant (REACTION-14).
+	for _, cbt := range c.Combatants {
+		if cbt.IsDead() {
+			continue
+		}
+		const baseMax = 1 // REACTION-14: all combatants get exactly 1 base reaction.
+		// Sum BonusReactions from active feats is applied by the gameserver layer
+		// (it has the feat registry); this package applies the base only.
+		if cbt.ReactionBudget == nil {
+			cbt.ReactionBudget = &reaction.Budget{}
+		}
+		cbt.ReactionBudget.Reset(baseMax)
+	}
+
 	var events []RoundConditionEvent
 
 	for _, cbt := range c.Combatants {
@@ -319,12 +343,36 @@ func (c *Combat) DyingStacks(uid string) int {
 //
 // Precondition: uid must be a living combatant in this combat with an active queue.
 // Postcondition: Returns error if uid not found or AP insufficient; otherwise action is appended.
+// When a.Type is ActionReady and enqueue succeeds, a corresponding ReadyEntry is registered
+// in c.ReadyRegistry so ResolveRound can fire the prepared action on its trigger.
 func (c *Combat) QueueAction(uid string, a QueuedAction) error {
 	q, ok := c.ActionQueues[uid]
 	if !ok {
 		return fmt.Errorf("combatant %q not found or has no active queue", uid)
 	}
-	return q.Enqueue(a)
+	if err := q.Enqueue(a); err != nil {
+		return err
+	}
+	// If this is a Ready action, register it in the ReadyRegistry.
+	if a.Type == ActionReady && a.ReadyAction != nil && c.ReadyRegistry != nil {
+		desc := reaction.ReadyActionDesc{
+			Type:        a.ReadyAction.Type.String(),
+			Target:      a.ReadyAction.Target,
+			Direction:   a.ReadyAction.Direction,
+			WeaponID:    a.ReadyAction.WeaponID,
+			ExplosiveID: a.ReadyAction.ExplosiveID,
+			AbilityID:   a.ReadyAction.AbilityID,
+			AbilityCost: a.ReadyAction.AbilityCost,
+		}
+		c.ReadyRegistry.Add(reaction.ReadyEntry{
+			UID:        uid,
+			Trigger:    a.ReadyTrigger,
+			TriggerTgt: a.ReadyTriggerTgt,
+			Action:     desc,
+			RoundSet:   c.Round,
+		})
+	}
+	return nil
 }
 
 // AllActionsSubmitted reports whether every living combatant's queue IsSubmitted.
@@ -453,14 +501,15 @@ func (e *Engine) StartCombat(roomID string, combatants []*Combatant, condRegistr
 	sortByInitiativeDesc(sorted)
 
 	cbt := &Combat{
-		RoomID:       roomID,
-		Combatants:   sorted,
-		ActionQueues: make(map[string]*ActionQueue),
-		Conditions:   make(map[string]*condition.ActiveSet),
-		DamageDealt:  make(map[string]int),
-		condRegistry: condRegistry,
-		scriptMgr:    scriptMgr,
-		zoneID:       zoneID,
+		RoomID:        roomID,
+		Combatants:    sorted,
+		ActionQueues:  make(map[string]*ActionQueue),
+		Conditions:    make(map[string]*condition.ActiveSet),
+		DamageDealt:   make(map[string]int),
+		condRegistry:  condRegistry,
+		scriptMgr:     scriptMgr,
+		zoneID:        zoneID,
+		ReadyRegistry: reaction.NewReadyRegistry(),
 	}
 	cbt.GridWidth = 20
 	cbt.GridHeight = 20

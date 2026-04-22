@@ -72,7 +72,7 @@ func TestActionAttack_Ranged_ConsumesAmmo(t *testing.T) {
 	require.NoError(t, cbt.QueueAction("p1", combat.QueuedAction{Type: combat.ActionAttack, Target: "Ganger"}))
 	require.NoError(t, cbt.QueueAction("n1", combat.QueuedAction{Type: combat.ActionPass}))
 
-	combat.ResolveRound(cbt, src, func(_ string, _ int) {}, nil)
+	combat.ResolveRound(cbt, src, func(_ string, _ int) {}, nil, 0)
 
 	assert.Equal(t, 9, eq.Magazine.Loaded,
 		"ActionAttack with ranged weapon must consume 1 round of ammo")
@@ -95,7 +95,7 @@ func TestActionAttack_Ranged_ConsumesAmmo_OnMiss(t *testing.T) {
 	require.NoError(t, cbt.QueueAction("p1", combat.QueuedAction{Type: combat.ActionAttack, Target: "Ganger"}))
 	require.NoError(t, cbt.QueueAction("n1", combat.QueuedAction{Type: combat.ActionPass}))
 
-	combat.ResolveRound(cbt, src, func(_ string, _ int) {}, nil)
+	combat.ResolveRound(cbt, src, func(_ string, _ int) {}, nil, 0)
 
 	assert.Equal(t, 9, eq.Magazine.Loaded,
 		"ActionAttack with ranged weapon must consume 1 round even on miss")
@@ -133,7 +133,7 @@ func TestActionAttack_Melee_DoesNotConsumeAmmo(t *testing.T) {
 	require.NoError(t, cbt.QueueAction("n1", combat.QueuedAction{Type: combat.ActionPass}))
 
 	// Must not panic.
-	events := combat.ResolveRound(cbt, src, func(_ string, _ int) {}, nil)
+	events := combat.ResolveRound(cbt, src, func(_ string, _ int) {}, nil, 0)
 	assert.NotEmpty(t, events, "melee attack must produce at least one event")
 }
 
@@ -189,7 +189,7 @@ func TestProperty_ActionAttack_Ranged_AlwaysConsumesOneRound(t *testing.T) {
 		cbt.StartRound(3)
 		_ = cbt.QueueAction("p1", combat.QueuedAction{Type: combat.ActionAttack, Target: "Ganger"})
 		_ = cbt.QueueAction("n1", combat.QueuedAction{Type: combat.ActionPass})
-		combat.ResolveRound(cbt, src, func(_ string, _ int) {}, nil)
+		combat.ResolveRound(cbt, src, func(_ string, _ int) {}, nil, 0)
 
 		expected := loadedBefore - 1
 		if eq.Magazine.Loaded != expected {

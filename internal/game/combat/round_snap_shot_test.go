@@ -85,9 +85,9 @@ func TestSnapShot_WaivesMAPOnFirstMiss(t *testing.T) {
 		t.Fatalf("QueueAction n1 without: %v", err)
 	}
 
-	combat.ResolveRound(cbtWith, src, noopUpdater, nil)
+	combat.ResolveRound(cbtWith, src, noopUpdater, nil, 0)
 	src.idx = 0 // reset for identical roll sequence
-	combat.ResolveRound(cbtWithout, src, noopUpdater, nil)
+	combat.ResolveRound(cbtWithout, src, noopUpdater, nil, 0)
 
 	hpWith := cbtWith.Combatants[1].CurrentHP
 	hpWithout := cbtWithout.Combatants[1].CurrentHP
@@ -115,8 +115,8 @@ func TestSnapShot_NoEffectWhenFirstHits(t *testing.T) {
 	_ = cbtWithout.QueueAction("p1", combat.QueuedAction{Type: combat.ActionStrike, Target: "Ganger"})
 	_ = cbtWithout.QueueAction("n1", combat.QueuedAction{Type: combat.ActionPass})
 
-	combat.ResolveRound(cbtWith, src, noopUpdater, nil)
-	combat.ResolveRound(cbtWithout, src, noopUpdater, nil)
+	combat.ResolveRound(cbtWith, src, noopUpdater, nil, 0)
+	combat.ResolveRound(cbtWithout, src, noopUpdater, nil, 0)
 
 	hpWith := cbtWith.Combatants[1].CurrentHP
 	hpWithout := cbtWithout.Combatants[1].CurrentHP
@@ -145,9 +145,9 @@ func TestProperty_SnapShot_NeverWorseThanNoFeat(t *testing.T) {
 		_ = cbtWithout.QueueAction("p1", combat.QueuedAction{Type: combat.ActionStrike, Target: "Ganger"})
 		_ = cbtWithout.QueueAction("n1", combat.QueuedAction{Type: combat.ActionPass})
 
-		combat.ResolveRound(cbtWith, src, noopUpdater, nil)
+		combat.ResolveRound(cbtWith, src, noopUpdater, nil, 0)
 		src.idx = 0
-		combat.ResolveRound(cbtWithout, src, noopUpdater, nil)
+		combat.ResolveRound(cbtWithout, src, noopUpdater, nil, 0)
 
 		hpWith := cbtWith.Combatants[1].CurrentHP
 		hpWithout := cbtWithout.Combatants[1].CurrentHP

@@ -84,7 +84,7 @@ func TestResolveRound_Reload_RestoresMagazine(t *testing.T) {
 	}
 
 	src := fixedSrc7{val: 10}
-	events := combat.ResolveRound(cbt, src, nil, nil)
+	events := combat.ResolveRound(cbt, src, nil, nil, 0)
 	if len(events) == 0 {
 		t.Fatal("expected at least 1 event")
 	}
@@ -134,7 +134,7 @@ func TestResolveRound_FireBurst_ProducesTwoEvents(t *testing.T) {
 
 	// Use a high roll so hits land and the goblin survives both shots.
 	src := fixedSrc7{val: 15}
-	events := combat.ResolveRound(cbt, src, nil, nil)
+	events := combat.ResolveRound(cbt, src, nil, nil, 0)
 
 	playerEvents := 0
 	for _, e := range events {
@@ -182,7 +182,7 @@ func TestResolveRound_Throw_ProducesThrowEvents(t *testing.T) {
 	}
 
 	src := fixedSrc7{val: 10}
-	events := combat.ResolveRound(cbt, src, nil, nil)
+	events := combat.ResolveRound(cbt, src, nil, nil, 0)
 
 	throwCount := 0
 	for _, e := range events {

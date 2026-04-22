@@ -42,7 +42,7 @@ func resolveAttackNarrative(t *testing.T, cbt *combat.Combat, src combat.Source)
 	t.Helper()
 	require.NoError(t, cbt.QueueAction("p1", combat.QueuedAction{Type: combat.ActionAttack, Target: "Grunt"}))
 	require.NoError(t, cbt.QueueAction("n1", combat.QueuedAction{Type: combat.ActionPass}))
-	events := combat.ResolveRound(cbt, src, func(string, int) {}, nil)
+	events := combat.ResolveRound(cbt, src, func(string, int) {}, nil, 0)
 	for _, ev := range events {
 		if ev.ActionType == combat.ActionAttack && ev.ActorID == "p1" && ev.Narrative != "" {
 			return ev.Narrative
@@ -122,7 +122,7 @@ func TestAttackNarrative_StrikeShowsBreakdown(t *testing.T) {
 	require.NoError(t, cbt.QueueAction("n1", combat.QueuedAction{Type: combat.ActionPass}))
 
 	src := fixedSrc{val: 18} // d20=19
-	events := combat.ResolveRound(cbt, src, func(string, int) {}, nil)
+	events := combat.ResolveRound(cbt, src, func(string, int) {}, nil, 0)
 
 	found := false
 	for _, ev := range events {
@@ -150,7 +150,7 @@ func TestProperty_AttackNarrative_AlwaysShowsBreakdown(t *testing.T) {
 		require.NoError(rt, cbt.QueueAction("n1", combat.QueuedAction{Type: combat.ActionPass}))
 
 		src := fixedSrc{val: val}
-		events := combat.ResolveRound(cbt, src, func(string, int) {}, nil)
+		events := combat.ResolveRound(cbt, src, func(string, int) {}, nil, 0)
 
 		for _, ev := range events {
 			if ev.ActionType == combat.ActionAttack && ev.ActorID == "p1" && ev.Narrative != "" {

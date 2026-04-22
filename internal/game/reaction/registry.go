@@ -65,3 +65,33 @@ func (r *ReactionRegistry) Get(uid string, trigger ReactionTriggerType) *PlayerR
 	}
 	return nil
 }
+
+// Filter returns all PlayerReactions registered for uid and trigger whose
+// requirement is satisfied by requirementChecker.
+// requirementChecker receives the Requirement string (empty when no requirement)
+// and returns true when met. Callers that want to accept empty requirements
+// unconditionally should return true for "" inside their checker.
+// A nil requirementChecker accepts all reactions.
+// Returns an empty (non-nil) slice when no matching reactions are found.
+func (r *ReactionRegistry) Filter(
+	uid string,
+	trigger ReactionTriggerType,
+	requirementChecker func(req string) bool,
+) []PlayerReaction {
+	var result []PlayerReaction
+	for _, pr := range r.byTrigger[trigger] {
+		if pr.UID != uid {
+			continue
+		}
+		if requirementChecker != nil {
+			if !requirementChecker(pr.Def.Requirement) {
+				continue
+			}
+		}
+		result = append(result, pr)
+	}
+	if result == nil {
+		result = []PlayerReaction{}
+	}
+	return result
+}

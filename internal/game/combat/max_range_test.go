@@ -31,7 +31,7 @@ func makeMaxRangeCombat(t *testing.T, playerX, playerY, npcX, npcY int) *combat.
 
 func resolveMaxRangeRound(cbt *combat.Combat) {
 	src := fixedSrcDist{val: 1}
-	combat.ResolveRound(cbt, src, func(string, int) {}, nil)
+	combat.ResolveRound(cbt, src, func(string, int) {}, nil, 0)
 }
 
 // TestMaxCombatRange_Constant verifies the constant is 100.

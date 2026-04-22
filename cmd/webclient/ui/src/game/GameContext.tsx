@@ -80,6 +80,8 @@ export interface CombatantAP {
   remaining: number
   total: number
   movementRemaining: number  // how many movement actions (Stride/Step) remain this round; max 2
+  reactionMax: number        // GH #244 Task 15: max reactions this round (0 when budget not yet initialised)
+  reactionSpent: number      // GH #244 Task 15: reactions spent so far this round
 }
 
 export interface GameState {
@@ -121,6 +123,7 @@ export interface GameState {
   jobGrants: JobGrantsResponse | null
   questFlashCount: number
   autoNavStepMs: number  // step delay for click-to-travel (REQ-CNT-2)
+  reactionPrompt: import('../proto').ReactionPromptEvent | null
 }
 
 type Action =
@@ -138,7 +141,7 @@ type Action =
   | { type: 'CLEAR_COMBAT_POSITIONS' }
   | { type: 'UPDATE_COMBATANT_HP'; name: string; current: number; max: number }
   | { type: 'CLEAR_COMBATANT_HP' }
-  | { type: 'UPDATE_COMBATANT_AP'; name: string; remaining: number; total: number; movementRemaining?: number }
+  | { type: 'UPDATE_COMBATANT_AP'; name: string; remaining: number; total: number; movementRemaining?: number; reactionMax?: number; reactionSpent?: number }
   | { type: 'CLEAR_COMBATANT_AP' }
   | { type: 'SET_HOTBAR'; slots: HotbarSlot[]; activeHotbarIndex: number; hotbarCount: number; maxHotbars: number }
   | { type: 'SET_TIME_OF_DAY'; tod: TimeOfDayEvent }
@@ -164,6 +167,7 @@ type Action =
   | { type: 'SET_JOB_GRANTS'; grants: JobGrantsResponse | null }
   | { type: 'QUEST_ADDED' }
   | { type: 'SET_AUTO_NAV_STEP_MS'; ms: number }
+  | { type: 'SET_REACTION_PROMPT'; prompt: import('../proto').ReactionPromptEvent | null }
 
 export function reducer(state: GameState, action: Action): GameState {
   switch (action.type) {
@@ -211,8 +215,25 @@ export function reducer(state: GameState, action: Action): GameState {
     }
     case 'CLEAR_COMBATANT_HP':
       return { ...state, combatantHp: {} }
-    case 'UPDATE_COMBATANT_AP':
-      return { ...state, combatantAP: { ...state.combatantAP, [action.name]: { remaining: action.remaining, total: action.total, movementRemaining: action.movementRemaining ?? 2 } } }
+    case 'UPDATE_COMBATANT_AP': {
+      // GH #244 Task 15: preserve the prior reaction budget when an AP-only update arrives
+      // (e.g. mid-round NPC movement broadcast where the caller omits reaction_* fields).
+      // Fresh reactionMax/reactionSpent values supplied in the action override the prior state.
+      const prior = state.combatantAP[action.name]
+      return {
+        ...state,
+        combatantAP: {
+          ...state.combatantAP,
+          [action.name]: {
+            remaining: action.remaining,
+            total: action.total,
+            movementRemaining: action.movementRemaining ?? 2,
+            reactionMax: action.reactionMax ?? prior?.reactionMax ?? 0,
+            reactionSpent: action.reactionSpent ?? prior?.reactionSpent ?? 0,
+          },
+        },
+      }
+    }
     case 'CLEAR_COMBATANT_AP':
       return { ...state, combatantAP: {} }
     case 'SET_HOTBAR':
@@ -272,6 +293,8 @@ export function reducer(state: GameState, action: Action): GameState {
       return { ...state, questFlashCount: state.questFlashCount + 1 }
     case 'SET_AUTO_NAV_STEP_MS':
       return { ...state, autoNavStepMs: action.ms }
+    case 'SET_REACTION_PROMPT':
+      return { ...state, reactionPrompt: action.prompt }
     case 'APPEND_FEED': {
       const updated = [...state.feedEntries, action.entry]
       return {
@@ -325,6 +348,7 @@ export const initialState: GameState = {
   jobGrants: null,
   questFlashCount: 0,
   autoNavStepMs: 1000,
+  reactionPrompt: null,
 }
 
 interface GameContextValue {
@@ -346,6 +370,7 @@ interface GameContextValue {
   clearLoadout: () => void
   clearChoicePrompt: () => void
   appendMessage: (text: string) => void
+  clearReactionPrompt: () => void
 }
 
 const GameContext = createContext<GameContextValue | null>(null)
@@ -546,7 +571,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
               positions[pos.name] = { x: pos.x ?? 0, y: pos.y ?? 0 }
               const apTotal = pos.apTotal ?? pos.ap_total ?? actionsPerTurn
               const apRemaining = pos.apRemaining ?? pos.ap_remaining ?? apTotal
-              apMap[pos.name] = { remaining: apRemaining, total: apTotal, movementRemaining: 2 }
+              apMap[pos.name] = { remaining: apRemaining, total: apTotal, movementRemaining: 2, reactionMax: 0, reactionSpent: 0 }
               const hpMax = pos.hpMax ?? pos.hp_max ?? 0
               const hpCurrent = pos.hpCurrent ?? pos.hp_current ?? 0
               if (hpMax > 0) {
@@ -584,12 +609,24 @@ export function GameProvider({ children }: { children: ReactNode }) {
           break
         }
         case 'APUpdateEvent': {
-          const au = payload as APUpdateEvent & { movement_ap_remaining?: number; movementApRemaining?: number }
+          const au = payload as APUpdateEvent
           if (au.name) {
             const remaining = au.apRemaining ?? au.ap_remaining ?? 0
             const total = au.apTotal ?? au.ap_total ?? 0
             const movementRemaining = au.movementApRemaining ?? au.movement_ap_remaining ?? 2
-            dispatch({ type: 'UPDATE_COMBATANT_AP', name: au.name, remaining, total, movementRemaining })
+            // GH #244 Task 15: reaction budget rides along with the AP update;
+            // undefined (rather than 0) means "no update" so the reducer preserves prior state.
+            const reactionMaxRaw = au.reactionMax ?? au.reaction_max
+            const reactionSpentRaw = au.reactionSpent ?? au.reaction_spent
+            dispatch({
+              type: 'UPDATE_COMBATANT_AP',
+              name: au.name,
+              remaining,
+              total,
+              movementRemaining,
+              reactionMax: reactionMaxRaw,
+              reactionSpent: reactionSpentRaw,
+            })
           }
           break
         }
@@ -751,6 +788,14 @@ export function GameProvider({ children }: { children: ReactNode }) {
           }
           break
         }
+        case 'ReactionPromptEvent': {
+          // GH #244 Task 13: server asks player to spend their reaction.
+          dispatch({
+            type: 'SET_REACTION_PROMPT',
+            prompt: payload as import('../proto').ReactionPromptEvent,
+          })
+          break
+        }
         case 'ErrorEvent': {
           const err = payload as { message?: string }
           dispatch({
@@ -846,12 +891,16 @@ export function GameProvider({ children }: { children: ReactNode }) {
     dispatch({ type: 'CLEAR_CHOICE_PROMPT' })
   }, [])
 
+  const clearReactionPrompt = useCallback(() => {
+    dispatch({ type: 'SET_REACTION_PROMPT', prompt: null })
+  }, [])
+
   const appendMessage = useCallback((text: string) => {
     dispatch({ type: 'APPEND_FEED', entry: makeFeedEntry('system', text) })
   }, [])
 
   return (
-    <GameContext.Provider value={{ state, sendMessage, sendCommand, clearShop, clearHealer, clearTrainer, clearTechTrainer, clearFixer, clearRestView, clearNpcView, clearCombatNpcView, clearHoverNpcView, setExamineIntent, clearQuestGiverView, dismissQuestComplete, clearLoadout, clearChoicePrompt, appendMessage }}>
+    <GameContext.Provider value={{ state, sendMessage, sendCommand, clearShop, clearHealer, clearTrainer, clearTechTrainer, clearFixer, clearRestView, clearNpcView, clearCombatNpcView, clearHoverNpcView, setExamineIntent, clearQuestGiverView, dismissQuestComplete, clearLoadout, clearChoicePrompt, appendMessage, clearReactionPrompt }}>
       {children}
     </GameContext.Provider>
   )
