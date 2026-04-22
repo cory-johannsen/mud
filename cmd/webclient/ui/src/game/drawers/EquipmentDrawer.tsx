@@ -10,6 +10,18 @@ interface WeaponTooltipData {
   abilityBonus: number
   profBonus: number
   profRank: string
+  // GH #242: the weapon's required proficiency category (e.g. "simple_melee").
+  profCategory: string
+}
+
+// humanProficiencyCategory converts a snake_case proficiency category like
+// "martial_melee" to a Title Case display string like "Martial Melee".
+function humanProficiencyCategory(cat: string): string {
+  if (!cat) return ''
+  return cat
+    .split('_')
+    .map(p => p.length === 0 ? '' : p[0].toUpperCase() + p.slice(1))
+    .join(' ')
 }
 
 function WeaponTooltip({ data }: { data: WeaponTooltipData }): JSX.Element {
@@ -44,6 +56,11 @@ function WeaponTooltip({ data }: { data: WeaponTooltipData }): JSX.Element {
       <div style={{ paddingLeft: '0.75rem', color: '#aaa', fontSize: '0.7rem' }}>
         <div>Ability:      {fmt(data.abilityBonus)}</div>
         <div>Proficiency ({data.profRank || 'untrained'}): {fmt(data.profBonus)}</div>
+        {data.profCategory && (
+          <div data-testid="weapon-req-proficiency">
+            Required: {humanProficiencyCategory(data.profCategory)}
+          </div>
+        )}
       </div>
     </div>
   )
@@ -340,6 +357,7 @@ export function EquipmentDrawer({ onClose }: { onClose: () => void }) {
     abilityBonus: sheet?.mainHandAbilityBonus ?? sheet?.main_hand_ability_bonus ?? 0,
     profBonus: sheet?.mainHandProfBonus ?? sheet?.main_hand_prof_bonus ?? 0,
     profRank: sheet?.mainHandProfRank ?? sheet?.main_hand_prof_rank ?? '',
+    profCategory: sheet?.mainHandProfCategory ?? sheet?.main_hand_prof_category ?? '',
   } : null
   const offHandTooltip: WeaponTooltipData | null = (offHand && offHandBonus && offHandDamage) ? {
     name: offHand,
@@ -348,6 +366,7 @@ export function EquipmentDrawer({ onClose }: { onClose: () => void }) {
     abilityBonus: sheet?.offHandAbilityBonus ?? sheet?.off_hand_ability_bonus ?? 0,
     profBonus: sheet?.offHandProfBonus ?? sheet?.off_hand_prof_bonus ?? 0,
     profRank: sheet?.offHandProfRank ?? sheet?.off_hand_prof_rank ?? '',
+    profCategory: sheet?.offHandProfCategory ?? sheet?.off_hand_prof_category ?? '',
   } : null
   const lv = state.loadoutView
   const activeIndex = lv?.activeIndex ?? 0

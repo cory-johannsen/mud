@@ -285,6 +285,11 @@ export interface CharacterSheetView {
   explore_mode?: string
   techTradition?: string
   tech_tradition?: string
+  // GH #242: proficiency category the weapon requires (e.g. "martial_melee").
+  mainHandProfCategory?: string
+  main_hand_prof_category?: string
+  offHandProfCategory?: string
+  off_hand_prof_category?: string
 }
 
 export interface QuestObjectiveView {

@@ -1271,6 +1271,10 @@ message CharacterSheetView {
     string off_hand_prof_rank      = 60; // proficiency rank string for off-hand weapon
     string explore_mode            = 61; // active exploration mode ID (empty string means no active mode)
     string tech_tradition          = 62; // player's technology tradition (e.g. "neural", "technical")
+    // Required proficiency categories for the equipped weapons (GH #242),
+    // e.g. "simple_melee", "martial_melee". Empty when that slot is unequipped.
+    string main_hand_prof_category = 63;
+    string off_hand_prof_category  = 64;
 }
 
 // InnateSlotView delivers the per-tech innate use slot state for the character sheet.

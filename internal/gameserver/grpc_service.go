@@ -6416,6 +6416,7 @@ func (s *GameServiceServer) handleChar(uid string) (*gamev1.ServerEvent, error) 
 				view.MainHandAbilityBonus = int32(brutalityMod)
 				view.MainHandProfBonus = int32(profBonus)
 				view.MainHandProfRank = profRank
+				view.MainHandProfCategory = def.ProficiencyCategory // GH #242
 			}
 			if preset.OffHand != nil {
 				def := preset.OffHand.Def
@@ -6428,6 +6429,7 @@ func (s *GameServiceServer) handleChar(uid string) (*gamev1.ServerEvent, error) 
 				view.OffHandAbilityBonus = int32(brutalityMod)
 				view.OffHandProfBonus = int32(profBonus)
 				view.OffHandProfRank = profRank
+				view.OffHandProfCategory = def.ProficiencyCategory // GH #242
 			}
 		}
 	}

@@ -11444,6 +11444,10 @@ type CharacterSheetView struct {
 	OffHandProfRank      string `protobuf:"bytes,60,opt,name=off_hand_prof_rank,json=offHandProfRank,proto3" json:"off_hand_prof_rank,omitempty"`                 // proficiency rank string for off-hand weapon
 	ExploreMode          string `protobuf:"bytes,61,opt,name=explore_mode,json=exploreMode,proto3" json:"explore_mode,omitempty"`                                 // active exploration mode ID (empty string means no active mode)
 	TechTradition        string `protobuf:"bytes,62,opt,name=tech_tradition,json=techTradition,proto3" json:"tech_tradition,omitempty"`                           // player's technology tradition (e.g. "neural", "technical")
+	// Required proficiency categories for the equipped weapons (GH #242),
+	// e.g. "simple_melee", "martial_melee". Empty when that slot is unequipped.
+	MainHandProfCategory string `protobuf:"bytes,63,opt,name=main_hand_prof_category,json=mainHandProfCategory,proto3" json:"main_hand_prof_category,omitempty"`
+	OffHandProfCategory  string `protobuf:"bytes,64,opt,name=off_hand_prof_category,json=offHandProfCategory,proto3" json:"off_hand_prof_category,omitempty"`
 	unknownFields        protoimpl.UnknownFields
 	sizeCache            protoimpl.SizeCache
 }
@@ -11908,6 +11912,20 @@ func (x *CharacterSheetView) GetExploreMode() string {
 func (x *CharacterSheetView) GetTechTradition() string {
 	if x != nil {
 		return x.TechTradition
+	}
+	return ""
+}
+
+func (x *CharacterSheetView) GetMainHandProfCategory() string {
+	if x != nil {
+		return x.MainHandProfCategory
+	}
+	return ""
+}
+
+func (x *CharacterSheetView) GetOffHandProfCategory() string {
+	if x != nil {
+		return x.OffHandProfCategory
 	}
 	return ""
 }
@@ -18147,7 +18165,7 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\vdescription\x18\x04 \x01(\tR\vdescription\x12'\n" +
 	"\x0feffects_summary\x18\x05 \x01(\tR\x0eeffectsSummary\x12\x1d\n" +
 	"\n" +
-	"short_name\x18\x06 \x01(\tR\tshortName\"\xc3\x16\n" +
+	"short_name\x18\x06 \x01(\tR\tshortName\"\xaf\x17\n" +
 	"\x12CharacterSheetView\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x10\n" +
 	"\x03job\x18\x02 \x01(\tR\x03job\x12\x1c\n" +
@@ -18217,7 +18235,9 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\x13off_hand_prof_bonus\x18; \x01(\x05R\x10offHandProfBonus\x12+\n" +
 	"\x12off_hand_prof_rank\x18< \x01(\tR\x0foffHandProfRank\x12!\n" +
 	"\fexplore_mode\x18= \x01(\tR\vexploreMode\x12%\n" +
-	"\x0etech_tradition\x18> \x01(\tR\rtechTradition\x1a8\n" +
+	"\x0etech_tradition\x18> \x01(\tR\rtechTradition\x125\n" +
+	"\x17main_hand_prof_category\x18? \x01(\tR\x14mainHandProfCategory\x123\n" +
+	"\x16off_hand_prof_category\x18@ \x01(\tR\x13offHandProfCategory\x1a8\n" +
 	"\n" +
 	"ArmorEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
