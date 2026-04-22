@@ -710,6 +710,30 @@ export interface ChooseFeatRequest {
   feat_id?: string
 }
 
+// ReactionPromptOption mirrors the proto ReactionPromptOption message.
+export interface ReactionPromptOption {
+  id?: string
+  label?: string
+}
+
+// ReactionPromptEvent is sent by the server when a player must decide whether
+// to spend their reaction. See api/proto/game/v1/game.proto.
+export interface ReactionPromptEvent {
+  promptId?: string
+  prompt_id?: string
+  deadlineUnixMs?: number
+  deadline_unix_ms?: number
+  options?: ReactionPromptOption[]
+}
+
+// ReactionResponse is the client's answer to a ReactionPromptEvent.
+// chosen === "" means "skip / decline".
+export interface ReactionResponse {
+  promptId?: string
+  prompt_id?: string
+  chosen?: string
+}
+
 export interface JobTechGrant {
   grantLevel?: number
   grant_level?: number
@@ -802,4 +826,5 @@ export type ServerEvent =
   | { type: 'QuestLogView'; payload: QuestLogView }
   | { type: 'QuestCompleteEvent'; payload: QuestCompleteEvent }
   | { type: 'GameConfig'; payload: GameConfig }
+  | { type: 'ReactionPromptEvent'; payload: ReactionPromptEvent }
   | { type: string; payload: unknown }

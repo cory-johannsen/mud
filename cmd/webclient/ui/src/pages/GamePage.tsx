@@ -20,6 +20,7 @@ import { CombatNpcModal } from '../game/CombatNpcModal'
 import { FeatureChoiceModal } from '../game/drawers/FeatureChoiceModal'
 import { QuestGiverModal } from '../game/QuestGiverModal'
 import { QuestCompleteNotification } from '../game/QuestCompleteNotification'
+import { ReactionPromptModal } from '../game/ReactionPromptModal'
 import { LogoutDropdown } from '../components/LogoutDropdown'
 import '../styles/game.css'
 
@@ -145,6 +146,7 @@ function GameLayout() {
       <CombatNpcModal />
       <QuestGiverModal />
       <QuestCompleteNotification />
+      <ReactionPromptModal />
       {state.choicePrompt && <FeatureChoiceModal onClose={() => { /* modal self-closes on selection */ }} />}
     </>
   )

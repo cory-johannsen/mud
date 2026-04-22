@@ -121,6 +121,7 @@ export interface GameState {
   jobGrants: JobGrantsResponse | null
   questFlashCount: number
   autoNavStepMs: number  // step delay for click-to-travel (REQ-CNT-2)
+  reactionPrompt: import('../proto').ReactionPromptEvent | null
 }
 
 type Action =
@@ -164,6 +165,7 @@ type Action =
   | { type: 'SET_JOB_GRANTS'; grants: JobGrantsResponse | null }
   | { type: 'QUEST_ADDED' }
   | { type: 'SET_AUTO_NAV_STEP_MS'; ms: number }
+  | { type: 'SET_REACTION_PROMPT'; prompt: import('../proto').ReactionPromptEvent | null }
 
 export function reducer(state: GameState, action: Action): GameState {
   switch (action.type) {
@@ -272,6 +274,8 @@ export function reducer(state: GameState, action: Action): GameState {
       return { ...state, questFlashCount: state.questFlashCount + 1 }
     case 'SET_AUTO_NAV_STEP_MS':
       return { ...state, autoNavStepMs: action.ms }
+    case 'SET_REACTION_PROMPT':
+      return { ...state, reactionPrompt: action.prompt }
     case 'APPEND_FEED': {
       const updated = [...state.feedEntries, action.entry]
       return {
@@ -325,6 +329,7 @@ export const initialState: GameState = {
   jobGrants: null,
   questFlashCount: 0,
   autoNavStepMs: 1000,
+  reactionPrompt: null,
 }
 
 interface GameContextValue {
@@ -346,6 +351,7 @@ interface GameContextValue {
   clearLoadout: () => void
   clearChoicePrompt: () => void
   appendMessage: (text: string) => void
+  clearReactionPrompt: () => void
 }
 
 const GameContext = createContext<GameContextValue | null>(null)
@@ -751,6 +757,14 @@ export function GameProvider({ children }: { children: ReactNode }) {
           }
           break
         }
+        case 'ReactionPromptEvent': {
+          // GH #244 Task 13: server asks player to spend their reaction.
+          dispatch({
+            type: 'SET_REACTION_PROMPT',
+            prompt: payload as import('../proto').ReactionPromptEvent,
+          })
+          break
+        }
         case 'ErrorEvent': {
           const err = payload as { message?: string }
           dispatch({
@@ -846,12 +860,16 @@ export function GameProvider({ children }: { children: ReactNode }) {
     dispatch({ type: 'CLEAR_CHOICE_PROMPT' })
   }, [])
 
+  const clearReactionPrompt = useCallback(() => {
+    dispatch({ type: 'SET_REACTION_PROMPT', prompt: null })
+  }, [])
+
   const appendMessage = useCallback((text: string) => {
     dispatch({ type: 'APPEND_FEED', entry: makeFeedEntry('system', text) })
   }, [])
 
   return (
-    <GameContext.Provider value={{ state, sendMessage, sendCommand, clearShop, clearHealer, clearTrainer, clearTechTrainer, clearFixer, clearRestView, clearNpcView, clearCombatNpcView, clearHoverNpcView, setExamineIntent, clearQuestGiverView, dismissQuestComplete, clearLoadout, clearChoicePrompt, appendMessage }}>
+    <GameContext.Provider value={{ state, sendMessage, sendCommand, clearShop, clearHealer, clearTrainer, clearTechTrainer, clearFixer, clearRestView, clearNpcView, clearCombatNpcView, clearHoverNpcView, setExamineIntent, clearQuestGiverView, dismissQuestComplete, clearLoadout, clearChoicePrompt, appendMessage, clearReactionPrompt }}>
       {children}
     </GameContext.Provider>
   )
