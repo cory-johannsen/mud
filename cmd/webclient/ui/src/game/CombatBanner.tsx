@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useGame } from './GameContext'
+import { ReadyActionPicker } from './ReadyActionPicker'
 
 // REQ-61-5: RoundTimerBar renders a countdown progress bar depleting over durationMs.
 // REQ-61-6: Fill starts at 100% and decreases to 0% over the round duration.
@@ -44,7 +45,8 @@ function RoundTimerBar({ durationMs, roundKey }: { durationMs: number; roundKey:
 }
 
 export function CombatBanner() {
-  const { state } = useGame()
+  const { state, sendCommand } = useGame()
+  const [readyPickerOpen, setReadyPickerOpen] = useState(false)
   const round = state.combatRound
   if (!round) return null
 
@@ -81,6 +83,33 @@ export function CombatBanner() {
           )
         })}
       </div>
+      <button
+        type="button"
+        className="combat-ready-btn"
+        onClick={() => setReadyPickerOpen(true)}
+        style={{
+          marginLeft: 'auto',
+          padding: '0.25rem 0.6rem',
+          background: '#1a1a2a',
+          border: '1px solid #4a4a6a',
+          color: '#8cf',
+          borderRadius: 3,
+          cursor: 'pointer',
+          fontFamily: 'monospace',
+          fontSize: '0.78rem',
+        }}
+      >
+        Ready
+      </button>
+      {readyPickerOpen && (
+        <ReadyActionPicker
+          onSubmit={(cmd) => {
+            sendCommand(cmd)
+            setReadyPickerOpen(false)
+          }}
+          onCancel={() => setReadyPickerOpen(false)}
+        />
+      )}
     </div>
   )
 }
