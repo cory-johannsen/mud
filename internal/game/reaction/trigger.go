@@ -64,6 +64,10 @@ type ReactionDef struct {
 	Requirement string `yaml:"requirement,omitempty"`
 	// Effect is the action taken when the reaction fires.
 	Effect ReactionEffect `yaml:"effect"`
+	// BonusReactions is the flat number of additional reactions this feat grants per round.
+	// Summed across all active feats at StartRound to compute Budget.Max.
+	// Default 0 (no bonus). Per REACTION-14, NPCs do not read this field.
+	BonusReactions int `yaml:"bonus_reactions,omitempty"`
 }
 
 // ReactionContext carries the mutable state the effect can read and modify.
