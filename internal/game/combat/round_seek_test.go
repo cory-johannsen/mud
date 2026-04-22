@@ -55,7 +55,7 @@ func TestHiddenNPC_FlatCheckEnforced(t *testing.T) {
 	require.NoError(t, cbt.QueueAction(player.ID, combat.QueuedAction{Type: combat.ActionAttack, Target: npc.Name}))
 	require.NoError(t, cbt.QueueAction(npc.ID, combat.QueuedAction{Type: combat.ActionPass}))
 
-	events := combat.ResolveRound(cbt, src, noopUpdater, nil)
+	events := combat.ResolveRound(cbt, src, noopUpdater, nil, 0)
 
 	assert.Equal(t, npc.MaxHP, npc.CurrentHP, "NPC should be unharmed when flat check fails")
 
@@ -81,7 +81,7 @@ func TestHiddenNPC_RevealedBySeek_FlatCheckBypassed(t *testing.T) {
 	require.NoError(t, cbt.QueueAction(player.ID, combat.QueuedAction{Type: combat.ActionAttack, Target: npc.Name}))
 	require.NoError(t, cbt.QueueAction(npc.ID, combat.QueuedAction{Type: combat.ActionPass}))
 
-	events := combat.ResolveRound(cbt, src, noopUpdater, nil)
+	events := combat.ResolveRound(cbt, src, noopUpdater, nil, 0)
 
 	attacked := false
 	for _, e := range events {
@@ -105,7 +105,7 @@ func TestPropertyHiddenNPC_FlatCheck(t *testing.T) {
 		require.NoError(rt, cbt.QueueAction(npc.ID, combat.QueuedAction{Type: combat.ActionPass}))
 
 		origHP := npc.CurrentHP
-		events := combat.ResolveRound(cbt, src, noopUpdater, nil)
+		events := combat.ResolveRound(cbt, src, noopUpdater, nil, 0)
 
 		if roll <= 10 {
 			require.Equal(rt, origHP, npc.CurrentHP, "flat check miss: NPC HP must be unchanged")

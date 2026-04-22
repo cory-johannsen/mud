@@ -129,7 +129,7 @@ func TestPassiveFeatHook_SuckerPunch_ConditionMet_HookCalledWithMetOutcome(t *te
 	require.NoError(t, cbt.QueueAction("n1", combat.QueuedAction{Type: combat.ActionPass}))
 
 	// val=15: d20=16, atkTotal=16+3=19 vs AC 10 → hit; EffectiveDamage>0 → sucker_punch fires.
-	combat.ResolveRound(cbt, &fixedSrc{val: 15}, nil, nil)
+	combat.ResolveRound(cbt, &fixedSrc{val: 15}, nil, nil, 0)
 
 	// Verify hook was called with the correct feat_id and outcome via Lua state getters.
 	assert.Equal(t, "sucker_punch", callLuaGetter(t, cbt, "get_last_feat_id"),
@@ -193,7 +193,7 @@ func TestPassiveFeatHook_SuckerPunch_MissFiresHook(t *testing.T) {
 	require.NoError(t, cbt.QueueAction("p1", combat.QueuedAction{Type: combat.ActionAttack, Target: "Ganger"}))
 	require.NoError(t, cbt.QueueAction("n1", combat.QueuedAction{Type: combat.ActionPass}))
 
-	combat.ResolveRound(cbt, &fixedSrc{val: 15}, nil, nil)
+	combat.ResolveRound(cbt, &fixedSrc{val: 15}, nil, nil, 0)
 
 	// Hook must have fired with feat_id=sucker_punch and outcome=not_met (miss → dmg=0).
 	assert.Equal(t, "sucker_punch", callLuaGetter(t, cbt, "get_last_feat_id"),
@@ -245,7 +245,7 @@ func TestPassiveFeatHook_SuckerPunch_ConditionNotMet_HookCalledWithNotMetOutcome
 	require.NoError(t, cbt.QueueAction("p1", combat.QueuedAction{Type: combat.ActionAttack, Target: "Ganger"}))
 	require.NoError(t, cbt.QueueAction("n1", combat.QueuedAction{Type: combat.ActionPass}))
 
-	combat.ResolveRound(cbt, &fixedSrc{val: 15}, nil, nil)
+	combat.ResolveRound(cbt, &fixedSrc{val: 15}, nil, nil, 0)
 
 	// NPC HP must be less than 200 (attack hit) but the sucker_punch bonus must be 0.
 	// We can verify by checking the scripting state via a fresh manager with state variables.
@@ -288,7 +288,7 @@ func TestPassiveFeatHook_NilScriptMgr_NoHookNoPanic(t *testing.T) {
 
 	// Must not panic.
 	assert.NotPanics(t, func() {
-		combat.ResolveRound(cbt, &fixedSrc{val: 15}, nil, nil)
+		combat.ResolveRound(cbt, &fixedSrc{val: 15}, nil, nil, 0)
 	})
 
 	var npc *combat.Combatant
@@ -350,7 +350,7 @@ func TestProperty_PassiveFeatHook_OverrideIsUsedAsBonus(t *testing.T) {
 		require.NoError(rt, cbt.QueueAction("p1", combat.QueuedAction{Type: combat.ActionAttack, Target: "Ganger"}))
 		require.NoError(rt, cbt.QueueAction("n1", combat.QueuedAction{Type: combat.ActionPass}))
 
-		combat.ResolveRound(cbt, &fixedSrc{val: 15}, nil, nil)
+		combat.ResolveRound(cbt, &fixedSrc{val: 15}, nil, nil, 0)
 
 		var npc *combat.Combatant
 		for _, c := range cbt.Combatants {
@@ -427,7 +427,7 @@ func TestPassiveFeatHook_PredatorsEye_ConditionMet_HookCalledWithMetOutcome(t *t
 	require.NoError(t, cbt.QueueAction("n1", combat.QueuedAction{Type: combat.ActionPass}))
 
 	// val=15: d20=16, atkTotal=16+3=19 vs AC 10 → hit; EffectiveDamage>0 → predators_eye fires.
-	combat.ResolveRound(cbt, &fixedSrc{val: 15}, nil, nil)
+	combat.ResolveRound(cbt, &fixedSrc{val: 15}, nil, nil, 0)
 
 	// Verify hook was called with the correct feat_id and outcome via Lua state getters.
 	assert.Equal(t, "predators_eye", callLuaGetter(t, cbt, "get_last_feat_id"),
@@ -482,7 +482,7 @@ func TestPassiveFeatHook_PredatorsEye_ConditionNotMet_HookCalledWithNotMetOutcom
 	require.NoError(t, cbt.QueueAction("n1", combat.QueuedAction{Type: combat.ActionPass}))
 
 	// val=15: d20=16, atkTotal=16+3=19 vs AC 10 → hit; NPCType mismatch → condition not met.
-	combat.ResolveRound(cbt, &fixedSrc{val: 15}, nil, nil)
+	combat.ResolveRound(cbt, &fixedSrc{val: 15}, nil, nil, 0)
 
 	assert.Equal(t, "predators_eye", callLuaGetter(t, cbt, "get_last_feat_id"),
 		"hook must be called with feat_id=predators_eye even when condition is not met")
@@ -542,7 +542,7 @@ func TestPassiveFeatHook_SuckerPunch_ActionStrike_HookFires(t *testing.T) {
 	require.NoError(t, cbt.QueueAction("n1", combat.QueuedAction{Type: combat.ActionPass}))
 
 	// val=15: d20=16, atkTotal=16+3=19 vs AC 1 → CritSuccess on first strike.
-	combat.ResolveRound(cbt, &fixedSrc{val: 15}, nil, nil)
+	combat.ResolveRound(cbt, &fixedSrc{val: 15}, nil, nil, 0)
 
 	// Hook must have fired with feat_id=sucker_punch and outcome=met.
 	assert.Equal(t, "sucker_punch", callLuaGetter(t, cbt, "get_last_feat_id"),

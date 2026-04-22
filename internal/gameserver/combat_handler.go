@@ -143,6 +143,20 @@ type CombatHandler struct {
 	// cbt is the active Combat, passed directly to avoid re-acquiring combatMu inside the callback.
 	// May be nil; tech effects are skipped when nil.
 	techUseResolverFn func(uid, techID, targetID string, targetX, targetY int32, cbt *combat.Combat)
+	// reactionPromptTimeout bounds the interactive reaction callback (GH #244 REACTION-13).
+	// Non-positive values are treated as combat.DefaultReactionTimeout by ResolveRound.
+	// Wired in via SetReactionPromptTimeout from GameServerConfig.ReactionPromptTimeout.
+	reactionPromptTimeout time.Duration
+}
+
+// SetReactionPromptTimeout wires the reaction prompt timeout from
+// config.GameServerConfig.ReactionPromptTimeout into the combat handler.
+// Non-positive values fall back to combat.DefaultReactionTimeout at call time.
+//
+// Precondition: none.
+// Postcondition: Subsequent ResolveRound calls use d to bound reaction prompts.
+func (h *CombatHandler) SetReactionPromptTimeout(d time.Duration) {
+	h.reactionPromptTimeout = d
 }
 
 // NewCombatHandler creates a CombatHandler with a round timer and broadcast function.
@@ -2387,7 +2401,7 @@ func (h *CombatHandler) resolveAndAdvanceLocked(roomID string, cbt *combat.Comba
 		}
 		return false, nil, nil
 	})
-	roundEvents := combat.ResolveRound(cbt, h.dice.Src(), targetUpdater, reactionFn, coverDegrader)
+	roundEvents := combat.ResolveRound(cbt, h.dice.Src(), targetUpdater, reactionFn, h.reactionPromptTimeout, coverDegrader)
 
 	// REQ-JD-10: Fire on_take_damage_in_one_hit_above_threshold drawback trigger for players
 	// that received ≥50% of their max HP in a single hit this round.
