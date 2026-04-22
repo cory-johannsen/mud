@@ -86,3 +86,44 @@ func TestActionReady_RejectsAbilityCostNotOne(t *testing.T) {
 		t.Fatal("expected error for AbilityCost != 1 on use_tech, got nil")
 	}
 }
+
+// makeSinglePlayerCombat builds a *combat.Combat with exactly one living player
+// combatant and calls StartRound(3) so ActionQueues are populated.
+func makeSinglePlayerCombat(uid string) *combat.Combat {
+	p := &combat.Combatant{
+		ID: uid, Kind: combat.KindPlayer, Level: 1,
+		MaxHP: 30, CurrentHP: 30, AC: 15,
+	}
+	engine := combat.NewEngine()
+	cbt, err := engine.StartCombat("test-room", []*combat.Combatant{p}, makeTestRegistry(), nil, "")
+	if err != nil {
+		panic(err)
+	}
+	cbt.StartRound(3)
+	return cbt
+}
+
+func TestQueueAction_ActionReady_RegistersReadyEntry(t *testing.T) {
+	cbt := makeSinglePlayerCombat("p1")
+	err := cbt.QueueAction("p1", combat.QueuedAction{
+		Type:         combat.ActionReady,
+		ReadyTrigger: reaction.TriggerOnEnemyEntersRoom,
+		ReadyAction:  &combat.QueuedAction{Type: combat.ActionAttack, Target: "goblin"},
+	})
+	if err != nil {
+		t.Fatalf("QueueAction: %v", err)
+	}
+	entry := cbt.ReadyRegistry.Consume("p1", reaction.TriggerOnEnemyEntersRoom, "")
+	if entry == nil {
+		t.Fatal("expected ReadyEntry in registry after QueueAction(ActionReady)")
+	}
+	if entry.Action.Type != "attack" {
+		t.Fatalf("ReadyEntry.Action.Type = %q, want %q", entry.Action.Type, "attack")
+	}
+	if entry.Action.Target != "goblin" {
+		t.Fatalf("ReadyEntry.Action.Target = %q, want %q", entry.Action.Target, "goblin")
+	}
+	if entry.RoundSet != cbt.Round {
+		t.Fatalf("ReadyEntry.RoundSet = %d, want %d", entry.RoundSet, cbt.Round)
+	}
+}

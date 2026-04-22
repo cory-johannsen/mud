@@ -343,12 +343,36 @@ func (c *Combat) DyingStacks(uid string) int {
 //
 // Precondition: uid must be a living combatant in this combat with an active queue.
 // Postcondition: Returns error if uid not found or AP insufficient; otherwise action is appended.
+// When a.Type is ActionReady and enqueue succeeds, a corresponding ReadyEntry is registered
+// in c.ReadyRegistry so ResolveRound can fire the prepared action on its trigger.
 func (c *Combat) QueueAction(uid string, a QueuedAction) error {
 	q, ok := c.ActionQueues[uid]
 	if !ok {
 		return fmt.Errorf("combatant %q not found or has no active queue", uid)
 	}
-	return q.Enqueue(a)
+	if err := q.Enqueue(a); err != nil {
+		return err
+	}
+	// If this is a Ready action, register it in the ReadyRegistry.
+	if a.Type == ActionReady && a.ReadyAction != nil && c.ReadyRegistry != nil {
+		desc := reaction.ReadyActionDesc{
+			Type:        a.ReadyAction.Type.String(),
+			Target:      a.ReadyAction.Target,
+			Direction:   a.ReadyAction.Direction,
+			WeaponID:    a.ReadyAction.WeaponID,
+			ExplosiveID: a.ReadyAction.ExplosiveID,
+			AbilityID:   a.ReadyAction.AbilityID,
+			AbilityCost: a.ReadyAction.AbilityCost,
+		}
+		c.ReadyRegistry.Add(reaction.ReadyEntry{
+			UID:        uid,
+			Trigger:    a.ReadyTrigger,
+			TriggerTgt: a.ReadyTriggerTgt,
+			Action:     desc,
+			RoundSet:   c.Round,
+		})
+	}
+	return nil
 }
 
 // AllActionsSubmitted reports whether every living combatant's queue IsSubmitted.
