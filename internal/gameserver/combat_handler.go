@@ -402,18 +402,27 @@ func (h *CombatHandler) SetAPUpdateBroadcastFn(fn func(roomID string, evt *gamev
 // broadcastAPUpdate emits an APUpdateEvent for the given combatant to all players in their room.
 // No-op if apUpdateBroadcastFn is nil.
 //
+// c may be nil; when non-nil and c.ReactionBudget is non-nil the reaction_max and
+// reaction_spent fields are populated from the combatant's ReactionBudget so clients
+// can render a reactions-remaining badge alongside the AP display (#244 Task 15).
+//
 // Precondition: roomID and name are non-empty; remaining >= 0; total >= 0; movementAPRemaining >= 0.
 // Postcondition: APUpdateEvent is delivered to all sessions in roomID via apUpdateBroadcastFn.
-func (h *CombatHandler) broadcastAPUpdate(roomID, name string, remaining, total, movementAPRemaining int) {
+func (h *CombatHandler) broadcastAPUpdate(roomID, name string, remaining, total, movementAPRemaining int, c *combat.Combatant) {
 	if h.apUpdateBroadcastFn == nil {
 		return
 	}
-	h.apUpdateBroadcastFn(roomID, &gamev1.APUpdateEvent{
+	evt := &gamev1.APUpdateEvent{
 		Name:                name,
 		ApRemaining:         int32(remaining),
 		ApTotal:             int32(total),
 		MovementApRemaining: int32(movementAPRemaining),
-	})
+	}
+	if c != nil && c.ReactionBudget != nil {
+		evt.ReactionMax = int32(c.ReactionBudget.Max)
+		evt.ReactionSpent = int32(c.ReactionBudget.Spent)
+	}
+	h.apUpdateBroadcastFn(roomID, evt)
 }
 
 // SetOnCoverHit registers a callback that fires when an attack misses due to cover.
@@ -967,7 +976,7 @@ func (h *CombatHandler) SpendAP(uid string, cost int) error {
 	if err := q.DeductAP(cost); err != nil {
 		return err
 	}
-	h.broadcastAPUpdate(sess.RoomID, sess.CharName, q.RemainingPoints(), q.MaxPoints, combat.MaxMovementAP-q.MovementAPSpent())
+	h.broadcastAPUpdate(sess.RoomID, sess.CharName, q.RemainingPoints(), q.MaxPoints, combat.MaxMovementAP-q.MovementAPSpent(), cbt.GetCombatant(uid))
 	return nil
 }
 
@@ -997,7 +1006,7 @@ func (h *CombatHandler) SpendMovementAP(uid string, cost int) error {
 	if err := q.DeductMovementAP(cost); err != nil {
 		return err
 	}
-	h.broadcastAPUpdate(sess.RoomID, sess.CharName, q.RemainingPoints(), q.MaxPoints, combat.MaxMovementAP-q.MovementAPSpent())
+	h.broadcastAPUpdate(sess.RoomID, sess.CharName, q.RemainingPoints(), q.MaxPoints, combat.MaxMovementAP-q.MovementAPSpent(), cbt.GetCombatant(uid))
 	return nil
 }
 
@@ -2815,7 +2824,7 @@ func (h *CombatHandler) resolveAndAdvanceLocked(roomID string, cbt *combat.Comba
 			continue
 		}
 		if q, qOK := cbt.ActionQueues[c.ID]; qOK {
-			h.broadcastAPUpdate(roomID, c.Name, q.RemainingPoints(), q.MaxPoints, combat.MaxMovementAP)
+			h.broadcastAPUpdate(roomID, c.Name, q.RemainingPoints(), q.MaxPoints, combat.MaxMovementAP, c)
 		}
 	}
 

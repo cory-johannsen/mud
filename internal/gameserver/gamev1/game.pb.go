@@ -10129,6 +10129,8 @@ type APUpdateEvent struct {
 	ApRemaining         int32                  `protobuf:"varint,2,opt,name=ap_remaining,json=apRemaining,proto3" json:"ap_remaining,omitempty"`                           // updated remaining action points
 	ApTotal             int32                  `protobuf:"varint,3,opt,name=ap_total,json=apTotal,proto3" json:"ap_total,omitempty"`                                       // total action points for this round
 	MovementApRemaining int32                  `protobuf:"varint,4,opt,name=movement_ap_remaining,json=movementApRemaining,proto3" json:"movement_ap_remaining,omitempty"` // how many movement actions (Stride/Step) remain this round; max 2
+	ReactionMax         int32                  `protobuf:"varint,5,opt,name=reaction_max,json=reactionMax,proto3" json:"reaction_max,omitempty"`                           // max reactions this round (ReactionBudget.Max); 0 if budget not initialised
+	ReactionSpent       int32                  `protobuf:"varint,6,opt,name=reaction_spent,json=reactionSpent,proto3" json:"reaction_spent,omitempty"`                     // reactions spent so far this round (ReactionBudget.Spent)
 	unknownFields       protoimpl.UnknownFields
 	sizeCache           protoimpl.SizeCache
 }
@@ -10187,6 +10189,20 @@ func (x *APUpdateEvent) GetApTotal() int32 {
 func (x *APUpdateEvent) GetMovementApRemaining() int32 {
 	if x != nil {
 		return x.MovementApRemaining
+	}
+	return 0
+}
+
+func (x *APUpdateEvent) GetReactionMax() int32 {
+	if x != nil {
+		return x.ReactionMax
+	}
+	return 0
+}
+
+func (x *APUpdateEvent) GetReactionSpent() int32 {
+	if x != nil {
+		return x.ReactionSpent
 	}
 	return 0
 }
@@ -18259,12 +18275,14 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"gridHeight\x12A\n" +
 	"\rcover_objects\x18\b \x03(\v2\x1c.game.v1.CoverObjectPositionR\fcoverObjects\"%\n" +
 	"\rRoundEndEvent\x12\x14\n" +
-	"\x05round\x18\x01 \x01(\x05R\x05round\"\x95\x01\n" +
+	"\x05round\x18\x01 \x01(\x05R\x05round\"\xdf\x01\n" +
 	"\rAPUpdateEvent\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12!\n" +
 	"\fap_remaining\x18\x02 \x01(\x05R\vapRemaining\x12\x19\n" +
 	"\bap_total\x18\x03 \x01(\x05R\aapTotal\x122\n" +
-	"\x15movement_ap_remaining\x18\x04 \x01(\x05R\x13movementApRemaining\"\xf0\x03\n" +
+	"\x15movement_ap_remaining\x18\x04 \x01(\x05R\x13movementApRemaining\x12!\n" +
+	"\freaction_max\x18\x05 \x01(\x05R\vreactionMax\x12%\n" +
+	"\x0ereaction_spent\x18\x06 \x01(\x05R\rreactionSpent\"\xf0\x03\n" +
 	"\vCombatEvent\x12,\n" +
 	"\x04type\x18\x01 \x01(\x0e2\x18.game.v1.CombatEventTypeR\x04type\x12\x1a\n" +
 	"\battacker\x18\x02 \x01(\tR\battacker\x12\x16\n" +

@@ -611,6 +611,12 @@ export interface APUpdateEvent {
   ap_remaining?: number
   apTotal?: number
   ap_total?: number
+  movementApRemaining?: number
+  movement_ap_remaining?: number
+  reactionMax?: number
+  reaction_max?: number
+  reactionSpent?: number
+  reaction_spent?: number
 }
 
 export interface CombatEvent {

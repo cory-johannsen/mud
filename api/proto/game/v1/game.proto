@@ -1049,6 +1049,8 @@ message APUpdateEvent {
   int32  ap_remaining          = 2; // updated remaining action points
   int32  ap_total              = 3; // total action points for this round
   int32  movement_ap_remaining = 4; // how many movement actions (Stride/Step) remain this round; max 2
+  int32  reaction_max          = 5; // max reactions this round (ReactionBudget.Max); 0 if budget not initialised
+  int32  reaction_spent        = 6; // reactions spent so far this round (ReactionBudget.Spent)
 }
 
 // CombatEvent delivers combat narration to all players in the room.
