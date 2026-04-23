@@ -6,6 +6,7 @@ import (
 
 	"github.com/cory-johannsen/mud/internal/game/effect"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 // Scenario: two same-type status bonuses — only the highest contributes.
@@ -21,6 +22,8 @@ func TestScenario_TwoStatusBonuses(t *testing.T) {
 	r := effect.Resolve(s, effect.StatAttack)
 	assert.Equal(t, 1, r.Total)    // only one status bonus contributes
 	assert.Len(t, r.Suppressed, 1) // the other is suppressed
+	require.NotNil(t, r.Suppressed[0].OverriddenBy)
+	assert.Equal(t, "heroism", r.Suppressed[0].OverriddenBy.EffectID)
 }
 
 // Scenario: stacking circumstance penalties — only the worst contributes.
@@ -35,6 +38,8 @@ func TestScenario_StackingCircumstancePenalties(t *testing.T) {
 	r := effect.Resolve(s, effect.StatAttack)
 	assert.Equal(t, -3, r.Total)   // only the worst penalty counts
 	assert.Len(t, r.Suppressed, 1)
+	require.NotNil(t, r.Suppressed[0].OverriddenBy)
+	assert.Equal(t, "blinded", r.Suppressed[0].OverriddenBy.EffectID)
 }
 
 // Scenario: untyped bonuses from different sources all stack.

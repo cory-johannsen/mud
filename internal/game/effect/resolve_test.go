@@ -114,8 +114,7 @@ func TestResolve_Pure_IdenticalInputSameOutput(t *testing.T) {
 		DurKind: effect.DurationRounds, DurRemain: 2})
 	r1 := effect.Resolve(s, effect.StatAC)
 	r2 := effect.Resolve(s, effect.StatAC)
-	assert.Equal(t, r1.Total, r2.Total)
-	assert.Equal(t, len(r1.Contributing), len(r2.Contributing))
+	assert.Equal(t, r1, r2)
 }
 
 func TestProperty_Resolve_UntypedSumsAll(t *testing.T) {
@@ -135,6 +134,68 @@ func TestProperty_Resolve_UntypedSumsAll(t *testing.T) {
 		}
 		r := effect.Resolve(s, effect.StatDamage)
 		assert.Equal(rt, total, r.Total)
+	})
+}
+
+func TestProperty_Resolve_StatusPositives_HighestWins(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		n := rapid.IntRange(2, 5).Draw(rt, "n")
+		values := make([]int, n)
+		maxVal := 0
+		s := effect.NewEffectSet()
+		for i := 0; i < n; i++ {
+			v := rapid.IntRange(1, 100).Draw(rt, fmt.Sprintf("v%d", i))
+			values[i] = v
+			if v > maxVal {
+				maxVal = v
+			}
+			s.Apply(effect.Effect{
+				EffectID: fmt.Sprintf("eid%d", i),
+				SourceID: fmt.Sprintf("src%d", i),
+				Bonuses:  []effect.Bonus{{Stat: effect.StatAttack, Value: v, Type: effect.BonusTypeStatus}},
+				DurKind:  effect.DurationPermanent,
+			})
+		}
+		r := effect.Resolve(s, effect.StatAttack)
+		assert.Equal(rt, maxVal, r.Total)
+		assert.Len(rt, r.Contributing, 1)
+		assert.Len(rt, r.Suppressed, n-1)
+		winnerEffectID := r.Contributing[0].EffectID
+		for _, sup := range r.Suppressed {
+			require.NotNil(rt, sup.OverriddenBy)
+			assert.Equal(rt, winnerEffectID, sup.OverriddenBy.EffectID)
+		}
+	})
+}
+
+func TestProperty_Resolve_StatusNegatives_WorstWins(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		n := rapid.IntRange(2, 5).Draw(rt, "n")
+		values := make([]int, n)
+		minVal := 0
+		s := effect.NewEffectSet()
+		for i := 0; i < n; i++ {
+			v := rapid.IntRange(-100, -1).Draw(rt, fmt.Sprintf("v%d", i))
+			values[i] = v
+			if v < minVal {
+				minVal = v
+			}
+			s.Apply(effect.Effect{
+				EffectID: fmt.Sprintf("eid%d", i),
+				SourceID: fmt.Sprintf("src%d", i),
+				Bonuses:  []effect.Bonus{{Stat: effect.StatAttack, Value: v, Type: effect.BonusTypeStatus}},
+				DurKind:  effect.DurationPermanent,
+			})
+		}
+		r := effect.Resolve(s, effect.StatAttack)
+		assert.Equal(rt, minVal, r.Total)
+		assert.Len(rt, r.Contributing, 1)
+		assert.Len(rt, r.Suppressed, n-1)
+		winnerEffectID := r.Contributing[0].EffectID
+		for _, sup := range r.Suppressed {
+			require.NotNil(rt, sup.OverriddenBy)
+			assert.Equal(rt, winnerEffectID, sup.OverriddenBy.EffectID)
+		}
 	})
 }
 

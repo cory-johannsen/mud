@@ -77,7 +77,7 @@ func Resolve(set *EffectSet, stat Stat) Resolved {
 			}
 			if m.value > 0 {
 				pos = append(pos, m)
-			} else {
+			} else if m.value < 0 {
 				neg = append(neg, m)
 			}
 		}
@@ -133,6 +133,7 @@ func pickHighest(cs []candidate) (*candidate, []candidate) {
 
 // pickLowest returns the candidate with the minimum value (lex tiebreak), plus the losers.
 // Precondition: all candidates have value < 0.
+// Ties are broken by ascending lex (SourceID, CasterUID) — first is winner (DEDUP-6).
 func pickLowest(cs []candidate) (*candidate, []candidate) {
 	if len(cs) == 0 {
 		return nil, nil
