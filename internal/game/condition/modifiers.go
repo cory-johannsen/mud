@@ -1,47 +1,106 @@
 package condition
 
+import "github.com/cory-johannsen/mud/internal/game/effect"
+
 // AttackBonus returns the net attack roll modifier from all active conditions.
-// Positive AttackBonus on a condition adds to the total (buff); positive AttackPenalty
-// subtracts from the total (debuff). For stackable conditions, values are multiplied
-// by the current stack count.
+// Positive values indicate a net bonus; negative values indicate a net penalty.
 //
 // Precondition: s may be nil.
-// Postcondition: Returns the net modifier; may be positive when attack bonuses are active.
+// Postcondition: value may be positive or negative.
 func AttackBonus(s *ActiveSet) int {
 	if s == nil {
 		return 0
 	}
-	total := 0
-	for _, ac := range s.conditions {
-		if ac.Def.AttackPenalty > 0 {
-			total -= ac.Def.AttackPenalty * ac.Stacks
-		}
-		if ac.Def.AttackBonus > 0 {
-			total += ac.Def.AttackBonus * ac.Stacks
-		}
-	}
-	return total
+	return effect.Resolve(s.Effects(), effect.StatAttack).Total
 }
 
 // ACBonus returns the net AC modifier from all active conditions.
-// Positive ACBonus on a condition adds to the total (buff); positive ACPenalty
-// subtracts from the total (debuff). For stackable conditions, values are multiplied
-// by the current stack count.
+// Positive values indicate a net bonus; negative values indicate a net penalty.
 //
 // Precondition: s may be nil.
-// Postcondition: May be positive when AC bonuses exceed penalties.
+// Postcondition: value may be positive or negative.
 func ACBonus(s *ActiveSet) int {
 	if s == nil {
 		return 0
 	}
+	return effect.Resolve(s.Effects(), effect.StatAC).Total
+}
+
+// DamageBonus returns the total damage bonus granted by all active conditions.
+//
+// Precondition: s may be nil.
+// Postcondition: returns >= 0 (negative totals are clamped to 0 per legacy contract).
+func DamageBonus(s *ActiveSet) int {
+	if s == nil {
+		return 0
+	}
+	v := effect.Resolve(s.Effects(), effect.StatDamage).Total
+	if v < 0 {
+		return 0
+	}
+	return v
+}
+
+// SkillPenalty returns the flat all-skill penalty magnitude from active conditions.
+// Returns the absolute value of any negative total from StatSkill; 0 when net is positive.
+//
+// Precondition: s may be nil.
+// Postcondition: returns >= 0.
+func SkillPenalty(s *ActiveSet) int {
+	if s == nil {
+		return 0
+	}
+	v := effect.Resolve(s.Effects(), effect.StatSkill).Total
+	if v >= 0 {
+		return 0
+	}
+	return -v
+}
+
+// StealthBonus returns the Stealth skill bonus from active conditions.
+//
+// Precondition: s may be nil.
+// Postcondition: returns >= 0.
+func StealthBonus(s *ActiveSet) int {
+	if s == nil {
+		return 0
+	}
+	v := effect.Resolve(s.Effects(), effect.Stat("skill:stealth")).Total
+	if v < 0 {
+		return 0
+	}
+	return v
+}
+
+// FlairBonus returns the Flair ability bonus from active conditions.
+//
+// Precondition: s may be nil.
+// Postcondition: returns >= 0.
+func FlairBonus(s *ActiveSet) int {
+	if s == nil {
+		return 0
+	}
+	v := effect.Resolve(s.Effects(), effect.StatFlair).Total
+	if v < 0 {
+		return 0
+	}
+	return v
+}
+
+// ReflexBonus returns the total Reflex save bonus granted by all active conditions.
+// For stackable conditions, the bonus is multiplied by the current stack count.
+// ReflexBonus is not routed through the EffectSet because ConditionDef.ReflexBonus
+// is not synthesised into Bonuses (Gunchete saves are handled separately).
+//
+// Precondition: s must not be nil.
+// Postcondition: Returns >= 0.
+func ReflexBonus(s *ActiveSet) int {
 	total := 0
 	for _, ac := range s.conditions {
-		if ac.Def.ACPenalty > 0 {
-			total -= ac.Def.ACPenalty * ac.Stacks
-		}
-		if ac.Def.ACBonus > 0 {
-			total += ac.Def.ACBonus * ac.Stacks
-		}
+		total += ac.Def.ReflexBonus * ac.Stacks
+	}
+	if total < 0 {
+		total = 0
 	}
 	return total
 }
@@ -107,22 +166,6 @@ func IsActionRestricted(s *ActiveSet, actionType string) bool {
 	return false
 }
 
-// DamageBonus returns the total damage bonus granted by all active conditions.
-// For stackable conditions, the bonus is multiplied by the current stack count.
-//
-// Precondition: s must not be nil.
-// Postcondition: returns >= 0.
-func DamageBonus(s *ActiveSet) int {
-	total := 0
-	for _, ac := range s.conditions {
-		total += ac.Def.DamageBonus * ac.Stacks
-	}
-	if total < 0 {
-		total = 0
-	}
-	return total
-}
-
 // ExtraWeaponDice returns the total number of extra weapon damage dice granted by all active conditions.
 // Each die is of the weapon's own die type, rolled on a hit and doubled on a crit.
 //
@@ -148,38 +191,6 @@ func ExtraWeaponDice(s *ActiveSet) int {
 // Postcondition: Returns >= 0.
 func StunnedAPReduction(s *ActiveSet) int {
 	return s.Stacks("stunned")
-}
-
-// ReflexBonus returns the total Reflex save bonus granted by all active conditions.
-// For stackable conditions, the bonus is multiplied by the current stack count.
-//
-// Precondition: s must not be nil.
-// Postcondition: Returns >= 0.
-func ReflexBonus(s *ActiveSet) int {
-	total := 0
-	for _, ac := range s.conditions {
-		total += ac.Def.ReflexBonus * ac.Stacks
-	}
-	if total < 0 {
-		total = 0
-	}
-	return total
-}
-
-// StealthBonus returns the total Stealth skill bonus granted by all active conditions.
-// For stackable conditions, the bonus is multiplied by the current stack count.
-//
-// Precondition: s must not be nil.
-// Postcondition: Returns >= 0.
-func StealthBonus(s *ActiveSet) int {
-	total := 0
-	for _, ac := range s.conditions {
-		total += ac.Def.StealthBonus * ac.Stacks
-	}
-	if total < 0 {
-		total = 0
-	}
-	return total
 }
 
 // APReduction returns the total AP reduction from all active conditions.
@@ -214,25 +225,6 @@ func SkipTurn(s *ActiveSet) bool {
 		}
 	}
 	return false
-}
-
-// SkillPenalty returns the total skill penalty from all active conditions.
-// Each condition contributes SkillPenalty * Stacks.
-//
-// Precondition: s must not be nil.
-// Postcondition: Returns >= 0.
-func SkillPenalty(s *ActiveSet) int {
-	if s == nil {
-		return 0
-	}
-	total := 0
-	for _, ac := range s.conditions {
-		total += ac.Def.SkillPenalty * ac.Stacks
-	}
-	if total < 0 {
-		total = 0
-	}
-	return total
 }
 
 // ForcedActionType returns the forced_action value from the first active condition

@@ -6,6 +6,7 @@ import (
 
 	lua "github.com/yuin/gopher-lua"
 
+	"github.com/cory-johannsen/mud/internal/game/effect"
 	"github.com/cory-johannsen/mud/internal/scripting"
 )
 
@@ -22,13 +23,57 @@ type ActiveCondition struct {
 // It is not safe for concurrent use; the caller must serialise access.
 type ActiveSet struct {
 	conditions map[string]*ActiveCondition
+	effects    *effect.EffectSet
 	scriptMgr  *scripting.Manager
 	zoneID     string
 }
 
 // NewActiveSet creates an empty ActiveSet.
 func NewActiveSet() *ActiveSet {
-	return &ActiveSet{conditions: make(map[string]*ActiveCondition)}
+	return &ActiveSet{
+		conditions: make(map[string]*ActiveCondition),
+		effects:    effect.NewEffectSet(),
+	}
+}
+
+// Effects returns the internal EffectSet derived from all active conditions.
+// Callers MUST NOT mutate the returned EffectSet directly.
+//
+// Precondition: s may be nil.
+// Postcondition: returns nil when s is nil; otherwise returns the internal EffectSet.
+func (s *ActiveSet) Effects() *effect.EffectSet {
+	if s == nil {
+		return nil
+	}
+	return s.effects
+}
+
+// syncConditionEffect writes a condition's scaled bonuses into the internal EffectSet.
+// If def.Bonuses is nil (condition created without going through LoadDirectory),
+// SynthesiseBonuses is called to populate it from flat fields before syncing.
+// Precondition: def must not be nil; stacks >= 1.
+// Postcondition: the effect identified by "condition:"+def.ID is updated in s.effects.
+func (s *ActiveSet) syncConditionEffect(uid string, def *ConditionDef, stacks int) {
+	if s.effects == nil {
+		s.effects = effect.NewEffectSet()
+	}
+	// Ensure Bonuses are synthesised (no-op if already populated; safe to call multiple times).
+	if def.Bonuses == nil {
+		_ = def.SynthesiseBonuses() // error only on mixed fields; flat-field-only defs are always valid
+	}
+	// Scale bonuses by stack count (copy — do not mutate def.Bonuses).
+	bonuses := make([]effect.Bonus, len(def.Bonuses))
+	for i, b := range def.Bonuses {
+		b.Value = b.Value * stacks
+		bonuses[i] = b
+	}
+	s.effects.Apply(effect.Effect{
+		EffectID:  def.ID,
+		SourceID:  "condition:" + def.ID,
+		CasterUID: uid,
+		Bonuses:   bonuses,
+		DurKind:   effect.DurationUntilRemove,
+	})
 }
 
 // SetScripting attaches a scripting.Manager and zoneID to this ActiveSet.
@@ -60,6 +105,7 @@ func (s *ActiveSet) Apply(uid string, def *ConditionDef, stacks, duration int) e
 			if duration > existing.DurationRemaining {
 				existing.DurationRemaining = duration
 			}
+			s.syncConditionEffect(uid, def, existing.Stacks)
 			return nil
 		}
 		newStacks := existing.Stacks + stacks
@@ -70,6 +116,7 @@ func (s *ActiveSet) Apply(uid string, def *ConditionDef, stacks, duration int) e
 		if duration > existing.DurationRemaining {
 			existing.DurationRemaining = duration
 		}
+		s.syncConditionEffect(uid, def, existing.Stacks)
 		return nil
 	}
 
@@ -87,6 +134,8 @@ func (s *ActiveSet) Apply(uid string, def *ConditionDef, stacks, duration int) e
 		Stacks:            capped,
 		DurationRemaining: duration,
 	}
+
+	s.syncConditionEffect(uid, def, capped)
 
 	if s.scriptMgr != nil && def.LuaOnApply != "" {
 		stks := s.conditions[def.ID].Stacks
@@ -129,6 +178,7 @@ func (s *ActiveSet) Source(id string) string {
 func (s *ActiveSet) Remove(uid, id string) {
 	removed := s.conditions[id]
 	delete(s.conditions, id)
+	s.effects.RemoveBySource("condition:" + id)
 	if s.scriptMgr != nil && removed != nil && removed.Def.LuaOnRemove != "" {
 		s.scriptMgr.CallHook(s.zoneID, removed.Def.LuaOnRemove, //nolint:errcheck
 			lua.LString(uid), lua.LString(id),
@@ -161,6 +211,7 @@ func (s *ActiveSet) Tick(uid string) []string {
 		if ac.DurationRemaining <= 0 {
 			expired = append(expired, id)
 			delete(s.conditions, id)
+			s.effects.RemoveBySource("condition:" + id)
 		}
 	}
 	return expired
@@ -188,6 +239,7 @@ func (s *ActiveSet) ClearEncounter() {
 	for id, ac := range s.conditions {
 		if ac.Def.DurationType == "encounter" {
 			delete(s.conditions, id)
+			s.effects.RemoveBySource("condition:" + id)
 		}
 	}
 }
@@ -201,6 +253,7 @@ func (s *ActiveSet) ClearAll() {
 	for id := range s.conditions {
 		delete(s.conditions, id)
 	}
+	s.effects = effect.NewEffectSet()
 }
 
 // ApplyTagged is like Apply but attaches a source tag to the condition.
@@ -260,6 +313,7 @@ func (s *ActiveSet) TickCalendar(uid string, now time.Time) []string {
 	for id, ac := range s.conditions {
 		if ac.ExpiresAt != nil && !now.Before(*ac.ExpiresAt) {
 			expired = append(expired, id)
+			// Remove calls s.effects.RemoveBySource internally.
 			s.Remove(uid, id)
 		}
 	}
