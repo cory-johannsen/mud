@@ -5,6 +5,7 @@ import (
 	"os"
 	"sort"
 
+	"github.com/cory-johannsen/mud/internal/game/effect"
 	"gopkg.in/yaml.v3"
 )
 
@@ -51,6 +52,9 @@ type ClassFeature struct {
 	GrantsFocusPoint  bool            `yaml:"grants_focus_point,omitempty"`  // true if this feature grants a Focus Point slot
 	// AoeRadius is the radius in feet for area-of-effect feats. 0 = single target.
 	AoeRadius int `yaml:"aoe_radius,omitempty"`
+	// PassiveBonuses are always-on typed bonuses granted while this feature is active.
+	// Only meaningful when Active == false (passive features).
+	PassiveBonuses []effect.Bonus `yaml:"passive_bonuses,omitempty"`
 }
 
 // classFeaturesFile is the top-level YAML structure for content/class_features.yaml.
