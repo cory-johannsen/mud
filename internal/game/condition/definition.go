@@ -79,7 +79,7 @@ type ConditionDef struct {
 
 // SynthesiseBonuses populates Bonuses from flat fields if Bonuses is empty.
 // Precondition: called after YAML unmarshal.
-// Postcondition: Bonuses is non-nil; each synthesised entry has Type == BonusTypeUntyped.
+// Postcondition: Bonuses is non-nil after a successful call; each synthesised entry has Type == BonusTypeUntyped.
 // Returns an error if both Bonuses and flat fields are set (DEDUP-11).
 func (d *ConditionDef) SynthesiseBonuses() error {
 	hasBonusesField := len(d.Bonuses) > 0
@@ -114,6 +114,9 @@ func (d *ConditionDef) SynthesiseBonuses() error {
 	add(effect.StatSkill, -d.SkillPenalty)
 	for skillID, penalty := range d.SkillPenalties {
 		add(effect.Stat("skill:"+skillID), -penalty)
+	}
+	if out == nil {
+		out = make([]effect.Bonus, 0)
 	}
 	d.Bonuses = out
 	return nil

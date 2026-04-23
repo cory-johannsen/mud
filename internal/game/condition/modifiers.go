@@ -92,9 +92,12 @@ func FlairBonus(s *ActiveSet) int {
 // ReflexBonus is not routed through the EffectSet because ConditionDef.ReflexBonus
 // is not synthesised into Bonuses (Gunchete saves are handled separately).
 //
-// Precondition: s must not be nil.
+// Precondition: s may be nil.
 // Postcondition: Returns >= 0.
 func ReflexBonus(s *ActiveSet) int {
+	if s == nil {
+		return 0
+	}
 	total := 0
 	for _, ac := range s.conditions {
 		total += ac.Def.ReflexBonus * ac.Stacks

@@ -57,7 +57,8 @@ func (s *ActiveSet) syncConditionEffect(uid string, def *ConditionDef, stacks in
 	if s.effects == nil {
 		s.effects = effect.NewEffectSet()
 	}
-	// Ensure Bonuses are synthesised (no-op if already populated; safe to call multiple times).
+	// Ensure Bonuses are synthesised. After SynthesiseBonuses runs, def.Bonuses is always
+	// non-nil (even for zero-bonus defs), so this check is a true no-op on subsequent calls.
 	if def.Bonuses == nil {
 		_ = def.SynthesiseBonuses() // error only on mixed fields; flat-field-only defs are always valid
 	}
