@@ -2,6 +2,7 @@
 package combat
 
 import (
+	"github.com/cory-johannsen/mud/internal/game/effect"
 	"github.com/cory-johannsen/mud/internal/game/inventory"
 	"github.com/cory-johannsen/mud/internal/game/reaction"
 )
@@ -158,6 +159,10 @@ type Combatant struct {
 	// ReactionBudget tracks this combatant's per-round reaction spending.
 	// Nil before the first StartRound call. Reset by StartRoundWithSrc each round.
 	ReactionBudget *reaction.Budget
+	// Effects is the unified typed-bonus set for this combatant.
+	// Populated at combatant creation from conditions + feat/tech passive bonuses + equipment bonuses.
+	// Kept in sync with ActiveSet condition state via SyncConditionApply/SyncConditionRemove/SyncConditionsTick.
+	Effects *effect.EffectSet
 }
 
 // SpeedSquares returns the number of grid squares this combatant may move per stride action.

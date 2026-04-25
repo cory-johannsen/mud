@@ -1276,6 +1276,66 @@ func (h *CombatHandler) JoinPendingNPCCombat(inst *npc.Instance, pendingRoomID s
 			zap.String("room_id", pendingRoomID),
 			zap.Error(addErr),
 		)
+		return
+	}
+	// Populate the newly added NPC's Effects set so it participates in the
+	// typed-bonus pipeline alongside the existing combatants (DEDUP-5).
+	if joinedCbt := cbt.GetCombatant(inst.ID); joinedCbt != nil {
+		npcSrc := ""
+		npcBonus := 0
+		if inst.WeaponID != "" && h.invRegistry != nil {
+			if wDef := h.invRegistry.Weapon(inst.WeaponID); wDef != nil {
+				npcSrc = wDef.ID
+				npcBonus = wDef.Bonus
+			}
+		}
+		joinedCbt.Effects = combat.BuildCombatantEffects(combat.BuildEffectsOpts{
+			BearerUID:        joinedCbt.ID,
+			Conditions:       cbt.Conditions[joinedCbt.ID],
+			WeaponSourceID:   npcSrc,
+			WeaponBonusValue: npcBonus,
+		})
+	}
+}
+
+// populateCombatantEffects builds and assigns a typed-bonus EffectSet
+// (combat.Combatant.Effects) for every combatant in cbt. It MUST be called
+// after cbt.Conditions[uid] has been populated (post StartCombat + any
+// CopyTo / flat_footed / combat-start condition applications) so that
+// condition bonuses are captured in the resulting EffectSet.
+//
+// Weapon item-typed bonuses are sourced from cbt.Combatant.WeaponBonus for
+// every combatant that has a non-zero bonus. The source identifier is
+// derived from the combatant's WeaponName (falling back to "weapon" when
+// empty) so per-combatant dedup keys remain unique across different weapons.
+//
+// Passive feat/technology bonuses are NOT wired here yet; that is deferred
+// to a later task. Only conditions and weapon bonuses contribute at this
+// stage.
+//
+// Precondition: cbt must be non-nil.
+// Postcondition: every Combatant in cbt.Combatants has a non-nil Effects field.
+func populateCombatantEffects(cbt *combat.Combat) {
+	if cbt == nil {
+		return
+	}
+	for _, c := range cbt.Combatants {
+		if c == nil {
+			continue
+		}
+		weaponSrc := ""
+		if c.WeaponBonus != 0 {
+			weaponSrc = c.WeaponName
+			if weaponSrc == "" {
+				weaponSrc = "weapon"
+			}
+		}
+		c.Effects = combat.BuildCombatantEffects(combat.BuildEffectsOpts{
+			BearerUID:        c.ID,
+			Conditions:       cbt.Conditions[c.ID],
+			WeaponSourceID:   weaponSrc,
+			WeaponBonusValue: c.WeaponBonus,
+		})
 	}
 }
 
@@ -1963,6 +2023,10 @@ func (h *CombatHandler) startPursuitCombatLocked(playerSess *session.PlayerSessi
 			}
 		}
 	}
+
+	// Populate per-combatant Effects sets (DEDUP-5). Must run AFTER conditions
+	// are fully populated (CopyTo + flat_footed application above).
+	populateCombatantEffects(cbt)
 
 	cbt.SetSessionGetter(func(uid string) (*session.PlayerSession, bool) {
 		return h.sessions.GetPlayer(uid)
@@ -3262,6 +3326,11 @@ func (h *CombatHandler) startCombatLocked(sess *session.PlayerSession, inst *npc
 			cbt.Conditions[npcCbt.ID].SetSource("flat_footed", "combat_start")
 		}
 	}
+
+	// Populate per-combatant Effects sets (DEDUP-5). Must run AFTER conditions
+	// are fully populated (CopyTo + flat_footed application above) so condition
+	// bonuses are captured.
+	populateCombatantEffects(cbt)
 
 	// Register session getter so ResolveRound can look up passive feats.
 	cbt.SetSessionGetter(func(uid string) (*session.PlayerSession, bool) {
