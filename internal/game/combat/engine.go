@@ -10,6 +10,7 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/inventory"
 	"github.com/cory-johannsen/mud/internal/game/reaction"
 	"github.com/cory-johannsen/mud/internal/game/session"
+	"github.com/cory-johannsen/mud/internal/game/world"
 	"github.com/cory-johannsen/mud/internal/scripting"
 )
 
@@ -55,6 +56,16 @@ type Combat struct {
 	// combat handler populates this slice at StartCombat from the room's
 	// equipment and removes entries when cover HP reaches zero.
 	CoverObjects []CoverObject
+	// Terrain is the per-cell terrain layer for this combat. Absent cells are TerrainNormal.
+	// Populated at combat start from the room's CombatTerrain config.
+	Terrain map[GridCell]*TerrainCell
+	// RoomHazards is a copy of the room's HazardDef list, used to resolve hazard_id
+	// references on TerrainHazardous cells at combat start.
+	RoomHazards []world.HazardDef
+	// skipHazardRoundStart tracks combatant IDs that entered a hazardous cell at
+	// combat start (via on_enter) and must not fire round_start hazards in round 1.
+	// Cleared by StartRoundWithSrc on first use.
+	skipHazardRoundStart map[string]bool
 	// ReadyRegistry holds pending Ready entries for the current round.
 	// Populated by QueueAction(ActionReady); consumed by ResolveRound.
 	ReadyRegistry *reaction.ReadyRegistry
