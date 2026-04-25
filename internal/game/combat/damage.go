@@ -68,6 +68,11 @@ type DamageResult struct {
 // ResolveDamage runs the six-stage damage pipeline and returns the final damage and an
 // ordered breakdown.
 //
+// PF2E semantic note: ALL additives (dice, modifier, condition bonus, feat bonus, weapon
+// modifier, extra dice) flow through the same Multiplier stage, so a critical hit doubles
+// every additive — not just the base dice + STR. This differs from common VTT shortcuts
+// that only crit-double the dice; it matches the rules-as-written.
+//
 // Precondition: every in.Multipliers[i].Factor > 1.0.
 // Postcondition: Final >= 0; Breakdown[0].Stage == StageBase (MULT-13).
 // Pure: no RNG, no state mutation, no I/O (MULT-11).
