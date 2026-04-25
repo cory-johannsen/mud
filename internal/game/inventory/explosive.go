@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 
 	"gopkg.in/yaml.v3"
+
+	"github.com/cory-johannsen/mud/internal/game/aoe"
 )
 
 // AreaType represents the area of effect for an explosive.
@@ -43,11 +45,20 @@ type ExplosiveDef struct {
 	// When false (default), only enemy-kind combatants are targeted.
 	// When true, all living combatants except the thrower are targeted.
 	FriendlyFire bool `yaml:"friendly_fire,omitempty"`
+	// AoeShape selects the AoE template geometry: "" (legacy / single-target /
+	// back-compat), "burst", "cone", or "line". When empty and AoERadius > 0
+	// the explosive is treated as an AoeShapeBurst (back-compat AOE-4).
+	AoeShape aoe.AoeShape `yaml:"aoe_shape,omitempty"`
 	// AoERadius is the blast radius in feet for AreaTypeBurst explosives.
 	// Stored for future position-based filtering; not actively used in target selection now.
 	// Zero means room-wide effect (current behavior).
-	AoERadius int      `yaml:"aoe_radius,omitempty"`
-	Traits    []string `yaml:"traits"`
+	AoERadius int `yaml:"aoe_radius,omitempty"`
+	// AoeLength is the length in feet for cone/line shapes. Required (> 0) for those
+	// shapes; must be 0 otherwise.
+	AoeLength int `yaml:"aoe_length,omitempty"`
+	// AoeWidth is the width in feet for line shapes. Defaults to 5 ft when zero (AOE-3).
+	AoeWidth int      `yaml:"aoe_width,omitempty"`
+	Traits   []string `yaml:"traits"`
 }
 
 // Validate checks that the ExplosiveDef satisfies its invariants.
@@ -72,6 +83,9 @@ func (e *ExplosiveDef) Validate() error {
 	}
 	if e.SaveDC <= 0 {
 		errs = append(errs, errors.New("SaveDC must be > 0"))
+	}
+	if err := aoe.ValidateAoeFields(e.AoeShape, e.AoERadius, e.AoeLength, e.AoeWidth); err != nil {
+		errs = append(errs, err)
 	}
 	if len(errs) > 0 {
 		return fmt.Errorf("explosive validation failed: %v", errs)

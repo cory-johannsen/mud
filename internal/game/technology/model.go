@@ -6,6 +6,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/cory-johannsen/mud/internal/game/aoe"
 	"github.com/cory-johannsen/mud/internal/game/effect"
 	"github.com/cory-johannsen/mud/internal/game/reaction"
 )
@@ -237,10 +238,19 @@ type TechnologyDef struct {
 	// Reaction declares this tech as a player reaction with the given trigger and effect.
 	// Only applicable to innate techs. Nil means this tech is not a reaction.
 	Reaction *reaction.ReactionDef `yaml:"reaction,omitempty"`
+	// AoeShape selects the AoE template geometry: "" (single-target / legacy
+	// back-compat), "burst", "cone", or "line". When empty and AoeRadius > 0
+	// the technology is treated as an AoeShapeBurst (back-compat AOE-4).
+	AoeShape aoe.AoeShape `yaml:"aoe_shape,omitempty"`
 	// AoeRadius is the radius in feet of an area-of-effect burst centered on the target grid square.
 	// 0 means single-target (default). When > 0 and UseRequest.target_x/target_y are >= 0 (not the -1 sentinel),
 	// effects are applied to every combatant within Chebyshev distance AoeRadius of the target square.
 	AoeRadius int `yaml:"aoe_radius,omitempty"`
+	// AoeLength is the length in feet for cone/line shapes. Required (> 0) for those
+	// shapes; must be 0 otherwise.
+	AoeLength int `yaml:"aoe_length,omitempty"`
+	// AoeWidth is the width in feet for line shapes. Defaults to 5 ft when zero (AOE-3).
+	AoeWidth int `yaml:"aoe_width,omitempty"`
 	// PassiveBonuses are always-on typed bonuses granted while this technology is active (Passive == true only).
 	PassiveBonuses []effect.Bonus `yaml:"passive_bonuses,omitempty"`
 }
@@ -326,8 +336,8 @@ func (t *TechnologyDef) Validate() error {
 			return err
 		}
 	}
-	if t.AoeRadius < 0 {
-		return fmt.Errorf("technology %q: aoe_radius must be >= 0, got %d", t.ID, t.AoeRadius)
+	if err := aoe.ValidateAoeFields(t.AoeShape, t.AoeRadius, t.AoeLength, t.AoeWidth); err != nil {
+		return fmt.Errorf("technology %q: %w", t.ID, err)
 	}
 	if len(t.AmpedEffects.AllEffects()) > 0 && t.AmpedLevel == 0 {
 		return fmt.Errorf("amped_level must be > 0 when amped_effects is non-empty")
