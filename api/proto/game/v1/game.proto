@@ -1301,6 +1301,10 @@ message CharacterSheetView {
     // e.g. "simple_melee", "martial_melee". Empty when that slot is unequipped.
     string main_hand_prof_category = 63;
     string off_hand_prof_category  = 64;
+    // effects_summary is the pre-rendered Active Effects block (multi-line string)
+    // produced by effect/render.RenderEffectsBlock. Populated server-side at
+    // handleChar time so both telnet and web clients render identical content.
+    string effects_summary         = 65;
 }
 
 // InnateSlotView delivers the per-tech innate use slot state for the character sheet.

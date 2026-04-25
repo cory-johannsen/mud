@@ -27,6 +27,7 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/command"
 	"github.com/cory-johannsen/mud/internal/game/condition"
 	"github.com/cory-johannsen/mud/internal/game/crafting"
+	effectrender "github.com/cory-johannsen/mud/internal/game/effect/render"
 	"github.com/cory-johannsen/mud/internal/game/danger"
 	"github.com/cory-johannsen/mud/internal/game/dice"
 	"github.com/cory-johannsen/mud/internal/game/downtime"
@@ -6734,6 +6735,17 @@ func (s *GameServiceServer) handleChar(uid string) (*gamev1.ServerEvent, error) 
 		}()) {
 			view.ActiveSetBonuses = append(view.ActiveSetBonuses, bonus.Description)
 		}
+	}
+
+	// Duplicate-effects plan Task 10: populate EffectsSummary so telnet and web
+	// clients render identical "Active Effects" blocks. We feed the player's
+	// condition-derived EffectSet into effect/render.EffectsBlock. casterNames
+	// is nil out-of-combat — render falls back to source-prefix labels
+	// ("item", "feat", "tech", "self").
+	if sess.Conditions != nil {
+		view.EffectsSummary = effectrender.EffectsBlock(sess.Conditions.Effects(), nil, 80)
+	} else {
+		view.EffectsSummary = effectrender.EffectsBlock(nil, nil, 80)
 	}
 
 	return &gamev1.ServerEvent{

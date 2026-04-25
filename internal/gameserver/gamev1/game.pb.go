@@ -11666,8 +11666,12 @@ type CharacterSheetView struct {
 	// e.g. "simple_melee", "martial_melee". Empty when that slot is unequipped.
 	MainHandProfCategory string `protobuf:"bytes,63,opt,name=main_hand_prof_category,json=mainHandProfCategory,proto3" json:"main_hand_prof_category,omitempty"`
 	OffHandProfCategory  string `protobuf:"bytes,64,opt,name=off_hand_prof_category,json=offHandProfCategory,proto3" json:"off_hand_prof_category,omitempty"`
-	unknownFields        protoimpl.UnknownFields
-	sizeCache            protoimpl.SizeCache
+	// effects_summary is the pre-rendered Active Effects block (multi-line string)
+	// produced by effect/render.RenderEffectsBlock. Populated server-side at
+	// handleChar time so both telnet and web clients render identical content.
+	EffectsSummary string `protobuf:"bytes,65,opt,name=effects_summary,json=effectsSummary,proto3" json:"effects_summary,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
 }
 
 func (x *CharacterSheetView) Reset() {
@@ -12144,6 +12148,13 @@ func (x *CharacterSheetView) GetMainHandProfCategory() string {
 func (x *CharacterSheetView) GetOffHandProfCategory() string {
 	if x != nil {
 		return x.OffHandProfCategory
+	}
+	return ""
+}
+
+func (x *CharacterSheetView) GetEffectsSummary() string {
+	if x != nil {
+		return x.EffectsSummary
 	}
 	return ""
 }
@@ -18397,7 +18408,7 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\vdescription\x18\x04 \x01(\tR\vdescription\x12'\n" +
 	"\x0feffects_summary\x18\x05 \x01(\tR\x0eeffectsSummary\x12\x1d\n" +
 	"\n" +
-	"short_name\x18\x06 \x01(\tR\tshortName\"\xaf\x17\n" +
+	"short_name\x18\x06 \x01(\tR\tshortName\"\xd8\x17\n" +
 	"\x12CharacterSheetView\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x10\n" +
 	"\x03job\x18\x02 \x01(\tR\x03job\x12\x1c\n" +
@@ -18469,7 +18480,8 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\fexplore_mode\x18= \x01(\tR\vexploreMode\x12%\n" +
 	"\x0etech_tradition\x18> \x01(\tR\rtechTradition\x125\n" +
 	"\x17main_hand_prof_category\x18? \x01(\tR\x14mainHandProfCategory\x123\n" +
-	"\x16off_hand_prof_category\x18@ \x01(\tR\x13offHandProfCategory\x1a8\n" +
+	"\x16off_hand_prof_category\x18@ \x01(\tR\x13offHandProfCategory\x12'\n" +
+	"\x0feffects_summary\x18A \x01(\tR\x0eeffectsSummary\x1a8\n" +
 	"\n" +
 	"ArmorEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +

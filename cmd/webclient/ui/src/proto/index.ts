@@ -290,6 +290,10 @@ export interface CharacterSheetView {
   main_hand_prof_category?: string
   offHandProfCategory?: string
   off_hand_prof_category?: string
+  // Pre-rendered multi-line "Active Effects" block produced server-side by
+  // effect/render.RenderEffectsBlock. Empty when no effects are active.
+  effectsSummary?: string
+  effects_summary?: string
 }
 
 export interface QuestObjectiveView {
