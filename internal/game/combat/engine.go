@@ -71,6 +71,18 @@ type Combat struct {
 	ReadyRegistry *reaction.ReadyRegistry
 }
 
+// SkipHazardRoundStart marks uid so that the next StartRoundWithSrc call will
+// NOT fire round_start hazards for this combatant — used by gameserver
+// combat-start placement after firing on_enter so round 1 doesn't double-fire.
+//
+// Precondition: uid is non-empty.
+func (c *Combat) SkipHazardRoundStart(uid string) {
+	if c.skipHazardRoundStart == nil {
+		c.skipHazardRoundStart = map[string]bool{}
+	}
+	c.skipHazardRoundStart[uid] = true
+}
+
 // CoverObject is a cover item placed on the combat grid. It blocks movement
 // through its cell until destroyed.
 type CoverObject struct {

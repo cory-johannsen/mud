@@ -772,7 +772,6 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 					stepsTaken++
 
 					// TERRAIN-9: fire on_enter hazard for hazardous cells.
-					// (Task 5 will replace applyCellHazard's stub with real logic.)
 					if tc := cbt.TerrainAt(newX, newY); tc.Type == TerrainHazardous && tc.Hazard != nil {
 						events = append(events, applyCellHazard(cbt, actor, tc, "on_enter", src)...)
 					}
@@ -1895,8 +1894,7 @@ func buildNarrative(actor, target *Combatant, result AttackResult, dmg int) stri
 // Returns zero or more RoundEvents (damage narrative, condition narrative, etc.).
 //
 // Precondition: tc.Type == TerrainHazardous; tc.Hazard must not be nil.
-func applyCellHazard(cbt *Combat, victim *Combatant, tc TerrainCell, trigger string, src Source) []RoundEvent {
-	_ = cbt
+func applyCellHazard(_ *Combat, victim *Combatant, tc TerrainCell, trigger string, src Source) []RoundEvent {
 	if tc.Hazard == nil || tc.Hazard.Def == nil {
 		return nil
 	}
