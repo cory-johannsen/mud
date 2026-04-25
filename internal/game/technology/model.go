@@ -2,6 +2,7 @@ package technology
 
 import (
 	"fmt"
+	"math"
 	"regexp"
 	"strings"
 
@@ -136,6 +137,34 @@ type TechEffect struct {
 	// utility
 	UtilityType string `yaml:"utility_type,omitempty"` // unlock | reveal | hack
 	Description string `yaml:"description,omitempty"` // human-readable text for utility effects
+}
+
+// ValidateMultiplier checks that the Multiplier field is a legal value.
+// Legal values: 0 (unset/no-op), 0.5 (halver), 1.0 (no-op), or > 1.0 (multiplier).
+// Values in (0, 1) other than 0.5 are a load-time error (MULT-10).
+// Postcondition: returns non-nil error iff Multiplier is illegal.
+func (e TechEffect) ValidateMultiplier() error {
+	m := e.Multiplier
+	if m == 0 || m == 1.0 || m > 1.0 {
+		return nil
+	}
+	if math.Abs(m-0.5) < 1e-9 {
+		return nil
+	}
+	if m < 0 {
+		return fmt.Errorf("tech effect: negative multiplier %v is not permitted", m)
+	}
+	return fmt.Errorf("tech effect: illegal fractional multiplier %v (only 0.5 permitted)", m)
+}
+
+// IsHalver returns true iff Multiplier == 0.5 (converts to a halver stage). (MULT-9)
+func (e TechEffect) IsHalver() bool {
+	return math.Abs(e.Multiplier-0.5) < 1e-9
+}
+
+// IsMultiplier returns true iff Multiplier > 1.0 (feeds the multiplier bucket). (MULT-8)
+func (e TechEffect) IsMultiplier() bool {
+	return e.Multiplier > 1.0
 }
 
 // TieredEffects holds per-outcome effect lists for a technology.
@@ -327,6 +356,9 @@ func validateEffect(e TechEffect, idx int) error {
 		if e.DC == 0 {
 			return fmt.Errorf("effects[%d]: skill_check effect requires dc > 0", idx)
 		}
+	}
+	if err := e.ValidateMultiplier(); err != nil {
+		return fmt.Errorf("effects[%d]: %w", idx, err)
 	}
 	return nil
 }

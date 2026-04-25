@@ -154,6 +154,62 @@ A bonus to `skill` contributes to any `skill:<id>` query (prefix-on-colon). A bo
 4. On round tick: `combat.SyncConditionsTick()` removes expired condition effects.
 5. `combat.OverrideNarrativeEvents()` diffs before/after Resolve to emit suppression log lines (DEDUP-14).
 
+## Damage Pipeline (MULT Requirements)
+
+All direct-damage computation flows through `combat.ResolveDamage(DamageInput) DamageResult`
+in `internal/game/combat/damage.go`. This function is pure: no RNG, no mutation, no I/O.
+
+### Stages (executed in order — MULT-1)
+
+| Stage | Rule |
+|-------|------|
+| **Base** | Sum all `DamageAdditive.Value` entries (may be negative) |
+| **Multiplier** | `effective = 1 + Σ(Factor_i − 1)`; apply `base × effective` (MULT-2) |
+| **Halver** | `floor(after_mult / 2)`; multiple halvers collapse to one (MULT-3, MULT-4) |
+| **Weakness** | `+ target.Weaknesses[damageType]` (MULT-5) |
+| **Resistance** | `− target.Resistances[damageType]` (MULT-6) |
+| **Floor** | `max(0, …)` (MULT-7) |
+
+### Multiplier stacking rule (MULT-2)
+
+PF2E: multiple ×M sources combine as `effective = 1 + Σ(M_i − 1)`.
+
+| Sources | Effective factor |
+|---------|-----------------|
+| Crit (×2) alone | ×2 |
+| Crit (×2) + Vulnerable (×2) | ×3 |
+| Three ×2 sources | ×4 |
+
+Multiplicative chaining (×4 from two ×2s) is **not** permitted.
+
+### Halver semantics (MULT-9)
+
+`TechEffect.Multiplier == 0.5` is interpreted as a halver (not a 0.5× multiplier).
+Any other value in `(0, 1)` except `0.5` is rejected at YAML load time (MULT-10).
+
+### buildDamageInput (MULT-12)
+
+Every damage-producing call site in `round.go` assembles its input via
+`BuildDamageInput(BuildDamageOpts)` in `damage_input.go`. Open-coded crit-doubling,
+weakness, and resistance arithmetic are removed; those stages live only in the pipeline.
+`AttackResult.EffectiveDamage()` is deprecated in favour of the pipeline (MULT-17).
+
+### Reaction compatibility (MULT-16)
+
+`TriggerOnDamageTaken` callbacks receive and may mutate `DamagePending *int` — the final
+post-pipeline scalar — before `ApplyDamage`. They do not see the breakdown in v1.
+
+### Breakdown output (MULT-13, MULT-14, MULT-15)
+
+- `DamageResult.Breakdown` contains one entry per non-trivial stage in canonical order.
+- `StageBase` is always present.
+- `FormatBreakdownInline(steps)` returns `""` for trivial (base-only) inputs; otherwise
+  an indented inline string wrapping at `→` boundaries within 80 cols.
+- `FormatBreakdownVerbose(steps)` (with `handlers.RenderDamageBreakdown` as a thin wrapper)
+  returns the verbose multi-line form.
+- Players with `PlayerSession.ShowDamageBreakdown` receive the verbose block as a separate
+  message; everyone sees the inline breakdown appended to the attack narrative.
+
 ## Component Dependencies
 
 ```mermaid

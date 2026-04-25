@@ -2886,6 +2886,10 @@ func (h *CombatHandler) resolveAndAdvanceLocked(roomID string, cbt *combat.Comba
 
 	h.broadcastFn(roomID, events)
 
+	// MULT-15: deliver verbose damage breakdowns to opted-in observers as
+	// out-of-band MessageEvents (does not affect the shared combat narrative).
+	h.deliverVerboseBreakdowns(roomID, roundEvents)
+
 	// Broadcast AP state for all living combatants after round resolves (NPC AP tracking).
 	for _, c := range cbt.Combatants {
 		if c.IsDead() {
@@ -4581,15 +4585,79 @@ func (h *CombatHandler) cancelTimer(roomID string) {
 	h.timersMu.Unlock()
 }
 
+// deliverVerboseBreakdowns delivers the verbose damage-breakdown block (MULT-15)
+// to each player session in roomID whose ShowDamageBreakdown preference is
+// enabled. The verbose block is sent as a MessageEvent so it reaches only
+// opted-in observers and does not pollute the shared combat narrative.
+//
+// Precondition: roomID is a valid room identifier; roundEvents may be empty.
+// Postcondition: For every event with non-empty BreakdownSteps and a non-empty
+// inline DamageBreakdown, each player in roomID with ShowDamageBreakdown=true
+// receives one MessageEvent containing the verbose render.
+func (h *CombatHandler) deliverVerboseBreakdowns(roomID string, roundEvents []combat.RoundEvent) {
+	if len(roundEvents) == 0 {
+		return
+	}
+	uids := h.sessions.PlayerUIDsInRoom(roomID)
+	if len(uids) == 0 {
+		return
+	}
+	// Pre-filter to opted-in observers to skip work in the common case.
+	var observers []*session.PlayerSession
+	for _, uid := range uids {
+		sess, ok := h.sessions.GetPlayer(uid)
+		if !ok || sess == nil || sess.Entity == nil {
+			continue
+		}
+		if !sess.ShowDamageBreakdown {
+			continue
+		}
+		observers = append(observers, sess)
+	}
+	if len(observers) == 0 {
+		return
+	}
+	for _, re := range roundEvents {
+		if len(re.BreakdownSteps) == 0 || re.DamageBreakdown == "" {
+			continue
+		}
+		verbose := combat.FormatBreakdownVerbose(re.BreakdownSteps)
+		if verbose == "" {
+			continue
+		}
+		evt := &gamev1.ServerEvent{
+			Payload: &gamev1.ServerEvent_Message{
+				Message: &gamev1.MessageEvent{Content: verbose},
+			},
+		}
+		data, err := proto.Marshal(evt)
+		if err != nil {
+			continue
+		}
+		for _, sess := range observers {
+			_ = sess.Entity.Push(data)
+		}
+	}
+}
+
 // roundEventToProto converts a combat.RoundEvent to a gamev1.CombatEvent.
+//
+// MULT-14: when the RoundEvent carries an inline damage breakdown line, it is
+// appended to Narrative so every observer in the room sees the per-stage
+// summary. The verbose breakdown (MULT-15) is delivered out-of-band by
+// deliverVerboseBreakdowns to opted-in observers only.
 //
 // Postcondition: Returns a non-nil CombatEvent.
 func (h *CombatHandler) roundEventToProto(re combat.RoundEvent) *gamev1.CombatEvent {
+	narrative := re.Narrative
+	if re.DamageBreakdown != "" {
+		narrative += "\n" + re.DamageBreakdown
+	}
 	if re.AttackResult == nil {
 		return &gamev1.CombatEvent{
 			Type:      gamev1.CombatEventType_COMBAT_EVENT_TYPE_ATTACK,
 			Attacker:  re.ActorName,
-			Narrative: re.Narrative,
+			Narrative: narrative,
 		}
 	}
 
@@ -4603,7 +4671,7 @@ func (h *CombatHandler) roundEventToProto(re combat.RoundEvent) *gamev1.CombatEv
 		AttackTotal: int32(r.AttackTotal),
 		Outcome:     r.Outcome.String(),
 		Damage:      int32(dmg),
-		Narrative:   re.Narrative,
+		Narrative:   narrative,
 		Flanking:    re.Flanking,
 	}
 

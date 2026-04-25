@@ -310,7 +310,11 @@ func TestResolveRound_SuckerPunch_HiddenStrikeFirstOnlyTriggersSneak(t *testing.
 	// Two rolls would indicate both strikes triggered sneak from Hidden; only the first must.
 	// (The second strike may still trigger sneak via flat_footed applied by the first CritSuccess,
 	// which is identical across both combats and does not contribute to the difference.)
-	expectedBonus := 19 + 1 // fixedSrc val=19; Intn(6) returns 19; +1 → 20
+	//
+	// Crit now doubles all additives per PF2E (was: base only). val=19 → d20=20 (CritSuccess),
+	// so the sucker_punch bonus is included in the ×2 multiply. Precision damage doubles on a
+	// critical hit in PF2E. Old expected: 20. New expected: 20*2 = 40.
+	expectedBonus := (19 + 1) * 2 // (fixedSrc val=19; Intn(6) returns 19; +1 → 20) ×2 crit
 	actualBonus := dmgHidden - dmgVisible
 	if actualBonus != expectedBonus {
 		t.Errorf("expected exactly one sucker_punch bonus (%d) from Hidden on first strike, got bonus=%d (dmgHidden=%d dmgVisible=%d)",

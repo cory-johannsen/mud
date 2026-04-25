@@ -198,30 +198,8 @@ func attackNarrative(actorName, verb, targetName, weaponName string, outcome Out
 	}
 }
 
-// applyResistanceWeakness adjusts baseDmg based on target's resistances and weaknesses
-// for the given damageType. Returns the final damage (minimum 0) and annotation strings.
-//
-// Precondition: baseDmg >= 0; damageType may be empty (returns baseDmg unchanged).
-// Postcondition: returned damage >= 0.
-func applyResistanceWeakness(target *Combatant, damageType string, baseDmg int) (int, []string) {
-	if damageType == "" || baseDmg == 0 {
-		return baseDmg, nil
-	}
-	var annotations []string
-	result := baseDmg
-	if r, ok := target.Resistances[damageType]; ok && r > 0 {
-		result -= r
-		if result < 0 {
-			result = 0
-		}
-		annotations = append(annotations, fmt.Sprintf("resisted %d %s", r, damageType))
-	}
-	if w, ok := target.Weaknesses[damageType]; ok && w > 0 {
-		result += w
-		annotations = append(annotations, fmt.Sprintf("weak to %s +%d", damageType, w))
-	}
-	return result, annotations
-}
+// applyResistanceWeakness was deleted (MULT-17). Resistance/weakness handling moved
+// into ResolveDamage's StageWeakness/StageResistance steps; see damage.go.
 
 // RoundEvent records what happened when one action was resolved.
 type RoundEvent struct {
@@ -249,6 +227,11 @@ type RoundEvent struct {
 	// prepared action after ResolveRound returns; inline execution is deferred
 	// to keep this package's responsibilities focused on dispatch.
 	ReadyEntry *reaction.ReadyEntry
+	// DamageBreakdown is the inline-formatted breakdown line (MULT-14).
+	// Empty string when the breakdown was trivial (only StageBase).
+	DamageBreakdown string
+	// BreakdownSteps is the structured breakdown for verbose rendering (MULT-15).
+	BreakdownSteps []DamageBreakdownStep
 }
 
 // findCombatantByName returns the first Combatant in cbt whose Name matches name, or nil.
@@ -948,11 +931,9 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 						}
 					}
 				}
-				dmg := r.EffectiveDamage()
-				dmg += weaponModifierDamageBonus(actor) // REQ-EM-23
-				dmg += effect.Resolve(actor.Effects, effect.StatDamage).Total
-				// Extra weapon dice from conditions (e.g. brutal_surge_active / Overpower).
-				// Only applied on a hit or crit; crits double the extra dice as well.
+				// MULT-17: damage now flows through ResolveDamage. Roll any extra weapon dice up
+				// front; crit-doubling is handled by the pipeline's DamageMultiplier stage.
+				var extraDiceRolled int
 				if extraDice := condition.ExtraWeaponDice(cbt.Conditions[actor.ID]); extraDice > 0 && (r.Outcome == CritSuccess || r.Outcome == Success) {
 					dieSides := 6 // unarmed fallback
 					if mainHandDef != nil && mainHandDef.DamageDice != "" {
@@ -960,18 +941,40 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 							dieSides = expr.Sides
 						}
 					}
-					extraDmg := 0
 					for i := 0; i < extraDice; i++ {
-						extraDmg += src.Intn(dieSides) + 1
+						extraDiceRolled += src.Intn(dieSides) + 1
 					}
-					if r.Outcome == CritSuccess {
-						extraDmg *= 2
-					}
-					dmg += extraDmg
 				}
-				dmg += applyPassiveFeats(cbt, actor, target, dmg, src)
-				dmg = hookDamageRoll(cbt, actor, target, dmg)
-				dmg, rwAnnotations := applyResistanceWeakness(target, r.DamageType, dmg)
+				// applyPassiveFeats gates on dmg > 0 to distinguish hit from miss; pass
+				// BaseDamage on a hit, 0 on a miss. The hook still fires either way and
+				// actor.Hidden is cleared regardless.
+				passiveFeatGate := 0
+				if r.Outcome == CritSuccess || r.Outcome == Success {
+					passiveFeatGate = r.BaseDamage
+				}
+				passiveFeatBonus := applyPassiveFeats(cbt, actor, target, passiveFeatGate, src)
+				di := BuildDamageInput(BuildDamageOpts{
+					Actor:             actor,
+					Target:            target,
+					AttackResult:      r,
+					ConditionDmgBonus: effect.Resolve(actor.Effects, effect.StatDamage).Total,
+					WeaponModBonus:    weaponModifierDamageBonus(actor), // REQ-EM-23
+					ExtraDiceRolled:   extraDiceRolled,
+					PassiveFeatBonus:  passiveFeatBonus,
+				})
+				dmgResult := ResolveDamage(di)
+				dmg := hookDamageRoll(cbt, actor, target, dmgResult.Final)
+				var rwAnnotations []string
+				// MULT-14: derive narrative annotations for resistance/weakness so the
+				// "(...)" suffix on attack narratives still surfaces target defenses to the player.
+				for _, step := range dmgResult.Breakdown {
+					switch step.Stage {
+					case StageWeakness:
+						rwAnnotations = append(rwAnnotations, fmt.Sprintf("weakness +%d", step.Delta))
+					case StageResistance:
+						rwAnnotations = append(rwAnnotations, fmt.Sprintf("resistance %d", -step.Delta))
+					}
+				}
 				// REQ-RXN19: TriggerOnDamageTaken fires before damage is applied so reduce_damage can modify it.
 				if target.Kind == KindPlayer && dmg > 0 {
 					events = append(events, fireReaction(target.ID, reaction.TriggerOnDamageTaken, reaction.ReactionContext{
@@ -1015,12 +1018,14 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 					narrative += " " + note
 				}
 				events = append(events, RoundEvent{
-					AttackResult: &r,
-					ActionType:   ActionAttack,
-					ActorID:      actor.ID,
-					ActorName:    actor.Name,
-					Narrative:    narrative,
-					Flanking:     flanked,
+					AttackResult:    &r,
+					ActionType:      ActionAttack,
+					ActorID:         actor.ID,
+					ActorName:       actor.Name,
+					Narrative:       narrative,
+					Flanking:        flanked,
+					DamageBreakdown: FormatBreakdownInline(dmgResult.Breakdown),
+					BreakdownSteps:  dmgResult.Breakdown,
 				})
 				// Consume one round of ammo for ranged attacks.
 				if !isMelee && actor.Loadout != nil {
@@ -1112,12 +1117,33 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 						}
 					}
 				}
-				dmg1 := r1.EffectiveDamage()
-				dmg1 += weaponModifierDamageBonus(actor) // REQ-EM-23
-				dmg1 += effect.Resolve(actor.Effects, effect.StatDamage).Total
-				dmg1 += applyPassiveFeats(cbt, actor, target, dmg1, src)
-				dmg1 = hookDamageRoll(cbt, actor, target, dmg1)
-				dmg1, rwAnnotations1 := applyResistanceWeakness(target, r1.DamageType, dmg1)
+				// MULT-17: damage now flows through ResolveDamage.
+				passiveFeatGate1 := 0
+				if r1.Outcome == CritSuccess || r1.Outcome == Success {
+					passiveFeatGate1 = r1.BaseDamage
+				}
+				passiveFeatBonus1 := applyPassiveFeats(cbt, actor, target, passiveFeatGate1, src)
+				di1 := BuildDamageInput(BuildDamageOpts{
+					Actor:             actor,
+					Target:            target,
+					AttackResult:      r1,
+					ConditionDmgBonus: effect.Resolve(actor.Effects, effect.StatDamage).Total,
+					WeaponModBonus:    weaponModifierDamageBonus(actor), // REQ-EM-23
+					PassiveFeatBonus:  passiveFeatBonus1,
+				})
+				dmgResult1 := ResolveDamage(di1)
+				dmg1 := hookDamageRoll(cbt, actor, target, dmgResult1.Final)
+				var rwAnnotations1 []string
+				// MULT-14: derive narrative annotations for resistance/weakness so the
+				// "(...)" suffix on attack narratives still surfaces target defenses to the player.
+				for _, step := range dmgResult1.Breakdown {
+					switch step.Stage {
+					case StageWeakness:
+						rwAnnotations1 = append(rwAnnotations1, fmt.Sprintf("weakness +%d", step.Delta))
+					case StageResistance:
+						rwAnnotations1 = append(rwAnnotations1, fmt.Sprintf("resistance %d", -step.Delta))
+					}
+				}
 				// REQ-RXN19: TriggerOnDamageTaken fires before damage is applied so reduce_damage can modify it.
 				if target.Kind == KindPlayer && dmg1 > 0 {
 					events = append(events, fireReaction(target.ID, reaction.TriggerOnDamageTaken, reaction.ReactionContext{
@@ -1158,11 +1184,13 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 					narrative1 += " " + note
 				}
 				events = append(events, RoundEvent{
-					AttackResult: &r1,
-					ActionType:   ActionStrike,
-					ActorID:      actor.ID,
-					ActorName:    actor.Name,
-					Narrative:    narrative1,
+					AttackResult:    &r1,
+					ActionType:      ActionStrike,
+					ActorID:         actor.ID,
+					ActorName:       actor.Name,
+					Narrative:       narrative1,
+					DamageBreakdown: FormatBreakdownInline(dmgResult1.Breakdown),
+					BreakdownSteps:  dmgResult1.Breakdown,
 				})
 				// Clear combat-start flat_footed from NPC combatants after their first
 				// action resolves (sucker_punch window). Mid-round flat_footed (crit,
@@ -1231,12 +1259,33 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 						}
 					}
 				}
-				dmg2 := r2.EffectiveDamage()
-				dmg2 += weaponModifierDamageBonus(actor) // REQ-EM-23
-				dmg2 += effect.Resolve(actor.Effects, effect.StatDamage).Total
-				dmg2 += applyPassiveFeats(cbt, actor, target, dmg2, src)
-				dmg2 = hookDamageRoll(cbt, actor, target, dmg2)
-				dmg2, rwAnnotations2 := applyResistanceWeakness(target, r2.DamageType, dmg2)
+				// MULT-17: damage now flows through ResolveDamage.
+				passiveFeatGate2 := 0
+				if r2.Outcome == CritSuccess || r2.Outcome == Success {
+					passiveFeatGate2 = r2.BaseDamage
+				}
+				passiveFeatBonus2 := applyPassiveFeats(cbt, actor, target, passiveFeatGate2, src)
+				di2 := BuildDamageInput(BuildDamageOpts{
+					Actor:             actor,
+					Target:            target,
+					AttackResult:      r2,
+					ConditionDmgBonus: effect.Resolve(actor.Effects, effect.StatDamage).Total,
+					WeaponModBonus:    weaponModifierDamageBonus(actor), // REQ-EM-23
+					PassiveFeatBonus:  passiveFeatBonus2,
+				})
+				dmgResult2 := ResolveDamage(di2)
+				dmg2 := hookDamageRoll(cbt, actor, target, dmgResult2.Final)
+				var rwAnnotations2 []string
+				// MULT-14: derive narrative annotations for resistance/weakness so the
+				// "(...)" suffix on attack narratives still surfaces target defenses to the player.
+				for _, step := range dmgResult2.Breakdown {
+					switch step.Stage {
+					case StageWeakness:
+						rwAnnotations2 = append(rwAnnotations2, fmt.Sprintf("weakness +%d", step.Delta))
+					case StageResistance:
+						rwAnnotations2 = append(rwAnnotations2, fmt.Sprintf("resistance %d", -step.Delta))
+					}
+				}
 				// REQ-RXN19: TriggerOnDamageTaken fires before damage is applied so reduce_damage can modify it.
 				if target.Kind == KindPlayer && dmg2 > 0 {
 					events = append(events, fireReaction(target.ID, reaction.TriggerOnDamageTaken, reaction.ReactionContext{
@@ -1277,11 +1326,13 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 					narrative2 += " " + note
 				}
 				events = append(events, RoundEvent{
-					AttackResult: &r2,
-					ActionType:   ActionStrike,
-					ActorID:      actor.ID,
-					ActorName:    actor.Name,
-					Narrative:    narrative2,
+					AttackResult:    &r2,
+					ActionType:      ActionStrike,
+					ActorID:         actor.ID,
+					ActorName:       actor.Name,
+					Narrative:       narrative2,
+					DamageBreakdown: FormatBreakdownInline(dmgResult2.Breakdown),
+					BreakdownSteps:  dmgResult2.Breakdown,
 				})
 			case ActionReload:
 				events = append(events, resolveReload(cbt, actor, action))
@@ -1423,8 +1474,15 @@ func resolveFireBurst(cbt *Combat, actor *Combatant, qa QueuedAction, src Source
 				}
 			}
 		}
-		dmg := result.EffectiveDamage()
-		dmg = hookDamageRoll(cbt, actor, target, dmg)
+		// MULT-17: damage now flows through ResolveDamage.
+		di := BuildDamageInput(BuildDamageOpts{
+			Actor:        actor,
+			Target:       target,
+			AttackResult: result,
+		})
+		dmgResult := ResolveDamage(di)
+		dmg := hookDamageRoll(cbt, actor, target, dmgResult.Final)
+		_ = dmgResult // breakdown reserved for Task 6 narrative work
 		// REQ-RXN19: TriggerOnDamageTaken fires before damage is applied so reduce_damage can modify it.
 		if target.Kind == KindPlayer && dmg > 0 {
 			events = append(events, fireReaction(target.ID, reaction.TriggerOnDamageTaken, reaction.ReactionContext{
@@ -1458,11 +1516,13 @@ func resolveFireBurst(cbt *Combat, actor *Combatant, qa QueuedAction, src Source
 		}
 		result.BaseDamage = dmg
 		events = append(events, RoundEvent{
-			AttackResult: &result,
-			ActionType:   ActionFireBurst,
-			ActorID:      actor.ID,
-			ActorName:    actor.Name,
-			Narrative:    buildNarrative(actor, target, result, dmg),
+			AttackResult:    &result,
+			ActionType:      ActionFireBurst,
+			ActorID:         actor.ID,
+			ActorName:       actor.Name,
+			Narrative:       buildNarrative(actor, target, result, dmg),
+			DamageBreakdown: FormatBreakdownInline(dmgResult.Breakdown),
+			BreakdownSteps:  dmgResult.Breakdown,
 		})
 		if target.IsDead() {
 			break
@@ -1529,8 +1589,15 @@ func resolveFireAutomatic(cbt *Combat, actor *Combatant, qa QueuedAction, src So
 				}
 			}
 		}
-		dmg := result.EffectiveDamage()
-		dmg = hookDamageRoll(cbt, actor, target, dmg)
+		// MULT-17: damage now flows through ResolveDamage.
+		di := BuildDamageInput(BuildDamageOpts{
+			Actor:        actor,
+			Target:       target,
+			AttackResult: result,
+		})
+		dmgResult := ResolveDamage(di)
+		dmg := hookDamageRoll(cbt, actor, target, dmgResult.Final)
+		_ = dmgResult // breakdown reserved for Task 6 narrative work
 		// REQ-RXN19: TriggerOnDamageTaken fires before damage is applied so reduce_damage can modify it.
 		if target.Kind == KindPlayer && dmg > 0 {
 			events = append(events, fireReaction(target.ID, reaction.TriggerOnDamageTaken, reaction.ReactionContext{
@@ -1565,11 +1632,13 @@ func resolveFireAutomatic(cbt *Combat, actor *Combatant, qa QueuedAction, src So
 		result.BaseDamage = dmg
 		shots--
 		events = append(events, RoundEvent{
-			AttackResult: &result,
-			ActionType:   ActionFireAutomatic,
-			ActorID:      actor.ID,
-			ActorName:    actor.Name,
-			Narrative:    buildNarrative(actor, target, result, dmg),
+			AttackResult:    &result,
+			ActionType:      ActionFireAutomatic,
+			ActorID:         actor.ID,
+			ActorName:       actor.Name,
+			Narrative:       buildNarrative(actor, target, result, dmg),
+			DamageBreakdown: FormatBreakdownInline(dmgResult.Breakdown),
+			BreakdownSteps:  dmgResult.Breakdown,
 		})
 	}
 	return events

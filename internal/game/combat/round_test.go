@@ -340,8 +340,11 @@ func TestResolveRound_ConditionDamageBonusApplied_Attack(t *testing.T) {
 	damageWithBonus := 100 - gangerWithBonus
 	damageNoBonus := 100 - gangerNoBonus
 	extraDamage := damageWithBonus - damageNoBonus
-	if extraDamage != 5 {
-		t.Errorf("expected exactly 5 extra damage from DamageBonus=5, got %d (withBonus=%d noBonus=%d)", extraDamage, damageWithBonus, damageNoBonus)
+	// Crit now doubles all additives per PF2E (was: base only). With val=19 the d20 rolls 20,
+	// a CritSuccess, so the +5 condition DamageBonus is included in the ×2 multiply.
+	// Old: +5. New: +5*2 = +10.
+	if extraDamage != 10 {
+		t.Errorf("expected exactly 10 extra damage from DamageBonus=5 on crit, got %d (withBonus=%d noBonus=%d)", extraDamage, damageWithBonus, damageNoBonus)
 	}
 }
 

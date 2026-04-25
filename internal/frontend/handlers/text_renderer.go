@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/cory-johannsen/mud/internal/frontend/telnet"
+	"github.com/cory-johannsen/mud/internal/game/combat"
 	"github.com/cory-johannsen/mud/internal/game/effect"
 	effectrender "github.com/cory-johannsen/mud/internal/game/effect/render"
 	"github.com/cory-johannsen/mud/internal/game/maputil"
@@ -2119,4 +2120,14 @@ func renderChoicePrompt(payload *choicePromptPayload) string {
 // Precondition / Postcondition: see effect/render.EffectsBlock.
 func RenderEffectsBlock(es *effect.EffectSet, casterNames map[string]string, width int) string {
 	return effectrender.EffectsBlock(es, casterNames, width)
+}
+
+// RenderDamageBreakdown renders the full verbose breakdown block (MULT-15).
+// Only emitted to observers with ShowDamageBreakdown enabled.
+//
+// Delegates to combat.FormatBreakdownVerbose so the gameserver and frontend
+// share a single canonical formatter without introducing a frontend-package
+// dependency from the gameserver.
+func RenderDamageBreakdown(steps []combat.DamageBreakdownStep) string {
+	return combat.FormatBreakdownVerbose(steps)
 }
