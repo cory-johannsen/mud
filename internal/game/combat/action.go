@@ -26,6 +26,7 @@ const (
 	ActionAid                             // costs 2 AP; aid an ally
 	ActionUseTech                         // costs AbilityCost AP; activate a technology during round resolution
 	ActionReady                           // costs 2 AP; prepares one 1-AP action bound to a trigger
+	ActionHazardDamage                    // informational: terrain hazard fires damage on entry or round start
 )
 
 // Cost returns the action point cost for the ActionType.
@@ -93,6 +94,8 @@ func (a ActionType) String() string {
 		return "use_tech"
 	case ActionReady:
 		return "ready"
+	case ActionHazardDamage:
+		return "hazard_damage"
 	default:
 		return "unknown"
 	}

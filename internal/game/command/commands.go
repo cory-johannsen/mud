@@ -158,6 +158,7 @@ const (
 	HandlerLoot               = "loot"
 	HandlerInspect            = "inspect"
 	HandlerEffects            = "effects"
+	HandlerTerrain            = "terrain"
 )
 
 // Command defines a player-invocable command.
@@ -199,6 +200,7 @@ func BuiltinCommands() []Command {
 		{Name: "strike", Aliases: []string{"st"}, Help: "Full attack routine (2 AP, two hits with MAP) against target.", Category: CategoryCombat, Handler: HandlerStrike},
 		{Name: "status", Aliases: []string{"cond"}, Help: "Show your active conditions.", Category: CategoryCombat, Handler: HandlerStatus},
 		{Name: "effects", Aliases: []string{"eff"}, Help: "Show active effects and which typed bonuses are suppressed.", Category: CategoryCombat, Handler: HandlerEffects},
+		{Name: "terrain", Aliases: []string{"terr"}, Help: "Show the combat-map terrain legend (glyphs and movement costs).", Category: CategoryCombat, Handler: HandlerTerrain},
 		{Name: "equip", Aliases: []string{"eq"}, Help: "Equip a weapon (equip <weapon_id> [slot])", Category: CategoryCombat, Handler: HandlerEquip},
 		{Name: "loadout", Aliases: []string{"lo", "prep", "kit"}, Help: "Display or swap weapon presets (loadout [1|2])", Category: CategoryCombat, Handler: HandlerLoadout},
 		{Name: "unequip", Aliases: []string{"ueq"}, Help: "Unequip an item from a slot (unequip <slot>)", Category: CategoryCombat, Handler: HandlerUnequip},

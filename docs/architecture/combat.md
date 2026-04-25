@@ -262,6 +262,58 @@ if attack missed AND coverTier > NoCover:
 | `internal/game/combat/round.go` | 5 attack resolution sites; ephemeral apply/remove; absorb-miss check |
 | `internal/game/effect/bonus.go` | `StatQuickness` constant |
 
+## Terrain (TERRAIN Requirements)
+
+### Requirements
+
+- TERRAIN-1: Per-cell layer with types `normal`, `difficult`, `greater_difficult`, `hazardous`.
+- TERRAIN-2: Absent cells default to `normal`.
+- TERRAIN-3: Room YAML accepts explicit grid (shape A) or default+overrides (shape B); both in same room is a load error.
+- TERRAIN-4: Hazardous cell requires exactly one of `hazard_id` or `hazard`; non-hazardous cells carrying either is a load error.
+- TERRAIN-5: `greater_difficult` may not combine with `difficult` or any hazard.
+- TERRAIN-6: Speed costs — `normal=1`, `difficult=2`, `hazardous=1` (+1 if `DifficultOverlay`), `greater_difficult=impassable`.
+- TERRAIN-7: Stride terminates when next step would exceed budget or enter impassable cell.
+- TERRAIN-8: `SpeedSquares()` deprecated; `SpeedBudget()` is canonical.
+- TERRAIN-9: Entering hazardous cell fires `on_enter` hazard.
+- TERRAIN-10: At `StartRound`, living combatants on hazardous cells fire `round_start` hazard.
+- TERRAIN-11: Hazard damage routes through `ResolveDamage` (#246).
+- TERRAIN-12: Combat-start placement fires `on_enter` once; `round_start` suppressed in round 1 (gameserver wiring is a follow-up).
+- TERRAIN-17: Terrain-stopped stride emits explanatory narrative.
+- TERRAIN-18: Zero-movement stride emits informational narrative.
+- TERRAIN-19: Unresolved `hazard_id` resolves to `Def=nil`; the cell is treated as inert at runtime.
+- TERRAIN-20: Terrain is static per combat (not mutated during a round).
+
+### Type / Cost Table
+
+| Type               | Entry Cost | Passable |
+|--------------------|-----------|----------|
+| `normal`           | 1         | yes      |
+| `difficult`        | 2         | yes      |
+| `hazardous`        | 1 (or 2 with `DifficultOverlay`) | yes |
+| `greater_difficult`| —         | no       |
+
+### Stride Budget Model
+
+```
+budget = actor.SpeedBudget()  // e.g. 5 for 25 ft
+for budget > 0:
+    cost, ok = cbt.EntryCost(newX, newY)
+    if !ok or cost > budget: stop
+    budget -= cost
+    move to (newX, newY)
+    if hazardous: fire on_enter hazard via applyCellHazard
+```
+
+### Implementation Files
+
+| File | Responsibility |
+|------|----------------|
+| `internal/game/combat/terrain.go` | `GridCell`, `TerrainType`, `TerrainCell`, `CellHazard`, `TerrainAt`, `EntryCost`, `TerrainGlyph`, `TerrainLegendText` |
+| `internal/game/world/terrain_load.go` | YAML loader for both authoring shapes |
+| `internal/game/combat/round.go` | Budget-based stride, `applyCellHazard` |
+| `internal/game/combat/engine.go` | `Combat.Terrain`, `RoomHazards`, `skipHazardRoundStart` fields; round_start hazard hook in `StartRoundWithSrc` |
+| `internal/game/combat/combat.go` | `Combatant.SpeedBudget()` (replaces deprecated `SpeedSquares()`); `WeaknessFor`/`ResistanceFor` helpers |
+
 ## Component Dependencies
 
 ```mermaid

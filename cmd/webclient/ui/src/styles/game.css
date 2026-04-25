@@ -688,3 +688,12 @@ body:has(.game-layout) #root { height: 100%; overflow: hidden; }
     z-index: 101;
   }
 }
+
+/* Combat-grid terrain layer (#248). Applied as a className on each cell.
+ * Absent (normal) terrain has no class — falls through to the cell's base
+ * background. Tints are translucent so they overlay the move-cost shading. */
+.terrain-normal { /* no tint — default */ }
+.terrain-difficult { background-color: rgba(180, 140, 60, 0.3); }
+.terrain-greater-difficult { background-color: rgba(80, 80, 80, 0.5); }
+.terrain-hazardous { background-color: rgba(220, 50, 50, 0.3); }
+

@@ -10,6 +10,7 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/inventory"
 	"github.com/cory-johannsen/mud/internal/game/reaction"
 	"github.com/cory-johannsen/mud/internal/game/session"
+	"github.com/cory-johannsen/mud/internal/game/world"
 	"github.com/cory-johannsen/mud/internal/scripting"
 )
 
@@ -55,9 +56,31 @@ type Combat struct {
 	// combat handler populates this slice at StartCombat from the room's
 	// equipment and removes entries when cover HP reaches zero.
 	CoverObjects []CoverObject
+	// Terrain is the per-cell terrain layer for this combat. Absent cells are TerrainNormal.
+	// Populated at combat start from the room's CombatTerrain config.
+	Terrain map[GridCell]*TerrainCell
+	// RoomHazards is a copy of the room's HazardDef list, used to resolve hazard_id
+	// references on TerrainHazardous cells at combat start.
+	RoomHazards []world.HazardDef
+	// skipHazardRoundStart tracks combatant IDs that entered a hazardous cell at
+	// combat start (via on_enter) and must not fire round_start hazards in round 1.
+	// Cleared by StartRoundWithSrc on first use.
+	skipHazardRoundStart map[string]bool
 	// ReadyRegistry holds pending Ready entries for the current round.
 	// Populated by QueueAction(ActionReady); consumed by ResolveRound.
 	ReadyRegistry *reaction.ReadyRegistry
+}
+
+// SkipHazardRoundStart marks uid so that the next StartRoundWithSrc call will
+// NOT fire round_start hazards for this combatant — used by gameserver
+// combat-start placement after firing on_enter so round 1 doesn't double-fire.
+//
+// Precondition: uid is non-empty.
+func (c *Combat) SkipHazardRoundStart(uid string) {
+	if c.skipHazardRoundStart == nil {
+		c.skipHazardRoundStart = map[string]bool{}
+	}
+	c.skipHazardRoundStart[uid] = true
 }
 
 // CoverObject is a cover item placed on the combat grid. It blocks movement
@@ -206,6 +229,24 @@ func (c *Combat) StartRoundWithSrc(actionsPerRound int, src Source) []RoundCondi
 					})
 				}
 			}
+		}
+	}
+
+	// TERRAIN-10: fire round_start hazards for combatants occupying hazardous cells.
+	for _, cbt := range c.Combatants {
+		if cbt.IsDead() {
+			continue
+		}
+		// TERRAIN-12: skip round_start in round 1 for combatants that entered at combat start.
+		if c.skipHazardRoundStart != nil && c.skipHazardRoundStart[cbt.ID] {
+			delete(c.skipHazardRoundStart, cbt.ID)
+			continue
+		}
+		if tc := c.TerrainAt(cbt.GridX, cbt.GridY); tc.Type == TerrainHazardous && tc.Hazard != nil {
+			_ = applyCellHazard(c, cbt, tc, "round_start", src)
+			// Note: applyCellHazard events are not propagated from StartRoundWithSrc in v1
+			// (StartRoundWithSrc returns []RoundConditionEvent, not []RoundEvent).
+			// The damage is applied; a follow-up ticket may surface the narrative.
 		}
 	}
 

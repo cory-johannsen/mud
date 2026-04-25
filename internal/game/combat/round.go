@@ -227,6 +227,9 @@ type RoundEvent struct {
 	// prepared action after ResolveRound returns; inline execution is deferred
 	// to keep this package's responsibilities focused on dispatch.
 	ReadyEntry *reaction.ReadyEntry
+	// Damage is the post-pipeline damage applied by this event (TERRAIN-9..14).
+	// Used by hazard-damage events; zero for non-damaging events.
+	Damage int
 	// DamageBreakdown is the inline-formatted breakdown line (MULT-14).
 	// Empty string when the breakdown was trivial (only StageBase).
 	DamageBreakdown string
@@ -704,10 +707,14 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 					}
 				}
 
-				// REQ-STRIDE-SPEED: Move up to SpeedSquares() cells per stride (default 5 = 25 ft).
+				// TERRAIN-6/7/8: Move up to SpeedBudget() points per stride. Each cell
+				// consumed costs EntryCost(newX, newY); TerrainGreaterDifficult is
+				// impassable. SpeedBudget defaults to 5 (25 ft) when SpeedFt is 0.
 				// Each step recomputes direction for "toward"/"away" since position changes.
-				steps := actor.SpeedSquares()
-				for step := 0; step < steps; step++ {
+				budget := actor.SpeedBudget()
+				strideNarrative := fmt.Sprintf("%s strides %s.", actor.Name, dir)
+				stepsTaken := 0
+				for budget > 0 {
 					// REQ-STRIDE-STOP: For "toward" strides, stop when already adjacent (≤ 5 ft).
 					if dir == "toward" && opponent != nil && CombatRange(*actor, *opponent) <= 5 {
 						break
@@ -740,8 +747,34 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 					if CellBlocked(cbt, actor.ID, newX, newY) {
 						break
 					}
+					// TERRAIN-8/17: Greater-difficult cells are impassable.
+					cost, passable := cbt.EntryCost(newX, newY)
+					if !passable {
+						if stepsTaken == 0 {
+							strideNarrative = fmt.Sprintf("%s tries to move but the terrain blocks the way.", actor.Name)
+						} else {
+							strideNarrative = fmt.Sprintf("%s strides %s and stops at the terrain.", actor.Name, dir)
+						}
+						break
+					}
+					// TERRAIN-7/18: Insufficient budget to enter the next cell.
+					if cost > budget {
+						if stepsTaken == 0 {
+							strideNarrative = fmt.Sprintf("%s cannot afford to move — not enough movement speed.", actor.Name)
+						} else {
+							strideNarrative = fmt.Sprintf("%s strides %s and stops — terrain too rough to continue.", actor.Name, dir)
+						}
+						break
+					}
+					budget -= cost
 					actor.GridX = newX
 					actor.GridY = newY
+					stepsTaken++
+
+					// TERRAIN-9: fire on_enter hazard for hazardous cells.
+					if tc := cbt.TerrainAt(newX, newY); tc.Type == TerrainHazardous && tc.Hazard != nil {
+						events = append(events, applyCellHazard(cbt, actor, tc, "on_enter", src)...)
+					}
 
 					// REQ-RXN19: TriggerOnEnemyMoveAdjacent fires when an NPC moves into melee range of a player.
 					if actor.Kind == KindNPC {
@@ -761,7 +794,7 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 					ActionType: ActionStride,
 					ActorID:    actor.ID,
 					ActorName:  actor.Name,
-					Narrative:  fmt.Sprintf("%s strides %s.", actor.Name, dir),
+					Narrative:  strideNarrative,
 				})
 
 			case ActionPass:
@@ -1854,4 +1887,53 @@ func buildNarrative(actor, target *Combatant, result AttackResult, dmg int) stri
 	default:
 		return fmt.Sprintf("%s attacks %s.", actor.Name, target.Name)
 	}
+}
+
+// applyCellHazard fires a hazard on victim if its trigger matches.
+// Routes damage through ResolveDamage (#246 pipeline).
+// Returns zero or more RoundEvents (damage narrative, condition narrative, etc.).
+//
+// Precondition: tc.Type == TerrainHazardous; tc.Hazard must not be nil.
+func applyCellHazard(_ *Combat, victim *Combatant, tc TerrainCell, trigger string, src Source) []RoundEvent {
+	if tc.Hazard == nil || tc.Hazard.Def == nil {
+		return nil
+	}
+	def := tc.Hazard.Def
+	if def.Trigger != trigger {
+		return nil
+	}
+	var events []RoundEvent
+	if def.DamageExpr != "" {
+		rollResult, err := dice.RollExpr(def.DamageExpr, src)
+		if err == nil && rollResult.Total() > 0 {
+			in := DamageInput{
+				Additives: []DamageAdditive{
+					{Label: def.ID, Value: rollResult.Total(), Source: "hazard:" + def.ID},
+				},
+				DamageType: def.DamageType,
+				Weakness:   victim.WeaknessFor(def.DamageType),
+				Resistance: victim.ResistanceFor(def.DamageType),
+			}
+			result := ResolveDamage(in)
+			victim.ApplyDamage(result.Final)
+			narrative := fmt.Sprintf("%s is hit by %s! (%s → %d damage)",
+				victim.Name, def.ID, def.DamageExpr, result.Final)
+			if def.Message != "" {
+				narrative = fmt.Sprintf("%s — %s (%s → %d damage)", def.Message, victim.Name, def.DamageExpr, result.Final)
+			}
+			events = append(events, RoundEvent{
+				ActionType: ActionHazardDamage,
+				ActorID:    victim.ID,
+				ActorName:  victim.Name,
+				Damage:     result.Final,
+				Narrative:  narrative,
+			})
+		}
+	}
+	return events
+}
+
+// ApplyCellHazardForTest exposes applyCellHazard for package-external tests.
+func ApplyCellHazardForTest(cbt *Combat, victim *Combatant, tc TerrainCell, trigger string, src Source) []RoundEvent {
+	return applyCellHazard(cbt, victim, tc, trigger, src)
 }

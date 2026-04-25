@@ -1025,6 +1025,15 @@ message CoverObjectPosition {
   string cover_tier = 5; // "lesser", "standard", or "greater"
 }
 
+// TerrainCell describes one non-normal cell in the combat grid's terrain layer.
+// Cells absent from the repeated terrain field are TerrainNormal by default.
+message TerrainCell {
+  int32  x           = 1; // grid column (0-based)
+  int32  y           = 2; // grid row (0-based)
+  string type        = 3; // "difficult", "greater_difficult", or "hazardous"
+  string hazard_name = 4; // populated for hazardous cells (HazardDef.ID); empty otherwise
+}
+
 // RoundStartEvent is broadcast to all combatants when a new round begins.
 message RoundStartEvent {
   int32                      round             = 1;
@@ -1035,6 +1044,7 @@ message RoundStartEvent {
   int32                      grid_width        = 6;
   int32                      grid_height       = 7;
   repeated CoverObjectPosition cover_objects   = 8;
+  repeated TerrainCell       terrain           = 9; // non-normal cells only
 }
 
 // RoundEndEvent is broadcast when a round's actions have resolved.

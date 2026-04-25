@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/cory-johannsen/mud/internal/frontend/telnet"
+	"github.com/cory-johannsen/mud/internal/game/combat"
 	"github.com/cory-johannsen/mud/internal/game/command"
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 )
@@ -71,6 +72,7 @@ var bridgeHandlerMap = map[string]bridgeHandlerFunc{
 	command.HandlerStrike:             bridgeStrike,
 	command.HandlerStatus:             bridgeStatus,
 	command.HandlerEffects:            bridgeEffects,
+	command.HandlerTerrain:            bridgeTerrain,
 	command.HandlerEquip:              bridgeEquip,
 	command.HandlerReload:             bridgeReload,
 	command.HandlerFireBurst:          bridgeFireBurst,
@@ -478,6 +480,31 @@ func bridgeEffects(bctx *bridgeContext) (bridgeResult, error) {
 		RequestId: bctx.reqID,
 		Payload:   &gamev1.ClientMessage_CharSheet{CharSheet: &gamev1.CharacterSheetRequest{}},
 	}}, nil
+}
+
+// bridgeTerrain renders the combat-map terrain legend describing the
+// glyph used for each terrain type and the movement / hazard semantics
+// associated with it. The output is rendered locally — no server round
+// trip is required.
+//
+// Precondition: bctx must be non-nil with a valid conn.
+// Postcondition: returns done=true after writing the legend to the
+// console; never produces a ClientMessage.
+func bridgeTerrain(bctx *bridgeContext) (bridgeResult, error) {
+	// Default to ASCII glyphs: the telnet session has no per-connection
+	// Unicode capability flag, so we render the safe fallback set that
+	// renders correctly on every terminal.
+	legend := combat.TerrainLegendText(false)
+	if bctx.conn != nil {
+		if bctx.conn.IsSplitScreen() {
+			_ = bctx.conn.WriteConsole(legend)
+			_ = bctx.conn.WritePromptSplit(bctx.promptFn())
+		} else {
+			_ = bctx.conn.WriteLine(legend)
+			_ = bctx.conn.WritePrompt(bctx.promptFn())
+		}
+	}
+	return bridgeResult{done: true}, nil
 }
 
 // bridgeEquip builds an EquipRequest with an optional slot argument.
