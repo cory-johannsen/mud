@@ -48,7 +48,6 @@ func findCombatantInCbt(cbt *combat.Combat, id string) *combat.Combatant {
 
 // TestResolveRound_Resistance_NarrativeContainsResisted verifies the narrative mentions resistance.
 func TestResolveRound_Resistance_NarrativeContainsResisted(t *testing.T) {
-	t.Skip("narrative resistance/weakness annotation moved to Task 6 / FormatBreakdownInline")
 	src := fixedSrc{val: 18} // high roll → guaranteed hit
 	cbt, playerID, npcID := makeResistanceCombat(t, "fire", map[string]int{"fire": 5}, nil)
 	_ = npcID
@@ -67,7 +66,6 @@ func TestResolveRound_Resistance_NarrativeContainsResisted(t *testing.T) {
 
 // TestResolveRound_Weakness_NarrativeContainsWeak verifies the narrative mentions weakness.
 func TestResolveRound_Weakness_NarrativeContainsWeak(t *testing.T) {
-	t.Skip("narrative resistance/weakness annotation moved to Task 6 / FormatBreakdownInline")
 	src := fixedSrc{val: 18}
 	cbt, playerID, npcID := makeResistanceCombat(t, "electricity", nil, map[string]int{"electricity": 4})
 	_ = npcID

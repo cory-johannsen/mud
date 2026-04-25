@@ -3,6 +3,7 @@ package combat
 import (
 	"fmt"
 	"math"
+	"strings"
 )
 
 // DamageStage identifies a stage in the damage resolution pipeline (MULT-1).
@@ -164,4 +165,63 @@ func ResolveDamage(in DamageInput) DamageResult {
 	}
 
 	return DamageResult{Final: cur, Breakdown: steps}
+}
+
+// FormatBreakdownInline renders the breakdown as a single indented line appended
+// to the combat narrative. Returns "" when breakdown has only StageBase (trivial). (MULT-14)
+//
+// Postcondition: returns "" iff len(steps) <= 1.
+func FormatBreakdownInline(steps []DamageBreakdownStep) string {
+	if len(steps) <= 1 {
+		return ""
+	}
+	var parts []string
+	for _, step := range steps {
+		switch step.Stage {
+		case StageBase:
+			parts = append(parts, fmt.Sprintf("base %d", step.After))
+		case StageMultiplier:
+			// Recover effective multiplier from delta/before; protect against zero base.
+			eff := 1.0
+			if step.Before != 0 {
+				eff = 1.0 + float64(step.Delta)/float64(step.Before)
+			}
+			parts = append(parts, fmt.Sprintf("×%.0f [%s] = %d", eff, step.Detail, step.After))
+		case StageHalver:
+			parts = append(parts, fmt.Sprintf("halved [%s] = %d", step.Detail, step.After))
+		case StageWeakness:
+			parts = append(parts, fmt.Sprintf("weakness +%d = %d", step.Delta, step.After))
+		case StageResistance:
+			parts = append(parts, fmt.Sprintf("resistance %d = %d", step.Delta, step.After))
+		case StageFloor:
+			parts = append(parts, "floored = 0")
+		}
+	}
+	line := "  (" + strings.Join(parts, " → ") + ")"
+	return wrapAtArrow(line, 80)
+}
+
+// wrapAtArrow wraps a breakdown line at " → " boundaries so no segment exceeds maxWidth.
+func wrapAtArrow(line string, maxWidth int) string {
+	if len(line) <= maxWidth {
+		return line
+	}
+	segments := strings.Split(line, " → ")
+	var sb strings.Builder
+	cur := ""
+	for i, seg := range segments {
+		candidate := cur
+		if i > 0 {
+			candidate += " → "
+		}
+		candidate += seg
+		if len(candidate) > maxWidth && cur != "" {
+			sb.WriteString(cur + "\n")
+			cur = "    → " + seg
+		} else {
+			cur = candidate
+		}
+	}
+	sb.WriteString(cur)
+	return sb.String()
 }

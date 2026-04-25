@@ -959,8 +959,17 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 				})
 				dmgResult := ResolveDamage(di)
 				dmg := hookDamageRoll(cbt, actor, target, dmgResult.Final)
-				_ = dmgResult // breakdown reserved for Task 6 narrative work
 				var rwAnnotations []string
+				// MULT-14: derive narrative annotations for resistance/weakness so the
+				// "(...)" suffix on attack narratives still surfaces target defenses to the player.
+				for _, step := range dmgResult.Breakdown {
+					switch step.Stage {
+					case StageWeakness:
+						rwAnnotations = append(rwAnnotations, fmt.Sprintf("weakness +%d", step.Delta))
+					case StageResistance:
+						rwAnnotations = append(rwAnnotations, fmt.Sprintf("resistance %d", -step.Delta))
+					}
+				}
 				// REQ-RXN19: TriggerOnDamageTaken fires before damage is applied so reduce_damage can modify it.
 				if target.Kind == KindPlayer && dmg > 0 {
 					events = append(events, fireReaction(target.ID, reaction.TriggerOnDamageTaken, reaction.ReactionContext{
@@ -1117,8 +1126,17 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 				})
 				dmgResult1 := ResolveDamage(di1)
 				dmg1 := hookDamageRoll(cbt, actor, target, dmgResult1.Final)
-				_ = dmgResult1 // breakdown reserved for Task 6 narrative work
 				var rwAnnotations1 []string
+				// MULT-14: derive narrative annotations for resistance/weakness so the
+				// "(...)" suffix on attack narratives still surfaces target defenses to the player.
+				for _, step := range dmgResult1.Breakdown {
+					switch step.Stage {
+					case StageWeakness:
+						rwAnnotations1 = append(rwAnnotations1, fmt.Sprintf("weakness +%d", step.Delta))
+					case StageResistance:
+						rwAnnotations1 = append(rwAnnotations1, fmt.Sprintf("resistance %d", -step.Delta))
+					}
+				}
 				// REQ-RXN19: TriggerOnDamageTaken fires before damage is applied so reduce_damage can modify it.
 				if target.Kind == KindPlayer && dmg1 > 0 {
 					events = append(events, fireReaction(target.ID, reaction.TriggerOnDamageTaken, reaction.ReactionContext{
@@ -1248,8 +1266,17 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 				})
 				dmgResult2 := ResolveDamage(di2)
 				dmg2 := hookDamageRoll(cbt, actor, target, dmgResult2.Final)
-				_ = dmgResult2 // breakdown reserved for Task 6 narrative work
 				var rwAnnotations2 []string
+				// MULT-14: derive narrative annotations for resistance/weakness so the
+				// "(...)" suffix on attack narratives still surfaces target defenses to the player.
+				for _, step := range dmgResult2.Breakdown {
+					switch step.Stage {
+					case StageWeakness:
+						rwAnnotations2 = append(rwAnnotations2, fmt.Sprintf("weakness +%d", step.Delta))
+					case StageResistance:
+						rwAnnotations2 = append(rwAnnotations2, fmt.Sprintf("resistance %d", -step.Delta))
+					}
+				}
 				// REQ-RXN19: TriggerOnDamageTaken fires before damage is applied so reduce_damage can modify it.
 				if target.Kind == KindPlayer && dmg2 > 0 {
 					events = append(events, fireReaction(target.ID, reaction.TriggerOnDamageTaken, reaction.ReactionContext{

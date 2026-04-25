@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/cory-johannsen/mud/internal/frontend/telnet"
+	"github.com/cory-johannsen/mud/internal/game/combat"
 	"github.com/cory-johannsen/mud/internal/game/effect"
 	effectrender "github.com/cory-johannsen/mud/internal/game/effect/render"
 	"github.com/cory-johannsen/mud/internal/game/maputil"
@@ -2119,4 +2120,35 @@ func renderChoicePrompt(payload *choicePromptPayload) string {
 // Precondition / Postcondition: see effect/render.EffectsBlock.
 func RenderEffectsBlock(es *effect.EffectSet, casterNames map[string]string, width int) string {
 	return effectrender.EffectsBlock(es, casterNames, width)
+}
+
+// RenderDamageBreakdown renders the full verbose breakdown block (MULT-15).
+// Only emitted to observers with ShowDamageBreakdown enabled.
+func RenderDamageBreakdown(steps []combat.DamageBreakdownStep) string {
+	if len(steps) == 0 {
+		return ""
+	}
+	var sb strings.Builder
+	for _, step := range steps {
+		switch step.Stage {
+		case combat.StageBase:
+			sb.WriteString(fmt.Sprintf("  base:       %+d\n", step.After))
+		case combat.StageMultiplier:
+			sb.WriteString(fmt.Sprintf("  multiplier: %s\n", step.Detail))
+			sb.WriteString(fmt.Sprintf("  after:      %d\n", step.After))
+		case combat.StageHalver:
+			sb.WriteString(fmt.Sprintf("  halver:     %s = %d\n", step.Detail, step.After))
+		case combat.StageWeakness:
+			sb.WriteString(fmt.Sprintf("  weakness:   %s\n", step.Detail))
+		case combat.StageResistance:
+			sb.WriteString(fmt.Sprintf("  resistance: %s\n", step.Detail))
+		case combat.StageFloor:
+			sb.WriteString("  final:      0 (floored)\n")
+		}
+	}
+	if steps[len(steps)-1].Stage != combat.StageFloor {
+		last := steps[len(steps)-1]
+		sb.WriteString(fmt.Sprintf("  final:      %d\n", last.After))
+	}
+	return sb.String()
 }
