@@ -72,7 +72,7 @@ func TestResolveRound_WeaponModifier_Tuned_DealsOneDamageMore(t *testing.T) {
 	// Baseline: no modifier.
 	cbt1, pid1, nid1 := makeModifierCombat(t, "")
 	require.NoError(t, cbt1.QueueAction(pid1, combat.QueuedAction{Type: combat.ActionAttack, Target: "Goblin"}))
-	events1 := combat.ResolveRound(cbt1, src, nil, nil)
+	events1 := combat.ResolveRound(cbt1, src, nil, nil, 0)
 	_ = events1
 	npc1 := findCombatantInCbt(cbt1, nid1)
 	require.NotNil(t, npc1)
@@ -81,7 +81,7 @@ func TestResolveRound_WeaponModifier_Tuned_DealsOneDamageMore(t *testing.T) {
 	// Tuned: +1 damage.
 	cbt2, pid2, nid2 := makeModifierCombat(t, "tuned")
 	require.NoError(t, cbt2.QueueAction(pid2, combat.QueuedAction{Type: combat.ActionAttack, Target: "Goblin"}))
-	events2 := combat.ResolveRound(cbt2, src, nil, nil)
+	events2 := combat.ResolveRound(cbt2, src, nil, nil, 0)
 	_ = events2
 	npc2 := findCombatantInCbt(cbt2, nid2)
 	require.NotNil(t, npc2)
@@ -98,14 +98,14 @@ func TestResolveRound_WeaponModifier_Defective_DealsOneDamageLess(t *testing.T) 
 
 	cbt1, pid1, nid1 := makeModifierCombat(t, "")
 	require.NoError(t, cbt1.QueueAction(pid1, combat.QueuedAction{Type: combat.ActionAttack, Target: "Goblin"}))
-	combat.ResolveRound(cbt1, src, nil, nil)
+	combat.ResolveRound(cbt1, src, nil, nil, 0)
 	npc1 := findCombatantInCbt(cbt1, nid1)
 	require.NotNil(t, npc1)
 	dmgNoModifier := 100 - npc1.CurrentHP
 
 	cbt2, pid2, nid2 := makeModifierCombat(t, "defective")
 	require.NoError(t, cbt2.QueueAction(pid2, combat.QueuedAction{Type: combat.ActionAttack, Target: "Goblin"}))
-	combat.ResolveRound(cbt2, src, nil, nil)
+	combat.ResolveRound(cbt2, src, nil, nil, 0)
 	npc2 := findCombatantInCbt(cbt2, nid2)
 	require.NotNil(t, npc2)
 	dmgDefective := 100 - npc2.CurrentHP
@@ -121,14 +121,14 @@ func TestResolveRound_WeaponModifier_Cursed_DealsTwoDamageLess(t *testing.T) {
 
 	cbt1, pid1, nid1 := makeModifierCombat(t, "")
 	require.NoError(t, cbt1.QueueAction(pid1, combat.QueuedAction{Type: combat.ActionAttack, Target: "Goblin"}))
-	combat.ResolveRound(cbt1, src, nil, nil)
+	combat.ResolveRound(cbt1, src, nil, nil, 0)
 	npc1 := findCombatantInCbt(cbt1, nid1)
 	require.NotNil(t, npc1)
 	dmgNoModifier := 100 - npc1.CurrentHP
 
 	cbt2, pid2, nid2 := makeModifierCombat(t, "cursed")
 	require.NoError(t, cbt2.QueueAction(pid2, combat.QueuedAction{Type: combat.ActionAttack, Target: "Goblin"}))
-	combat.ResolveRound(cbt2, src, nil, nil)
+	combat.ResolveRound(cbt2, src, nil, nil, 0)
 	npc2 := findCombatantInCbt(cbt2, nid2)
 	require.NotNil(t, npc2)
 	dmgCursed := 100 - npc2.CurrentHP

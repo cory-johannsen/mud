@@ -76,6 +76,13 @@ type LoggingConfig struct {
 	Format string `mapstructure:"format"`
 }
 
+const (
+	// DefaultReactionPromptTimeout is the interactive reaction-prompt timeout per REACTION-13.
+	DefaultReactionPromptTimeout = 3 * time.Second
+	reactionPromptTimeoutMin     = 500 * time.Millisecond
+	reactionPromptTimeoutMax     = 30 * time.Second
+)
+
 // GameServerConfig holds game server gRPC connection settings.
 type GameServerConfig struct {
 	// GRPCHost is the bind/connect address for the game server gRPC service.
@@ -91,6 +98,20 @@ type GameServerConfig struct {
 	// AutoNavStepMs is the delay in milliseconds between auto-navigation steps in the web client.
 	// Minimum 100. Default 1000. (REQ-CNT-2)
 	AutoNavStepMs int `mapstructure:"auto_nav_step_ms"`
+	// ReactionPromptTimeout is the maximum time a player has to respond to a reaction prompt.
+	// Valid range [500ms, 30s]. Zero or out-of-range values default to DefaultReactionPromptTimeout.
+	// Per REACTION-12 and REACTION-13.
+	ReactionPromptTimeout time.Duration `mapstructure:"reaction_prompt_timeout"`
+}
+
+// ValidateReactionPromptTimeout clamps ReactionPromptTimeout to [500ms, 30s].
+// Zero or out-of-range values are replaced with DefaultReactionPromptTimeout.
+func (g *GameServerConfig) ValidateReactionPromptTimeout() {
+	if g.ReactionPromptTimeout == 0 ||
+		g.ReactionPromptTimeout < reactionPromptTimeoutMin ||
+		g.ReactionPromptTimeout > reactionPromptTimeoutMax {
+		g.ReactionPromptTimeout = DefaultReactionPromptTimeout
+	}
 }
 
 // Addr returns the "host:port" gRPC address.
@@ -332,6 +353,8 @@ func Load(path string) (Config, error) {
 		return Config{}, fmt.Errorf("unmarshalling config: %w", err)
 	}
 
+	cfg.GameServer.ValidateReactionPromptTimeout()
+
 	if err := cfg.Validate(); err != nil {
 		return Config{}, err
 	}
@@ -348,6 +371,7 @@ func LoadFromViper(v *viper.Viper) (Config, error) {
 	if err := v.Unmarshal(&cfg); err != nil {
 		return Config{}, fmt.Errorf("unmarshalling config: %w", err)
 	}
+	cfg.GameServer.ValidateReactionPromptTimeout()
 	if err := cfg.Validate(); err != nil {
 		return Config{}, err
 	}

@@ -232,6 +232,13 @@ func (h *AuthHandler) gameBridge(ctx context.Context, conn *telnet.Conn, acct po
 	var lastRoomView atomic.Value
 	lastRoomView.Store((*gamev1.RoomView)(nil))
 
+	// lastCharacterSheet stores the most recent *gamev1.CharacterSheetView so
+	// the `effects` command (bridgeEffects) can render the pre-formatted
+	// EffectsSummary field without re-round-tripping to the server. Populated
+	// whenever a CharacterSheet ServerEvent arrives.
+	var lastCharacterSheet atomic.Value
+	lastCharacterSheet.Store((*gamev1.CharacterSheetView)(nil))
+
 	var currentHotbar atomic.Value
 	currentHotbar.Store([10]*gamev1.HotbarSlot{})
 
@@ -371,11 +378,11 @@ func (h *AuthHandler) gameBridge(ctx context.Context, conn *telnet.Conn, acct po
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		h.forwardServerEvents(streamCtx, stream, conn, char.Name, &currentRoom, &currentTime, &currentDT, &currentHP, &maxHP, &currentFP, &maxFP, &lastRoomView, &condMu, activeConditions, session, mapHandler, &currentHotbar, &activeWeather)
+		h.forwardServerEvents(streamCtx, stream, conn, char.Name, &currentRoom, &currentTime, &currentDT, &currentHP, &maxHP, &currentFP, &maxFP, &lastRoomView, &condMu, activeConditions, session, mapHandler, &currentHotbar, &activeWeather, &lastCharacterSheet)
 	}()
 
 	// Command loop: read Telnet → parse → send gRPC
-	err = h.commandLoop(streamCtx, stream, conn, char.Name, acct.Role, &lastInput, session, mapHandler, &lastRoomView, &currentHotbar)
+	err = h.commandLoop(streamCtx, stream, conn, char.Name, acct.Role, &lastInput, session, mapHandler, &lastRoomView, &currentHotbar, &lastCharacterSheet)
 
 	cancel()
 	wg.Wait()
@@ -410,7 +417,7 @@ func (h *AuthHandler) gameBridge(ctx context.Context, conn *telnet.Conn, acct po
 //
 // Precondition: stream must be open; charName must be non-empty; lastInput must be non-nil; session must be non-nil.
 // Postcondition: Returns nil on clean quit, ctx.Err() on cancellation, or a wrapped error on failure.
-func (h *AuthHandler) commandLoop(ctx context.Context, stream gamev1.GameService_SessionClient, conn *telnet.Conn, charName string, role string, lastInput *atomic.Int64, session *SessionInputState, mapHandler *MapModeHandler, lastRoomView *atomic.Value, currentHotbar *atomic.Value) error {
+func (h *AuthHandler) commandLoop(ctx context.Context, stream gamev1.GameService_SessionClient, conn *telnet.Conn, charName string, role string, lastInput *atomic.Int64, session *SessionInputState, mapHandler *MapModeHandler, lastRoomView *atomic.Value, currentHotbar *atomic.Value, lastCharacterSheet *atomic.Value) error {
 	registry := command.DefaultRegistry()
 	requestID := 0
 
@@ -587,6 +594,12 @@ func (h *AuthHandler) commandLoop(ctx context.Context, stream gamev1.GameService
 				}
 				return nil
 			},
+			characterSheetFn: func() *gamev1.CharacterSheetView {
+				if sh, ok := lastCharacterSheet.Load().(*gamev1.CharacterSheetView); ok {
+					return sh
+				}
+				return nil
+			},
 			helpFn: func() {
 				h.showGameHelp(conn, registry, role)
 				if conn.IsSplitScreen() {
@@ -698,7 +711,7 @@ func renderTabCompleteResponse(conn *telnet.Conn, resp *gamev1.TabCompleteRespon
 // Side-effect: currentRoom is updated to the latest RoomView.RoomId whenever a RoomView event is received.
 // Side-effect: currentTime and currentDT are updated from TimeOfDayEvent or RoomView events.
 // Side-effect: currentHP, maxHP, currentFP, and maxFP are updated from CharacterInfo and HpUpdateEvent events.
-func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.GameService_SessionClient, conn *telnet.Conn, charName string, currentRoom *atomic.Value, currentTime *atomic.Value, currentDT *atomic.Value, currentHP *atomic.Int32, maxHP *atomic.Int32, currentFP *atomic.Int32, maxFP *atomic.Int32, lastRoomView *atomic.Value, condMu *sync.Mutex, activeConditions map[string]string, session *SessionInputState, mapHandler *MapModeHandler, currentHotbar *atomic.Value, activeWeather *atomic.Value) {
+func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.GameService_SessionClient, conn *telnet.Conn, charName string, currentRoom *atomic.Value, currentTime *atomic.Value, currentDT *atomic.Value, currentHP *atomic.Int32, maxHP *atomic.Int32, currentFP *atomic.Int32, maxFP *atomic.Int32, lastRoomView *atomic.Value, condMu *sync.Mutex, activeConditions map[string]string, session *SessionInputState, mapHandler *MapModeHandler, currentHotbar *atomic.Value, activeWeather *atomic.Value, lastCharacterSheet *atomic.Value) {
 	// Pump stream.Recv() into a channel so it can participate in a proper
 	// select alongside resize events and the prompt-refresh ticker.
 	type recvResult struct {
@@ -1017,6 +1030,9 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 				text = RenderCharacterInfo(ci)
 			case *gamev1.ServerEvent_CharacterSheet:
 				cw, _ := conn.Dimensions()
+				// Cache the sheet so bridgeEffects can access the pre-rendered
+				// EffectsSummary without round-tripping to the server.
+				lastCharacterSheet.Store(p.CharacterSheet)
 				text = RenderCharacterSheet(p.CharacterSheet, cw)
 			case *gamev1.ServerEvent_Map:
 				mw, _ := conn.Dimensions()

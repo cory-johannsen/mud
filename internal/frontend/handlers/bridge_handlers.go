@@ -21,8 +21,9 @@ type bridgeContext struct {
 	stream         gamev1.GameService_SessionClient
 	helpFn         func()                    // called by bridgeHelp to render help output
 	promptFn       func() string             // called to build the current colored prompt
-	travelResolver func(zoneName string) (zoneID string, errMsg string) // nil if not available; errMsg non-empty signals failure
-	roomViewFn     func() *gamev1.RoomView   // returns the last cached RoomView; nil if unavailable
+	travelResolver    func(zoneName string) (zoneID string, errMsg string) // nil if not available; errMsg non-empty signals failure
+	roomViewFn        func() *gamev1.RoomView           // returns the last cached RoomView; nil if unavailable
+	characterSheetFn  func() *gamev1.CharacterSheetView // returns the last cached CharacterSheetView; nil if unavailable
 }
 
 // bridgeResult is returned by every bridge handler.
@@ -69,6 +70,7 @@ var bridgeHandlerMap = map[string]bridgeHandlerFunc{
 	command.HandlerPass:               bridgePass,
 	command.HandlerStrike:             bridgeStrike,
 	command.HandlerStatus:             bridgeStatus,
+	command.HandlerEffects:            bridgeEffects,
 	command.HandlerEquip:              bridgeEquip,
 	command.HandlerReload:             bridgeReload,
 	command.HandlerFireBurst:          bridgeFireBurst,
@@ -428,6 +430,53 @@ func bridgeStatus(bctx *bridgeContext) (bridgeResult, error) {
 	return bridgeResult{msg: &gamev1.ClientMessage{
 		RequestId: bctx.reqID,
 		Payload:   &gamev1.ClientMessage_Status{Status: &gamev1.StatusRequest{}},
+	}}, nil
+}
+
+// bridgeEffects renders the bearer's active-effects block using the
+// server-populated CharacterSheetView.EffectsSummary field (Task 10 of the
+// duplicate-effects plan).
+//
+// Precondition: bctx must be non-nil. When a cached CharacterSheetView is
+// available via characterSheetFn, its EffectsSummary is written verbatim to
+// the console. When no sheet is cached yet, a CharacterSheetRequest is
+// dispatched so the next `effects` invocation (after the server responds)
+// renders real data.
+// Postcondition: returns done=true when a cached summary was rendered;
+// otherwise returns a StatusRequest ClientMessage to prime the cache.
+func bridgeEffects(bctx *bridgeContext) (bridgeResult, error) {
+	if bctx.characterSheetFn != nil {
+		if sheet := bctx.characterSheetFn(); sheet != nil {
+			summary := sheet.GetEffectsSummary()
+			if strings.TrimSpace(summary) == "" {
+				summary = "Effects:\n  No active effects.\n"
+			}
+			if bctx.conn != nil {
+				if bctx.conn.IsSplitScreen() {
+					_ = bctx.conn.WriteConsole(summary)
+					_ = bctx.conn.WritePromptSplit(bctx.promptFn())
+				} else {
+					_ = bctx.conn.WriteLine(summary)
+					_ = bctx.conn.WritePrompt(bctx.promptFn())
+				}
+			}
+			return bridgeResult{done: true}, nil
+		}
+	}
+	// No cached sheet yet — ask the server for one. The response path in
+	// game_bridge.go's event loop stores the sheet in the atomic cache, so
+	// the next `effects` invocation will find it populated.
+	msg := "Effects view populating (requesting character sheet)… try again."
+	if bctx.conn != nil {
+		if bctx.conn.IsSplitScreen() {
+			_ = bctx.conn.WriteConsole(msg)
+		} else {
+			_ = bctx.conn.WriteLine(msg)
+		}
+	}
+	return bridgeResult{msg: &gamev1.ClientMessage{
+		RequestId: bctx.reqID,
+		Payload:   &gamev1.ClientMessage_CharSheet{CharSheet: &gamev1.CharacterSheetRequest{}},
 	}}, nil
 }
 

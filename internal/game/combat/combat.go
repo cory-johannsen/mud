@@ -1,7 +1,11 @@
 // Package combat implements the PvE combat engine for Gunchete.
 package combat
 
-import "github.com/cory-johannsen/mud/internal/game/inventory"
+import (
+	"github.com/cory-johannsen/mud/internal/game/effect"
+	"github.com/cory-johannsen/mud/internal/game/inventory"
+	"github.com/cory-johannsen/mud/internal/game/reaction"
+)
 
 // MaxCombatRange is the maximum engagement distance in feet.
 // Legacy value retained for ranged weapon checks. On the 10×10 grid the actual
@@ -122,6 +126,11 @@ type Combatant struct {
 	SpeedFt int
 	// WeaponName is the display name of the NPC's equipped weapon; empty = unarmed.
 	WeaponName string
+	// WeaponDefID is the registry ID of the equipped main-hand weapon (the inventory key).
+	// Empty means unarmed or unknown. Used as the stable dedup key for the weapon's
+	// item-typed SourceID ("item:<WeaponDefID>") in the effect.EffectSet pipeline so
+	// the same key is produced at combat start and when a combatant joins a pending combat.
+	WeaponDefID string
 	// Hidden is true when this combatant is concealed. Attackers must pass a DC 11 flat check.
 	// For player combatants: set by hide/divert actions; cleared when the player attacks or is targeted.
 	// For NPC combatants: unused (always false).
@@ -152,6 +161,13 @@ type Combatant struct {
 	// FactionID is the faction this combatant belongs to; empty for players and faction-less NPCs.
 	// Used by the Lua scripting layer for faction-aware targeting (e.g. get_faction_enemies).
 	FactionID string
+	// ReactionBudget tracks this combatant's per-round reaction spending.
+	// Nil before the first StartRound call. Reset by StartRoundWithSrc each round.
+	ReactionBudget *reaction.Budget
+	// Effects is the unified typed-bonus set for this combatant.
+	// Populated at combatant creation from conditions + feat/tech passive bonuses + equipment bonuses.
+	// Kept in sync with ActiveSet condition state via SyncConditionApply/SyncConditionRemove/SyncConditionsTick.
+	Effects *effect.EffectSet
 }
 
 // SpeedSquares returns the number of grid squares this combatant may move per stride action.

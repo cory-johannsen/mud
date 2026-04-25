@@ -67,7 +67,7 @@ func TestSimultaneousResolution_NPCTargetsStartOfRoundPosition(t *testing.T) {
 	}
 
 	src := fixedSrc{val: 10}
-	combat.ResolveRound(cbt, src, nil, nil)
+	combat.ResolveRound(cbt, src, nil, nil, 0)
 
 	playerY := cbt.Combatants[0].GridY
 	npcY := cbt.Combatants[1].GridY
@@ -123,7 +123,7 @@ func TestSimultaneousResolution_PlayerActsFirst_NPCNotAffected(t *testing.T) {
 	}
 
 	src := fixedSrc{val: 10}
-	combat.ResolveRound(cbt, src, nil, nil)
+	combat.ResolveRound(cbt, src, nil, nil, 0)
 
 	npcY := cbt.Combatants[1].GridY
 

@@ -1,6 +1,7 @@
 package gameserver
 
 import (
+	"context"
 	"testing"
 
 	"github.com/cory-johannsen/mud/internal/game/npc"
@@ -68,17 +69,17 @@ func TestReactionCallback_SkipsWhenNoReactionsRemaining(t *testing.T) {
 	sess.Reactions.Register("rxn-skip", "test_feat", "Test Feat", def)
 
 	called := false
-	var cb reaction.ReactionCallback = func(uid string, trigger reaction.ReactionTriggerType, ctx reaction.ReactionContext) (bool, error) {
+	var cb reaction.ReactionCallback = func(_ context.Context, uid string, trigger reaction.ReactionTriggerType, ctx reaction.ReactionContext, _ []reaction.PlayerReaction) (bool, *reaction.PlayerReaction, error) {
 		if sess.ReactionsRemaining <= 0 {
-			return false, nil
+			return false, nil, nil
 		}
 		called = true
-		return true, nil
+		return true, nil, nil
 	}
 	sess.ReactionFn = cb
 
 	ctx := reaction.ReactionContext{TriggerUID: "rxn-skip", DamagePending: new(5)}
-	spent, err := sess.ReactionFn("rxn-skip", reaction.TriggerOnDamageTaken, ctx)
+	spent, _, err := sess.ReactionFn(context.Background(), "rxn-skip", reaction.TriggerOnDamageTaken, ctx, nil)
 	require.NoError(t, err)
 	assert.False(t, spent, "reaction must not be spent when ReactionsRemaining is 0")
 	assert.False(t, called)
@@ -98,23 +99,23 @@ func TestReactionCallback_SecondTriggerSkipped_WhenReactionSpent(t *testing.T) {
 	sess.Reactions.Register("rxn-spent", "test_feat", "Test Feat", def)
 
 	callCount := 0
-	var cb reaction.ReactionCallback = func(uid string, trigger reaction.ReactionTriggerType, ctx reaction.ReactionContext) (bool, error) {
+	var cb reaction.ReactionCallback = func(_ context.Context, uid string, trigger reaction.ReactionTriggerType, ctx reaction.ReactionContext, _ []reaction.PlayerReaction) (bool, *reaction.PlayerReaction, error) {
 		if sess.ReactionsRemaining <= 0 {
-			return false, nil
+			return false, nil, nil
 		}
 		callCount++
 		sess.ReactionsRemaining--
-		return true, nil
+		return true, nil, nil
 	}
 	sess.ReactionFn = cb
 
 	ctx1 := reaction.ReactionContext{TriggerUID: "rxn-spent", DamagePending: new(5)}
-	spent1, err := sess.ReactionFn("rxn-spent", reaction.TriggerOnDamageTaken, ctx1)
+	spent1, _, err := sess.ReactionFn(context.Background(), "rxn-spent", reaction.TriggerOnDamageTaken, ctx1, nil)
 	require.NoError(t, err)
 	assert.True(t, spent1)
 
 	ctx2 := reaction.ReactionContext{TriggerUID: "rxn-spent", DamagePending: new(3)}
-	spent2, err := sess.ReactionFn("rxn-spent", reaction.TriggerOnDamageTaken, ctx2)
+	spent2, _, err := sess.ReactionFn(context.Background(), "rxn-spent", reaction.TriggerOnDamageTaken, ctx2, nil)
 	require.NoError(t, err)
 	assert.False(t, spent2, "second trigger must be skipped after reaction is spent")
 	assert.Equal(t, 1, callCount, "callback logic must only fire once per round")
@@ -126,10 +127,10 @@ func TestReactionCallback_Decline_OriginalOutcomePreserved(t *testing.T) {
 	ctx := reaction.ReactionContext{SaveOutcome: &original}
 
 	// Simulate a decline: callback returns false without modifying ctx.
-	var cb reaction.ReactionCallback = func(uid string, trigger reaction.ReactionTriggerType, ctx reaction.ReactionContext) (bool, error) {
-		return false, nil
+	var cb reaction.ReactionCallback = func(_ context.Context, uid string, trigger reaction.ReactionTriggerType, ctx reaction.ReactionContext, _ []reaction.PlayerReaction) (bool, *reaction.PlayerReaction, error) {
+		return false, nil, nil
 	}
-	spent, err := cb("p1", reaction.TriggerOnSaveFail, ctx)
+	spent, _, err := cb(context.Background(), "p1", reaction.TriggerOnSaveFail, ctx, nil)
 	require.NoError(t, err)
 	assert.False(t, spent)
 	assert.Equal(t, 2, original, "original save outcome must be preserved when reaction is declined")

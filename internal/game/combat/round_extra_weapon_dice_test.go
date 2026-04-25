@@ -98,7 +98,7 @@ func TestExtraWeaponDice_OnHit_AddsExtraDamage(t *testing.T) {
 	// Without extra dice: NPC HP = 30-6 = 24.
 	// With extra dice:    NPC HP = 30-18 = 12.
 	src := fixedSrc{val: 15}
-	combat.ResolveRound(cbt, src, nil, nil)
+	combat.ResolveRound(cbt, src, nil, nil, 0)
 
 	npcHP := cbt.Combatants[1].CurrentHP
 	// Discriminating assertion: if extra dice fire, damage=18 → npcHP=12.
@@ -141,7 +141,7 @@ func TestExtraWeaponDice_OnMiss_NoExtraDamage(t *testing.T) {
 
 	// val=1: d20=2, miss vs AC 10 (no mods). No damage should be applied.
 	src := fixedSrc{val: 1}
-	combat.ResolveRound(cbt, src, nil, nil)
+	combat.ResolveRound(cbt, src, nil, nil, 0)
 
 	npcHP := cbt.Combatants[1].CurrentHP
 	if npcHP != 30 {
@@ -205,7 +205,7 @@ func TestProperty_ExtraWeaponDice_OnHit_DamageGreaterThanBaseAlone(t *testing.T)
 		// val=15 → guaranteed hit vs AC 1. Each d6 → 15%6+1=4.
 		// Base damage = 4. Extra = extraDice*4. Total ≥ base+extra.
 		src := fixedSrc{val: 15}
-		combat.ResolveRound(cbt, src, nil, nil)
+		combat.ResolveRound(cbt, src, nil, nil, 0)
 
 		dmgDealt := npcHP - cbt.Combatants[1].CurrentHP
 		if cbt.Combatants[1].CurrentHP < 0 {

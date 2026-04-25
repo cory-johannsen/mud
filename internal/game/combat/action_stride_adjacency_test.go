@@ -34,7 +34,7 @@ func makeAdjacentStrideCombat(t *testing.T, playerX, playerY, npcX, npcY int) (*
 
 func resolveAdjacentRound(cbt *combat.Combat) {
 	src := fixedSrcDist{val: 1}
-	combat.ResolveRound(cbt, src, func(string, int) {}, nil)
+	combat.ResolveRound(cbt, src, func(string, int) {}, nil, 0)
 }
 
 // TestStride_Toward_StopsWhenAdjacent verifies that striding "toward" an opponent

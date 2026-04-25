@@ -157,6 +157,7 @@ const (
 	HandlerKillNPC            = "kill_npc"
 	HandlerLoot               = "loot"
 	HandlerInspect            = "inspect"
+	HandlerEffects            = "effects"
 )
 
 // Command defines a player-invocable command.
@@ -197,6 +198,7 @@ func BuiltinCommands() []Command {
 		{Name: "pass", Aliases: []string{"p"}, Help: "Forfeit remaining action points this round.", Category: CategoryCombat, Handler: HandlerPass},
 		{Name: "strike", Aliases: []string{"st"}, Help: "Full attack routine (2 AP, two hits with MAP) against target.", Category: CategoryCombat, Handler: HandlerStrike},
 		{Name: "status", Aliases: []string{"cond"}, Help: "Show your active conditions.", Category: CategoryCombat, Handler: HandlerStatus},
+		{Name: "effects", Aliases: []string{"eff"}, Help: "Show active effects and which typed bonuses are suppressed.", Category: CategoryCombat, Handler: HandlerEffects},
 		{Name: "equip", Aliases: []string{"eq"}, Help: "Equip a weapon (equip <weapon_id> [slot])", Category: CategoryCombat, Handler: HandlerEquip},
 		{Name: "loadout", Aliases: []string{"lo", "prep", "kit"}, Help: "Display or swap weapon presets (loadout [1|2])", Category: CategoryCombat, Handler: HandlerLoadout},
 		{Name: "unequip", Aliases: []string{"ueq"}, Help: "Unequip an item from a slot (unequip <slot>)", Category: CategoryCombat, Handler: HandlerUnequip},

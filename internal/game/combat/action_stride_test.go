@@ -56,7 +56,7 @@ func TestStride_TowardMovesCloserOnGrid(t *testing.T) {
 	_ = cbt.StartRound(3)
 	_ = cbt.QueueAction("p1", combat.QueuedAction{Type: combat.ActionStride, Direction: "toward"})
 	_ = cbt.QueueAction("n1", combat.QueuedAction{Type: combat.ActionPass})
-	_ = combat.ResolveRound(cbt, src, func(id string, hp int) {}, nil)
+	_ = combat.ResolveRound(cbt, src, func(id string, hp int) {}, nil, 0)
 
 	distAfter := combat.CombatRange(*player, *npc)
 	assert.Less(t, distAfter, distBefore, "stride toward must reduce Chebyshev distance")
@@ -74,7 +74,7 @@ func TestStride_AwayMovesAwayOnGrid(t *testing.T) {
 	_ = cbt.StartRound(3)
 	_ = cbt.QueueAction("p1", combat.QueuedAction{Type: combat.ActionStride, Direction: "away"})
 	_ = cbt.QueueAction("n1", combat.QueuedAction{Type: combat.ActionPass})
-	_ = combat.ResolveRound(cbt, src, func(id string, hp int) {}, nil)
+	_ = combat.ResolveRound(cbt, src, func(id string, hp int) {}, nil, 0)
 
 	distAfter := combat.CombatRange(*player, *npc)
 	assert.GreaterOrEqual(t, distAfter, distBefore, "stride away must not reduce Chebyshev distance")
@@ -107,7 +107,7 @@ func TestStride_CompassDirections(t *testing.T) {
 			_ = cbt.StartRound(3)
 			_ = cbt.QueueAction("p1", combat.QueuedAction{Type: combat.ActionStride, Direction: tc.dir})
 			_ = cbt.QueueAction("n1", combat.QueuedAction{Type: combat.ActionPass})
-			_ = combat.ResolveRound(cbt, src, func(id string, hp int) {}, nil)
+			_ = combat.ResolveRound(cbt, src, func(id string, hp int) {}, nil, 0)
 
 			assert.Equal(t, tc.wantX, player.GridX, "dir=%s: wrong GridX", tc.dir)
 			assert.Equal(t, tc.wantY, player.GridY, "dir=%s: wrong GridY", tc.dir)
@@ -157,7 +157,7 @@ func TestProperty_Stride_GridBoundsRespected(t *testing.T) {
 		_ = cbt.StartRound(3)
 		_ = cbt.QueueAction("p1", combat.QueuedAction{Type: combat.ActionStride, Direction: dir})
 		_ = cbt.QueueAction("n1", combat.QueuedAction{Type: combat.ActionPass})
-		_ = combat.ResolveRound(cbt, src, func(id string, hp int) {}, nil)
+		_ = combat.ResolveRound(cbt, src, func(id string, hp int) {}, nil, 0)
 
 		if player.GridX < 0 || player.GridX > 19 || player.GridY < 0 || player.GridY > 19 {
 			rt.Fatalf("after stride %q from (%d,%d), player ended at (%d,%d) — outside 20x20 grid",

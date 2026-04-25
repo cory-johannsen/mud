@@ -174,6 +174,7 @@ message ClientMessage {
     TrainTechRequest     train_tech            = 138;
     ChooseFeatRequest    choose_feat           = 139;
     MoveToRequest        move_to               = 140;
+    ReactionResponse     reaction_response     = 141;
   }
 }
 
@@ -370,7 +371,30 @@ message ServerEvent {
     QuestCompleteEvent   quest_complete          = 40;
     TechTrainerView      tech_trainer_view       = 41;
     GameConfig          game_config             = 42;
+    ReactionPromptEvent  reaction_prompt         = 43;
   }
+}
+
+// ReactionPromptEvent is sent when the server needs the player to decide whether
+// to spend their reaction. The player responds with ReactionResponse (matching
+// prompt_id). The server honours ctx timeout independently; if no response
+// arrives before deadline the callback returns "skipped" on the server side.
+message ReactionPromptEvent {
+  string prompt_id = 1;
+  int64 deadline_unix_ms = 2;
+  repeated ReactionPromptOption options = 3;
+}
+
+message ReactionPromptOption {
+  string id = 1;    // opaque option identifier (e.g. feat ID)
+  string label = 2; // display label
+}
+
+// ReactionResponse is the client's answer to a ReactionPromptEvent.
+// chosen == "" means "skip / decline".
+message ReactionResponse {
+  string prompt_id = 1;
+  string chosen = 2;
 }
 
 // ShopItem represents a single item row in a merchant's shop listing.
@@ -1025,6 +1049,8 @@ message APUpdateEvent {
   int32  ap_remaining          = 2; // updated remaining action points
   int32  ap_total              = 3; // total action points for this round
   int32  movement_ap_remaining = 4; // how many movement actions (Stride/Step) remain this round; max 2
+  int32  reaction_max          = 5; // max reactions this round (ReactionBudget.Max); 0 if budget not initialised
+  int32  reaction_spent        = 6; // reactions spent so far this round (ReactionBudget.Spent)
 }
 
 // CombatEvent delivers combat narration to all players in the room.
@@ -1275,6 +1301,10 @@ message CharacterSheetView {
     // e.g. "simple_melee", "martial_melee". Empty when that slot is unequipped.
     string main_hand_prof_category = 63;
     string off_hand_prof_category  = 64;
+    // effects_summary is the pre-rendered Active Effects block (multi-line string)
+    // produced by effect/render.RenderEffectsBlock. Populated server-side at
+    // handleChar time so both telnet and web clients render identical content.
+    string effects_summary         = 65;
 }
 
 // InnateSlotView delivers the per-tech innate use slot state for the character sheet.

@@ -6,6 +6,8 @@ import (
 	"strings"
 
 	"github.com/cory-johannsen/mud/internal/frontend/telnet"
+	"github.com/cory-johannsen/mud/internal/game/effect"
+	effectrender "github.com/cory-johannsen/mud/internal/game/effect/render"
 	"github.com/cory-johannsen/mud/internal/game/maputil"
 	"github.com/cory-johannsen/mud/internal/gameserver"
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
@@ -1098,6 +1100,7 @@ func RenderCharacterSheet(csv *gamev1.CharacterSheetView, width int) string {
 	}
 
 	// ── Assemble ──────────────────────────────────────────────────────────────
+	var out string
 	if !twoCol {
 		// Single column: left then right, each line terminated with \r\n.
 		var b strings.Builder
@@ -1109,9 +1112,36 @@ func RenderCharacterSheet(csv *gamev1.CharacterSheetView, width int) string {
 			b.WriteString(r.text)
 			b.WriteString("\r\n")
 		}
-		return b.String()
+		out = b.String()
+	} else {
+		out = assembleColumns(left, right, leftW)
 	}
-	return assembleColumns(left, right, leftW)
+
+	// ── Effects block ─────────────────────────────────────────────────────────
+	// Appended after the main sheet body when the server-supplied summary is
+	// non-empty. The divider width scales with the terminal width so narrow
+	// clients don't wrap; a sensible floor prevents a degenerate empty divider.
+	if summary := csv.GetEffectsSummary(); summary != "" {
+		dashW := width - len("── Effects ")
+		if dashW < 8 {
+			dashW = 8
+		}
+		if dashW > 64 {
+			dashW = 64
+		}
+		var b strings.Builder
+		b.WriteString(out)
+		b.WriteString("\r\n")
+		b.WriteString("── Effects ")
+		b.WriteString(strings.Repeat("─", dashW))
+		b.WriteString("\r\n")
+		b.WriteString(summary)
+		if !strings.HasSuffix(summary, "\n") {
+			b.WriteString("\r\n")
+		}
+		out = b.String()
+	}
+	return out
 }
 
 // sortedInt32Set returns the keys of a map[int32]bool in ascending order.
@@ -2076,4 +2106,17 @@ func renderChoicePrompt(payload *choicePromptPayload) string {
 	}
 	fmt.Fprintf(&sb, "Enter 1-%d:", len(payload.Options))
 	return strings.TrimRight(sb.String(), "\r\n")
+}
+
+
+// RenderEffectsBlock is a thin forwarder to
+// internal/game/effect/render.EffectsBlock. The underlying formatter was
+// moved to that package so the gameserver (which has no business importing
+// frontend/handlers) can populate CharacterSheetView.EffectsSummary with
+// identical content. This wrapper preserves the original function name used
+// by the telnet bridge and by the existing effects_render_test.go suite.
+//
+// Precondition / Postcondition: see effect/render.EffectsBlock.
+func RenderEffectsBlock(es *effect.EffectSet, casterNames map[string]string, width int) string {
+	return effectrender.EffectsBlock(es, casterNames, width)
 }

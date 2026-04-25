@@ -5,9 +5,9 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/cory-johannsen/mud/internal/game/effect"
 	"github.com/cory-johannsen/mud/internal/game/reaction"
 )
-
 var shortNameRE = regexp.MustCompile(`^[a-z0-9_]+$`)
 
 type Tradition string
@@ -212,6 +212,8 @@ type TechnologyDef struct {
 	// 0 means single-target (default). When > 0 and UseRequest.target_x/target_y are >= 0 (not the -1 sentinel),
 	// effects are applied to every combatant within Chebyshev distance AoeRadius of the target square.
 	AoeRadius int `yaml:"aoe_radius,omitempty"`
+	// PassiveBonuses are always-on typed bonuses granted while this technology is active (Passive == true only).
+	PassiveBonuses []effect.Bonus `yaml:"passive_bonuses,omitempty"`
 }
 
 // Validate returns an error if any required field is missing or invalid.

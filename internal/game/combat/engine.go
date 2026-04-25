@@ -7,6 +7,7 @@ import (
 
 	"github.com/cory-johannsen/mud/internal/game/condition"
 	"github.com/cory-johannsen/mud/internal/game/inventory"
+	"github.com/cory-johannsen/mud/internal/game/reaction"
 	"github.com/cory-johannsen/mud/internal/game/session"
 	"github.com/cory-johannsen/mud/internal/scripting"
 )
@@ -53,6 +54,9 @@ type Combat struct {
 	// combat handler populates this slice at StartCombat from the room's
 	// equipment and removes entries when cover HP reaches zero.
 	CoverObjects []CoverObject
+	// ReadyRegistry holds pending Ready entries for the current round.
+	// Populated by QueueAction(ActionReady); consumed by ResolveRound.
+	ReadyRegistry *reaction.ReadyRegistry
 }
 
 // CoverObject is a cover item placed on the combat grid. It blocks movement
@@ -93,6 +97,26 @@ func (c *Combat) StartRound(actionsPerRound int) []RoundConditionEvent {
 // Precondition: src must not be nil; actionsPerRound >= 0.
 func (c *Combat) StartRoundWithSrc(actionsPerRound int, src Source) []RoundConditionEvent {
 	c.Round++
+
+	// Expire ready entries from the previous round (REACTION-17).
+	if c.ReadyRegistry != nil {
+		c.ReadyRegistry.ExpireRound(c.Round - 1)
+	}
+
+	// Reset (or initialise) reaction budget for each living combatant (REACTION-14).
+	for _, cbt := range c.Combatants {
+		if cbt.IsDead() {
+			continue
+		}
+		const baseMax = 1 // REACTION-14: all combatants get exactly 1 base reaction.
+		// Sum BonusReactions from active feats is applied by the gameserver layer
+		// (it has the feat registry); this package applies the base only.
+		if cbt.ReactionBudget == nil {
+			cbt.ReactionBudget = &reaction.Budget{}
+		}
+		cbt.ReactionBudget.Reset(baseMax)
+	}
+
 	var events []RoundConditionEvent
 
 	for _, cbt := range c.Combatants {
@@ -103,6 +127,12 @@ func (c *Combat) StartRoundWithSrc(actionsPerRound int, src Source) []RoundCondi
 
 		// Tick durations; collect expired conditions
 		expired := s.Tick(cbt.ID)
+		// Mirror expirations into Combatant.Effects so the unified effect
+		// pipeline (effect.Resolve) observes the same state as the legacy
+		// ActiveSet-based accessors. Required for REQ-EM-* after round.go
+		// migrated from condition.AttackBonus/ACBonus/DamageBonus to
+		// effect.Resolve.
+		SyncConditionsTick(cbt, expired)
 		for _, id := range expired {
 			def, _ := c.condRegistry.Get(id)
 			name := id
@@ -123,6 +153,7 @@ func (c *Combat) StartRoundWithSrc(actionsPerRound int, src Source) []RoundCondi
 			switch {
 			case roll == 20: // natural 20 = crit success: remove dying entirely, restore to 1 HP
 				s.Remove(cbt.ID, "dying")
+				SyncConditionRemove(cbt, "dying")
 				cbt.CurrentHP = 1
 				events = append(events, RoundConditionEvent{
 					UID: cbt.ID, Name: cbt.Name,
@@ -131,8 +162,10 @@ func (c *Combat) StartRoundWithSrc(actionsPerRound int, src Source) []RoundCondi
 				})
 			case roll >= 15: // success: remove dying, apply wounded +1, restore to 1 HP
 				s.Remove(cbt.ID, "dying")
+				SyncConditionRemove(cbt, "dying")
 				if woundedDef, ok := c.condRegistry.Get("wounded"); ok {
 					_ = s.Apply(cbt.ID, woundedDef, 1, -1)
+					SyncConditionApply(cbt, cbt.ID, woundedDef, s.Stacks("wounded"))
 				}
 				cbt.CurrentHP = 1
 				events = append(events, RoundConditionEvent{
@@ -153,6 +186,7 @@ func (c *Combat) StartRoundWithSrc(actionsPerRound int, src Source) []RoundCondi
 					cbt.CurrentHP = 0
 					cbt.Dead = true
 					s.Remove(cbt.ID, "dying")
+					SyncConditionRemove(cbt, "dying")
 					events = append(events, RoundConditionEvent{
 						UID: cbt.ID, Name: cbt.Name,
 						ConditionID: "dying", CondName: "Dying",
@@ -162,6 +196,7 @@ func (c *Combat) StartRoundWithSrc(actionsPerRound int, src Source) []RoundCondi
 					if dyingDef, ok := c.condRegistry.Get("dying"); ok {
 						s.Remove(cbt.ID, "dying")
 						_ = s.Apply(cbt.ID, dyingDef, dyingStacks, -1)
+						SyncConditionApply(cbt, cbt.ID, dyingDef, s.Stacks("dying"))
 					}
 					events = append(events, RoundConditionEvent{
 						UID: cbt.ID, Name: cbt.Name,
@@ -199,6 +234,7 @@ func (c *Combat) StartRoundWithSrc(actionsPerRound int, src Source) []RoundCondi
 		if s.Has("prone") {
 			reduction++
 			s.Remove(cbt.ID, "prone")
+			SyncConditionRemove(cbt, "prone")
 			name := "Prone"
 			if def, ok := c.condRegistry.Get("prone"); ok && def != nil {
 				name = def.Name
@@ -280,13 +316,28 @@ func (c *Combat) ApplyCondition(uid, condID string, stacks, duration int) error 
 	if c.scriptMgr != nil {
 		s.SetScripting(c.scriptMgr, c.zoneID)
 	}
-	return s.Apply(uid, def, stacks, duration)
+	if err := s.Apply(uid, def, stacks, duration); err != nil {
+		return err
+	}
+	// Mirror the condition into Combatant.Effects so the unified effect
+	// pipeline (effect.Resolve) observes the same state as the legacy
+	// ActiveSet-based accessors. Required for REQ-EM-* after round.go
+	// migrated from condition.AttackBonus/ACBonus/DamageBonus to
+	// effect.Resolve.
+	if cbt := findCombatantByID(c, uid); cbt != nil {
+		stored := s.Stacks(condID)
+		SyncConditionApply(cbt, uid, def, stored)
+	}
+	return nil
 }
 
 // RemoveCondition removes condID from combatant uid. No-op if not present.
 func (c *Combat) RemoveCondition(uid, condID string) {
 	if s, ok := c.Conditions[uid]; ok {
 		s.Remove(uid, condID)
+		if cbt := findCombatantByID(c, uid); cbt != nil {
+			SyncConditionRemove(cbt, condID)
+		}
 	}
 }
 
@@ -319,12 +370,36 @@ func (c *Combat) DyingStacks(uid string) int {
 //
 // Precondition: uid must be a living combatant in this combat with an active queue.
 // Postcondition: Returns error if uid not found or AP insufficient; otherwise action is appended.
+// When a.Type is ActionReady and enqueue succeeds, a corresponding ReadyEntry is registered
+// in c.ReadyRegistry so ResolveRound can fire the prepared action on its trigger.
 func (c *Combat) QueueAction(uid string, a QueuedAction) error {
 	q, ok := c.ActionQueues[uid]
 	if !ok {
 		return fmt.Errorf("combatant %q not found or has no active queue", uid)
 	}
-	return q.Enqueue(a)
+	if err := q.Enqueue(a); err != nil {
+		return err
+	}
+	// If this is a Ready action, register it in the ReadyRegistry.
+	if a.Type == ActionReady && a.ReadyAction != nil && c.ReadyRegistry != nil {
+		desc := reaction.ReadyActionDesc{
+			Type:        a.ReadyAction.Type.String(),
+			Target:      a.ReadyAction.Target,
+			Direction:   a.ReadyAction.Direction,
+			WeaponID:    a.ReadyAction.WeaponID,
+			ExplosiveID: a.ReadyAction.ExplosiveID,
+			AbilityID:   a.ReadyAction.AbilityID,
+			AbilityCost: a.ReadyAction.AbilityCost,
+		}
+		c.ReadyRegistry.Add(reaction.ReadyEntry{
+			UID:        uid,
+			Trigger:    a.ReadyTrigger,
+			TriggerTgt: a.ReadyTriggerTgt,
+			Action:     desc,
+			RoundSet:   c.Round,
+		})
+	}
+	return nil
 }
 
 // AllActionsSubmitted reports whether every living combatant's queue IsSubmitted.
@@ -453,14 +528,15 @@ func (e *Engine) StartCombat(roomID string, combatants []*Combatant, condRegistr
 	sortByInitiativeDesc(sorted)
 
 	cbt := &Combat{
-		RoomID:       roomID,
-		Combatants:   sorted,
-		ActionQueues: make(map[string]*ActionQueue),
-		Conditions:   make(map[string]*condition.ActiveSet),
-		DamageDealt:  make(map[string]int),
-		condRegistry: condRegistry,
-		scriptMgr:    scriptMgr,
-		zoneID:       zoneID,
+		RoomID:        roomID,
+		Combatants:    sorted,
+		ActionQueues:  make(map[string]*ActionQueue),
+		Conditions:    make(map[string]*condition.ActiveSet),
+		DamageDealt:   make(map[string]int),
+		condRegistry:  condRegistry,
+		scriptMgr:     scriptMgr,
+		zoneID:        zoneID,
+		ReadyRegistry: reaction.NewReadyRegistry(),
 	}
 	cbt.GridWidth = 20
 	cbt.GridHeight = 20

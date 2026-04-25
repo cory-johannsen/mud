@@ -1,6 +1,7 @@
 package gameserver
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
@@ -373,12 +374,13 @@ func (s *GameServiceServer) checkEnemyEntersReadyTrigger(roomID, movedCombatantI
 	}
 
 	// Fire the trigger for every player session in the room with a matching readied trigger.
-	ctx := reaction.ReactionContext{}
+	rctx := reaction.ReactionContext{}
 	for _, p := range s.sessions.AllPlayers() {
 		if p.RoomID != roomID || p.ReadiedTrigger != "enemy_enters" || p.ReactionFn == nil {
 			continue
 		}
-		_, _ = p.ReactionFn(p.UID, reaction.TriggerOnEnemyEntersRoom, ctx)
+		// TODO(#244 Task 9): thread the resolver's ctx and filtered candidates instead of Background/nil.
+		_, _, _ = p.ReactionFn(context.Background(), p.UID, reaction.TriggerOnEnemyEntersRoom, rctx, nil)
 	}
 }
 

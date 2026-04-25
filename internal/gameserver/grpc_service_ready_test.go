@@ -1,6 +1,7 @@
 package gameserver
 
 import (
+	"context"
 	"testing"
 
 	"github.com/cory-johannsen/mud/internal/game/character"
@@ -222,9 +223,9 @@ func TestCheckEnemyEntersReadyTrigger_FiresForWaitingPlayer(t *testing.T) {
 
 	// Capture whether ReactionFn was called and with which trigger.
 	var capturedTrigger reaction.ReactionTriggerType
-	waiterSess.ReactionFn = func(uid string, trigger reaction.ReactionTriggerType, ctx reaction.ReactionContext) (bool, error) {
+	waiterSess.ReactionFn = func(_ context.Context, uid string, trigger reaction.ReactionTriggerType, ctx reaction.ReactionContext, _ []reaction.PlayerReaction) (bool, *reaction.PlayerReaction, error) {
 		capturedTrigger = trigger
-		return true, nil
+		return true, nil, nil
 	}
 
 	// Call the fire point with the NPC as the mover.
@@ -256,9 +257,9 @@ func TestCheckEnemyEntersReadyTrigger_NoFireForPlayerMover(t *testing.T) {
 
 	waiterSess.ReadiedTrigger = "enemy_enters"
 	called := false
-	waiterSess.ReactionFn = func(_ string, _ reaction.ReactionTriggerType, _ reaction.ReactionContext) (bool, error) {
+	waiterSess.ReactionFn = func(_ context.Context, _ string, _ reaction.ReactionTriggerType, _ reaction.ReactionContext, _ []reaction.PlayerReaction) (bool, *reaction.PlayerReaction, error) {
 		called = true
-		return true, nil
+		return true, nil, nil
 	}
 
 	// Player "rp8" is the mover (KindPlayer) — trigger must NOT fire.

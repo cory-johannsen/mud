@@ -143,6 +143,20 @@ type CombatHandler struct {
 	// cbt is the active Combat, passed directly to avoid re-acquiring combatMu inside the callback.
 	// May be nil; tech effects are skipped when nil.
 	techUseResolverFn func(uid, techID, targetID string, targetX, targetY int32, cbt *combat.Combat)
+	// reactionPromptTimeout bounds the interactive reaction callback (GH #244 REACTION-13).
+	// Non-positive values are treated as combat.DefaultReactionTimeout by ResolveRound.
+	// Wired in via SetReactionPromptTimeout from GameServerConfig.ReactionPromptTimeout.
+	reactionPromptTimeout time.Duration
+}
+
+// SetReactionPromptTimeout wires the reaction prompt timeout from
+// config.GameServerConfig.ReactionPromptTimeout into the combat handler.
+// Non-positive values fall back to combat.DefaultReactionTimeout at call time.
+//
+// Precondition: none.
+// Postcondition: Subsequent ResolveRound calls use d to bound reaction prompts.
+func (h *CombatHandler) SetReactionPromptTimeout(d time.Duration) {
+	h.reactionPromptTimeout = d
 }
 
 // NewCombatHandler creates a CombatHandler with a round timer and broadcast function.
@@ -388,18 +402,27 @@ func (h *CombatHandler) SetAPUpdateBroadcastFn(fn func(roomID string, evt *gamev
 // broadcastAPUpdate emits an APUpdateEvent for the given combatant to all players in their room.
 // No-op if apUpdateBroadcastFn is nil.
 //
+// c may be nil; when non-nil and c.ReactionBudget is non-nil the reaction_max and
+// reaction_spent fields are populated from the combatant's ReactionBudget so clients
+// can render a reactions-remaining badge alongside the AP display (#244 Task 15).
+//
 // Precondition: roomID and name are non-empty; remaining >= 0; total >= 0; movementAPRemaining >= 0.
 // Postcondition: APUpdateEvent is delivered to all sessions in roomID via apUpdateBroadcastFn.
-func (h *CombatHandler) broadcastAPUpdate(roomID, name string, remaining, total, movementAPRemaining int) {
+func (h *CombatHandler) broadcastAPUpdate(roomID, name string, remaining, total, movementAPRemaining int, c *combat.Combatant) {
 	if h.apUpdateBroadcastFn == nil {
 		return
 	}
-	h.apUpdateBroadcastFn(roomID, &gamev1.APUpdateEvent{
+	evt := &gamev1.APUpdateEvent{
 		Name:                name,
 		ApRemaining:         int32(remaining),
 		ApTotal:             int32(total),
 		MovementApRemaining: int32(movementAPRemaining),
-	})
+	}
+	if c != nil && c.ReactionBudget != nil {
+		evt.ReactionMax = int32(c.ReactionBudget.Max)
+		evt.ReactionSpent = int32(c.ReactionBudget.Spent)
+	}
+	h.apUpdateBroadcastFn(roomID, evt)
 }
 
 // SetOnCoverHit registers a callback that fires when an attack misses due to cover.
@@ -953,7 +976,7 @@ func (h *CombatHandler) SpendAP(uid string, cost int) error {
 	if err := q.DeductAP(cost); err != nil {
 		return err
 	}
-	h.broadcastAPUpdate(sess.RoomID, sess.CharName, q.RemainingPoints(), q.MaxPoints, combat.MaxMovementAP-q.MovementAPSpent())
+	h.broadcastAPUpdate(sess.RoomID, sess.CharName, q.RemainingPoints(), q.MaxPoints, combat.MaxMovementAP-q.MovementAPSpent(), cbt.GetCombatant(uid))
 	return nil
 }
 
@@ -983,7 +1006,7 @@ func (h *CombatHandler) SpendMovementAP(uid string, cost int) error {
 	if err := q.DeductMovementAP(cost); err != nil {
 		return err
 	}
-	h.broadcastAPUpdate(sess.RoomID, sess.CharName, q.RemainingPoints(), q.MaxPoints, combat.MaxMovementAP-q.MovementAPSpent())
+	h.broadcastAPUpdate(sess.RoomID, sess.CharName, q.RemainingPoints(), q.MaxPoints, combat.MaxMovementAP-q.MovementAPSpent(), cbt.GetCombatant(uid))
 	return nil
 }
 
@@ -1213,9 +1236,13 @@ func (h *CombatHandler) JoinPendingNPCCombat(inst *npc.Instance, pendingRoomID s
 		npcFeatStats = ComputeNPCAttackStats(inst, nil, h.featRegistry, roomNPCs)
 	}
 	npcWeaponName := ""
+	npcWeaponDefID := ""
+	npcWeaponBonus := 0
 	if inst.WeaponID != "" && h.invRegistry != nil {
 		if wDef := h.invRegistry.Weapon(inst.WeaponID); wDef != nil {
 			npcWeaponName = wDef.Name
+			npcWeaponDefID = wDef.ID
+			npcWeaponBonus = wDef.Bonus
 		}
 	}
 	npcStrMod := combat.AbilityMod(inst.Awareness) + npcFeatStats.DamageBonus + npcFeatStats.AttackBonus
@@ -1233,6 +1260,8 @@ func (h *CombatHandler) JoinPendingNPCCombat(inst *npc.Instance, pendingRoomID s
 		Resistances: inst.Resistances,
 		Weaknesses:  inst.Weaknesses,
 		WeaponName:  npcWeaponName,
+		WeaponDefID: npcWeaponDefID,
+		WeaponBonus: npcWeaponBonus,
 		AttackVerb:  inst.AttackVerb,
 		SpeedFt:     inst.SpeedFt,
 		FactionID:   inst.FactionID,
@@ -1253,6 +1282,54 @@ func (h *CombatHandler) JoinPendingNPCCombat(inst *npc.Instance, pendingRoomID s
 			zap.String("room_id", pendingRoomID),
 			zap.Error(addErr),
 		)
+		return
+	}
+	// Populate the newly added NPC's Effects set so it participates in the
+	// typed-bonus pipeline alongside the existing combatants (DEDUP-5). Uses
+	// the combatant's WeaponDefID so the dedup key matches the one produced by
+	// populateCombatantEffects at combat start.
+	if joinedCbt := cbt.GetCombatant(inst.ID); joinedCbt != nil {
+		joinedCbt.Effects = combat.BuildCombatantEffects(combat.BuildEffectsOpts{
+			BearerUID:        joinedCbt.ID,
+			Conditions:       cbt.Conditions[joinedCbt.ID],
+			WeaponSourceID:   joinedCbt.WeaponDefID,
+			WeaponBonusValue: joinedCbt.WeaponBonus,
+		})
+	}
+}
+
+// populateCombatantEffects builds and assigns a typed-bonus EffectSet
+// (combat.Combatant.Effects) for every combatant in cbt. It MUST be called
+// after cbt.Conditions[uid] has been populated (post StartCombat + any
+// CopyTo / flat_footed / combat-start condition applications) so that
+// condition bonuses are captured in the resulting EffectSet.
+//
+// Weapon item-typed bonuses are sourced from cbt.Combatant.WeaponBonus for
+// every combatant that has a non-zero bonus. The source identifier is the
+// combatant's WeaponDefID (the inventory registry key), which is the same
+// stable key used by JoinPendingNPCCombat so the dedup namespace is unified
+// across all combatant-creation paths.
+//
+// Passive feat/technology bonuses are NOT wired here yet; that is deferred
+// to a later task. Only conditions and weapon bonuses contribute at this
+// stage.
+//
+// Precondition: cbt must be non-nil.
+// Postcondition: every Combatant in cbt.Combatants has a non-nil Effects field.
+func populateCombatantEffects(cbt *combat.Combat) {
+	if cbt == nil {
+		return
+	}
+	for _, c := range cbt.Combatants {
+		if c == nil {
+			continue
+		}
+		c.Effects = combat.BuildCombatantEffects(combat.BuildEffectsOpts{
+			BearerUID:        c.ID,
+			Conditions:       cbt.Conditions[c.ID],
+			WeaponSourceID:   c.WeaponDefID,
+			WeaponBonusValue: c.WeaponBonus,
+		})
 	}
 }
 
@@ -1838,6 +1915,7 @@ func (h *CombatHandler) startPursuitCombatLocked(playerSess *session.PlayerSessi
 	// Wire weapon name, damage type, and item bonus from equipped main-hand weapon.
 	if playerCbt.Loadout != nil && playerCbt.Loadout.MainHand != nil && playerCbt.Loadout.MainHand.Def != nil {
 		playerCbt.WeaponName = playerCbt.Loadout.MainHand.Def.Name
+		playerCbt.WeaponDefID = playerCbt.Loadout.MainHand.Def.ID
 		playerCbt.WeaponDamageType = playerCbt.Loadout.MainHand.Def.DamageType
 		playerCbt.WeaponBonus = playerCbt.Loadout.MainHand.Def.Bonus
 	} else {
@@ -1864,9 +1942,11 @@ func (h *CombatHandler) startPursuitCombatLocked(playerSess *session.PlayerSessi
 	combatants := []*combat.Combatant{playerCbt}
 	for i, inst := range insts {
 		npcWeaponName := ""
+		npcWeaponDefID := ""
 		if inst.WeaponID != "" && h.invRegistry != nil {
 			if wDef := h.invRegistry.Weapon(inst.WeaponID); wDef != nil {
 				npcWeaponName = wDef.Name
+				npcWeaponDefID = wDef.ID
 			}
 		}
 		npcCbt := &combat.Combatant{
@@ -1883,6 +1963,7 @@ func (h *CombatHandler) startPursuitCombatLocked(playerSess *session.PlayerSessi
 			Resistances: inst.Resistances,
 			Weaknesses:  inst.Weaknesses,
 			WeaponName:  npcWeaponName,
+			WeaponDefID: npcWeaponDefID,
 			AttackVerb:  inst.AttackVerb,
 			SpeedFt:     inst.SpeedFt,
 			FactionID:   inst.FactionID,
@@ -1940,6 +2021,10 @@ func (h *CombatHandler) startPursuitCombatLocked(playerSess *session.PlayerSessi
 			}
 		}
 	}
+
+	// Populate per-combatant Effects sets (DEDUP-5). Must run AFTER conditions
+	// are fully populated (CopyTo + flat_footed application above).
+	populateCombatantEffects(cbt)
 
 	cbt.SetSessionGetter(func(uid string) (*session.PlayerSession, bool) {
 		return h.sessions.GetPlayer(uid)
@@ -2360,6 +2445,12 @@ func (h *CombatHandler) resolveAndAdvanceLocked(roomID string, cbt *combat.Comba
 							sess.Conditions.Remove(c.ID, condID)
 						}
 					}
+					if as, ok := cbt.Conditions[c.ID]; ok && as != nil {
+						for _, condID := range []string{"greater_cover", "standard_cover", "lesser_cover"} {
+							as.Remove(c.ID, condID)
+							combat.SyncConditionRemove(c, condID)
+						}
+					}
 				}
 			}
 			// GH #227: remove the destroyed cover from the movement-blocking
@@ -2375,13 +2466,19 @@ func (h *CombatHandler) resolveAndAdvanceLocked(roomID string, cbt *combat.Comba
 		return destroyed
 	}
 	// Build a per-round dispatch wrapper: for each player in this combat, call their stored ReactionFn.
-	reactionFn := reaction.ReactionCallback(func(uid string, trigger reaction.ReactionTriggerType, ctx reaction.ReactionContext) (bool, error) {
+	reactionFn := reaction.ReactionCallback(func(
+		ctx context.Context,
+		uid string,
+		trigger reaction.ReactionTriggerType,
+		rctx reaction.ReactionContext,
+		candidates []reaction.PlayerReaction,
+	) (bool, *reaction.PlayerReaction, error) {
 		if sess, ok := h.sessions.GetPlayer(uid); ok && sess.ReactionFn != nil {
-			return sess.ReactionFn(uid, trigger, ctx)
+			return sess.ReactionFn(ctx, uid, trigger, rctx, candidates)
 		}
-		return false, nil
+		return false, nil, nil
 	})
-	roundEvents := combat.ResolveRound(cbt, h.dice.Src(), targetUpdater, reactionFn, coverDegrader)
+	roundEvents := combat.ResolveRound(cbt, h.dice.Src(), targetUpdater, reactionFn, h.reactionPromptTimeout, coverDegrader)
 
 	// REQ-JD-10: Fire on_take_damage_in_one_hit_above_threshold drawback trigger for players
 	// that received ≥50% of their max HP in a single hit this round.
@@ -2795,7 +2892,7 @@ func (h *CombatHandler) resolveAndAdvanceLocked(roomID string, cbt *combat.Comba
 			continue
 		}
 		if q, qOK := cbt.ActionQueues[c.ID]; qOK {
-			h.broadcastAPUpdate(roomID, c.Name, q.RemainingPoints(), q.MaxPoints, combat.MaxMovementAP)
+			h.broadcastAPUpdate(roomID, c.Name, q.RemainingPoints(), q.MaxPoints, combat.MaxMovementAP, c)
 		}
 	}
 
@@ -3043,6 +3140,7 @@ func buildPlayerCombatant(sess *session.PlayerSession, h *CombatHandler) *combat
 	// Wire weapon name, damage type, and item bonus from equipped main-hand weapon.
 	if playerCbt.Loadout != nil && playerCbt.Loadout.MainHand != nil && playerCbt.Loadout.MainHand.Def != nil {
 		playerCbt.WeaponName = playerCbt.Loadout.MainHand.Def.Name
+		playerCbt.WeaponDefID = playerCbt.Loadout.MainHand.Def.ID
 		playerCbt.WeaponDamageType = playerCbt.Loadout.MainHand.Def.DamageType
 		playerCbt.WeaponBonus = playerCbt.Loadout.MainHand.Def.Bonus
 	} else {
@@ -3077,9 +3175,11 @@ func (h *CombatHandler) startCombatLocked(sess *session.PlayerSession, inst *npc
 
 	// Resolve NPC weapon name for combat narrative.
 	npcWeaponName := ""
+	npcWeaponDefID := ""
 	if inst.WeaponID != "" && h.invRegistry != nil {
 		if wDef := h.invRegistry.Weapon(inst.WeaponID); wDef != nil {
 			npcWeaponName = wDef.Name
+			npcWeaponDefID = wDef.ID
 		}
 	}
 
@@ -3111,6 +3211,7 @@ func (h *CombatHandler) startCombatLocked(sess *session.PlayerSession, inst *npc
 		Resistances: inst.Resistances,
 		Weaknesses:  inst.Weaknesses,
 		WeaponName:  npcWeaponName,
+		WeaponDefID: npcWeaponDefID,
 		AttackVerb:  inst.AttackVerb,
 		SpeedFt:     inst.SpeedFt,
 		FactionID:   inst.FactionID,
@@ -3233,6 +3334,11 @@ func (h *CombatHandler) startCombatLocked(sess *session.PlayerSession, inst *npc
 			cbt.Conditions[npcCbt.ID].SetSource("flat_footed", "combat_start")
 		}
 	}
+
+	// Populate per-combatant Effects sets (DEDUP-5). Must run AFTER conditions
+	// are fully populated (CopyTo + flat_footed application above) so condition
+	// bonuses are captured.
+	populateCombatantEffects(cbt)
 
 	// Register session getter so ResolveRound can look up passive feats.
 	cbt.SetSessionGetter(func(uid string) (*session.PlayerSession, bool) {
@@ -3850,6 +3956,7 @@ func (h *CombatHandler) autoQueueNPCsLocked(cbt *combat.Combat) {
 								cbt.Conditions[c.ID] = condition.NewActiveSet()
 							}
 							_ = cbt.Conditions[c.ID].Apply(c.ID, def, 1, -1)
+							combat.SyncConditionApply(c, c.ID, def, cbt.Conditions[c.ID].Stacks(condID))
 						}
 					}
 					if bestEquip.CoverDestructible && bestEquip.CoverHP > 0 && h.GetCoverHP(cbt.RoomID, bestEquip.ItemID) < 0 {

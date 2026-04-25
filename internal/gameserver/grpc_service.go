@@ -22,10 +22,12 @@ import (
 
 	"github.com/cory-johannsen/mud/internal/game/ai"
 	"github.com/cory-johannsen/mud/internal/game/character"
+	"github.com/cory-johannsen/mud/internal/config"
 	"github.com/cory-johannsen/mud/internal/game/combat"
 	"github.com/cory-johannsen/mud/internal/game/command"
 	"github.com/cory-johannsen/mud/internal/game/condition"
 	"github.com/cory-johannsen/mud/internal/game/crafting"
+	effectrender "github.com/cory-johannsen/mud/internal/game/effect/render"
 	"github.com/cory-johannsen/mud/internal/game/danger"
 	"github.com/cory-johannsen/mud/internal/game/dice"
 	"github.com/cory-johannsen/mud/internal/game/downtime"
@@ -357,6 +359,14 @@ type GameServiceServer struct {
 	// autoNavStepMs is the delay in milliseconds between auto-navigation steps sent to the web client.
 	// Defaults to 1000 when not set via SetAutoNavStepMs. (REQ-CNT-2)
 	autoNavStepMs int
+	// reactionPromptHub routes ReactionResponse ClientMessages back to the
+	// goroutine blocked inside buildReactionCallback. See reaction_prompt_hub.go.
+	reactionPromptHub *reactionPromptHub
+	// reactionPromptTimeout bounds the interactive reaction prompt wait
+	// independently from the CombatHandler's ResolveRound timeout. Treated as
+	// the deadline_unix_ms sent to clients when non-zero; default
+	// config.DefaultReactionPromptTimeout applies at Set time.
+	reactionPromptTimeout time.Duration
 }
 
 // applyArmorTrainingProficiency applies the armor_training feat choice as a real proficiency
@@ -528,6 +538,8 @@ func NewGameServiceServer(
 		craftEngine:                crafting.NewEngine(),
 		characterJobsRepo:          storage.CharacterJobsRepo,
 		seduceConditions:           make(map[string]*condition.ActiveSet),
+		reactionPromptHub:          newReactionPromptHub(),
+		reactionPromptTimeout:      config.DefaultReactionPromptTimeout,
 	}
 	if content.FactionRegistry != nil {
 		s.factionRegistry = content.FactionRegistry
@@ -837,6 +849,15 @@ func (s *GameServiceServer) SetMaxHotbars(n int) {
 func (s *GameServiceServer) SetAutoNavStepMs(ms int) {
 	if ms >= 100 {
 		s.autoNavStepMs = ms
+	}
+}
+
+// SetReactionPromptTimeout sets the interactive reaction prompt timeout
+// delivered to clients via the deadline_unix_ms field.
+// Values <= 0 are ignored; the existing default is retained.
+func (s *GameServiceServer) SetReactionPromptTimeout(d time.Duration) {
+	if d > 0 {
+		s.reactionPromptTimeout = d
 	}
 }
 
@@ -2568,6 +2589,14 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 		return s.handleTrainTech(uid, p.TrainTech.GetNpcName(), p.TrainTech.GetTechId())
 	case *gamev1.ClientMessage_ChooseFeat:
 		return s.handleChooseFeat(uid, int(p.ChooseFeat.GetGrantLevel()), p.ChooseFeat.GetFeatId())
+	case *gamev1.ClientMessage_ReactionResponse:
+		// Route the reaction response to the goroutine blocked inside
+		// buildReactionCallback. No server event is produced here; the
+		// blocked goroutine emits follow-up MessageEvents on wake.
+		if s.reactionPromptHub != nil {
+			s.reactionPromptHub.Deliver(p.ReactionResponse)
+		}
+		return nil, nil
 	case *gamev1.ClientMessage_ListJobs:
 		return s.handleListJobs(uid, p.ListJobs)
 	case *gamev1.ClientMessage_SetJob:
@@ -6706,6 +6735,24 @@ func (s *GameServiceServer) handleChar(uid string) (*gamev1.ServerEvent, error) 
 		}()) {
 			view.ActiveSetBonuses = append(view.ActiveSetBonuses, bonus.Description)
 		}
+	}
+
+	// Duplicate-effects plan Task 10: populate EffectsSummary so telnet and web
+	// clients render identical "Active Effects" blocks. We feed the player's
+	// condition-derived EffectSet into effect/render.EffectsBlock. casterNames
+	// is nil out-of-combat — render falls back to source-prefix labels
+	// ("item", "feat", "tech", "self").
+	//
+	// Semantic limitation: sess.Conditions.Effects() covers only
+	// condition-sourced effects in the EffectSet. Passive feat/tech and item
+	// bonuses materialized on Combatant.Effects (built per Task 6) are NOT
+	// reflected here when the player is out-of-combat. Task 11 (character-sheet
+	// Effects block on telnet) is the broader reconciliation point if this
+	// gap becomes a problem.
+	if sess.Conditions != nil {
+		view.EffectsSummary = effectrender.EffectsBlock(sess.Conditions.Effects(), nil, 80)
+	} else {
+		view.EffectsSummary = effectrender.EffectsBlock(nil, nil, 80)
 	}
 
 	return &gamev1.ServerEvent{

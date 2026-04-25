@@ -9,6 +9,8 @@ import (
 	"strings"
 
 	"gopkg.in/yaml.v3"
+
+	"github.com/cory-johannsen/mud/internal/game/effect"
 )
 
 // ConditionDef is the static definition of a condition, loaded from YAML.
@@ -69,6 +71,55 @@ type ConditionDef struct {
 	MaxSeverity       int  `yaml:"max_severity,omitempty"`
 	Stage             int  `yaml:"stage,omitempty"`
 	MaxStage          int  `yaml:"max_stage,omitempty"`
+	// Bonuses is the authoritative typed-bonus list. When non-empty, flat bonus fields
+	// (AttackBonus, AttackPenalty, ACBonus, ACPenalty, etc.) MUST NOT also be set (DEDUP-11).
+	// When absent, flat fields are synthesised as untyped bonuses at load time via SynthesiseBonuses.
+	Bonuses []effect.Bonus `yaml:"bonuses,omitempty"`
+}
+
+// SynthesiseBonuses populates Bonuses from flat fields if Bonuses is empty.
+// Precondition: called after YAML unmarshal.
+// Postcondition: Bonuses is non-nil after a successful call; each synthesised entry has Type == BonusTypeUntyped.
+// Returns an error if both Bonuses and flat fields are set (DEDUP-11).
+func (d *ConditionDef) SynthesiseBonuses() error {
+	hasBonusesField := len(d.Bonuses) > 0
+	hasFlatFields := d.AttackBonus != 0 || d.AttackPenalty != 0 ||
+		d.ACBonus != 0 || d.ACPenalty != 0 ||
+		d.DamageBonus != 0 || d.StealthBonus != 0 ||
+		d.FlairBonus != 0 || d.SkillPenalty != 0 ||
+		len(d.SkillPenalties) > 0
+	if hasBonusesField && hasFlatFields {
+		return fmt.Errorf("condition %q: cannot mix 'bonuses:' and flat bonus fields", d.ID)
+	}
+	if hasBonusesField {
+		for i := range d.Bonuses {
+			d.Bonuses[i].Normalise()
+		}
+		return nil
+	}
+	// Synthesise untyped bonuses from flat fields.
+	var out []effect.Bonus
+	add := func(stat effect.Stat, value int) {
+		if value != 0 {
+			out = append(out, effect.Bonus{Stat: stat, Value: value, Type: effect.BonusTypeUntyped})
+		}
+	}
+	add(effect.StatAttack, d.AttackBonus)
+	add(effect.StatAttack, -d.AttackPenalty)
+	add(effect.StatAC, d.ACBonus)
+	add(effect.StatAC, -d.ACPenalty)
+	add(effect.StatDamage, d.DamageBonus)
+	add(effect.Stat("skill:stealth"), d.StealthBonus)
+	add(effect.StatFlair, d.FlairBonus)
+	add(effect.StatSkill, -d.SkillPenalty)
+	for skillID, penalty := range d.SkillPenalties {
+		add(effect.Stat("skill:"+skillID), -penalty)
+	}
+	if out == nil {
+		out = make([]effect.Bonus, 0)
+	}
+	d.Bonuses = out
+	return nil
 }
 
 // Registry holds all known ConditionDefs keyed by ID.
@@ -139,6 +190,9 @@ func LoadDirectory(dir string) (*Registry, error) {
 		dec.KnownFields(true)
 		if err := dec.Decode(&def); err != nil {
 			return nil, fmt.Errorf("parsing %q: %w", path, err)
+		}
+		if err := def.SynthesiseBonuses(); err != nil {
+			return nil, fmt.Errorf("synthesising bonuses for %q: %w", path, err)
 		}
 		reg.Register(&def)
 	}

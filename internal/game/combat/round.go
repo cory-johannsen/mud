@@ -1,15 +1,32 @@
 package combat
 
 import (
+	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	lua "github.com/yuin/gopher-lua"
 
 	"github.com/cory-johannsen/mud/internal/game/condition"
 	"github.com/cory-johannsen/mud/internal/game/dice"
+	"github.com/cory-johannsen/mud/internal/game/effect"
 	"github.com/cory-johannsen/mud/internal/game/inventory"
 	"github.com/cory-johannsen/mud/internal/game/reaction"
+)
+
+// Reaction-related RoundEvent labels (GH #244 Task 9). These strings appear as
+// the Narrative-prefix tag for events emitted by fireTrigger so downstream
+// systems can distinguish Ready / feat-reaction events from regular combat.
+const (
+	// EventTypeReactionFired labels a RoundEvent emitted when a Ready entry or a
+	// feat reaction fires. When ReadyEntry is non-nil the gameserver layer is
+	// expected to resolve the prepared action after ResolveRound returns.
+	EventTypeReactionFired = "reaction_fired"
+	// EventTypeReadyFizzled labels a RoundEvent emitted when a Ready entry matched
+	// its trigger but revalidation failed (e.g., the queued target is now dead).
+	// The ReactionBudget has been refunded; no prepared action runs.
+	EventTypeReadyFizzled = "ready_fizzled"
 )
 
 // CheckReactiveStrikes returns attack events from all NPCs that are adjacent
@@ -227,6 +244,11 @@ type RoundEvent struct {
 	// -1 means unset (no AoE targeting).
 	TargetX int32
 	TargetY int32
+	// ReadyEntry is non-nil on EventTypeReactionFired events that fire a prepared
+	// Ready action (GH #244 REACTION-8). The gameserver layer resolves the
+	// prepared action after ResolveRound returns; inline execution is deferred
+	// to keep this package's responsibilities focused on dispatch.
+	ReadyEntry *reaction.ReadyEntry
 }
 
 // findCombatantByName returns the first Combatant in cbt whose Name matches name, or nil.
@@ -465,6 +487,145 @@ func AidOutcome(total int) string {
 	}
 }
 
+// DefaultReactionTimeout is the fallback prompt timeout used by ResolveRound
+// when a caller passes a non-positive reactionTimeout. Matches
+// config.DefaultReactionPromptTimeout (kept as a local literal to avoid a cyclic
+// import of the config package from this low-level engine package).
+const DefaultReactionTimeout = 3 * time.Second
+
+// fireTrigger is the sole reaction dispatch helper for every trigger point in
+// the resolver (GH #244 Task 9). Priority order (REACTION-8):
+//  1. Ready entries win over feat reactions.
+//  2. Only one reaction spends per combatant per round (enforced via
+//     Combatant.ReactionBudget.TrySpend/Refund).
+//
+// cbt / uid identify the player who may react; trigger + rctx describe the
+// trigger; sourceUID is used to match the Ready entry's optional TriggerTgt.
+// reactionFn is the player-interactive callback (may be nil for no feat path).
+// reactionTimeout bounds the interactive prompt (<= 0 maps to DefaultReactionTimeout).
+// reactRegistry is an optional pre-filter source for feat-reaction candidates;
+// when nil the callback is responsible for its own candidate lookup (legacy
+// behavior compatible with sess.ReactionFn that filters internally).
+//
+// Returns any RoundEvents emitted. The caller MUST append them to its own
+// events slice.
+//
+// Precondition: cbt must not be nil.
+// Postcondition: Returns nil when no reaction fires. When a Ready entry matched
+// but revalidation failed, returns a single EventTypeReadyFizzled narrative
+// event and refunds the budget. When a Ready entry fires, returns an
+// EventTypeReactionFired event carrying the ReadyEntry pointer. When a feat
+// reaction fires, returns an EventTypeReactionFired narrative event.
+func fireTrigger(
+	cbt *Combat,
+	uid string,
+	trigger reaction.ReactionTriggerType,
+	rctx reaction.ReactionContext,
+	sourceUID string,
+	reactionFn reaction.ReactionCallback,
+	reactionTimeout time.Duration,
+	reactRegistry *reaction.ReactionRegistry,
+) []RoundEvent {
+	combatant := findCombatantByID(cbt, uid)
+	if combatant == nil || combatant.ReactionBudget == nil {
+		return nil
+	}
+	if reactionTimeout <= 0 {
+		reactionTimeout = DefaultReactionTimeout
+	}
+
+	// 1) Ready-first (REACTION-8).
+	if cbt.ReadyRegistry != nil {
+		if entry := cbt.ReadyRegistry.Consume(uid, trigger, sourceUID); entry != nil {
+			if !combatant.ReactionBudget.TrySpend() {
+				// Budget exhausted; the Ready entry was already consumed from the
+				// registry by Consume. Emit a fizzled event so callers know the
+				// Ready was skipped rather than silently dropped.
+				return []RoundEvent{{
+					ActorID:   uid,
+					ActorName: combatant.Name,
+					Narrative: fmt.Sprintf("[%s] %s's ready is skipped: reaction budget exhausted.", EventTypeReadyFizzled, combatant.Name),
+				}}
+			}
+			if !revalidateReadyEntry(cbt, entry) {
+				combatant.ReactionBudget.Refund()
+				return []RoundEvent{{
+					ActorID:   uid,
+					ActorName: combatant.Name,
+					Narrative: fmt.Sprintf("[%s] %s's ready fizzles: target no longer valid.", EventTypeReadyFizzled, combatant.Name),
+				}}
+			}
+			// Inline execution of the prepared action is deferred to the
+			// gameserver layer; emit an event carrying the ReadyEntry pointer.
+			return []RoundEvent{{
+				ActorID:    uid,
+				ActorName:  combatant.Name,
+				Narrative:  fmt.Sprintf("[%s] %s's ready triggers (%s).", EventTypeReactionFired, combatant.Name, entry.Action.Type),
+				ReadyEntry: entry,
+			}}
+		}
+	}
+
+	// 2) Feat reactions.
+	if reactionFn == nil {
+		return nil
+	}
+	var candidates []reaction.PlayerReaction
+	if reactRegistry != nil {
+		candidates = reactRegistry.Filter(uid, trigger, func(req string) bool {
+			// Per-requirement checks are the callback's responsibility; the
+			// pre-filter here accepts any registered entry.
+			return true
+		})
+		if len(candidates) == 0 {
+			return nil
+		}
+	}
+	if !combatant.ReactionBudget.TrySpend() {
+		return nil
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), reactionTimeout)
+	defer cancel()
+	spent, chosen, err := reactionFn(ctx, uid, trigger, rctx, candidates)
+	if err != nil && ctx.Err() != context.DeadlineExceeded {
+		combatant.ReactionBudget.Refund()
+		return nil
+	}
+	if !spent || chosen == nil {
+		combatant.ReactionBudget.Refund()
+		return nil
+	}
+	return []RoundEvent{{
+		ActorID:   uid,
+		ActorName: combatant.Name,
+		Narrative: fmt.Sprintf("[%s] %s reacts with %s.", EventTypeReactionFired, combatant.Name, chosen.FeatName),
+	}}
+}
+
+// revalidateReadyEntry returns true when a Ready entry's queued action is still
+// valid at trigger time. Used by fireTrigger to filter out entries whose target
+// has been killed or removed since enqueue. Currently validates "attack"-type
+// Ready actions: the named target must be alive in cbt. Other action types are
+// treated as always-valid (the downstream resolver handles their sanity checks).
+func revalidateReadyEntry(cbt *Combat, entry *reaction.ReadyEntry) bool {
+	if entry == nil {
+		return false
+	}
+	if entry.Action.Type == "attack" && entry.Action.Target != "" {
+		for _, c := range cbt.Combatants {
+			if c.Name == entry.Action.Target && !c.IsDead() {
+				return true
+			}
+		}
+		return false
+	}
+	return true
+}
+
+// reactionDispatchFn is the callback type the sub-resolvers use to fire
+// reactions. It returns any RoundEvents the caller must append.
+type reactionDispatchFn func(uid string, trigger reaction.ReactionTriggerType, rctx reaction.ReactionContext) []RoundEvent
+
 // ResolveRound processes all queued actions for cbt in Combatants order (initiative-sorted).
 // For each living combatant, iterates their QueuedActions():
 //   - ActionAttack: one ResolveAttack call; damage applied to target combatant; targetUpdater called.
@@ -489,7 +650,10 @@ func AidOutcome(total int) string {
 // coverDegrader(roomID, equipID) is called when an attack misses the target but would have
 // hit without the cover penalty (i.e., the cover absorbed the shot). Returns true when the
 // cover is destroyed. May be nil (no-op; treated as always returning false).
-func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int), reactionFn reaction.ReactionCallback, coverDegraderArgs ...func(roomID, equipID string) bool) []RoundEvent {
+//
+// reactionTimeout bounds the reaction-prompt callback (REACTION-13). Non-positive
+// values fall back to DefaultReactionTimeout.
+func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int), reactionFn reaction.ReactionCallback, reactionTimeout time.Duration, coverDegraderArgs ...func(roomID, equipID string) bool) []RoundEvent {
 	if targetUpdater == nil {
 		targetUpdater = func(id string, hp int) {}
 	}
@@ -497,11 +661,11 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 	if len(coverDegraderArgs) > 0 && coverDegraderArgs[0] != nil {
 		coverDegrader = coverDegraderArgs[0]
 	}
-	fireReaction := func(uid string, trigger reaction.ReactionTriggerType, ctx reaction.ReactionContext) {
-		if reactionFn == nil {
-			return
-		}
-		_, _ = reactionFn(uid, trigger, ctx)
+	// fireReaction dispatches via fireTrigger so Ready entries win over feat
+	// reactions (REACTION-8). Any events emitted by fireTrigger are appended
+	// to the outer events slice by the caller via the returned slice.
+	fireReaction := func(uid string, trigger reaction.ReactionTriggerType, rctx reaction.ReactionContext) []RoundEvent {
+		return fireTrigger(cbt, uid, trigger, rctx, rctx.SourceUID, reactionFn, reactionTimeout, nil)
 	}
 
 	var events []RoundEvent
@@ -601,10 +765,10 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 						for _, c := range cbt.Combatants {
 							if c.Kind == KindPlayer && !c.IsDead() {
 								if CombatRange(*actor, *c) <= 5 {
-									fireReaction(c.ID, reaction.TriggerOnEnemyMoveAdjacent, reaction.ReactionContext{
+									events = append(events, fireReaction(c.ID, reaction.TriggerOnEnemyMoveAdjacent, reaction.ReactionContext{
 										TriggerUID: c.ID,
 										SourceUID:  actor.ID,
-									})
+									})...)
 								}
 							}
 						}
@@ -631,6 +795,7 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 				if actor.Kind == KindNPC && cbt.Conditions[actor.ID] != nil &&
 					cbt.Conditions[actor.ID].Source("flat_footed") == "combat_start" {
 					cbt.Conditions[actor.ID].Remove(actor.ID, "flat_footed")
+					SyncConditionRemove(actor, "flat_footed")
 				}
 
 			case ActionAttack:
@@ -695,6 +860,7 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 						if actor.Kind == KindNPC && cbt.Conditions[actor.ID] != nil &&
 							cbt.Conditions[actor.ID].Source("flat_footed") == "combat_start" {
 							cbt.Conditions[actor.ID].Remove(actor.ID, "flat_footed")
+							SyncConditionRemove(actor, "flat_footed")
 						}
 						continue
 					}
@@ -710,13 +876,14 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 						if actor.Kind == KindNPC && cbt.Conditions[actor.ID] != nil &&
 							cbt.Conditions[actor.ID].Source("flat_footed") == "combat_start" {
 							cbt.Conditions[actor.ID].Remove(actor.ID, "flat_footed")
+							SyncConditionRemove(actor, "flat_footed")
 						}
 						continue
 					}
 				}
 
-				atkBonus := condition.AttackBonus(cbt.Conditions[actor.ID])
-				acBonus := condition.ACBonus(cbt.Conditions[target.ID])
+				atkBonus := effect.Resolve(actor.Effects, effect.StatAttack).Total
+				acBonus := effect.Resolve(target.Effects, effect.StatAC).Total
 
 				// Flanking check: gather all living combatants on the attacker's side.
 				// Flanking only applies to melee attacks (attacker must be adjacent).
@@ -783,7 +950,7 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 				}
 				dmg := r.EffectiveDamage()
 				dmg += weaponModifierDamageBonus(actor) // REQ-EM-23
-				dmg += condition.DamageBonus(cbt.Conditions[actor.ID])
+				dmg += effect.Resolve(actor.Effects, effect.StatDamage).Total
 				// Extra weapon dice from conditions (e.g. brutal_surge_active / Overpower).
 				// Only applied on a hit or crit; crits double the extra dice as well.
 				if extraDice := condition.ExtraWeaponDice(cbt.Conditions[actor.ID]); extraDice > 0 && (r.Outcome == CritSuccess || r.Outcome == Success) {
@@ -807,11 +974,11 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 				dmg, rwAnnotations := applyResistanceWeakness(target, r.DamageType, dmg)
 				// REQ-RXN19: TriggerOnDamageTaken fires before damage is applied so reduce_damage can modify it.
 				if target.Kind == KindPlayer && dmg > 0 {
-					fireReaction(target.ID, reaction.TriggerOnDamageTaken, reaction.ReactionContext{
+					events = append(events, fireReaction(target.ID, reaction.TriggerOnDamageTaken, reaction.ReactionContext{
 						TriggerUID:    target.ID,
 						SourceUID:     actor.ID,
 						DamagePending: &dmg,
-					})
+					})...)
 				}
 				if dmg > 0 {
 					target.ApplyDamage(dmg)
@@ -823,11 +990,11 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 					if target.Kind == KindPlayer {
 						for _, c := range cbt.Combatants {
 							if c.Kind == KindPlayer && c.ID != target.ID && !c.IsDead() {
-								fireReaction(c.ID, reaction.TriggerOnAllyDamaged, reaction.ReactionContext{
+								events = append(events, fireReaction(c.ID, reaction.TriggerOnAllyDamaged, reaction.ReactionContext{
 									TriggerUID:    c.ID,
 									SourceUID:     actor.ID,
 									DamagePending: nil,
-								})
+								})...)
 							}
 						}
 					}
@@ -868,6 +1035,7 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 				if actor.Kind == KindNPC && cbt.Conditions[actor.ID] != nil &&
 					cbt.Conditions[actor.ID].Source("flat_footed") == "combat_start" {
 					cbt.Conditions[actor.ID].Remove(actor.ID, "flat_footed")
+					SyncConditionRemove(actor, "flat_footed")
 				}
 
 			case ActionStrike:
@@ -905,8 +1073,8 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 					// Flat check passed — both strikes proceed normally against now-revealed target.
 				}
 				// First strike
-				atkBonus1 := condition.AttackBonus(cbt.Conditions[actor.ID])
-				acBonus1 := condition.ACBonus(cbt.Conditions[target.ID])
+				atkBonus1 := effect.Resolve(actor.Effects, effect.StatAttack).Total
+				acBonus1 := effect.Resolve(target.Effects, effect.StatAC).Total
 				r1 := ResolveAttack(actor, target, src)
 				r1.AttackTotal += atkBonus1
 				r1.AttackTotal += acBonus1
@@ -946,17 +1114,17 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 				}
 				dmg1 := r1.EffectiveDamage()
 				dmg1 += weaponModifierDamageBonus(actor) // REQ-EM-23
-				dmg1 += condition.DamageBonus(cbt.Conditions[actor.ID])
+				dmg1 += effect.Resolve(actor.Effects, effect.StatDamage).Total
 				dmg1 += applyPassiveFeats(cbt, actor, target, dmg1, src)
 				dmg1 = hookDamageRoll(cbt, actor, target, dmg1)
 				dmg1, rwAnnotations1 := applyResistanceWeakness(target, r1.DamageType, dmg1)
 				// REQ-RXN19: TriggerOnDamageTaken fires before damage is applied so reduce_damage can modify it.
 				if target.Kind == KindPlayer && dmg1 > 0 {
-					fireReaction(target.ID, reaction.TriggerOnDamageTaken, reaction.ReactionContext{
+					events = append(events, fireReaction(target.ID, reaction.TriggerOnDamageTaken, reaction.ReactionContext{
 						TriggerUID:    target.ID,
 						SourceUID:     actor.ID,
 						DamagePending: &dmg1,
-					})
+					})...)
 				}
 				if dmg1 > 0 {
 					target.ApplyDamage(dmg1)
@@ -968,11 +1136,11 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 					if target.Kind == KindPlayer {
 						for _, c := range cbt.Combatants {
 							if c.Kind == KindPlayer && c.ID != target.ID && !c.IsDead() {
-								fireReaction(c.ID, reaction.TriggerOnAllyDamaged, reaction.ReactionContext{
+								events = append(events, fireReaction(c.ID, reaction.TriggerOnAllyDamaged, reaction.ReactionContext{
 									TriggerUID:    c.ID,
 									SourceUID:     actor.ID,
 									DamagePending: nil,
-								})
+								})...)
 							}
 						}
 					}
@@ -1003,6 +1171,7 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 				if actor.Kind == KindNPC && cbt.Conditions[actor.ID] != nil &&
 					cbt.Conditions[actor.ID].Source("flat_footed") == "combat_start" {
 					cbt.Conditions[actor.ID].Remove(actor.ID, "flat_footed")
+					SyncConditionRemove(actor, "flat_footed")
 				}
 
 				// Second strike with MAP penalty
@@ -1015,8 +1184,8 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 					})
 					continue
 				}
-				atkBonus2 := condition.AttackBonus(cbt.Conditions[actor.ID])
-				acBonus2 := condition.ACBonus(cbt.Conditions[target.ID])
+				atkBonus2 := effect.Resolve(actor.Effects, effect.StatAttack).Total
+				acBonus2 := effect.Resolve(target.Effects, effect.StatAC).Total
 				r2 := ResolveAttack(actor, target, src)
 				r2.AttackTotal += atkBonus2
 				r2.AttackTotal += acBonus2
@@ -1064,17 +1233,17 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 				}
 				dmg2 := r2.EffectiveDamage()
 				dmg2 += weaponModifierDamageBonus(actor) // REQ-EM-23
-				dmg2 += condition.DamageBonus(cbt.Conditions[actor.ID])
+				dmg2 += effect.Resolve(actor.Effects, effect.StatDamage).Total
 				dmg2 += applyPassiveFeats(cbt, actor, target, dmg2, src)
 				dmg2 = hookDamageRoll(cbt, actor, target, dmg2)
 				dmg2, rwAnnotations2 := applyResistanceWeakness(target, r2.DamageType, dmg2)
 				// REQ-RXN19: TriggerOnDamageTaken fires before damage is applied so reduce_damage can modify it.
 				if target.Kind == KindPlayer && dmg2 > 0 {
-					fireReaction(target.ID, reaction.TriggerOnDamageTaken, reaction.ReactionContext{
+					events = append(events, fireReaction(target.ID, reaction.TriggerOnDamageTaken, reaction.ReactionContext{
 						TriggerUID:    target.ID,
 						SourceUID:     actor.ID,
 						DamagePending: &dmg2,
-					})
+					})...)
 				}
 				if dmg2 > 0 {
 					target.ApplyDamage(dmg2)
@@ -1086,11 +1255,11 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 					if target.Kind == KindPlayer {
 						for _, c := range cbt.Combatants {
 							if c.Kind == KindPlayer && c.ID != target.ID && !c.IsDead() {
-								fireReaction(c.ID, reaction.TriggerOnAllyDamaged, reaction.ReactionContext{
+								events = append(events, fireReaction(c.ID, reaction.TriggerOnAllyDamaged, reaction.ReactionContext{
 									TriggerUID:    c.ID,
 									SourceUID:     actor.ID,
 									DamagePending: nil,
-								})
+								})...)
 							}
 						}
 					}
@@ -1202,7 +1371,7 @@ func resolveReload(cbt *Combat, actor *Combatant, qa QueuedAction) RoundEvent {
 
 // resolveFireBurst handles ActionFireBurst: two ranged attacks against the same target.
 // coverDegrader is called when a shot misses the target but would have hit without cover; may be nil.
-func resolveFireBurst(cbt *Combat, actor *Combatant, qa QueuedAction, src Source, coverDegrader func(roomID, equipID string) bool, fireReaction func(uid string, trigger reaction.ReactionTriggerType, ctx reaction.ReactionContext)) []RoundEvent {
+func resolveFireBurst(cbt *Combat, actor *Combatant, qa QueuedAction, src Source, coverDegrader func(roomID, equipID string) bool, fireReaction reactionDispatchFn) []RoundEvent {
 	target := findCombatantByNameOrID(cbt, qa.Target)
 	if target == nil || target.IsDead() {
 		return []RoundEvent{{ActionType: ActionFireBurst, ActorID: actor.ID, ActorName: actor.Name,
@@ -1221,7 +1390,7 @@ func resolveFireBurst(cbt *Combat, actor *Combatant, qa QueuedAction, src Source
 			result = ResolveAttack(actor, target, src)
 		}
 		result.AttackTotal = hookAttackRoll(cbt, actor, target, result.AttackTotal)
-		acBonus := condition.ACBonus(cbt.Conditions[target.ID])
+		acBonus := effect.Resolve(target.Effects, effect.StatAC).Total
 		result.AttackTotal += acBonus
 		// GH #232: each burst shot counts toward cross-action MAP.
 		result.AttackTotal += mapPenaltyFor(actor.AttacksMadeThisRound)
@@ -1258,11 +1427,11 @@ func resolveFireBurst(cbt *Combat, actor *Combatant, qa QueuedAction, src Source
 		dmg = hookDamageRoll(cbt, actor, target, dmg)
 		// REQ-RXN19: TriggerOnDamageTaken fires before damage is applied so reduce_damage can modify it.
 		if target.Kind == KindPlayer && dmg > 0 {
-			fireReaction(target.ID, reaction.TriggerOnDamageTaken, reaction.ReactionContext{
+			events = append(events, fireReaction(target.ID, reaction.TriggerOnDamageTaken, reaction.ReactionContext{
 				TriggerUID:    target.ID,
 				SourceUID:     actor.ID,
 				DamagePending: &dmg,
-			})
+			})...)
 		}
 		if dmg > 0 {
 			target.ApplyDamage(dmg)
@@ -1273,11 +1442,11 @@ func resolveFireBurst(cbt *Combat, actor *Combatant, qa QueuedAction, src Source
 			if target.Kind == KindPlayer {
 				for _, c := range cbt.Combatants {
 					if c.Kind == KindPlayer && c.ID != target.ID && !c.IsDead() {
-						fireReaction(c.ID, reaction.TriggerOnAllyDamaged, reaction.ReactionContext{
+						events = append(events, fireReaction(c.ID, reaction.TriggerOnAllyDamaged, reaction.ReactionContext{
 							TriggerUID:    c.ID,
 							SourceUID:     actor.ID,
 							DamagePending: nil,
-						})
+						})...)
 					}
 				}
 			}
@@ -1304,7 +1473,7 @@ func resolveFireBurst(cbt *Combat, actor *Combatant, qa QueuedAction, src Source
 
 // resolveFireAutomatic handles ActionFireAutomatic: one attack against each living enemy (up to 3).
 // coverDegrader is called when a shot misses a target but would have hit without cover; may be nil.
-func resolveFireAutomatic(cbt *Combat, actor *Combatant, qa QueuedAction, src Source, coverDegrader func(roomID, equipID string) bool, fireReaction func(uid string, trigger reaction.ReactionTriggerType, ctx reaction.ReactionContext)) []RoundEvent {
+func resolveFireAutomatic(cbt *Combat, actor *Combatant, qa QueuedAction, src Source, coverDegrader func(roomID, equipID string) bool, fireReaction reactionDispatchFn) []RoundEvent {
 	enemies := livingEnemiesOf(cbt, actor)
 	if len(enemies) == 0 {
 		return []RoundEvent{{ActionType: ActionFireAutomatic, ActorID: actor.ID, ActorName: actor.Name,
@@ -1327,7 +1496,7 @@ func resolveFireAutomatic(cbt *Combat, actor *Combatant, qa QueuedAction, src So
 			result = ResolveAttack(actor, target, src)
 		}
 		result.AttackTotal = hookAttackRoll(cbt, actor, target, result.AttackTotal)
-		acBonus := condition.ACBonus(cbt.Conditions[target.ID])
+		acBonus := effect.Resolve(target.Effects, effect.StatAC).Total
 		result.AttackTotal += acBonus
 		// GH #232: each automatic-fire shot counts toward cross-action MAP.
 		result.AttackTotal += mapPenaltyFor(actor.AttacksMadeThisRound)
@@ -1364,11 +1533,11 @@ func resolveFireAutomatic(cbt *Combat, actor *Combatant, qa QueuedAction, src So
 		dmg = hookDamageRoll(cbt, actor, target, dmg)
 		// REQ-RXN19: TriggerOnDamageTaken fires before damage is applied so reduce_damage can modify it.
 		if target.Kind == KindPlayer && dmg > 0 {
-			fireReaction(target.ID, reaction.TriggerOnDamageTaken, reaction.ReactionContext{
+			events = append(events, fireReaction(target.ID, reaction.TriggerOnDamageTaken, reaction.ReactionContext{
 				TriggerUID:    target.ID,
 				SourceUID:     actor.ID,
 				DamagePending: &dmg,
-			})
+			})...)
 		}
 		if dmg > 0 {
 			target.ApplyDamage(dmg)
@@ -1379,11 +1548,11 @@ func resolveFireAutomatic(cbt *Combat, actor *Combatant, qa QueuedAction, src So
 			if target.Kind == KindPlayer {
 				for _, c := range cbt.Combatants {
 					if c.Kind == KindPlayer && c.ID != target.ID && !c.IsDead() {
-						fireReaction(c.ID, reaction.TriggerOnAllyDamaged, reaction.ReactionContext{
+						events = append(events, fireReaction(c.ID, reaction.TriggerOnAllyDamaged, reaction.ReactionContext{
 							TriggerUID:    c.ID,
 							SourceUID:     actor.ID,
 							DamagePending: nil,
-						})
+						})...)
 					}
 				}
 			}
@@ -1426,7 +1595,7 @@ func explosiveTargetsOf(cbt *Combat, actor *Combatant, grenade *inventory.Explos
 }
 
 // resolveThrow handles ActionThrow: explosive area effect against all living enemies.
-func resolveThrow(cbt *Combat, actor *Combatant, qa QueuedAction, src Source, fireReaction func(uid string, trigger reaction.ReactionTriggerType, ctx reaction.ReactionContext)) []RoundEvent {
+func resolveThrow(cbt *Combat, actor *Combatant, qa QueuedAction, src Source, fireReaction reactionDispatchFn) []RoundEvent {
 	if cbt.invRegistry == nil {
 		return []RoundEvent{{ActionType: ActionThrow, ActorID: actor.ID, ActorName: actor.Name,
 			Narrative: fmt.Sprintf("%s fumbles the throw.", actor.Name)}}
@@ -1450,15 +1619,15 @@ func resolveThrow(cbt *Combat, actor *Combatant, qa QueuedAction, src Source, fi
 		if target.Kind == KindPlayer {
 			switch r.SaveResult {
 			case Failure:
-				fireReaction(target.ID, reaction.TriggerOnSaveFail, reaction.ReactionContext{
+				events = append(events, fireReaction(target.ID, reaction.TriggerOnSaveFail, reaction.ReactionContext{
 					TriggerUID: target.ID,
 					SourceUID:  actor.ID,
-				})
+				})...)
 			case CritFailure:
-				fireReaction(target.ID, reaction.TriggerOnSaveCritFail, reaction.ReactionContext{
+				events = append(events, fireReaction(target.ID, reaction.TriggerOnSaveCritFail, reaction.ReactionContext{
 					TriggerUID: target.ID,
 					SourceUID:  actor.ID,
-				})
+				})...)
 			}
 		}
 		if r.BaseDamage > 0 {
