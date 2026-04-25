@@ -1236,9 +1236,13 @@ func (h *CombatHandler) JoinPendingNPCCombat(inst *npc.Instance, pendingRoomID s
 		npcFeatStats = ComputeNPCAttackStats(inst, nil, h.featRegistry, roomNPCs)
 	}
 	npcWeaponName := ""
+	npcWeaponDefID := ""
+	npcWeaponBonus := 0
 	if inst.WeaponID != "" && h.invRegistry != nil {
 		if wDef := h.invRegistry.Weapon(inst.WeaponID); wDef != nil {
 			npcWeaponName = wDef.Name
+			npcWeaponDefID = wDef.ID
+			npcWeaponBonus = wDef.Bonus
 		}
 	}
 	npcStrMod := combat.AbilityMod(inst.Awareness) + npcFeatStats.DamageBonus + npcFeatStats.AttackBonus
@@ -1256,6 +1260,8 @@ func (h *CombatHandler) JoinPendingNPCCombat(inst *npc.Instance, pendingRoomID s
 		Resistances: inst.Resistances,
 		Weaknesses:  inst.Weaknesses,
 		WeaponName:  npcWeaponName,
+		WeaponDefID: npcWeaponDefID,
+		WeaponBonus: npcWeaponBonus,
 		AttackVerb:  inst.AttackVerb,
 		SpeedFt:     inst.SpeedFt,
 		FactionID:   inst.FactionID,
@@ -1279,21 +1285,15 @@ func (h *CombatHandler) JoinPendingNPCCombat(inst *npc.Instance, pendingRoomID s
 		return
 	}
 	// Populate the newly added NPC's Effects set so it participates in the
-	// typed-bonus pipeline alongside the existing combatants (DEDUP-5).
+	// typed-bonus pipeline alongside the existing combatants (DEDUP-5). Uses
+	// the combatant's WeaponDefID so the dedup key matches the one produced by
+	// populateCombatantEffects at combat start.
 	if joinedCbt := cbt.GetCombatant(inst.ID); joinedCbt != nil {
-		npcSrc := ""
-		npcBonus := 0
-		if inst.WeaponID != "" && h.invRegistry != nil {
-			if wDef := h.invRegistry.Weapon(inst.WeaponID); wDef != nil {
-				npcSrc = wDef.ID
-				npcBonus = wDef.Bonus
-			}
-		}
 		joinedCbt.Effects = combat.BuildCombatantEffects(combat.BuildEffectsOpts{
 			BearerUID:        joinedCbt.ID,
 			Conditions:       cbt.Conditions[joinedCbt.ID],
-			WeaponSourceID:   npcSrc,
-			WeaponBonusValue: npcBonus,
+			WeaponSourceID:   joinedCbt.WeaponDefID,
+			WeaponBonusValue: joinedCbt.WeaponBonus,
 		})
 	}
 }
@@ -1305,9 +1305,10 @@ func (h *CombatHandler) JoinPendingNPCCombat(inst *npc.Instance, pendingRoomID s
 // condition bonuses are captured in the resulting EffectSet.
 //
 // Weapon item-typed bonuses are sourced from cbt.Combatant.WeaponBonus for
-// every combatant that has a non-zero bonus. The source identifier is
-// derived from the combatant's WeaponName (falling back to "weapon" when
-// empty) so per-combatant dedup keys remain unique across different weapons.
+// every combatant that has a non-zero bonus. The source identifier is the
+// combatant's WeaponDefID (the inventory registry key), which is the same
+// stable key used by JoinPendingNPCCombat so the dedup namespace is unified
+// across all combatant-creation paths.
 //
 // Passive feat/technology bonuses are NOT wired here yet; that is deferred
 // to a later task. Only conditions and weapon bonuses contribute at this
@@ -1323,17 +1324,10 @@ func populateCombatantEffects(cbt *combat.Combat) {
 		if c == nil {
 			continue
 		}
-		weaponSrc := ""
-		if c.WeaponBonus != 0 {
-			weaponSrc = c.WeaponName
-			if weaponSrc == "" {
-				weaponSrc = "weapon"
-			}
-		}
 		c.Effects = combat.BuildCombatantEffects(combat.BuildEffectsOpts{
 			BearerUID:        c.ID,
 			Conditions:       cbt.Conditions[c.ID],
-			WeaponSourceID:   weaponSrc,
+			WeaponSourceID:   c.WeaponDefID,
 			WeaponBonusValue: c.WeaponBonus,
 		})
 	}
@@ -1921,6 +1915,7 @@ func (h *CombatHandler) startPursuitCombatLocked(playerSess *session.PlayerSessi
 	// Wire weapon name, damage type, and item bonus from equipped main-hand weapon.
 	if playerCbt.Loadout != nil && playerCbt.Loadout.MainHand != nil && playerCbt.Loadout.MainHand.Def != nil {
 		playerCbt.WeaponName = playerCbt.Loadout.MainHand.Def.Name
+		playerCbt.WeaponDefID = playerCbt.Loadout.MainHand.Def.ID
 		playerCbt.WeaponDamageType = playerCbt.Loadout.MainHand.Def.DamageType
 		playerCbt.WeaponBonus = playerCbt.Loadout.MainHand.Def.Bonus
 	} else {
@@ -1947,9 +1942,11 @@ func (h *CombatHandler) startPursuitCombatLocked(playerSess *session.PlayerSessi
 	combatants := []*combat.Combatant{playerCbt}
 	for i, inst := range insts {
 		npcWeaponName := ""
+		npcWeaponDefID := ""
 		if inst.WeaponID != "" && h.invRegistry != nil {
 			if wDef := h.invRegistry.Weapon(inst.WeaponID); wDef != nil {
 				npcWeaponName = wDef.Name
+				npcWeaponDefID = wDef.ID
 			}
 		}
 		npcCbt := &combat.Combatant{
@@ -1966,6 +1963,7 @@ func (h *CombatHandler) startPursuitCombatLocked(playerSess *session.PlayerSessi
 			Resistances: inst.Resistances,
 			Weaknesses:  inst.Weaknesses,
 			WeaponName:  npcWeaponName,
+			WeaponDefID: npcWeaponDefID,
 			AttackVerb:  inst.AttackVerb,
 			SpeedFt:     inst.SpeedFt,
 			FactionID:   inst.FactionID,
@@ -3136,6 +3134,7 @@ func buildPlayerCombatant(sess *session.PlayerSession, h *CombatHandler) *combat
 	// Wire weapon name, damage type, and item bonus from equipped main-hand weapon.
 	if playerCbt.Loadout != nil && playerCbt.Loadout.MainHand != nil && playerCbt.Loadout.MainHand.Def != nil {
 		playerCbt.WeaponName = playerCbt.Loadout.MainHand.Def.Name
+		playerCbt.WeaponDefID = playerCbt.Loadout.MainHand.Def.ID
 		playerCbt.WeaponDamageType = playerCbt.Loadout.MainHand.Def.DamageType
 		playerCbt.WeaponBonus = playerCbt.Loadout.MainHand.Def.Bonus
 	} else {
@@ -3170,9 +3169,11 @@ func (h *CombatHandler) startCombatLocked(sess *session.PlayerSession, inst *npc
 
 	// Resolve NPC weapon name for combat narrative.
 	npcWeaponName := ""
+	npcWeaponDefID := ""
 	if inst.WeaponID != "" && h.invRegistry != nil {
 		if wDef := h.invRegistry.Weapon(inst.WeaponID); wDef != nil {
 			npcWeaponName = wDef.Name
+			npcWeaponDefID = wDef.ID
 		}
 	}
 
@@ -3204,6 +3205,7 @@ func (h *CombatHandler) startCombatLocked(sess *session.PlayerSession, inst *npc
 		Resistances: inst.Resistances,
 		Weaknesses:  inst.Weaknesses,
 		WeaponName:  npcWeaponName,
+		WeaponDefID: npcWeaponDefID,
 		AttackVerb:  inst.AttackVerb,
 		SpeedFt:     inst.SpeedFt,
 		FactionID:   inst.FactionID,

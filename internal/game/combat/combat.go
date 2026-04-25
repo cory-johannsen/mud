@@ -126,6 +126,11 @@ type Combatant struct {
 	SpeedFt int
 	// WeaponName is the display name of the NPC's equipped weapon; empty = unarmed.
 	WeaponName string
+	// WeaponDefID is the registry ID of the equipped main-hand weapon (the inventory key).
+	// Empty means unarmed or unknown. Used as the stable dedup key for the weapon's
+	// item-typed SourceID ("item:<WeaponDefID>") in the effect.EffectSet pipeline so
+	// the same key is produced at combat start and when a combatant joins a pending combat.
+	WeaponDefID string
 	// Hidden is true when this combatant is concealed. Attackers must pass a DC 11 flat check.
 	// For player combatants: set by hide/divert actions; cleared when the player attacks or is targeted.
 	// For NPC combatants: unused (always false).

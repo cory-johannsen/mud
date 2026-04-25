@@ -9,6 +9,30 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/technology"
 )
 
+// Source-ID prefixes for the effect.Effect.SourceID dedup key namespace.
+// Each prefix partitions sources by origin so that entries from different
+// subsystems cannot collide, and so that per-subsystem bulk removal (via
+// RemoveBySource) is unambiguous.
+const (
+	sourcePrefixCondition = "condition:"
+	sourcePrefixFeat      = "feat:"
+	sourcePrefixTech      = "tech:"
+	sourcePrefixItem      = "item:"
+)
+
+// scaleBonuses returns a copy of bonuses with each Value multiplied by stacks.
+//
+// Precondition: stacks >= 1.
+// Postcondition: returns a newly-allocated slice of length len(bonuses).
+func scaleBonuses(bonuses []effect.Bonus, stacks int) []effect.Bonus {
+	out := make([]effect.Bonus, len(bonuses))
+	for i, b := range bonuses {
+		b.Value = b.Value * stacks
+		out[i] = b
+	}
+	return out
+}
+
 // BuildEffectsOpts carries all sources needed to build a Combatant's EffectSet.
 //
 // Precondition: BearerUID must be non-empty.
@@ -50,17 +74,11 @@ func BuildCombatantEffects(opts BuildEffectsOpts) *effect.EffectSet {
 			if ac == nil || ac.Def == nil || len(ac.Def.Bonuses) == 0 {
 				continue
 			}
-			bonuses := make([]effect.Bonus, len(ac.Def.Bonuses))
-			for i, b := range ac.Def.Bonuses {
-				scaled := b
-				scaled.Value = b.Value * ac.Stacks
-				bonuses[i] = scaled
-			}
 			es.Apply(effect.Effect{
 				EffectID:  ac.Def.ID,
-				SourceID:  "condition:" + ac.Def.ID,
+				SourceID:  sourcePrefixCondition + ac.Def.ID,
 				CasterUID: opts.BearerUID,
-				Bonuses:   bonuses,
+				Bonuses:   scaleBonuses(ac.Def.Bonuses, ac.Stacks),
 				DurKind:   effect.DurationUntilRemove,
 			})
 		}
@@ -73,7 +91,7 @@ func BuildCombatantEffects(opts BuildEffectsOpts) *effect.EffectSet {
 		}
 		es.Apply(effect.Effect{
 			EffectID:  f.ID,
-			SourceID:  "feat:" + f.ID,
+			SourceID:  sourcePrefixFeat + f.ID,
 			CasterUID: opts.BearerUID,
 			Bonuses:   f.PassiveBonuses,
 			DurKind:   effect.DurationUntilRemove,
@@ -87,7 +105,7 @@ func BuildCombatantEffects(opts BuildEffectsOpts) *effect.EffectSet {
 		}
 		es.Apply(effect.Effect{
 			EffectID:  td.ID,
-			SourceID:  "tech:" + td.ID,
+			SourceID:  sourcePrefixTech + td.ID,
 			CasterUID: opts.BearerUID,
 			Bonuses:   td.PassiveBonuses,
 			DurKind:   effect.DurationUntilRemove,
@@ -98,7 +116,7 @@ func BuildCombatantEffects(opts BuildEffectsOpts) *effect.EffectSet {
 	if opts.WeaponSourceID != "" && opts.WeaponBonusValue != 0 {
 		es.Apply(effect.Effect{
 			EffectID:  opts.WeaponSourceID,
-			SourceID:  "item:" + opts.WeaponSourceID,
+			SourceID:  sourcePrefixItem + opts.WeaponSourceID,
 			CasterUID: "",
 			Bonuses: []effect.Bonus{
 				{Stat: effect.StatAttack, Value: opts.WeaponBonusValue, Type: effect.BonusTypeItem},
@@ -116,7 +134,7 @@ func BuildCombatantEffects(opts BuildEffectsOpts) *effect.EffectSet {
 //
 // Precondition: cbt must be non-nil; def must be non-nil; stacks >= 1.
 // Postcondition: cbt.Effects is initialised if nil and contains an effect
-// keyed by SourceID="condition:"+def.ID for the given caster UID.
+// keyed by SourceID=sourcePrefixCondition+def.ID for the given caster UID.
 func SyncConditionApply(cbt *Combatant, uid string, def *condition.ConditionDef, stacks int) {
 	if cbt == nil || def == nil {
 		return
@@ -127,17 +145,11 @@ func SyncConditionApply(cbt *Combatant, uid string, def *condition.ConditionDef,
 	if len(def.Bonuses) == 0 {
 		return
 	}
-	bonuses := make([]effect.Bonus, len(def.Bonuses))
-	for i, b := range def.Bonuses {
-		scaled := b
-		scaled.Value = b.Value * stacks
-		bonuses[i] = scaled
-	}
 	cbt.Effects.Apply(effect.Effect{
 		EffectID:  def.ID,
-		SourceID:  "condition:" + def.ID,
+		SourceID:  sourcePrefixCondition + def.ID,
 		CasterUID: uid,
-		Bonuses:   bonuses,
+		Bonuses:   scaleBonuses(def.Bonuses, stacks),
 		DurKind:   effect.DurationUntilRemove,
 	})
 }
@@ -145,25 +157,25 @@ func SyncConditionApply(cbt *Combatant, uid string, def *condition.ConditionDef,
 // SyncConditionRemove updates cbt.Effects when a condition is removed mid-combat.
 //
 // Precondition: conditionID must be non-empty.
-// Postcondition: no effect with SourceID="condition:"+conditionID remains in cbt.Effects.
+// Postcondition: no effect with SourceID=sourcePrefixCondition+conditionID remains in cbt.Effects.
 func SyncConditionRemove(cbt *Combatant, conditionID string) {
 	if cbt == nil || cbt.Effects == nil {
 		return
 	}
-	cbt.Effects.RemoveBySource("condition:" + conditionID)
+	cbt.Effects.RemoveBySource(sourcePrefixCondition + conditionID)
 }
 
 // SyncConditionsTick updates cbt.Effects after an ActiveSet.Tick expires the
 // given condition IDs. Each expired condition's associated effect is removed.
 //
 // Precondition: cbt may be nil (no-op); expiredIDs may be nil or empty.
-// Postcondition: no effect with SourceID="condition:"+id remains for any id in expiredIDs.
+// Postcondition: no effect with SourceID=sourcePrefixCondition+id remains for any id in expiredIDs.
 func SyncConditionsTick(cbt *Combatant, expiredIDs []string) {
 	if cbt == nil || cbt.Effects == nil {
 		return
 	}
 	for _, id := range expiredIDs {
-		cbt.Effects.RemoveBySource("condition:" + id)
+		cbt.Effects.RemoveBySource(sourcePrefixCondition + id)
 	}
 }
 
