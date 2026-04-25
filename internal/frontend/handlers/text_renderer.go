@@ -1100,6 +1100,7 @@ func RenderCharacterSheet(csv *gamev1.CharacterSheetView, width int) string {
 	}
 
 	// ── Assemble ──────────────────────────────────────────────────────────────
+	var out string
 	if !twoCol {
 		// Single column: left then right, each line terminated with \r\n.
 		var b strings.Builder
@@ -1111,9 +1112,36 @@ func RenderCharacterSheet(csv *gamev1.CharacterSheetView, width int) string {
 			b.WriteString(r.text)
 			b.WriteString("\r\n")
 		}
-		return b.String()
+		out = b.String()
+	} else {
+		out = assembleColumns(left, right, leftW)
 	}
-	return assembleColumns(left, right, leftW)
+
+	// ── Effects block ─────────────────────────────────────────────────────────
+	// Appended after the main sheet body when the server-supplied summary is
+	// non-empty. The divider width scales with the terminal width so narrow
+	// clients don't wrap; a sensible floor prevents a degenerate empty divider.
+	if summary := csv.GetEffectsSummary(); summary != "" {
+		dashW := width - len("── Effects ")
+		if dashW < 8 {
+			dashW = 8
+		}
+		if dashW > 64 {
+			dashW = 64
+		}
+		var b strings.Builder
+		b.WriteString(out)
+		b.WriteString("\r\n")
+		b.WriteString("── Effects ")
+		b.WriteString(strings.Repeat("─", dashW))
+		b.WriteString("\r\n")
+		b.WriteString(summary)
+		if !strings.HasSuffix(summary, "\n") {
+			b.WriteString("\r\n")
+		}
+		out = b.String()
+	}
+	return out
 }
 
 // sortedInt32Set returns the keys of a map[int32]bool in ascending order.
