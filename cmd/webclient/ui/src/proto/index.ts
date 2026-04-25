@@ -817,12 +817,54 @@ export interface ConditionEvent {
   applied?: boolean
 }
 
+// AoeTemplate.Shape — numeric proto enum mirroring api/proto/game/v1/game.proto.
+export const AoeTemplateShape = {
+  SHAPE_UNSPECIFIED: 0,
+  SHAPE_BURST: 1,
+  SHAPE_CONE: 2,
+  SHAPE_LINE: 3,
+} as const
+export type AoeTemplateShape = (typeof AoeTemplateShape)[keyof typeof AoeTemplateShape]
+
+// AoeTemplate.Direction — numeric proto enum mirroring api/proto/game/v1/game.proto.
+export const AoeTemplateDirection = {
+  DIR_UNSPECIFIED: 0,
+  DIR_N: 1,
+  DIR_NE: 2,
+  DIR_E: 3,
+  DIR_SE: 4,
+  DIR_S: 5,
+  DIR_SW: 6,
+  DIR_W: 7,
+  DIR_NW: 8,
+} as const
+export type AoeTemplateDirection = (typeof AoeTemplateDirection)[keyof typeof AoeTemplateDirection]
+
+export interface AoeTemplateCell {
+  x?: number
+  y?: number
+}
+
+// AoeTemplate — placed area-of-effect template payload.
+// Inbound: client sets shape, anchor_x/y, and (for cone/line) facing.
+// Outbound: server populates cells.
+export interface AoeTemplate {
+  shape?: AoeTemplateShape
+  anchorX?: number
+  anchor_x?: number
+  anchorY?: number
+  anchor_y?: number
+  facing?: AoeTemplateDirection
+  cells?: AoeTemplateCell[]
+}
+
 export interface UseRequest {
   itemRef?: string
   targetName?: string
   target_name?: string
   target_x?: number // 0-based grid column; -1 (or omit) means unset / no AoE
   target_y?: number // 0-based grid row; -1 (or omit) means unset / no AoE
+  template?: AoeTemplate // required for cone/line content (AOE-13)
 }
 
 export type ServerEvent =

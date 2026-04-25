@@ -2479,6 +2479,10 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 	case *gamev1.ClientMessage_InteractRequest:
 		return s.handleInteract(uid, p.InteractRequest.InstanceId)
 	case *gamev1.ClientMessage_UseRequest:
+		// AOE-13: validate AoeTemplate contract before dispatching.
+		if err := s.validateUseRequestAoeTemplate(p.UseRequest); err != nil {
+			return nil, err
+		}
 		return s.handleUse(uid, p.UseRequest.FeatId, p.UseRequest.GetTarget(), p.UseRequest.GetTargetX(), p.UseRequest.GetTargetY())
 	case *gamev1.ClientMessage_Action:
 		return s.handleAction(uid, p.Action)
