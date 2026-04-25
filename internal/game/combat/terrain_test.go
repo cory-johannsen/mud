@@ -74,3 +74,24 @@ func TestProperty_EntryCost_NormalCostsOne(t *testing.T) {
 		}
 	})
 }
+
+func TestProperty_SpeedBudget_EqualsSpeedSquares(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		c := &combat.Combatant{
+			SpeedFt: rapid.IntRange(0, 100).Draw(rt, "speedFt"),
+		}
+		if c.SpeedBudget() != c.SpeedSquares() {
+			rt.Fatalf("SpeedBudget %d != SpeedSquares %d for SpeedFt %d",
+				c.SpeedBudget(), c.SpeedSquares(), c.SpeedFt)
+		}
+	})
+}
+
+func TestProperty_SpeedBudget_MinOne(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		c := &combat.Combatant{SpeedFt: 0}
+		if c.SpeedBudget() < 1 {
+			rt.Fatalf("SpeedBudget must be >= 1, got %d", c.SpeedBudget())
+		}
+	})
+}

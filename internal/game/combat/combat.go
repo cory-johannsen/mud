@@ -170,12 +170,11 @@ type Combatant struct {
 	Effects *effect.EffectSet
 }
 
-// SpeedSquares returns the number of grid squares this combatant may move per stride action.
-// SpeedFt == 0 is treated as the PF2e default of 25 ft = 5 squares.
-// Minimum 1 square.
+// SpeedBudget returns the number of speed budget points available per stride action.
+// Difficult cells cost 2 points; normal and hazardous cost 1. Default 25 ft = 5 points.
 //
 // Postcondition: returns >= 1.
-func (c *Combatant) SpeedSquares() int {
+func (c *Combatant) SpeedBudget() int {
 	ft := c.SpeedFt
 	if ft <= 0 {
 		ft = 25
@@ -185,6 +184,13 @@ func (c *Combatant) SpeedSquares() int {
 		sq = 1
 	}
 	return sq
+}
+
+// SpeedSquares is deprecated: use SpeedBudget instead.
+//
+// Deprecated: SpeedSquares delegates to SpeedBudget. Retained for external callers.
+func (c *Combatant) SpeedSquares() int {
+	return c.SpeedBudget()
 }
 
 // IsPlayer reports whether this combatant is a player character.
