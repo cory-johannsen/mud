@@ -209,6 +209,24 @@ func (c *Combatant) IsDead() bool {
 	return c.CurrentHP <= 0
 }
 
+// WeaknessFor returns the combatant's weakness value for the given damage type,
+// or 0 when no weakness is configured.
+func (c *Combatant) WeaknessFor(dt string) int {
+	if c.Weaknesses == nil {
+		return 0
+	}
+	return c.Weaknesses[dt]
+}
+
+// ResistanceFor returns the combatant's resistance value for the given damage type,
+// or 0 when no resistance is configured.
+func (c *Combatant) ResistanceFor(dt string) int {
+	if c.Resistances == nil {
+		return 0
+	}
+	return c.Resistances[dt]
+}
+
 // ApplyDamage reduces CurrentHP by amount, flooring at zero.
 // Precondition: amount must be >= 0.
 // Postcondition: CurrentHP >= 0.

@@ -220,6 +220,24 @@ func (c *Combat) StartRoundWithSrc(actionsPerRound int, src Source) []RoundCondi
 		}
 	}
 
+	// TERRAIN-10: fire round_start hazards for combatants occupying hazardous cells.
+	for _, cbt := range c.Combatants {
+		if cbt.IsDead() {
+			continue
+		}
+		// TERRAIN-12: skip round_start in round 1 for combatants that entered at combat start.
+		if c.skipHazardRoundStart != nil && c.skipHazardRoundStart[cbt.ID] {
+			delete(c.skipHazardRoundStart, cbt.ID)
+			continue
+		}
+		if tc := c.TerrainAt(cbt.GridX, cbt.GridY); tc.Type == TerrainHazardous && tc.Hazard != nil {
+			_ = applyCellHazard(c, cbt, tc, "round_start", src)
+			// Note: applyCellHazard events are not propagated from StartRoundWithSrc in v1
+			// (StartRoundWithSrc returns []RoundConditionEvent, not []RoundEvent).
+			// The damage is applied; a follow-up ticket may surface the narrative.
+		}
+	}
+
 	// Reset per-round modifiers so condition effects do not carry across rounds.
 	for _, cbt := range c.Combatants {
 		if cbt.IsDead() {

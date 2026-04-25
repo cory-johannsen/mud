@@ -227,6 +227,9 @@ type RoundEvent struct {
 	// prepared action after ResolveRound returns; inline execution is deferred
 	// to keep this package's responsibilities focused on dispatch.
 	ReadyEntry *reaction.ReadyEntry
+	// Damage is the post-pipeline damage applied by this event (TERRAIN-9..14).
+	// Used by hazard-damage events; zero for non-damaging events.
+	Damage int
 	// DamageBreakdown is the inline-formatted breakdown line (MULT-14).
 	// Empty string when the breakdown was trivial (only StageBase).
 	DamageBreakdown string
@@ -1887,15 +1890,52 @@ func buildNarrative(actor, target *Combatant, result AttackResult, dmg int) stri
 	}
 }
 
-// applyCellHazard fires the per-cell hazard for the given trigger ("on_enter",
-// "on_start_round") and returns the resulting RoundEvents. Task 4 ships this
-// as a stub so the budget-based stride loop compiles; Task 5 replaces it with
-// the real hazard-resolution implementation (TERRAIN-9..14).
-func applyCellHazard(cbt *Combat, actor *Combatant, tc TerrainCell, trigger string, src Source) []RoundEvent {
+// applyCellHazard fires a hazard on victim if its trigger matches.
+// Routes damage through ResolveDamage (#246 pipeline).
+// Returns zero or more RoundEvents (damage narrative, condition narrative, etc.).
+//
+// Precondition: tc.Type == TerrainHazardous; tc.Hazard must not be nil.
+func applyCellHazard(cbt *Combat, victim *Combatant, tc TerrainCell, trigger string, src Source) []RoundEvent {
 	_ = cbt
-	_ = actor
-	_ = tc
-	_ = trigger
-	_ = src
-	return nil
+	if tc.Hazard == nil || tc.Hazard.Def == nil {
+		return nil
+	}
+	def := tc.Hazard.Def
+	if def.Trigger != trigger {
+		return nil
+	}
+	var events []RoundEvent
+	if def.DamageExpr != "" {
+		rollResult, err := dice.RollExpr(def.DamageExpr, src)
+		if err == nil && rollResult.Total() > 0 {
+			in := DamageInput{
+				Additives: []DamageAdditive{
+					{Label: def.ID, Value: rollResult.Total(), Source: "hazard:" + def.ID},
+				},
+				DamageType: def.DamageType,
+				Weakness:   victim.WeaknessFor(def.DamageType),
+				Resistance: victim.ResistanceFor(def.DamageType),
+			}
+			result := ResolveDamage(in)
+			victim.ApplyDamage(result.Final)
+			narrative := fmt.Sprintf("%s is hit by %s! (%s → %d damage)",
+				victim.Name, def.ID, def.DamageExpr, result.Final)
+			if def.Message != "" {
+				narrative = fmt.Sprintf("%s — %s (%s → %d damage)", def.Message, victim.Name, def.DamageExpr, result.Final)
+			}
+			events = append(events, RoundEvent{
+				ActionType: ActionHazardDamage,
+				ActorID:    victim.ID,
+				ActorName:  victim.Name,
+				Damage:     result.Final,
+				Narrative:  narrative,
+			})
+		}
+	}
+	return events
+}
+
+// ApplyCellHazardForTest exposes applyCellHazard for package-external tests.
+func ApplyCellHazardForTest(cbt *Combat, victim *Combatant, tc TerrainCell, trigger string, src Source) []RoundEvent {
+	return applyCellHazard(cbt, victim, tc, trigger, src)
 }
