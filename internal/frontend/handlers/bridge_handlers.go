@@ -69,6 +69,7 @@ var bridgeHandlerMap = map[string]bridgeHandlerFunc{
 	command.HandlerPass:               bridgePass,
 	command.HandlerStrike:             bridgeStrike,
 	command.HandlerStatus:             bridgeStatus,
+	command.HandlerEffects:            bridgeEffects,
 	command.HandlerEquip:              bridgeEquip,
 	command.HandlerReload:             bridgeReload,
 	command.HandlerFireBurst:          bridgeFireBurst,
@@ -429,6 +430,28 @@ func bridgeStatus(bctx *bridgeContext) (bridgeResult, error) {
 		RequestId: bctx.reqID,
 		Payload:   &gamev1.ClientMessage_Status{Status: &gamev1.StatusRequest{}},
 	}}, nil
+}
+
+// bridgeEffects renders the bearer's EffectSet using RenderEffectsBlock.
+//
+// Precondition: bctx must be non-nil. The client-side EffectSet is currently
+// not wired through the gRPC protocol (gated on Task 10 of the duplicate
+// effects plan), so this handler emits an informational placeholder until
+// the EffectsSummary / effects protobuf field lands. The rendering code
+// (RenderEffectsBlock) is implemented and exercised by unit tests.
+// Postcondition: returns done=true; no server message is dispatched.
+func bridgeEffects(bctx *bridgeContext) (bridgeResult, error) {
+	msg := "Effects view not yet wired (requires protocol support — see Task 10)."
+	if bctx.conn != nil {
+		if bctx.conn.IsSplitScreen() {
+			_ = bctx.conn.WriteConsole(msg)
+			_ = bctx.conn.WritePromptSplit(bctx.promptFn())
+		} else {
+			_ = bctx.conn.WriteLine(msg)
+			_ = bctx.conn.WritePrompt(bctx.promptFn())
+		}
+	}
+	return bridgeResult{done: true}, nil
 }
 
 // bridgeEquip builds an EquipRequest with an optional slot argument.
