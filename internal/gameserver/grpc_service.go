@@ -1027,6 +1027,7 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 							DurationMs:       int32(s.combatH.roundDuration.Milliseconds()),
 							TurnOrder:        turnOrder,
 							InitialPositions: positions,
+							Terrain:          terrainToProto(cbt.Terrain),
 						},
 					},
 				})

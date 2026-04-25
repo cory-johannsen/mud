@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { useGame } from '../GameContext'
-import type { MapTile, CoverObjectPosition } from '../../proto'
+import type { MapTile, CoverObjectPosition, TerrainCell } from '../../proto'
 import { RoomTooltip } from '../RoomTooltip'
 import { ZoneMapSvg, REFERENCE_W } from '../ZoneMapSvg'
 import { WorldMapSvg } from '../WorldMapSvg'
@@ -84,6 +84,7 @@ function renderBattleGrid(
   strideCells: number,
   movementRemaining: number,
   coverObjects: CoverObjectPosition[],
+  terrain: TerrainCell[],
 ): JSX.Element {
   const rawCell = Math.floor(320 / Math.max(gridWidth, gridHeight))
   const CELL_PX = Math.max(12, Math.min(32, rawCell))
@@ -100,6 +101,15 @@ function renderBattleGrid(
     coverMap[`${cx},${cy}`] = co
   }
 
+  // Terrain lookup keyed by "x,y". Cells absent from this map are TerrainNormal
+  // and receive no terrain class. The proto only sends non-normal cells.
+  const terrainMap: Record<string, TerrainCell> = {}
+  for (const tc of terrain) {
+    const tx = tc.x ?? 0
+    const ty = tc.y ?? 0
+    terrainMap[`${tx},${ty}`] = tc
+  }
+
   const cells: JSX.Element[] = []
   for (let y = 0; y < gridHeight; y++) {
     for (let x = 0; x < gridWidth; x++) {
@@ -108,12 +118,22 @@ function renderBattleGrid(
       const isEnemy = name !== '' && !isPlayer
       const cover = coverMap[`${x},${y}`]
       const isCover = cover !== undefined && name === ''
+      const terrainCell = terrainMap[`${x},${y}`]
+      const terrainType = terrainCell?.type ?? ''
+      // Convert "greater_difficult" → "greater-difficult" for CSS class naming.
+      const terrainClass = terrainType
+        ? `terrain-${terrainType.replace(/_/g, '-')}`
+        : ''
 
       const moveCost = (name === '' && !isCover && playerX >= 0)
         ? cellMoveCost(playerX, playerY, x, y, strideCells, movementRemaining)
         : 0
 
-      let bg: string
+      // bg may be undefined when the cell is "default" and has terrain — in that
+      // case the CSS class supplies the background tint. Inline styles win over
+      // class styles, so highlighted cells (occupant/cover/move-cost) keep their
+      // explicit colour and the terrain class is visually masked under them.
+      let bg: string | undefined
       if (isPlayer) {
         bg = '#1a3a6b'
       } else if (isEnemy) {
@@ -125,6 +145,8 @@ function renderBattleGrid(
         bg = '#0d3b0d'
       } else if (moveCost === 2) {
         bg = '#2e2600'
+      } else if (terrainClass !== '') {
+        bg = undefined // let CSS class paint the terrain tint
       } else {
         bg = '#1a1a2e'
       }
@@ -150,24 +172,29 @@ function renderBattleGrid(
         ? `${cover.name ?? cover.itemId ?? cover.item_id ?? 'Cover'} (${cover.coverTier ?? cover.cover_tier ?? 'lesser'})`
         : undefined
 
+      const cellStyle: React.CSSProperties = {
+        width: CELL_PX,
+        height: CELL_PX,
+        border,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: '0.75rem',
+        color: isPlayer ? '#7bb8ff' : isEnemy ? '#ff7b7b' : isCover ? '#c8a060' : '#555',
+        fontWeight: 'bold',
+        cursor,
+        flexShrink: 0,
+      }
+      if (bg !== undefined) {
+        cellStyle.background = bg
+      }
+
       cells.push(
         <div
           key={`${x},${y}`}
+          className={terrainClass || undefined}
           title={coverTitle}
-          style={{
-            width: CELL_PX,
-            height: CELL_PX,
-            background: bg,
-            border,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '0.75rem',
-            color: isPlayer ? '#7bb8ff' : isEnemy ? '#ff7b7b' : isCover ? '#c8a060' : '#555',
-            fontWeight: 'bold',
-            cursor,
-            flexShrink: 0,
-          }}
+          style={cellStyle}
           onMouseEnter={e => {
             onCellHover(x, y)
             if (name !== '') {
@@ -356,6 +383,7 @@ export function MapPanel() {
               strideCells,
               movementRemaining,
               state.combatRound?.coverObjects ?? state.combatRound?.cover_objects ?? [],
+              state.combatRound?.terrain ?? [],
             )}
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', justifyContent: 'center' }}>

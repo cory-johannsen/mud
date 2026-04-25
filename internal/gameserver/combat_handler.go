@@ -2102,6 +2102,7 @@ func (h *CombatHandler) startPursuitCombatLocked(playerSess *session.PlayerSessi
 			GridWidth:        int32(cbt.GridWidth),
 			GridHeight:       int32(cbt.GridHeight),
 			CoverObjects:     coverObjects,
+			Terrain:          terrainToProto(cbt.Terrain),
 		})
 	}
 
@@ -3083,6 +3084,7 @@ func (h *CombatHandler) resolveAndAdvanceLocked(roomID string, cbt *combat.Comba
 			InitialPositions: initialPositions,
 			GridWidth:        int32(cbt.GridWidth),
 			GridHeight:       int32(cbt.GridHeight),
+			Terrain:          terrainToProto(cbt.Terrain),
 		})
 	}
 
@@ -3467,6 +3469,7 @@ func (h *CombatHandler) startCombatLocked(sess *session.PlayerSession, inst *npc
 			GridWidth:        int32(cbt.GridWidth),
 			GridHeight:       int32(cbt.GridHeight),
 			CoverObjects:     coverObjects,
+			Terrain:          terrainToProto(cbt.Terrain),
 		})
 	}
 
@@ -4489,6 +4492,38 @@ func computeCoverObjects(room *world.Room) []combat.CoverObject {
 			GridX:       xPositions[i%len(xPositions)],
 			GridY:       yStart[i%len(yStart)],
 		})
+	}
+	return out
+}
+
+// terrainToProto converts a Combat's terrain map to []*gamev1.TerrainCell for
+// transmission to the client. Cells of TerrainNormal are omitted (the client
+// treats absent cells as normal). For TerrainHazardous cells, the hazard
+// definition ID is included so the client can render a tooltip.
+//
+// Precondition: terrain may be nil or empty.
+// Postcondition: returned slice contains only non-normal cells; nil if none.
+func terrainToProto(terrain map[combat.GridCell]*combat.TerrainCell) []*gamev1.TerrainCell {
+	if len(terrain) == 0 {
+		return nil
+	}
+	out := make([]*gamev1.TerrainCell, 0, len(terrain))
+	for _, tc := range terrain {
+		if tc == nil || tc.Type == combat.TerrainNormal {
+			continue
+		}
+		cell := &gamev1.TerrainCell{
+			X:    int32(tc.X),
+			Y:    int32(tc.Y),
+			Type: string(tc.Type),
+		}
+		if tc.Type == combat.TerrainHazardous && tc.Hazard != nil && tc.Hazard.Def != nil {
+			cell.HazardName = tc.Hazard.Def.ID
+		}
+		out = append(out, cell)
+	}
+	if len(out) == 0 {
+		return nil
 	}
 	return out
 }

@@ -651,6 +651,14 @@ export interface CoverObjectPosition {
   cover_tier?: string
 }
 
+export interface TerrainCell {
+  x?: number
+  y?: number
+  type?: string
+  hazardName?: string
+  hazard_name?: string
+}
+
 export interface RoundStartEvent {
   round?: number
   actionsPerTurn?: number
@@ -665,6 +673,7 @@ export interface RoundStartEvent {
   grid_height?: number
   coverObjects?: CoverObjectPosition[]
   cover_objects?: CoverObjectPosition[]
+  terrain?: TerrainCell[]
 }
 
 export interface RoundEndEvent {
