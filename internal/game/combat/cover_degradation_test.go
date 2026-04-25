@@ -21,27 +21,37 @@ func (s coverFixedSrc) Intn(_ int) int {
 	return v
 }
 
+// coverTierForPenalty maps an AC bonus magnitude (1, 2, or 4) to the canonical
+// cover tier string the new pipeline understands (lesser, standard, greater).
+func coverTierForPenalty(coverPenalty int) string {
+	switch coverPenalty {
+	case combat.CoverACBonusLesser:
+		return "lesser"
+	case combat.CoverACBonusStandard:
+		return "standard"
+	case combat.CoverACBonusGreater:
+		return "greater"
+	default:
+		return ""
+	}
+}
+
 // buildCoverCombat builds a minimal *Combat where:
 //   - Player "p1" has AC=10 (bare minimum; attack bonuses come from level+str)
-//   - NPC "n1" has AC=baseAC with a standard_cover condition providing ACPenalty=coverPenalty
-//   - n1 has CoverTier="standard_cover" and CoverEquipmentID="equip1"
+//   - NPC "n1" has AC=baseAC and CoverTier set to the canonical tier matching
+//     coverPenalty (1=lesser, 2=standard, 4=greater) plus CoverEquipmentID="equip1"
+//
+// Under the post-#247 pipeline, cover is sourced from Combatant.CoverTier;
+// DetermineCoverTier+BuildCoverEffect inject an ephemeral circumstance AC bonus
+// at attack-resolution time. The legacy ACPenalty-on-condition hack has been
+// removed because it inverted AC and AttackTotal.
 //
 // The attacker p1 queues an ActionAttack against n1.
 // The src will always produce attackRoll for d20 calls.
 func buildCoverCombat(t *rapid.T, baseAC, coverPenalty, attackRoll int) *combat.Combat {
 	t.Helper()
 	reg := condition.NewRegistry()
-	// Register a synthetic cover condition that penalises the attacker's roll.
-	// ACPenalty on the defender's condition set is subtracted from the attacker's roll
-	// via condition.ACBonus (returns -ACPenalty).
-	reg.Register(&condition.ConditionDef{
-		ID:           "test_cover",
-		Name:         "Test Cover",
-		DurationType: "permanent",
-		MaxStacks:    0,
-		ACPenalty:    coverPenalty,
-	})
-	// Also register standard conditions to keep the engine happy.
+	// Standard conditions registered to keep the engine happy.
 	reg.Register(&condition.ConditionDef{ID: "prone", Name: "Prone", DurationType: "permanent"})
 	reg.Register(&condition.ConditionDef{ID: "flat_footed", Name: "Flat-Footed", DurationType: "rounds"})
 	reg.Register(&condition.ConditionDef{ID: "dying", Name: "Dying", DurationType: "until_save", MaxStacks: 4})
@@ -56,17 +66,13 @@ func buildCoverCombat(t *rapid.T, baseAC, coverPenalty, attackRoll int) *combat.
 		{
 			ID: "n1", Kind: combat.KindNPC, Name: "Defender",
 			MaxHP: 30, CurrentHP: 30, AC: baseAC, Level: 0, StrMod: 0, DexMod: 0,
-			CoverTier:        "test_cover",
+			CoverTier:        coverTierForPenalty(coverPenalty),
 			CoverEquipmentID: "equip1",
 		},
 	}
 	cbt, err := eng.StartCombat("testroom", combatants, reg, nil, "")
 	if err != nil {
 		t.Fatalf("StartCombat: %v", err)
-	}
-	// Apply the cover condition to the defender so ACBonus returns -coverPenalty.
-	if err := cbt.ApplyCondition("n1", "test_cover", 1, -1); err != nil {
-		t.Fatalf("ApplyCondition: %v", err)
 	}
 	_ = cbt.StartRound(3)
 	if err := cbt.QueueAction("p1", combat.QueuedAction{Type: combat.ActionAttack, Target: "Defender"}); err != nil {
