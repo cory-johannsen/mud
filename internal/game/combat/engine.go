@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	"github.com/cory-johannsen/mud/internal/game/condition"
+	"github.com/cory-johannsen/mud/internal/game/effect"
 	"github.com/cory-johannsen/mud/internal/game/inventory"
 	"github.com/cory-johannsen/mud/internal/game/reaction"
 	"github.com/cory-johannsen/mud/internal/game/session"
@@ -546,6 +547,11 @@ func (e *Engine) StartCombat(roomID string, combatants []*Combatant, condRegistr
 			set.SetScripting(scriptMgr, zoneID)
 		}
 		cbt.Conditions[c.ID] = set
+		// COVER-4 prerequisite: ensure every combatant has a non-nil EffectSet so the
+		// cover pipeline (and any other effect.Apply caller) can always operate.
+		if c.Effects == nil {
+			c.Effects = effect.NewEffectSet()
+		}
 	}
 	// Populate Participants with player UIDs from the initial combatant list.
 	for _, c := range combatants {

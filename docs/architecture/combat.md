@@ -210,6 +210,58 @@ post-pipeline scalar — before `ApplyDamage`. They do not see the breakdown in 
 - Players with `PlayerSession.ShowDamageBreakdown` receive the verbose block as a separate
   message; everyone sees the inline breakdown appended to the attack narrative.
 
+## Cover (COVER Requirements)
+
+### Requirements
+
+- COVER-1: Cover tier is determined per attack-resolution event by reading the target combatant's `CoverTier` field (set when the target uses a cover-granting action). In the 1D linear combat model there is no Bresenham line walk; the tier is carried on the combatant.
+- COVER-2: The highest cover tier present on the target is returned (`greater > standard > lesser`).
+- COVER-3: Cover tier-to-bonus mapping: `lesser = +1 AC`; `standard = +2 AC, +2 Quickness`; `greater = +4 AC, +4 Quickness`.
+- COVER-4: Cover bonuses are applied as `circumstance`-typed bonuses to `target.Effects` before each attack resolution and removed immediately after.
+- COVER-5: Cover effects use `SourceID = "cover:<tier>"` and `CasterUID = ""`.
+- COVER-6: `DetermineCoverTier` returns `NoCover` when the target has no cover tier set.
+- COVER-8: Attack resolution derives effective AC as `target.AC + target.InitiativeBonus + effect.Resolve(target.Effects, StatAC).Total`.
+- COVER-9: Attack resolution derives effective attack total as `r.AttackTotal + effect.Resolve(actor.Effects, StatAttack).Total`.
+- COVER-10: The pre-existing inversion where the target's AC bonus was added to `r.AttackTotal` is removed; COVER-8/COVER-9 formulas apply at every call site.
+- COVER-11: Cover absorb-miss: if the attack would have hit without the cover AC bonus, `ActionCoverHit` fires and the cover object degrades.
+- COVER-13: When cover absorbs a miss, `ActionCoverHit` emits a dedicated `"<actor>'s attack hits <target>'s cover!"` event; per-attack narrative is unchanged.
+
+### Tier-to-Bonus Table
+
+| Tier     | AC Bonus | Quickness Bonus | SourceID         |
+|----------|----------|-----------------|------------------|
+| none     | 0        | 0               | —                |
+| lesser   | +1       | 0               | `cover:lesser`   |
+| standard | +2       | +2              | `cover:standard` |
+| greater  | +4       | +4              | `cover:greater`  |
+
+### AC Derivation (post-fix)
+
+```
+effectiveAC  = target.AC + target.InitiativeBonus + effect.Resolve(target.Effects, StatAC).Total
+effectiveAtk = r.AttackTotal + effect.Resolve(actor.Effects, StatAttack).Total
+```
+
+Both include condition effects (via `Combatant.Effects` after #245), cover effects (ephemerally applied), and feat/tech/equip effects.
+
+### Absorb-Miss Logic
+
+```
+if attack missed AND coverTier > NoCover:
+    coverAC, _ := CoverBonus(coverTier)
+    if r.AttackTotal >= effectiveAC - coverAC:
+        fire ActionCoverHit for target.CoverEquipmentID
+        degrade the cover object
+```
+
+### Implementation Files
+
+| File | Responsibility |
+|------|----------------|
+| `internal/game/combat/cover_bonus.go` | `CoverTier` enum, `CoverBonus`, `DetermineCoverTier`, `BuildCoverEffect`, `WithCoverEffect` |
+| `internal/game/combat/round.go` | 5 attack resolution sites; ephemeral apply/remove; absorb-miss check |
+| `internal/game/effect/bonus.go` | `StatQuickness` constant |
+
 ## Component Dependencies
 
 ```mermaid

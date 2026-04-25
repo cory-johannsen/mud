@@ -865,7 +865,14 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 					}
 				}
 
+				// COVER-4: apply ephemeral cover bonus before resolving AC.
+				coverTier := DetermineCoverTier(target)
+				if coverTier > NoCover && target.Effects != nil {
+					target.Effects.Apply(BuildCoverEffect(coverTier))
+				}
+
 				atkBonus := effect.Resolve(actor.Effects, effect.StatAttack).Total
+				// COVER-8: AC bonus moves to effectiveAC, no longer subtracted from AttackTotal.
 				acBonus := effect.Resolve(target.Effects, effect.StatAC).Total
 
 				// Flanking check: gather all living combatants on the attacker's side.
@@ -894,7 +901,6 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 					r = ResolveAttack(actor, target, src)
 				}
 				r.AttackTotal += atkBonus
-				r.AttackTotal += acBonus
 				r.AttackTotal += actor.InitiativeBonus
 				// GH #232: cross-action Multiple Attack Penalty.
 				r.AttackTotal += mapPenaltyFor(actor.AttacksMadeThisRound)
@@ -902,14 +908,14 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 				if flanked {
 					r.AttackTotal += 2
 				}
-				effectiveAC := target.AC + target.InitiativeBonus
+				effectiveAC := target.AC + target.InitiativeBonus + acBonus
 				r.AttackTotal = hookAttackRoll(cbt, actor, target, r.AttackTotal)
 				r.Outcome = OutcomeFor(r.AttackTotal, effectiveAC)
-				// Crossfire degradation: attack missed but would have hit without cover penalty.
+				// COVER-11/12: cover absorb-miss — target was hit only because of cover.
 				if (r.Outcome == Failure || r.Outcome == CritFailure) &&
-					target.CoverTier != "" && target.CoverEquipmentID != "" {
-					attackWithoutCoverPenalty := r.AttackTotal - acBonus // acBonus <= 0, so this raises the effective roll
-					if attackWithoutCoverPenalty >= effectiveAC {
+					coverTier > NoCover && target.CoverEquipmentID != "" {
+					coverACMag, _ := CoverBonus(coverTier)
+					if coverACMag > 0 && r.AttackTotal >= effectiveAC-coverACMag {
 						coverEquipID := target.CoverEquipmentID
 						destroyed := coverDegrader(cbt.RoomID, coverEquipID)
 						events = append(events, RoundEvent{
@@ -930,6 +936,10 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 							})
 						}
 					}
+				}
+				// COVER-13: remove ephemeral cover effect after resolution.
+				if coverTier > NoCover && target.Effects != nil {
+					target.Effects.Remove(CoverSourceID(coverTier), "")
 				}
 				// MULT-17: damage now flows through ResolveDamage. Roll any extra weapon dice up
 				// front; crit-doubling is handled by the pipeline's DamageMultiplier stage.
@@ -1078,24 +1088,29 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 					// Flat check passed — both strikes proceed normally against now-revealed target.
 				}
 				// First strike
+				// COVER-4: apply ephemeral cover bonus before resolving AC.
+				coverTier1 := DetermineCoverTier(target)
+				if coverTier1 > NoCover && target.Effects != nil {
+					target.Effects.Apply(BuildCoverEffect(coverTier1))
+				}
 				atkBonus1 := effect.Resolve(actor.Effects, effect.StatAttack).Total
+				// COVER-8: AC bonus moves to effectiveAC, no longer subtracted from AttackTotal.
 				acBonus1 := effect.Resolve(target.Effects, effect.StatAC).Total
 				r1 := ResolveAttack(actor, target, src)
 				r1.AttackTotal += atkBonus1
-				r1.AttackTotal += acBonus1
 				r1.AttackTotal += actor.InitiativeBonus
 				// GH #232: cross-action MAP. Within a Strike the first attack uses
 				// the counter value at entry; the second uses the incremented value.
 				r1.AttackTotal += mapPenaltyFor(actor.AttacksMadeThisRound)
 				actor.AttacksMadeThisRound++
-				effectiveAC1 := target.AC + target.InitiativeBonus
+				effectiveAC1 := target.AC + target.InitiativeBonus + acBonus1
 				r1.AttackTotal = hookAttackRoll(cbt, actor, target, r1.AttackTotal)
 				r1.Outcome = OutcomeFor(r1.AttackTotal, effectiveAC1)
-				// Crossfire degradation: first strike missed but would have hit without cover penalty.
+				// COVER-11/12: cover absorb-miss — first strike was a miss only because of cover.
 				if (r1.Outcome == Failure || r1.Outcome == CritFailure) &&
-					target.CoverTier != "" && target.CoverEquipmentID != "" {
-					attackWithoutCoverPenalty1 := r1.AttackTotal - acBonus1
-					if attackWithoutCoverPenalty1 >= effectiveAC1 {
+					coverTier1 > NoCover && target.CoverEquipmentID != "" {
+					coverACMag1, _ := CoverBonus(coverTier1)
+					if coverACMag1 > 0 && r1.AttackTotal >= effectiveAC1-coverACMag1 {
 						coverEquipID1 := target.CoverEquipmentID
 						destroyed1 := coverDegrader(cbt.RoomID, coverEquipID1)
 						events = append(events, RoundEvent{
@@ -1116,6 +1131,10 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 							})
 						}
 					}
+				}
+				// COVER-13: remove ephemeral cover effect after first-strike resolution.
+				if coverTier1 > NoCover && target.Effects != nil {
+					target.Effects.Remove(CoverSourceID(coverTier1), "")
 				}
 				// MULT-17: damage now flows through ResolveDamage.
 				passiveFeatGate1 := 0
@@ -1212,11 +1231,16 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 					})
 					continue
 				}
+				// COVER-4: apply ephemeral cover bonus before resolving AC for the second strike.
+				coverTier2 := DetermineCoverTier(target)
+				if coverTier2 > NoCover && target.Effects != nil {
+					target.Effects.Apply(BuildCoverEffect(coverTier2))
+				}
 				atkBonus2 := effect.Resolve(actor.Effects, effect.StatAttack).Total
+				// COVER-8: AC bonus moves to effectiveAC, no longer subtracted from AttackTotal.
 				acBonus2 := effect.Resolve(target.Effects, effect.StatAC).Total
 				r2 := ResolveAttack(actor, target, src)
 				r2.AttackTotal += atkBonus2
-				r2.AttackTotal += acBonus2
 				r2.AttackTotal += actor.InitiativeBonus
 				// GH #232: cross-action MAP. The counter now reflects the first
 				// strike, so this attack picks up -5 (or -10 if there were prior
@@ -1230,14 +1254,14 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 						r2.AttackTotal -= mapBonus2
 					}
 				}
-				effectiveAC2 := target.AC + target.InitiativeBonus
+				effectiveAC2 := target.AC + target.InitiativeBonus + acBonus2
 				r2.AttackTotal = hookAttackRoll(cbt, actor, target, r2.AttackTotal)
 				r2.Outcome = OutcomeFor(r2.AttackTotal, effectiveAC2)
-				// Crossfire degradation: second strike missed but would have hit without cover penalty.
+				// COVER-11/12: cover absorb-miss — second strike was a miss only because of cover.
 				if (r2.Outcome == Failure || r2.Outcome == CritFailure) &&
-					target.CoverTier != "" && target.CoverEquipmentID != "" {
-					attackWithoutCoverPenalty2 := r2.AttackTotal - acBonus2
-					if attackWithoutCoverPenalty2 >= effectiveAC2 {
+					coverTier2 > NoCover && target.CoverEquipmentID != "" {
+					coverACMag2, _ := CoverBonus(coverTier2)
+					if coverACMag2 > 0 && r2.AttackTotal >= effectiveAC2-coverACMag2 {
 						coverEquipID2 := target.CoverEquipmentID
 						destroyed2 := coverDegrader(cbt.RoomID, coverEquipID2)
 						events = append(events, RoundEvent{
@@ -1258,6 +1282,10 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 							})
 						}
 					}
+				}
+				// COVER-13: remove ephemeral cover effect after second-strike resolution.
+				if coverTier2 > NoCover && target.Effects != nil {
+					target.Effects.Remove(CoverSourceID(coverTier2), "")
 				}
 				// MULT-17: damage now flows through ResolveDamage.
 				passiveFeatGate2 := 0
@@ -1441,18 +1469,26 @@ func resolveFireBurst(cbt *Combat, actor *Combatant, qa QueuedAction, src Source
 			result = ResolveAttack(actor, target, src)
 		}
 		result.AttackTotal = hookAttackRoll(cbt, actor, target, result.AttackTotal)
+		// COVER-4: apply ephemeral cover bonus before resolving AC.
+		coverTierBurst := DetermineCoverTier(target)
+		if coverTierBurst > NoCover && target.Effects != nil {
+			target.Effects.Apply(BuildCoverEffect(coverTierBurst))
+		}
+		// COVER-9: include attacker's StatAttack effect bonus (was missing prior to #247).
+		atkBonus := effect.Resolve(actor.Effects, effect.StatAttack).Total
+		result.AttackTotal += atkBonus
+		// COVER-8: AC bonus moves to effectiveAC, no longer subtracted from AttackTotal.
 		acBonus := effect.Resolve(target.Effects, effect.StatAC).Total
-		result.AttackTotal += acBonus
 		// GH #232: each burst shot counts toward cross-action MAP.
 		result.AttackTotal += mapPenaltyFor(actor.AttacksMadeThisRound)
 		actor.AttacksMadeThisRound++
-		effectiveAC := target.AC + target.InitiativeBonus
+		effectiveAC := target.AC + target.InitiativeBonus + acBonus
 		result.Outcome = OutcomeFor(result.AttackTotal, effectiveAC)
-		// Crossfire degradation: burst shot missed but would have hit without cover penalty.
+		// COVER-11/12: cover absorb-miss — burst shot was a miss only because of cover.
 		if (result.Outcome == Failure || result.Outcome == CritFailure) &&
-			target.CoverTier != "" && target.CoverEquipmentID != "" {
-			attackWithoutCoverPenalty := result.AttackTotal - acBonus
-			if attackWithoutCoverPenalty >= effectiveAC {
+			coverTierBurst > NoCover && target.CoverEquipmentID != "" {
+			coverACMagBurst, _ := CoverBonus(coverTierBurst)
+			if coverACMagBurst > 0 && result.AttackTotal >= effectiveAC-coverACMagBurst {
 				coverEquipIDBurst := target.CoverEquipmentID
 				destroyed := coverDegrader(cbt.RoomID, coverEquipIDBurst)
 				events = append(events, RoundEvent{
@@ -1473,6 +1509,10 @@ func resolveFireBurst(cbt *Combat, actor *Combatant, qa QueuedAction, src Source
 					})
 				}
 			}
+		}
+		// COVER-13: remove ephemeral cover effect after resolution.
+		if coverTierBurst > NoCover && target.Effects != nil {
+			target.Effects.Remove(CoverSourceID(coverTierBurst), "")
 		}
 		// MULT-17: damage now flows through ResolveDamage.
 		di := BuildDamageInput(BuildDamageOpts{
@@ -1556,18 +1596,26 @@ func resolveFireAutomatic(cbt *Combat, actor *Combatant, qa QueuedAction, src So
 			result = ResolveAttack(actor, target, src)
 		}
 		result.AttackTotal = hookAttackRoll(cbt, actor, target, result.AttackTotal)
+		// COVER-4: apply ephemeral cover bonus before resolving AC.
+		coverTierAutomatic := DetermineCoverTier(target)
+		if coverTierAutomatic > NoCover && target.Effects != nil {
+			target.Effects.Apply(BuildCoverEffect(coverTierAutomatic))
+		}
+		// COVER-9: include attacker's StatAttack effect bonus (was missing prior to #247).
+		atkBonus := effect.Resolve(actor.Effects, effect.StatAttack).Total
+		result.AttackTotal += atkBonus
+		// COVER-8: AC bonus moves to effectiveAC, no longer subtracted from AttackTotal.
 		acBonus := effect.Resolve(target.Effects, effect.StatAC).Total
-		result.AttackTotal += acBonus
 		// GH #232: each automatic-fire shot counts toward cross-action MAP.
 		result.AttackTotal += mapPenaltyFor(actor.AttacksMadeThisRound)
 		actor.AttacksMadeThisRound++
-		effectiveAC := target.AC + target.InitiativeBonus
+		effectiveAC := target.AC + target.InitiativeBonus + acBonus
 		result.Outcome = OutcomeFor(result.AttackTotal, effectiveAC)
-		// Crossfire degradation: automatic shot missed but would have hit without cover penalty.
+		// COVER-11/12: cover absorb-miss — automatic shot was a miss only because of cover.
 		if (result.Outcome == Failure || result.Outcome == CritFailure) &&
-			target.CoverTier != "" && target.CoverEquipmentID != "" {
-			attackWithoutCoverPenalty := result.AttackTotal - acBonus
-			if attackWithoutCoverPenalty >= effectiveAC {
+			coverTierAutomatic > NoCover && target.CoverEquipmentID != "" {
+			coverACMagAutomatic, _ := CoverBonus(coverTierAutomatic)
+			if coverACMagAutomatic > 0 && result.AttackTotal >= effectiveAC-coverACMagAutomatic {
 				coverEquipIDAutomatic := target.CoverEquipmentID
 				destroyed := coverDegrader(cbt.RoomID, coverEquipIDAutomatic)
 				events = append(events, RoundEvent{
@@ -1588,6 +1636,10 @@ func resolveFireAutomatic(cbt *Combat, actor *Combatant, qa QueuedAction, src So
 					})
 				}
 			}
+		}
+		// COVER-13: remove ephemeral cover effect after resolution.
+		if coverTierAutomatic > NoCover && target.Effects != nil {
+			target.Effects.Remove(CoverSourceID(coverTierAutomatic), "")
 		}
 		// MULT-17: damage now flows through ResolveDamage.
 		di := BuildDamageInput(BuildDamageOpts{
