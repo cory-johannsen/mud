@@ -147,6 +147,9 @@ type PlayerSession struct {
 	Dead bool
 	// BankedAP is AP banked from a delay action; added to the next round's AP pool; session-only, not persisted.
 	BankedAP int
+	// ShowDamageBreakdown controls whether the player receives verbose per-stage
+	// damage breakdowns for attacks they deal or receive.
+	ShowDamageBreakdown bool
 	// PendingCombatJoin holds the RoomID of a combat the player has been invited to join.
 	// Empty string means no pending join offer. Protected by combatMu in the gameserver.
 	PendingCombatJoin string

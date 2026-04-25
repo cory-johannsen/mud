@@ -227,6 +227,11 @@ type RoundEvent struct {
 	// prepared action after ResolveRound returns; inline execution is deferred
 	// to keep this package's responsibilities focused on dispatch.
 	ReadyEntry *reaction.ReadyEntry
+	// DamageBreakdown is the inline-formatted breakdown line (MULT-14).
+	// Empty string when the breakdown was trivial (only StageBase).
+	DamageBreakdown string
+	// BreakdownSteps is the structured breakdown for verbose rendering (MULT-15).
+	BreakdownSteps []DamageBreakdownStep
 }
 
 // findCombatantByName returns the first Combatant in cbt whose Name matches name, or nil.
@@ -1013,12 +1018,14 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 					narrative += " " + note
 				}
 				events = append(events, RoundEvent{
-					AttackResult: &r,
-					ActionType:   ActionAttack,
-					ActorID:      actor.ID,
-					ActorName:    actor.Name,
-					Narrative:    narrative,
-					Flanking:     flanked,
+					AttackResult:    &r,
+					ActionType:      ActionAttack,
+					ActorID:         actor.ID,
+					ActorName:       actor.Name,
+					Narrative:       narrative,
+					Flanking:        flanked,
+					DamageBreakdown: FormatBreakdownInline(dmgResult.Breakdown),
+					BreakdownSteps:  dmgResult.Breakdown,
 				})
 				// Consume one round of ammo for ranged attacks.
 				if !isMelee && actor.Loadout != nil {
@@ -1177,11 +1184,13 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 					narrative1 += " " + note
 				}
 				events = append(events, RoundEvent{
-					AttackResult: &r1,
-					ActionType:   ActionStrike,
-					ActorID:      actor.ID,
-					ActorName:    actor.Name,
-					Narrative:    narrative1,
+					AttackResult:    &r1,
+					ActionType:      ActionStrike,
+					ActorID:         actor.ID,
+					ActorName:       actor.Name,
+					Narrative:       narrative1,
+					DamageBreakdown: FormatBreakdownInline(dmgResult1.Breakdown),
+					BreakdownSteps:  dmgResult1.Breakdown,
 				})
 				// Clear combat-start flat_footed from NPC combatants after their first
 				// action resolves (sucker_punch window). Mid-round flat_footed (crit,
@@ -1317,11 +1326,13 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 					narrative2 += " " + note
 				}
 				events = append(events, RoundEvent{
-					AttackResult: &r2,
-					ActionType:   ActionStrike,
-					ActorID:      actor.ID,
-					ActorName:    actor.Name,
-					Narrative:    narrative2,
+					AttackResult:    &r2,
+					ActionType:      ActionStrike,
+					ActorID:         actor.ID,
+					ActorName:       actor.Name,
+					Narrative:       narrative2,
+					DamageBreakdown: FormatBreakdownInline(dmgResult2.Breakdown),
+					BreakdownSteps:  dmgResult2.Breakdown,
 				})
 			case ActionReload:
 				events = append(events, resolveReload(cbt, actor, action))
@@ -1505,11 +1516,13 @@ func resolveFireBurst(cbt *Combat, actor *Combatant, qa QueuedAction, src Source
 		}
 		result.BaseDamage = dmg
 		events = append(events, RoundEvent{
-			AttackResult: &result,
-			ActionType:   ActionFireBurst,
-			ActorID:      actor.ID,
-			ActorName:    actor.Name,
-			Narrative:    buildNarrative(actor, target, result, dmg),
+			AttackResult:    &result,
+			ActionType:      ActionFireBurst,
+			ActorID:         actor.ID,
+			ActorName:       actor.Name,
+			Narrative:       buildNarrative(actor, target, result, dmg),
+			DamageBreakdown: FormatBreakdownInline(dmgResult.Breakdown),
+			BreakdownSteps:  dmgResult.Breakdown,
 		})
 		if target.IsDead() {
 			break
@@ -1619,11 +1632,13 @@ func resolveFireAutomatic(cbt *Combat, actor *Combatant, qa QueuedAction, src So
 		result.BaseDamage = dmg
 		shots--
 		events = append(events, RoundEvent{
-			AttackResult: &result,
-			ActionType:   ActionFireAutomatic,
-			ActorID:      actor.ID,
-			ActorName:    actor.Name,
-			Narrative:    buildNarrative(actor, target, result, dmg),
+			AttackResult:    &result,
+			ActionType:      ActionFireAutomatic,
+			ActorID:         actor.ID,
+			ActorName:       actor.Name,
+			Narrative:       buildNarrative(actor, target, result, dmg),
+			DamageBreakdown: FormatBreakdownInline(dmgResult.Breakdown),
+			BreakdownSteps:  dmgResult.Breakdown,
 		})
 	}
 	return events

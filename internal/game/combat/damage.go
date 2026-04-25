@@ -201,6 +201,40 @@ func FormatBreakdownInline(steps []DamageBreakdownStep) string {
 	return wrapAtArrow(line, 80)
 }
 
+// FormatBreakdownVerbose renders the full multi-line damage breakdown block (MULT-15).
+// Returns "" when no steps. Intended for delivery to observers who have the
+// ShowDamageBreakdown preference enabled.
+//
+// Postcondition: returns "" iff len(steps) == 0.
+func FormatBreakdownVerbose(steps []DamageBreakdownStep) string {
+	if len(steps) == 0 {
+		return ""
+	}
+	var sb strings.Builder
+	for _, step := range steps {
+		switch step.Stage {
+		case StageBase:
+			sb.WriteString(fmt.Sprintf("  base:       %+d\n", step.After))
+		case StageMultiplier:
+			sb.WriteString(fmt.Sprintf("  multiplier: %s\n", step.Detail))
+			sb.WriteString(fmt.Sprintf("  after:      %d\n", step.After))
+		case StageHalver:
+			sb.WriteString(fmt.Sprintf("  halver:     %s = %d\n", step.Detail, step.After))
+		case StageWeakness:
+			sb.WriteString(fmt.Sprintf("  weakness:   %s\n", step.Detail))
+		case StageResistance:
+			sb.WriteString(fmt.Sprintf("  resistance: %s\n", step.Detail))
+		case StageFloor:
+			sb.WriteString("  final:      0 (floored)\n")
+		}
+	}
+	if steps[len(steps)-1].Stage != StageFloor {
+		last := steps[len(steps)-1]
+		sb.WriteString(fmt.Sprintf("  final:      %d\n", last.After))
+	}
+	return sb.String()
+}
+
 // wrapAtArrow wraps a breakdown line at " → " boundaries so no segment exceeds maxWidth.
 func wrapAtArrow(line string, maxWidth int) string {
 	if len(line) <= maxWidth {

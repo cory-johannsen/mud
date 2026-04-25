@@ -2124,31 +2124,10 @@ func RenderEffectsBlock(es *effect.EffectSet, casterNames map[string]string, wid
 
 // RenderDamageBreakdown renders the full verbose breakdown block (MULT-15).
 // Only emitted to observers with ShowDamageBreakdown enabled.
+//
+// Delegates to combat.FormatBreakdownVerbose so the gameserver and frontend
+// share a single canonical formatter without introducing a frontend-package
+// dependency from the gameserver.
 func RenderDamageBreakdown(steps []combat.DamageBreakdownStep) string {
-	if len(steps) == 0 {
-		return ""
-	}
-	var sb strings.Builder
-	for _, step := range steps {
-		switch step.Stage {
-		case combat.StageBase:
-			sb.WriteString(fmt.Sprintf("  base:       %+d\n", step.After))
-		case combat.StageMultiplier:
-			sb.WriteString(fmt.Sprintf("  multiplier: %s\n", step.Detail))
-			sb.WriteString(fmt.Sprintf("  after:      %d\n", step.After))
-		case combat.StageHalver:
-			sb.WriteString(fmt.Sprintf("  halver:     %s = %d\n", step.Detail, step.After))
-		case combat.StageWeakness:
-			sb.WriteString(fmt.Sprintf("  weakness:   %s\n", step.Detail))
-		case combat.StageResistance:
-			sb.WriteString(fmt.Sprintf("  resistance: %s\n", step.Detail))
-		case combat.StageFloor:
-			sb.WriteString("  final:      0 (floored)\n")
-		}
-	}
-	if steps[len(steps)-1].Stage != combat.StageFloor {
-		last := steps[len(steps)-1]
-		sb.WriteString(fmt.Sprintf("  final:      %d\n", last.After))
-	}
-	return sb.String()
+	return combat.FormatBreakdownVerbose(steps)
 }
