@@ -173,3 +173,22 @@ The primary runtime access path for skill feats is `FeatRegistry.SkillFeatsForTr
 1. Add entry to `content/feats.yaml` in the appropriate section.
 2. Set `category`, `skill` (if skill feat), `pf2e` (source name), `active` (true if player-triggered), `description` (Gunchete-flavored).
 3. Restart server — feat is immediately available via `SkillFeatsForTrainedSkills` and all registry indexes.
+
+## Effect Pipeline
+
+In combat, each `Combatant` carries an `Effects *effect.EffectSet` (package `internal/game/effect`).
+This is the single source of truth for all typed bonus calculations during a combat encounter.
+
+### Provider Pattern
+
+At combatant creation, `BuildCombatantEffects(BuildEffectsOpts)` merges:
+1. Condition effects from `condition.ActiveSet`
+2. `ClassFeature.PassiveBonuses` for each passive feat the player holds
+3. `TechnologyDef.PassiveBonuses` for each passive tech the player holds
+4. Weapon item bonus (from `WeaponDef.Bonus`) as `item:`-typed entries
+
+Each source is keyed by `source_id` (e.g. `"condition:prone"`, `"feat:iron_will"`, `"item:my_sword_instance"`).
+
+### Out-of-Combat Bonus Queries
+
+`condition/modifiers.go` functions (`AttackBonus`, `ACBonus`, etc.) remain available for out-of-combat callers. They delegate to `effect.Resolve(activeSet.Effects(), stat).Total` internally.

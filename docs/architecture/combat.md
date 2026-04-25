@@ -112,6 +112,48 @@ sequenceDiagram
     end
 ```
 
+## Bonus Stacking (DEDUP Requirements)
+
+All numeric bonuses to combat stats flow through `internal/game/effect/EffectSet` and `effect.Resolve`. No subsystem computes bonus totals outside this pipeline (DEDUP-10).
+
+### Bonus Types
+
+| Type | Stacking Rule |
+|------|--------------|
+| `status` | Only the highest single positive bonus contributes per stat; only the worst single penalty contributes |
+| `circumstance` | Same as status |
+| `item` | Same as status |
+| `untyped` | All values stack additively |
+
+### Dedup Key
+
+Effects are deduplicated by `(source_id, caster_uid)`. Re-applying the same key overwrites the previous entry (DEDUP-1).
+
+### Resolve Algorithm
+
+`effect.Resolve(set, stat)` is a pure function (DEDUP-7). Per-type: highest-bonus-wins, worst-penalty-wins. Untyped: sum all. Ties broken lexicographically by `(SourceID, CasterUID)` ascending (DEDUP-6).
+
+### Stat Inheritance
+
+A bonus to `skill` contributes to any `skill:<id>` query (prefix-on-colon). A bonus to `skill:stealth` does NOT contribute to `skill:savvy` (DEDUP-16).
+
+### Effect Sources
+
+| Source prefix | Origin |
+|--------------|--------|
+| `condition:<id>` | Applied via `condition.ActiveSet` |
+| `feat:<id>` | Passive `ClassFeature.PassiveBonuses` |
+| `tech:<id>` | Passive `TechnologyDef.PassiveBonuses` |
+| `item:<instance>` | Equipped weapon/armor item bonus |
+
+### Combatant Effects Lifecycle
+
+1. At combatant creation: `combat.BuildCombatantEffects()` populates `Combatant.Effects` from all sources.
+2. On condition apply mid-combat: `combat.SyncConditionApply()` updates `Combatant.Effects`.
+3. On condition removal: `combat.SyncConditionRemove()` updates `Combatant.Effects`.
+4. On round tick: `combat.SyncConditionsTick()` removes expired condition effects.
+5. `combat.OverrideNarrativeEvents()` diffs before/after Resolve to emit suppression log lines (DEDUP-14).
+
 ## Component Dependencies
 
 ```mermaid
