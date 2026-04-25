@@ -87,8 +87,11 @@ func TestResolveRound_WeaponModifier_Tuned_DealsOneDamageMore(t *testing.T) {
 	require.NotNil(t, npc2)
 	dmgTuned := 100 - npc2.CurrentHP
 
-	require.Equal(t, dmgNoModifier+1, dmgTuned,
-		"tuned modifier should add +1 damage (no-modifier=%d, tuned=%d)", dmgNoModifier, dmgTuned)
+	// Crit now doubles all additives per PF2E (was: base only). With val=18 the d20 rolls 19,
+	// which is a CritSuccess vs AC 10, so the +1 tuned bonus is included in the ×2 multiply.
+	// Old: base*2 + 1 = dmgNoModifier + 1. New: (base+1)*2 = dmgNoModifier + 2.
+	require.Equal(t, dmgNoModifier+2, dmgTuned,
+		"tuned modifier should add +1 damage pre-crit (=+2 on crit) (no-modifier=%d, tuned=%d)", dmgNoModifier, dmgTuned)
 }
 
 // TestResolveRound_WeaponModifier_Defective_DealsOneDamageLess verifies that a defective
@@ -110,8 +113,11 @@ func TestResolveRound_WeaponModifier_Defective_DealsOneDamageLess(t *testing.T) 
 	require.NotNil(t, npc2)
 	dmgDefective := 100 - npc2.CurrentHP
 
-	require.Equal(t, dmgNoModifier-1, dmgDefective,
-		"defective modifier should reduce damage by 1 (no-modifier=%d, defective=%d)", dmgNoModifier, dmgDefective)
+	// Crit now doubles all additives per PF2E (was: base only). The -1 defective bonus is
+	// included in the ×2 multiply on a crit.
+	// Old: base*2 - 1 = dmgNoModifier - 1. New: (base-1)*2 = dmgNoModifier - 2.
+	require.Equal(t, dmgNoModifier-2, dmgDefective,
+		"defective modifier should reduce damage by 1 pre-crit (=-2 on crit) (no-modifier=%d, defective=%d)", dmgNoModifier, dmgDefective)
 }
 
 // TestResolveRound_WeaponModifier_Cursed_DealsTwoDamageLess verifies that a cursed
@@ -133,6 +139,9 @@ func TestResolveRound_WeaponModifier_Cursed_DealsTwoDamageLess(t *testing.T) {
 	require.NotNil(t, npc2)
 	dmgCursed := 100 - npc2.CurrentHP
 
-	require.Equal(t, dmgNoModifier-2, dmgCursed,
-		"cursed modifier should reduce damage by 2 (no-modifier=%d, cursed=%d)", dmgNoModifier, dmgCursed)
+	// Crit now doubles all additives per PF2E (was: base only). The -2 cursed bonus is
+	// included in the ×2 multiply on a crit.
+	// Old: base*2 - 2 = dmgNoModifier - 2. New: (base-2)*2 = dmgNoModifier - 4.
+	require.Equal(t, dmgNoModifier-4, dmgCursed,
+		"cursed modifier should reduce damage by 2 pre-crit (=-4 on crit) (no-modifier=%d, cursed=%d)", dmgNoModifier, dmgCursed)
 }

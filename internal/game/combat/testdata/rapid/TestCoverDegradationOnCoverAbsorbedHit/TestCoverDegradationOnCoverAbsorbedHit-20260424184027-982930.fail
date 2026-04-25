@@ -1,0 +1,14 @@
+# 2026/04/24 18:40:27.281807 [TestCoverDegradationOnCoverAbsorbedHit] [rapid] draw baseAC: 5
+# 2026/04/24 18:40:27.281812 [TestCoverDegradationOnCoverAbsorbedHit] [rapid] draw coverPenalty: 1
+# 2026/04/24 18:40:27.281813 [TestCoverDegradationOnCoverAbsorbedHit] [rapid] draw attackRoll: 5
+# 2026/04/24 18:40:27.281821 [TestCoverDegradationOnCoverAbsorbedHit] expected coverDegrader to fire (roll=5 baseAC=5 coverPenalty=1)
+# 
+v0.4.8#8704299483813458702
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0

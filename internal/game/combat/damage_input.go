@@ -13,14 +13,20 @@ type BuildDamageOpts struct {
 }
 
 // BuildDamageInput assembles a DamageInput from round.go call-site data.
-// On a miss (Failure or CritFailure), BaseDamage is 0 from the resolver, producing a
-// zero-damage input which ResolveDamage correctly resolves to 0.
+// On a miss (Failure or CritFailure), the returned DamageInput is empty so
+// ResolveDamage returns 0; no additives or multipliers are constructed even
+// though the AttackResult carries a non-zero BaseDamage from ResolveAttack.
 //
 // Precondition: opts.Actor, opts.Target, opts.AttackResult must be set.
-// Postcondition: returns a fully populated DamageInput.
+// Postcondition: returns a DamageInput; on a miss, ResolveDamage(result).Final == 0.
 func BuildDamageInput(opts BuildDamageOpts) DamageInput {
 	r := opts.AttackResult
 	target := opts.Target
+
+	// On a miss, return an empty input — no damage, no resistance interaction.
+	if r.Outcome != CritSuccess && r.Outcome != Success {
+		return DamageInput{DamageType: r.DamageType}
+	}
 
 	var additives []DamageAdditive
 	additives = append(additives, DamageAdditive{

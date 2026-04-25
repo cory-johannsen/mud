@@ -29,6 +29,9 @@ type AttackResult struct {
 
 // EffectiveDamage returns the damage dealt after applying the outcome multiplier.
 //
+// Deprecated: prefer BuildDamageInput + ResolveDamage in new code. Retained for
+// external callers and the deprecated explosive resolver path. (MULT-17)
+//
 // Postcondition: Returns >= 0.
 func (r AttackResult) EffectiveDamage() int {
 	switch r.Outcome {
