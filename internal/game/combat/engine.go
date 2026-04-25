@@ -127,6 +127,12 @@ func (c *Combat) StartRoundWithSrc(actionsPerRound int, src Source) []RoundCondi
 
 		// Tick durations; collect expired conditions
 		expired := s.Tick(cbt.ID)
+		// Mirror expirations into Combatant.Effects so the unified effect
+		// pipeline (effect.Resolve) observes the same state as the legacy
+		// ActiveSet-based accessors. Required for REQ-EM-* after round.go
+		// migrated from condition.AttackBonus/ACBonus/DamageBonus to
+		// effect.Resolve.
+		SyncConditionsTick(cbt, expired)
 		for _, id := range expired {
 			def, _ := c.condRegistry.Get(id)
 			name := id
@@ -147,6 +153,7 @@ func (c *Combat) StartRoundWithSrc(actionsPerRound int, src Source) []RoundCondi
 			switch {
 			case roll == 20: // natural 20 = crit success: remove dying entirely, restore to 1 HP
 				s.Remove(cbt.ID, "dying")
+				SyncConditionRemove(cbt, "dying")
 				cbt.CurrentHP = 1
 				events = append(events, RoundConditionEvent{
 					UID: cbt.ID, Name: cbt.Name,
@@ -155,8 +162,10 @@ func (c *Combat) StartRoundWithSrc(actionsPerRound int, src Source) []RoundCondi
 				})
 			case roll >= 15: // success: remove dying, apply wounded +1, restore to 1 HP
 				s.Remove(cbt.ID, "dying")
+				SyncConditionRemove(cbt, "dying")
 				if woundedDef, ok := c.condRegistry.Get("wounded"); ok {
 					_ = s.Apply(cbt.ID, woundedDef, 1, -1)
+					SyncConditionApply(cbt, cbt.ID, woundedDef, s.Stacks("wounded"))
 				}
 				cbt.CurrentHP = 1
 				events = append(events, RoundConditionEvent{
@@ -177,6 +186,7 @@ func (c *Combat) StartRoundWithSrc(actionsPerRound int, src Source) []RoundCondi
 					cbt.CurrentHP = 0
 					cbt.Dead = true
 					s.Remove(cbt.ID, "dying")
+					SyncConditionRemove(cbt, "dying")
 					events = append(events, RoundConditionEvent{
 						UID: cbt.ID, Name: cbt.Name,
 						ConditionID: "dying", CondName: "Dying",
@@ -186,6 +196,7 @@ func (c *Combat) StartRoundWithSrc(actionsPerRound int, src Source) []RoundCondi
 					if dyingDef, ok := c.condRegistry.Get("dying"); ok {
 						s.Remove(cbt.ID, "dying")
 						_ = s.Apply(cbt.ID, dyingDef, dyingStacks, -1)
+						SyncConditionApply(cbt, cbt.ID, dyingDef, s.Stacks("dying"))
 					}
 					events = append(events, RoundConditionEvent{
 						UID: cbt.ID, Name: cbt.Name,
@@ -223,6 +234,7 @@ func (c *Combat) StartRoundWithSrc(actionsPerRound int, src Source) []RoundCondi
 		if s.Has("prone") {
 			reduction++
 			s.Remove(cbt.ID, "prone")
+			SyncConditionRemove(cbt, "prone")
 			name := "Prone"
 			if def, ok := c.condRegistry.Get("prone"); ok && def != nil {
 				name = def.Name

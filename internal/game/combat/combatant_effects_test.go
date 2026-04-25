@@ -246,3 +246,47 @@ func TestOverrideNarrativeEvents_EmitsWhenPreviouslyContributing(t *testing.T) {
 	assert.Contains(t, events[0], "condition:weak_buff")
 	assert.Contains(t, events[0], "condition:strong_buff")
 }
+
+func TestOverrideNarrativeEvents_DetectsNewSuppression(t *testing.T) {
+	before := effect.NewEffectSet()
+	before.Apply(effect.Effect{
+		EffectID:  "inspire",
+		SourceID:  "condition:inspire_courage",
+		CasterUID: "xin",
+		Bonuses:   []effect.Bonus{{Stat: effect.StatAttack, Value: 1, Type: effect.BonusTypeStatus}},
+		DurKind:   effect.DurationUntilRemove,
+	})
+
+	after := effect.NewEffectSet()
+	after.Apply(effect.Effect{
+		EffectID:  "inspire",
+		SourceID:  "condition:inspire_courage",
+		CasterUID: "xin",
+		Bonuses:   []effect.Bonus{{Stat: effect.StatAttack, Value: 1, Type: effect.BonusTypeStatus}},
+		DurKind:   effect.DurationUntilRemove,
+	})
+	after.Apply(effect.Effect{
+		EffectID:  "heroism",
+		SourceID:  "condition:heroism",
+		CasterUID: "kira",
+		Bonuses:   []effect.Bonus{{Stat: effect.StatAttack, Value: 2, Type: effect.BonusTypeStatus}},
+		DurKind:   effect.DurationUntilRemove,
+	})
+
+	events := combat.OverrideNarrativeEvents(before, after, []effect.Stat{effect.StatAttack})
+	require.Len(t, events, 1)
+	assert.Contains(t, events[0], "overridden")
+}
+
+func TestOverrideNarrativeEvents_NoChangeNoEvents(t *testing.T) {
+	s := effect.NewEffectSet()
+	s.Apply(effect.Effect{
+		EffectID:  "e1",
+		SourceID:  "condition:bless",
+		CasterUID: "",
+		Bonuses:   []effect.Bonus{{Stat: effect.StatAttack, Value: 1, Type: effect.BonusTypeStatus}},
+		DurKind:   effect.DurationUntilRemove,
+	})
+	events := combat.OverrideNarrativeEvents(s, s, []effect.Stat{effect.StatAttack})
+	assert.Empty(t, events)
+}

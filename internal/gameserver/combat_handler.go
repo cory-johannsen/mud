@@ -2445,6 +2445,12 @@ func (h *CombatHandler) resolveAndAdvanceLocked(roomID string, cbt *combat.Comba
 							sess.Conditions.Remove(c.ID, condID)
 						}
 					}
+					if as, ok := cbt.Conditions[c.ID]; ok && as != nil {
+						for _, condID := range []string{"greater_cover", "standard_cover", "lesser_cover"} {
+							as.Remove(c.ID, condID)
+							combat.SyncConditionRemove(c, condID)
+						}
+					}
 				}
 			}
 			// GH #227: remove the destroyed cover from the movement-blocking
@@ -3950,6 +3956,7 @@ func (h *CombatHandler) autoQueueNPCsLocked(cbt *combat.Combat) {
 								cbt.Conditions[c.ID] = condition.NewActiveSet()
 							}
 							_ = cbt.Conditions[c.ID].Apply(c.ID, def, 1, -1)
+							combat.SyncConditionApply(c, c.ID, def, cbt.Conditions[c.ID].Stacks(condID))
 						}
 					}
 					if bestEquip.CoverDestructible && bestEquip.CoverHP > 0 && h.GetCoverHP(cbt.RoomID, bestEquip.ItemID) < 0 {
