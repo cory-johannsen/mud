@@ -206,6 +206,8 @@ type Room struct {
 	Indoor bool `yaml:"indoor,omitempty"`
 	// Hazards lists environmental hazards that fire on player entry or each combat round.
 	Hazards []HazardDef `yaml:"hazards,omitempty"`
+	// CombatTerrain holds the authored per-cell terrain configuration for tactical combat.
+	CombatTerrain *CombatTerrainConfig `yaml:"combat_terrain,omitempty"`
 	// MinFactionTierID is the minimum faction tier ID required to enter this room.
 	// Empty string means no gating.
 	MinFactionTierID string `yaml:"min_faction_tier_id"`
@@ -501,4 +503,47 @@ func (z *Zone) Validate() error {
 		coordSeen[key] = r.ID
 	}
 	return nil
+}
+
+// CombatTerrainConfig holds the authored per-cell terrain configuration for a room.
+// Exactly one of Grid (shape A) or Cells (shape B) must be set.
+type CombatTerrainConfig struct {
+	Grid    []string                      `yaml:"grid,omitempty"`
+	Legend  map[string]TerrainLegendEntry `yaml:"legend,omitempty"`
+	Default string                        `yaml:"default,omitempty"`
+	Cells   []TerrainCellDef              `yaml:"cells,omitempty"`
+}
+
+// TerrainLegendEntry is a legend value in shape-A terrain authoring.
+type TerrainLegendEntry struct {
+	Type      string     `yaml:"type"`
+	Difficult bool       `yaml:"difficult,omitempty"`
+	HazardID  string     `yaml:"hazard_id,omitempty"`
+	Hazard    *HazardDef `yaml:"hazard,omitempty"`
+}
+
+// UnmarshalYAML for TerrainLegendEntry supports both bare-string and object forms.
+func (e *TerrainLegendEntry) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	var s string
+	if err := unmarshal(&s); err == nil {
+		e.Type = s
+		return nil
+	}
+	type plain TerrainLegendEntry
+	var obj plain
+	if err := unmarshal(&obj); err != nil {
+		return err
+	}
+	*e = TerrainLegendEntry(obj)
+	return nil
+}
+
+// TerrainCellDef is a single per-cell override entry in shape-B terrain authoring.
+type TerrainCellDef struct {
+	X         int        `yaml:"x"`
+	Y         int        `yaml:"y"`
+	Type      string     `yaml:"type"`
+	Difficult bool       `yaml:"difficult,omitempty"`
+	HazardID  string     `yaml:"hazard_id,omitempty"`
+	Hazard    *HazardDef `yaml:"hazard,omitempty"`
 }
