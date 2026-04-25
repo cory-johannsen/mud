@@ -1,6 +1,10 @@
 package combat
 
-import "github.com/cory-johannsen/mud/internal/game/world"
+import (
+	"fmt"
+
+	"github.com/cory-johannsen/mud/internal/game/world"
+)
 
 // GridCell is a 2D grid coordinate (column, row).
 type GridCell struct {
@@ -69,4 +73,57 @@ func (c *Combat) EntryCost(x, y int) (cost int, ok bool) {
 	default:
 		return 1, true
 	}
+}
+
+// TerrainGlyph returns the display character for a terrain type.
+// When unicode is true, returns block-shade glyphs; otherwise returns
+// ASCII fallbacks suitable for clients that cannot render UTF-8.
+//
+// Precondition: t should be a valid TerrainType; unknown values map to
+// the normal-terrain glyph.
+// Postcondition: the returned string is always non-empty.
+func TerrainGlyph(t TerrainType, unicode bool) string {
+	if unicode {
+		switch t {
+		case TerrainDifficult:
+			return "▒"
+		case TerrainGreaterDifficult:
+			return "▓"
+		case TerrainHazardous:
+			return "!"
+		default:
+			return "·"
+		}
+	}
+	switch t {
+	case TerrainDifficult:
+		return "+"
+	case TerrainGreaterDifficult:
+		return "#"
+	case TerrainHazardous:
+		return "!"
+	default:
+		return "."
+	}
+}
+
+// TerrainLegendText returns a printable legend describing the four
+// terrain types and their movement / hazard semantics. It is the
+// canonical output of the `terrain` telnet command.
+//
+// Postcondition: the returned text always mentions all four terrain
+// keywords (normal, difficult, impassable, hazardous).
+func TerrainLegendText(unicode bool) string {
+	dot := TerrainGlyph(TerrainNormal, unicode)
+	diff := TerrainGlyph(TerrainDifficult, unicode)
+	greater := TerrainGlyph(TerrainGreaterDifficult, unicode)
+	haz := TerrainGlyph(TerrainHazardous, unicode)
+	return fmt.Sprintf(
+		"Combat map legend:\n"+
+			"  %s  normal          - 1 speed to enter\n"+
+			"  %s  difficult       - 2 speed to enter\n"+
+			"  %s  impassable      - cannot be entered\n"+
+			"  %s  hazardous       - damage on entry or round start\n",
+		dot, diff, greater, haz,
+	)
 }
