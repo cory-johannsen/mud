@@ -704,10 +704,14 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 					}
 				}
 
-				// REQ-STRIDE-SPEED: Move up to SpeedSquares() cells per stride (default 5 = 25 ft).
+				// TERRAIN-6/7/8: Move up to SpeedBudget() points per stride. Each cell
+				// consumed costs EntryCost(newX, newY); TerrainGreaterDifficult is
+				// impassable. SpeedBudget defaults to 5 (25 ft) when SpeedFt is 0.
 				// Each step recomputes direction for "toward"/"away" since position changes.
-				steps := actor.SpeedSquares()
-				for step := 0; step < steps; step++ {
+				budget := actor.SpeedBudget()
+				strideNarrative := fmt.Sprintf("%s strides %s.", actor.Name, dir)
+				stepsTaken := 0
+				for budget > 0 {
 					// REQ-STRIDE-STOP: For "toward" strides, stop when already adjacent (≤ 5 ft).
 					if dir == "toward" && opponent != nil && CombatRange(*actor, *opponent) <= 5 {
 						break
@@ -740,8 +744,35 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 					if CellBlocked(cbt, actor.ID, newX, newY) {
 						break
 					}
+					// TERRAIN-8/17: Greater-difficult cells are impassable.
+					cost, passable := cbt.EntryCost(newX, newY)
+					if !passable {
+						if stepsTaken == 0 {
+							strideNarrative = fmt.Sprintf("%s tries to move but the terrain blocks the way.", actor.Name)
+						} else {
+							strideNarrative = fmt.Sprintf("%s strides %s and stops at the terrain.", actor.Name, dir)
+						}
+						break
+					}
+					// TERRAIN-7/18: Insufficient budget to enter the next cell.
+					if cost > budget {
+						if stepsTaken == 0 {
+							strideNarrative = fmt.Sprintf("%s cannot afford to move — not enough movement speed.", actor.Name)
+						} else {
+							strideNarrative = fmt.Sprintf("%s strides %s and stops — terrain too rough to continue.", actor.Name, dir)
+						}
+						break
+					}
+					budget -= cost
 					actor.GridX = newX
 					actor.GridY = newY
+					stepsTaken++
+
+					// TERRAIN-9: fire on_enter hazard for hazardous cells.
+					// (Task 5 will replace applyCellHazard's stub with real logic.)
+					if tc := cbt.TerrainAt(newX, newY); tc.Type == TerrainHazardous && tc.Hazard != nil {
+						events = append(events, applyCellHazard(cbt, actor, tc, "on_enter", src)...)
+					}
 
 					// REQ-RXN19: TriggerOnEnemyMoveAdjacent fires when an NPC moves into melee range of a player.
 					if actor.Kind == KindNPC {
@@ -761,7 +792,7 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 					ActionType: ActionStride,
 					ActorID:    actor.ID,
 					ActorName:  actor.Name,
-					Narrative:  fmt.Sprintf("%s strides %s.", actor.Name, dir),
+					Narrative:  strideNarrative,
 				})
 
 			case ActionPass:
@@ -1854,4 +1885,17 @@ func buildNarrative(actor, target *Combatant, result AttackResult, dmg int) stri
 	default:
 		return fmt.Sprintf("%s attacks %s.", actor.Name, target.Name)
 	}
+}
+
+// applyCellHazard fires the per-cell hazard for the given trigger ("on_enter",
+// "on_start_round") and returns the resulting RoundEvents. Task 4 ships this
+// as a stub so the budget-based stride loop compiles; Task 5 replaces it with
+// the real hazard-resolution implementation (TERRAIN-9..14).
+func applyCellHazard(cbt *Combat, actor *Combatant, tc TerrainCell, trigger string, src Source) []RoundEvent {
+	_ = cbt
+	_ = actor
+	_ = tc
+	_ = trigger
+	_ = src
+	return nil
 }
