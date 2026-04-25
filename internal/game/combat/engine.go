@@ -304,13 +304,28 @@ func (c *Combat) ApplyCondition(uid, condID string, stacks, duration int) error 
 	if c.scriptMgr != nil {
 		s.SetScripting(c.scriptMgr, c.zoneID)
 	}
-	return s.Apply(uid, def, stacks, duration)
+	if err := s.Apply(uid, def, stacks, duration); err != nil {
+		return err
+	}
+	// Mirror the condition into Combatant.Effects so the unified effect
+	// pipeline (effect.Resolve) observes the same state as the legacy
+	// ActiveSet-based accessors. Required for REQ-EM-* after round.go
+	// migrated from condition.AttackBonus/ACBonus/DamageBonus to
+	// effect.Resolve.
+	if cbt := findCombatantByID(c, uid); cbt != nil {
+		stored := s.Stacks(condID)
+		SyncConditionApply(cbt, uid, def, stored)
+	}
+	return nil
 }
 
 // RemoveCondition removes condID from combatant uid. No-op if not present.
 func (c *Combat) RemoveCondition(uid, condID string) {
 	if s, ok := c.Conditions[uid]; ok {
 		s.Remove(uid, condID)
+		if cbt := findCombatantByID(c, uid); cbt != nil {
+			SyncConditionRemove(cbt, condID)
+		}
 	}
 }
 

@@ -10,6 +10,7 @@ import (
 
 	"github.com/cory-johannsen/mud/internal/game/condition"
 	"github.com/cory-johannsen/mud/internal/game/dice"
+	"github.com/cory-johannsen/mud/internal/game/effect"
 	"github.com/cory-johannsen/mud/internal/game/inventory"
 	"github.com/cory-johannsen/mud/internal/game/reaction"
 )
@@ -794,6 +795,7 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 				if actor.Kind == KindNPC && cbt.Conditions[actor.ID] != nil &&
 					cbt.Conditions[actor.ID].Source("flat_footed") == "combat_start" {
 					cbt.Conditions[actor.ID].Remove(actor.ID, "flat_footed")
+					SyncConditionRemove(actor, "flat_footed")
 				}
 
 			case ActionAttack:
@@ -858,6 +860,7 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 						if actor.Kind == KindNPC && cbt.Conditions[actor.ID] != nil &&
 							cbt.Conditions[actor.ID].Source("flat_footed") == "combat_start" {
 							cbt.Conditions[actor.ID].Remove(actor.ID, "flat_footed")
+							SyncConditionRemove(actor, "flat_footed")
 						}
 						continue
 					}
@@ -873,13 +876,14 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 						if actor.Kind == KindNPC && cbt.Conditions[actor.ID] != nil &&
 							cbt.Conditions[actor.ID].Source("flat_footed") == "combat_start" {
 							cbt.Conditions[actor.ID].Remove(actor.ID, "flat_footed")
+							SyncConditionRemove(actor, "flat_footed")
 						}
 						continue
 					}
 				}
 
-				atkBonus := condition.AttackBonus(cbt.Conditions[actor.ID])
-				acBonus := condition.ACBonus(cbt.Conditions[target.ID])
+				atkBonus := effect.Resolve(actor.Effects, effect.StatAttack).Total
+				acBonus := effect.Resolve(target.Effects, effect.StatAC).Total
 
 				// Flanking check: gather all living combatants on the attacker's side.
 				// Flanking only applies to melee attacks (attacker must be adjacent).
@@ -946,7 +950,7 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 				}
 				dmg := r.EffectiveDamage()
 				dmg += weaponModifierDamageBonus(actor) // REQ-EM-23
-				dmg += condition.DamageBonus(cbt.Conditions[actor.ID])
+				dmg += effect.Resolve(actor.Effects, effect.StatDamage).Total
 				// Extra weapon dice from conditions (e.g. brutal_surge_active / Overpower).
 				// Only applied on a hit or crit; crits double the extra dice as well.
 				if extraDice := condition.ExtraWeaponDice(cbt.Conditions[actor.ID]); extraDice > 0 && (r.Outcome == CritSuccess || r.Outcome == Success) {
@@ -1031,6 +1035,7 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 				if actor.Kind == KindNPC && cbt.Conditions[actor.ID] != nil &&
 					cbt.Conditions[actor.ID].Source("flat_footed") == "combat_start" {
 					cbt.Conditions[actor.ID].Remove(actor.ID, "flat_footed")
+					SyncConditionRemove(actor, "flat_footed")
 				}
 
 			case ActionStrike:
@@ -1068,8 +1073,8 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 					// Flat check passed — both strikes proceed normally against now-revealed target.
 				}
 				// First strike
-				atkBonus1 := condition.AttackBonus(cbt.Conditions[actor.ID])
-				acBonus1 := condition.ACBonus(cbt.Conditions[target.ID])
+				atkBonus1 := effect.Resolve(actor.Effects, effect.StatAttack).Total
+				acBonus1 := effect.Resolve(target.Effects, effect.StatAC).Total
 				r1 := ResolveAttack(actor, target, src)
 				r1.AttackTotal += atkBonus1
 				r1.AttackTotal += acBonus1
@@ -1109,7 +1114,7 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 				}
 				dmg1 := r1.EffectiveDamage()
 				dmg1 += weaponModifierDamageBonus(actor) // REQ-EM-23
-				dmg1 += condition.DamageBonus(cbt.Conditions[actor.ID])
+				dmg1 += effect.Resolve(actor.Effects, effect.StatDamage).Total
 				dmg1 += applyPassiveFeats(cbt, actor, target, dmg1, src)
 				dmg1 = hookDamageRoll(cbt, actor, target, dmg1)
 				dmg1, rwAnnotations1 := applyResistanceWeakness(target, r1.DamageType, dmg1)
@@ -1166,6 +1171,7 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 				if actor.Kind == KindNPC && cbt.Conditions[actor.ID] != nil &&
 					cbt.Conditions[actor.ID].Source("flat_footed") == "combat_start" {
 					cbt.Conditions[actor.ID].Remove(actor.ID, "flat_footed")
+					SyncConditionRemove(actor, "flat_footed")
 				}
 
 				// Second strike with MAP penalty
@@ -1178,8 +1184,8 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 					})
 					continue
 				}
-				atkBonus2 := condition.AttackBonus(cbt.Conditions[actor.ID])
-				acBonus2 := condition.ACBonus(cbt.Conditions[target.ID])
+				atkBonus2 := effect.Resolve(actor.Effects, effect.StatAttack).Total
+				acBonus2 := effect.Resolve(target.Effects, effect.StatAC).Total
 				r2 := ResolveAttack(actor, target, src)
 				r2.AttackTotal += atkBonus2
 				r2.AttackTotal += acBonus2
@@ -1227,7 +1233,7 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 				}
 				dmg2 := r2.EffectiveDamage()
 				dmg2 += weaponModifierDamageBonus(actor) // REQ-EM-23
-				dmg2 += condition.DamageBonus(cbt.Conditions[actor.ID])
+				dmg2 += effect.Resolve(actor.Effects, effect.StatDamage).Total
 				dmg2 += applyPassiveFeats(cbt, actor, target, dmg2, src)
 				dmg2 = hookDamageRoll(cbt, actor, target, dmg2)
 				dmg2, rwAnnotations2 := applyResistanceWeakness(target, r2.DamageType, dmg2)
@@ -1384,7 +1390,7 @@ func resolveFireBurst(cbt *Combat, actor *Combatant, qa QueuedAction, src Source
 			result = ResolveAttack(actor, target, src)
 		}
 		result.AttackTotal = hookAttackRoll(cbt, actor, target, result.AttackTotal)
-		acBonus := condition.ACBonus(cbt.Conditions[target.ID])
+		acBonus := effect.Resolve(target.Effects, effect.StatAC).Total
 		result.AttackTotal += acBonus
 		// GH #232: each burst shot counts toward cross-action MAP.
 		result.AttackTotal += mapPenaltyFor(actor.AttacksMadeThisRound)
@@ -1490,7 +1496,7 @@ func resolveFireAutomatic(cbt *Combat, actor *Combatant, qa QueuedAction, src So
 			result = ResolveAttack(actor, target, src)
 		}
 		result.AttackTotal = hookAttackRoll(cbt, actor, target, result.AttackTotal)
-		acBonus := condition.ACBonus(cbt.Conditions[target.ID])
+		acBonus := effect.Resolve(target.Effects, effect.StatAC).Total
 		result.AttackTotal += acBonus
 		// GH #232: each automatic-fire shot counts toward cross-action MAP.
 		result.AttackTotal += mapPenaltyFor(actor.AttacksMadeThisRound)
