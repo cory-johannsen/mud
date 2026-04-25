@@ -6742,6 +6742,13 @@ func (s *GameServiceServer) handleChar(uid string) (*gamev1.ServerEvent, error) 
 	// condition-derived EffectSet into effect/render.EffectsBlock. casterNames
 	// is nil out-of-combat — render falls back to source-prefix labels
 	// ("item", "feat", "tech", "self").
+	//
+	// Semantic limitation: sess.Conditions.Effects() covers only
+	// condition-sourced effects in the EffectSet. Passive feat/tech and item
+	// bonuses materialized on Combatant.Effects (built per Task 6) are NOT
+	// reflected here when the player is out-of-combat. Task 11 (character-sheet
+	// Effects block on telnet) is the broader reconciliation point if this
+	// gap becomes a problem.
 	if sess.Conditions != nil {
 		view.EffectsSummary = effectrender.EffectsBlock(sess.Conditions.Effects(), nil, 80)
 	} else {

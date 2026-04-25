@@ -44,43 +44,37 @@ export function EffectsDrawer({ onClose }: { onClose: () => void }) {
   const active = hasActiveEffects(summary)
 
   return (
-    <div style={{ fontFamily: 'monospace', color: '#ccc' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-        <h3 style={{ margin: 0, color: '#e0c060', fontSize: '0.95rem' }}>Active Effects</h3>
-        <button
-          type="button"
-          aria-label="Close"
-          style={{ background: 'none', border: '1px solid #444', color: '#888', cursor: 'pointer', borderRadius: 3, padding: '0.1rem 0.4rem', fontFamily: 'monospace' }}
-          onClick={onClose}
-        >
-          ✕
-        </button>
+    <>
+      <div className="drawer-header">
+        <h3>Active Effects</h3>
+        <button className="drawer-close" aria-label="Close" onClick={onClose}>✕</button>
       </div>
-
-      {!sheet && (
-        <p style={{ color: '#555', fontSize: '0.82rem' }}>Loading…</p>
-      )}
-      {sheet && !active && (
-        <p style={{ color: '#666', fontSize: '0.82rem', fontStyle: 'italic' }}>No active effects.</p>
-      )}
-      {sheet && active && (
-        <pre
-          style={{
-            margin: 0,
-            padding: '0.6rem 0.75rem',
-            background: '#0f1420',
-            border: '1px solid #1e2a3a',
-            borderRadius: 4,
-            color: '#cde',
-            fontSize: '0.78rem',
-            lineHeight: 1.4,
-            whiteSpace: 'pre-wrap',
-            wordBreak: 'break-word',
-          }}
-        >
-          {summary}
-        </pre>
-      )}
-    </div>
+      <div className="drawer-body">
+        {!sheet && (
+          <p style={{ color: '#666' }}>Loading…</p>
+        )}
+        {sheet && !active && (
+          <p style={{ color: '#666', fontStyle: 'italic' }}>No active effects.</p>
+        )}
+        {sheet && active && (
+          <pre
+            style={{
+              margin: 0,
+              padding: '0.6rem 0.75rem',
+              background: '#0f1420',
+              border: '1px solid #1e2a3a',
+              borderRadius: 4,
+              color: '#cde',
+              fontSize: '0.78rem',
+              lineHeight: 1.4,
+              whiteSpace: 'pre-wrap',
+              wordBreak: 'break-word',
+            }}
+          >
+            {summary}
+          </pre>
+        )}
+      </div>
+    </>
   )
 }
