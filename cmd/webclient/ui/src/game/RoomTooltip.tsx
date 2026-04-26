@@ -8,6 +8,13 @@ const DANGER_COLOR: Record<string, string> = {
   all_out_war: '#f44',
 }
 
+const DANGER_LABEL: Record<string, string> = {
+  safe:        'Safe',
+  sketchy:     'Sketchy',
+  dangerous:   'Dangerous',
+  all_out_war: 'All-Out War',
+}
+
 const ZONE_EXIT_COLOR = '#c8f'
 
 const POI_TYPES: Array<{ id: string; symbol: string; color: string; label: string }> = [
@@ -88,7 +95,7 @@ export function RoomTooltip({ tile, pos, overrideText }: RoomTooltipProps) {
       {danger && (
         <div style={{ marginBottom: '0.2rem' }}>
           <span style={{ color: '#666' }}>Danger: </span>
-          <span style={{ color: dangerColor }}>{danger}</span>
+          <span style={{ color: dangerColor }}>{DANGER_LABEL[danger] ?? danger}</span>
         </div>
       )}
 

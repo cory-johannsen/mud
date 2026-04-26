@@ -22,7 +22,7 @@ describe('RoomTooltip', () => {
 
   it('renders the danger level', () => {
     render(<RoomTooltip tile={tile} pos={{ x: 100, y: 200 }} />)
-    expect(screen.getByText('safe')).toBeDefined()
+    expect(screen.getByText('Safe')).toBeDefined()
   })
 
   it('renders all POI labels', () => {
@@ -71,7 +71,7 @@ describe('RoomTooltip', () => {
   it('renders danger level from snake_case danger_level field', () => {
     const snakeTile: MapTile = { ...tile, dangerLevel: undefined, danger_level: 'dangerous' }
     render(<RoomTooltip tile={snakeTile} pos={{ x: 100, y: 200 }} />)
-    expect(screen.getByText('dangerous')).toBeDefined()
+    expect(screen.getByText('Dangerous')).toBeDefined()
   })
 
   it('shows NPC name alongside POI label when poiNpcs is provided', () => {
