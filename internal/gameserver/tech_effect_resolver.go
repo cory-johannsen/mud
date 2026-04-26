@@ -396,6 +396,14 @@ func applyEffect(
 		return fmt.Sprintf("Pushed %d feet %s.", e.Distance, e.Direction)
 
 	case technology.EffectUtility:
+		// GH #329: description-only utility effects (no UtilityType) previously
+		// returned an empty message, causing techs like Litany of Iron and
+		// Fervor Pulse on_success to silently no-op. Surface the description
+		// when present so the player at least sees the narrative outcome;
+		// fall back to the typed-utility format for unlock/reveal/hack.
+		if e.Description != "" {
+			return e.Description
+		}
 		if e.UtilityType != "" {
 			return fmt.Sprintf("Utility effect: %s.", e.UtilityType)
 		}
