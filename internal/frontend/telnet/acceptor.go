@@ -49,11 +49,20 @@ func NewAcceptor(cfg config.TelnetConfig, handler SessionHandler, logger *zap.Lo
 // NewHeadlessAcceptor creates a Telnet acceptor that wraps each accepted
 // connection as a headless plain-text session (no ANSI, no split-screen).
 //
-// Precondition: cfg must have a valid port; handler and logger must be non-nil.
-// Postcondition: Returns an Acceptor ready to be started; all connections will have Headless=true.
+// REQ-TD-1a / REQ-TD-3a: the headless listener is unconditionally bound to
+// 127.0.0.1 regardless of cfg.Host, and listens on cfg.HeadlessPort (not
+// cfg.Port).
+//
+// Precondition: cfg must have a valid HeadlessPort; handler and logger must
+// be non-nil.
+// Postcondition: Returns an Acceptor ready to be started; all connections
+// will have Headless=true and bind to loopback.
 func NewHeadlessAcceptor(cfg config.TelnetConfig, handler SessionHandler, logger *zap.Logger) *Acceptor {
+	headlessCfg := cfg
+	headlessCfg.Host = "127.0.0.1"
+	headlessCfg.Port = cfg.HeadlessPort
 	return &Acceptor{
-		cfg:      cfg,
+		cfg:      headlessCfg,
 		handler:  handler,
 		logger:   logger,
 		quit:     make(chan struct{}),

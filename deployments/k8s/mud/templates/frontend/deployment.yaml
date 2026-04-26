@@ -24,7 +24,13 @@ spec:
           image: {{ .Values.image.registry }}/{{ .Values.image.frontendRepository }}:{{ .Values.image.tag }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
+            # 4000: legacy player-port rejector (telnet-deprecation #325).
+            #       Bound to 127.0.0.1 inside the pod; not exposed by the
+            #       Service.
             - containerPort: 4000
+            # 4002: headless debug surface; loopback-only inside the pod and
+            #       exposed via the ClusterIP Service for in-cluster debug.
+            - containerPort: 4002
           env:
             - name: MUD_GAMESERVER_GRPC_HOST
               value: gameserver.mud.svc.cluster.local
@@ -54,8 +60,11 @@ spec:
             - name: MUD_LOGGING_FORMAT
               value: {{ .Values.logging.format | quote }}
           readinessProbe:
+            # Probe the headless debug port; the rejector on 4000 also
+            # responds, but readiness probes against the debug surface are
+            # less coupled to the deprecated player flow.
             tcpSocket:
-              port: 4000
+              port: 4002
             initialDelaySeconds: 5
             periodSeconds: 5
           resources:

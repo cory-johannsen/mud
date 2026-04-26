@@ -12,6 +12,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/cory-johannsen/mud/internal/config"
+	"github.com/cory-johannsen/mud/internal/frontend/telnet"
 	"github.com/cory-johannsen/mud/internal/game/ruleset"
 	"github.com/cory-johannsen/mud/internal/observability"
 	"github.com/cory-johannsen/mud/internal/server"
@@ -84,14 +85,41 @@ func main() {
 		},
 	})
 
+	// Telnet-deprecation (#325): mirror the cmd/frontend wiring — player
+	// port runs the rejector by default; full game handler only when the
+	// graceful-sunset flag is set.
+	playerAcceptor := app.TelnetAcceptor
+	if !cfg.Telnet.AllowGameCommands {
+		rejector := telnet.NewRejector(cfg.Telnet.WebClientURL, logger)
+		playerAcceptor = telnet.NewAcceptor(cfg.Telnet, rejector, logger)
+		logger.Info("telnet player port wired to rejector",
+			zap.String("addr", cfg.Telnet.Addr()),
+		)
+	}
 	lifecycle.Add("telnet", &server.FuncService{
 		StartFn: func() error {
-			return app.TelnetAcceptor.ListenAndServe()
+			return playerAcceptor.ListenAndServe()
 		},
 		StopFn: func() {
-			app.TelnetAcceptor.Stop()
+			playerAcceptor.Stop()
 		},
 	})
+
+	if cfg.Telnet.HeadlessPort != 0 {
+		headlessAcceptor := telnet.NewHeadlessAcceptor(cfg.Telnet, app.TelnetAcceptor.Handler(), logger)
+		lifecycle.Add("telnet-headless", &server.FuncService{
+			StartFn: func() error {
+				return headlessAcceptor.ListenAndServe()
+			},
+			StopFn: func() {
+				headlessAcceptor.Stop()
+			},
+		})
+		logger.Info("headless telnet acceptor configured",
+			zap.Int("port", cfg.Telnet.HeadlessPort),
+			zap.String("bind", "127.0.0.1"),
+		)
+	}
 
 	logger.Info("server initialized",
 		zap.Duration("startup", time.Since(start)),

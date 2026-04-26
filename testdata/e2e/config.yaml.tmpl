@@ -21,6 +21,9 @@ telnet:
   write_timeout: 10s
   idle_timeout: 10m
   idle_grace_period: 30s
+  # E2E suite drives the legacy player flow over the headless port; the
+  # seed-claude-accounts harness pre-populates the seed-authorized identities.
+  allow_game_commands: true
 
 logging:
   level: warn

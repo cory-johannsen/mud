@@ -82,19 +82,36 @@ func main() {
 		},
 	})
 
+	// Telnet-deprecation (#325): the player port runs the rejector by
+	// default. When telnet.allow_game_commands is true (graceful sunset),
+	// the original game handler is wired instead.
+	playerAcceptor := app.TelnetAcceptor
+	if !cfg.Telnet.AllowGameCommands {
+		rejector := telnet.NewRejector(cfg.Telnet.WebClientURL, logger)
+		playerAcceptor = telnet.NewAcceptor(cfg.Telnet, rejector, logger)
+		logger.Info("telnet player port wired to rejector",
+			zap.String("addr", cfg.Telnet.Addr()),
+			zap.String("web_client_url", cfg.Telnet.WebClientURL),
+		)
+	} else {
+		logger.Warn("telnet player flow ENABLED via allow_game_commands; this is a graceful-sunset toggle and MUST NOT remain on in production",
+			zap.String("addr", cfg.Telnet.Addr()),
+		)
+	}
 	lifecycle.Add("telnet", &server.FuncService{
 		StartFn: func() error {
-			return app.TelnetAcceptor.ListenAndServe()
+			return playerAcceptor.ListenAndServe()
 		},
 		StopFn: func() {
-			app.TelnetAcceptor.Stop()
+			playerAcceptor.Stop()
 		},
 	})
 
 	if cfg.Telnet.HeadlessPort != 0 {
-		headlessCfg := cfg.Telnet
-		headlessCfg.Port = cfg.Telnet.HeadlessPort
-		headlessAcceptor := telnet.NewHeadlessAcceptor(headlessCfg, app.TelnetAcceptor.Handler(), logger)
+		// REQ-TD-1a / REQ-TD-3a: headless port forced loopback inside
+		// NewHeadlessAcceptor. The seed-authorized handler is the existing
+		// AuthHandler; it now rejects non-seeded usernames per REQ-TD-3b.
+		headlessAcceptor := telnet.NewHeadlessAcceptor(cfg.Telnet, app.TelnetAcceptor.Handler(), logger)
 		lifecycle.Add("telnet-headless", &server.FuncService{
 			StartFn: func() error {
 				return headlessAcceptor.ListenAndServe()
@@ -105,6 +122,7 @@ func main() {
 		})
 		logger.Info("headless telnet acceptor configured",
 			zap.Int("port", cfg.Telnet.HeadlessPort),
+			zap.String("bind", "127.0.0.1"),
 		)
 	}
 
