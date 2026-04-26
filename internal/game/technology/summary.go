@@ -65,6 +65,12 @@ func formatHeader(def *TechnologyDef) string {
 		parts = append(parts, rangeStr)
 	}
 
+	// #363: surface AoE shape parameters in the header so the per-tech UI
+	// row shows the area at a glance (e.g. "burst 10 ft", "cone 30 ft", "line 25x5 ft").
+	if aoe := formatAoeHeader(def); aoe != "" {
+		parts = append(parts, aoe)
+	}
+
 	switch def.Resolution {
 	case "save":
 		parts = append(parts, fmt.Sprintf("Save: %s DC %d", strings.Title(strings.ReplaceAll(def.SaveType, "_", " ")), def.SaveDC)) //nolint:staticcheck
@@ -172,10 +178,22 @@ func formatEffect(e TechEffect) string {
 	switch e.Type {
 	case EffectDamage:
 		dmg := formatDiceAmount(e.Dice, e.Amount)
+		var s string
 		if e.DamageType != "" {
-			return dmg + " " + e.DamageType + " damage"
+			s = dmg + " " + e.DamageType + " damage"
+		} else {
+			s = dmg + " damage"
 		}
-		return dmg + " damage"
+		// #363: surface multi-projectile + persistent flags so the count is
+		// visible in the Technologies panel and hotbar tooltip without the
+		// player having to drill into the YAML or read the description prose.
+		if e.Projectiles > 0 {
+			s += fmt.Sprintf(" × %d projectiles", e.Projectiles)
+		}
+		if e.Persistent {
+			s += " (persistent)"
+		}
+		return s
 	case EffectHeal:
 		return formatDiceAmount(e.Dice, e.Amount) + " healing"
 	case EffectDrain:
@@ -232,4 +250,33 @@ func formatDiceAmount(dice string, amount int) string {
 	default:
 		return "?"
 	}
+}
+
+// formatAoeHeader returns a compact AoE shape descriptor for the header line,
+// or "" when the tech has no AoE shape. Generic across burst / cone / line so
+// any tech declaring an AoE shape gets the same affordance (#363).
+func formatAoeHeader(def *TechnologyDef) string {
+	// Legacy back-compat: aoe_radius without an explicit shape implies burst.
+	if def.AoeRadius > 0 && def.AoeShape == "" {
+		return fmt.Sprintf("burst %d ft", def.AoeRadius)
+	}
+	switch string(def.AoeShape) {
+	case "burst":
+		if def.AoeRadius > 0 {
+			return fmt.Sprintf("burst %d ft", def.AoeRadius)
+		}
+	case "cone":
+		if def.AoeLength > 0 {
+			return fmt.Sprintf("cone %d ft", def.AoeLength)
+		}
+	case "line":
+		if def.AoeLength > 0 {
+			w := def.AoeWidth
+			if w == 0 {
+				w = 5
+			}
+			return fmt.Sprintf("line %dx%d ft", def.AoeLength, w)
+		}
+	}
+	return ""
 }
