@@ -58,7 +58,7 @@ zone:
       The road ahead leads deeper into Beaverton territory.
 
       '
-    danger_level: safe
+    danger_level: sketchy
     exits:
     - direction: east
       target: beav_canyon_road_east
@@ -85,6 +85,7 @@ zone:
 
       '
     core: true
+    danger_level: dangerous
     exits:
     - direction: east
       target: beav_canyon_road_west
@@ -113,6 +114,7 @@ zone:
 
       '
     core: true
+    danger_level: dangerous
     exits:
     - direction: east
       target: beav_town_center
@@ -145,7 +147,7 @@ zone:
       a string of lights that makes this the brightest place for miles.
 
       '
-    danger_level: safe
+    danger_level: sketchy
     exits:
     - direction: south
       target: beav_hall_boulevard
@@ -171,7 +173,7 @@ zone:
       are enforced with lethal enthusiasm.
 
       '
-    danger_level: safe
+    danger_level: sketchy
     exits:
     - direction: north
       target: beav_parking_garage_b
@@ -199,7 +201,7 @@ zone:
       which means it''s full of everything they don''t want found.
 
       '
-    danger_level: safe
+    danger_level: sketchy
     exits:
     - direction: south
       target: beav_bike_path_north
@@ -223,7 +225,7 @@ zone:
       golf carts and modified riding mowers.
 
       '
-    danger_level: safe
+    danger_level: sketchy
     exits:
     - direction: south
       target: beav_canyon_road_west
@@ -247,7 +249,7 @@ zone:
       and whatever Aloha has become.
 
       '
-    danger_level: safe
+    danger_level: sketchy
     exits:
     - direction: west
       target: aloha_tv_highway_east
@@ -272,7 +274,7 @@ zone:
       in Tigard. On most days, it''s just grey.
 
       '
-    danger_level: safe
+    danger_level: sketchy
     exits:
     - direction: north
       target: beav_murray_blvd
@@ -296,7 +298,7 @@ zone:
       log hangs from a lamppost, meticulously maintained.
 
       '
-    danger_level: safe
+    danger_level: sketchy
     exits:
     - direction: east
       target: beav_hall_boulevard
@@ -322,7 +324,7 @@ zone:
       each one stamped with an official seal.
 
       '
-    danger_level: safe
+    danger_level: sketchy
     exits:
     - direction: south
       target: beav_town_center
@@ -348,7 +350,7 @@ zone:
       Your parking level determines your rank.
 
       '
-    danger_level: safe
+    danger_level: sketchy
     exits:
     - direction: north
       target: beav_food_court_command
@@ -372,7 +374,7 @@ zone:
       which is an old toll booth.
 
       '
-    danger_level: safe
+    danger_level: sketchy
     exits:
     - direction: south
       target: beav_murray_blvd
@@ -394,7 +396,7 @@ zone:
       Children''s toys rust in the yards beside weapon racks.
 
       '
-    danger_level: safe
+    danger_level: sketchy
     exits:
     - direction: east
       target: beav_murray_blvd
@@ -416,7 +418,7 @@ zone:
       of constitutional law. Violators are sentenced to parking duty.
 
       '
-    danger_level: safe
+    danger_level: sketchy
     exits:
     - direction: south
       target: beav_walker_road
@@ -436,7 +438,7 @@ zone:
       their spoke-mounted playing cards clicking a warning of their approach.
 
       '
-    danger_level: safe
+    danger_level: sketchy
     exits:
     - direction: south
       target: beav_cedar_hills
@@ -460,7 +462,7 @@ zone:
       movement in meticulous detail.
 
       '
-    danger_level: safe
+    danger_level: sketchy
     exits:
     - direction: south
       target: beav_sunset_transit
@@ -486,7 +488,7 @@ zone:
       hoarded pre-collapse beans that are almost certainly just dirt by now.
 
       '
-    danger_level: safe
+    danger_level: sketchy
     exits:
     - direction: south
       target: beav_free_market
@@ -510,7 +512,7 @@ zone:
       the ground like fence posts — line both sides.
 
       '
-    danger_level: safe
+    danger_level: sketchy
     exits:
     - direction: north
       target: beav_canyon_road_east
@@ -539,7 +541,7 @@ zone:
       priced in parking tokens, the unofficial currency of the Free State.
 
       '
-    danger_level: safe
+    danger_level: sketchy
     exits:
     - direction: west
       target: beav_progress_ridge
@@ -563,7 +565,7 @@ zone:
       depicts a golden shopping cart ascending into heaven.
 
       '
-    danger_level: safe
+    danger_level: sketchy
     exits:
     - direction: west
       target: beav_scholls_ferry
@@ -613,7 +615,7 @@ zone:
   - id: beav_mall_core
     title: Mall Enforcement Core
     boss_room: true
-    danger_level: dangerous
+    danger_level: all_out_war
     description: |
       The reinforced core of the Beaverton Town Center mall serves as the nerve
       center of the Free State's enforcement apparatus. Steel blast doors seal
@@ -652,6 +654,7 @@ zone:
       converted Auntie Anne's pretzel stand — overlooks the bullpen through
       a reinforced window.
     core: true
+    danger_level: dangerous
     exits:
     - direction: north
       target: beav_mall_core
@@ -674,7 +677,7 @@ zone:
       the ghosts of prix-fixe menus. The kitchen equipment was looted long since,
       but the wine cellar — sealed behind a collapsed wall — may still hold
       something worth finding. Feral cats have claimed the dining room.
-    danger_level: safe
+    danger_level: sketchy
     exits:
     - direction: south
       target: beav_neighborhood_watch_north
@@ -691,7 +694,7 @@ zone:
       in driveways. The street grid is still legible under the weeds. Occasional
       foragers pick through the debris for anything the official salvage teams
       missed. The checkpoint at Canyon Road is visible a few blocks east.
-    danger_level: safe
+    danger_level: sketchy
     exits:
     - direction: southwest
       target: beav_canyon_road_east
@@ -708,7 +711,7 @@ zone:
       structures remain upright. Salvagers work quickly here, aware that patrols
       from the Walker Road post swing through every few hours. Graffiti tags mark
       the ruins in a dozen competing dialects.
-    danger_level: safe
+    danger_level: sketchy
     exits:
     - direction: east
       target: beav_walker_road
@@ -727,7 +730,7 @@ zone:
       menu offers real coffee — rare enough to enforce the peace by itself.
       A staircase leads down to a basement workshop where discrete technical
       services are available.
-    danger_level: safe
+    danger_level: sketchy
     exits:
     - direction: east
       target: beav_nature_park
@@ -752,7 +755,7 @@ zone:
       and tools in various states of organization. The proprietor asks no questions
       about what needs fixing. A handwritten sign reads "NO RUSH JOBS. NO EXCEPTIONS."
       The smell of solder and machine oil is constant.
-    danger_level: safe
+    danger_level: sketchy
     exits:
     - direction: east
       target: beav_neutral_cafe
@@ -771,7 +774,7 @@ zone:
       without allegiance to Beaverton's enforcement apparatus. Prices are posted
       in multiple currencies. Disputes are settled by the café's proprietor, whose
       word is final. The stalls close at nightfall, no exceptions.
-    danger_level: safe
+    danger_level: sketchy
     exits:
     - direction: north
       target: beav_neutral_cafe
