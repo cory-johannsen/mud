@@ -29,6 +29,30 @@ func RollRoomTrap(level DangerLevel, override *int, rng Roller) bool {
 	return rng.Roll(100) < pct
 }
 
+// RoomTrapPayload describes the default damage and condition for a random room trap
+// firing at the given danger level.
+type RoomTrapPayload struct {
+	DamageDice  string // dice expression; "" means no damage
+	DamageType  string // e.g. "piercing"
+	ConditionID string // e.g. "bleeding"; "" means no condition
+}
+
+// DefaultRoomTrapPayload returns the canonical room-trap payload by danger level.
+// Safe and Sketchy levels never roll room traps (see defaultTrapPcts), so they
+// have no payload. Dangerous and AllOutWar return progressively heavier payloads.
+//
+// Postcondition: returned payload's DamageDice is non-empty for Dangerous/AllOutWar.
+func DefaultRoomTrapPayload(level DangerLevel) RoomTrapPayload {
+	switch level {
+	case Dangerous:
+		return RoomTrapPayload{DamageDice: "2d6", DamageType: "piercing", ConditionID: "bleeding"}
+	case AllOutWar:
+		return RoomTrapPayload{DamageDice: "4d6", DamageType: "piercing", ConditionID: "prone"}
+	default:
+		return RoomTrapPayload{}
+	}
+}
+
 // RollCoverTrap returns true if a cover trap should trigger.
 // override is nil to use the danger level default; non-nil uses the explicit value (including 0).
 // Precondition: rng MUST NOT be nil.
