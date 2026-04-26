@@ -42,6 +42,7 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/quest"
 	"github.com/cory-johannsen/mud/internal/game/ruleset"
 	"github.com/cory-johannsen/mud/internal/game/session"
+	"github.com/cory-johannsen/mud/internal/game/skillaction"
 	"github.com/cory-johannsen/mud/internal/game/skillcheck"
 	"github.com/cory-johannsen/mud/internal/game/substance"
 	"github.com/cory-johannsen/mud/internal/game/technology"
@@ -10401,11 +10402,17 @@ func (s *GameServiceServer) handleFeint(uid string, req *gamev1.FeintRequest) (*
 }
 
 // handleDemoralize performs a smooth_talk skill check against the target NPC's Cool DC (10 + level + AbilityMod(Savvy) + CoolRank bonus).
-// On success, applies -1 AC and -1 attack to the target combatant for the encounter.
+// On success, applies -1 AC and -1 attack to the target combatant for the encounter,
+// and (per #252) also applies the canonical Frightened condition through the unified
+// skillaction pipeline (loaded from content/skill_actions/demoralize.yaml).
 // Combat only; costs 1 AP.
 //
 // Precondition: uid must be in active combat; req.Target must name an NPC in the room.
-// Postcondition: On success, target's ACMod and AttackMod are each decremented by 1.
+// Postcondition: On success, target's ACMod and AttackMod are each decremented by 1
+// AND the target gains 1 stack of Frightened (2 stacks on critical success when the
+// skillaction catalog loads successfully). Legacy ACMod/AttackMod application is
+// retained for backward compatibility with existing combat tests; future work
+// (Task 6) will retire the flat-mod path in favour of the condition-only model.
 func (s *GameServiceServer) handleDemoralize(uid string, req *gamev1.DemoralizeRequest) (*gamev1.ServerEvent, error) {
 	sess, ok := s.sessions.GetPlayer(uid)
 	if !ok {
@@ -10452,7 +10459,9 @@ func (s *GameServiceServer) handleDemoralize(uid string, req *gamev1.DemoralizeR
 		return messageEvent(detail + " — failure. Your words fall flat."), nil
 	}
 
-	// Success: apply -1 AC and -1 attack to NPC combatant.
+	// Legacy flat-mod application — retained for backward compatibility with
+	// the combat engine's pre-#252 demoralize handling. Task 6 of #252 will
+	// migrate this to a Frightened-only model gated by an audit checkpoint.
 	if err := s.combatH.ApplyCombatantACMod(uid, inst.ID, -1); err != nil {
 		s.logger.Warn("handleDemoralize: ApplyCombatantACMod failed",
 			zap.String("npc_id", inst.ID), zap.Error(err))
@@ -10462,7 +10471,57 @@ func (s *GameServiceServer) handleDemoralize(uid string, req *gamev1.DemoralizeR
 			zap.String("npc_id", inst.ID), zap.Error(err))
 	}
 
+	// #252 NCA-7/NCA-9: drive the canonical Frightened condition application
+	// through the unified skillaction pipeline so the catalog YAML is the
+	// source of truth for the demoralize ladder. Failures here are non-fatal
+	// — the legacy mods above already applied — and are logged.
+	s.applyDemoralizeFrightened(uid, sess.RoomID, inst.ID, roll, bonus, dc)
+
 	return messageEvent(detail + fmt.Sprintf(" — success! %s is demoralized (-1 AC, -1 attack).", inst.Name())), nil
+}
+
+// applyDemoralizeFrightened is the #252 skillaction-pipeline integration for
+// Demoralize. It computes the PF2E degree of success (with nat-1/nat-20
+// promotion/demotion), looks up the matching outcome in the loaded
+// demoralize.yaml ActionDef, and applies any apply_condition effects through
+// the existing CombatHandler.ApplyConditionToNPC plumbing.
+//
+// Failures are warning-logged and silently swallowed: the caller has already
+// applied the legacy flat mods, so the legacy behaviour is preserved even
+// when the skillaction catalog fails to load.
+func (s *GameServiceServer) applyDemoralizeFrightened(uid, roomID, npcID string, roll, bonus, dc int) {
+	defs, err := loadSkillActions(s.condRegistry)
+	if err != nil {
+		s.logger.Debug("skillaction: catalog load failed; legacy demoralize path only",
+			zap.Error(err))
+		return
+	}
+	def, ok := defs["demoralize"]
+	if !ok {
+		s.logger.Debug("skillaction: demoralize def not present in catalog")
+		return
+	}
+	out, err := skillaction.Resolve(skillaction.ResolveContext{}, def, roll, bonus, dc)
+	if err != nil {
+		s.logger.Warn("skillaction: Resolve failed", zap.Error(err))
+		return
+	}
+	for _, eff := range out.Effects {
+		ac, ok := eff.(skillaction.ApplyCondition)
+		if !ok {
+			continue
+		}
+		stacks := ac.Stacks
+		if stacks <= 0 {
+			stacks = 1
+		}
+		if applyErr := s.combatH.ApplyConditionToNPC(roomID, npcID, ac.ID, stacks, ac.DurationRounds); applyErr != nil {
+			s.logger.Warn("skillaction: ApplyConditionToNPC failed",
+				zap.String("npc_id", npcID),
+				zap.String("condition", ac.ID),
+				zap.Error(applyErr))
+		}
+	}
 }
 
 // handleGrapple performs a muscle skill check against the target NPC's Toughness DC (10 + level + AbilityMod(Brutality) + ToughnessRank bonus).
