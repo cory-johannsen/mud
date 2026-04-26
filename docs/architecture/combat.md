@@ -314,6 +314,83 @@ for budget > 0:
 | `internal/game/combat/engine.go` | `Combat.Terrain`, `RoomHazards`, `skipHazardRoundStart` fields; round_start hazard hook in `StartRoundWithSrc` |
 | `internal/game/combat/combat.go` | `Combatant.SpeedBudget()` (replaces deprecated `SpeedSquares()`); `WeaknessFor`/`ResistanceFor` helpers |
 
+## Area-of-Effect (AOE Requirements)
+
+Typed AoE templates (burst / cone / line) flow from client to server to resolver via the
+new `AoeTemplate` proto message. Content declares an `aoe_shape` plus shape-appropriate
+dimensions; the resolver derives affected cells from the template, applies an optional
+post-filter, then applies the action's effect to every living combatant in the resulting
+cell set.
+
+### Requirements (35 total, summarised by category)
+
+| Category | Requirements | Summary |
+|----------|-------------|---------|
+| Content model | AOE-1..AOE-6 | `aoe_shape` enum (burst/cone/line) + `aoe_length` / `aoe_width` / `aoe_radius` per shape; loader defaults missing shape to `burst` (AOE-4); validator rejects mismatched dimensions (AOE-5/6). |
+| Geometry helpers | AOE-7..AOE-11 | Pure-function `BurstCells / ConeCells / LineCells / FacingFrom` in `internal/game/combat/geometry.go`; cone/line exclude apex (AOE-10); no occlusion consulted (AOE-11). |
+| Wire format | AOE-12..AOE-16 | `AoeTemplate{shape, anchor_x, anchor_y, facing, cells}` proto; `UseRequest.template` optional; cone/line require `template`, burst accepts either (AOE-13); legacy `target_x/y` retained for back-compat (AOE-16). |
+| Resolver | AOE-17..AOE-21 | `CellsForTemplate -> PostFilterAffectedCells -> CombatantsInCells -> effect application`; empty intersection still consumes AP (AOE-20); `PostFilterAffectedCells` is a no-op extension point reserved for #267 (AOE-21). |
+| Placement UX | AOE-22..AOE-32 | Telnet aim/face/confirm/cancel mode with 60s timeout; web `aoePlacement` state with mouse-driven anchor/facing and Enter/Esc bindings. *Deferred to a follow-up issue.* |
+| Content migration | AOE-33..AOE-35 | Explicit `aoe_shape: burst` on existing entries (done); cone/line exemplar migration deferred. |
+
+### Geometry helpers (`internal/game/combat/geometry.go`)
+
+| Helper | Signature | Notes |
+|--------|-----------|-------|
+| `BurstCells` | `(center Cell, radiusFt int) []Cell` | Includes center; Chebyshev distance, 5 ft per cell. |
+| `ConeCells` | `(apex Cell, dir Direction, lengthFt int) []Cell` | 90 degree octant wedge; excludes apex (AOE-10). |
+| `LineCells` | `(apex Cell, dir Direction, lengthFt, widthFt int) []Cell` | Excludes apex; width defaults to 5 ft (one cell). |
+| `FacingFrom` | `(from Cell, to Cell) Direction` | Rounds to nearest of 8 octants (N..NW), preferring axial in ties. |
+| `CellsForTemplate` | `(tmpl *AoeTemplate, content AoeContent) []Cell` | Dispatches by `tmpl.Shape`; reads dimensions from content. |
+| `combat.CombatantsInCells` | `(cbt *Combat, cells []Cell) []*Combatant` | Returns living combatants only; mirrors `CombatantsInRadius` filter (AOE-18). `CombatantsInRadius` retained as a thin wrapper (AOE-19). |
+
+### Resolver pipeline
+
+```
+1. affectedCells   = geometry.CellsForTemplate(template, content)        // AOE-17
+2. affectedCells   = resolver.PostFilterAffectedCells(cells, ctx)        // AOE-21 (identity in v1)
+3. affectedTargets = combat.CombatantsInCells(cbt, affectedCells)        // AOE-18
+4. for each target: applyEffect(action, target)                          // existing effect.Resolve path
+```
+
+`PostFilterAffectedCells` is the single seam where #267 (visibility / line-of-sight) will
+plug in without further resolver edits. v1 returns the input slice unchanged.
+
+### Back-compat
+
+When a `UseRequest` arrives with `template == nil` and valid `target_x` / `target_y`, the
+server synthesises a burst template centred on those coordinates using the content's
+`aoe_radius` (AOE-16). This preserves existing macros and aliases. The synthetic template
+is the only path by which `template == nil` is accepted; cone and line shapes always
+require an explicit `template` (AOE-13).
+
+### Validation
+
+Shape-specific load-time validation rejects authoring mistakes:
+
+| Shape | Required dimensions | Forbidden |
+|-------|---------------------|-----------|
+| `burst` | `aoe_radius > 0` | `aoe_length` / `aoe_width` set |
+| `cone` | `aoe_length > 0` | `aoe_radius` / `aoe_width` set |
+| `line` | `aoe_length > 0` (`aoe_width` defaults to 5 ft) | `aoe_radius` set |
+
+### Implementation files
+
+| File | Responsibility |
+|------|----------------|
+| `internal/game/combat/geometry.go` | `BurstCells`, `ConeCells`, `LineCells`, `FacingFrom`, `CellsForTemplate`, `Direction` |
+| `internal/game/combat/aoe.go` | `CombatantsInCells`, `CombatantsInRadius` (back-compat wrapper) |
+| `internal/gameserver/grpc_service.go` | Resolver swap (AOE-17): `CellsForTemplate -> PostFilterAffectedCells -> CombatantsInCells` |
+| `api/proto/game/v1/game.proto` | `AoeTemplate` message; `UseRequest.template` field |
+| `internal/game/loader/*.go` | `aoe_shape` / `aoe_length` / `aoe_width` parsing on `TechnologyDef`, `ClassFeatureDef`, `FeatDef`, `Explosive`; AOE-5 / AOE-6 validation |
+
+### Follow-up
+
+Interactive placement UX (telnet aim/face/confirm/cancel and the web `AoePlacement`
+component) is tracked as a follow-up to #250. The core resolver is functional end-to-end
+today: clients can submit programmatic `AoeTemplate` messages without an interactive
+placement step.
+
 ## Component Dependencies
 
 ```mermaid

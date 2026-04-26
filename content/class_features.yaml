@@ -74,6 +74,7 @@ class_features:
     pf2e: inspire_courage
     active: true
     action_cost: 1
+    aoe_shape: burst
     aoe_radius: 30
     activate_text: "You raise your voice and all eyes snap to you."
     condition_id: command_attention_active
@@ -90,6 +91,7 @@ class_features:
     pf2e: inspire_defense
     active: true
     action_cost: 1
+    aoe_shape: burst
     aoe_radius: 30
     activate_text: "You spin a rapid web of distracting chatter."
     description: "Grant allies within earshot +1 AC and saving throws for the current encounter."
@@ -377,6 +379,7 @@ class_features:
     pf2e: sudden_charge
     active: true
     action_cost: 1
+    aoe_shape: burst
     aoe_radius: 30
     activate_text: "You break into a full sprint before anyone can react."
     description: "Once per encounter, before your first turn begins, move up to your speed and make one melee or ranged attack."
@@ -660,6 +663,7 @@ class_features:
     pf2e: demoralize
     active: true
     action_cost: 2
+    aoe_shape: burst
     aoe_radius: 15
     activate_text: "You invoke fire and damnation against your enemies."
     description: "Once per encounter, make a single Intimidate check against all enemies within 20 ft simultaneously."
@@ -722,6 +726,7 @@ class_features:
     pf2e: captivating_performance
     active: true
     action_cost: 1
+    aoe_shape: burst
     aoe_radius: 30
     activate_text: "You turn on the charm and command the room."
     description: "Once per encounter, make an opposed Perform check to distract all enemies within 30 ft for 1 round."
@@ -751,6 +756,7 @@ class_features:
     pf2e: coerce
     active: true
     action_cost: 1
+    aoe_shape: burst
     aoe_radius: 15
     activate_text: "You make absolutely clear what happens to people who don't comply."
     description: "Intimidate a target; on success they take no hostile action against you for 24 hours."
@@ -847,6 +853,7 @@ class_features:
     pf2e: recall_knowledge
     active: true
     action_cost: 1
+    aoe_shape: burst
     aoe_radius: 15
     activate_text: "You open yourself to the possibility of something beyond."
     description: "Once per day, ask one yes/no question about a topic and receive a truthful answer at the GM's discretion."
@@ -950,6 +957,7 @@ class_features:
     pf2e: demoralize
     active: true
     action_cost: 2
+    aoe_shape: burst
     aoe_radius: 15
     activate_text: "You offer words of comfort and faith."
     description: "Once per day, remove the frightened condition from one demoralized ally as a single action."
@@ -966,6 +974,7 @@ class_features:
     pf2e: coerce
     active: true
     action_cost: 2
+    aoe_shape: burst
     aoe_radius: 15
     activate_text: "You speak with absolute conviction and leave no room for doubt."
     description: "Once per day, one NPC who fails a Will save becomes a devoted follower for 24 hours."
