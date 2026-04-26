@@ -322,6 +322,8 @@ zone:
     - direction: west
       target: pdx_concourse_d
     - direction: east
+      target: pdx_the_carpet
+    - direction: southeast
       target: pdx_the_tarmac
     map_x: 2
     map_y: -4
@@ -401,7 +403,7 @@ zone:
 
       '
     exits:
-    - direction: west
+    - direction: northwest
       target: pdx_concourse_e
     - direction: east
       target: pdx_hangar_row
