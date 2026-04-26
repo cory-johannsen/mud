@@ -13,7 +13,7 @@ const DANGER_FILLS: Record<string, string> = {
   safe: '#2a4a2a',
   sketchy: '#3a3a1a',
   dangerous: '#4a2a1a',
-  deadly: '#4a1a1a',
+  all_out_war: '#4a1a1a',
 }
 
 const UNDISCOVERED_FILL = '#111'
@@ -484,14 +484,14 @@ const DANGER_LABELS: Record<string, string> = {
   safe: 'Safe',
   sketchy: 'Sketchy',
   dangerous: 'Dangerous',
-  deadly: 'Deadly',
+  all_out_war: 'All Out War',
 }
 
 const DANGER_COLORS: Record<string, string> = {
   safe: '#6abf69',
   sketchy: '#e6c84e',
   dangerous: '#e08030',
-  deadly: '#c03030',
+  all_out_war: '#c03030',
 }
 
 function ZoneTooltip({ tooltip, tiles }: { tooltip: TooltipState; tiles: WorldZoneTile[] }): JSX.Element {
