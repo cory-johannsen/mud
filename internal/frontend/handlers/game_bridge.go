@@ -550,6 +550,17 @@ func (h *AuthHandler) commandLoop(ctx context.Context, stream gamev1.GameService
 
 		cmd, ok := registry.Resolve(parsed.Command)
 		if !ok {
+			// #360: pure-digit input is a leaked menu-option pick (level-up
+			// tech, feat choice, etc.). Surface a clear hint instead of
+			// dispatching as a "custom exit name" which would produce
+			// 'no exit "N"' errors. Server-side handleMove also rejects this
+			// as a defence-in-depth.
+			if isAllDigits(parsed.Command) {
+				_ = conn.WriteLine(telnet.Colorize(telnet.Dim,
+					"Numbers select menu options. Finish your pending selection (look at the prompt above), or type a direction word."))
+				_ = conn.WritePrompt(session.CurrentPrompt())
+				continue
+			}
 			// Try it as a custom exit name (e.g., "stairs")
 			msg := buildMoveMessage(reqID, parsed.Command)
 			if err := stream.Send(msg); err != nil {
@@ -663,6 +674,21 @@ func (h *AuthHandler) commandLoop(ctx context.Context, stream gamev1.GameService
 			}
 		}
 	}
+}
+
+// isAllDigits reports whether s is non-empty and entirely 0-9. Used by the
+// telnet input dispatcher (#360) to gate menu-option picks from leaking into
+// the room-movement fall-through.
+func isAllDigits(s string) bool {
+	if s == "" {
+		return false
+	}
+	for _, r := range s {
+		if r < '0' || r > '9' {
+			return false
+		}
+	}
+	return true
 }
 
 func buildMoveMessage(reqID, direction string) *gamev1.ClientMessage {
