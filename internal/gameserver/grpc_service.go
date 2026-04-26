@@ -2999,10 +2999,32 @@ func (s *GameServiceServer) handleMove(uid string, req *gamev1.MoveRequest) (*ga
 			effectiveLevel := danger.EffectiveDangerLevel(newZone.DangerLevel, newRoom.DangerLevel)
 			if danger.RollRoomTrap(effectiveLevel, newRoom.RoomTrapChance, danger.RandRoller{}) {
 				s.logger.Info("room trap triggered", zap.String("uid", uid), zap.String("room", newRoom.ID))
+				// #319: room traps now apply real damage + a condition based on danger level.
+				payload := danger.DefaultRoomTrapPayload(effectiveLevel)
+				narrative := "You trigger a hidden trap!"
+				if payload.DamageDice != "" && s.dice != nil {
+					rolled, rollErr := s.dice.RollExpr(payload.DamageDice)
+					if rollErr == nil {
+						total := rolled.Total()
+						resistance := sess.Resistances[payload.DamageType]
+						dmg := total - resistance
+						if dmg < 0 {
+							dmg = 0
+						}
+						sess.CurrentHP -= dmg
+						narrative += fmt.Sprintf(" %d %s damage.", dmg, payload.DamageType)
+					}
+				}
+				if payload.ConditionID != "" && sess.Conditions != nil && s.condRegistry != nil {
+					if condDef, condOK := s.condRegistry.Get(payload.ConditionID); condOK {
+						_ = sess.Conditions.Apply(sess.UID, condDef, 1, -1)
+						narrative += fmt.Sprintf(" You are now %s.", payload.ConditionID)
+					}
+				}
 				trapEvt := &gamev1.ServerEvent{
 					Payload: &gamev1.ServerEvent_Message{
 						Message: &gamev1.MessageEvent{
-							Content: "You trigger a hidden trap!",
+							Content: narrative,
 							Type:    gamev1.MessageType_MESSAGE_TYPE_UNSPECIFIED,
 						},
 					},
@@ -3015,6 +3037,7 @@ func (s *GameServiceServer) handleMove(uid string, req *gamev1.MoveRequest) (*ga
 						)
 					}
 				}
+				s.checkNonCombatDeath(uid, sess)
 			}
 		}
 		// Wanted-level guard check: initiate guard combat if player is wanted in this zone.
