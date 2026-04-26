@@ -112,6 +112,12 @@ type QueuedAction struct {
 	AbilityCost int    // for ActionUseAbility and ActionUseTech; AP cost
 	TargetX     int32  // for ActionUseTech AoE burst center; -1 means unset
 	TargetY     int32  // for ActionUseTech AoE burst center; -1 means unset
+	// TargetUID is the canonical combatant UID for the action's primary target.
+	// Populated by the targeting pipeline (see combat.ValidateSingleTarget and
+	// gameserver.ResolveAndValidate, #249). May be empty for self/AoE-only
+	// actions or for legacy code paths that still resolve targets via Target
+	// (NPC display name). New code MUST prefer TargetUID over Target.
+	TargetUID string
 	// Ready fields — only meaningful when Type == ActionReady.
 	ReadyTrigger    reaction.ReactionTriggerType // trigger that fires the prepared action
 	ReadyAction     *QueuedAction                // the 1-AP action to execute on trigger

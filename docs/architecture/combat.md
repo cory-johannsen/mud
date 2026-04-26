@@ -495,3 +495,48 @@ Ready entries expire at the end of the round in which they were registered — `
 ### Configuration
 
 - `config.GameServerConfig.ReactionPromptTimeout` (valid range 500ms–30s; defaults to 3s) is clamped by `ValidateReactionPromptTimeout`. Plumbed into `CombatHandler.SetReactionPromptTimeout` at startup.
+
+## Targeting
+
+The targeting subsystem (`internal/game/combat/targeting.go`, `internal/game/combat/targeting_state.go`) provides the enqueue-time validation seam for player combat actions (#249). It is intentionally split from the resolver pipeline: `Combat.QueueAction` validates, the resolver consumes already-validated `QueuedAction.TargetUID` values without re-checking allegiance or range.
+
+### Categories (TARGET-1)
+
+`combat.TargetCategory` enumerates seven action target shapes:
+
+| Category | Meaning |
+| --- | --- |
+| `self` | actor targets self; no UID required |
+| `single_ally` | exactly one living ally |
+| `single_enemy` | exactly one living enemy |
+| `single_any` | any single living combatant |
+| `aoe_burst` | burst centered on a grid cell (cell layout via #250 `gamev1.AoeTemplate`) |
+| `aoe_cone` | cone originating from the actor |
+| `aoe_line` | line originating from the actor |
+
+### Error codes (TARGET-2)
+
+`combat.TargetingError` exposes eight discrete codes. `TargetOK` is the success sentinel; the others are terminal failures and the action MUST be refused:
+
+`target_missing`, `target_not_in_combat`, `target_dead`, `out_of_range`, `line_of_fire_blocked`, `wrong_category`, `aoe_shape_invalid`.
+
+`TargetingResult{Err, Detail}` carries the code plus a human-readable reason for narration. The zero value is `{TargetOK, ""}`.
+
+### Two-phase validation
+
+1. **Enqueue phase — `combat.ValidateSingleTarget(cbt, actor, uid, category, maxRangeFt, requiresLOF)`.** Six stages run in order: presence → combatant lookup → liveness → category match (allegiance) → range (Chebyshev × 5 ft) → line of fire. The line-of-fire stage is currently a no-op and reserved for a future LOF feature; AoE shape validation (`ValidateAoE`) is deferred to the same follow-up that wires #250's `CellsForTemplate` output through this pipeline.
+2. **Resolution phase — combat resolver.** Already-validated `TargetUID` values flow through `QueuedAction.TargetUID` (additive field on `combat.QueuedAction`). The resolver does not re-validate allegiance.
+
+### Sticky selection (TARGET-3)
+
+`combat.CombatTargeting` holds per-player sticky selection. The auto-target rule fires from `OnCombatStart` and `OnTargetDeath`: when exactly one living enemy remains, that enemy becomes the sticky target. Selections survive across turns inside one combat and are cleared by `Clear()`, by combat end, or when the chosen target dies (post-death the rule re-evaluates).
+
+`CombatTargeting` lives in the `combat` package — not in `session.PlayerSession` — because `combat` already imports `session`; closing the cycle would break the build. Per-player instances are held in a small registry on the gameserver side: `internal/gameserver/combat_targeting.go::targetingRegistry` (keyed by player UID, lazy-create, drop on combat end).
+
+### Resolution helper (TARGET-4)
+
+`(*CombatTargeting).ResolveAndValidate(cbt, actor, category, maxRangeFt, inlineUID)` is the single entry point for action handlers. Inline UID wins when non-empty; otherwise the sticky value is used. On a successful validation the sticky is updated to the resolved UID; on failure the sticky is left intact.
+
+### Wiring status
+
+The handler wiring (telnet `attack` / `strike` / `use` and the corresponding gRPC handlers) is **deferred to a follow-up of #249**. The same follow-up brings telnet/web `target` commands, AoE-cell validation, and feat/tech YAML targeting blocks online. The seam shipped in this iteration is the type and helper surface only.
