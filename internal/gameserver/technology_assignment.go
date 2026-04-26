@@ -1749,34 +1749,19 @@ func BackfillLevelUpTechnologies(
 			agg := bySpellLevel[spellLvl]
 
 			// REQ-TTA-2: L2+ prepared slots always require a trainer — never auto-assign.
-			// For any existing pool-assigned slots at L2+ (previously auto-assigned by the
-			// buggy backfill), clear them and return them as pending.
+			// Bug #351: previous behavior unconditionally deleted all pool-assigned L2+ slots
+			// on every login under the assumption they were buggy auto-fills. That destroyed
+			// legitimate trainer-resolved and rest-rearranged selections — most visibly when
+			// the same tech was prepared at multiple cast levels (only the L1 row survived).
+			//
+			// Current behavior: preserve every existing slot. Only the SHORTAGE between the
+			// expected slot count and the actual stored count is registered as pending so the
+			// trainer flow can backfill missing slots without touching what the player already
+			// chose.
 			if spellLvl >= 2 {
 				actual := len(existingPrep[spellLvl])
-				// Count fixed entries at this spell level — those may stay.
-				fixedCount := 0
-				for _, e := range agg.fixed {
-					if e.Level == spellLvl {
-						fixedCount++
-					}
-				}
-				// Pool-assigned = total assigned minus fixed-assigned.
-				// Any pool slot at L2+ was auto-assigned without trainer — remove it.
-				poolAssigned := actual - fixedCount
-				if poolAssigned > 0 {
-					// Clear all slots at this level; the fixed ones will be re-applied when the
-					// trainer resolves the pending grant.
-					if delErr := prepRepo.DeleteAtSpellLevel(ctx, characterID, spellLvl); delErr != nil {
-						return nil, fmt.Errorf("BackfillLevelUpTechnologies clear auto-assigned spell level %d: %w", spellLvl, delErr)
-					}
-					// Remove from session as well.
-					if sess.PreparedTechs != nil {
-						delete(sess.PreparedTechs, spellLvl)
-					}
-					actual = fixedCount
-					existingPrep[spellLvl] = existingPrep[spellLvl][:fixedCount]
-				}
 				// Compute remaining pending slots (expected − what's actually assigned).
+				// Never goes negative: extra slots beyond grant expectations are preserved.
 				pending := agg.expectedSlots - actual
 				if pending > 0 {
 					if pendingPrepared == nil {
