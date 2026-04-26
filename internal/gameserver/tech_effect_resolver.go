@@ -102,6 +102,13 @@ func ResolveTechEffectsWithHeighten(
 	}
 	if len(targets) == 0 {
 		if tech.Resolution == "attack" || tech.Resolution == "save" {
+			// #349: when out-of-combat AND the tech has authored damage/condition
+			// blocks, surface a clearer "requires a combat target" instead of the
+			// generic "No valid target." Pure passives (e.g. tremorsense) keep
+			// existing behaviour.
+			if cbt == nil && techHasTargetedEffects(tech) {
+				return []string{fmt.Sprintf("%s requires a combat target — start combat or pick a target first.", tech.Name)}
+			}
 			return []string{"No valid target."}
 		}
 		return applyEffects(sess, tech.Effects.OnApply, nil, cbt, condRegistry, src, querier, heightenDelta)
@@ -480,4 +487,23 @@ func parseDuration(s string) int {
 	default:
 		return 1
 	}
+}
+
+// techHasTargetedEffects reports whether tech has any tier with damage or
+// condition effects that need a target to apply (#349). Pure narrative or
+// passive techs return false so the legacy "No valid target." message is used.
+func techHasTargetedEffects(tech *technology.TechnologyDef) bool {
+	for _, tier := range [][]technology.TechEffect{
+		tech.Effects.OnHit, tech.Effects.OnCritHit, tech.Effects.OnMiss,
+		tech.Effects.OnSuccess, tech.Effects.OnCritSuccess,
+		tech.Effects.OnFailure, tech.Effects.OnCritFailure,
+	} {
+		for _, e := range tier {
+			switch e.Type {
+			case technology.EffectDamage, technology.EffectCondition, technology.EffectMovement:
+				return true
+			}
+		}
+	}
+	return false
 }
