@@ -258,7 +258,28 @@ body:has(.game-layout) #root { height: 100%; overflow: hidden; }
   border-top: 1px solid #333;
   border-bottom: 1px solid #333;
   height: 38px;
-  overflow: hidden;
+  /* #365: do NOT clip the row — the slots scroll horizontally inside
+     .hotbar-slots, and the New button is anchored outside that scroll
+     region so it stays reachable regardless of how many slots are bound. */
+  overflow: visible;
+}
+
+/* #365: scrollable container for the 10 numbered slot buttons. flex:1 +
+   min-width:0 lets it shrink within the .hotbar row; overflow-x:auto produces
+   a horizontal scrollbar when slots overflow. */
+.hotbar-slots {
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+}
+.hotbar-slots::-webkit-scrollbar {
+  height: 4px;
+}
+.hotbar-slots::-webkit-scrollbar-thumb {
+  background: #333;
 }
 .hotbar-slot {
   flex: 1;

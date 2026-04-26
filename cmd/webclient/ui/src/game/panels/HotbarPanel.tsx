@@ -421,6 +421,7 @@ export function HotbarPanel() {
           type="button"
         >▼</button>
         <span className="hotbar-indicator">{activeHotbarIndex}/{hotbarCount}</span>
+        <div className="hotbar-slots">
         {KEYS.map((key, i) => {
           const slot = hotbarSlots[i] ?? { kind: 'command', ref: '' }
           const label = slotDisplayLabel(slot)
@@ -467,6 +468,7 @@ export function HotbarPanel() {
             </button>
           )
         })}
+        </div>
         {hotbarCount < maxHotbars && (
           <button
             className="hotbar-new-btn"
