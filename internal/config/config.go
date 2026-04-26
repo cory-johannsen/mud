@@ -286,13 +286,12 @@ func validateTelnet(t TelnetConfig) error {
 		errs = append(errs, "telnet.write_timeout must not be negative")
 	}
 	// REQ-TD-1c: with the player flow retired by default, the public telnet
-	// port MUST bind to loopback unless the operator has opted into the
-	// graceful-sunset flow with allow_game_commands=true.
-	if t.Host != "" && t.Host != "127.0.0.1" && !t.AllowGameCommands {
-		errs = append(errs, fmt.Sprintf(
-			"telnet.host must be 127.0.0.1 unless telnet.allow_game_commands is true (got %q)",
-			t.Host))
-	}
+	// port runs the rejector that refuses player auth and disconnects with a
+	// pointer to the web client. The bind address may be 0.0.0.0 in
+	// containerised deployments so the K8s readiness probe (and any in-cluster
+	// caller) can reach the rejector. The Service is ClusterIP so external
+	// access is still blocked at the K8s edge. The headless port (Telnet.HeadlessPort)
+	// is always bound to 127.0.0.1 regardless of Host.
 	if len(errs) > 0 {
 		return fmt.Errorf("%s", strings.Join(errs, "; "))
 	}
