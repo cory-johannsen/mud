@@ -8,6 +8,7 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/combat"
 	"github.com/cory-johannsen/mud/internal/game/condition"
 	"github.com/cory-johannsen/mud/internal/game/dice"
+	"github.com/cory-johannsen/mud/internal/game/effect"
 	"github.com/cory-johannsen/mud/internal/game/session"
 	"github.com/cory-johannsen/mud/internal/game/technology"
 )
@@ -131,7 +132,7 @@ func ResolveTechEffectsWithHeighten(
 			outcome := combat.ResolveSave(tech.SaveType, target, tech.SaveDC, src)
 			tier, label = selectSaveTier(tech.Effects, outcome, target.Name)
 		case "attack":
-			outcome, roll, total := resolveAttackRollWithTotal(sess, tech, target, src)
+			outcome, roll, total := resolveAttackRollWithTotal(sess, tech, target, src, cbt)
 			tier, label = selectAttackTier(tech.Effects, outcome, target.Name)
 			// GH #226: include raw roll, total, and target AC in the label so
 			// players see what happened mechanically, matching the detail level
@@ -202,9 +203,9 @@ func selectAttackTier(effects technology.TieredEffects, outcome combat.Outcome, 
 }
 
 // resolveAttackRoll resolves an attack roll for tech vs target.
-// Formula: 1d20 + techAttackMod(sess, tech) vs target.AC.
-func resolveAttackRoll(sess *session.PlayerSession, tech *technology.TechnologyDef, target *combat.Combatant, src combat.Source) combat.Outcome {
-	outcome, _, _ := resolveAttackRollWithTotal(sess, tech, target, src)
+// Formula: 1d20 + techAttackMod(sess, tech) + effect.Resolve(actor.Effects, StatAttack) vs target.AC.
+func resolveAttackRoll(sess *session.PlayerSession, tech *technology.TechnologyDef, target *combat.Combatant, src combat.Source, cbt *combat.Combat) combat.Outcome {
+	outcome, _, _ := resolveAttackRollWithTotal(sess, tech, target, src, cbt)
 	return outcome
 }
 
@@ -212,10 +213,12 @@ func resolveAttackRoll(sess *session.PlayerSession, tech *technology.TechnologyD
 // roll and the post-modifier total, so callers can display roll details to
 // the player (GH #226).
 //
-// Postcondition: roll in [1,20]; total = roll + techAttackMod(sess, tech).
-func resolveAttackRollWithTotal(sess *session.PlayerSession, tech *technology.TechnologyDef, target *combat.Combatant, src combat.Source) (combat.Outcome, int, int) {
+// Postcondition: roll in [1,20]; total = roll + techAttackMod(sess, tech) +
+// effect.Resolve(actor.Effects, StatAttack).Total when actor is in the active
+// combat (#368).
+func resolveAttackRollWithTotal(sess *session.PlayerSession, tech *technology.TechnologyDef, target *combat.Combatant, src combat.Source, cbt *combat.Combat) (combat.Outcome, int, int) {
 	roll := src.Intn(20) + 1
-	total := roll + techAttackMod(sess, tech)
+	total := roll + techAttackMod(sess, tech, cbt)
 	return combat.OutcomeFor(total, target.AC), roll, total
 }
 
@@ -238,9 +241,16 @@ func annotateAttackLabel(label string, roll, total, ac int) string {
 
 // techAttackMod returns the tech attack bonus for the given session and tech tradition.
 //
-// Formula: Level/2 + primary ability modifier.
-// Tradition → primary ability: neural→Savvy, bio_synthetic→Grit, technical→Quickness, others→Quickness.
-func techAttackMod(sess *session.PlayerSession, tech *technology.TechnologyDef) int {
+// Formula: Level/2 + primary ability modifier + typed-bonus pipeline contributions
+// to StatAttack (#368). Tradition → primary ability: neural→Savvy,
+// bio_synthetic→Grit, technical→Quickness, others→Quickness.
+//
+// The typed-bonus contribution comes from the actor's Combatant.Effects in the
+// active combat, mirroring the weapon-strike path so caster archetypes scale
+// with status / circumstance / item attack bonuses the same way martials do.
+// When cbt is nil (out of combat or actor not yet a combatant), the typed
+// component is 0 — matches existing weapon-strike behaviour.
+func techAttackMod(sess *session.PlayerSession, tech *technology.TechnologyDef, cbt *combat.Combat) int {
 	if sess == nil {
 		return 0
 	}
@@ -254,7 +264,13 @@ func techAttackMod(sess *session.PlayerSession, tech *technology.TechnologyDef) 
 	default:
 		abilityScore = sess.Abilities.Quickness
 	}
-	return levelBonus + abilityModifier(abilityScore)
+	typedBonus := 0
+	if cbt != nil {
+		if actor := cbt.GetCombatant(sess.UID); actor != nil {
+			typedBonus = effect.Resolve(actor.Effects, effect.StatAttack).Total
+		}
+	}
+	return levelBonus + abilityModifier(abilityScore) + typedBonus
 }
 
 // abilityModifier returns the PF2E ability modifier for a score.

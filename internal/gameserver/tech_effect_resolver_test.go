@@ -12,6 +12,7 @@ import (
 
 	"github.com/cory-johannsen/mud/internal/game/combat"
 	"github.com/cory-johannsen/mud/internal/game/condition"
+	"github.com/cory-johannsen/mud/internal/game/effect"
 	"github.com/cory-johannsen/mud/internal/game/session"
 	"github.com/cory-johannsen/mud/internal/game/technology"
 )
@@ -481,6 +482,43 @@ func TestResolveTechEffects_ThermalPlasmaFist_OnHitDamagesTarget(t *testing.T) {
 	require.NotEmpty(t, msgs, "on_hit damage must produce a non-empty message")
 	assert.Less(t, target.CurrentHP, 30, "target must take fire damage on hit")
 	assert.Contains(t, msgs[0], "fire", "message must mention fire damage type")
+}
+
+// TestTechAttackBonus_IncludesTypedBonusPipeline verifies that an attack-resolution
+// tech roll includes the actor's typed-bonus contribution to StatAttack (#368).
+// Without the fix, the same roll missed; with the fix, the +N circumstance
+// bonus pushes total over AC.
+func TestTechAttackBonus_IncludesTypedBonusPipeline(t *testing.T) {
+	sess := &session.PlayerSession{UID: "p1", Level: 1}
+	sess.Abilities.Quickness = 14 // +2
+
+	// AC = 14: roll=11 + Level/2(0) + Quick(+2) = 13 → miss without typed bonus.
+	// With +5 typed StatAttack on actor.Effects → 13 + 5 = 18 → hit.
+	target := makeTarget("npc", 30, 30, 14)
+	actor := &combat.Combatant{ID: "p1", Kind: combat.KindPlayer, Name: "p1", Effects: effect.NewEffectSet()}
+	actor.Effects.Apply(effect.Effect{
+		EffectID: "boost", SourceID: "test:boost", Bonuses: []effect.Bonus{
+			{Stat: effect.StatAttack, Value: 5, Type: effect.BonusTypeStatus},
+		}, DurKind: effect.DurationUntilRemove,
+	})
+	cbt := &combat.Combat{Combatants: []*combat.Combatant{actor, target}}
+
+	tech := &technology.TechnologyDef{
+		ID: "thermal_plasma_fist", Resolution: "attack",
+		Tradition: technology.TraditionTechnical, Targets: technology.TargetsSingle,
+		Effects: technology.TieredEffects{
+			OnHit: []technology.TechEffect{
+				{Type: technology.EffectDamage, Dice: "2d8", DamageType: "fire"},
+			},
+		},
+	}
+	// src.Intn(20)→10 → roll=11; without typed bonus: total=13 (miss); with: 18 (hit).
+	src := &deterministicSrc{val: 10}
+
+	msgs := ResolveTechEffects(sess, tech, []*combat.Combatant{target}, cbt, nil, src, nil)
+	require.NotEmpty(t, msgs)
+	assert.Less(t, target.CurrentHP, 30,
+		"target must take damage when typed bonus pushes the tech attack over AC; got msg=%v", msgs)
 }
 
 // REQ-TER-TPF-NOTGT: When an attack tech has no targets, ResolveTechEffects MUST return
