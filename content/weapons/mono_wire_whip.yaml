@@ -1,10 +1,10 @@
 id: mono_wire_whip
 name: Mono-Wire Whip
-description: A reel of monomolecular wire that can strip limbs with a flick of the wrist.
+description: A reel of monomolecular wire that can strip limbs with a flick of the wrist. Its lashing arc and recoil pull the wielder into a free Stride before or after each Strike (Mobile trait), and that bonus movement does not provoke reactive strikes.
 damage_dice: 1d12
 damage_type: slashing
 range_increment: 0
-traits: [reach, machete-team, two-hand]
+traits: [reach, machete-team, two-hand, mobile]
 kind: two_handed
 group: blade
 proficiency_category: specialized

@@ -27,6 +27,13 @@ const (
 	ActionUseTech                         // costs AbilityCost AP; activate a technology during round resolution
 	ActionReady                           // costs 2 AP; prepares one 1-AP action bound to a trigger
 	ActionHazardDamage                    // informational: terrain hazard fires damage on entry or round start
+	// ActionMoveTraitStride is a free Stride granted by a Move-trait weapon
+	// (see internal/game/inventory/traits.Mobile). Cost is 0; the action does
+	// not consume AP and does not count against the per-round movement AP cap.
+	// It is queued only via ActionQueue.QueueFreeAction (allowlist-gated) and
+	// resolves under MoveContext{Cause: MoveCauseMoveTrait} so reactive strikes
+	// are suppressed.
+	ActionMoveTraitStride
 )
 
 // Cost returns the action point cost for the ActionType.
@@ -59,6 +66,9 @@ func (a ActionType) Cost() int {
 		return 0 // cost comes from QueuedAction.AbilityCost
 	case ActionReady:
 		return 2
+	case ActionMoveTraitStride:
+		// WMOVE-7: free action — cost 0 by construction.
+		return 0
 	default:
 		// ActionUnknown and any unrecognized values have cost 0.
 		return 0
@@ -96,6 +106,8 @@ func (a ActionType) String() string {
 		return "ready"
 	case ActionHazardDamage:
 		return "hazard_damage"
+	case ActionMoveTraitStride:
+		return "move_trait_stride"
 	default:
 		return "unknown"
 	}
@@ -122,6 +134,46 @@ type QueuedAction struct {
 	ReadyTrigger    reaction.ReactionTriggerType // trigger that fires the prepared action
 	ReadyAction     *QueuedAction                // the 1-AP action to execute on trigger
 	ReadyTriggerTgt string                       // optional: restrict to a specific source UID
+
+	// Move-trait fields — only meaningful when Type == ActionMoveTraitStride or
+	// for ActionStrike entries that are paired with a free Stride.
+	//
+	// MoveTraitWielder reports whether the wielder's weapon has the Mobile
+	// trait at queue time. Set by the Strike pipeline so ResolveRound can decide
+	// whether to honour a paired ActionMoveTraitStride entry.
+	MoveTraitWielder bool
+	// StrikeAction is a non-zero monotonic id used to scope the once-per-Strike
+	// enforcement of free Strides (WMOVE-10). The Strike pipeline assigns it.
+	StrikeAction int64
+	// MoveOrdering is the requested ordering of a free Stride relative to its
+	// paired Strike: MoveOrderingBefore (default 0) or MoveOrderingAfter.
+	// Only meaningful when Type == ActionMoveTraitStride.
+	MoveOrdering MoveTraitOrdering
+}
+
+// MoveTraitOrdering selects whether a free Stride runs before or after the
+// paired Strike. The zero value is "before".
+type MoveTraitOrdering int
+
+const (
+	// MoveOrderingBefore queues the free Stride to resolve immediately before
+	// its paired Strike (WMOVE-Q5 default ordering).
+	MoveOrderingBefore MoveTraitOrdering = iota
+	// MoveOrderingAfter queues the free Stride to resolve immediately after
+	// its paired Strike.
+	MoveOrderingAfter
+)
+
+// String returns the human-readable name of the MoveTraitOrdering.
+func (o MoveTraitOrdering) String() string {
+	switch o {
+	case MoveOrderingBefore:
+		return "before"
+	case MoveOrderingAfter:
+		return "after"
+	default:
+		return "unknown"
+	}
 }
 
 // MaxMovementAP is the maximum action points a combatant may spend on movement
@@ -284,6 +336,44 @@ func (q *ActionQueue) IsSubmitted() bool {
 		}
 	}
 	return false
+}
+
+// freeActionAllowlist is the closed set of ActionTypes that may be queued via
+// QueueFreeAction. Any other type is rejected. Adding to this set is an
+// explicit, audited decision per WMOVE-8 (no general free-action support).
+var freeActionAllowlist = map[ActionType]bool{
+	ActionMoveTraitStride: true,
+}
+
+// QueueFreeAction appends a free (cost-zero) action to the queue without
+// touching remaining AP or the per-round movement AP cap. The action's Type
+// must appear in the freeActionAllowlist; everything else is rejected.
+//
+// WMOVE-7: free action does not deduct AP or increment movementAPSpent.
+// WMOVE-8: gated by an explicit allowlist; arbitrary types cannot be queued.
+// WMOVE-10: when StrikeAction != 0, at most one ActionMoveTraitStride may be
+//   queued for a given StrikeAction value (once-per-Strike).
+//
+// Precondition: q is non-nil.
+// Postcondition: on success, the action is appended and remaining /
+// movementAPSpent are unchanged. On error, queue state is unchanged.
+func (q *ActionQueue) QueueFreeAction(qa QueuedAction) error {
+	if q == nil {
+		return fmt.Errorf("QueueFreeAction: nil queue")
+	}
+	if !freeActionAllowlist[qa.Type] {
+		return fmt.Errorf("QueueFreeAction: action type %q is not in the free-action allowlist", qa.Type.String())
+	}
+	if qa.Type == ActionMoveTraitStride && qa.StrikeAction != 0 {
+		for _, existing := range q.actions {
+			if existing.Type == ActionMoveTraitStride && existing.StrikeAction == qa.StrikeAction {
+				return fmt.Errorf("QueueFreeAction: free Stride already queued for strike action %d (once per Strike — WMOVE-10)", qa.StrikeAction)
+			}
+		}
+	}
+	q.actions = append(q.actions, qa)
+	// Intentionally do NOT touch remaining or movementAPSpent (WMOVE-7).
+	return nil
 }
 
 // ClearActions drains all queued actions, restores remaining AP to MaxPoints,

@@ -6,10 +6,34 @@ import (
 	"testing"
 
 	"github.com/cory-johannsen/mud/internal/game/inventory"
+	"github.com/cory-johannsen/mud/internal/game/inventory/traits"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"pgregory.net/rapid"
 )
+
+func TestWeaponDef_HasTrait_Canonical(t *testing.T) {
+	w := &inventory.WeaponDef{Traits: []string{"mobile"}}
+	assert.True(t, w.HasTrait(traits.Mobile))
+	assert.False(t, w.HasTrait("reach"))
+}
+
+func TestWeaponDef_HasTrait_AliasResolution(t *testing.T) {
+	// Authors may write either `mobile` or `move` in YAML.
+	w := &inventory.WeaponDef{Traits: []string{"move"}}
+	assert.True(t, w.HasTrait(traits.Mobile), "alias `move` must satisfy a query for canonical Mobile")
+	assert.True(t, w.HasTrait("move"), "alias `move` must satisfy a query for itself")
+}
+
+func TestWeaponDef_HasTrait_NilSafe(t *testing.T) {
+	var w *inventory.WeaponDef
+	assert.False(t, w.HasTrait(traits.Mobile))
+}
+
+func TestWeaponDef_HasTrait_EmptyTraits(t *testing.T) {
+	w := &inventory.WeaponDef{}
+	assert.False(t, w.HasTrait(traits.Mobile))
+}
 
 func TestWeaponDef_Validate_RejectsEmpty(t *testing.T) {
 	w := &inventory.WeaponDef{}
@@ -364,3 +388,4 @@ func TestProperty_WeaponDef_WeaponKind_MutuallyExclusive(t *testing.T) {
 		}
 	})
 }
+
