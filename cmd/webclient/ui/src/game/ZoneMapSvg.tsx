@@ -27,7 +27,7 @@ const DANGER_FILLS: Record<string, string> = {
   safe: '#2a4a2a',
   sketchy: '#3a3a1a',
   dangerous: '#4a2a1a',
-  deadly: '#4a1a1a',
+  all_out_war: '#4a1a1a',
 }
 
 // Server sends full direction names (e.g. "north"), not abbreviations.
