@@ -344,6 +344,33 @@ func TestHandleMove_BlockedWhileInCombat(t *testing.T) {
 	assert.Equal(t, "room_a", updatedSess.RoomID, "player room must not change while in combat")
 }
 
+// TestHandleMove_PureDigitInputRejected verifies the #360 guard: a movement
+// request with a pure-digit direction (a leaked menu-option pick) returns a
+// helpful message instead of attempting an exit lookup. This protects every
+// menu (level-up tech, feat choice, hotbar, etc.) at every level — the guard
+// is a single server-side check that doesn't need to know which menu is open.
+func TestHandleMove_PureDigitInputRejected(t *testing.T) {
+	worldMgr, sessMgr := newNormalTerrainWorld(t)
+	svc := newMoveTestService(t, worldMgr, sessMgr, nil)
+
+	_, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID: "u_digit", Username: "Fighter", CharName: "Fighter",
+		CharacterID: 11, RoomID: "room_a", CurrentHP: 10, MaxHP: 10,
+		Abilities: character.AbilityScores{}, Role: "player",
+	})
+	require.NoError(t, err)
+
+	for _, dir := range []string{"1", "2", "3", "10"} {
+		evt, err := svc.handleMove("u_digit", &gamev1.MoveRequest{Direction: dir})
+		require.NoError(t, err)
+		require.NotNil(t, evt)
+		msg := evt.GetMessage()
+		require.NotNil(t, msg, "digit %q should produce a MessageEvent", dir)
+		assert.Contains(t, msg.Content, "menu options",
+			"digit %q must surface the menu-option hint, not 'no exit %q'", dir, dir)
+	}
+}
+
 // TestPropertyHandleMove_InCombat_AlwaysBlocked is a property test verifying that
 // a player with statusInCombat can never move to another room.
 //

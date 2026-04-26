@@ -2699,8 +2699,32 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 	}
 }
 
+// isPureDigitDirection reports whether dir is non-empty and entirely digits.
+// Used by handleMove (#360) to reject leaked menu-option picks that would
+// otherwise be looked up as exit names and produce confusing 'no exit "N"'
+// errors.
+func isPureDigitDirection(dir string) bool {
+	if dir == "" {
+		return false
+	}
+	for _, r := range dir {
+		if r < '0' || r > '9' {
+			return false
+		}
+	}
+	return true
+}
+
 func (s *GameServiceServer) handleMove(uid string, req *gamev1.MoveRequest) (*gamev1.ServerEvent, error) {
 	dir := world.Direction(req.Direction)
+
+	// #360: a pure-digit input is a menu-option pick that leaked through the
+	// client's room-input fallthrough. Rejecting it here keeps the player out
+	// of a confusing "no exit" loop and surfaces the actual cause regardless
+	// of which menu (level-up tech, feat choice, hotbar number, etc.) is open.
+	if isPureDigitDirection(string(dir)) {
+		return messageEvent("Numbers select menu options, not movement directions. Finish your pending selection first, or type a direction (n/s/e/w/...)."), nil
+	}
 
 	// REQ-MV-1: movement is blocked while the player is in combat.
 	if sess, ok := s.sessions.GetPlayer(uid); ok && sess.Status == statusInCombat {
