@@ -391,6 +391,72 @@ component) is tracked as a follow-up to #250. The core resolver is functional en
 today: clients can submit programmatic `AoeTemplate` messages without an interactive
 placement step.
 
+## NPC Movement (#251 — Smarter NPC Movement)
+
+NPCs choose stride destinations through a goal-based scorer rather than the
+legacy "melee-closes / ranged-retreats" binary. Every reachable cell is
+evaluated against four weighted goals; the highest-scoring cell wins. The
+existing `ActionStride` machinery in `round.go` consumes the result via the
+unchanged `npcMovementStrideLocked` wrapper, so NPC turn structure (HTN plan
+→ stride → attack) is preserved.
+
+### Decision flow
+
+```
+HTN planner emits actions
+  └── npcMovementStrideLocked(cbt, actor)
+        └── combat.ChooseMoveDestination(cbt, actor, target, ctx, flipRange)
+              ├── CandidateCells(cbt, actor)            # reachable, in-bounds, passable
+              └── for each cell: weighted sum of
+                    Range·RangeGoal + Cover·CoverGoal +
+                    Spread·SpreadGoal + Terrain·TerrainGoal
+        └── translate destination into "toward" / "away"
+  └── existing stride loop in round.go walks the destination
+```
+
+### Goal functions (`internal/game/combat/movement.go`)
+
+| Goal | Score range | Intent |
+|------|-------------|--------|
+| `RangeGoal` | [0, 1] | 1.0 at the NPC's preferred engagement distance (adjacent for melee, range increment for ranged); falls linearly to 0.0 at the grid diagonal. Ranged NPCs explicitly score point-blank cells (Chebyshev ≤ 1) at 0.0 — they never prefer to be in melee. |
+| `CoverGoal` | [0, 1] | 0.33 / 0.66 / 1.0 for lesser / standard / greater cover. Returns 0 when the NPC's strategy disables cover or no cover model is wired (the soft dependency on #247). |
+| `SpreadGoal` | [0, 1] | Linearly scales with Chebyshev distance to the nearest faction-allied combatant; saturates at the ranged NPC's first range increment (or 6 cells / 30 ft for melee NPCs). NPCs without allies always score 1.0. |
+| `TerrainGoal` | {0.0, 0.5, 1.0} | Hazardous → 0.0; difficult → 0.5; normal → 1.0. Greater-difficult cells are filtered out before scoring (`CandidateCells`). |
+
+Weights default to `Range=1.0`, `Cover=0.5`, `Spread=0.3`, `Terrain=0.4`
+(`combat.DefaultMoveWeights`). Per-NPC overrides via YAML `combat_strategy.move_weights`
+are deferred to a follow-up; until then, `MoveWeights{}` zeros are filled from
+the defaults via `WithDefaults()`.
+
+### Wrapper translation
+
+`npcMovementStrideLocked` translates the chosen destination into a single
+"toward" / "away" string consumed by the existing per-cell stride loop in
+`round.go`. The walk itself still uses `CompassDelta` against the live
+target each step, which preserves multi-cell stride behaviour, terrain
+budget enforcement, and reactive-strike triggers without further changes.
+
+### Soft dependencies
+
+| Concern | Plug-in seam | Status |
+|---------|--------------|--------|
+| Cover (positional, #247) | `MoveContext.CoverTierAt` (callback) | Stub returns "" today; `CoverGoal` returns 0. |
+| Terrain (#248) | `Combat.TerrainAt` / `Combat.EntryCost` | Already wired (#248 landed). |
+
+### Deferred
+
+- HTN integration (`move_to_position` action + `WorldState.MoveScores`) — tracked as a follow-up so HTN domains can reserve movement decisions when desired.
+- YAML weights on NPC templates — deferred; code defaults are sufficient for the first roll-out.
+- Multi-stride decomposition with per-step direction queueing — the existing single "toward"/"away" stride loop is reused.
+
+### Implementation files
+
+| File | Responsibility |
+|------|----------------|
+| `internal/game/combat/movement.go` | `MoveWeights`, `MoveContext`, `CandidateCells`, `RangeGoal`, `CoverGoal`, `SpreadGoal`, `TerrainGoal`, `ChooseMoveDestination`, `StepToward` |
+| `internal/game/combat/movement_test.go` | Goal/scenario tests + property tests (determinism, candidate-bounded, stride budget) |
+| `internal/gameserver/combat_handler.go` | `npcMovementStrideLocked` wrapper translates the chooser's destination into the legacy stride direction |
+
 ## Component Dependencies
 
 ```mermaid
