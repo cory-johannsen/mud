@@ -111,7 +111,14 @@ func ResolveTechEffectsWithHeighten(
 			}
 			return []string{"No valid target."}
 		}
-		return applyEffects(sess, tech.Effects.OnApply, nil, cbt, condRegistry, src, querier, heightenDelta)
+		// #350: resolution:none techs with on_apply damage/condition (e.g.
+		// Multi-Round Kinetic Volley) also need a target. Surface the same
+		// out-of-combat feedback when nothing would have applied.
+		applied := applyEffects(sess, tech.Effects.OnApply, nil, cbt, condRegistry, src, querier, heightenDelta)
+		if len(applied) == 0 && cbt == nil && onApplyNeedsTarget(tech) {
+			return []string{fmt.Sprintf("%s requires a combat target — start combat or pick a target first.", tech.Name)}
+		}
+		return applied
 	}
 
 	var msgs []string
@@ -300,21 +307,29 @@ func applyEffect(
 		}
 		// GH #224: Magic Missile-style multi-projectile resolution. When
 		// Projectiles > 0, roll the damage expression independently for each
-		// projectile and sum. Heighten delta adds one projectile per level.
+		// projectile. Heighten delta adds one projectile per level (#350).
 		if e.Projectiles > 0 {
 			shots := e.Projectiles + heightenDelta
 			if shots < 1 {
 				shots = 1
 			}
+			rolls := make([]int, shots)
 			total := 0
 			for i := 0; i < shots; i++ {
-				total += rollAmount(e.Dice, e.Amount, src)
+				rolls[i] = rollAmount(e.Dice, e.Amount, src)
+				total += rolls[i]
 			}
 			target.CurrentHP -= total
 			if target.CurrentHP < 0 {
 				target.CurrentHP = 0
 			}
-			return fmt.Sprintf("%d %s damage across %d projectiles.", total, e.DamageType, shots)
+			// #350: surface per-projectile rolls so players see the volley variance,
+			// not just the lump sum.
+			parts := make([]string, len(rolls))
+			for i, r := range rolls {
+				parts[i] = strconv.Itoa(r)
+			}
+			return fmt.Sprintf("%d %s damage from %d projectiles (%s).", total, e.DamageType, shots, strings.Join(parts, "+"))
 		}
 		dmg := rollAmount(e.Dice, e.Amount, src)
 		target.CurrentHP -= dmg
@@ -503,6 +518,18 @@ func techHasTargetedEffects(tech *technology.TechnologyDef) bool {
 			case technology.EffectDamage, technology.EffectCondition, technology.EffectMovement:
 				return true
 			}
+		}
+	}
+	return false
+}
+
+// onApplyNeedsTarget reports whether tech.Effects.OnApply contains any effect
+// that requires a target combatant to apply (#350).
+func onApplyNeedsTarget(tech *technology.TechnologyDef) bool {
+	for _, e := range tech.Effects.OnApply {
+		switch e.Type {
+		case technology.EffectDamage, technology.EffectCondition, technology.EffectMovement:
+			return true
 		}
 	}
 	return false
