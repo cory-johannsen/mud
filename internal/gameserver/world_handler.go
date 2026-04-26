@@ -189,6 +189,23 @@ func (h *WorldHandler) buildRoomView(uid string, room *world.Room) *gamev1.RoomV
 	npcInfos := make([]*gamev1.NpcInfo, 0, len(instances))
 	for _, inst := range instances {
 		if !inst.IsDead() {
+			// DETECT-16/17/18: per-recipient detection redaction. Drop
+			// Unnoticed NPCs from the recipient's view entirely; replace
+			// the display name for Hidden / Undetected / Invisible-without-
+			// sound. Outside combat the decision is the zero value (no
+			// change) so existing behaviour is preserved.
+			var detectDecision = struct {
+				Drop       bool
+				RedactName string
+			}{}
+			if h.combatH != nil {
+				d := h.combatH.DetectionDecisionFor(uid, inst.ID)
+				detectDecision.Drop = d.Drop
+				detectDecision.RedactName = d.RedactName
+			}
+			if detectDecision.Drop {
+				continue
+			}
 			fightingTarget := ""
 			var condNames []string
 			if h.combatH != nil {
@@ -206,9 +223,13 @@ func (h *WorldHandler) buildRoomView(uid string, room *world.Room) *gamev1.RoomV
 					tradition = tmpl.TechTrainer.Tradition
 				}
 			}
+			displayName := inst.Name()
+			if detectDecision.RedactName != "" {
+				displayName = detectDecision.RedactName
+			}
 			npcInfos = append(npcInfos, &gamev1.NpcInfo{
 				InstanceId:        inst.ID,
-				Name:              inst.Name(),
+				Name:              displayName,
 				HealthDescription: inst.HealthDescription(),
 				FightingTarget:    fightingTarget,
 				Conditions:        condNames,

@@ -1,0 +1,15 @@
+id: concealed
+name: Concealed
+description: |
+  An attacker can pinpoint your square but you have visual concealment.
+  Attackers must succeed on a DC 5 flat check to hit you (#254 / DETECT-7).
+duration_type: encounter
+max_stacks: 0
+attack_penalty: 0
+ac_penalty: 0
+damage_bonus: 0
+speed_penalty: 0
+restrict_actions: []
+lua_on_apply: ""
+lua_on_remove: ""
+lua_on_tick: ""

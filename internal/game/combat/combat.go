@@ -134,7 +134,17 @@ type Combatant struct {
 	// Hidden is true when this combatant is concealed. Attackers must pass a DC 11 flat check.
 	// For player combatants: set by hide/divert actions; cleared when the player attacks or is targeted.
 	// For NPC combatants: unused (always false).
+	//
+	// DEPRECATED (#254 / DETECT-Q4): superseded by Combat.DetectionStates per-pair table.
+	// Retained one release for back-compat; populated symmetrically into the map at
+	// Combat.Start() (see populateDetectionFromLegacyHidden) so existing pinned tests
+	// in round_hidden_test.go keep working without modification.
 	Hidden bool
+	// MadeSoundThisRound is true when this combatant performed an auditory action
+	// (Strike, Reload, Stride, MoveTo, etc.) during the current round. Drives the
+	// Invisible-state branch in detection.GateAttack: with sound the pair behaves
+	// as Hidden, without it as Undetected. Reset to false at StartRound.
+	MadeSoundThisRound bool
 	// RevealedUntilRound suppresses the DC 11 flat check for attackers through this round number.
 	// Set by a successful Seek action to cbt.Round+1.
 	RevealedUntilRound int
