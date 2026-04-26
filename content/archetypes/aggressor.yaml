@@ -9,6 +9,11 @@ ability_boosts:
   fixed: [brutality, grit]
   free: 2
 
+# Level-band pools so Boot players always have a meaningful choice through level 20.
+# Early band (2-8): archetype-defining combat feats only.
+# Mid band (10-14): early band + general combat-flavoured feats.
+# Late band (16-20): all of the above + late-game general feats (titan_swing, brutal_strike, etc).
+# (#318 — flat 10-feat pool was exhausted by level 16-20 once Boot job + earlier picks consumed it.)
 level_up_feat_grants:
   2:
     choices:
@@ -28,25 +33,36 @@ level_up_feat_grants:
       count: 1
   10:
     choices:
-      pool: [rage, reactive_block, overpower, snap_shot, adrenaline_surge, raging_threat, cover_fire, dual_draw, combat_read, hit_the_dirt]
+      pool: [rage, reactive_block, overpower, snap_shot, adrenaline_surge, raging_threat, cover_fire, dual_draw, combat_read, hit_the_dirt,
+             toughness, hard_to_kill, quick_recovery, hardened_constitution, steel_your_resolve, push_the_pace, combat_vigor]
       count: 1
   12:
     choices:
-      pool: [rage, reactive_block, overpower, snap_shot, adrenaline_surge, raging_threat, cover_fire, dual_draw, combat_read, hit_the_dirt]
+      pool: [rage, reactive_block, overpower, snap_shot, adrenaline_surge, raging_threat, cover_fire, dual_draw, combat_read, hit_the_dirt,
+             toughness, hard_to_kill, quick_recovery, hardened_constitution, steel_your_resolve, push_the_pace, combat_vigor]
       count: 1
   14:
     choices:
-      pool: [rage, reactive_block, overpower, snap_shot, adrenaline_surge, raging_threat, cover_fire, dual_draw, combat_read, hit_the_dirt]
+      pool: [rage, reactive_block, overpower, snap_shot, adrenaline_surge, raging_threat, cover_fire, dual_draw, combat_read, hit_the_dirt,
+             toughness, hard_to_kill, quick_recovery, hardened_constitution, steel_your_resolve, push_the_pace, combat_vigor]
       count: 1
   16:
     choices:
-      pool: [rage, reactive_block, overpower, snap_shot, adrenaline_surge, raging_threat, cover_fire, dual_draw, combat_read, hit_the_dirt]
+      pool: [rage, reactive_block, overpower, snap_shot, adrenaline_surge, raging_threat, cover_fire, dual_draw, combat_read, hit_the_dirt,
+             toughness, hard_to_kill, quick_recovery, hardened_constitution, steel_your_resolve, push_the_pace, combat_vigor,
+             brutal_strike, titan_swing, rapid_regen, pain_is_temporary, like_a_roach, evasive, pack_tactics]
       count: 1
   18:
     choices:
-      pool: [rage, reactive_block, overpower, snap_shot, adrenaline_surge, raging_threat, cover_fire, dual_draw, combat_read, hit_the_dirt]
+      pool: [rage, reactive_block, overpower, snap_shot, adrenaline_surge, raging_threat, cover_fire, dual_draw, combat_read, hit_the_dirt,
+             toughness, hard_to_kill, quick_recovery, hardened_constitution, steel_your_resolve, push_the_pace, combat_vigor,
+             brutal_strike, titan_swing, rapid_regen, pain_is_temporary, like_a_roach, evasive, pack_tactics,
+             unbreakable_will, iron_resolve, tough, blood_will, methodical_sweep]
       count: 1
   20:
     choices:
-      pool: [rage, reactive_block, overpower, snap_shot, adrenaline_surge, raging_threat, cover_fire, dual_draw, combat_read, hit_the_dirt]
+      pool: [rage, reactive_block, overpower, snap_shot, adrenaline_surge, raging_threat, cover_fire, dual_draw, combat_read, hit_the_dirt,
+             toughness, hard_to_kill, quick_recovery, hardened_constitution, steel_your_resolve, push_the_pace, combat_vigor,
+             brutal_strike, titan_swing, rapid_regen, pain_is_temporary, like_a_roach, evasive, pack_tactics,
+             unbreakable_will, iron_resolve, tough, blood_will, methodical_sweep]
       count: 1
