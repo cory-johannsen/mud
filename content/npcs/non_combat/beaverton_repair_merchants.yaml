@@ -1,0 +1,155 @@
+# Repair Workshop merchants for Beaverton (zone level 16-25). Closes #324.
+
+- id: beaverton_weapons_merchant
+  name: "Workshop Quartermaster"
+  npc_type: merchant
+  npc_role: merchant
+  type: human
+  description: "An ex-corp weapons tech who stripped her badge for a grease-stained apron. She'll sell you anything that goes bang and a few things that hum."
+  level: 0
+  max_hp: 38
+  ac: 12
+  awareness: 6
+  disposition: neutral
+  personality: neutral
+  abilities:
+    brutality: 12
+    grit: 12
+    quickness: 12
+    reasoning: 14
+    savvy: 13
+    flair: 10
+  merchant:
+    merchant_type: weapons
+    sell_margin: 1.30
+    buy_margin: 0.45
+    budget: 2500
+    inventory:
+      - item_id: tactical_hatchet
+        base_price: 250
+        init_stock: 2
+        max_stock: 4
+      - item_id: chainsaw
+        base_price: 400
+        init_stock: 1
+        max_stock: 2
+      - item_id: vibroblade
+        base_price: 700
+        init_stock: 2
+        max_stock: 3
+      - item_id: mono_wire_whip
+        base_price: 900
+        init_stock: 1
+        max_stock: 2
+      - item_id: combat_knife
+        base_price: 90
+        init_stock: 4
+        max_stock: 6
+      - item_id: assault_rifle
+        base_price: 850
+        init_stock: 2
+        max_stock: 3
+      - item_id: combat_shotgun
+        base_price: 600
+        init_stock: 2
+        max_stock: 3
+      - item_id: battle_rifle
+        base_price: 1100
+        init_stock: 1
+        max_stock: 2
+      - item_id: emp_grenade
+        base_price: 250
+        init_stock: 4
+        max_stock: 8
+      - item_id: incendiary_grenade
+        base_price: 200
+        init_stock: 4
+        max_stock: 8
+    replenish_rate:
+      min_hours: 6
+      max_hours: 12
+      stock_refill: 1
+      budget_refill: 500
+  loot:
+    currency:
+      min: 10
+      max: 40
+
+- id: beaverton_armor_merchant
+  name: "Plate-and-Patch Vendor"
+  npc_type: merchant
+  npc_role: merchant
+  type: human
+  description: "A heavyset salvager who knows every joint and gap in modern armor. He stitches, plates, and resells whatever the patrols leave behind."
+  level: 0
+  max_hp: 34
+  ac: 13
+  awareness: 5
+  disposition: neutral
+  personality: neutral
+  abilities:
+    brutality: 13
+    grit: 14
+    quickness: 11
+    reasoning: 12
+    savvy: 11
+    flair: 10
+  merchant:
+    merchant_type: armor
+    sell_margin: 1.30
+    buy_margin: 0.40
+    budget: 2200
+    inventory:
+      - item_id: combat_helmet
+        base_price: 250
+        init_stock: 2
+        max_stock: 4
+      - item_id: tactical_vest
+        base_price: 300
+        init_stock: 2
+        max_stock: 4
+      - item_id: kevlar_vest
+        base_price: 500
+        init_stock: 2
+        max_stock: 3
+      - item_id: military_plate
+        base_price: 950
+        init_stock: 1
+        max_stock: 2
+      - item_id: tactical_gloves
+        base_price: 80
+        init_stock: 4
+        max_stock: 6
+      - item_id: shock_gloves
+        base_price: 180
+        init_stock: 2
+        max_stock: 3
+      - item_id: tactical_boots
+        base_price: 150
+        init_stock: 2
+        max_stock: 4
+      - item_id: left_tactical_vambrace
+        base_price: 220
+        init_stock: 2
+        max_stock: 3
+      - item_id: right_tactical_vambrace
+        base_price: 220
+        init_stock: 2
+        max_stock: 3
+      - item_id: left_tactical_greaves
+        base_price: 220
+        init_stock: 2
+        max_stock: 3
+      - item_id: right_tactical_greaves
+        base_price: 220
+        init_stock: 2
+        max_stock: 3
+    replenish_rate:
+      min_hours: 8
+      max_hours: 16
+      stock_refill: 1
+      budget_refill: 400
+  loot:
+    currency:
+      min: 10
+      max: 40

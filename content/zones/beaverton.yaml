@@ -763,6 +763,13 @@ zone:
       target: beav_neutral_market
     map_x: -8
     map_y: -8
+    spawns:
+    - template: beaverton_weapons_merchant
+      count: 1
+      respawn_after: 0s
+    - template: beaverton_armor_merchant
+      count: 1
+      respawn_after: 0s
     properties:
       lighting: work
       atmosphere: industrious
