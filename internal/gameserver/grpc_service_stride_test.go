@@ -380,13 +380,19 @@ func TestNPCAutoStride_MeleeNPC_ClosesDistance(t *testing.T) {
 	assert.Equal(t, combat.ActionAttack, actions[1].Type, "second action must be ActionAttack")
 }
 
-// TestNPCAutoStride_RangedNPC_DoesNotStride verifies that an NPC equipped with a
-// ranged weapon does NOT queue ActionStride even when distance > 5ft.
+// TestNPCAutoStride_RangedNPC_StridesAwayWhenInsideOptimalRange verifies that an NPC
+// equipped with a ranged weapon strides "away" when its current distance to the target
+// is well inside its preferred range increment (#251 smarter NPC movement). Previously
+// this test asserted the NPC would NOT stride at distance > 5ft, but the goal-based
+// chooser correctly backs the NPC off toward its first range increment. The legacy
+// "only retreat when within 5ft" behaviour is preserved at the wrapper boundary only
+// when the chooser produces no preferred destination.
 //
-// Precondition: NPC WeaponID references a WeaponDef with RangeIncrement > 0; player at (0,0), NPC at (2,0)
-// (Chebyshev dist=10ft > 5ft).
-// Postcondition: NPC action queue starts directly with ActionAttack (no ActionStride).
-func TestNPCAutoStride_RangedNPC_DoesNotStride(t *testing.T) {
+// Precondition: NPC WeaponID references a WeaponDef with RangeIncrement = 60ft; player at (0,0),
+// NPC at (2,0) (Chebyshev dist=10ft, well inside the 60ft / 12-cell preferred range).
+// Postcondition: NPC action queue prepends an ActionStride{Direction: "away"} so the NPC
+// retreats toward its preferred firing distance.
+func TestNPCAutoStride_RangedNPC_StridesAwayWhenInsideOptimalRange(t *testing.T) {
 	reg := inventory.NewRegistry()
 	bowDef := &inventory.WeaponDef{
 		ID:             "shortbow",
@@ -436,7 +442,11 @@ func TestNPCAutoStride_RangedNPC_DoesNotStride(t *testing.T) {
 	require.NotNil(t, q, "expected an action queue for the NPC")
 	actions := q.QueuedActions()
 	require.NotEmpty(t, actions, "expected at least one action in queue")
-	assert.Equal(t, combat.ActionAttack, actions[0].Type, "first action must be ActionAttack (no stride for ranged NPC)")
+	require.GreaterOrEqual(t, len(actions), 2,
+		"expected at least Stride+Attack (the chooser should retreat toward optimal range)")
+	assert.Equal(t, combat.ActionStride, actions[0].Type, "first action must be ActionStride (chooser retreats toward optimal range)")
+	assert.Equal(t, "away", actions[0].Direction, "stride must be away from the target")
+	assert.Equal(t, combat.ActionAttack, actions[1].Type, "second action must be ActionAttack")
 }
 
 // TestHandleStride_ReactiveStrike verifies that when a player strides away from an

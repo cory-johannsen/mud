@@ -4381,35 +4381,92 @@ func (h *CombatHandler) maybeBroadcastTauntLocked(cbt *combat.Combat, c *combat.
 	}})
 }
 
-// npcMovementStrideLocked returns the stride direction needed for the NPC combatant
-// based on its current weapon type and distance to the nearest living player.
+// npcMovementStrideLocked returns the stride direction needed for the NPC
+// combatant based on the smarter goal-based chooser (combat.ChooseMoveDestination).
+// The chooser scores all reachable cells against four weighted goals — range,
+// cover, spread, and terrain — and the wrapper translates the chosen cell back
+// into the legacy "toward" / "away" string consumed by the existing stride
+// loop in round.go. Returns "" when the chooser opts to stay put.
 //
-// Rules:
-//   - Melee weapon (RangeIncrement == 0): stride "toward" when distance > 5 feet.
-//   - Ranged weapon (RangeIncrement > 0): stride "away" when distance <= 5 feet.
-//   - Returns "" when no stride is needed.
+// The chooser falls back to the previous melee-closes / ranged-retreats heuristic
+// in degenerate cases (no target, single-cell candidate set), preserving the
+// existing behavioural envelope while letting the goal-weighted picker handle
+// terrain, cover, and faction-spread decisions.
 //
-// Precondition: h.combatMu is held; c must not be nil.
+// Precondition: h.combatMu is held; cbt and c must not be nil.
 // Postcondition: Returns "toward", "away", or "".
 func (h *CombatHandler) npcMovementStrideLocked(cbt *combat.Combat, c *combat.Combatant) string {
-	isRanged := false
-	if inst, ok := h.npcMgr.Get(c.ID); ok && inst.WeaponID != "" && h.invRegistry != nil {
-		if wDef := h.invRegistry.Weapon(inst.WeaponID); wDef != nil && wDef.RangeIncrement > 0 {
-			isRanged = true
+	if cbt == nil || c == nil {
+		return ""
+	}
+	rangeIncrementFt := 0
+	useCover := false
+	if inst, ok := h.npcMgr.Get(c.ID); ok {
+		useCover = inst.UseCover
+		if inst.WeaponID != "" && h.invRegistry != nil {
+			if wDef := h.invRegistry.Weapon(inst.WeaponID); wDef != nil {
+				rangeIncrementFt = wDef.RangeIncrement
+			}
 		}
 	}
-	playerDist := 25 // fallback if no living player found
+
+	var target *combat.Combatant
 	for _, comb := range cbt.Combatants {
 		if comb.Kind == combat.KindPlayer && !comb.IsDead() {
-			playerDist = combat.CombatRange(*c, *comb)
+			target = comb
 			break
 		}
 	}
-	if !isRanged && playerDist > 5 {
+	if target == nil {
+		return ""
+	}
+
+	allies := make([]*combat.Combatant, 0, len(cbt.Combatants))
+	for _, comb := range cbt.Combatants {
+		if comb == c || comb.IsDead() || comb.Kind != c.Kind {
+			continue
+		}
+		allies = append(allies, comb)
+	}
+
+	ctx := combat.MoveContext{
+		RangeIncrementFt: rangeIncrementFt,
+		UseCover:         useCover,
+		Allies:           allies,
+		// CoverTierAt left nil until #247 ships its positional cover model;
+		// CoverGoal returns 0 in that case.
+		// Weights left zero — DefaultMoveWeights apply.
+	}
+
+	dest := combat.ChooseMoveDestination(cbt, c, target, ctx, false)
+	if dest == nil {
+		return ""
+	}
+
+	// Translate the chosen destination into the legacy "toward"/"away" string.
+	// The existing stride loop steps one cell at a time using CompassDelta
+	// against the current target, so we just need to know whether the chosen
+	// destination is closer to or farther from the target than the actor's
+	// current position.
+	curDist := combat.CombatRange(*c, *target)
+	destC := *c
+	destC.GridX = dest.X
+	destC.GridY = dest.Y
+	newDist := combat.CombatRange(destC, *target)
+	if newDist < curDist {
 		return "toward"
 	}
-	if isRanged && playerDist <= 5 && playerDist < combat.MaxCombatRange {
+	if newDist > curDist {
 		return "away"
+	}
+	// Lateral move (newDist == curDist). The stride loop only knows
+	// "toward"/"away"; pick the direction that the legacy heuristic would
+	// have chosen so we don't regress melee-closes / ranged-retreats.
+	if rangeIncrementFt > 0 && curDist <= 5 && curDist < combat.MaxCombatRange {
+		return "away"
+	}
+	if rangeIncrementFt == 0 && curDist > 5 {
+		return "toward"
 	}
 	return ""
 }
