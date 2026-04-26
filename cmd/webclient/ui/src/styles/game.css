@@ -387,8 +387,14 @@ body:has(.game-layout) #root { height: 100%; overflow: hidden; }
   white-space: nowrap;
   font-family: monospace;
 }
-.hotbar-new-btn:hover {
+.hotbar-new-btn:hover:not(:disabled) {
   background: #1f4a1f;
+}
+.hotbar-new-btn:disabled {
+  background: #1a1a1a;
+  color: #555;
+  border-left-color: #333;
+  cursor: not-allowed;
 }
 
 /* Input panel */
