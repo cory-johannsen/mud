@@ -22,11 +22,15 @@ func makeTestSess(level int) *session.PlayerSession {
 	}
 }
 
-// TestBackfill_L2SlotsAlreadyPopulated_ClearedAndReturnedAsPending verifies that
-// a player who has L2+ prepared slots that were auto-assigned (without trainer) has
-// those slots cleared and receives them back as pending grants.
-// REQ-TTA-2: L2+ slots always require a trainer — existing auto-assigned slots must be remediated.
-func TestBackfill_L2SlotsAlreadyPopulated_ClearedAndReturnedAsPending(t *testing.T) {
+// TestBackfill_L2SlotsAlreadyPopulated_Preserved verifies that existing L2+ prepared
+// slots are preserved across login and not registered as pending grants when the
+// expected slot count is already met.
+//
+// Bug #351: previous behavior unconditionally deleted all pool-assigned L2+ slots,
+// destroying legitimate trainer-resolved and rest-rearranged selections.
+// REQ-TTA-2 still applies for slots that have NEVER been resolved — those become pending —
+// but slots already filled by the player's choices must round-trip across logout/login.
+func TestBackfill_L2SlotsAlreadyPopulated_Preserved(t *testing.T) {
 	t.Parallel()
 	archetype := &ruleset.Archetype{
 		TechnologyGrants: &ruleset.TechnologyGrants{
@@ -47,11 +51,11 @@ func TestBackfill_L2SlotsAlreadyPopulated_ClearedAndReturnedAsPending(t *testing
 	job := &ruleset.Job{}
 	merged := ruleset.MergeLevelUpGrants(archetype.LevelUpGrants, job.LevelUpGrants)
 
-	// Pre-populate L2 slots simulating the old buggy auto-assign.
+	// Pre-populate L2 slots representing the player's trainer-resolved or rest-prepared selections.
 	prepRepo := &lutPreparedRepo{
 		slots: map[int][]*session.PreparedSlot{
 			1: {{TechID: "creation_tech_x"}, {TechID: "creation_tech_y"}}, // 2 creation slots
-			2: {{TechID: "tech_a"}, {TechID: "tech_b"}},                   // wrongly auto-assigned
+			2: {{TechID: "tech_a"}, {TechID: "tech_b"}},                   // legitimate L2 selections
 		},
 	}
 	hwRepo := &lutHardwiredRepo{}
@@ -65,14 +69,88 @@ func TestBackfill_L2SlotsAlreadyPopulated_ClearedAndReturnedAsPending(t *testing
 		hwRepo, prepRepo, spontRepo, innateRepo, nil,
 	)
 	require.NoError(t, err)
-	// L2 slots must have been cleared from the repo.
-	assert.Empty(t, prepRepo.slots[2], "auto-assigned L2 slots should be cleared")
-	// Pending grants must be returned for the 2 cleared slots.
-	require.NotNil(t, pending, "pending grants must be returned for cleared L2 slots")
-	require.NotNil(t, pending.Prepared)
-	assert.Equal(t, 2, pending.Prepared.SlotsByLevel[2], "2 pending L2 slots expected")
+	// L2 slots must NOT have been cleared.
+	assert.Len(t, prepRepo.slots[2], 2, "existing L2 slots must be preserved across login")
+	assert.Equal(t, "tech_a", prepRepo.slots[2][0].TechID)
+	assert.Equal(t, "tech_b", prepRepo.slots[2][1].TechID)
+	// All expected slots are present, so no pending grants for L2.
+	if pending != nil && pending.Prepared != nil {
+		assert.Equal(t, 0, pending.Prepared.SlotsByLevel[2], "no pending L2 slots when all are filled")
+	}
 	// L1 creation slots must remain untouched.
 	assert.Len(t, prepRepo.slots[1], 2, "L1 creation slots must be preserved")
+}
+
+// TestBackfill_SameTechAtMultipleCastLevels_Preserved is the direct regression test
+// for bug #351: preparing the same tech at multiple cast levels round-trips across
+// logout/login.
+func TestBackfill_SameTechAtMultipleCastLevels_Preserved(t *testing.T) {
+	t.Parallel()
+	// Nerd-style archetype: L1 slots from creation, L2 slots from level 3, L3 slots from level 5.
+	archetype := &ruleset.Archetype{
+		TechnologyGrants: &ruleset.TechnologyGrants{
+			Prepared: &ruleset.PreparedGrants{
+				SlotsByLevel: map[int]int{1: 2},
+				Pool: []ruleset.PreparedEntry{
+					{ID: "multi_round_kinetic_volley", Level: 1},
+				},
+			},
+		},
+		LevelUpGrants: map[int]*ruleset.TechnologyGrants{
+			3: {Prepared: &ruleset.PreparedGrants{
+				SlotsByLevel: map[int]int{2: 1},
+				Pool: []ruleset.PreparedEntry{
+					{ID: "corrosive_projectile", Level: 2},
+				},
+			}},
+			5: {Prepared: &ruleset.PreparedGrants{
+				SlotsByLevel: map[int]int{3: 1},
+				Pool: []ruleset.PreparedEntry{
+					{ID: "terror_frequency", Level: 3},
+				},
+			}},
+		},
+	}
+	job := &ruleset.Job{}
+	merged := ruleset.MergeLevelUpGrants(archetype.LevelUpGrants, job.LevelUpGrants)
+
+	// Player has prepared the same tech (multi_round_kinetic_volley) at 3 different cast levels.
+	prepRepo := &lutPreparedRepo{
+		slots: map[int][]*session.PreparedSlot{
+			1: {{TechID: "multi_round_kinetic_volley"}, {TechID: "multi_round_kinetic_volley"}},
+			2: {{TechID: "multi_round_kinetic_volley"}},
+			3: {{TechID: "multi_round_kinetic_volley"}},
+		},
+	}
+	hwRepo := &lutHardwiredRepo{}
+	sess := makeTestSess(5)
+	sess.PreparedTechs = map[int][]*session.PreparedSlot{
+		1: {{TechID: "multi_round_kinetic_volley"}, {TechID: "multi_round_kinetic_volley"}},
+		2: {{TechID: "multi_round_kinetic_volley"}},
+		3: {{TechID: "multi_round_kinetic_volley"}},
+	}
+
+	pending, err := BackfillLevelUpTechnologies(
+		context.Background(), sess, 1,
+		job, archetype, merged, nil,
+		hwRepo, prepRepo, &lutSpontaneousRepo{}, &lutInnateRepo{}, nil,
+	)
+	require.NoError(t, err)
+
+	// All three cast-level slots must survive.
+	require.Len(t, prepRepo.slots[1], 2, "L1 slots preserved")
+	require.Len(t, prepRepo.slots[2], 1, "L2 slot preserved (was lost before fix)")
+	require.Len(t, prepRepo.slots[3], 1, "L3 slot preserved (was lost before fix)")
+	assert.Equal(t, "multi_round_kinetic_volley", prepRepo.slots[2][0].TechID)
+	assert.Equal(t, "multi_round_kinetic_volley", prepRepo.slots[3][0].TechID)
+	// Session must reflect the same.
+	require.Len(t, sess.PreparedTechs[2], 1, "session L2 slot preserved")
+	require.Len(t, sess.PreparedTechs[3], 1, "session L3 slot preserved")
+	// No pending grants because expected counts are met.
+	if pending != nil && pending.Prepared != nil {
+		assert.Equal(t, 0, pending.Prepared.SlotsByLevel[2])
+		assert.Equal(t, 0, pending.Prepared.SlotsByLevel[3])
+	}
 }
 
 // TestBackfill_MissingL2SlotsReturnedAsPending verifies that a player at level 3
