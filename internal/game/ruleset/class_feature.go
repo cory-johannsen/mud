@@ -5,6 +5,7 @@ import (
 	"os"
 	"sort"
 
+	"github.com/cory-johannsen/mud/internal/game/aoe"
 	"github.com/cory-johannsen/mud/internal/game/effect"
 	"gopkg.in/yaml.v3"
 )
@@ -50,11 +51,32 @@ type ClassFeature struct {
 	Contexts     []string        `yaml:"contexts"`    // valid contexts: combat, exploration, downtime
 	Effect            *ActionEffect   `yaml:"effect"`                        // nil for passive features
 	GrantsFocusPoint  bool            `yaml:"grants_focus_point,omitempty"`  // true if this feature grants a Focus Point slot
+	// AoeShape selects the AoE template geometry: "" (single-target / legacy
+	// back-compat), "burst", "cone", or "line". When empty and AoeRadius > 0
+	// the feature is treated as an AoeShapeBurst (back-compat AOE-4).
+	AoeShape aoe.AoeShape `yaml:"aoe_shape,omitempty"`
 	// AoeRadius is the radius in feet for area-of-effect feats. 0 = single target.
 	AoeRadius int `yaml:"aoe_radius,omitempty"`
+	// AoeLength is the length in feet for cone/line shapes. Required (> 0) for those
+	// shapes; must be 0 otherwise.
+	AoeLength int `yaml:"aoe_length,omitempty"`
+	// AoeWidth is the width in feet for line shapes. Defaults to 5 ft when zero (AOE-3).
+	AoeWidth int `yaml:"aoe_width,omitempty"`
 	// PassiveBonuses are always-on typed bonuses granted while this feature is active.
 	// Only meaningful when Active == false (passive features).
 	PassiveBonuses []effect.Bonus `yaml:"passive_bonuses,omitempty"`
+}
+
+// Validate returns an error if the feature's AoE fields are inconsistent.
+//
+// Precondition: cf is non-nil.
+// Postcondition: returns nil iff (AoeShape, AoeRadius, AoeLength, AoeWidth)
+// satisfy the AoE field rules.
+func (cf *ClassFeature) Validate() error {
+	if err := aoe.ValidateAoeFields(cf.AoeShape, cf.AoeRadius, cf.AoeLength, cf.AoeWidth); err != nil {
+		return fmt.Errorf("class_feature %q: %w", cf.ID, err)
+	}
+	return nil
 }
 
 // classFeaturesFile is the top-level YAML structure for content/class_features.yaml.
@@ -70,6 +92,11 @@ func LoadClassFeaturesFromBytes(data []byte) ([]*ClassFeature, error) {
 	var f classFeaturesFile
 	if err := yaml.Unmarshal(data, &f); err != nil {
 		return nil, fmt.Errorf("parsing class features: %w", err)
+	}
+	for _, cf := range f.ClassFeatures {
+		if err := cf.Validate(); err != nil {
+			return nil, err
+		}
 	}
 	return f.ClassFeatures, nil
 }

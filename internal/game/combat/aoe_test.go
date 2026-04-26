@@ -104,6 +104,41 @@ func TestProperty_CombatantsInRadius_NeverReturnsDead(t *testing.T) {
 	})
 }
 
+// REQ-AOE-HELPER-8: CombatantsInCells returns only living combatants whose cell
+// is in the input set; dead combatants and off-set combatants are excluded.
+func TestCombatantsInCells_FiltersDeadAndOffSet(t *testing.T) {
+	a := &Combatant{ID: "a", GridX: 5, GridY: 5, Dead: false, CurrentHP: 10}
+	b := &Combatant{ID: "b", GridX: 6, GridY: 6, Dead: true, CurrentHP: 0}
+	c := &Combatant{ID: "c", GridX: 9, GridY: 9, Dead: false, CurrentHP: 10}
+	cbt := &Combat{Combatants: []*Combatant{a, b, c}}
+
+	got := CombatantsInCells(cbt, []Cell{{X: 5, Y: 5}, {X: 6, Y: 6}})
+
+	require.Len(t, got, 1)
+	assert.Same(t, a, got[0])
+}
+
+// REQ-AOE-HELPER-9: CombatantsInCells returns nil for empty cell set.
+func TestCombatantsInCells_EmptyCells_ReturnsNil(t *testing.T) {
+	cbt := &Combat{Combatants: []*Combatant{
+		{ID: "a", GridX: 0, GridY: 0, CurrentHP: 10},
+	}}
+	assert.Nil(t, CombatantsInCells(cbt, nil))
+	assert.Nil(t, CombatantsInCells(cbt, []Cell{}))
+}
+
+// REQ-AOE-HELPER-10: CombatantsInRadius regression — behaviour after refactor
+// to delegate through CombatantsInCells/BurstCells matches Chebyshev distance.
+func TestCombatantsInRadius_RegressionAfterRefactor(t *testing.T) {
+	a := &Combatant{ID: "a", GridX: 5, GridY: 5, Dead: false, CurrentHP: 10}
+	b := &Combatant{ID: "b", GridX: 5, GridY: 6, Dead: false, CurrentHP: 10}
+	cbt := &Combat{Combatants: []*Combatant{a, b}}
+	center := Combatant{GridX: 5, GridY: 5}
+
+	got := CombatantsInRadius(cbt, center, 10)
+	require.Len(t, got, 2)
+}
+
 // REQ-AOE-HELPER-7 (property): All returned combatants are within radiusFt of center.
 func TestProperty_CombatantsInRadius_AllWithinRadius(t *testing.T) {
 	rapid.Check(t, func(rt *rapid.T) {

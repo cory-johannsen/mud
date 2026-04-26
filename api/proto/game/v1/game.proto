@@ -1188,6 +1188,36 @@ message InteractResponse {
   string message = 1;
 }
 
+// AoeTemplate describes a placed area-of-effect template for a Use action.
+// The client populates shape, anchor, and (for cones/lines) facing on inbound
+// requests; the server populates cells on outbound combat events.
+message AoeTemplate {
+  enum Shape {
+    SHAPE_UNSPECIFIED = 0;
+    SHAPE_BURST = 1;
+    SHAPE_CONE = 2;
+    SHAPE_LINE = 3;
+  }
+  enum Direction {
+    DIR_UNSPECIFIED = 0;
+    DIR_N  = 1;
+    DIR_NE = 2;
+    DIR_E  = 3;
+    DIR_SE = 4;
+    DIR_S  = 5;
+    DIR_SW = 6;
+    DIR_W  = 7;
+    DIR_NW = 8;
+  }
+  message Cell { int32 x = 1; int32 y = 2; }
+
+  Shape     shape    = 1;
+  int32     anchor_x = 2;
+  int32     anchor_y = 3;
+  Direction facing   = 4;
+  repeated Cell cells = 5; // server-populated on outbound; ignored on inbound
+}
+
 // UseRequest asks the server to activate an active feat.
 // An empty feat_id causes the server to return the list of available active feats.
 message UseRequest {
@@ -1195,6 +1225,7 @@ message UseRequest {
   string target   = 2;
   int32  target_x = 3; // 0-based grid column (0–9); -1 means unset / no AoE; ignored unless feat has aoe_radius > 0
   int32  target_y = 4; // 0-based grid row (0–9); -1 means unset / no AoE; ignored unless feat has aoe_radius > 0
+  AoeTemplate template = 5; // optional; required for cone/line content (AOE-13)
 }
 
 // UseResponse carries the result of a feat activation or a list of active feats.

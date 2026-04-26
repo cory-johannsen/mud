@@ -6,6 +6,7 @@ import (
 
 	"gopkg.in/yaml.v3"
 
+	"github.com/cory-johannsen/mud/internal/game/aoe"
 	"github.com/cory-johannsen/mud/internal/game/reaction"
 )
 
@@ -41,10 +42,20 @@ type Feat struct {
 	TargetTags []string `yaml:"target_tags"`
 	// GrantsFocusPoint when true means this feat grants one Focus Point slot to the character's pool.
 	GrantsFocusPoint bool `yaml:"grants_focus_point,omitempty"`
+	// AoeShape selects the AoE template geometry: "" (single-target / legacy
+	// back-compat), "burst", "cone", or "line". When empty and AoeRadius > 0
+	// the feat is treated as an AoeShapeBurst (back-compat AOE-4).
+	AoeShape aoe.AoeShape `yaml:"aoe_shape,omitempty"`
 	// AoeRadius is the radius in feet of an area-of-effect burst centered on the target grid square.
 	// 0 means single-target (default). When > 0 and UseRequest.target_x/target_y are non-zero,
 	// the feat's condition effect is applied to every combatant within Chebyshev distance AoeRadius.
 	AoeRadius int `yaml:"aoe_radius,omitempty"`
+	// AoeLength is the length in feet for AoeShapeCone or AoeShapeLine. Required (> 0) for
+	// those shapes; must be 0 for AoeShapeBurst and the legacy form.
+	AoeLength int `yaml:"aoe_length,omitempty"`
+	// AoeWidth is the width in feet for AoeShapeLine. Defaults to 5 ft when zero per AOE-3.
+	// Must be 0 for all other shapes.
+	AoeWidth int `yaml:"aoe_width,omitempty"`
 	// RequiresCombat, when true, means this feat may only be activated while the player is in
 	// an active combat encounter. Attempting to use it outside combat returns an error message.
 	RequiresCombat bool `yaml:"requires_combat,omitempty"`
@@ -54,6 +65,18 @@ type Feat struct {
 	// ActionCost is the number of action points this active feat costs to use.
 	// 0 means the engine defaults to 1 AP. Only meaningful for Active == true feats.
 	ActionCost int `yaml:"action_cost,omitempty"`
+}
+
+// Validate returns an error if the feat's AoE fields are inconsistent.
+//
+// Precondition: f is non-nil.
+// Postcondition: returns nil iff (AoeShape, AoeRadius, AoeLength, AoeWidth)
+// satisfy the AoE field rules.
+func (f *Feat) Validate() error {
+	if err := aoe.ValidateAoeFields(f.AoeShape, f.AoeRadius, f.AoeLength, f.AoeWidth); err != nil {
+		return fmt.Errorf("feat %q: %w", f.ID, err)
+	}
+	return nil
 }
 
 // featsFile is the top-level YAML structure for content/feats.yaml.
@@ -69,6 +92,11 @@ func LoadFeatsFromBytes(data []byte) ([]*Feat, error) {
 	var f featsFile
 	if err := yaml.Unmarshal(data, &f); err != nil {
 		return nil, fmt.Errorf("parsing feats: %w", err)
+	}
+	for _, feat := range f.Feats {
+		if err := feat.Validate(); err != nil {
+			return nil, err
+		}
 	}
 	return f.Feats, nil
 }
