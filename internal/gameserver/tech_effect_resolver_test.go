@@ -489,6 +489,7 @@ func TestResolveTechEffects_AttackTech_NoTargets_ReturnsNoValidTarget(t *testing
 	sess := &session.PlayerSession{UID: "p1", Level: 1}
 	tech := &technology.TechnologyDef{
 		ID:         "thermal_plasma_fist",
+		Name:       "Thermal Plasma Fist",
 		Resolution: "attack",
 		Tradition:  technology.TraditionTechnical,
 		Targets:    technology.TargetsSingle,
@@ -500,10 +501,13 @@ func TestResolveTechEffects_AttackTech_NoTargets_ReturnsNoValidTarget(t *testing
 	}
 	src := &deterministicSrc{val: 10}
 
+	// #349: out-of-combat (cbt nil) attack-resolution tech with damage block now
+	// surfaces a clearer "requires a combat target" message instead of the
+	// generic "No valid target." (which is reserved for the in-combat
+	// no-targets-found case).
 	msgs := ResolveTechEffects(sess, tech, nil, nil, nil, src, nil)
-
 	require.Len(t, msgs, 1, "must return exactly one message when no targets")
-	assert.Equal(t, "No valid target.", msgs[0], "message must be 'No valid target.'")
+	assert.Contains(t, msgs[0], "requires a combat target", "out-of-combat message must point to combat")
 }
 
 // REQ-TER-MRKV-PROP (property): multi_round_kinetic_volley on_apply damage always within 1d4+1 bounds.
