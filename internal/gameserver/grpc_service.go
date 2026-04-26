@@ -2483,7 +2483,7 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 		if err := s.validateUseRequestAoeTemplate(p.UseRequest); err != nil {
 			return nil, err
 		}
-		return s.handleUse(uid, p.UseRequest.FeatId, p.UseRequest.GetTarget(), p.UseRequest.GetTargetX(), p.UseRequest.GetTargetY())
+		return s.handleUseWithTemplate(uid, p.UseRequest.FeatId, p.UseRequest.GetTarget(), p.UseRequest.GetTargetX(), p.UseRequest.GetTargetY(), p.UseRequest.GetTemplate())
 	case *gamev1.ClientMessage_Action:
 		return s.handleAction(uid, p.Action)
 	case *gamev1.ClientMessage_RaiseShield:
@@ -8316,7 +8316,15 @@ func (s *GameServiceServer) handleTabComplete(uid, prefix string) (*gamev1.Serve
 // Precondition: uid must resolve to an active session with a loaded character.
 // Postcondition: Returns a ServerEvent with UseResponse containing choices or an activation message.
 // targetX and targetY are the 0-based grid coordinates of the AoE burst center; -1 means unset / no AoE.
+// This is the legacy entry point; cone/line content arrives via handleUseWithTemplate.
 func (s *GameServiceServer) handleUse(uid, abilityID, targetID string, targetX, targetY int32) (*gamev1.ServerEvent, error) {
+	return s.handleUseWithTemplate(uid, abilityID, targetID, targetX, targetY, nil)
+}
+
+// handleUseWithTemplate is handleUse with an optional client-supplied AoeTemplate (AOE-13).
+// When template is nil and AoeRadius > 0, a burst template is synthesised from
+// targetX/targetY for back-compat (AOE-16).
+func (s *GameServiceServer) handleUseWithTemplate(uid, abilityID, targetID string, targetX, targetY int32, template *gamev1.AoeTemplate) (*gamev1.ServerEvent, error) {
 	sess, ok := s.sessions.GetPlayer(uid)
 	if !ok {
 		return nil, fmt.Errorf("player %q not found", uid)
@@ -8594,11 +8602,15 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string, targetX, 
 				}
 				condID := f.ConditionID
 				if condID != "" && s.condRegistry != nil {
-					// REQ-AOE-2: When feat has aoe_radius > 0 and target coordinates are provided,
-					// apply the condition to every living combatant within Chebyshev distance aoe_radius.
-					// REQ-2D-5e: AoE does not distinguish friend from foe — all combatants in radius are affected.
-					// Sentinel: targetX < 0 or targetY < 0 means no AoE target (use single-target path instead).
-					if f.AoeRadius > 0 && (targetX >= 0 && targetY >= 0) {
+					// REQ-AOE-2: When feat has aoe_radius > 0 (or shape == cone/line) and a template /
+					// target coordinates are provided, resolve the AoE template into a cell set and
+					// apply the condition to every living combatant whose grid square intersects.
+					// REQ-2D-5e: AoE does not distinguish friend from foe — all combatants in the
+					// resolved cells are affected.
+					// AOE-16: targetX/targetY < 0 with no template falls through to single-target.
+					hasTemplate := template != nil
+					hasLegacyBurst := f.AoeRadius > 0 && (targetX >= 0 && targetY >= 0)
+					if hasTemplate || hasLegacyBurst {
 						var cbt *combat.Combat
 						if s.combatH != nil {
 							cbt = s.combatH.ActiveCombatForPlayer(uid)
@@ -8606,9 +8618,9 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string, targetX, 
 						if cbt == nil {
 							return messageEvent(fmt.Sprintf("You must be in combat to use %s.", f.Name)), nil
 						}
-						center := combat.Combatant{GridX: int(targetX), GridY: int(targetY)}
+						affected, _ := resolveAoeCells(template, f.AoeRadius, f.AoeLength, f.AoeWidth, targetX, targetY, cbt)
 						if def, ok := s.condRegistry.Get(condID); ok {
-							for _, c := range combat.CombatantsInRadius(cbt, center, f.AoeRadius) {
+							for _, c := range affected {
 								if condSet := cbt.Conditions[c.ID]; condSet != nil {
 									if err := condSet.Apply(c.ID, def, 1, -1); err != nil {
 										s.logger.Warn("failed to apply feat AoE condition",
@@ -8865,7 +8877,7 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string, targetX, 
 					}
 					return nil, nil
 				}
-				return s.activateTechWithEffectsAndHeighten(sess, uid, techID, targetID, fmt.Sprintf("You activate %s.", techDisplay), nil, targetX, targetY, heightenDelta)
+				return s.activateTechWithEffectsAndHeighten(sess, uid, techID, targetID, fmt.Sprintf("You activate %s.", techDisplay), nil, targetX, targetY, heightenDelta, template)
 			}
 		}
 		if foundInPrepared {
@@ -8949,7 +8961,7 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string, targetX, 
 			}
 			return nil, nil
 		}
-		return s.activateTechWithEffects(sess, uid, abilityID, targetID, fmt.Sprintf("You activate %s. (%d uses remaining at level %d.)", spontaneousDisplay, pool.Remaining, foundLevel), nil, targetX, targetY)
+		return s.activateTechWithEffectsAndTemplate(sess, uid, abilityID, targetID, fmt.Sprintf("You activate %s. (%d uses remaining at level %d.)", spontaneousDisplay, pool.Remaining, foundLevel), nil, targetX, targetY, template)
 	}
 // innateCheck is the target for goto from the spontaneous path when the tech is not
 // found in KnownTechs. This allows innate techs to be checked even when the player
@@ -8998,9 +9010,9 @@ innateCheck:
 				slot.UsesRemaining--
 				sess.InnateTechs[innateTechBaseID] = slot
 				s.pushEventToUID(uid, s.hotbarUpdateEvent(sess))
-				return s.activateTechWithEffects(sess, uid, innateTechBaseID, targetID, fmt.Sprintf("You activate %s. (%d uses remaining.)", name, slot.UsesRemaining), nil, targetX, targetY)
+				return s.activateTechWithEffectsAndTemplate(sess, uid, innateTechBaseID, targetID, fmt.Sprintf("You activate %s. (%d uses remaining.)", name, slot.UsesRemaining), nil, targetX, targetY, template)
 			}
-			return s.activateTechWithEffects(sess, uid, innateTechBaseID, targetID, fmt.Sprintf("You activate %s.", name), nil, targetX, targetY)
+			return s.activateTechWithEffectsAndTemplate(sess, uid, innateTechBaseID, targetID, fmt.Sprintf("You activate %s.", name), nil, targetX, targetY, template)
 		}
 		// REQ-USE-1: fall through to room equipment before reporting no match.
 		if evt, err := s.tryRoomEquipFallback(uid, sess.RoomID, abilityID); evt != nil || err != nil {
@@ -9186,14 +9198,17 @@ func (s *GameServiceServer) handleAmpedUse(
 		cbt = s.combatH.ActiveCombatForPlayer(uid)
 	}
 
-	// REQ-AOE-1: When tech has aoe_radius > 0 and target coordinates are provided,
-	// collect all living combatants within Chebyshev distance aoe_radius of the target square.
-	// Sentinel: techTargetX < 0 or techTargetY < 0 means no AoE target (use single-target path instead).
+	// REQ-AOE-1: When tech has aoe_radius > 0 (or shape == cone/line) and a template /
+	// target coordinates are provided, resolve the AoE template to a cell set and collect
+	// every living combatant in that cell set.
+	// AOE-16: legacy techTargetX/techTargetY with no template synthesises a burst template.
 	var techTargets []*combat.Combatant
 	techTargetX, techTargetY := req.GetTargetX(), req.GetTargetY()
-	if resolvedTech.AoeRadius > 0 && (techTargetX >= 0 && techTargetY >= 0) && cbt != nil {
-		center := combat.Combatant{GridX: int(techTargetX), GridY: int(techTargetY)}
-		techTargets = combat.CombatantsInRadius(cbt, center, resolvedTech.AoeRadius)
+	tmpl := req.GetTemplate()
+	hasTemplate := tmpl != nil
+	hasLegacyBurst := resolvedTech.AoeRadius > 0 && (techTargetX >= 0 && techTargetY >= 0)
+	if (hasTemplate || hasLegacyBurst) && cbt != nil {
+		techTargets, _ = resolveAoeCells(tmpl, resolvedTech.AoeRadius, resolvedTech.AoeLength, resolvedTech.AoeWidth, techTargetX, techTargetY, cbt)
 	} else {
 		target, errMsg := s.resolveUseTarget(uid, targetID, resolvedTech)
 		if errMsg != "" {
@@ -9282,14 +9297,26 @@ func (s *GameServiceServer) resolveUseTarget(uid, targetID string, tech *technol
 //   - If s.techRegistry is nil or the tech is not registered, falls back to fallbackMsg.
 //   - Returns a non-nil ServerEvent on success.
 func (s *GameServiceServer) activateTechWithEffects(sess *session.PlayerSession, uid, abilityID, targetID, fallbackMsg string, querier RoomQuerier, targetX, targetY int32) (*gamev1.ServerEvent, error) {
-	return s.activateTechWithEffectsAndHeighten(sess, uid, abilityID, targetID, fallbackMsg, querier, targetX, targetY, 0)
+	return s.activateTechWithEffectsAndHeighten(sess, uid, abilityID, targetID, fallbackMsg, querier, targetX, targetY, 0, nil)
+}
+
+// activateTechWithEffectsAndTemplate is activateTechWithEffects with an
+// optional client-supplied AoeTemplate (AOE-13). Pass nil for legacy burst
+// flows that rely on targetX/targetY (AOE-16); pass non-nil for cone/line
+// content where the template is required.
+func (s *GameServiceServer) activateTechWithEffectsAndTemplate(sess *session.PlayerSession, uid, abilityID, targetID, fallbackMsg string, querier RoomQuerier, targetX, targetY int32, template *gamev1.AoeTemplate) (*gamev1.ServerEvent, error) {
+	return s.activateTechWithEffectsAndHeighten(sess, uid, abilityID, targetID, fallbackMsg, querier, targetX, targetY, 0, template)
 }
 
 // activateTechWithEffectsAndHeighten is activateTechWithEffects plus a
 // heighten delta (slotLevel - techLevel). The delta propagates through
 // ResolveTechEffectsWithHeighten so damage effects with Projectiles > 0
 // scale up by one projectile per heighten level (GH #224).
-func (s *GameServiceServer) activateTechWithEffectsAndHeighten(sess *session.PlayerSession, uid, abilityID, targetID, fallbackMsg string, querier RoomQuerier, targetX, targetY int32, heightenDelta int) (*gamev1.ServerEvent, error) {
+//
+// template (AOE-13) is the optional client-supplied AoE template; cone/line
+// techs require a non-nil template, while burst techs may pass nil and rely
+// on legacy targetX/targetY (AOE-16).
+func (s *GameServiceServer) activateTechWithEffectsAndHeighten(sess *session.PlayerSession, uid, abilityID, targetID, fallbackMsg string, querier RoomQuerier, targetX, targetY int32, heightenDelta int, template *gamev1.AoeTemplate) (*gamev1.ServerEvent, error) {
 	if s.techRegistry == nil {
 		return messageEvent(fallbackMsg), nil
 	}
@@ -9317,12 +9344,14 @@ func (s *GameServiceServer) activateTechWithEffectsAndHeighten(sess *session.Pla
 	}
 
 	var techTargets []*combat.Combatant
-	// REQ-AOE-1: When tech has aoe_radius > 0 and target coordinates are provided,
-	// collect all living combatants within Chebyshev distance aoe_radius of the target square.
-	// Sentinel: targetX < 0 or targetY < 0 means no AoE target (use single-target path instead).
-	if techDef.AoeRadius > 0 && (targetX >= 0 && targetY >= 0) && cbt != nil {
-		center := combat.Combatant{GridX: int(targetX), GridY: int(targetY)}
-		techTargets = combat.CombatantsInRadius(cbt, center, techDef.AoeRadius)
+	// REQ-AOE-1: When tech has an AoE shape (legacy burst via aoe_radius, or cone/line via template)
+	// and the corresponding inputs are present, resolve the template to a cell set and collect every
+	// living combatant in that cell set.
+	// AOE-16: legacy targetX/targetY with no template synthesises a burst template at runtime.
+	hasTemplate := template != nil
+	hasLegacyBurst := techDef.AoeRadius > 0 && (targetX >= 0 && targetY >= 0)
+	if (hasTemplate || hasLegacyBurst) && cbt != nil {
+		techTargets, _ = resolveAoeCells(template, techDef.AoeRadius, techDef.AoeLength, techDef.AoeWidth, targetX, targetY, cbt)
 	} else {
 		target, errMsg := s.resolveUseTarget(uid, targetID, techDef)
 		if errMsg != "" {
@@ -9396,9 +9425,9 @@ func (s *GameServiceServer) activateTechWithEffectsWithCombat(sess *session.Play
 	// Use the pre-acquired cbt directly instead of calling resolveUseTarget (which would
 	// re-acquire combatMu and deadlock since the caller already holds it).
 	var techTargets []*combat.Combatant
+	// AOE-16: queued tech-use legacy path synthesises a burst template from targetX/targetY.
 	if techDef.AoeRadius > 0 && (targetX >= 0 && targetY >= 0) && cbt != nil {
-		center := combat.Combatant{GridX: int(targetX), GridY: int(targetY)}
-		techTargets = combat.CombatantsInRadius(cbt, center, techDef.AoeRadius)
+		techTargets, _ = resolveAoeCells(nil, techDef.AoeRadius, techDef.AoeLength, techDef.AoeWidth, targetX, targetY, cbt)
 	} else if techDef.Targets == technology.TargetsAllEnemies && cbt != nil {
 		for _, c := range cbt.Combatants {
 			if c.Kind == combat.KindNPC && !c.IsDead() {
