@@ -469,14 +469,17 @@ export function HotbarPanel() {
           )
         })}
         </div>
-        {hotbarCount < maxHotbars && (
-          <button
-            className="hotbar-new-btn"
-            onClick={createHotbar}
-            title="Create new hotbar"
-            type="button"
-          >+ New Hotbar</button>
-        )}
+        {/* #365: always render so the New button is visible even at max
+            hotbars; disabled state explains why it's not clickable. */}
+        <button
+          className="hotbar-new-btn"
+          onClick={createHotbar}
+          disabled={hotbarCount >= maxHotbars}
+          title={hotbarCount >= maxHotbars
+            ? `Max hotbars reached (${maxHotbars}). Switch with ▲/▼.`
+            : 'Create new hotbar'}
+          type="button"
+        >+ New</button>
       </div>
     </>
   )
