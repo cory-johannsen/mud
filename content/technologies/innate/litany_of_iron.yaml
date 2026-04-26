@@ -11,5 +11,9 @@ duration: rounds:1
 resolution: none
 effects:
   on_apply:
+    - type: condition
+      condition_id: litany_of_iron_active
+      value: 1
+      duration: rounds:1
     - type: utility
       description: "Litany of Iron grants +2 circumstance bonus to all saving throws for 1 round."
