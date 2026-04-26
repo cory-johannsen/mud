@@ -803,8 +803,8 @@ zone:
     title: The Silicon Comfort
     danger_level: safe
     description: A converted extended-stay hotel suite behind the neutral market stalls. Climate-controlled, keycard access, brand-neutral toiletries. The Silicon Comfort operates with corporate efficiency — check-in process, standardized rates, satisfaction guaranteed or the metrics don't reflect it.
-    map_x: 0
-    map_y: 100
+    map_x: -7
+    map_y: -7
     exits:
     - direction: north
       target: beav_neutral_market
