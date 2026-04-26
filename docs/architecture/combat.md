@@ -606,3 +606,104 @@ The targeting subsystem (`internal/game/combat/targeting.go`, `internal/game/com
 ### Wiring status
 
 The handler wiring (telnet `attack` / `strike` / `use` and the corresponding gRPC handlers) is **deferred to a follow-up of #249**. The same follow-up brings telnet/web `target` commands, AoE-cell validation, and feat/tech YAML targeting blocks online. The seam shipped in this iteration is the type and helper surface only.
+
+## Skill Actions Against Combat NPCs (#252 MVP)
+
+The `internal/game/skillaction/` package is the unified, data-driven framework
+for non-combat (skill-based) actions taken against combat NPCs (Demoralize,
+Feint, Trip, Recall Knowledge, etc). The MVP lands the framework plus
+**Demoralize** as the exemplar; the remaining actions and the discovery RPC
+(`ListCombatActions`), telnet `skills` command, web Skill Actions submenu,
+telemetry, and the Task 6 audit-and-migrate of the eight other handlers are
+deferred to follow-ups of #252.
+
+### Pipeline
+
+```
+bindSkillAction
+  → ValidateTarget          (target_kind + range + presence/liveness/allegiance + LoF seam)
+  → spendAP                 (legacy combat handler)
+  → Resolve                 (DoS computation + outcome lookup)
+  → Apply effects           (ApplyCondition / Damage / Move / Narrative / Reveal)
+  → emit narrative + log
+  → refund AP if Outcome.APRefund (NCA-33)
+```
+
+`Resolve` itself is pure: every side-effect is dispatched via the
+`ResolveContext.Apply` callback supplied by the handler. This keeps the
+functional core deterministic and trivially testable.
+
+### Degree of Success (NCA-7)
+
+`skillaction.DoS(roll, bonus, dc)` returns the four-tier PF2E result band:
+
+| Total vs DC | Band         |
+|-------------|--------------|
+| `>= dc+10`  | CritSuccess  |
+| `>= dc`     | Success      |
+| `>= dc-10`  | Failure      |
+| `<  dc-10`  | CritFailure  |
+
+The natural-1 / natural-20 step rule applies after band computation: nat 20
+bumps the result up one step (capped at CritSuccess); nat 1 bumps the result
+down one step (capped at CritFailure).
+
+### ActionDef YAML schema
+
+Each action lives at `content/skill_actions/<id>.yaml` and is loaded via
+`skillaction.LoadDirectory`. The loader validates that every
+`apply_condition.id` resolves against the live `condition.Registry` and that
+all numeric fields (ap_cost, stacks, durations, fixed DCs, range feet) are
+non-negative. See `content/skill_actions/demoralize.yaml` for the canonical
+example.
+
+Effect kinds supported by the `EffectEntry` discriminated union:
+
+- `apply_condition` — adds a stacked condition with a duration in rounds
+  (`-1` = until removed).
+- `narrative` — emits a player-facing line. `{actor}` and `{target}` are
+  substituted at resolve time.
+- `damage` — rolls and applies an HP damage formula (deferred wiring; the
+  damage routing lives in #246's `combat.ResolveDamage`).
+- `move` — shifts the target by a number of feet.
+- `reveal` — Recall Knowledge; surfaces NPC-metadata facts to a per-session
+  store (deferred wiring).
+
+### Target validation (NCA-12 / NCA-15 / NCA-16)
+
+`skillaction.ValidateTarget` composes:
+
+1. **Target-kind filter** — `npc` / `player` / `any` / `self`.
+2. **Range gate** — `melee_reach` (5 ft / adjacency), `ranged` (≤ feet),
+   `self`.
+3. **Standard combat target pipeline** — delegates to
+   `combat.ValidateSingleTarget` for presence, liveness, allegiance, and
+   distance, plus the line-of-fire seam (`PostValidateTarget`, currently a
+   no-op until #267 lands).
+
+Failures return a structured `*PreconditionError{Field, Detail}` that the
+handler surfaces to the client without consuming AP (NCA-17).
+
+### MVP scope (#252)
+
+Shipped in this iteration:
+
+- `internal/game/skillaction/` — `def.go`, `loader.go`, `dos.go`, `target.go`,
+  `resolve.go` plus full unit tests.
+- `content/skill_actions/demoralize.yaml` — the canonical Demoralize def with
+  the Frightened 1 / Frightened 2 ladder.
+- `internal/gameserver/skillaction_catalog.go` — process-wide lazy-loaded
+  catalog keyed off the existing condition registry.
+- `handleDemoralize` integration — on success, the unified pipeline applies
+  the canonical Frightened condition through `CombatHandler.ApplyConditionToNPC`
+  in addition to the legacy `ACMod` / `AttackMod` flat decrements (preserved
+  for backward compatibility until Task 6's audit-and-migrate completes).
+
+Deferred (tracked as follow-ups of #252):
+
+- Tasks 5/6/8/9/10 — `ListCombatActions` RPC, audit-and-migrate of the eight
+  other handlers, telnet `skills` command, web Skill Actions submenu,
+  structured telemetry.
+- Task 7 (other actions) — Feint, Trip, Grapple, Recall Knowledge defs.
+- The full canonical condition catalog (off_guard, clumsy, stupefied, etc.)
+  beyond the four already present (frightened, fleeing, grabbed, prone).

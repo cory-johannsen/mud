@@ -1,0 +1,40 @@
+id: demoralize
+display_name: Demoralize
+description: |
+  Cow your foe with a verbal threat, harsh stare, or display of dominance.
+  On a successful smooth_talk check vs the target's Cool DC, the target
+  becomes Frightened — penalising their attacks and AC for the encounter.
+ap_cost: 1
+skill: smooth_talk
+dc:
+  kind: target_will
+range:
+  kind: ranged
+  feet: 30
+target_kinds:
+  - npc
+outcomes:
+  crit_success:
+    effects:
+      - apply_condition:
+          id: frightened
+          stacks: 2
+          duration_rounds: -1
+      - narrative:
+          text: "{actor}'s words shatter {target}'s composure. ({target} is Frightened 2.)"
+  success:
+    effects:
+      - apply_condition:
+          id: frightened
+          stacks: 1
+          duration_rounds: -1
+      - narrative:
+          text: "{actor} unnerves {target}. ({target} is Frightened 1.)"
+  failure:
+    effects:
+      - narrative:
+          text: "{actor}'s threats fall flat."
+  crit_failure:
+    effects:
+      - narrative:
+          text: "{actor}'s posturing only emboldens {target}."
