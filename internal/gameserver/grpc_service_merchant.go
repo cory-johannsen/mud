@@ -58,7 +58,7 @@ func (s *GameServiceServer) findMerchantInRoom(roomID, npcName string) (*npc.Ins
 	if inst == nil {
 		return nil, fmt.Sprintf("You don't see %q here.", npcName)
 	}
-	if inst.NPCType != "merchant" {
+	if inst.NPCType != "merchant" && inst.NPCType != "black_market_merchant" {
 		return nil, fmt.Sprintf("%s is not a merchant.", inst.Name())
 	}
 	if inst.Cowering {
