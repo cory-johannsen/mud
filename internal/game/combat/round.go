@@ -9,6 +9,7 @@ import (
 	lua "github.com/yuin/gopher-lua"
 
 	"github.com/cory-johannsen/mud/internal/game/condition"
+	"github.com/cory-johannsen/mud/internal/game/detection"
 	"github.com/cory-johannsen/mud/internal/game/dice"
 	"github.com/cory-johannsen/mud/internal/game/effect"
 	"github.com/cory-johannsen/mud/internal/game/inventory"
@@ -929,9 +930,15 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 					})
 					continue
 				}
+				// DETECT-19: Strike/Attack is an auditory action.
+				actor.MadeSoundThisRound = true
 				// Hidden flat check: NPC attacking a hidden player must pass DC 11.
 				if actor.Kind == KindNPC && target.Kind == KindPlayer && target.Hidden {
 					target.Hidden = false // being targeted always breaks concealment
+					// Mirror the legacy clear into the per-pair map (DETECT-3).
+					if cbt.DetectionStates != nil {
+						cbt.DetectionStates.Clear(actor.ID, target.ID)
+					}
 					flatRoll := src.Intn(20) + 1
 					if flatRoll <= 10 {
 						events = append(events, RoundEvent{
@@ -960,6 +967,9 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 					}
 					// Flat check passed — attack proceeds, hidden is cleared.
 					target.Hidden = false
+					if cbt.DetectionStates != nil {
+						cbt.DetectionStates.Clear(actor.ID, target.ID)
+					}
 				}
 				// Range enforcement: determine weapon type and enforce distance rules.
 				var mainHandDef *inventory.WeaponDef
@@ -1136,6 +1146,11 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 					if actor.Kind == KindPlayer && target.Kind == KindNPC {
 						cbt.RecordDamage(actor.ID, dmg)
 					}
+					// DETECT-27: damage advances the target's awareness of the
+					// attacker one rung up the detection ladder.
+					if cbt.DetectionStates != nil {
+						detection.AdvanceTowardObserved(cbt.DetectionStates, target.ID, actor.ID)
+					}
 					// REQ-RXN19: TriggerOnAllyDamaged fires for other players when a player ally takes damage.
 					if target.Kind == KindPlayer {
 						for _, c := range cbt.Combatants {
@@ -1208,10 +1223,15 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 					})
 					continue
 				}
+				// DETECT-19: Strike is an auditory action.
+				actor.MadeSoundThisRound = true
 				// Hidden flat check: NPC striking a hidden player must pass DC 11.
 				// On failure, skip BOTH strikes with a single flat-check-fail event.
 				if actor.Kind == KindNPC && target.Kind == KindPlayer && target.Hidden {
 					target.Hidden = false // being targeted always breaks concealment
+					if cbt.DetectionStates != nil {
+						cbt.DetectionStates.Clear(actor.ID, target.ID)
+					}
 					flatRoll := src.Intn(20) + 1
 					if flatRoll <= 10 {
 						events = append(events, RoundEvent{
@@ -1313,6 +1333,11 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 					targetUpdater(target.ID, target.CurrentHP)
 					if actor.Kind == KindPlayer && target.Kind == KindNPC {
 						cbt.RecordDamage(actor.ID, dmg1)
+					}
+					// DETECT-27: damage advances the target's awareness of the
+					// attacker one rung up the detection ladder.
+					if cbt.DetectionStates != nil {
+						detection.AdvanceTowardObserved(cbt.DetectionStates, target.ID, actor.ID)
 					}
 					// REQ-RXN19: TriggerOnAllyDamaged fires for other players when a player ally takes damage.
 					if target.Kind == KindPlayer {

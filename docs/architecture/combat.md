@@ -707,3 +707,87 @@ Deferred (tracked as follow-ups of #252):
 - Task 7 (other actions) — Feint, Trip, Grapple, Recall Knowledge defs.
 - The full canonical condition catalog (off_guard, clumsy, stupefied, etc.)
   beyond the four already present (frightened, fleeing, grabbed, prone).
+
+## Detection States (#254 — DETECT MVP)
+
+The `internal/game/detection/` package owns the PF2E detection ladder as a
+per-pair `(observer, target) → State` table on `Combat.DetectionStates`.
+States are: **Observed**, **Concealed**, **Hidden**, **Undetected**,
+**Unnoticed**, **Invisible**. Pair states are **asymmetric** — A's view of
+B is independent of B's view of A. Absent pairs default to `Observed`.
+
+### Components
+
+- `state.go` — `State` enum + `String()`, `MissChancePercent()`, `ParseState()`.
+- `map.go` — `Map`: thread-safe per-pair table with `Get` / `Set` / `Clear` /
+  `ForObserver` / `AdvanceTowardObserved`. Setting Observed clears the row
+  entry so absent and explicitly-Observed are indistinguishable.
+- `gate.go` — `GateAttack(state, src, opts...) GateResult`. Single uniform
+  gate per state, replacing the ad-hoc DC-11 block in `round.go`. Returns
+  `Outcome` (Proceed / AutoMiss) and `OffGuard`. Options:
+  `WithSquareGuess(Cell)`, `WithTargetCell(Cell)`, `WithSoundCue(bool)`.
+- `filter.go` — `DecideForNPC(observer, target, map, sound) FilterDecision`.
+  Drives `WorldHandler.buildRoomView` per-recipient redaction.
+- `occlusion.go` — `OcclusionProvider` interface + `NoOpOcclusion` v1
+  default. Reserved seam for #267 (Visibility / LoS).
+
+### Gating matrix
+
+| State                     | Flat check | Off-Guard | Notes                         |
+|---------------------------|------------|-----------|-------------------------------|
+| Observed                  | none       | no        | Proceed                       |
+| Concealed                 | DC 5       | no        | Fail → AutoMiss               |
+| Hidden                    | DC 11      | yes       | Fail → AutoMiss               |
+| Undetected / Unnoticed    | DC 11      | yes       | Wrong-square → AutoMiss       |
+| Invisible (sound this rd) | DC 11      | yes       | Behaves as Hidden             |
+| Invisible (no sound)      | DC 11      | yes       | Behaves as Undetected         |
+
+### Damage advances awareness
+
+`detection.AdvanceTowardObserved(map, observer, target)` walks the pair one
+rung up the ladder when damage lands: Concealed → Observed, Hidden →
+Concealed, Undetected → Hidden, Unnoticed → Undetected. Observed and
+Invisible are no-ops in v1. Wired into the ActionAttack and ActionStrike
+hit paths in `round.go` after `target.ApplyDamage(...)`.
+
+### Sound-cue tracking
+
+`Combatant.MadeSoundThisRound` is set true at action-resolution start for
+auditory actions (currently: Strike, Attack — Reload / Stride etc. are
+follow-ups). Reset to false at `StartRoundWithSrc`. Drives the
+`Invisible`-state branch in `GateAttack`.
+
+### Back-compat shim
+
+The legacy `Combatant.Hidden bool` is `// DEPRECATED` (DETECT-Q4). At
+`StartCombat`, `populateDetectionFromLegacyHidden` mirrors any combatant
+flagged Hidden to `detection.Hidden` against every other combatant in the
+map (symmetric on-ramp). The existing pinned tests in
+`round_hidden_test.go` continue to pass without modification (DETECT-9).
+
+### Outbound RoomView filter
+
+`CombatHandler.DetectionDecisionFor(uid, npcID)` returns the FilterDecision
+for a recipient; `WorldHandler.buildRoomView` consults it to drop Unnoticed
+NPCs and redact display names for Hidden / Undetected / Invisible-without-
+sound. Outside combat the decision is the zero value (no change).
+
+### YAML conditions
+
+`content/conditions/{observed,concealed,hidden,undetected,unnoticed,invisible}.yaml`
+expose each detection state as a loadable condition for designer use. The
+typed-bonus `kind: detection_state` extension and the loader bridge that
+sets `Combat.DetectionStates.Set(...)` on apply are scheduled for the #254
+follow-up alongside transition actions and UI.
+
+### Deferred to follow-up
+
+- Square-guess targeting protos and `attack-at` / `strike-at` commands
+  (Plan Task 5 + Task 8).
+- Hide / Seek / Sneak / Avoid Notice / Create-a-Diversion handlers and
+  per-enemy starting-state evaluation at combat start (Plan Task 7).
+- Telemetry log emit on `Map.Set` and per-perspective combat log narrative
+  (Plan Task 10).
+- Loader extension for `kind: detection_state` typed-bonus and the
+  `Trigger.Fire` reaction-vs-detection gate (Plan Task 9 Step 3 + 4).
+- Web square-picker UX (Plan Task 8).

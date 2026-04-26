@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	"github.com/cory-johannsen/mud/internal/game/condition"
+	"github.com/cory-johannsen/mud/internal/game/detection"
 	"github.com/cory-johannsen/mud/internal/game/effect"
 	"github.com/cory-johannsen/mud/internal/game/inventory"
 	"github.com/cory-johannsen/mud/internal/game/reaction"
@@ -69,6 +70,13 @@ type Combat struct {
 	// ReadyRegistry holds pending Ready entries for the current round.
 	// Populated by QueueAction(ActionReady); consumed by ResolveRound.
 	ReadyRegistry *reaction.ReadyRegistry
+	// DetectionStates is the per-pair (observer→target) PF2E detection ladder
+	// driving GateAttack, RoomView filtering, and reaction gating (DETECT-3).
+	// Initialised at StartCombat. Absent pairs default to detection.Observed.
+	// Legacy Combatant.Hidden flags are populated symmetrically via the
+	// back-compat shim populateDetectionFromLegacyHidden so pinned tests in
+	// round_hidden_test.go keep working unchanged.
+	DetectionStates *detection.Map
 }
 
 // SkipHazardRoundStart marks uid so that the next StartRoundWithSrc call will
@@ -128,6 +136,8 @@ func (c *Combat) StartRoundWithSrc(actionsPerRound int, src Source) []RoundCondi
 	}
 
 	// Reset (or initialise) reaction budget for each living combatant (REACTION-14).
+	// DETECT-19: also reset the per-round MadeSoundThisRound flag so the next
+	// round's auditory cue accounting starts fresh.
 	for _, cbt := range c.Combatants {
 		if cbt.IsDead() {
 			continue
@@ -139,6 +149,7 @@ func (c *Combat) StartRoundWithSrc(actionsPerRound int, src Source) []RoundCondi
 			cbt.ReactionBudget = &reaction.Budget{}
 		}
 		cbt.ReactionBudget.Reset(baseMax)
+		cbt.MadeSoundThisRound = false
 	}
 
 	var events []RoundConditionEvent
@@ -586,15 +597,16 @@ func (e *Engine) StartCombat(roomID string, combatants []*Combatant, condRegistr
 	sortByInitiativeDesc(sorted)
 
 	cbt := &Combat{
-		RoomID:        roomID,
-		Combatants:    sorted,
-		ActionQueues:  make(map[string]*ActionQueue),
-		Conditions:    make(map[string]*condition.ActiveSet),
-		DamageDealt:   make(map[string]int),
-		condRegistry:  condRegistry,
-		scriptMgr:     scriptMgr,
-		zoneID:        zoneID,
-		ReadyRegistry: reaction.NewReadyRegistry(),
+		RoomID:          roomID,
+		Combatants:      sorted,
+		ActionQueues:    make(map[string]*ActionQueue),
+		Conditions:      make(map[string]*condition.ActiveSet),
+		DamageDealt:     make(map[string]int),
+		condRegistry:    condRegistry,
+		scriptMgr:       scriptMgr,
+		zoneID:          zoneID,
+		ReadyRegistry:   reaction.NewReadyRegistry(),
+		DetectionStates: detection.NewMap(),
 	}
 	cbt.GridWidth = 20
 	cbt.GridHeight = 20
@@ -616,8 +628,35 @@ func (e *Engine) StartCombat(roomID string, combatants []*Combatant, condRegistr
 			cbt.Participants = append(cbt.Participants, c.ID)
 		}
 	}
+	// Populate the per-pair detection table from the legacy Combatant.Hidden
+	// flag (#254 / DETECT-5). Until the legacy bool is removed, any combatant
+	// flagged Hidden is treated as Hidden to every other combatant in the
+	// table (symmetric on-ramp). Asymmetric usage is set by the new handlers.
+	populateDetectionFromLegacyHidden(cbt)
 	e.combats[roomID] = cbt
 	return cbt, nil
+}
+
+// populateDetectionFromLegacyHidden is the DETECT-5 back-compat shim. For each
+// combatant whose deprecated Hidden flag is true, it sets every other
+// combatant's pair-state to detection.Hidden. This preserves the behaviour of
+// the existing pinned tests in round_hidden_test.go while new code migrates
+// onto the per-pair table.
+func populateDetectionFromLegacyHidden(cbt *Combat) {
+	if cbt == nil || cbt.DetectionStates == nil {
+		return
+	}
+	for _, target := range cbt.Combatants {
+		if !target.Hidden {
+			continue
+		}
+		for _, observer := range cbt.Combatants {
+			if observer == target {
+				continue
+			}
+			cbt.DetectionStates.Set(observer.ID, target.ID, detection.Hidden)
+		}
+	}
 }
 
 // GetCombatant returns the combatant with the given ID, or nil if not found.

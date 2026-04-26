@@ -16,6 +16,7 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/combat"
 	"github.com/cory-johannsen/mud/internal/game/danger"
 	"github.com/cory-johannsen/mud/internal/game/condition"
+	"github.com/cory-johannsen/mud/internal/game/detection"
 	"github.com/cory-johannsen/mud/internal/game/faction"
 	"github.com/cory-johannsen/mud/internal/game/quest"
 	"github.com/cory-johannsen/mud/internal/game/reaction"
@@ -1700,6 +1701,37 @@ func (h *CombatHandler) GetCombatantsInRoom(roomID string) []*scripting.Combatan
 		})
 	}
 	return out
+}
+
+// DetectionDecisionFor returns the per-recipient detection redaction decision
+// for an NPC instance from the perspective of the player identified by uid.
+// Returns the zero FilterDecision (no change) when uid is not in active
+// combat, or the NPC is not present in the same combat, or the pair is in
+// the default Observed state.
+//
+// Used by WorldHandler.buildRoomView to filter outbound RoomViews per
+// recipient (DETECT-16/17/18).
+func (h *CombatHandler) DetectionDecisionFor(uid, npcID string) detection.FilterDecision {
+	sess, ok := h.sessions.GetPlayer(uid)
+	if !ok {
+		return detection.FilterDecision{}
+	}
+	h.combatMu.Lock()
+	defer h.combatMu.Unlock()
+	cbt, ok := h.engine.GetCombat(sess.RoomID)
+	if !ok || cbt.DetectionStates == nil {
+		return detection.FilterDecision{}
+	}
+	// Determine whether the NPC made a sound this round; needed for the
+	// Invisible-state branch.
+	soundCue := false
+	for _, c := range cbt.Combatants {
+		if c.ID == npcID {
+			soundCue = c.MadeSoundThisRound
+			break
+		}
+	}
+	return detection.DecideForNPC(uid, npcID, cbt.DetectionStates, soundCue)
 }
 
 // GetCombatConditionSet returns the condition ActiveSet for targetID from the active combat
