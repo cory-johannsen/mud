@@ -87,13 +87,16 @@ func TestTelnetConfig_HeadlessPortDistinctFromMain(t *testing.T) {
 		"telnet.headless_port must default to a non-zero value")
 }
 
-func TestTelnetConfig_RejectsExternalHostWhenSunsetFlagOff(t *testing.T) {
+func TestTelnetConfig_AllowsExternalRejectorHost(t *testing.T) {
+	// The rejector port may bind to 0.0.0.0 in containerised deployments so
+	// the K8s readiness probe on the pod IP can reach it. The Service is
+	// ClusterIP so external access is still blocked at the cluster edge.
+	// The headless port is always loopback-only regardless of Host.
 	cfg := validConfig()
 	cfg.Telnet.Host = "0.0.0.0"
 	cfg.Telnet.AllowGameCommands = false
-	err := cfg.Validate()
-	require.Error(t, err)
-	assert.Contains(t, err.Error(), "telnet.host must be 127.0.0.1")
+	assert.NoError(t, cfg.Validate(),
+		"rejector host must accept 0.0.0.0 — K8s probe needs pod-IP reachability")
 }
 
 func TestTelnetConfig_AllowsExternalHostWhenSunsetFlagSet(t *testing.T) {

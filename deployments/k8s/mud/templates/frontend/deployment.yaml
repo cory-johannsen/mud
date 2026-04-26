@@ -59,12 +59,17 @@ spec:
               value: {{ .Values.logging.level | quote }}
             - name: MUD_LOGGING_FORMAT
               value: {{ .Values.logging.format | quote }}
+            # The rejector port (4000) needs to bind to all interfaces so the
+            # K8s readiness probe on the pod IP can reach it. Service is
+            # ClusterIP so external access is still blocked at the cluster
+            # edge. The headless port (4002) is always loopback-only.
+            - name: MUD_TELNET_HOST
+              value: "0.0.0.0"
           readinessProbe:
-            # Probe the headless debug port; the rejector on 4000 also
-            # responds, but readiness probes against the debug surface are
-            # less coupled to the deprecated player flow.
+            # Probe the rejector port — it's reachable on the pod IP and
+            # accepts TCP even when refusing player auth.
             tcpSocket:
-              port: 4002
+              port: 4000
             initialDelaySeconds: 5
             periodSeconds: 5
           resources:
