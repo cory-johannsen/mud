@@ -1,15 +1,23 @@
 # deployments/k8s/mud/templates/frontend/service.yaml
+#
+# Telnet-deprecation (#325): the player-facing telnet surface is retired.
+# This Service exposes only the headless debug port (4002) and is ClusterIP
+# (in-cluster only) so the surface is never reachable from outside the
+# namespace. To reach the debug shell from a workstation, use
+# `kubectl port-forward -n mud svc/frontend 4002:4002`.
 apiVersion: v1
 kind: Service
 metadata:
   name: frontend
   namespace: mud
+  annotations:
+    deprecated.mud/telnet: "telnet is loopback-only; this Service is for in-cluster debug only"
 spec:
-  type: LoadBalancer
+  type: ClusterIP
   selector:
     app: frontend
   ports:
-    - port: 4000
-      targetPort: 4000
-      nodePort: 30400
+    - name: telnet-debug
+      port: 4002
+      targetPort: 4002
       protocol: TCP

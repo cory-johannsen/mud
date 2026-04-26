@@ -164,6 +164,19 @@ type AuthHandler struct {
 	// loginFailures tracks consecutive failed password attempts per username.
 	loginFailuresMu sync.Mutex
 	loginFailures   map[string]int
+	// seedAuthorized is the set of usernames permitted to authenticate over
+	// the headless / debug surface (REQ-TD-3b — telnet-deprecation #325).
+	// These match the accounts created by cmd/seed-claude-accounts.
+	seedAuthorized map[string]struct{}
+}
+
+// SeedAuthorizedAccounts is the canonical list of usernames the headless
+// surface treats as seed-authorized. Mirror of the set created by the
+// seed-claude-accounts CLI tool.
+var SeedAuthorizedAccounts = []string{
+	"claude_player",
+	"claude_editor",
+	"claude_admin",
 }
 
 // NewAuthHandler creates an AuthHandler backed by the given account and character stores.
@@ -200,6 +213,10 @@ func NewAuthHandler(
 	if len(allClassFeatures) > 0 {
 		cfReg = ruleset.NewClassFeatureRegistry(allClassFeatures)
 	}
+	seedSet := make(map[string]struct{}, len(SeedAuthorizedAccounts))
+	for _, name := range SeedAuthorizedAccounts {
+		seedSet[name] = struct{}{}
+	}
 	return &AuthHandler{
 		accounts:        accounts,
 		characters:      characters,
@@ -220,7 +237,30 @@ func NewAuthHandler(
 		gameServerAddr:  gameServerAddr,
 		telnetCfg:       telnetCfg,
 		loginFailures:   make(map[string]int),
+		seedAuthorized:  seedSet,
 	}
+}
+
+// SetSeedAuthorized replaces the set of usernames permitted on the headless
+// surface. Test-only. Postcondition: subsequent headless login attempts use
+// the new set.
+func (h *AuthHandler) SetSeedAuthorized(usernames []string) {
+	set := make(map[string]struct{}, len(usernames))
+	for _, n := range usernames {
+		set[n] = struct{}{}
+	}
+	h.seedAuthorized = set
+}
+
+// isSeedAuthorized reports whether the given username is in the seed-bootstrap
+// list (REQ-TD-3b). Returns true when no set is configured (graceful fallback
+// for unit-test mocks that bypass NewAuthHandler).
+func (h *AuthHandler) isSeedAuthorized(username string) bool {
+	if h.seedAuthorized == nil {
+		return true
+	}
+	_, ok := h.seedAuthorized[username]
+	return ok
 }
 
 // HandleSession implements telnet.SessionHandler. It shows the welcome banner
@@ -230,10 +270,25 @@ func NewAuthHandler(
 // skipped; the session goes directly to username/password prompts so that
 // automated clients can authenticate without sending a "login" command first.
 //
+// Telnet-deprecation gate (#325): when conn is not headless and the operator
+// has not opted into the legacy player flow via telnet.allow_game_commands,
+// the auth handler refuses login attempts with a redirect-to-web-client
+// narrative. This is a belt-and-suspenders gate; the acceptor layer SHOULD
+// already have substituted the Rejector handler for the player port.
+//
 // Postcondition: Returns nil on clean quit, or an error if the session ended abnormally.
 func (h *AuthHandler) HandleSession(ctx context.Context, conn *telnet.Conn) error {
 	if conn.Headless {
 		return h.handleHeadlessSession(ctx, conn)
+	}
+
+	if !h.telnetCfg.AllowGameCommands {
+		// REQ-TD-2a / REQ-TD-2b: telnet player surface retired.
+		_ = conn.WriteLine(telnet.Colorize(telnet.Yellow,
+			"The telnet player surface has been retired."))
+		_ = conn.WriteLine(telnet.Colorize(telnet.BrightWhite,
+			"Please use the web client for gameplay; this port now serves debug only."))
+		return nil
 	}
 
 	start := time.Now()
@@ -348,6 +403,19 @@ func (h *AuthHandler) handleHeadlessSession(ctx context.Context, conn *telnet.Co
 		if username == "" {
 			_ = conn.WriteLine(telnet.Colorize(telnet.Red, "Username cannot be empty."))
 			continue
+		}
+
+		// REQ-TD-3b: only seed-bootstrapped accounts may authenticate over
+		// the headless / debug surface. Reject other usernames before any
+		// password prompt is shown so unauthorized callers learn nothing
+		// about account existence.
+		if !h.isSeedAuthorized(username) {
+			_ = conn.WriteLine("not seed-authorized")
+			h.logger.Info("rejected non-seeded headless login",
+				zap.String("username", username),
+				zap.String("remote_addr", conn.RemoteAddr().String()),
+			)
+			return nil
 		}
 
 		// Pass username as arg so handleLogin skips its own username prompt

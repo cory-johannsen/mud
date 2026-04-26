@@ -14,10 +14,14 @@ database:
   max_conn_lifetime: 1h
 
 telnet:
-  host: 0.0.0.0
+  host: 127.0.0.1
   port: 4000
+  headless_port: 4002
   read_timeout: 5m
   write_timeout: 30s
+  # Telnet-deprecation (#325): the player flow is retired by default.
+  allow_game_commands: false
+  web_client_url: http://localhost:8080
 
 logging:
   level: debug

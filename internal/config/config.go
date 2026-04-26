@@ -43,8 +43,18 @@ func (d DatabaseConfig) DSN() string {
 }
 
 // TelnetConfig holds Telnet acceptor settings.
+//
+// As of the telnet-deprecation rollout (#325), the player-facing telnet
+// surface is retired. The player port (Host:Port) defaults to a rejector
+// that prints a redirect to the web client and disconnects. The headless
+// debug port (HeadlessPort) is bound loopback-only and accepts only
+// seed-authorized connections (accounts seeded by seed-claude-accounts).
+//
+// Operators may temporarily re-enable the legacy player flow for graceful
+// sunset by setting AllowGameCommands=true; this MUST NOT be enabled in
+// production.
 type TelnetConfig struct {
-	// Host is the bind address for the Telnet listener.
+	// Host is the bind address for the Telnet listener. Default: 127.0.0.1.
 	Host string `mapstructure:"host"`
 	// Port is the TCP port for the Telnet listener.
 	Port int `mapstructure:"port"`
@@ -57,8 +67,18 @@ type TelnetConfig struct {
 	// IdleGracePeriod is the additional duration after IdleTimeout before disconnecting.
 	IdleGracePeriod time.Duration `mapstructure:"idle_grace_period"`
 	// HeadlessPort is the TCP port for the headless plain-text telnet listener.
-	// If 0 or absent, the headless listener is not started.
+	// If 0 or absent, the headless listener is not started. The headless
+	// listener is always bound to 127.0.0.1 regardless of Host.
 	HeadlessPort int `mapstructure:"headless_port"`
+	// AllowGameCommands re-enables the legacy player-facing telnet flow.
+	// Default: false. When false, the player port emits a redirect message
+	// and closes; the auth handler also refuses login attempts as a
+	// belt-and-suspenders gate. Set to true only for time-bounded graceful
+	// sunset operations. MUST NOT be true in production.
+	AllowGameCommands bool `mapstructure:"allow_game_commands"`
+	// WebClientURL is the URL announced in the rejector message when
+	// AllowGameCommands is false. Default: https://gunchete.local.
+	WebClientURL string `mapstructure:"web_client_url"`
 }
 
 // Addr returns the "host:port" listen address.
@@ -265,6 +285,14 @@ func validateTelnet(t TelnetConfig) error {
 	if t.WriteTimeout < 0 {
 		errs = append(errs, "telnet.write_timeout must not be negative")
 	}
+	// REQ-TD-1c: with the player flow retired by default, the public telnet
+	// port MUST bind to loopback unless the operator has opted into the
+	// graceful-sunset flow with allow_game_commands=true.
+	if t.Host != "" && t.Host != "127.0.0.1" && !t.AllowGameCommands {
+		errs = append(errs, fmt.Sprintf(
+			"telnet.host must be 127.0.0.1 unless telnet.allow_game_commands is true (got %q)",
+			t.Host))
+	}
 	if len(errs) > 0 {
 		return fmt.Errorf("%s", strings.Join(errs, "; "))
 	}
@@ -392,13 +420,16 @@ func setDefaults(v *viper.Viper) {
 	v.SetDefault("database.min_conns", 2)
 	v.SetDefault("database.max_conn_lifetime", "1h")
 
-	v.SetDefault("telnet.host", "0.0.0.0")
+	// REQ-TD-1c: default to loopback now that the player flow is retired.
+	v.SetDefault("telnet.host", "127.0.0.1")
 	v.SetDefault("telnet.port", 4000)
 	v.SetDefault("telnet.read_timeout", "5m")
 	v.SetDefault("telnet.write_timeout", "30s")
 	v.SetDefault("telnet.idle_timeout", "4m")
 	v.SetDefault("telnet.idle_grace_period", "30s")
-	v.SetDefault("telnet.headless_port", 0)
+	v.SetDefault("telnet.headless_port", 4002)
+	v.SetDefault("telnet.allow_game_commands", false)
+	v.SetDefault("telnet.web_client_url", "https://gunchete.local")
 
 	v.SetDefault("logging.level", "info")
 	v.SetDefault("logging.format", "json")

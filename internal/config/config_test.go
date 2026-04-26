@@ -29,7 +29,7 @@ func validConfig() Config {
 			MaxConnLifetime: time.Hour,
 		},
 		Telnet: TelnetConfig{
-			Host:         "0.0.0.0",
+			Host:         "127.0.0.1",
 			Port:         4000,
 			ReadTimeout:  5 * time.Minute,
 			WriteTimeout: 30 * time.Second,
@@ -64,7 +64,77 @@ func TestDatabaseDSN(t *testing.T) {
 
 func TestTelnetAddr(t *testing.T) {
 	cfg := validConfig()
-	assert.Equal(t, "0.0.0.0:4000", cfg.Telnet.Addr())
+	assert.Equal(t, "127.0.0.1:4000", cfg.Telnet.Addr())
+}
+
+func TestTelnetConfig_DefaultsLoopback(t *testing.T) {
+	cfg := defaultConfigViaLoad(t)
+	assert.Equal(t, "127.0.0.1", cfg.Telnet.Host,
+		"REQ-TD-1c: default telnet.host must be 127.0.0.1")
+}
+
+func TestTelnetConfig_AllowGameCommandsDefaultsFalse(t *testing.T) {
+	cfg := defaultConfigViaLoad(t)
+	assert.False(t, cfg.Telnet.AllowGameCommands,
+		"telnet.allow_game_commands default must be false (#325)")
+}
+
+func TestTelnetConfig_HeadlessPortDistinctFromMain(t *testing.T) {
+	cfg := defaultConfigViaLoad(t)
+	assert.NotEqual(t, cfg.Telnet.Port, cfg.Telnet.HeadlessPort,
+		"telnet.headless_port must differ from telnet.port")
+	assert.NotZero(t, cfg.Telnet.HeadlessPort,
+		"telnet.headless_port must default to a non-zero value")
+}
+
+func TestTelnetConfig_RejectsExternalHostWhenSunsetFlagOff(t *testing.T) {
+	cfg := validConfig()
+	cfg.Telnet.Host = "0.0.0.0"
+	cfg.Telnet.AllowGameCommands = false
+	err := cfg.Validate()
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "telnet.host must be 127.0.0.1")
+}
+
+func TestTelnetConfig_AllowsExternalHostWhenSunsetFlagSet(t *testing.T) {
+	cfg := validConfig()
+	cfg.Telnet.Host = "0.0.0.0"
+	cfg.Telnet.AllowGameCommands = true
+	assert.NoError(t, cfg.Validate(),
+		"sunset flag must permit non-loopback host for graceful migration")
+}
+
+// defaultConfigViaLoad writes a minimal YAML and runs the full Load() path so
+// that defaults set in setDefaults() are exercised.
+func defaultConfigViaLoad(t *testing.T) Config {
+	t.Helper()
+	dir := t.TempDir()
+	path := filepath.Join(dir, "minimal.yaml")
+	require.NoError(t, os.WriteFile(path, []byte(`
+server:
+  mode: standalone
+  type: mud
+database:
+  host: localhost
+  port: 5432
+  user: u
+  password: p
+  name: n
+  sslmode: disable
+  max_conns: 5
+  min_conns: 1
+gameserver:
+  grpc_host: 127.0.0.1
+  grpc_port: 50051
+  game_clock_start: 6
+  game_tick_duration: 1m
+weather:
+  chance_per_tick: 0.05
+  content_file: content/weather.yaml
+`), 0o600))
+	cfg, err := Load(path)
+	require.NoError(t, err)
+	return cfg
 }
 
 func TestLoadFromFile(t *testing.T) {
@@ -324,8 +394,12 @@ func TestPropertyDSNContainsAllFields(t *testing.T) {
 }
 
 func TestTelnetConfig_HeadlessPort_DefaultIsZero(t *testing.T) {
+	// validConfig() does not call Load(); it returns the bare struct, where
+	// HeadlessPort is the Go zero value. The Load() default is now 4002 (see
+	// TestTelnetConfig_HeadlessPortDistinctFromMain).
 	cfg := validConfig()
-	assert.Equal(t, 0, cfg.Telnet.HeadlessPort, "HeadlessPort default must be 0 (disabled)")
+	assert.Equal(t, 0, cfg.Telnet.HeadlessPort,
+		"bare TelnetConfig.HeadlessPort zero value must remain 0")
 }
 
 func TestTelnetConfig_HeadlessPort_CanBeSet(t *testing.T) {

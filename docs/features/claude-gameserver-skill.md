@@ -2,6 +2,20 @@
 
 A Claude Code skill giving Claude agent sessions direct, programmatic access to the running MUD game server via a dedicated headless telnet port (plain-text, no ANSI/split-screen). Three pre-seeded accounts (`claude_player`, `claude_editor`, `claude_admin`) provide player, editor, and admin access for feature testing and content work. See `docs/superpowers/specs/2026-03-21-claude-gameserver-skill-design.md` for the full design spec.
 
+## Direct telnet access (debug only)
+
+As of telnet-deprecation #325, the telnet port is retained for plain-text
+system debugging only. The web client is the sole player-facing surface.
+
+- Headless port: `127.0.0.1:4002` (loopback only).
+- Authorization: only the seed-bootstrapped logins
+  (`claude_player`, `claude_editor`, `claude_admin`) are accepted; other
+  usernames receive `not seed-authorized` and are disconnected.
+- Player port (4000) emits a redirect-to-web-client banner and closes.
+- For graceful sunset only, the legacy player flow can be re-enabled by
+  setting `telnet.allow_game_commands: true` in the config. This MUST NOT
+  be enabled in production.
+
 ## Requirements
 
 - REQ-CGS-1: A second telnet listener MUST accept connections on a configurable port (`frontend.headless_port`; default 4002). If `headless_port` is 0 or absent, the listener MUST NOT start.

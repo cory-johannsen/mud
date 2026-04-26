@@ -6,7 +6,7 @@
 
 ## Overview
 
-Gunchete is a text-based multi-user dungeon (MUD) set in a sci-fi post-collapse Portland. The system is implemented as two cooperating Go binaries. The frontend binary (`cmd/frontend`) is a telnet server that accepts raw TCP connections from players, manages account authentication and character selection against PostgreSQL, and then enters a persistent bidirectional gRPC stream with the gameserver for the duration of each play session. The gameserver binary (`cmd/gameserver`) owns all game state: world navigation, NPC management, PF2E-derived combat, technology (the setting's term for spells/powers), inventory, conditions, and XP progression.
+Gunchete is a text-based multi-user dungeon (MUD) set in a sci-fi post-collapse Portland. The system is implemented as two cooperating Go binaries. The frontend binary (`cmd/frontend`) historically served the telnet player surface; as of telnet-deprecation #325 the web client (`cmd/webclient`) is the supported player surface and the telnet listener is retained for headless test/debug access only (loopback-bound on port 4002, seed-authorized). The frontend binary still manages account authentication and character selection against PostgreSQL and brokers the persistent bidirectional gRPC stream into the gameserver. The gameserver binary (`cmd/gameserver`) owns all game state: world navigation, NPC management, PF2E-derived combat, technology (the setting's term for spells/powers), inventory, conditions, and XP progression.
 
 The two binaries communicate exclusively over gRPC using a single `Session` RPC that is a bidirectional streaming method. The client (frontend) sends `ClientMessage` frames containing one of ~80 typed request payloads; the server responds with `ServerEvent` frames containing one of ~25 typed event payloads. This proto oneof design means the wire protocol is self-describing and adding a new command always requires a new proto message type on both sides of the oneof.
 
@@ -69,27 +69,34 @@ All game content — zones, rooms, NPCs, weapons, armor, items, conditions, feat
 
 ## Primary Data Flow
 
+Players reach the game through the web client (`cmd/webclient`), which
+proxies into the gameserver. The telnet surface (`cmd/frontend`) is now
+debug-only (#325): port 4000 emits a redirect-to-web-client banner and
+disconnects; port 4002 is loopback-only and accepts only seed-bootstrapped
+accounts (`claude_player`, `claude_editor`, `claude_admin`).
+
 ```mermaid
 sequenceDiagram
-    participant Player as Player (telnet)
-    participant FE as Frontend (internal/frontend)
+    participant Player as Player
+    participant Web as Web Client (cmd/webclient)
+    participant FE as Frontend (cmd/frontend, debug-only)
     participant Bridge as BridgeHandler (bridge_handlers.go)
     participant GS as GameServer (grpc_service.go)
     participant Domain as Game Domain (internal/game/*)
     participant DB as PostgreSQL
 
-    Player->>FE: raw TCP input (e.g. "attack goblin")
-    FE->>FE: parse command via command.Registry
-    FE->>Bridge: dispatch to bridgeHandlerMap[handler]
+    Player->>Web: HTTP/WebSocket
+    Web->>GS: ClientMessage (gRPC stream)
+    Note over FE: telnet 4000: rejector\ntelnet 4002: loopback debug
+    FE->>Bridge: ClientMessage (debug/sunset only)
     Bridge->>GS: ClientMessage (gRPC stream send)
     GS->>GS: dispatch on ClientMessage.payload type switch
     GS->>Domain: invoke domain logic (combat, world, etc.)
     Domain->>DB: persist state changes (optional)
     Domain-->>GS: return result
     GS->>GS: build ServerEvent(s)
-    GS-->>FE: ServerEvent (gRPC stream recv)
-    FE->>FE: render event (RoomView, CombatEvent, etc.)
-    FE->>Player: ANSI terminal output
+    GS-->>Web: ServerEvent (gRPC stream recv)
+    Web->>Player: rendered UI
 ```
 
 ## Component Dependencies
