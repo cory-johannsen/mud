@@ -6,3 +6,5 @@ weight: 0.5
 stackable: true
 max_stack: 5
 value: 50
+effect:
+  heal: "2d8+4"
