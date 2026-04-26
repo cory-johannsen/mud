@@ -205,8 +205,8 @@ zone:
       target: trout_river_trail
     - direction: north
       target: trout_gorge_trail
-    map_x: 202
-    map_y: 10
+    map_x: 22
+    map_y: 1
     spawns:
     - template: gorge_runner
       count: 1
@@ -235,8 +235,8 @@ zone:
       target: trout_wind_tunnel
     - direction: west
       target: trout_gorge_trail
-    map_x: 202
-    map_y: 12
+    map_x: 23
+    map_y: 0
     spawns:
     - template: wind_walker
       count: 1
@@ -264,8 +264,8 @@ zone:
       target: trout_wind_tunnel
     - direction: north
       target: trout_falls_overlook
-    map_x: 202
-    map_y: 14
+    map_x: 25
+    map_y: 0
     spawns:
     - template: wind_walker
       count: 1
@@ -295,8 +295,8 @@ zone:
       target: trout_multnomah_falls
     - direction: south
       target: trout_wind_shelter
-    map_x: 202
-    map_y: 16
+    map_x: 24
+    map_y: 0
     spawns:
     - template: gorge_runner
       count: 1
@@ -353,8 +353,8 @@ zone:
       target: trout_parking_lot
     - direction: southeast
       target: trout_parking_lot
-    map_x: 202
-    map_y: 20
+    map_x: -1
+    map_y: 3
     spawns:
     - template: outlet_scavenger
       count: 1
@@ -411,8 +411,8 @@ zone:
       target: trout_dam_overlook
     - direction: west
       target: trout_old_highway_ruins
-    map_x: 202
-    map_y: 24
+    map_x: 22
+    map_y: -1
     spawns:
     - template: gorge_runner
       count: 1
@@ -437,8 +437,8 @@ zone:
     exits:
     - direction: west
       target: trout_ranger_station
-    map_x: 202
-    map_y: 26
+    map_x: 23
+    map_y: -1
     spawns:
     - template: wind_walker
       count: 1
@@ -465,8 +465,8 @@ zone:
       target: trout_lewis_clark_park
     - direction: east
       target: trout_crown_point
-    map_x: 202
-    map_y: 28
+    map_x: 22
+    map_y: 0
     spawns:
     - template: gorge_runner
       count: 1
@@ -491,8 +491,8 @@ zone:
     exits:
     - direction: north
       target: trout_wind_tunnel
-    map_x: 202
-    map_y: 30
+    map_x: 24
+    map_y: 1
     spawns:
     - template: salvager_crew
       count: 1
@@ -545,8 +545,8 @@ zone:
       target: trout_lewis_clark_park
     - direction: west
       target: trout_sandy_river_bank
-    map_x: 202
-    map_y: 34
+    map_x: 21
+    map_y: 1
     spawns:
     - template: gorge_runner
       count: 1
@@ -647,8 +647,8 @@ zone:
     exits:
     - direction: south
       target: trout_multnomah_falls
-    map_x: 202
-    map_y: 42
+    map_x: 25
+    map_y: -1
     spawns:
     - template: wind_walker
       count: 1
