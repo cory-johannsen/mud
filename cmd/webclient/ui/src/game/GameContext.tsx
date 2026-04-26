@@ -656,10 +656,18 @@ export function GameProvider({ children }: { children: ReactNode }) {
           break
         }
         case 'HotbarUpdate': {
+          // protojson emits camelCase by default. Earlier code read only snake_case
+          // and so always saw undefined → fell back to defaults (count=1, max=4).
+          // That made every switch button auto-create a new hotbar, which the
+          // server rejected once 4 hotbars existed (#310). Read camelCase first
+          // and accept snake_case as a defensive fallback.
           const hu = payload as {
             slots?: HotbarSlot[]
+            activeHotbarIndex?: number
             active_hotbar_index?: number
+            hotbarCount?: number
             hotbar_count?: number
+            maxHotbars?: number
             max_hotbars?: number
           }
           const slots = hu.slots && hu.slots.length > 0
@@ -668,9 +676,9 @@ export function GameProvider({ children }: { children: ReactNode }) {
           dispatch({
             type: 'SET_HOTBAR',
             slots,
-            activeHotbarIndex: hu.active_hotbar_index ?? 1,
-            hotbarCount: hu.hotbar_count ?? 1,
-            maxHotbars: hu.max_hotbars ?? 4,
+            activeHotbarIndex: hu.activeHotbarIndex ?? hu.active_hotbar_index ?? 1,
+            hotbarCount: hu.hotbarCount ?? hu.hotbar_count ?? 1,
+            maxHotbars: hu.maxHotbars ?? hu.max_hotbars ?? 4,
           })
           break
         }
