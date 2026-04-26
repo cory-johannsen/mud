@@ -68,6 +68,10 @@ zone:
       target: beav_sunset_transit
     map_x: -2
     map_y: 0
+    spawns:
+    - template: beaverton_scav
+      count: 1
+      respawn_after: 6m
     properties:
       lighting: overcast
       atmosphere: quiet
@@ -157,6 +161,10 @@ zone:
       target: beav_bike_path_north
     map_x: -4
     map_y: -4
+    spawns:
+    - template: beaverton_scav
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: electric
       atmosphere: busy
@@ -185,6 +193,10 @@ zone:
       target: beav_cul_de_sac_west
     map_x: -2
     map_y: 2
+    spawns:
+    - template: mall_cop_elite
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: overcast
       atmosphere: patrolled
@@ -209,6 +221,10 @@ zone:
       target: beav_neutral_cafe
     map_x: -4
     map_y: -8
+    spawns:
+    - template: beaverton_scav
+      count: 2
+      respawn_after: 6m
     properties:
       lighting: dim
       atmosphere: overgrown
@@ -233,6 +249,10 @@ zone:
       target: beav_neighborhood_watch_north
     map_x: -2
     map_y: -2
+    spawns:
+    - template: beaverton_scav
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: spotlight
       atmosphere: fortified
@@ -258,6 +278,10 @@ zone:
       target: beav_cedar_hills
     map_x: -6
     map_y: -4
+    spawns:
+    - template: beaverton_scav
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: overcast
       atmosphere: guarded
@@ -282,6 +306,10 @@ zone:
       target: beav_scholls_ferry
     map_x: -2
     map_y: 4
+    spawns:
+    - template: beaverton_scav
+      count: 1
+      respawn_after: 6m
     properties:
       lighting: overcast
       atmosphere: windy
@@ -308,6 +336,10 @@ zone:
       target: beav_suburban_ruins_west
     map_x: -6
     map_y: -2
+    spawns:
+    - template: beaverton_minuteman
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: overcast
       atmosphere: suburban
@@ -334,6 +366,10 @@ zone:
       target: beav_walker_road
     map_x: -4
     map_y: -2
+    spawns:
+    - template: beaverton_minuteman
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: overcast
       atmosphere: official
@@ -358,6 +394,10 @@ zone:
       target: beav_security_hq
     map_x: -6
     map_y: 2
+    spawns:
+    - template: beaverton_minuteman
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: dim
       atmosphere: echoing
@@ -380,6 +420,10 @@ zone:
       target: beav_murray_blvd
     map_x: -2
     map_y: 6
+    spawns:
+    - template: beaverton_minuteman
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: dim
       atmosphere: judicial
@@ -402,6 +446,13 @@ zone:
       target: beav_murray_blvd
     map_x: -4
     map_y: 2
+    spawns:
+    - template: hoa_enforcer
+      count: 1
+      respawn_after: 5m
+    - template: compound_guard
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: firelight
       atmosphere: domestic
@@ -424,6 +475,10 @@ zone:
       target: beav_walker_road
     map_x: -6
     map_y: 0
+    spawns:
+    - template: hoa_enforcer
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: fluorescent
       atmosphere: officious
@@ -446,6 +501,10 @@ zone:
       target: beav_nature_park
     map_x: -4
     map_y: -6
+    spawns:
+    - template: beaverton_scav
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: overcast
       atmosphere: open
@@ -472,6 +531,10 @@ zone:
       target: beav_neighborhood_watch_east
     map_x: -2
     map_y: -4
+    spawns:
+    - template: hoa_enforcer
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: dim
       atmosphere: vigilant
@@ -496,6 +559,10 @@ zone:
       target: beav_neighborhood_watch_north
     map_x: 0
     map_y: -4
+    spawns:
+    - template: hoa_enforcer
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: dim
       atmosphere: watchful
@@ -525,6 +592,10 @@ zone:
       zone: oregon_country_fair
     map_x: 0
     map_y: 2
+    spawns:
+    - template: beaverton_scav
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: overcast
       atmosphere: exposed
@@ -549,6 +620,10 @@ zone:
       target: beav_cul_de_sac_south
     map_x: 0
     map_y: 4
+    spawns:
+    - template: beaverton_scav
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: overcast
       atmosphere: commercial
@@ -573,6 +648,10 @@ zone:
       target: beav_beaverton_hillsdale
     map_x: 2
     map_y: 4
+    spawns:
+    - template: hoa_enforcer
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: overcast
       atmosphere: wary
@@ -683,6 +762,10 @@ zone:
       target: beav_neighborhood_watch_north
     map_x: -2
     map_y: -6
+    spawns:
+    - template: beaverton_scav
+      count: 2
+      respawn_after: 6m
     properties:
       lighting: dim
       atmosphere: derelict
@@ -700,6 +783,10 @@ zone:
       target: beav_canyon_road_east
     map_x: 2
     map_y: 0
+    spawns:
+    - template: beaverton_scav
+      count: 2
+      respawn_after: 6m
     properties:
       lighting: overcast
       atmosphere: desolate
@@ -717,6 +804,10 @@ zone:
       target: beav_walker_road
     map_x: -8
     map_y: -2
+    spawns:
+    - template: beaverton_scav
+      count: 2
+      respawn_after: 6m
     properties:
       lighting: overcast
       atmosphere: exposed
