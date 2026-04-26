@@ -33,13 +33,42 @@ const (
 // (≤5 ft) to mover before the stride and whose position did not change
 // (i.e., they were not the one striding).
 //
+// This is a legacy wrapper that constructs a MoveContext with Cause set to
+// MoveCauseStride. New callers SHOULD use CheckReactiveStrikesCtx so they can
+// pass the correct cause (e.g. MoveCauseMoveTrait suppresses reactions per
+// WMOVE-12).
+//
 // Precondition: cbt non-nil; moverID non-empty; oldX/oldY is mover's grid position before stride.
 // Postcondition: Returns zero or more RoundEvent{ActionType: ActionAttack} events.
 // targetUpdater(id, hp) is called after each damage application; may be nil (no-op).
 func CheckReactiveStrikes(cbt *Combat, moverID string, oldX, oldY int, rng Source, targetUpdater func(id string, hp int)) []RoundEvent {
+	return CheckReactiveStrikesCtx(cbt, ReactionMoveContext{
+		MoverID: moverID,
+		FromX:   oldX,
+		FromY:   oldY,
+		Cause:   MoveCauseStride,
+	}, rng, targetUpdater)
+}
+
+// CheckReactiveStrikesCtx is the cause-aware variant of CheckReactiveStrikes.
+// It accepts a MoveContext carrying the originating MoveCause and short-circuits
+// when the cause suppresses reactions (WMOVE-12).
+//
+// Precondition: cbt non-nil; ctx.MoverID non-empty.
+// Postcondition: returns nil when ctx.Cause == MoveCauseMoveTrait. Otherwise
+// returns zero or more RoundEvent{ActionType: ActionAttack} events identical
+// to the legacy CheckReactiveStrikes path.
+func CheckReactiveStrikesCtx(cbt *Combat, ctx ReactionMoveContext, rng Source, targetUpdater func(id string, hp int)) []RoundEvent {
+	// WMOVE-12: Mobile-trait granted movement does not provoke reactive strikes.
+	if ctx.Cause == MoveCauseMoveTrait {
+		return nil
+	}
 	if targetUpdater == nil {
 		targetUpdater = func(id string, hp int) {}
 	}
+	moverID := ctx.MoverID
+	oldX := ctx.FromX
+	oldY := ctx.FromY
 	mover := findCombatantByID(cbt, moverID)
 	if mover == nil {
 		return nil
@@ -795,6 +824,81 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 					ActorID:    actor.ID,
 					ActorName:  actor.Name,
 					Narrative:  strideNarrative,
+				})
+
+			case ActionMoveTraitStride:
+				// WMOVE-7/12: a free Stride granted by the Mobile weapon trait.
+				// Resolves like a normal Stride but: (a) does not consume AP
+				// (already enforced at queue time via QueueFreeAction), (b) does
+				// NOT provoke reactive strikes for the moving actor, (c) does
+				// NOT fire TriggerOnEnemyMoveAdjacent for adjacent players when
+				// the mover is an NPC. Movement is bounded by SpeedBudget()
+				// (WMOVE-G1) and travels toward (TargetX, TargetY).
+				width := cbt.GridWidth
+				if width == 0 {
+					width = 10
+				}
+				height := cbt.GridHeight
+				if height == 0 {
+					height = 10
+				}
+				targetX := int(action.TargetX)
+				targetY := int(action.TargetY)
+				budget := actor.SpeedBudget()
+				stepsTaken := 0
+				moveNarrative := fmt.Sprintf("%s strides freely (move trait).", actor.Name)
+				for budget > 0 {
+					if actor.GridX == targetX && actor.GridY == targetY {
+						break
+					}
+					dx, dy := towardDelta(actor.GridX, actor.GridY, targetX, targetY)
+					if dx == 0 && dy == 0 {
+						break
+					}
+					newX := actor.GridX + dx
+					newY := actor.GridY + dy
+					if newX < 0 {
+						newX = 0
+					} else if newX >= width {
+						newX = width - 1
+					}
+					if newY < 0 {
+						newY = 0
+					} else if newY >= height {
+						newY = height - 1
+					}
+					if newX == actor.GridX && newY == actor.GridY {
+						break
+					}
+					if CellBlocked(cbt, actor.ID, newX, newY) {
+						break
+					}
+					cost, passable := cbt.EntryCost(newX, newY)
+					if !passable {
+						break
+					}
+					if cost > budget {
+						break
+					}
+					budget -= cost
+					actor.GridX = newX
+					actor.GridY = newY
+					stepsTaken++
+					if tc := cbt.TerrainAt(newX, newY); tc.Type == TerrainHazardous && tc.Hazard != nil {
+						events = append(events, applyCellHazard(cbt, actor, tc, "on_enter", src)...)
+					}
+					// WMOVE-12: explicitly do NOT fire TriggerOnEnemyMoveAdjacent
+					// here — the Mobile trait suppresses reaction triggers on
+					// the granted movement.
+				}
+				if stepsTaken == 0 {
+					moveNarrative = fmt.Sprintf("%s does not move (move trait).", actor.Name)
+				}
+				events = append(events, RoundEvent{
+					ActionType: ActionMoveTraitStride,
+					ActorID:    actor.ID,
+					ActorName:  actor.Name,
+					Narrative:  moveNarrative,
 				})
 
 			case ActionPass:

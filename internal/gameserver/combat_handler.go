@@ -22,6 +22,7 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/mentalstate"
 	"github.com/cory-johannsen/mud/internal/game/dice"
 	"github.com/cory-johannsen/mud/internal/game/inventory"
+	"github.com/cory-johannsen/mud/internal/game/inventory/traits"
 	"github.com/cory-johannsen/mud/internal/game/npc"
 	"github.com/cory-johannsen/mud/internal/game/ruleset"
 	"github.com/cory-johannsen/mud/internal/game/session"
@@ -147,6 +148,23 @@ type CombatHandler struct {
 	// Non-positive values are treated as combat.DefaultReactionTimeout by ResolveRound.
 	// Wired in via SetReactionPromptTimeout from GameServerConfig.ReactionPromptTimeout.
 	reactionPromptTimeout time.Duration
+	// strikeActionMu guards strikeActionSeq.
+	strikeActionMu sync.Mutex
+	// strikeActionSeq is a monotonic counter used to scope once-per-Strike
+	// enforcement on free Move-trait Strides (WMOVE-10).
+	strikeActionSeq int64
+}
+
+// nextStrikeActionID returns a fresh, monotonically-increasing id used to scope
+// the once-per-Strike enforcement on queued ActionMoveTraitStride entries.
+//
+// Postcondition: returns a value greater than every previously-returned value
+// from the same CombatHandler.
+func (h *CombatHandler) nextStrikeActionID() int64 {
+	h.strikeActionMu.Lock()
+	defer h.strikeActionMu.Unlock()
+	h.strikeActionSeq++
+	return h.strikeActionSeq
 }
 
 // SetReactionPromptTimeout wires the reaction prompt timeout from
@@ -718,12 +736,43 @@ func (h *CombatHandler) Attack(uid, target string) ([]*gamev1.CombatEvent, error
 	return []*gamev1.CombatEvent{confirmEvent}, nil
 }
 
+// MoveTraitStrideRequest is an optional rider on a Strike that asks the
+// gameserver to also queue a free ActionMoveTraitStride paired with the Strike,
+// per the Mobile weapon trait (WMOVE-7/WMOVE-12). The free Stride does not
+// consume AP and does not provoke reactive strikes.
+type MoveTraitStrideRequest struct {
+	// DestinationX, DestinationY are the requested grid cell coordinates the
+	// wielder wants to stride to. The actual movement may stop short if the
+	// path is blocked or the SpeedBudget is exhausted.
+	DestinationX int32
+	DestinationY int32
+	// Ordering selects whether the free Stride is queued before or after the
+	// paired Strike (default = before).
+	Ordering combat.MoveTraitOrdering
+}
+
 // Strike queues a 2-AP ActionStrike for uid against target.
 // Requires active combat. Early-resolves if all actions submitted.
 //
 // Precondition: uid must be a valid connected player in active combat; target must be non-empty.
 // Postcondition: Returns events to return to the requesting player, or an error.
 func (h *CombatHandler) Strike(uid, target string) ([]*gamev1.CombatEvent, error) {
+	return h.StrikeWithMoveTrait(uid, target, nil)
+}
+
+// StrikeWithMoveTrait queues a 2-AP ActionStrike for uid against target, and
+// when moveStride is non-nil and the wielder's main-hand weapon has the Mobile
+// trait, additionally queues a free ActionMoveTraitStride bound to the same
+// Strike action id (WMOVE-10).
+//
+// Precondition: uid must be a valid connected player in active combat;
+// target must be non-empty; moveStride may be nil. When moveStride is non-nil,
+// the wielder's main-hand weapon MUST have the Mobile trait.
+// Postcondition: on success, both actions are appended to the wielder's queue
+// in the order specified by moveStride.Ordering. Remaining AP is reduced by
+// the Strike's normal cost only (free Stride is cost 0). On error, queue state
+// is unchanged.
+func (h *CombatHandler) StrikeWithMoveTrait(uid, target string, moveStride *MoveTraitStrideRequest) ([]*gamev1.CombatEvent, error) {
 	sess, ok := h.sessions.GetPlayer(uid)
 	if !ok {
 		return nil, fmt.Errorf("player %q not found", uid)
@@ -737,8 +786,79 @@ func (h *CombatHandler) Strike(uid, target string) ([]*gamev1.CombatEvent, error
 		return nil, fmt.Errorf("you are not in combat")
 	}
 
-	if err := cbt.QueueAction(uid, combat.QueuedAction{Type: combat.ActionStrike, Target: target}); err != nil {
+	// Determine whether the wielder is currently swinging a Mobile-trait weapon.
+	moveTraitWielder := false
+	var actor *combat.Combatant
+	for _, c := range cbt.Combatants {
+		if c.ID == uid {
+			actor = c
+			break
+		}
+	}
+	if actor != nil && actor.Loadout != nil && actor.Loadout.MainHand != nil && actor.Loadout.MainHand.Def != nil {
+		moveTraitWielder = actor.Loadout.MainHand.Def.HasTrait(traits.Mobile)
+	}
+
+	if moveStride != nil {
+		if !moveTraitWielder {
+			return nil, fmt.Errorf("equipped weapon does not have the Mobile trait")
+		}
+		if actor == nil {
+			return nil, fmt.Errorf("striker not found in combat")
+		}
+		// WMOVE-G1: bound the requested destination by SpeedBudget (Chebyshev).
+		dx := int(moveStride.DestinationX) - actor.GridX
+		if dx < 0 {
+			dx = -dx
+		}
+		dy := int(moveStride.DestinationY) - actor.GridY
+		if dy < 0 {
+			dy = -dy
+		}
+		cells := dx
+		if dy > cells {
+			cells = dy
+		}
+		if cells > actor.SpeedBudget() {
+			return nil, fmt.Errorf("move-trait stride distance %d exceeds Speed budget %d", cells, actor.SpeedBudget())
+		}
+	}
+
+	strikeID := h.nextStrikeActionID()
+
+	// When the free Stride is requested BEFORE the Strike, queue it first so
+	// ResolveRound resolves them in queue order.
+	if moveStride != nil && moveStride.Ordering == combat.MoveOrderingBefore {
+		if err := cbt.QueueFreeAction(uid, combat.QueuedAction{
+			Type:         combat.ActionMoveTraitStride,
+			TargetX:      moveStride.DestinationX,
+			TargetY:      moveStride.DestinationY,
+			MoveOrdering: combat.MoveOrderingBefore,
+			StrikeAction: strikeID,
+		}); err != nil {
+			return nil, fmt.Errorf("queuing free stride: %w", err)
+		}
+	}
+
+	if err := cbt.QueueAction(uid, combat.QueuedAction{
+		Type:             combat.ActionStrike,
+		Target:           target,
+		StrikeAction:     strikeID,
+		MoveTraitWielder: moveTraitWielder,
+	}); err != nil {
 		return nil, fmt.Errorf("queuing strike: %w", err)
+	}
+
+	if moveStride != nil && moveStride.Ordering == combat.MoveOrderingAfter {
+		if err := cbt.QueueFreeAction(uid, combat.QueuedAction{
+			Type:         combat.ActionMoveTraitStride,
+			TargetX:      moveStride.DestinationX,
+			TargetY:      moveStride.DestinationY,
+			MoveOrdering: combat.MoveOrderingAfter,
+			StrikeAction: strikeID,
+		}); err != nil {
+			return nil, fmt.Errorf("queuing free stride: %w", err)
+		}
 	}
 
 	apMsg := h.formatAPRemaining(uid, cbt)

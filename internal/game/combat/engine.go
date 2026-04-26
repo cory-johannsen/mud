@@ -408,6 +408,22 @@ func (c *Combat) DyingStacks(uid string) int {
 	return 0
 }
 
+// QueueFreeAction appends a free (cost-zero) action to the combatant's queue
+// without consuming AP. The action's type must appear in the free-action
+// allowlist (see ActionQueue.QueueFreeAction).
+//
+// Precondition: uid must be a combatant in this combat with an active queue.
+// Postcondition: returns error if uid is unknown or the action is rejected by
+// the allowlist or once-per-Strike enforcement; otherwise the action is
+// appended and remaining AP is unchanged.
+func (c *Combat) QueueFreeAction(uid string, a QueuedAction) error {
+	q, ok := c.ActionQueues[uid]
+	if !ok {
+		return fmt.Errorf("combatant %q not found or has no active queue", uid)
+	}
+	return q.QueueFreeAction(a)
+}
+
 // QueueAction enqueues an action for the combatant with the given UID.
 //
 // Precondition: uid must be a living combatant in this combat with an active queue.

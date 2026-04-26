@@ -9,6 +9,8 @@ import (
 	"path/filepath"
 
 	"gopkg.in/yaml.v3"
+
+	"github.com/cory-johannsen/mud/internal/game/inventory/traits"
 )
 
 // FiringMode represents the firing mode of a ranged weapon.
@@ -64,6 +66,27 @@ type WeaponDef struct {
 	// Maps to the "+" designation on a weapon (e.g. Vibroblade +3 has Bonus: 3).
 	// Zero means no item bonus (default). Always >= 0.
 	Bonus int `yaml:"bonus,omitempty"`
+}
+
+// HasTrait reports whether the weapon's Traits list contains the given trait id
+// (or any registered alias of it). Comparison is performed against the canonical
+// id from the default trait registry, so authors can write either the canonical
+// or the alias form in YAML.
+//
+// Postcondition: returns true iff at least one entry in w.Traits resolves to the
+// same canonical id as the input.
+func (w *WeaponDef) HasTrait(id string) bool {
+	if w == nil {
+		return false
+	}
+	r := traits.DefaultRegistry()
+	canonical := r.CanonicalID(id)
+	for _, t := range w.Traits {
+		if r.CanonicalID(t) == canonical {
+			return true
+		}
+	}
+	return false
 }
 
 // IsMelee reports whether the weapon is a melee weapon (RangeIncrement == 0).
@@ -174,6 +197,9 @@ func LoadWeapons(dir string) ([]*WeaponDef, error) {
 			w.RarityStatMultiplier = def.StatMultiplier
 			w.UpgradeSlots = def.FeatureSlots
 		}
+		// WMOVE-4: warn (do not error) for unknown trait ids so content can land
+		// before behaviour ships. The default registry tolerates aliases.
+		_ = traits.DefaultRegistry().Validate(w.Traits)
 		weapons = append(weapons, &w)
 	}
 	return weapons, nil
